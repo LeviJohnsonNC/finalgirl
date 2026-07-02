@@ -219,11 +219,11 @@ const IndexContent = () => {
       case 'archive':
         return <Archive />;
       case 'scrapbooks':
-        return <Scrapbooks />;
+        return <Suspense fallback={<PageLoading />}><Scrapbooks /></Suspense>;
       case 'stats':
-        return <Stats />;
+        return <Suspense fallback={<PageLoading />}><Stats /></Suspense>;
       case 'rules':
-        return <Rules />;
+        return <Suspense fallback={<PageLoading />}><Rules /></Suspense>;
       default:
         return <CastingRoom onStartGame={handleStartGame} onGoToArchive={() => setCurrentPage('archive')} />;
     }
