@@ -142,22 +142,15 @@ const TheEnd = ({
       };
 
 
-      const { data, error: fnError } = await supabase.functions.invoke('generate-ending', {
+      const full = await streamChatCompletion({
+        functionName: 'generate-ending',
         body: payload,
+        onToken: (_delta, accumulated) => setEndingStory(accumulated),
       });
 
-      if (fnError) {
-        console.error('Edge function error:', fnError);
-        throw new Error(fnError.message || 'Failed to generate ending');
-      }
+      if (!full) throw new Error('No ending returned from the generator');
+      setEndingStory(full);
 
-      if (data?.ending) {
-        setEndingStory(data.ending);
-      } else if (data?.error) {
-        throw new Error(data.error);
-      } else {
-        throw new Error('No ending returned from the generator');
-      }
     } catch (err) {
       console.error('Ending generation error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to generate ending';

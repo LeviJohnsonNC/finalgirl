@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Film, Loader2, Sparkles, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client';
+import { streamChatCompletion } from '@/lib/streamChatCompletion';
 import { getFilmDetails } from '@/types/featureFilmDetails';
 import { toast } from 'sonner';
+
 
 interface StoryGeneratorProps {
   killer: string | null;
@@ -71,24 +72,14 @@ export const StoryGenerator = ({
       };
 
 
-      const { data, error: fnError } = await supabase.functions.invoke('generate-story', {
+      const full = await streamChatCompletion({
+        functionName: 'generate-story',
         body: payload,
+        onToken: (_delta, accumulated) => setStory(accumulated),
       });
 
-      if (fnError) {
-        console.error('Function error:', fnError);
-        throw new Error(fnError.message || 'Failed to generate story');
-      }
-
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-
-      if (data?.story) {
-        setStory(data.story);
-      } else {
-        throw new Error('No story was generated');
-      }
+      if (!full) throw new Error('No story was generated');
+      setStory(full);
     } catch (err) {
       console.error('Generation error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to generate content';
@@ -98,6 +89,7 @@ export const StoryGenerator = ({
       setIsGenerating(false);
     }
   };
+
 
   return (
     <div className="glass-card p-6 rounded-lg space-y-4">
