@@ -3,6 +3,8 @@ import { ImageIcon, Volume2, VolumeX, Loader2, ScrollText } from 'lucide-react';
 import { SpecialRulesModal, getApplicableSpecialRules } from '@/components/SpecialRulesModal';
 import { getModulePromptContext } from '@/data/rules/moduleRules';
 import { supabase } from '@/integrations/supabase/client';
+import { streamChatCompletion } from '@/lib/streamChatCompletion';
+
 import { createPrimedAudio, base64ToBlob } from '@/lib/audioUtils';
 import { getFilmDetails } from '@/types/featureFilmDetails';
 import { getFilmIdByKiller, getFilmIdByLocation, getFilmIdByFinalGirl, FEATURE_FILMS } from '@/types/gameData';
@@ -145,22 +147,15 @@ const NowPlaying = ({
       };
 
 
-      const { data, error: fnError } = await supabase.functions.invoke('generate-story', {
+      const full = await streamChatCompletion({
+        functionName: 'generate-story',
         body: payload,
+        onToken: (_delta, accumulated) => setStory(accumulated),
       });
 
-      if (fnError) {
-        console.error('Edge function error:', fnError);
-        throw new Error(fnError.message || 'Failed to generate story');
-      }
+      if (!full) throw new Error('No story returned from the generator');
+      setStory(full);
 
-      if (data?.story) {
-        setStory(data.story);
-      } else if (data?.error) {
-        throw new Error(data.error);
-      } else {
-        throw new Error('No story returned from the generator');
-      }
     } catch (err) {
       console.error('Story generation error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to generate story';
@@ -191,6 +186,10 @@ const NowPlaying = ({
 
     setIsNarrating(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('You must be signed in to narrate.');
+      }
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-story`,
         {
@@ -198,11 +197,12 @@ const NowPlaying = ({
           headers: {
             'Content-Type': 'application/json',
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({ text: story }),
         }
       );
+
 
       if (!response.ok) {
         throw new Error(`Narration request failed: ${response.status}`);

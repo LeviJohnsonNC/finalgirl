@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Marquee } from '@/components/Marquee';
 import { AppHeader } from '@/components/AppHeader';
@@ -7,15 +7,24 @@ import Archive from './Archive';
 import NowPlaying from './NowPlaying';
 import GameOutcome from './GameOutcome';
 import TheEnd, { EndingFormData } from './TheEnd';
-import Scrapbooks from './Scrapbooks';
-import Stats from './Stats';
-import Rules from './Rules';
-import { Library, BookOpen, BarChart3, ArrowLeft, User, BookMarked } from 'lucide-react';
+// Lazy-load heavy pages to trim the initial bundle.
+const Scrapbooks = lazy(() => import('./Scrapbooks'));
+const Stats = lazy(() => import('./Stats'));
+const Rules = lazy(() => import('./Rules'));
+import { Library, BookOpen, BarChart3, ArrowLeft, User, BookMarked, Loader2 } from 'lucide-react';
 import { getFilmIdByLocation } from '@/types/gameData';
 import { GameResult } from '@/hooks/useGameHistory';
 import { GameHistoryProvider, useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { NewsTicker } from '@/components/NewsTicker';
 import { useAuth } from '@/hooks/useAuth';
+
+const PageLoading = () => (
+  <div className="min-h-screen flex flex-col items-center justify-center gap-3 text-muted-foreground">
+    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+    <p className="font-vhs text-xs tracking-widest animate-pulse">[ PROJECTOR WARMING UP... ]</p>
+  </div>
+);
+
 
 interface GameSelection {
   killer: string;
@@ -210,11 +219,11 @@ const IndexContent = () => {
       case 'archive':
         return <Archive />;
       case 'scrapbooks':
-        return <Scrapbooks />;
+        return <Suspense fallback={<PageLoading />}><Scrapbooks /></Suspense>;
       case 'stats':
-        return <Stats />;
+        return <Suspense fallback={<PageLoading />}><Stats /></Suspense>;
       case 'rules':
-        return <Rules />;
+        return <Suspense fallback={<PageLoading />}><Rules /></Suspense>;
       default:
         return <CastingRoom onStartGame={handleStartGame} onGoToArchive={() => setCurrentPage('archive')} />;
     }

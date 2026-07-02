@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getCorsHeaders } from "../_shared/auth.ts";
 import { validateRequest, EndingRequestSchema } from "../_shared/validation.ts";
+import { requireUser } from "../_shared/guard.ts";
 
 serve(async (req) => {
   const cors = getCorsHeaders(req.headers.get('origin'));
@@ -11,13 +12,18 @@ serve(async (req) => {
   }
 
   try {
+    // Auth + rate limit
+    const guard = await requireUser(req, cors, { functionName: "generate-ending", hourlyLimit: 30 });
+    if (!guard.ok) return guard.response;
+
     const body = await req.json();
-    
+
     // Validate request
     const validation = validateRequest(EndingRequestSchema, body);
     if (!validation.success) {
       return validation.error;
     }
+
 
     const {
       introStory,
@@ -125,61 +131,44 @@ ${optionalStats ? `Optional Details:\n${optionalStats}` : ''}`.trim();
       );
     }
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-3.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
+        stream: true,
       }),
     });
 
-    if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error("AI Gateway error:", aiResponse.status, errorText);
-      
-      if (aiResponse.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please wait a moment before generating again." }),
-          { status: 429, headers: { ...cors, "Content-Type": "application/json" } }
-        );
-      }
-      
-      if (aiResponse.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits depleted. Please add credits to continue." }),
-          { status: 402, headers: { ...cors, "Content-Type": "application/json" } }
-        );
-      }
-      
-      return new Response(
-        JSON.stringify({ error: "Failed to generate ending" }),
-        { status: 500, headers: { ...cors, "Content-Type": "application/json" } }
-      );
+    if (!upstream.ok || !upstream.body) {
+      const errorText = await upstream.text().catch(() => "");
+      console.error("AI Gateway error:", upstream.status, errorText);
+      const status = upstream.status === 429 || upstream.status === 402 ? upstream.status : 500;
+      const message = upstream.status === 429
+        ? "Rate limit exceeded. Please wait a moment before generating again."
+        : upstream.status === 402
+        ? "AI credits depleted. Please add credits to continue."
+        : "Failed to generate ending";
+      return new Response(JSON.stringify({ error: message }),
+        { status, headers: { ...cors, "Content-Type": "application/json" } });
     }
 
-    const aiData = await aiResponse.json();
-    const ending = aiData.choices?.[0]?.message?.content;
-
-    if (!ending) {
-      console.error("No content in AI response:", aiData);
-      return new Response(
-        JSON.stringify({ error: "Failed to generate ending content" }),
-        { status: 500, headers: { ...cors, "Content-Type": "application/json" } }
-      );
-    }
-
-
-    return new Response(
-      JSON.stringify({ ending }),
-      { status: 200, headers: { ...cors, "Content-Type": "application/json" } }
-    );
+    return new Response(upstream.body, {
+      status: 200,
+      headers: {
+        ...cors,
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+      },
+    });
   } catch (error) {
     console.error("Error in generate-ending:", error);
     return new Response(

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { ImageIcon, Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { streamChatCompletion } from '@/lib/streamChatCompletion';
+
 import { toast } from 'sonner';
 import { createPrimedAudio, base64ToBlob } from '@/lib/audioUtils';
 import nowPlayingBg from '@/assets/now-playing-bg.png';
@@ -142,22 +144,15 @@ const TheEnd = ({
       };
 
 
-      const { data, error: fnError } = await supabase.functions.invoke('generate-ending', {
+      const full = await streamChatCompletion({
+        functionName: 'generate-ending',
         body: payload,
+        onToken: (_delta, accumulated) => setEndingStory(accumulated),
       });
 
-      if (fnError) {
-        console.error('Edge function error:', fnError);
-        throw new Error(fnError.message || 'Failed to generate ending');
-      }
+      if (!full) throw new Error('No ending returned from the generator');
+      setEndingStory(full);
 
-      if (data?.ending) {
-        setEndingStory(data.ending);
-      } else if (data?.error) {
-        throw new Error(data.error);
-      } else {
-        throw new Error('No ending returned from the generator');
-      }
     } catch (err) {
       console.error('Ending generation error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to generate ending';
@@ -188,6 +183,10 @@ const TheEnd = ({
 
     setIsNarrating(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('You must be signed in to narrate.');
+      }
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-story`,
         {
@@ -195,11 +194,12 @@ const TheEnd = ({
           headers: {
             'Content-Type': 'application/json',
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({ text: endingStory }),
         }
       );
+
 
       if (!response.ok) {
         throw new Error(`Narration request failed: ${response.status}`);

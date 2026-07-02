@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { decode as base64Decode, encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 import { getCorsHeaders } from "../_shared/auth.ts";
 import { NarrationRequestSchema, validateRequest } from "../_shared/validation.ts";
+import { requireUser } from "../_shared/guard.ts";
+
 
 const MAX_CHUNK_SIZE = 1900; // Inworld limit is 2000, leave margin for safety
 
@@ -74,9 +76,15 @@ serve(async (req) => {
   }
 
   try {
+    // Auth + rate limit (narration can be heavier; allow more per hour)
+    const guard = await requireUser(req, cors, { functionName: "narrate-story", hourlyLimit: 60 });
+    if (!guard.ok) return guard.response;
+
     // Parse and validate request body
     const body = await req.json();
     const validation = validateRequest(NarrationRequestSchema, body);
+
+
     
     if (!validation.success) {
       return validation.error;

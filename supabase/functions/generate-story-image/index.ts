@@ -2,6 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getCorsHeaders } from "../_shared/auth.ts";
 import { ImageRequestSchema, validateRequest } from "../_shared/validation.ts";
+import { requireUser } from "../_shared/guard.ts";
 
 serve(async (req) => {
   const cors = getCorsHeaders(req.headers.get('origin'));
@@ -12,14 +13,19 @@ serve(async (req) => {
   }
 
   try {
+    // Auth + rate limit
+    const guard = await requireUser(req, cors, { functionName: "generate-story-image", hourlyLimit: 40 });
+    if (!guard.ok) return guard.response;
 
     // Parse and validate request body
     const body = await req.json();
     const validation = validateRequest(ImageRequestSchema, body);
-    
+
     if (!validation.success) {
       return validation.error;
     }
+
+
 
     const { 
       position, 
