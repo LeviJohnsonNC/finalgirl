@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { ImageIcon, Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { streamChatCompletion } from '@/lib/streamChatCompletion';
+
 import { toast } from 'sonner';
 import { createPrimedAudio, base64ToBlob } from '@/lib/audioUtils';
 import nowPlayingBg from '@/assets/now-playing-bg.png';
