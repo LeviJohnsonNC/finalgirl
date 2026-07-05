@@ -34,7 +34,8 @@ export const CastingPicker = ({ type, options, onSelect, onClose }: CastingPicke
         className="evidence-drawer p-0 gap-0 border-0
           w-screen h-[100dvh] max-w-none rounded-none
           sm:w-[92vw] sm:h-[82vh] sm:max-w-[1200px] sm:rounded-sm
-          grid grid-rows-[auto_1fr] overflow-hidden"
+          grid grid-rows-[auto_1fr] overflow-hidden
+          [&>button]:hidden"
       >
         {/* Decorative tape corners (desktop only) */}
         <span className="evidence-drawer__tape evidence-drawer__tape--tl hidden sm:block" />
