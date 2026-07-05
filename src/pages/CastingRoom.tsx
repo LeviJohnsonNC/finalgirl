@@ -167,8 +167,8 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
             CLOUD ARCHIVE RECONNECTING • USING SAVED COLLECTION
           </div>
         )}
-        {/* Three Casting Slots - flex layout for different card sizes */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-10 mb-10 md:mb-14 w-full px-4">
+        {/* Three Casting Slots — files-on-a-desk layout, same height */}
+        <div className="flex flex-col md:flex-row items-end justify-center gap-6 md:gap-8 mb-10 md:mb-12 w-full px-4">
           <CastingSlot
             type="killer"
             value={selection.killer}
@@ -198,15 +198,22 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
           />
         </div>
 
-        {/* Setup Scenario & Event Dropdowns */}
-        <ScenarioDropdowns 
-          selectedLocation={selection.location}
-          onSetupChange={setSelectedSetup}
-          onEventChange={setSelectedEvent}
-        />
+        {/* Case Options strip */}
+        <div className="w-full max-w-3xl px-4 mb-10">
+          <div className="border-t border-border/40 pt-4">
+            <div className="font-vhs text-xs text-muted-foreground/70 tracking-[0.25em] mb-3">
+              CASE OPTIONS //
+            </div>
+            <ScenarioDropdowns
+              selectedLocation={selection.location}
+              onSetupChange={setSelectedSetup}
+              onEventChange={setSelectedEvent}
+            />
+          </div>
+        </div>
 
-        {/* Final CTA - Locked until complete */}
-        <div className="relative">
+        {/* Press Play */}
+        <div className="flex flex-col items-center gap-3">
           <button
             onClick={handlePressPlay}
             disabled={!isComplete}
@@ -216,23 +223,22 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
               flex items-center gap-3
               font-display text-lg md:text-xl tracking-[0.15em] uppercase
               transition-all duration-500
-              ${isComplete 
-                ? 'cta-unlocked vcr-tape-button text-foreground' 
+              ${isComplete
+                ? 'cta-unlocked vcr-tape-button text-foreground'
                 : 'cta-locked text-muted-foreground/50 cursor-not-allowed'
               }
             `}
-            title={!isComplete ? 'Cast your feature to begin' : undefined}
           >
             <Play className={`w-5 h-5 ${isComplete ? 'text-primary' : ''}`} />
             <span>Press Play</span>
           </button>
-          
-          {/* Subtle hint when locked */}
-          {!isComplete && (
-            <p className="absolute -bottom-6 left-1/2 -translate-x-1/2 font-vhs text-xs text-muted-foreground/40 whitespace-nowrap">
-              Cast your feature to begin
-            </p>
-          )}
+          <p
+            className={`press-play-helper ${
+              isComplete ? 'text-primary/70' : 'text-muted-foreground/40'
+            }`}
+          >
+            {isComplete ? 'Tape ready' : 'Cast your feature to begin'}
+          </p>
         </div>
       </div>
 
