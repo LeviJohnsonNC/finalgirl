@@ -13,6 +13,7 @@ const Scrapbooks = () => {
   const { user, authError } = useAuth();
   const [openBook, setOpenBook] = useState<'finalGirl' | 'killer' | null>(null);
   const migrationAttemptedRef = useRef(false);
+  const legacyBackfilledRef = useRef<Set<string>>(new Set());
 
   // One-time background migration of legacy inline data: URI images to the
   // posters bucket. Only runs when the summary flags a legacy asset, and only
@@ -41,6 +42,25 @@ const Scrapbooks = () => {
         if (migrated > 0) retryLoadHistory();
       });
   }, [user, isLoading, loadError, gameHistory, retryLoadHistory]);
+
+  // Defensive self-heal: if any row still comes back flagged as legacy (e.g.
+  // the migration hasn't run yet, or ran with partial failures), lazily fetch
+  // the full row for it in the background so the poster appears in the grid
+  // without requiring the user to click the tile first. Limits to a few at a
+  // time to avoid a burst of requests on large scrapbooks.
+  useEffect(() => {
+    if (!user || isLoading) return;
+    const pending = gameHistory
+      .filter(g => (g.hasLegacyPoster && !g.posterImageUrl) || (g.hasLegacyScene && !g.sceneImageUrl))
+      .filter(g => !legacyBackfilledRef.current.has(g.id))
+      .slice(0, 5);
+    if (pending.length === 0) return;
+    pending.forEach(g => {
+      legacyBackfilledRef.current.add(g.id);
+      void fetchGameDetails(g.id);
+    });
+  }, [user, isLoading, gameHistory, fetchGameDetails]);
+
 
 
   const wonGames = gameHistory.filter(g => g.outcome === 'won');
