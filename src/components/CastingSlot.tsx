@@ -119,7 +119,7 @@ export const CastingSlot = ({
     : 'w-[14.5rem] md:w-[17.25rem] aspect-[2/3]';
 
   return (
-    <div className="casting-slot flex flex-col items-center shrink-0 min-w-0 h-full justify-between gap-3">
+    <div className="casting-slot flex flex-col items-center shrink-0 min-w-0 self-stretch justify-between gap-3">
       {/* Top block: label + card */}
       <div className="flex flex-col items-center gap-3 w-full">
         {/* Slot label */}
