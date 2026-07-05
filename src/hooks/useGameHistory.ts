@@ -71,26 +71,10 @@ const sanitizeStoredImageUrl = (value: unknown): string | undefined => {
   return trimmed;
 };
 
-const HISTORY_SUMMARY_SELECT = [
-  'id',
-  'user_id',
-  'timestamp',
-  'outcome',
-  'killer',
-  'location',
-  'final_girl',
-  'setup_scenario',
-  'starting_event',
-  'final_horror_level',
-  'final_girl_health',
-  'killer_health',
-  'weapon_used',
-  'ending_sub_location',
-  'victims_saved',
-  'victims_killed',
-  'poster_image_url',
-  'scene_image_url',
-].join(',');
+// Note: the on-load summary query goes through the get_game_history_summary
+// RPC (see fetchFromDb) so that legacy inline data: URIs never come back over
+// the wire. The full row (including intro_story / ending_narration / any
+// legacy inline image) is fetched on demand via fetchGameDetails.
 
 export interface GameResult {
   id: string;
