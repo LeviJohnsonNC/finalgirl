@@ -168,7 +168,7 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
           </div>
         )}
         {/* Three Casting Slots — files-on-a-desk layout, same height */}
-        <div className="flex flex-col md:flex-row items-center md:items-end justify-center gap-6 md:gap-8 mb-10 md:mb-12 w-full px-4">
+        <div className="flex flex-col md:flex-row items-center md:items-stretch justify-center gap-6 md:gap-8 mb-10 md:mb-12 w-full px-4">
           <CastingSlot
             type="killer"
             value={selection.killer}
