@@ -119,8 +119,9 @@ export const CastingSlot = ({
     : 'w-[14.5rem] md:w-[17.25rem] aspect-[2/3]';
 
   return (
-    <div className="casting-slot flex flex-col items-center shrink-0 min-w-0 h-full">
-      <div className="flex-1 flex flex-col items-center justify-center gap-3 w-full">
+    <div className="casting-slot flex flex-col items-center shrink-0 min-w-0 h-full justify-between gap-3">
+      {/* Top block: label + card */}
+      <div className="flex flex-col items-center gap-3 w-full">
         {/* Slot label */}
         <span className="font-display text-xs text-muted-foreground tracking-[0.28em] uppercase">
           {SLOT_LABELS[type]}
@@ -187,7 +188,10 @@ export const CastingSlot = ({
             </div>
           )}
         </div>
+      </div>
 
+      {/* Bottom block: dossier meta + plate buttons, bottom-aligned across all slots */}
+      <div className="flex flex-col items-center gap-3 w-full">
         {/* Dossier metadata strip */}
         <div className="min-h-[1.5rem] flex items-center justify-center gap-1.5">
           {isAnimating ? (
@@ -207,30 +211,30 @@ export const CastingSlot = ({
             </span>
           )}
         </div>
-      </div>
 
-      {/* Plate buttons — equal-width row, bottom-aligned across all slots */}
-      <div className="flex gap-3 w-full mt-3">
-        <button
-          type="button"
-          onClick={onShuffle}
-          disabled={isAnimating || options.length === 0}
-          className="plate-btn plate-btn--shuffle flex-1"
-          style={{ backgroundImage: `url(${shufflePlate.url})` }}
-          aria-label="Shuffle"
-        >
-          <span className="plate-btn__label">SHUFFLE</span>
-        </button>
-        <button
-          type="button"
-          onClick={onChoose}
-          disabled={options.length === 0}
-          className="plate-btn plate-btn--choose flex-1"
-          style={{ backgroundImage: `url(${choosePlate.url})` }}
-          aria-label="Choose"
-        >
-          <span className="plate-btn__label">CHOOSE</span>
-        </button>
+        {/* Plate buttons — equal-width row */}
+        <div className="flex gap-3 w-full">
+          <button
+            type="button"
+            onClick={onShuffle}
+            disabled={isAnimating || options.length === 0}
+            className="plate-btn plate-btn--shuffle flex-1"
+            style={{ backgroundImage: `url(${shufflePlate.url})` }}
+            aria-label="Shuffle"
+          >
+            <span className="plate-btn__label">SHUFFLE</span>
+          </button>
+          <button
+            type="button"
+            onClick={onChoose}
+            disabled={options.length === 0}
+            className="plate-btn plate-btn--choose flex-1"
+            style={{ backgroundImage: `url(${choosePlate.url})` }}
+            aria-label="Choose"
+          >
+            <span className="plate-btn__label">CHOOSE</span>
+          </button>
+        </div>
       </div>
     </div>
   );
