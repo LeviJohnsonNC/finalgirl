@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { ScrapbookBook } from '@/components/ScrapbookBook';
 import { useAuth } from '@/hooks/useAuth';
 import { AlertTriangle, Film } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import finalGirlCover from '@/assets/scrapbooks/final-girl-cover.png';
 import killerCover from '@/assets/scrapbooks/killer-cover.png';
 
@@ -10,6 +12,36 @@ const Scrapbooks = () => {
   const { gameHistory, updateGame, deleteGame, fetchGameDetails, isLoading, loadError, retryLoadHistory, isDegraded } = useGameHistoryContext();
   const { user, authError } = useAuth();
   const [openBook, setOpenBook] = useState<'finalGirl' | 'killer' | null>(null);
+  const migrationAttemptedRef = useRef(false);
+
+  // One-time background migration of legacy inline data: URI images to the
+  // posters bucket. Only runs when the summary flags a legacy asset, and only
+  // once per session — the RPC will stop flagging rows after a successful pass.
+  useEffect(() => {
+    if (!user || isLoading || loadError) return;
+    if (migrationAttemptedRef.current) return;
+    const hasLegacy = gameHistory.some(g => g.hasLegacyPoster || g.hasLegacyScene);
+    if (!hasLegacy) return;
+
+    migrationAttemptedRef.current = true;
+    const toastId = toast.loading('Restoring archived stills...');
+    supabase.functions
+      .invoke('migrate-legacy-images')
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('legacy image migration failed:', error);
+          toast.error('Could not restore archived stills', { id: toastId });
+          return;
+        }
+        const migrated = (data?.migratedPosters ?? 0) + (data?.migratedScenes ?? 0);
+        toast.success(
+          migrated > 0 ? `Restored ${migrated} archived still${migrated === 1 ? '' : 's'}` : 'Scrapbook up to date',
+          { id: toastId },
+        );
+        if (migrated > 0) retryLoadHistory();
+      });
+  }, [user, isLoading, loadError, gameHistory, retryLoadHistory]);
+
 
   const wonGames = gameHistory.filter(g => g.outcome === 'won');
   const lostGames = gameHistory.filter(g => g.outcome === 'lost');
