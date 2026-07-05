@@ -1,97 +1,77 @@
-## Current diagnosis
+## Diagnosis
 
-This is not a data-loss or RLS problem.
+Scrapbook load = one query per sign-in that pulls every row for the user. The `HISTORY_SUMMARY_SELECT` intentionally omits the big story text columns, but it still selects `poster_image_url` and `scene_image_url`, and those columns contain more than just short URLs.
 
-- Your data is still in the backend: the signed-in user has **42 game records** and **1 user settings row with 14 owned films**.
-- The published app is failing at the backend layer:
-  - auth logs show repeated `POST /token` **504 timeouts** (`context deadline exceeded`)
-  - app requests to `game_history` and `user_settings` return **503 `PGRST002`**
-  - official PostgREST docs define `PGRST002` as: **could not connect to the database while building the schema cache**
-- That means the backend was unhealthy/restarting after publish, so the app could not read history, collection, or reliably complete sign-in.
+For your account (47 games), the database has:
 
-## Why the last fixes did not work
+- **66 MB** of content in `poster_image_url` + `scene_image_url` combined
+- 9 posters and 11 scenes stored as inline `data:image/...;base64,...` URIs (legacy rows, from before the `posters` bucket existed)
+- Only ~237 KB of actual story text — text is not the problem
 
-1. **The payload optimization fix was aimed at slow queries**, but the current failures happen **before a normal query can even run**. The backend is returning 503/504, so a lighter select alone cannot fix it.
-2. **The auth hardening fix addressed loading deadlocks**, but the real live issue is now backend auth instability. Worse, the new 10-second session timeout clears stored auth and signs the user out on a slow backend, which makes a temporary outage look like a broken login.
-3. **Collection still shows “No films in collection” because `useOwnedFilms` has no failure fallback**. When `user_settings` fails, `dbOwnedFilms` stays `[]`, and the app interprets that as “you own nothing,” even though your data exists.
+Every scrapbook open streams that ~66 MB payload from Postgres → PostgREST → your browser, then hands it to React and to the localStorage cache writer. That's why it's slow only on your account: no other user has legacy base64 rows.
 
-## Best repair plan
+Secondary amplifier: after each fetch, `useGameHistory` runs `JSON.stringify(prev) === JSON.stringify(slimmed)` to decide whether to update the cache — serializing 66 MB twice per fetch on the main thread.
 
-### 1. Make auth failure-safe instead of destructive
-Update `src/hooks/useAuth.ts` so temporary backend slowness does **not** erase a valid local session.
+## Fix
 
-- stop clearing persisted auth tokens on timeout/network/backend-unavailable errors
-- only clear the session for truly invalid/expired auth states
-- distinguish these cases in state:
-  - session unavailable because user is signed out
-  - session temporarily unavailable because backend auth is unhealthy
-  - session invalid and must be replaced
-- keep the UI usable while auth recovery is pending or temporarily degraded
+Two-part fix — immediate relief plus a permanent cleanup.
 
-### 2. Add cached fallback for cloud-backed user data
-Update `src/hooks/useOwnedFilms.ts` and `src/hooks/useGameHistory.ts` to preserve the last successful cloud snapshot locally.
+### 1. Immediate: stop sending base64 blobs in the summary query
 
-- store last successful owned films and history summary in local storage
-- when backend reads fail with 503/504/network errors, fall back to cached cloud data instead of empty arrays
-- expose explicit `loadError` / `isDegraded` states
-- add controlled retry behavior rather than indefinite loading or silent empty states
+Add a Postgres SQL function `get_game_history_summary(uid uuid)` that returns the same columns as today, but with:
 
-### 3. Fix the misleading empty-state UX
-Update the pages/components that currently convert backend failure into “no data.”
+```sql
+CASE WHEN poster_image_url LIKE 'data:%' THEN NULL ELSE poster_image_url END AS poster_image_url
+```
 
-Files to adjust:
-- `src/pages/Auth.tsx`
-- `src/pages/Archive.tsx`
-- `src/pages/CastingRoom.tsx`
-- `src/pages/Stats.tsx`
-- `src/pages/Scrapbooks.tsx`
-- `src/components/Marquee.tsx`
+(same for `scene_image_url`), plus two booleans `has_legacy_poster` / `has_legacy_scene` so the UI can show a placeholder for legacy rows until they're migrated.
 
-Behavior changes:
-- if collection cannot load, show **“Collection unavailable”**, not **“No films in collection”**
-- if auth backend is unavailable, show **“Sign-in temporarily unavailable”** with retry guidance
-- if cached data exists, allow the user to keep browsing/playing from cached collection/history instead of blocking them
-- keep Stats/Scrapbooks error states specific and actionable
+`useGameHistory.fetchFromDb` swaps its `.from('game_history').select(...)` call for `supabase.rpc('get_game_history_summary')`. The individual `fetchGameDetails(id)` call (used when a scrapbook page is opened) still returns the full row, so legacy images still render — one at a time, on demand, instead of all 47 at page load.
 
-### 4. Re-verify the live backend after publish
-Once the code changes are in place, validate against the **published URL** and check backend health/logs during the test.
+Also drop the `JSON.stringify` equality check on the cache write — replace it with a length + id-list comparison so we're not serializing megabytes on the main thread.
 
-Validation goals:
-- existing signed-in users are not forcibly logged out during temporary backend slowness
-- collection loads from live data when backend is healthy
-- collection falls back to cached data when backend is unhealthy
-- Stats and Scrapbooks fail gracefully and recover with retry
-- sign-in works again once the backend token endpoint is healthy
+Expected result: initial scrapbook payload drops from ~66 MB to a few KB. Load feels instant.
 
-### 5. Keep the query optimizations already made, but don’t treat them as the root fix
-The lighter history query is still a good optimization, so I would keep it. But the main repair is **resilience to backend unavailability**, not query trimming.
+### 2. Permanent: one-time migration of legacy base64 → storage
 
-## Technical details
+New edge function `migrate-legacy-images` (JWT-guarded, per-user):
 
-### Files I plan to change
-- `src/hooks/useAuth.ts`
-- `src/hooks/useOwnedFilms.ts`
-- `src/hooks/useGameHistory.ts`
-- `src/pages/Auth.tsx`
-- `src/pages/Archive.tsx`
-- `src/pages/CastingRoom.tsx`
-- `src/pages/Stats.tsx`
-- `src/pages/Scrapbooks.tsx`
-- `src/components/Marquee.tsx`
+1. Select the caller's rows where `poster_image_url LIKE 'data:%'` OR `scene_image_url LIKE 'data:%'`.
+2. For each match, decode the base64, upload to the existing `posters` bucket at `game-posters/<user_id>/<gameId>-poster.jpg` (or `-scene.jpg`), then `UPDATE game_history` with the new public URL.
+3. Return a count of migrated rows.
 
-### Concrete implementation approach
-- introduce non-destructive auth recovery logic
-- add cached cloud snapshot keys for:
-  - owned films
-  - game history summary
-- treat `503`, `504`, `PGRST002`, and network fetch failures as **backend unavailable**, not **no data**
-- thread an `isDegraded` / `backendUnavailable` state into the UI
-- ensure the game-start flow depends on **resolved collection state**, not just `ownedFilms.length`
+Trigger it automatically the first time a signed-in user with `has_legacy_poster || has_legacy_scene` opens Scrapbooks, with a small "Restoring archived stills..." toast. Runs once, then the flag disappears from every summary row and the CASE fallback becomes a no-op.
 
-## Expected result
+### Technical details
 
-After this fix:
-- you should stop seeing false “no films” states when the backend hiccups
-- Stats and Scrapbooks should either load normally or show a correct degraded-state message with retry
-- sign-in should stop being broken by the app clearing its own session during temporary backend slowness
-- the app will behave much more safely around publish-time backend restarts
+- **Migration SQL** — creates the summary function, no schema change to `game_history` itself:
+  ```sql
+  create or replace function public.get_game_history_summary()
+  returns table (...) language sql stable security invoker
+  set search_path = public as $$
+    select id, user_id, timestamp, outcome, killer, location, final_girl,
+           setup_scenario, starting_event, final_horror_level,
+           final_girl_health, killer_health, weapon_used, ending_sub_location,
+           victims_saved, victims_killed,
+           case when poster_image_url like 'data:%' then null else poster_image_url end,
+           case when scene_image_url  like 'data:%' then null else scene_image_url  end,
+           (poster_image_url like 'data:%') as has_legacy_poster,
+           (scene_image_url  like 'data:%') as has_legacy_scene
+      from public.game_history
+     where user_id = auth.uid()
+     order by timestamp desc;
+  $$;
+  grant execute on function public.get_game_history_summary() to authenticated;
+  ```
+  RLS on `game_history` still applies since it's `security invoker`.
+
+- **Client** — `useGameHistory.ts`: swap select for `rpc`, extend `fromDbRow` with the two new booleans, add cheap cache-equality (`prev.length === next.length && prev[0]?.id === next[0]?.id`).
+
+- **Edge function** — `supabase/functions/migrate-legacy-images/index.ts` using the existing `_shared/guard.ts` for JWT, service role client for the `UPDATE` after upload. Base64 decode via `Uint8Array.from(atob(...), c => c.charCodeAt(0))`. Content-type parsed from the `data:` prefix.
+
+- **Trigger point** — `Scrapbooks.tsx` runs the migration once when `gameHistory.some(g => g.hasLegacyPoster || g.hasLegacyScene)` and hasn't been attempted this session; on success, calls `retryLoadHistory()` to refresh.
+
+### Out of scope
+
+- Changing story-text loading (not the bottleneck).
+- Adding pagination or virtualization to the scrapbook grid (worth doing later, but 47 rows renders fine once the payload isn't 66 MB).

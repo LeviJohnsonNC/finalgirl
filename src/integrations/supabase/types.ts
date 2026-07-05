@@ -211,7 +211,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_game_history_summary: {
+        Args: never
+        Returns: {
+          ending_sub_location: string
+          final_girl: string
+          final_girl_health: number
+          final_horror_level: number
+          has_legacy_poster: boolean
+          has_legacy_scene: boolean
+          id: string
+          killer: string
+          killer_health: number
+          location: string
+          outcome: string
+          poster_image_url: string
+          scene_image_url: string
+          setup_scenario: string
+          starting_event: string
+          timestamp: number
+          user_id: string
+          victims_killed: number
+          victims_saved: number
+          weapon_used: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
