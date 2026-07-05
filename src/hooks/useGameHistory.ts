@@ -166,7 +166,10 @@ const fromDbRow = (row: Record<string, unknown>): GameResult => ({
 export const useGameHistory = () => {
   const { user, isLoading: authLoading, isAuthReady, authError } = useAuth();
   const [localGameHistory, setLocalGameHistory] = useLocalStorage<GameResult[]>('final-girl-game-history', []);
-  const [cachedCloudGameHistory, setCachedCloudGameHistory] = useLocalStorage<GameResult[]>('final-girl-cloud-game-history-cache', []);
+  // v2 cache key: older caches captured null poster/scene URLs for legacy rows
+  // while the summary RPC was still stripping data: URIs. Bump the key so
+  // clients ignore that stale snapshot and rehydrate from the RPC.
+  const [cachedCloudGameHistory, setCachedCloudGameHistory] = useLocalStorage<GameResult[]>('final-girl-cloud-game-history-cache-v2', []);
   const [dbGameHistory, setDbGameHistory] = useState<GameResult[]>([]);
   const [isDbLoading, setIsDbLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
