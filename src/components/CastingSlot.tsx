@@ -1,8 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import shuffleSound from '@/assets/sounds/card-shuffle.mp3';
 import { LoreInfoModal } from './LoreInfoModal';
-import shuffleButton from '@/assets/buttons/shuffle-button.png';
-import chooseButton from '@/assets/buttons/choose-button.png';
+import shufflePlate from '@/assets/buttons/shuffle-plate.png.asset.json';
+import choosePlate from '@/assets/buttons/choose-plate.png.asset.json';
+import emptyKillerFrame from '@/assets/frames/empty-killer.png.asset.json';
+import emptyLocationFrame from '@/assets/frames/empty-location.png.asset.json';
+import emptyFinalGirlFrame from '@/assets/frames/empty-finalgirl.png.asset.json';
 import { useActiveImages } from '@/hooks/useActiveImages';
 
 interface CastingSlotProps {
@@ -21,25 +24,39 @@ const SLOT_LABELS = {
   finalGirl: 'FINAL GIRL',
 };
 
-// Get object position for specific characters (some need different cropping)
+const EMPTY_LABELS = {
+  killer: 'UNIDENTIFIED',
+  location: 'UNKNOWN SITE',
+  finalGirl: 'UNASSIGNED',
+};
+
+const META_TAGS = {
+  killer: 'KILLER',
+  location: 'SITE',
+  finalGirl: 'SURVIVOR',
+};
+
+const EMPTY_FRAME = {
+  killer: emptyKillerFrame.url,
+  location: emptyLocationFrame.url,
+  finalGirl: emptyFinalGirlFrame.url,
+};
+
 const getObjectPosition = (type: 'killer' | 'location' | 'finalGirl', value: string | null): string => {
-  // Dr. Fright should use center positioning, not top
   if (value === 'Dr. Fright') return 'object-center';
-  // Poltergeist needs center positioning to show the ghost figure
   if (value === 'Poltergeist') return 'object-center';
-  // Other killers use top positioning
   if (type === 'killer') return 'object-top';
   return '';
 };
 
-export const CastingSlot = ({ 
-  type, 
-  value, 
-  options, 
-  onShuffle, 
+export const CastingSlot = ({
+  type,
+  value,
+  options,
+  onShuffle,
   onChoose,
   isShuffling = false,
-  shuffleKey = 0
+  shuffleKey = 0,
 }: CastingSlotProps) => {
   const [displayValue, setDisplayValue] = useState(value);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -48,11 +65,9 @@ export const CastingSlot = ({
   const preloadedRef = useRef<boolean>(false);
   const { getImageForValue } = useActiveImages();
 
-  // Preload all option images on mount for smooth animation
   useEffect(() => {
     if (preloadedRef.current || options.length === 0) return;
     preloadedRef.current = true;
-    
     options.forEach(option => {
       const imgSrc = getImageForValue(type, option);
       if (imgSrc) {
@@ -62,10 +77,8 @@ export const CastingSlot = ({
     });
   }, [options, type, getImageForValue]);
 
-  // Build shuffle sequence when shuffling starts
   useEffect(() => {
     if (isShuffling && options.length > 0 && value) {
-      // Play shuffle sound immediately
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
@@ -74,28 +87,21 @@ export const CastingSlot = ({
       audioRef.current.volume = 0.4;
       audioRef.current.play().catch(() => {});
 
-      // Use requestAnimationFrame to ensure DOM is ready before starting animation
       requestAnimationFrame(() => {
-        // Build sequence: 22 random options ending with the selected value
         const sequence: string[] = [];
         for (let i = 0; i < 22; i++) {
           const randomIdx = Math.floor(Math.random() * options.length);
           sequence.push(options[randomIdx]);
         }
-        sequence.push(value); // Final item is the selected value
+        sequence.push(value);
         setShuffleSequence(sequence);
-        
-        // Set animating state after sequence is ready
-        requestAnimationFrame(() => {
-          setIsAnimating(true);
-        });
+        requestAnimationFrame(() => setIsAnimating(true));
       });
     } else if (!isShuffling) {
       setDisplayValue(value);
     }
   }, [isShuffling, shuffleKey, value, options]);
 
-  // Handle animation end
   const handleAnimationEnd = () => {
     setIsAnimating(false);
     setShuffleSequence([]);
@@ -104,113 +110,124 @@ export const CastingSlot = ({
 
   const cardImage = getImageForValue(type, displayValue);
   const isEmpty = !displayValue && !isAnimating;
-
-  // Location cards are landscape (16:10), character cards are square (1:1)
   const isLocation = type === 'location';
-  
+
+  // Portrait for killer/final girl (2:3). Landscape for location (3:2).
+  // Widths chosen so the location card is ~1.5x the portrait width, same visual height.
+  const slotDimensions = isLocation
+    ? 'w-[22rem] md:w-[26rem] aspect-[3/2]'
+    : 'w-[14.5rem] md:w-[17.25rem] aspect-[2/3]';
+
   return (
-    <div className={`casting-slot flex flex-col items-center gap-3 shrink min-w-0 max-w-full ${
-      isLocation ? 'w-[28.5rem] md:w-[63rem]' : 'w-60 sm:w-72 md:w-[21rem]'
-    }`}>
-      {/* Label */}
-      <span className="font-display text-xs text-muted-foreground tracking-[0.2em] uppercase">
+    <div className="casting-slot flex flex-col items-center gap-3 shrink-0 min-w-0">
+      {/* Slot label */}
+      <span className="font-display text-xs text-muted-foreground tracking-[0.28em] uppercase">
         {SLOT_LABELS[type]}
       </span>
 
-      {/* Poster Card - different dimensions for location vs characters */}
-      <div 
-        className={`
-          poster-card relative rounded-sm overflow-hidden w-full
-          ${isLocation ? 'aspect-[3/1]' : 'aspect-square'}
-          ${isEmpty ? 'poster-card-empty cursor-pointer hover:border-primary/50' : 'poster-card-filled'}
-          ${isAnimating ? 'poster-card-shuffling' : ''}
-        `}
-        onClick={!isAnimating ? onChoose : undefined}
-        style={{ cursor: isAnimating ? 'default' : 'pointer' }}
-      >
-        {/* Scrolling reel during animation - key forces remount for fresh animation */}
-        {isAnimating && shuffleSequence.length > 0 ? (
-          <div 
-            key={shuffleKey}
-            className="slot-reel absolute inset-0"
-            style={{ '--item-count': shuffleSequence.length } as React.CSSProperties}
-            onAnimationEnd={handleAnimationEnd}
+      {/* The card */}
+      <div className={`relative ${slotDimensions}`}>
+        {isEmpty ? (
+          <button
+            type="button"
+            onClick={onChoose}
+            className="evidence-frame w-full h-full"
+            aria-label={`Choose ${SLOT_LABELS[type]}`}
           >
-            {shuffleSequence.map((option, idx) => {
-              const img = getImageForValue(type, option);
-              const positionClass = getObjectPosition(type, option);
-              return img ? (
-                <img 
-                  key={idx}
-                  src={img}
-                  alt={option}
-                  className={`w-full h-full object-cover flex-shrink-0 ${positionClass}`}
-                  loading="eager"
-                />
-              ) : (
-                <div key={idx} className="w-full h-full mystery-static flex-shrink-0" />
-              );
-            })}
-          </div>
+            <img src={EMPTY_FRAME[type]} alt="" className="frame-png" />
+            <span className="evidence-frame__label">{EMPTY_LABELS[type]}</span>
+          </button>
         ) : (
-          /* Static display */
-          cardImage ? (
-            <img 
-              src={cardImage} 
-              alt={displayValue || ''} 
-              className={`absolute inset-0 w-full h-full object-cover ${getObjectPosition(type, displayValue)}`}
-            />
-          ) : (
-            <div className="absolute inset-0 mystery-static" />
-          )
-        )}
+          <div
+            className="case-frame w-full h-full cursor-pointer"
+            onClick={!isAnimating ? onChoose : undefined}
+            style={{ cursor: isAnimating ? 'default' : 'pointer' }}
+          >
+            <span className="case-frame__cnr-bl" />
+            <span className="case-frame__cnr-br" />
+            <span className="case-frame__crosshair" />
 
-        {/* VHS softness overlay */}
-        <div className="absolute inset-0 vhs-softness pointer-events-none" />
-        
-        {/* Film grain */}
-        <div className="absolute inset-0 film-grain pointer-events-none" />
+            {isAnimating && shuffleSequence.length > 0 ? (
+              <div
+                key={shuffleKey}
+                className="slot-reel absolute inset-0"
+                style={{ '--item-count': shuffleSequence.length } as React.CSSProperties}
+                onAnimationEnd={handleAnimationEnd}
+              >
+                {shuffleSequence.map((option, idx) => {
+                  const img = getImageForValue(type, option);
+                  const positionClass = getObjectPosition(type, option);
+                  return img ? (
+                    <img
+                      key={idx}
+                      src={img}
+                      alt={option}
+                      className={`w-full h-full object-cover flex-shrink-0 ${positionClass}`}
+                      loading="eager"
+                    />
+                  ) : (
+                    <div key={idx} className="w-full h-full mystery-static flex-shrink-0" />
+                  );
+                })}
+              </div>
+            ) : cardImage ? (
+              <img
+                src={cardImage}
+                alt={displayValue || ''}
+                className={`absolute inset-0 w-full h-full object-cover ${getObjectPosition(type, displayValue)}`}
+              />
+            ) : (
+              <div className="absolute inset-0 mystery-static" />
+            )}
+
+            <div className="absolute inset-0 vhs-softness pointer-events-none" />
+            <div className="absolute inset-0 film-grain pointer-events-none opacity-70" />
+            <div className="absolute inset-0 scanlines-overlay pointer-events-none opacity-40" />
+          </div>
+        )}
       </div>
 
-      {/* Name with Info Icon */}
-      <div className="h-6 flex items-center justify-center gap-1.5">
+      {/* Dossier metadata strip */}
+      <div className="min-h-[1.5rem] flex items-center justify-center gap-1.5">
         {isAnimating ? (
-          <span className="font-vhs text-sm text-muted-foreground/50 animate-pulse">...</span>
+          <span className="font-vhs text-sm text-muted-foreground/50 animate-pulse tracking-widest">SCANNING...</span>
         ) : displayValue ? (
           <>
-            <span className="font-display text-lg text-foreground tracking-wide text-center">
-              {displayValue}
+            <span className="dossier-meta">
+              <span className="dossier-meta__tag">{META_TAGS[type]}</span>
+              <span className="dossier-meta__sep">//</span>
+              <span className="dossier-meta__value">{displayValue}</span>
             </span>
             <LoreInfoModal type={type} name={displayValue} />
           </>
         ) : (
-          <span className="font-vhs text-sm text-muted-foreground/50">???</span>
+          <span className="font-vhs text-xs text-muted-foreground/40 tracking-[0.25em]">
+            {META_TAGS[type]} // ————
+          </span>
         )}
       </div>
 
-      {/* Action Buttons - 3D Pressable Style */}
-      <div className="flex gap-4 mt-2">
+      {/* Plate buttons — equal-width row */}
+      <div className="flex gap-3 w-full mt-1">
         <button
+          type="button"
           onClick={onShuffle}
           disabled={isAnimating || options.length === 0}
-          className="group min-h-[44px] disabled:opacity-50 transition-all duration-150 
-            hover:translate-y-[-2px] hover:brightness-110 
-            active:translate-y-[3px] active:brightness-90
-            drop-shadow-[0_6px_0_rgba(0,0,0,0.5)] hover:drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]
-            active:drop-shadow-[0_2px_0_rgba(0,0,0,0.6)]"
+          className="plate-btn plate-btn--shuffle flex-1"
+          style={{ backgroundImage: `url(${shufflePlate.url})` }}
+          aria-label="Shuffle"
         >
-          <img src={shuffleButton} alt="Shuffle" className="h-12 sm:h-14 w-auto object-contain" />
+          <span className="plate-btn__label">SHUFFLE</span>
         </button>
         <button
+          type="button"
           onClick={onChoose}
           disabled={options.length === 0}
-          className="group min-h-[44px] disabled:opacity-50 transition-all duration-150 
-            hover:translate-y-[-2px] hover:brightness-110 
-            active:translate-y-[3px] active:brightness-90
-            drop-shadow-[0_6px_0_rgba(0,0,0,0.5)] hover:drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]
-            active:drop-shadow-[0_2px_0_rgba(0,0,0,0.6)]"
+          className="plate-btn plate-btn--choose flex-1"
+          style={{ backgroundImage: `url(${choosePlate.url})` }}
+          aria-label="Choose"
         >
-          <img src={chooseButton} alt="Choose" className="h-12 sm:h-14 w-auto object-contain" />
+          <span className="plate-btn__label">CHOOSE</span>
         </button>
       </div>
     </div>
