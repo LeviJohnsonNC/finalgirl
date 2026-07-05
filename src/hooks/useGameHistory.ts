@@ -45,6 +45,19 @@ const slimGameForCache = (game: GameResult): GameResult => {
 
 const slimGamesForCache = (games: GameResult[]): GameResult[] => games.map(slimGameForCache);
 
+// Cheap equality: length + first/last id + first/last timestamp. Good enough
+// to detect list changes without JSON.stringify'ing megabytes of data.
+const listsShallowEqual = (a: GameResult[], b: GameResult[]): boolean => {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+  if (a.length === 0) return true;
+  return (
+    a[0].id === b[0].id &&
+    a[0].timestamp === b[0].timestamp &&
+    a[a.length - 1].id === b[b.length - 1].id
+  );
+};
+
 const sanitizeStoredImageUrl = (value: unknown): string | undefined => {
   if (typeof value !== 'string') return undefined;
   const trimmed = value.trim();
@@ -101,6 +114,8 @@ export interface GameResult {
   victimsKilled?: number;
   posterImageUrl?: string;
   sceneImageUrl?: string;
+  hasLegacyPoster?: boolean;
+  hasLegacyScene?: boolean;
 }
 
 export interface GameStats {
@@ -160,6 +175,8 @@ const fromDbRow = (row: Record<string, unknown>): GameResult => ({
   victimsKilled: (row.victims_killed as number) || undefined,
   posterImageUrl: sanitizeStoredImageUrl(row.poster_image_url),
   sceneImageUrl: sanitizeStoredImageUrl(row.scene_image_url),
+  hasLegacyPoster: row.has_legacy_poster === true,
+  hasLegacyScene: row.has_legacy_scene === true,
 });
 
 export const useGameHistory = () => {
@@ -189,11 +206,10 @@ export const useGameHistory = () => {
     const timeoutId = window.setTimeout(() => controller.abort(), 20000);
 
     try {
+      // Use the summary RPC — it strips out legacy inline data: URIs from
+      // poster_image_url / scene_image_url so we don't ship megabytes on load.
       const { data, error } = await supabase
-        .from('game_history')
-        .select(HISTORY_SUMMARY_SELECT)
-        .eq('user_id', user.id)
-        .order('timestamp', { ascending: false })
+        .rpc('get_game_history_summary')
         .abortSignal(controller.signal);
 
       if (error) {
@@ -207,10 +223,10 @@ export const useGameHistory = () => {
       }
 
       if (data && fetchIdRef.current === fetchId) {
-        const games = data.map(row => fromDbRow(row as unknown as Record<string, unknown>));
+        const games = (data as Array<Record<string, unknown>>).map(row => fromDbRow(row));
         setDbGameHistory(games);
         const slimmed = slimGamesForCache(games);
-        setCachedCloudGameHistory(prev => JSON.stringify(prev) === JSON.stringify(slimmed) ? prev : slimmed);
+        setCachedCloudGameHistory(prev => listsShallowEqual(prev, slimmed) ? prev : slimmed);
       }
     } catch (err) {
       console.error('Game history fetch failed:', err);
