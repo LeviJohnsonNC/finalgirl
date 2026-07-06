@@ -2,10 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { ImageIcon, Volume2, VolumeX, Loader2, ScrollText } from 'lucide-react';
 import { SpecialRulesModal, getApplicableSpecialRules } from '@/components/SpecialRulesModal';
 import { getModulePromptContext } from '@/data/rules/moduleRules';
-import { supabase } from '@/integrations/supabase/client';
 import { streamChatCompletion } from '@/lib/streamChatCompletion';
 
-import { createPrimedAudio, base64ToBlob } from '@/lib/audioUtils';
+import { useNarration } from '@/hooks/useNarration';
 import { getFilmDetails } from '@/types/featureFilmDetails';
 import { getFilmIdByKiller, getFilmIdByLocation, getFilmIdByFinalGirl, FEATURE_FILMS } from '@/types/gameData';
 import { useActiveImages } from '@/hooks/useActiveImages';
@@ -52,18 +51,21 @@ const NowPlaying = ({
   const [story, setStory] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isNarrating, setIsNarrating] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [sceneImageUrl, setSceneImageUrl] = useState<string>('');
   const [generatedSceneUrl, setGeneratedSceneUrl] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { isNarrating, isPlaying, toggleNarration } = useNarration();
   const { hasApiKey, autoGenerate, generateImage } = useImageGeneration();
   const autoGenerateTriggered = useRef(false);
+  // Abort the story stream when the user navigates away mid-generation so the
+  // reader loop stops and no further setState fires on an unmounted component.
+  const streamAbortRef = useRef<AbortController | null>(null);
   const moduleContext = getModulePromptContext(killer, location);
+  const applicableSpecialRules = getApplicableSpecialRules(killer, location);
 
   // Auto-generate story on mount
   useEffect(() => {
     generateStory();
+    return () => streamAbortRef.current?.abort();
   }, []);
 
   // Auto-generate scene image when story loads (if enabled)
@@ -91,6 +93,10 @@ const NowPlaying = ({
   }, [story, hasApiKey, autoGenerate]);
 
   const generateStory = async () => {
+    streamAbortRef.current?.abort();
+    const abortController = new AbortController();
+    streamAbortRef.current = abortController;
+
     setIsGenerating(true);
     setError(null);
 
@@ -151,12 +157,15 @@ const NowPlaying = ({
         functionName: 'generate-story',
         body: payload,
         onToken: (_delta, accumulated) => setStory(accumulated),
+        signal: abortController.signal,
       });
 
       if (!full) throw new Error('No story returned from the generator');
       setStory(full);
 
     } catch (err) {
+      // Deliberate cancellation (unmount / regenerate) is not an error state.
+      if (abortController.signal.aborted) return;
       console.error('Story generation error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to generate story';
       setError(errorMessage);
@@ -164,83 +173,11 @@ const NowPlaying = ({
         description: errorMessage,
       });
     } finally {
-      setIsGenerating(false);
+      if (!abortController.signal.aborted) setIsGenerating(false);
     }
   };
 
-  const handleNarrate = async () => {
-    if (!story) return;
-    
-    // If already playing, stop and reset
-    if (isPlaying && audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      setIsPlaying(false);
-      return;
-    }
-
-    // Prime an Audio element immediately (synchronously in the tap handler)
-    // so iOS Safari marks it as user-gesture-activated.
-    const audio = createPrimedAudio();
-    audioRef.current = audio;
-
-    setIsNarrating(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        throw new Error('You must be signed in to narrate.');
-      }
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-story`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ text: story }),
-        }
-      );
-
-
-      if (!response.ok) {
-        throw new Error(`Narration request failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      // Convert base64 to a Blob URL (avoids iOS data-URI size limits)
-      const blob = base64ToBlob(data.audioContent, 'audio/mpeg');
-      const blobUrl = URL.createObjectURL(blob);
-      audio.src = blobUrl;
-      
-      audio.onended = () => {
-        setIsPlaying(false);
-        URL.revokeObjectURL(blobUrl);
-      };
-      
-      audio.onerror = () => {
-        setIsPlaying(false);
-        URL.revokeObjectURL(blobUrl);
-        toast.error('Audio playback failed');
-      };
-
-      await audio.play();
-      setIsPlaying(true);
-      
-    } catch (err) {
-      console.error('Narration error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to generate narration';
-      toast.error('Narration failed', { description: errorMessage });
-    } finally {
-      setIsNarrating(false);
-    }
-  };
+  const handleNarrate = () => toggleNarration(story);
 
   return (
     <div
@@ -306,7 +243,7 @@ const NowPlaying = ({
               </button>
 
               {/* Special Rules — only when killer/location has dedicated rules */}
-              {getApplicableSpecialRules(killer, location).length > 0 && (
+              {applicableSpecialRules.length > 0 && (
                 <SpecialRulesModal killer={killer} location={location}>
                   <button className="vcr-tape-button flex items-center justify-center gap-2 px-4 sm:px-6 py-3 font-display text-xs sm:text-sm tracking-[0.1em] sm:tracking-[0.15em] uppercase transition-all duration-300 min-h-[44px] w-full sm:w-auto">
                     <ScrollText className="w-4 h-4 shrink-0" />

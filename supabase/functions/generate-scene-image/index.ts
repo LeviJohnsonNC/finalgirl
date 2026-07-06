@@ -253,7 +253,7 @@ async function generateWithGoogle(apiKey: string, prompt: string, isPoster: bool
 
   const data = await response.json();
   const parts = data.candidates?.[0]?.content?.parts;
-  const imagePart = parts?.find((p: any) => p.inlineData);
+  const imagePart = parts?.find((p: { inlineData?: { mimeType: string; data: string } }) => p.inlineData);
 
   if (!imagePart?.inlineData) {
     throw new Error('No image returned from Google');

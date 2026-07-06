@@ -33,6 +33,8 @@ export const FilmToggle = React.forwardRef<HTMLDivElement, FilmToggleProps>(
               <img
                 src={boxArt}
                 alt={`${film.name} box art`}
+                loading="lazy"
+                decoding="async"
                 className={cn(
                   "w-full h-full object-cover object-top rounded transition-all",
                   isOwned

@@ -2,28 +2,44 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Marquee } from '@/components/Marquee';
 import { AppHeader } from '@/components/AppHeader';
-import CastingRoom from './CastingRoom';
-import Archive from './Archive';
-import NowPlaying from './NowPlaying';
-import GameOutcome from './GameOutcome';
-import TheEnd, { EndingFormData } from './TheEnd';
-// Lazy-load heavy pages to trim the initial bundle.
+import { PageLoading } from '@/components/PageLoading';
+import { VCRTime, VCRDate } from '@/components/VCRClock';
+// Every page is lazy: the entry screen is the Marquee, so none of the page
+// code (and none of the static lore/description data it imports) belongs in
+// the entry chunk. The likely-next chunks are prefetched while the marquee
+// idles — see prefetchLikelyPages below.
+const castingRoomImport = () => import('./CastingRoom');
+const archiveImport = () => import('./Archive');
+const CastingRoom = lazy(castingRoomImport);
+const Archive = lazy(archiveImport);
+const NowPlaying = lazy(() => import('./NowPlaying'));
+const GameOutcome = lazy(() => import('./GameOutcome'));
+const TheEnd = lazy(() => import('./TheEnd'));
 const Scrapbooks = lazy(() => import('./Scrapbooks'));
 const Stats = lazy(() => import('./Stats'));
 const Rules = lazy(() => import('./Rules'));
-import { Library, BookOpen, BarChart3, ArrowLeft, User, BookMarked, Loader2 } from 'lucide-react';
+import type { EndingFormData } from './TheEnd';
+import { Library, BookOpen, BarChart3, ArrowLeft, User, BookMarked } from 'lucide-react';
 import { getFilmIdByLocation } from '@/types/gameData';
 import { GameResult } from '@/hooks/useGameHistory';
 import { GameHistoryProvider, useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { NewsTicker } from '@/components/NewsTicker';
 import { useAuth } from '@/hooks/useAuth';
 
-const PageLoading = () => (
-  <div className="min-h-screen flex flex-col items-center justify-center gap-3 text-muted-foreground">
-    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-    <p className="font-vhs text-xs tracking-widest animate-pulse">[ PROJECTOR WARMING UP... ]</p>
-  </div>
-);
+// Warm the chunks the user reaches first (dashboard = CastingRoom, plus the
+// Archive) once the browser is idle, so the marquee → dashboard transition
+// stays instant despite the code splitting.
+const prefetchLikelyPages = () => {
+  const prefetch = () => {
+    castingRoomImport().catch(() => {});
+    archiveImport().catch(() => {});
+  };
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(prefetch, { timeout: 3000 });
+  } else {
+    window.setTimeout(prefetch, 1500);
+  }
+};
 
 
 interface GameSelection {
@@ -45,7 +61,6 @@ const IndexContent = () => {
   const [lastGameResult, setLastGameResult] = useState<GameResult | null>(null);
   const [introStory, setIntroStory] = useState<string | undefined>(undefined);
   const [endingFormData, setEndingFormData] = useState<EndingFormData | null>(null);
-  const [time, setTime] = useState(new Date());
   const { recordGame, updateGame } = useGameHistoryContext();
 
   // Scroll to top when page changes
@@ -53,10 +68,9 @@ const IndexContent = () => {
     window.scrollTo(0, 0);
   }, [currentPage]);
 
-  // Update time every second for VCR display
+  // Warm likely-next page chunks while the marquee idles
   useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
+    prefetchLikelyPages();
   }, []);
 
   const handleStart = () => {
@@ -219,11 +233,11 @@ const IndexContent = () => {
       case 'archive':
         return <Archive />;
       case 'scrapbooks':
-        return <Suspense fallback={<PageLoading />}><Scrapbooks /></Suspense>;
+        return <Scrapbooks />;
       case 'stats':
-        return <Suspense fallback={<PageLoading />}><Stats /></Suspense>;
+        return <Stats />;
       case 'rules':
-        return <Suspense fallback={<PageLoading />}><Rules /></Suspense>;
+        return <Rules />;
       default:
         return <CastingRoom onStartGame={handleStartGame} onGoToArchive={() => setCurrentPage('archive')} />;
     }
@@ -238,9 +252,11 @@ const IndexContent = () => {
         <AppHeader onNavigateHome={handleNavigateHome} />
       </div>
       
-      {/* Main Content */}
+      {/* Main Content — one Suspense boundary covers every lazy page */}
       <main className="container mx-auto px-3 sm:px-4 pt-24 sm:pt-32 pb-28 relative z-10">
-        {renderPage()}
+        <Suspense fallback={<PageLoading />}>
+          {renderPage()}
+        </Suspense>
       </main>
 
       {/* News Ticker - above footer */}
@@ -268,7 +284,7 @@ const IndexContent = () => {
           {/* Center: Title - simplified on mobile */}
           <div className="font-vhs text-[10px] sm:text-xs text-muted-foreground truncate group relative">
             <span className="sm:hidden">FINAL GIRL™</span>
-            <span className="hidden sm:inline">FINAL GIRL™ UNOFFICIAL CASE FILES • {time.toLocaleDateString()}</span>
+            <span className="hidden sm:inline">FINAL GIRL™ UNOFFICIAL CASE FILES • <VCRDate /></span>
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-background/95 border border-border rounded text-[9px] text-muted-foreground/60 leading-relaxed max-w-[320px] text-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-normal">
               This is an unofficial fan-made application that is not endorsed by or affiliated with Van Ryder Games who is the registered trademark owner of Final Girl and all associated intellectual property rights.
             </div>
@@ -314,9 +330,7 @@ const IndexContent = () => {
                 <span className="hidden sm:inline">{user ? 'ACCOUNT' : 'SIGN IN'}</span>
               </button>
             )}
-            <span className="font-vhs text-[10px] sm:text-xs text-secondary neon-text">
-              {time.toLocaleTimeString('en-US', { hour12: false })}
-            </span>
+            <VCRTime />
             <span className="hidden sm:inline font-vhs text-xs text-primary">SP</span>
           </div>
         </div>

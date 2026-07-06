@@ -12,7 +12,9 @@ const shuffleArray = <T,>(array: T[]): T[] => {
   return shuffled;
 };
 
-export const NewsTicker = React.forwardRef<HTMLDivElement>(
+// memo: content is static after mount; no reason to reconcile this subtree
+// when the page shell re-renders.
+export const NewsTicker = React.memo(React.forwardRef<HTMLDivElement>(
   (_, ref) => {
     // Shuffle headlines once on mount, then duplicate for seamless loop
     const tickerContent = useMemo(() => {
@@ -51,6 +53,6 @@ export const NewsTicker = React.forwardRef<HTMLDivElement>(
       </div>
     );
   }
-);
+));
 
 NewsTicker.displayName = 'NewsTicker';

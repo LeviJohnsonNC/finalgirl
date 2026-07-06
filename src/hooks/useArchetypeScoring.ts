@@ -255,7 +255,7 @@ function buildProfile(
   const otherScores = scores.filter((s) => s.archetype !== winner.archetype && s.score > 0);
   const runnerUp = otherScores.length > 0 ? otherScores[0] : null;
 
-  let p2Parts: string[] = [];
+  const p2Parts: string[] = [];
   if (runnerUp) {
     p2Parts.push(buildRunnerUpSentence(winner, runnerUp, ctx));
   }

@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Final Girl Case Files (Unofficial)</title>
     <meta name="description" content="An unofficial fan-made app for Final Girl. Not endorsed by or affiliated with Van Ryder Games.">
+    <!-- Preconnect so font CSS + woff2 fetches start in parallel with the JS bundle -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roslindale+Display+Condensed:wght@700&display=swap" />
+    <!-- Moved out of src/index.css: a CSS @import chains serially behind the bundled
+         stylesheet; a <link> here downloads immediately alongside it. -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=Bebas+Neue&family=Creepster&display=swap" />
     <meta name="author" content="Lovable" />
 
     
