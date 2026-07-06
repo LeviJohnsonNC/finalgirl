@@ -25,8 +25,14 @@ describe("FEATURE_FILM_DETAILS data", () => {
       expect(detail.filmId).toBe(filmId);
       expect(detail.finalGirls).toBeDefined();
       expect(detail.finalGirls.length).toBeGreaterThanOrEqual(1);
-      expect(detail.location).toBeDefined();
-      expect(detail.location.name).toBeTruthy();
+      if (detail.isVignette) {
+        // Vignettes have no location by design (location? is optional in the
+        // type); they describe their setting via vignetteDescription.
+        expect(detail.vignetteDescription).toBeTruthy();
+      } else {
+        expect(detail.location).toBeDefined();
+        expect(detail.location!.name).toBeTruthy();
+      }
       expect(detail.killer).toBeDefined();
       expect(detail.killer.name).toBeTruthy();
     }

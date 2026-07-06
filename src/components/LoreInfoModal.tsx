@@ -104,6 +104,7 @@ export const LoreInfoModal = ({ type, name }: LoreInfoModalProps) => {
                   src={image}
                   alt={name}
                   className={`w-full h-full ${type === 'location' ? 'object-cover' : 'object-cover object-top'}`}
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
               </div>

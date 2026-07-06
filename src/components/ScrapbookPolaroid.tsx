@@ -22,6 +22,8 @@ export const ScrapbookPolaroid = ({ sceneImageUrl }: ScrapbookPolaroidProps) => 
               src={sceneImageUrl}
               alt="Scene evidence"
               className="polaroid-image"
+              loading="lazy"
+              decoding="async"
             />
             <span className="polaroid-caption">EVIDENCE</span>
           </div>

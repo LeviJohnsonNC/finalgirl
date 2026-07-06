@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, type CSSProperties } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, type CSSProperties } from 'react';
 
 interface ProjectorSlideshowProps {
   images: string[];
@@ -20,10 +20,15 @@ export const ProjectorSlideshow = ({ images, style }: ProjectorSlideshowProps) =
     return arr;
   }, [images]);
 
+  // Track the in-flight transition timeout so unmount doesn't leave a
+  // setState firing 4s after the component is gone.
+  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const advance = useCallback(() => {
     if (shuffled.length < 2) return;
     setIsTransitioning(true);
-    setTimeout(() => {
+    transitionTimeoutRef.current = setTimeout(() => {
+      transitionTimeoutRef.current = null;
       setCurrentIndex(prev => (prev + 1) % shuffled.length);
       setNextIndex(prev => (prev + 1) % shuffled.length);
       setIsTransitioning(false);
@@ -33,7 +38,13 @@ export const ProjectorSlideshow = ({ images, style }: ProjectorSlideshowProps) =
   useEffect(() => {
     if (shuffled.length < 2) return;
     const interval = setInterval(advance, 16000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (transitionTimeoutRef.current !== null) {
+        clearTimeout(transitionTimeoutRef.current);
+        transitionTimeoutRef.current = null;
+      }
+    };
   }, [advance, shuffled.length]);
 
   if (shuffled.length === 0) return null;

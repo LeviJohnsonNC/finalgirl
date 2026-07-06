@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=VT323&family=Bebas+Neue&family=Creepster&display=swap');
+/* VT323 / Bebas Neue / Creepster are loaded via <link> in index.html so the
+   font CSS downloads in parallel with this stylesheet instead of chaining
+   serially behind it (a CSS @import blocks until the importing sheet loads). */
 
 /* ========== NEWS TICKER ANIMATION ========== */
 /* Placed outside @layer to prevent Tailwind JIT purging */

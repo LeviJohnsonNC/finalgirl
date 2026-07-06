@@ -24,8 +24,14 @@ describe("FEATURE_FILMS data", () => {
       expect(film.name).toBeTruthy();
       expect(film.season).toBeGreaterThanOrEqual(1);
       expect(film.killer).toBeTruthy();
-      expect(film.location).toBeTruthy();
-      expect(film.finalGirls).toHaveLength(2);
+      if (film.isVignette) {
+        // Vignettes intentionally have no location and a single final girl.
+        expect(film.location).toBe('');
+        expect(film.finalGirls).toHaveLength(1);
+      } else {
+        expect(film.location).toBeTruthy();
+        expect(film.finalGirls).toHaveLength(2);
+      }
     }
   });
 

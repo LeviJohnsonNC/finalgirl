@@ -177,6 +177,14 @@ export const useGameHistory = () => {
   const [hasMigrated, setHasMigrated] = useState(false);
   const fetchIdRef = useRef(0);
 
+  // Mirror the cached history in a ref so fetchFromDb can read the latest
+  // cache for its degraded-mode fallback WITHOUT depending on it. When it was
+  // a dependency, every successful fetch that updated the cache minted a new
+  // fetchFromDb identity, which re-ran the mount effect and issued the summary
+  // RPC a second time on every sign-in.
+  const cachedCloudGameHistoryRef = useRef(cachedCloudGameHistory);
+  cachedCloudGameHistoryRef.current = cachedCloudGameHistory;
+
   // Determine which history to use
   const gameHistory = user ? dbGameHistory : localGameHistory;
 
@@ -202,9 +210,10 @@ export const useGameHistory = () => {
       if (error) {
         console.error('Error fetching game history:', error);
         if (fetchIdRef.current === fetchId) {
+          const cached = cachedCloudGameHistoryRef.current;
           setLoadError(error.message || 'Failed to retrieve session data.');
-          setIsDegraded(cachedCloudGameHistory.length > 0);
-          if (cachedCloudGameHistory.length > 0) setDbGameHistory(cachedCloudGameHistory);
+          setIsDegraded(cached.length > 0);
+          if (cached.length > 0) setDbGameHistory(cached);
         }
         return;
       }
@@ -221,9 +230,10 @@ export const useGameHistory = () => {
         const message = err instanceof DOMException && err.name === 'AbortError'
           ? 'Cloud records did not respond within 20 seconds.'
           : err instanceof Error ? err.message : 'Failed to retrieve session data.';
+        const cached = cachedCloudGameHistoryRef.current;
         setLoadError(message);
-        setIsDegraded(cachedCloudGameHistory.length > 0);
-        if (cachedCloudGameHistory.length > 0) setDbGameHistory(cachedCloudGameHistory);
+        setIsDegraded(cached.length > 0);
+        if (cached.length > 0) setDbGameHistory(cached);
       }
     } finally {
       window.clearTimeout(timeoutId);
@@ -231,7 +241,7 @@ export const useGameHistory = () => {
         setIsDbLoading(false);
       }
     }
-  }, [user, cachedCloudGameHistory, setCachedCloudGameHistory]);
+  }, [user, setCachedCloudGameHistory]);
 
   // Fetch from database when authenticated
   useEffect(() => {
@@ -458,58 +468,72 @@ export const useGameHistory = () => {
   const deleteGame = useCallback(async (id: string) => {
     // Find the game to get image URLs before deletion
     const gameToDelete = gameHistory.find(g => g.id === id);
-    
+
     if (user) {
-      // Optimistically update
+      // Optimistically update state AND the cloud cache — a stale cache entry
+      // would resurrect the deleted game in degraded mode.
       setDbGameHistory(prev => prev.filter(game => game.id !== id));
-      
-      // Delete storage files first (best effort)
-      if (gameToDelete) {
-        await deleteStorageFiles(gameToDelete);
-      }
-      
-      // Delete from database
+      setCachedCloudGameHistory(prev => prev.filter(game => game.id !== id));
+
+      // Delete the row first. Storage cleanup happens only after the row is
+      // gone: deleting the images before a failed row-delete would roll the
+      // game back with its poster/scene irrecoverably destroyed.
       const { error } = await supabase
         .from('game_history')
         .delete()
         .eq('id', id)
         .eq('user_id', user.id);
-        
+
       if (error) {
         console.error('Error deleting game:', error);
         // Rollback optimistic update on error
         if (gameToDelete) {
           setDbGameHistory(prev => [...prev, gameToDelete].sort((a, b) => b.timestamp - a.timestamp));
+          setCachedCloudGameHistory(prev =>
+            [...prev, slimGameForCache(gameToDelete)].sort((a, b) => b.timestamp - a.timestamp)
+          );
         }
+        return;
+      }
+
+      // Row is gone — now remove the orphaned storage files (best effort).
+      if (gameToDelete) {
+        await deleteStorageFiles(gameToDelete);
       }
     } else {
       setLocalGameHistory(prev => prev.filter(game => game.id !== id));
     }
-  }, [user, gameHistory, setLocalGameHistory]);
+  }, [user, gameHistory, setLocalGameHistory, setCachedCloudGameHistory]);
 
   const clearHistory = useCallback(async () => {
     if (user) {
       const gamesToClear = [...dbGameHistory];
-      
-      // Optimistically clear
+
+      // Optimistically clear state and the cloud cache together.
       setDbGameHistory([]);
-      
-      // Delete all storage files (best effort, in parallel)
-      await Promise.all(gamesToClear.map(game => deleteStorageFiles(game)));
-      
-      // Delete all from database
+      setCachedCloudGameHistory([]);
+
+      // Delete rows first, storage files after — same ordering rationale as
+      // deleteGame: never destroy images for rows that might survive.
       const { error } = await supabase
         .from('game_history')
         .delete()
         .eq('user_id', user.id);
-        
+
       if (error) {
         console.error('Error clearing history:', error);
+        // Rollback so the UI reflects that the rows still exist.
+        setDbGameHistory(gamesToClear);
+        setCachedCloudGameHistory(slimGamesForCache(gamesToClear));
+        return;
       }
+
+      // Best effort, in parallel.
+      await Promise.all(gamesToClear.map(game => deleteStorageFiles(game)));
     } else {
       setLocalGameHistory([]);
     }
-  }, [user, dbGameHistory, setLocalGameHistory]);
+  }, [user, dbGameHistory, setLocalGameHistory, setCachedCloudGameHistory]);
 
   return {
     gameHistory,

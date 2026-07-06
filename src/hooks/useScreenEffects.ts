@@ -14,30 +14,42 @@ export const useScreenEffects = (): ScreenEffects => {
   const [showFrameJump, setShowFrameJump] = useState(false);
 
   useEffect(() => {
-    const scheduleFlicker = (): ReturnType<typeof setTimeout> => {
-      const delay = Math.random() * 15000 + 15000;
-      return setTimeout(() => {
+    // Track every live timer: these chains reschedule themselves, so clearing
+    // only the first handle (the old behavior) leaked the chain forever after
+    // unmount and kept calling setState on an unmounted component.
+    const timers = new Set<ReturnType<typeof setTimeout>>();
+    let cancelled = false;
+
+    const later = (fn: () => void, delay: number) => {
+      const handle = setTimeout(() => {
+        timers.delete(handle);
+        if (!cancelled) fn();
+      }, delay);
+      timers.add(handle);
+    };
+
+    const scheduleFlicker = () => {
+      later(() => {
         setShowFlicker(true);
-        setTimeout(() => setShowFlicker(false), 150);
+        later(() => setShowFlicker(false), 150);
         scheduleFlicker();
-      }, delay);
+      }, Math.random() * 15000 + 15000);
     };
 
-    const scheduleFrameJump = (): ReturnType<typeof setTimeout> => {
-      const delay = Math.random() * 20000 + 40000;
-      return setTimeout(() => {
+    const scheduleFrameJump = () => {
+      later(() => {
         setShowFrameJump(true);
-        setTimeout(() => setShowFrameJump(false), 120);
+        later(() => setShowFrameJump(false), 120);
         scheduleFrameJump();
-      }, delay);
+      }, Math.random() * 20000 + 40000);
     };
 
-    const flickerTimeout = scheduleFlicker();
-    const frameJumpTimeout = scheduleFrameJump();
+    scheduleFlicker();
+    scheduleFrameJump();
 
     return () => {
-      clearTimeout(flickerTimeout);
-      clearTimeout(frameJumpTimeout);
+      cancelled = true;
+      timers.forEach(clearTimeout);
     };
   }, []);
 

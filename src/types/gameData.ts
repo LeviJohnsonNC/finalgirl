@@ -36,12 +36,22 @@ const aiBoxArtGlob = import.meta.glob<{ default: string }>(
   { eager: true },
 );
 
+// Index each glob by basename once, so building the image maps is a hash
+// lookup per entity instead of a linear scan over every glob entry.
+const globsByBasename = new WeakMap<Record<string, { default: string }>, Map<string, string>>();
+
 function resolveAsset(
   glob: Record<string, { default: string }>,
   filename: string,
 ): string | undefined {
-  const entry = Object.entries(glob).find(([path]) => path.endsWith(`/${filename}`));
-  return entry?.[1].default;
+  let index = globsByBasename.get(glob);
+  if (!index) {
+    index = new Map(
+      Object.entries(glob).map(([path, mod]) => [path.slice(path.lastIndexOf('/') + 1), mod.default]),
+    );
+    globsByBasename.set(glob, index);
+  }
+  return index.get(filename);
 }
 
 function buildImageMap(
@@ -281,20 +291,26 @@ export const getOwnedContent = (ownedFilms: string[]) => {
   };
 };
 
-// Helper to find film ID by location name
+// Helper to find film ID by location name.
+// Guard against empty input: vignettes legitimately store location: '', so an
+// unguarded lookup with '' would misattribute them (e.g. return the first
+// vignette's film for a game with no location selected).
 export const getFilmIdByLocation = (locationName: string): string | null => {
+  if (!locationName) return null;
   const film = FEATURE_FILMS.find(f => f.location === locationName);
   return film?.id ?? null;
 };
 
 // Helper to find film ID by killer name
 export const getFilmIdByKiller = (killerName: string): string | null => {
+  if (!killerName) return null;
   const film = FEATURE_FILMS.find(f => f.killer === killerName);
   return film?.id ?? null;
 };
 
 // Helper to find film ID by final girl name
 export const getFilmIdByFinalGirl = (finalGirlName: string): string | null => {
+  if (!finalGirlName) return null;
   const film = FEATURE_FILMS.find(f => f.finalGirls.includes(finalGirlName));
   return film?.id ?? null;
 };

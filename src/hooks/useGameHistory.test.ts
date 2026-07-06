@@ -2,6 +2,20 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useGameHistory, GameResult } from "./useGameHistory";
 
+// These tests exercise the signed-out (localStorage) path. useGameHistory now
+// reads auth state via useAuth, which requires an AuthProvider — mock it with
+// a resolved, signed-out session so the hook stays in guest mode.
+vi.mock("./useAuth", () => ({
+  useAuth: () => ({
+    user: null,
+    session: null,
+    isLoading: false,
+    isAuthReady: true,
+    authError: null,
+    isAuthenticated: false,
+  }),
+}));
+
 describe("useGameHistory", () => {
   beforeEach(() => {
     localStorage.clear();
