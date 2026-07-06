@@ -37,7 +37,7 @@ const prefetchLikelyPages = () => {
   if ('requestIdleCallback' in window) {
     window.requestIdleCallback(prefetch, { timeout: 3000 });
   } else {
-    window.setTimeout(prefetch, 1500);
+    setTimeout(prefetch, 1500);
   }
 };
 
