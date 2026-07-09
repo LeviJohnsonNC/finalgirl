@@ -57,7 +57,7 @@ export const GameOutcomeForm = ({
   // Big Bad Wolf mode
   const [wolfMode, setWolfMode] = useState<'TRACK' | 'SLAY' | 'Killing Machine'>('SLAY');
   // The Intruders - active killer at game end
-  const [activeIntruder, setActiveIntruder] = useState<'Baghead' | 'Redhood' | 'Zeke'>('Baghead');
+  const [activeIntruder, setActiveIntruder] = useState<'Trish' | 'Baghead' | 'Zeke'>('Trish');
   // Buddyland - Buddies + power supplies
   const [buddiesInPlay, setBuddiesInPlay] = useState(0);
   const [powerSuppliesShutDown, setPowerSuppliesShutDown] = useState(false);
