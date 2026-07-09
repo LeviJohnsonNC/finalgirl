@@ -360,7 +360,60 @@ const theIntruders: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders];
+// ─── Wingard Cottage (Location) — A Knock at the Door ─────────────────────
+const wingardCottage: EntityRuleModule = {
+  entity: 'Wingard Cottage',
+  kind: 'location',
+  filmId: 's2-knock-at-door',
+  source: 'A Knock at the Door — Location Sheet',
+  credits: { design: 'Mike Martins', art: 'Heather Vaughan' },
+  tags: ['wingard cottage', 'supply items', 'crafted items', 'house', 'indoors', 'outdoors', 'location'],
+  setup: [
+    {
+      type: 'paragraph',
+      text: 'Setup the game as normal, with the following changes when playing with Wingard Cottage:',
+    },
+    {
+      type: 'list',
+      items: [
+        'Place the four Supply Item cards faceup in the play area.',
+        'Shuffle the Crafted Item cards together and deal out four faceup cards in the play area.',
+      ],
+    },
+  ],
+  rules: [
+    { type: 'heading', level: 3, text: 'Definitions' },
+    {
+      type: 'list',
+      items: [
+        'HOUSE: Refers to all of the following spaces — Kitchen, Bedroom x2, Bathroom, Family Room, Foyer, Laundry Room, and Garage.',
+        'INDOORS: Refers to all spaces inside the House as well as the Shed and the Boathouse.',
+        'OUTDOOR SPACE: Refers to all spaces that are not considered Indoors.',
+      ],
+    },
+    { type: 'heading', level: 3, text: 'Supply Items' },
+    {
+      type: 'paragraph',
+      text: 'Some spaces on the board have Supply Item symbols corresponding to a specific type of Supply Item (Discarded Tools, Nails, Rope, Wood). While on one of these spaces, you may gain the corresponding Supply Item card at the cost of 1 Time (you cannot do this while moving through the space). Place it into a Backpack slot. When discarding a Supply Item card, it goes back in the play area faceup, available to be gained again.',
+    },
+    { type: 'heading', level: 3, text: 'Crafted Items' },
+    {
+      type: 'paragraph',
+      text: 'Crafting allows you to gain an available Crafted Item card by discarding the Item cards and/or Supply Item cards listed on the Crafted Item card, as well as losing the required amount of Time. When you gain a Crafted Item card, either place it into a Hand or Backpack slot. When discarding a Crafted Item card, it goes back in the play area faceup, available to be Crafted again.',
+    },
+    {
+      type: 'paragraph',
+      text: 'When Items with limited uses are discarded to gain a Crafted Item card, those uses carry over to the Crafted Item. For example, if the Shotgun has one use left when it is discarded to craft the Sawed-off Shotgun, then the Sawed-off Shotgun will also have one use left. The same would apply if the Trashcan Lid is discarded to craft the Porcupine.',
+    },
+    {
+      type: 'example',
+      title: 'Crafting Example',
+      text: 'Ava has a Wooden Bat and Nails. She spends 2 Time to craft the Nail Bat, taking it into her hand. Finally, she discards the Wooden Bat and returns the Nails faceup next to the other Supply Item cards.',
+    },
+  ],
+};
+
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -383,6 +436,11 @@ const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
     narrativeGuidance: 'The Intruders are THREE coordinated home invaders — Trish (the Red Killer, often in a red hood), Baghead (the Gray Killer, wearing a burlap sack over his head), and Zeke (the Black Killer). Only one is "active" at any given moment, but all three are stalking Wingard Cottage in parallel: they hand off pursuit, flank, and cut off escape routes. If one is downed, another steps in — and downed Intruders sometimes get back up (Final Health). Never describe them as a single figure or a lone killer.',
     visualGuidance: 'Depict a trio of masked suburban home-invaders inside a warmly lit cottage: Trish in a red hood, Baghead with a burlap sack mask, Zeke in dark clothing and a mask. Show them stalking as a group, one lunging while the others block doorways or windows. If the ending specifies a single Active Intruder (Trish, Baghead, or Zeke), feature that one in the foreground while the others loom in the background.',
     rulesSummary: 'Horde-style killer: three separate Intruders on the board with a single Active Killer token that shifts between them via attacks, up/down arrow symbols, and deaths. "All Killers" effects hit every living Intruder top-to-bottom. Final Health tokens can revive an Intruder that appeared dead. Minor Dark Powers apply to all three and soak damage first.',
+  },
+  'Wingard Cottage': {
+    narrativeGuidance: 'Wingard Cottage is a lakeside family getaway with a long, buried history of tragedy. The story should move between INDOOR spaces (Kitchen, Bedrooms, Bathroom, Family Room, Foyer, Laundry Room, Garage, Shed, Boathouse) and OUTDOOR spaces (yard, dock, woods\' edge, driveway). Emphasize scavenging for supplies (Discarded Tools, Nails, Rope, Wood) and improvising crafted weapons (e.g. a Nail Bat from a Wooden Bat + Nails, a Sawed-off Shotgun, a Porcupine from a Trashcan Lid). The cottage feels charming on the surface but hides generations of violence.',
+    visualGuidance: 'Depict a rustic wooden cottage on the edge of a pristine lake at night: warm yellow interior windows, a shed and boathouse, a dock, surrounding pine woods, and a violet/purple sky. Interiors show a lived-in family kitchen, bedrooms, and family room with makeshift weapons (nail-studded bats, sawed-off shotguns, trashcan lids). Include stashes of Supply Items (piles of nails, rope, wood, discarded tools).',
+    rulesSummary: 'Spaces are classified as HOUSE, INDOORS (house + shed + boathouse), or OUTDOOR. Four Supply Item types (Discarded Tools, Nails, Rope, Wood) can be gathered from marked spaces at the cost of 1 Time and stored in a Backpack. Crafted Items are built by discarding required Items/Supply Items and spending Time; discarded Crafted and Supply Item cards return to the play area to be gained/crafted again. Limited-use Item charges carry over into their Crafted upgrades.',
   },
 };
 
