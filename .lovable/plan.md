@@ -1,126 +1,41 @@
+## Plan: Wire up The Intruders official rules
 
-# Casting Room Redesign — Cursed VHS Case File
+The Intruders (killer, film `s2-knock-at-door`, *A Knock at the Door*) currently has no entry in `moduleRules.ts` — so it never appears in the Rulebook or the in-session Special Rules modal even though owners of the film should see it. The official sheet you uploaded also unlocks better AI narration/visuals and a small stats-tracker win. Here's what I'd change.
 
-Rebuild the feature selection page around the 5 uploaded assets. Keep all game logic; change only presentation, geometry, and the picker overlay.
+### 1. `src/data/rules/moduleRules.ts` — add `theIntruders` module (primary win)
+New `EntityRuleModule` entry (kind: `killer`, filmId: `s2-knock-at-door`, source: "A Knock at the Door — Killer Sheet", credits: design Mike Martins / art Heather Vaughan). Transcribed verbatim from the sheet:
 
-## 1. Asset intake
+- **Setup** (list): place all 3 Killer meeples (red/black/gray) on the Killer start space; give each Killer their starting health including a Final Health token; place the **Active Killer** token on Trish's (Red) circle.
+- **Rules**:
+  - Intro paragraph: 3 Killers, only ONE is active at a time (the one with the Active Killer token) for boot/attack/place-Killer effects.
+  - Heading **Changing the Active Killer** + numbered list of the 3 triggers (attack/item damage → that Killer becomes active; UP/DOWN arrow symbols move the token, wrapping top↔bottom and skipping dead Killers; when Active Killer dies, move to top-most living Killer).
+  - Heading **Resolving "All Killers" Effects** — ignore Active Killer token, resolve top-to-bottom; token doesn't change.
+  - Heading **Panic** — Victims in a space with ANY Killer panic if a Victim was killed that turn.
+  - Heading **Minor Dark Powers** — apply to ALL Killers; damage lands on the Minor Dark Power card first.
+  - Heading **Intruder Death & Final Health Tokens** + critical callout: if a Killer loses final health while another is alive, don't end the phase — lay meeple on its side, change Active Killer, finish the phase, THEN reveal the black Final Health token; blank = dead, health = replenish + white token + stand up. `+1 ♥` bonus only triggers once regardless of how many Killers are at final health.
+  - `example` block for the **Active Killer Example** (Ginny/Trish/Baghead/Zeke/"They're Everywhere!" walkthrough from the third photo), condensed into 3–4 bullets.
+- Add `theIntruders` to the `ENTITY_RULE_MODULES` export array so `Rules.tsx` picks it up automatically for owners of *A Knock at the Door*.
 
-Upload the 5 PNGs via `lovable-assets` (CDN, preserves transparency) and reference them via `.asset.json` pointers:
+### 2. `moduleRules.ts` — add `getModulePromptContext` entry for The Intruders
+So `NowPlaying` and `TheEnd` AI generation know how this killer actually works (right now they don't):
+- **narrativeGuidance**: three coordinated home invaders (Trish/Red, Baghead/Gray, Zeke/Black), one is "active" at any moment but the others are stalking in parallel; emphasize hand-offs, flanking, and the moment one is downed but another steps in. Do not describe them as a single figure.
+- **visualGuidance**: trio of masked suburban home-invaders (bag mask, red hood, third masked figure) in a lit cottage interior; if the game ended with a specific Active Intruder, feature that one prominently — otherwise show all three.
+- **rulesSummary**: horde-style killer with an Active Killer token that shifts between three; dying members can be revived via Final Health tokens; damage from Minor Dark Powers is soaked by the card.
 
-- `src/assets/buttons/shuffle-plate.png.asset.json` — red wax/dice horizontal plate
-- `src/assets/buttons/choose-plate.png.asset.json` — cyan/checkmark horizontal plate
-- `src/assets/frames/empty-killer.png.asset.json` — dark red portrait frame
-- `src/assets/frames/empty-location.png.asset.json` — landscape surveillance frame
-- `src/assets/frames/empty-finalgirl.png.asset.json` — portrait frame with red tick
+### 3. `src/data/killerSpecialRules.ts` — enrich Intruders narrative note
+Replace the current generic 2-line note with the correct mechanics (three named Killers, Active Killer token, Final Health revival, cottage setting) so the intro/ending prompts already using `killerSpecialRules` produce accurate stories.
 
-Delete the old `shuffle-button.png` / `choose-button.png` after swap.
+### 4. `src/components/GameOutcomeForm.tsx` — small tracker tweak
+`activeIntruder` currently only tracks Baghead / Redhood / Zeke. The sheet confirms the Red Killer is **Trish**, and canonically the three names are **Trish, Baghead, Zeke** (Redhood is the color of Trish's meeple, not a separate character). I'll rename the third option to **Trish** and re-label to match the sheet. Existing highlights strings keep working.
 
-## 2. Slot geometry changes (visible layout change)
+### 5. Nothing changed
+- No new UI, no new routes, no schema changes.
+- `Rules.tsx` and `SpecialRulesModal` already render new modules automatically once `ENTITY_RULE_MODULES` includes them.
+- No changes to edge functions — they already read `getModulePromptContext`.
 
-`src/components/CastingSlot.tsx`:
+### Files touched
+- `src/data/rules/moduleRules.ts` (add module + prompt context, export)
+- `src/data/killerSpecialRules.ts` (rewrite Intruders `narrativeNote`)
+- `src/components/GameOutcomeForm.tsx` (Redhood → Trish in the 3-option radio)
 
-- Killer + Final Girl: change to portrait `aspect-[2/3]`, fixed width ~ `w-56 md:w-64`.
-- Location: change to landscape `aspect-[3/2]`, width sized so **height matches** the portrait slots (~ `w-[24rem] md:w-[27rem]`).
-- Row is now three same-height "files on a desk" rather than one giant panorama.
-
-## 3. Empty slot: use frame PNG at natural aspect
-
-For empty slots, render the frame PNG as the whole card (no dashed border). Center a small monospaced label **inside** the dark inner area:
-
-- Killer → `UNIDENTIFIED`
-- Location → `UNKNOWN SITE`
-- Final Girl → `UNASSIGNED`
-
-Below the frame, keep the existing `KILLER` / `LOCATION` / `FINAL GIRL` slot label.
-
-## 4. Selected card: pure CSS frame (no PNG)
-
-When a value is selected, the poster fills the same box with a CSS-only "case-file" treatment:
-
-- 1px worn `border-neutral-700/60`, subtle inner shadow (`inset 0 0 24px rgba(0,0,0,.6)`).
-- 4 corner brackets (cyan `hsl(var(--neon-cyan))`, 12px, 1px, absolutely positioned).
-- Tiny registration crosshair top-right (cyan, 6px).
-- Existing scanline + film-grain overlays retained.
-- Metadata strip below (monospaced VT323):
-  - `KILLER // {name}`, `SITE // {name}`, `SURVIVOR // {name}`.
-- The current name + LoreInfoModal trigger moves into this strip.
-
-Red is reserved: only the `SELECTED` stamp inside the picker and Press Play backlight use red.
-
-## 5. Buttons — replace with the two plates
-
-Under each slot, two equal-width buttons using the plate PNGs as background:
-
-- Fixed height `h-14`, width auto, wrapped in `flex gap-3` with `flex-1` containers so Shuffle and Choose share the slot's width.
-- Live HTML text (`font-display tracking-[0.25em]`): `SHUFFLE`, `CHOOSE`.
-- **Shuffle right-side triangle fix:** apply `mask-image: linear-gradient(to right, black 92%, transparent 100%)` to fade the triangle edge, then absolutely position `SHUFFLE` label slightly right-of-center so text visually occupies the fade zone. No cropping of the actual PNG file.
-- Hover: `translate-y-[-1px]` + a soft `drop-shadow` in that plate's accent (red-glow for shuffle, cyan-glow for choose) at ~30% opacity. No neon.
-- Active: `translate-y-[2px]` + brief `animate-[vhs-flicker_120ms_ease-out]` (new tiny keyframe: opacity 1→.7→1).
-- Disabled: `opacity-40 grayscale`.
-
-Buttons render identically for all three slots.
-
-## 6. Picker modal → Evidence Drawer
-
-Rewrite `src/components/CastingPicker.tsx`:
-
-- Root: `Dialog` from `@/components/ui/dialog` (already installed shadcn), backdrop `bg-black/70 backdrop-blur-md` blurring the page (not the modal).
-- Panel: solid case-file surface `bg-[hsl(var(--card))]` with 1px worn border, corner tape pseudo-elements (::before/::after with slight rotation) referencing the cyan-frame asset's tape look. Rendered in CSS, not a PNG.
-- Desktop size: `max-w-[1200px] w-[92vw] h-[82vh]`. Mobile: full-screen `w-screen h-[100dvh] max-w-none rounded-none`.
-- **Sticky header inside modal** (not floating over grid): title + close button (X). Content scrolls below header, never underneath (`grid-rows-[auto_1fr]`, inner `overflow-y-auto`).
-- Header titles:
-  - `SELECT KILLER FILE`
-  - `SELECT LOCATION FILE`
-  - `SELECT FINAL GIRL FILE`
-
-## 7. Picker grid cards
-
-- Killer/Final Girl: portrait `aspect-[2/3]`. Desktop `grid-cols-4`, tablet `grid-cols-3`, mobile `grid-cols-2`.
-- Location: landscape `aspect-[3/2]`. Desktop `grid-cols-2`, mobile `grid-cols-1`.
-- Card: 1px worn border, inner shadow, name in `font-display` below.
-- Hover/focus: `scale-[1.02]`, cyan edge glow `shadow-[0_0_0_1px_hsl(var(--neon-cyan)/0.5)]`, small red corner tick (5px triangle) top-right.
-- Selected state: dual border (red inner + cyan outer) + tiny `SELECTED` monospaced stamp bottom-left.
-- Keyboard focus: same treatment as hover, always visible via `focus-visible`.
-
-## 8. Page hierarchy (`src/pages/CastingRoom.tsx`)
-
-Vertical rhythm, all centered:
-
-1. Feature row (3 slots side-by-side, each with slot label above, frame/poster, metadata, then Shuffle+Choose row).
-2. Thin "case options" strip: existing `ScenarioDropdowns` restyled with a top hairline divider and monospaced `CASE OPTIONS //` label at the left.
-3. Press Play block, centered, with more breathing room above.
-
-Removes current oversized location column that dominated the row.
-
-## 9. Press Play states
-
-Existing `press-play-btn` in `src/index.css` gets two clear looks:
-
-- **Disabled** (`cta-locked`): flat charcoal, no glow, `text-muted-foreground/40`, helper below: `Cast your feature to begin`.
-- **Enabled** (`cta-unlocked`): faint red backlight `shadow-[0_0_28px_hsl(var(--blood-red)/0.35)]`, on hover apply the same `vhs-flicker` keyframe. Label unchanged (`PRESS PLAY`). Helper below: `Tape ready`.
-
-## 10. Preserve
-
-- Shuffle animation reel logic in `CastingSlot`.
-- `useOwnedFilms`, `ownedContent`, `getRandomItem`, `handlePressPlay` — untouched.
-- `ScenarioDropdowns` component — only wrapper styling changes.
-- `LoreInfoModal` trigger — moves into metadata strip.
-- All existing scanline/vignette/grain overlays.
-
-## Technical notes
-
-- Files touched:
-  - `src/components/CastingSlot.tsx` (rewrite render, keep logic)
-  - `src/components/CastingPicker.tsx` (replace overlay with Dialog)
-  - `src/pages/CastingRoom.tsx` (spacing/hierarchy tweaks + removal of degraded-banner top margin)
-  - `src/index.css` (add `vhs-flicker` keyframe, `.case-frame`, `.evidence-card`, `.corner-bracket` utilities)
-  - 5 new `.asset.json` pointers under `src/assets/buttons/` and `src/assets/frames/`
-- Tokens only — no hardcoded hex colors (uses `--blood-red`, `--neon-cyan`, `--card`, `--muted-foreground`).
-- No new dependencies.
-- No changes to backend, hooks, routing, or the `Index.tsx` state machine.
-
-## Out of scope
-
-- Poster generation, story generation, scrapbook — untouched.
-- No per-slot color tinting on top of frame PNGs.
-- No animated tape-peel / frame-shake effects.
+Want me to also add an **Active Intruder at start** field, or keep it end-of-game only like today?
