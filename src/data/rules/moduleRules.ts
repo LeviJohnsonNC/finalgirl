@@ -296,7 +296,71 @@ const megaBgCon: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon];
+// ─── The Intruders (Killer) — A Knock at the Door ─────────────────────────
+const theIntruders: EntityRuleModule = {
+  entity: 'The Intruders',
+  kind: 'killer',
+  filmId: 's2-knock-at-door',
+  source: 'A Knock at the Door — Killer Sheet',
+  credits: { design: 'Mike Martins', art: 'Heather Vaughan' },
+  tags: ['intruders', 'trish', 'baghead', 'zeke', 'active killer', 'killer'],
+  setup: [
+    {
+      type: 'list',
+      items: [
+        'Place all three Killer meeples (red, black, and gray) on the Killer starting space.',
+        'Give each Killer their starting health, including a Final Health token.',
+        'Place the Active Killer token on Trish (the Red Killer) to start the game.',
+      ],
+    },
+  ],
+  rules: [
+    {
+      type: 'paragraph',
+      text: 'The Intruders consist of three separate Killers, but only ONE is the Active Killer at any given time. The Active Killer is the one with the Active Killer token. Boot symbols, attacks, and any effect that targets or places "the Killer" applies only to the Active Killer unless the effect explicitly says otherwise.',
+    },
+    { type: 'heading', level: 3, text: 'Changing the Active Killer' },
+    {
+      type: 'list',
+      ordered: true,
+      items: [
+        'Attacking / Item damage: If you attack (or otherwise damage) a Killer that is NOT the Active Killer, that Killer immediately becomes the Active Killer before damage is resolved.',
+        'Up / Down arrow symbols: Terror and Killer cards may show an UP or DOWN arrow. Move the Active Killer token one slot in that direction on the Killer board, wrapping around top-to-bottom (or bottom-to-top) and skipping any Killer that is already dead.',
+        'Death of the Active Killer: If the Active Killer dies, immediately move the Active Killer token to the top-most Killer that is still alive.',
+      ],
+    },
+    { type: 'heading', level: 3, text: 'Resolving "All Killers" Effects' },
+    {
+      type: 'paragraph',
+      text: 'Some effects target "All Killers." Ignore the Active Killer token for these — resolve the effect on every living Killer from top to bottom on the Killer board. The Active Killer token does NOT move as a result of resolving an "All Killers" effect.',
+    },
+    { type: 'heading', level: 3, text: 'Panic' },
+    {
+      type: 'paragraph',
+      text: 'Victims panic in a space that contains ANY Killer if a Victim was killed that turn — not just the Active Killer. Any Intruder in the space is enough to trigger the panic.',
+    },
+    { type: 'heading', level: 3, text: 'Minor Dark Powers' },
+    {
+      type: 'paragraph',
+      text: 'Minor Dark Powers apply to ALL Killers, not just the Active Killer. When damage would be dealt to a Killer that shares a space with a Minor Dark Power card that can take damage, the damage is applied to the Minor Dark Power card first.',
+    },
+    { type: 'heading', level: 3, text: 'Intruder Death & Final Health Tokens' },
+    {
+      type: 'callout',
+      variant: 'critical',
+      title: 'Do Not End the Phase Early',
+      text: 'If an Intruder loses their final health while another Intruder is still alive, DO NOT end the phase. Lay the meeple on its side, change the Active Killer if needed, and finish resolving the current phase. Only then reveal that Intruder\'s black Final Health token: if the token is blank, the Intruder is dead — if it shows health, replenish that Intruder to that amount, replace the black token with a white one, and stand the meeple back up. The "+1 ♥" bonus from reaching final health only triggers ONCE per game, no matter how many Intruders reach final health.',
+    },
+    { type: 'heading', level: 3, text: 'Active Killer Example' },
+    {
+      type: 'example',
+      title: 'Ginny vs. the Intruders',
+      text: 'Trish is the Active Killer. Ginny attacks Baghead — Baghead immediately becomes the Active Killer before damage lands, then takes the hit. Later a Terror card shows a DOWN arrow: the token moves from Baghead down to Zeke, skipping any dead Killer along the way. When a "They\'re Everywhere!" All-Killers effect resolves, every living Intruder acts from top to bottom and the Active Killer token stays exactly where it was.',
+    },
+  ],
+};
+
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
