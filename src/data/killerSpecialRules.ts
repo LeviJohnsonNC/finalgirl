@@ -79,7 +79,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   'The Intruders': {
     narrativeNote:
-      'Three home invaders operating as a coordinated group, not a solo killer. They communicate, flank, and cut off escape routes together. The domestic setting (a cottage) makes nowhere feel safe.',
+      'Three coordinated home invaders — Trish (Red, often in a red hood), Baghead (Gray, burlap-sack mask), and Zeke (Black) — stalking Wingard Cottage together. Only one is the "Active" killer at any moment, but all three are present on the board: they hand off pursuit, flank, and cut off escape routes. Downed Intruders can be revived by their Final Health tokens, so a "kill" is not always final. Minor Dark Powers apply to all three. Never portray them as a single lone slasher.',
   },
 
   // ── Season 2 Vignette ────────────────────────────────────────────────────
