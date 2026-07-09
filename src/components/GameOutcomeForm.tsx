@@ -57,7 +57,7 @@ export const GameOutcomeForm = ({
   // Big Bad Wolf mode
   const [wolfMode, setWolfMode] = useState<'TRACK' | 'SLAY' | 'Killing Machine'>('SLAY');
   // The Intruders - active killer at game end
-  const [activeIntruder, setActiveIntruder] = useState<'Baghead' | 'Redhood' | 'Zeke'>('Baghead');
+  const [activeIntruder, setActiveIntruder] = useState<'Trish' | 'Baghead' | 'Zeke'>('Trish');
   // Buddyland - Buddies + power supplies
   const [buddiesInPlay, setBuddiesInPlay] = useState(0);
   const [powerSuppliesShutDown, setPowerSuppliesShutDown] = useState(false);
@@ -417,7 +417,7 @@ export const GameOutcomeForm = ({
             Active Intruder
           </h3>
           <div className="flex flex-col sm:flex-row gap-2">
-            {(['Baghead', 'Redhood', 'Zeke'] as const).map((intruder) => (
+            {(['Trish', 'Baghead', 'Zeke'] as const).map((intruder) => (
               <label key={intruder} className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
