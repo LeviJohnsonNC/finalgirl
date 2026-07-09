@@ -360,7 +360,60 @@ const theIntruders: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders];
+// ─── Wingard Cottage (Location) — A Knock at the Door ─────────────────────
+const wingardCottage: EntityRuleModule = {
+  entity: 'Wingard Cottage',
+  kind: 'location',
+  filmId: 's2-knock-at-door',
+  source: 'A Knock at the Door — Location Sheet',
+  credits: { design: 'Mike Martins', art: 'Heather Vaughan' },
+  tags: ['wingard cottage', 'supply items', 'crafted items', 'house', 'indoors', 'outdoors', 'location'],
+  setup: [
+    {
+      type: 'paragraph',
+      text: 'Setup the game as normal, with the following changes when playing with Wingard Cottage:',
+    },
+    {
+      type: 'list',
+      items: [
+        'Place the four Supply Item cards faceup in the play area.',
+        'Shuffle the Crafted Item cards together and deal out four faceup cards in the play area.',
+      ],
+    },
+  ],
+  rules: [
+    { type: 'heading', level: 3, text: 'Definitions' },
+    {
+      type: 'list',
+      items: [
+        'HOUSE: Refers to all of the following spaces — Kitchen, Bedroom x2, Bathroom, Family Room, Foyer, Laundry Room, and Garage.',
+        'INDOORS: Refers to all spaces inside the House as well as the Shed and the Boathouse.',
+        'OUTDOOR SPACE: Refers to all spaces that are not considered Indoors.',
+      ],
+    },
+    { type: 'heading', level: 3, text: 'Supply Items' },
+    {
+      type: 'paragraph',
+      text: 'Some spaces on the board have Supply Item symbols corresponding to a specific type of Supply Item (Discarded Tools, Nails, Rope, Wood). While on one of these spaces, you may gain the corresponding Supply Item card at the cost of 1 Time (you cannot do this while moving through the space). Place it into a Backpack slot. When discarding a Supply Item card, it goes back in the play area faceup, available to be gained again.',
+    },
+    { type: 'heading', level: 3, text: 'Crafted Items' },
+    {
+      type: 'paragraph',
+      text: 'Crafting allows you to gain an available Crafted Item card by discarding the Item cards and/or Supply Item cards listed on the Crafted Item card, as well as losing the required amount of Time. When you gain a Crafted Item card, either place it into a Hand or Backpack slot. When discarding a Crafted Item card, it goes back in the play area faceup, available to be Crafted again.',
+    },
+    {
+      type: 'paragraph',
+      text: 'When Items with limited uses are discarded to gain a Crafted Item card, those uses carry over to the Crafted Item. For example, if the Shotgun has one use left when it is discarded to craft the Sawed-off Shotgun, then the Sawed-off Shotgun will also have one use left. The same would apply if the Trashcan Lid is discarded to craft the Porcupine.',
+    },
+    {
+      type: 'example',
+      title: 'Crafting Example',
+      text: 'Ava has a Wooden Bat and Nails. She spends 2 Time to craft the Nail Bat, taking it into her hand. Finally, she discards the Wooden Bat and returns the Nails faceup next to the other Supply Item cards.',
+    },
+  ],
+};
+
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
