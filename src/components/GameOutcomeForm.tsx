@@ -417,7 +417,7 @@ export const GameOutcomeForm = ({
             Active Intruder
           </h3>
           <div className="flex flex-col sm:flex-row gap-2">
-            {(['Baghead', 'Redhood', 'Zeke'] as const).map((intruder) => (
+            {(['Trish', 'Baghead', 'Zeke'] as const).map((intruder) => (
               <label key={intruder} className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
