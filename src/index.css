@@ -1591,6 +1591,43 @@
     text-align: center;
   }
 
+  /* Dark variant for live readouts / ending screens */
+  .story-text-dark {
+    color: hsl(0 0% 88%);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .story-text-dark strong {
+    color: hsl(0 0% 96%);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-shadow: 0 0 8px hsl(var(--blood-red) / 0.35);
+  }
+
+  .story-text-dark em {
+    color: hsl(0 60% 78%);
+    background-image: linear-gradient(transparent 90%, hsl(var(--blood-red) / 0.4) 90%, hsl(var(--blood-red) / 0.4) 98%, transparent 98%);
+  }
+
+  .story-text-dark mark {
+    background: hsl(48 70% 60% / 0.35);
+    color: hsl(0 0% 96%);
+  }
+
+  .story-text-dark .story-beat {
+    color: hsl(0 70% 82%);
+    text-shadow: 0 0 10px hsl(var(--blood-red) / 0.25);
+  }
+
+  .story-text-dark.story-intro > p:first-of-type::first-letter {
+    color: hsl(0 55% 55%);
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+  }
+
+  .story-text-dark.story-intro > p:first-of-type::first-line {
+    color: hsl(0 0% 92%);
+  }
+
   .story-footer {
     margin-top: auto;
     padding-top: 12px;
