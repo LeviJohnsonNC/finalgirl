@@ -69,8 +69,14 @@ How to use optional details (only if present):
 - Ending Location anchors the final scene.
 - Game Highlights are "key beats"—pick the 2-3 most dramatic and weave them in as quick flashes, consequences, or callbacks.
 
+Formatting:
+- Break the ending into paragraphs of 2–3 sentences, separated by a blank line.
+- Use **bold** sparingly for the killer's name, the Final Girl's name, and at most one climactic verb per paragraph.
+- Use *italics* for the location, whispered/remembered lines, and brief internal thoughts.
+- Never emphasize more than ~5% of the words.
+
 Output Rules:
-Return ONLY the story text. No headings, bullet points, or meta commentary.`;
+Return ONLY the story text (markdown bold/italics allowed). No headings, bullet points, or meta commentary.`;
 
     // Build character context strings
     const killerContext = [
