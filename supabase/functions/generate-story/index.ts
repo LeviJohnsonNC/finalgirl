@@ -71,8 +71,14 @@ Avoid clichés ("dark and stormy night", "it was quiet… too quiet", etc.).
 
 End with an immediate hook: a discovery, a scream, a missing person, a power outage, a chilling announcement—something that makes the player feel "okay, we're live."
 
+Formatting:
+- Break the story into paragraphs of 2–3 sentences each, separated by a blank line.
+- Use **bold** sparingly — only for the killer's name on first mention, the Final Girl's name on first mention, and at most one climactic action verb per paragraph.
+- Use *italics* for the location on first mention, whispered or remembered dialogue, and brief internal thoughts.
+- Never emphasize more than roughly 5% of the words. Restraint is the point.
+
 Output Rules:
-Return only the story text. No headings, bullet points, or meta commentary.`;
+Return only the story text (markdown bold/italics allowed). No headings, bullet points, or meta commentary.`;
 
     const userPrompt = `Scenario Inputs (use these explicitly):
 
