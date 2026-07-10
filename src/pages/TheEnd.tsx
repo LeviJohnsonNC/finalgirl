@@ -15,7 +15,7 @@ import { getLocationDescription } from '@/data/locationDescriptions';
 import { getFinalGirlMaxHealth } from '@/data/finalGirlHealth';
 import { getKillerSpecialRules } from '@/data/killerSpecialRules';
 import { getModulePromptContext } from '@/data/rules/moduleRules';
-import { renderFormattedText } from '@/lib/textFormatting';
+import { renderStoryText } from '@/lib/textFormatting';
 import SceneImageControls from '@/components/SceneImageControls';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 
