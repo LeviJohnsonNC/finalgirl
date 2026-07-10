@@ -123,7 +123,7 @@ export const ScrapbookStoryPage = ({ game, type, onDelete }: ScrapbookStoryPageP
           <span className="heading-line" />
         </h4>
         {game.endingNarration ? (
-          <div className="story-text">
+          <div className="story-text story-ending">
             {renderStoryText(game.endingNarration)}
           </div>
         ) : (
