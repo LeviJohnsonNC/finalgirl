@@ -18,7 +18,7 @@ import nowPlayingBg from '@/assets/now-playing-bg.png';
 import projectorSound from '@/assets/sounds/projector-start.mp3';
 import { ImagePromptModal } from '@/components/ImagePromptModal';
 import { ImageUploadSlot } from '@/components/ImageUploadSlot';
-import { renderFormattedText } from '@/lib/textFormatting';
+import { renderStoryText } from '@/lib/textFormatting';
 import SceneImageControls from '@/components/SceneImageControls';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 
