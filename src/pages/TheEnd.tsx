@@ -296,9 +296,9 @@ const TheEnd = ({
                 </div>
               ) : endingStory ? (
                 <div className={posterImageUrl ? 'grid grid-cols-1 md:grid-cols-[1fr_35%] gap-4 sm:gap-6' : ''}>
-                  <p className="font-vhs text-sm sm:text-sm text-muted-foreground leading-relaxed sm:leading-relaxed whitespace-pre-wrap">
-                    {renderFormattedText(endingStory)}
-                  </p>
+                  <div className="story-text story-ending story-text-dark">
+                    {renderStoryText(endingStory)}
+                  </div>
                   {posterImageUrl && (
                     <div className="relative rounded-sm overflow-hidden">
                       <img
