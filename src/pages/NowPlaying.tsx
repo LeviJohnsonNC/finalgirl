@@ -314,7 +314,7 @@ const NowPlaying = ({
                   </button>
                 </div>
               ) : story ? (
-                <p className="font-vhs text-sm sm:text-sm text-muted-foreground leading-relaxed sm:leading-relaxed whitespace-pre-wrap">
+                <p className="font-display text-base sm:text-lg lg:text-xl text-foreground/90 leading-relaxed whitespace-pre-wrap [&_strong]:text-primary [&_strong]:font-bold [&_em]:text-secondary/90 [&_em]:italic tracking-[0.005em]">
                   {renderFormattedText(story)}
                 </p>
               ) : (

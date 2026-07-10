@@ -35,24 +35,46 @@ const renderFormattedInline = (text: string): React.ReactNode[] => {
   return parts;
 };
 
-// Split text into paragraphs and render with safe inline formatting
+// Split text into paragraphs. Groups sentences into 2–3 sentence chunks when the
+// source lacks blank-line paragraph breaks, and promotes short dramatic single
+// sentences (ending in ! or …) into their own centered "beat" paragraph.
 const renderStoryText = (text: string): React.ReactNode[] => {
-  const paragraphs = text.split(/\n\n+/).filter(p => p.trim());
+  const rawParagraphs = text.split(/\n\n+/).map(p => p.trim()).filter(Boolean);
 
-  let chunks: string[];
-  if (paragraphs.length === 1) {
-    const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-    chunks = [];
-    for (let i = 0; i < sentences.length; i += 4) {
-      chunks.push(sentences.slice(i, i + 4).join(''));
-    }
+  let paragraphs: string[];
+  if (rawParagraphs.length > 1) {
+    paragraphs = rawParagraphs;
   } else {
-    chunks = paragraphs;
+    // Sentence-boundary split that respects quoted dialogue.
+    const sentences = text.match(/[^.!?…]+(?:\.{3}|…|[.!?])+["'"']?\s*/g)?.map(s => s.trim()).filter(Boolean) ?? [text];
+    paragraphs = [];
+    let buf: string[] = [];
+    for (const s of sentences) {
+      buf.push(s);
+      // Break every 2-3 sentences (target ~220 chars).
+      if (buf.length >= 2 && buf.join(' ').length > 220) {
+        paragraphs.push(buf.join(' '));
+        buf = [];
+      }
+    }
+    if (buf.length) paragraphs.push(buf.join(' '));
   }
 
-  return chunks.map((chunk, i) => (
-    <p key={i}>{renderFormattedInline(chunk.trim())}</p>
-  ));
+  const isDramaticBeat = (p: string): boolean => {
+    if (p.length > 90) return false;
+    const sentenceCount = (p.match(/[.!?…]+/g) ?? []).length;
+    if (sentenceCount > 1) return false;
+    return /[!…]$|\.\.\.$/.test(p.trim());
+  };
+
+  return paragraphs.map((chunk, i) => {
+    const beat = isDramaticBeat(chunk);
+    return (
+      <p key={i} className={beat ? 'story-beat' : undefined}>
+        {renderFormattedInline(chunk.trim())}
+      </p>
+    );
+  });
 };
 
 interface ScrapbookStoryPageProps {
@@ -82,7 +104,8 @@ export const ScrapbookStoryPage = ({ game, type, onDelete }: ScrapbookStoryPageP
           <span className="heading-line" />
         </h4>
         {game.introStory ? (
-          <div className="story-text">
+          <div className="story-text story-intro">
+
             {renderStoryText(game.introStory)}
           </div>
         ) : (
@@ -100,7 +123,7 @@ export const ScrapbookStoryPage = ({ game, type, onDelete }: ScrapbookStoryPageP
           <span className="heading-line" />
         </h4>
         {game.endingNarration ? (
-          <div className="story-text">
+          <div className="story-text story-ending">
             {renderStoryText(game.endingNarration)}
           </div>
         ) : (
