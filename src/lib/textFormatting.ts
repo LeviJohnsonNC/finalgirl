@@ -56,11 +56,11 @@ export const renderFormattedInline = (text: string): React.ReactNode[] => {
 
     if (boldIndex <= italicIndex && boldMatch) {
       if (boldIndex > 0) parts.push(remaining.slice(0, boldIndex));
-      parts.push(<strong key={key++} className="font-bold text-foreground">{boldMatch[1]}</strong>);
+      parts.push(React.createElement('strong', { key: key++, className: 'font-bold text-foreground' }, boldMatch[1]));
       remaining = remaining.slice(boldIndex + boldMatch[0].length);
     } else if (italicMatch) {
       if (italicIndex > 0) parts.push(remaining.slice(0, italicIndex));
-      parts.push(<em key={key++} className="italic text-foreground/90">{italicMatch[1]}</em>);
+      parts.push(React.createElement('em', { key: key++, className: 'italic text-foreground/90' }, italicMatch[1]));
       remaining = remaining.slice(italicIndex + italicMatch[0].length);
     }
   }
@@ -102,10 +102,10 @@ export const renderStoryText = (text: string): React.ReactNode[] => {
 
   return paragraphs.map((chunk, i) => {
     const beat = isDramaticBeat(chunk);
-    return (
-      <p key={i} className={beat ? 'story-beat' : undefined}>
-        {renderFormattedInline(chunk.trim())}
-      </p>
+    return React.createElement(
+      'p',
+      { key: i, className: beat ? 'story-beat' : undefined },
+      renderFormattedInline(chunk.trim())
     );
   });
 };
