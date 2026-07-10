@@ -1619,6 +1619,15 @@
     text-shadow: 0 0 10px hsl(var(--blood-red) / 0.25);
   }
 
+  .story-text-dark.story-intro > p:first-of-type::first-letter {
+    color: hsl(0 55% 55%);
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+  }
+
+  .story-text-dark.story-intro > p:first-of-type::first-line {
+    color: hsl(0 0% 92%);
+  }
+
   .story-footer {
     margin-top: auto;
     padding-top: 12px;
