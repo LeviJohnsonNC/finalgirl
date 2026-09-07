@@ -15,22 +15,30 @@ const envOverride = (name: string): string[] => {
   return value ? [value] : [];
 };
 
-// Text: story, ending, shot briefs, visual bible. Cheap Flash-tier only —
-// nothing here needs a frontier model.
+// Text: story, ending, shot briefs, visual bible.
+//
+// The head of the chain is an OpenAI model, which the gateway serves through the
+// Responses API (/v1/responses) rather than /v1/chat/completions. `aiGateway.ts`
+// routes per model id — anything starting with `openai/` takes the Responses
+// path, everything else stays on chat completions — so the Gemini fallbacks below
+// still work unchanged.
 export const TEXT_MODEL_CANDIDATES: string[] = [
   ...envOverride("LOVABLE_TEXT_MODEL"),
-  "google/gemini-3.5-flash",
+  "openai/gpt-5.6-sol",
+  "google/gemini-3.8-flash",
   "google/gemini-2.5-flash",
-  "google/gemini-2.5-flash-lite",
 ];
 
 // Image: opening scene still and closing poster.
 export const IMAGE_MODEL_CANDIDATES: string[] = [
   ...envOverride("LOVABLE_IMAGE_MODEL"),
+  "google/gemini-3-pro-image",
   "google/gemini-3.1-flash-image",
   "google/gemini-2.5-flash-image",
-  "google/gemini-2.5-flash-image-preview",
 ];
 
 export const TEXT_MODEL = TEXT_MODEL_CANDIDATES[0];
 export const IMAGE_MODEL = IMAGE_MODEL_CANDIDATES[0];
+
+/** True when the gateway serves this model through /v1/responses. */
+export const usesResponsesApi = (model: string): boolean => model.startsWith("openai/");
