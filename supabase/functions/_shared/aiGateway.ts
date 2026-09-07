@@ -3,9 +3,10 @@
 // Everything AI in this app goes through here so that retry, credit/rate-limit
 // handling and model fallback are written once. Callers get a typed
 // GatewayError they can map to a user-facing message.
-import { IMAGE_MODEL_CANDIDATES, TEXT_MODEL_CANDIDATES } from "./models.ts";
+import { IMAGE_MODEL_CANDIDATES, TEXT_MODEL_CANDIDATES, usesResponsesApi } from "./models.ts";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const RESPONSES_URL = "https://ai.gateway.lovable.dev/v1/responses";
 
 export type GatewayErrorKind =
   | "no_key"
