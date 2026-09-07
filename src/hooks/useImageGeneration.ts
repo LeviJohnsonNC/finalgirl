@@ -1,22 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'sonner';
-
-interface ApiKeyInfo {
-  id: string;
-  provider: string;
-  created_at: string;
-  // We intentionally never fetch api_key_encrypted on the client
-  last4?: string;
-}
 
 interface ImageSettings {
-  auto_generate_images: boolean;
-  preferred_provider: string | null;
+  /** Auto-generate the opening still and closing poster. On by default. */
+  autoGenerate: boolean;
+  /** Show the AI-rendered casting art instead of the photographic variants. */
+  useAiCastingArt: boolean;
 }
 
-interface GenerateImageContext {
+const DEFAULT_SETTINGS: ImageSettings = {
+  autoGenerate: true,
+  useAiCastingArt: false,
+};
+
+export interface GenerateImageContext {
   story: string;
   killer: string;
   killerDescription?: string;
@@ -25,211 +23,151 @@ interface GenerateImageContext {
   location: string;
   locationDescription?: string;
   moduleVisualGuidance?: string;
+  visualBible?: string;
   sceneType: 'beginning' | 'ending';
   outcome?: 'won' | 'lost';
+  gameId?: string;
+  previousImageUrl?: string;
 }
 
-export const PROVIDER_LABELS: Record<string, string> = {
-  google: 'Google Gemini',
-  openai: 'OpenAI DALL-E',
-  stability: 'Stability AI',
+/** POSTs to an edge function with the caller's session token. */
+const callFunction = async <T>(name: string, body: unknown): Promise<T> => {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData?.session?.access_token;
+  if (!token) throw new Error('Please sign in first.');
+
+  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${name}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data.error) {
+    throw new Error(data.error || `Request failed (${response.status})`);
+  }
+  return data as T;
 };
 
+/**
+ * Image generation runs on the platform's AI key — no per-user API key, no
+ * copy-and-paste prompt. Callers get a generate function plus the two display
+ * preferences.
+ */
 export const useImageGeneration = () => {
   const { user, isAuthenticated } = useAuth();
-  const [apiKeys, setApiKeys] = useState<ApiKeyInfo[]>([]);
-  const [settings, setSettings] = useState<ImageSettings>({
-    auto_generate_images: false,
-    preferred_provider: null,
-  });
-  const [isLoadingKeys, setIsLoadingKeys] = useState(false);
+  const [settings, setSettings] = useState<ImageSettings>(DEFAULT_SETTINGS);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
 
-  // Fetch saved keys (metadata only) and settings
   useEffect(() => {
     if (!isAuthenticated || !user) {
-      setApiKeys([]);
-      setSettings({ auto_generate_images: false, preferred_provider: null });
+      setSettings(DEFAULT_SETTINGS);
       return;
     }
-    loadKeysAndSettings();
-  }, [isAuthenticated, user?.id]);
 
-  const loadKeysAndSettings = async () => {
-    if (!user) return;
-    setIsLoadingKeys(true);
-    try {
-      // Fetch keys — only select non-sensitive columns
-      const { data: keysData } = await supabase
-        .from('user_api_keys')
-        .select('id, provider, created_at')
-        .eq('user_id', user.id);
-
-      setApiKeys(keysData ?? []);
-
-      // Fetch settings
-      const { data: settingsData } = await supabase
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
         .from('user_image_settings')
-        .select('auto_generate_images, preferred_provider')
+        .select('auto_generate_images, use_ai_casting_art')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (settingsData) {
-        setSettings({
-          auto_generate_images: settingsData.auto_generate_images,
-          preferred_provider: settingsData.preferred_provider,
-        });
-      }
-    } finally {
-      setIsLoadingKeys(false);
-    }
-  };
+      if (cancelled || !data) return;
+      setSettings({
+        autoGenerate: data.auto_generate_images ?? true,
+        useAiCastingArt: data.use_ai_casting_art ?? false,
+      });
+    })();
 
-  const saveApiKey = useCallback(async (provider: string, apiKey: string) => {
-    if (!user) return;
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, user?.id]);
 
-    const { error } = await supabase
-      .from('user_api_keys')
-      .upsert(
+  const updateSettings = useCallback(
+    async (updates: Partial<ImageSettings>) => {
+      if (!user) return;
+      const next = { ...settings, ...updates };
+      setSettings(next);
+
+      const { error } = await supabase.from('user_image_settings').upsert(
         {
           user_id: user.id,
-          provider,
-          api_key_encrypted: apiKey,
-        },
-        { onConflict: 'user_id,provider' }
-      );
-
-    if (error) {
-      toast.error('Failed to save API key');
-      console.error(error);
-      return;
-    }
-
-    toast.success('API key saved securely');
-
-    // Also set preferred provider if none set
-    if (!settings.preferred_provider) {
-      await updateSettings({ preferred_provider: provider });
-    }
-
-    await loadKeysAndSettings();
-  }, [user, settings.preferred_provider]);
-
-  const removeApiKey = useCallback(async (provider: string) => {
-    if (!user) return;
-
-    const { error } = await supabase
-      .from('user_api_keys')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('provider', provider);
-
-    if (error) {
-      toast.error('Failed to remove API key');
-      return;
-    }
-
-    toast.success('API key removed');
-
-    // If this was the preferred provider, clear it
-    if (settings.preferred_provider === provider) {
-      await updateSettings({ preferred_provider: null });
-    }
-
-    await loadKeysAndSettings();
-  }, [user, settings.preferred_provider]);
-
-  const updateSettings = useCallback(async (updates: Partial<ImageSettings>) => {
-    if (!user) return;
-
-    const newSettings = { ...settings, ...updates };
-
-    const { error } = await supabase
-      .from('user_image_settings')
-      .upsert(
-        {
-          user_id: user.id,
-          auto_generate_images: newSettings.auto_generate_images,
-          preferred_provider: newSettings.preferred_provider,
+          auto_generate_images: next.autoGenerate,
+          use_ai_casting_art: next.useAiCastingArt,
         },
         { onConflict: 'user_id' }
       );
 
-    if (error) {
-      toast.error('Failed to update settings');
-      console.error(error);
-      return;
-    }
+      if (error) {
+        console.error('Failed to update image settings:', error);
+        setSettings(settings); // Roll back the optimistic update.
+      }
+    },
+    [user, settings]
+  );
 
-    setSettings(newSettings);
-  }, [user, settings]);
+  /**
+   * Generates a scene still or poster. Returns a storage URL, or null on
+   * failure — the caller decides how loudly to complain, because an image
+   * failing must never block the story.
+   */
+  const generateImage = useCallback(
+    async (context: GenerateImageContext): Promise<string | null> => {
+      if (!user) return null;
 
-  const setAutoGenerate = useCallback(async (value: boolean) => {
-    await updateSettings({ auto_generate_images: value });
-  }, [updateSettings]);
-
-  const generateImage = useCallback(async (context: GenerateImageContext): Promise<string | null> => {
-    if (!user) return null;
-
-    setIsGeneratingImage(true);
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData?.session?.access_token;
-      if (!token) {
-        toast.error('Please sign in to generate images');
+      setIsGeneratingImage(true);
+      setImageError(null);
+      try {
+        const data = await callFunction<{ imageUrl?: string }>('generate-scene-image', context);
+        return data.imageUrl ?? null;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Image generation failed';
+        console.error('Image generation error:', err);
+        setImageError(message);
         return null;
+      } finally {
+        setIsGeneratingImage(false);
       }
+    },
+    [user]
+  );
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-scene-image`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          },
-          body: JSON.stringify(context),
-        }
-      );
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || `Image generation failed (${response.status})`);
+  /** One short look-book paragraph per game, shared by both of its images. */
+  const generateVisualBible = useCallback(
+    async (context: {
+      killer: string;
+      finalGirl: string;
+      location: string;
+      locationDescription?: string;
+    }): Promise<string | undefined> => {
+      if (!user) return undefined;
+      try {
+        const data = await callFunction<{ visualBible?: string }>('generate-visual-bible', context);
+        return data.visualBible;
+      } catch (err) {
+        // Purely an enhancement — images still generate without it.
+        console.warn('Visual bible generation failed:', err);
+        return undefined;
       }
-
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      return data.imageUrl ?? null;
-    } catch (err) {
-      console.error('Image generation error:', err);
-      const msg = err instanceof Error ? err.message : 'Image generation failed';
-      toast.error(msg);
-      return null;
-    } finally {
-      setIsGeneratingImage(false);
-    }
-  }, [user]);
-
-  const hasApiKey = apiKeys.length > 0;
-  const activeProvider = settings.preferred_provider ?? apiKeys[0]?.provider ?? null;
+    },
+    [user]
+  );
 
   return {
     isAuthenticated,
-    hasApiKey,
-    apiKeys,
-    activeProvider,
-    autoGenerate: settings.auto_generate_images,
-    isLoadingKeys,
+    autoGenerate: settings.autoGenerate,
+    useAiCastingArt: settings.useAiCastingArt,
     isGeneratingImage,
-    saveApiKey,
-    removeApiKey,
-    setAutoGenerate,
+    imageError,
     updateSettings,
     generateImage,
+    generateVisualBible,
   };
 };

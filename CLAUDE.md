@@ -1,6 +1,6 @@
 # CLAUDE.md — Working notes for Claude on this repo
 
-Last reviewed: 2026-07-05
+Last reviewed: 2026-09-07
 
 ## What this app is
 An **unofficial, fan-made** companion-style web app for the tabletop game *Final Girl* by Van Ryder Games. It is a solo-play aid that:
@@ -41,8 +41,8 @@ Important folders
 * `src/components/` — feature components (VHS UI, casting, scrapbook, story generation).
    * `src/components/ui/` — shadcn primitives. Do not restyle wholesale; theme via CSS tokens in `src/index.css`.
    * `src/components/rules/` and `src/components/stats/` — rules browser and stats dashboard widgets.
-* `src/hooks/` — app-level hooks (`useAuth`, `useGameHistory`, `useGameStats`, `useImageGeneration`, `useArchetypeScoring`, `useLocalStorage`, `useOwnedFilms`, `useScreenEffects`, `useActiveImages`). `useImageGeneration` reads the user's stored provider key + `user_image_settings` (`auto_generate_images`, `preferred_provider`).
-* **Bring-your-own image API keys**: `src/components/ApiKeyManager.tsx` (rendered inside `Archive.tsx`) lets a user save an encrypted Google / OpenAI / Stability key into `public.user_api_keys`. `generate-scene-image` uses that per-user key; `generate-story-image` uses the platform `GOOGLE_API_KEY` instead. `useOwnedFilms` is backed by `public.user_settings.owned_films` (JSONB).
+* `src/hooks/` — app-level hooks (`useAuth`, `useGameHistory`, `useGameStats`, `useImageGeneration`, `useArchetypeScoring`, `useLocalStorage`, `useOwnedFilms`, `useScreenEffects`, `useActiveImages`). `useImageGeneration` owns image generation plus `user_image_settings`; `useActiveImages` reads only `use_ai_casting_art`.
+* **Images generate automatically on the platform key.** There is no bring-your-own-key path and no copy/paste prompt: `generate-scene-image` runs on `LOVABLE_API_KEY` via the AI Gateway and uploads to the `posters` bucket. `src/components/ImageSettingsPanel.tsx` (rendered inside `Archive.tsx`) exposes the only two preferences — `auto_generate_images` (scene + poster, default on) and `use_ai_casting_art` (AI casting-room art, default off). Keep those two separate; they were one overloaded flag historically. `useOwnedFilms` is backed by `public.user_settings.owned_films` (JSONB).
 * `src/contexts/GameHistoryContext.tsx` — wraps `useGameHistory` for the whole session.
 * `src/data/` — static game data (killer/final girl/location descriptions, health, special rules, film themes, ticker headlines, and `rules/` corpus).
 * `src/types/gameData.ts` — the source of truth for killer/location/Final Girl identifiers and film mapping.
@@ -55,14 +55,18 @@ Edge functions (Deno, `supabase/functions/*/index.ts`)
 
 * `generate-story` — intro story text (Lovable AI Gateway `https://ai.gateway.lovable.dev`; `LOVABLE_API_KEY`). 30/hr.
 * `generate-ending` — ending narration text (Lovable AI Gateway; `LOVABLE_API_KEY`). 30/hr.
-* `generate-story-image` — poster image via Google Gemini using the **platform** `GOOGLE_API_KEY`; returns base64. 40/hr.
-* `generate-scene-image` — mid-game scene image; uses the signed-in user's **own** provider key from `public.user_api_keys` (Google / OpenAI / Stability), then uploads to the `posters` bucket via the service role. 40/hr.
+* `generate-scene-image` — opening still (3:4) and closing poster (2:3). Runs a cheap text "shot brief" pass, then the image model, both on the gateway; uploads to the `posters` bucket and returns a **public URL, never a `data:` URI** (the history layer strips those). 20/hr, 60/day, fails closed.
+* `generate-visual-bible` — one short look-book paragraph per game, reused by both images so they match. 30/hr.
+* `ai-capabilities` — diagnostic: lists what the gateway actually offers. Delete once model ids are pinned.
 * `narrate-story` — Inworld TTS (`INWORLD_API_KEY`) with sentence-boundary chunking (`MAX_CHUNK_SIZE = 1900`); base64 audio in/out. 60/hr.
 * `migrate-legacy-images` — one-shot migration of inline `data:` URIs out of `game_history` into `posters` bucket. 10/hr.
 * `_shared/auth.ts` — `getCorsHeaders(origin)` (CORS only, despite the name) + a static `corsHeaders` export.
-* `_shared/guard.ts` — `requireUser()` enforces auth + per-user hourly rate limit via `public.ai_usage_events`
+* `_shared/guard.ts` — `requireUser()` enforces auth, hourly + optional daily caps via `public.ai_usage_events`, and returns `logUsage()` to record the model that answered.
+* `_shared/models.ts` — model id candidate chains, overridable with `LOVABLE_TEXT_MODEL` / `LOVABLE_IMAGE_MODEL`. Change models here, nowhere else.
+* `_shared/aiGateway.ts` — the only place that talks to the gateway: retry, 402/429 classification, model fallback.
+* `_shared/prompts.ts` — the only place image prompts are written.
 * `_shared/validation.ts` — Zod schemas for edge inputs
-All user-facing generation functions require an authenticated user and are rate-limited per user per hour (limits vary: 10 for `migrate-legacy-images`, 30 for text, 40 for images, 60 for narration). The limiter **fails open** if the count query errors.
+All user-facing generation functions require an authenticated user and are rate-limited per user. Text and narration **fail open** if the count query errors; image generation costs money, so it carries a daily cap and **fails closed**.
 Coding conventions already in the repo
 
 * Path alias: import from `@/...` (see `vite.config.ts` and `tsconfig`).
@@ -89,7 +93,8 @@ Common mistakes to avoid
 * Adding new top-level React Router routes for what is really an internal view. Extend the `Index.tsx` state machine instead.
 * Storing user roles on the `profiles` table. A minimal `profiles` table exists (only `id` + timestamps, no roles, no privileged columns). Do **not** add a role/permission column to it — if you introduce roles, keep them in a dedicated `user_roles` table with a `security definer` `has_role` function.
 * Creating a `public` table without accompanying `GRANT` statements — PostgREST will 401/403.
-* Persisting AI-generated images as `data:` base64 in DB rows. The `posters` storage bucket is the correct home; a legacy-migration function already exists (`migrate-legacy-images`).
+* Persisting AI-generated images as `data:` base64 in DB rows. The `posters` storage bucket is the correct home; a legacy-migration function already exists (`migrate-legacy-images`). An edge function returning a `data:` URI is a silent data-loss bug — `sanitizeStoredImageUrl` drops it and the image never reaches the scrapbook.
+* Re-introducing per-user provider API keys, a "copy this prompt" modal, or a second copy of an image prompt. All three were removed on purpose.
 * Introducing purple/indigo/generic "AI" gradients or default fonts (Inter/Poppins). This app has a strong VHS identity — do not dilute it.
 * Using the word "companion" in copy.
 * Removing the footer legal disclaimer.

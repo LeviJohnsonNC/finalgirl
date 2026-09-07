@@ -6,8 +6,8 @@ import { toast } from 'sonner';
 import { useNarration } from '@/hooks/useNarration';
 import nowPlayingBg from '@/assets/now-playing-bg.png';
 import projectorSound from '@/assets/sounds/projector-start.mp3';
-import { PosterPromptModal } from '@/components/PosterPromptModal';
 import { ImageUploadSlot } from '@/components/ImageUploadSlot';
+import { SceneImageFrame } from '@/components/SceneImageFrame';
 import { GameResult } from '@/hooks/useGameHistory';
 import { getKillerDescription } from '@/data/killerDescriptions';
 import { getFinalGirlDescription } from '@/data/finalGirlDescriptions';
@@ -33,6 +33,8 @@ export interface EndingFormData {
 interface TheEndProps {
   result: GameResult;
   introStory?: string;
+  /** This game's look description, established on Now Playing. */
+  visualBible?: string;
   formData: EndingFormData;
   onSave: (endingNarration: string, posterImageUrl?: string) => void;
   onDiscard: () => void;
@@ -41,6 +43,7 @@ interface TheEndProps {
 const TheEnd = ({
   result,
   introStory,
+  visualBible,
   formData,
   onSave,
   onDiscard,
@@ -50,13 +53,21 @@ const TheEnd = ({
   const [error, setError] = useState<string | null>(null);
   const [posterImageUrl, setPosterImageUrl] = useState<string>('');
   const { isNarrating, isPlaying, toggleNarration } = useNarration();
-  const { hasApiKey, autoGenerate, generateImage } = useImageGeneration();
+  const {
+    isAuthenticated,
+    autoGenerate,
+    generateImage,
+    isGeneratingImage,
+    imageError,
+  } = useImageGeneration();
   const autoGenerateTriggered = useRef(false);
   // Abort the ending stream when the user navigates away mid-generation.
   const streamAbortRef = useRef<AbortController | null>(null);
   const moduleContext = getModulePromptContext(result.killer, result.location);
 
   const isWin = result.outcome === 'won';
+  // Reserve the poster column while it develops, not just once it exists.
+  const showPosterSlot = Boolean(posterImageUrl) || isGeneratingImage || Boolean(imageError);
 
   // Auto-generate ending story on mount
   useEffect(() => {
@@ -64,27 +75,39 @@ const TheEnd = ({
     return () => streamAbortRef.current?.abort();
   }, []);
 
-  // Auto-generate scene image when ending loads (if enabled)
+  const developPoster = async (previousImageUrl?: string) => {
+    if (!endingStory) return;
+    const url = await generateImage({
+      story: endingStory,
+      killer: result.killer,
+      killerDescription: getKillerDescription(result.killer),
+      finalGirl: result.finalGirl,
+      finalGirlDescription: getFinalGirlDescription(result.finalGirl),
+      location: result.location,
+      locationDescription: getLocationDescription(result.location),
+      moduleVisualGuidance: moduleContext?.visualGuidance,
+      // Carried over from Now Playing so the poster matches the opening still.
+      visualBible,
+      sceneType: 'ending',
+      outcome: result.outcome,
+      gameId: result.id,
+      previousImageUrl,
+    });
+    if (url) setPosterImageUrl(url);
+  };
+
+  // The poster develops on its own once the ending narration lands.
+  //
+  // Gated on `isGenerating` clearing, not on `endingStory` appearing: the stream
+  // updates the story on every token, and a poster built from the first
+  // half-sentence would be worse than no poster.
   useEffect(() => {
-    if (endingStory && hasApiKey && autoGenerate && !autoGenerateTriggered.current) {
-      autoGenerateTriggered.current = true;
-      (async () => {
-        const url = await generateImage({
-          story: endingStory,
-          killer: result.killer,
-          killerDescription: getKillerDescription(result.killer),
-          finalGirl: result.finalGirl,
-          finalGirlDescription: getFinalGirlDescription(result.finalGirl),
-          location: result.location,
-          locationDescription: getLocationDescription(result.location),
-          moduleVisualGuidance: moduleContext?.visualGuidance,
-          sceneType: 'ending',
-          outcome: result.outcome,
-        });
-        if (url) setPosterImageUrl(url);
-      })();
-    }
-  }, [endingStory, hasApiKey, autoGenerate]);
+    if (!endingStory || isGenerating || error) return;
+    if (!isAuthenticated || !autoGenerate) return;
+    if (autoGenerateTriggered.current) return;
+    autoGenerateTriggered.current = true;
+    developPoster();
+  }, [endingStory, isGenerating, error, isAuthenticated, autoGenerate]);
 
   const generateEnding = async () => {
     if (!introStory) {
@@ -233,21 +256,13 @@ const TheEnd = ({
                 {isNarrating ? 'Generating...' : isPlaying ? 'Stop' : 'Narrate'}
               </button>
               
-              {/* Row 2: Poster Prompt + Upload — side by side on mobile */}
+              {/* Row 2: Reshoot + Replace — side by side on mobile */}
               <div className="flex w-full sm:w-auto gap-2 sm:gap-3 sm:contents">
-                <PosterPromptModal
-                  introStory={introStory}
-                  endingNarration={endingStory}
-                  killer={result.killer}
-                  location={result.location}
-                  finalGirl={result.finalGirl}
-                  outcome={result.outcome}
-                >
-                  <button className="vcr-tape-button flex items-center justify-center gap-2 px-4 sm:px-6 py-3 font-display text-xs sm:text-sm tracking-[0.1em] sm:tracking-[0.15em] uppercase transition-all duration-300 min-h-[44px] flex-1 sm:flex-none">
-                    <ImageIcon className="w-4 h-4 shrink-0" />
-                    <span>Poster Prompt</span>
-                  </button>
-                </PosterPromptModal>
+                <SceneImageControls
+                  isGenerating={isGeneratingImage}
+                  hasImage={Boolean(posterImageUrl)}
+                  onGenerate={() => developPoster(posterImageUrl || undefined)}
+                />
 
                 <div className="flex-1 sm:flex-none">
                   <ImageUploadSlot
@@ -258,17 +273,6 @@ const TheEnd = ({
                 </div>
               </div>
 
-              {/* Row 3: Generate Scene — full width on mobile */}
-              <SceneImageControls
-                story={endingStory}
-                killer={result.killer}
-                finalGirl={result.finalGirl}
-                location={result.location}
-                sceneType="ending"
-                outcome={result.outcome}
-                generatedImageUrl={posterImageUrl || null}
-                onImageGenerated={setPosterImageUrl}
-              />
             </div>
           )}
           
@@ -295,21 +299,18 @@ const TheEnd = ({
                   </button>
                 </div>
               ) : endingStory ? (
-                <div className={posterImageUrl ? 'grid grid-cols-1 md:grid-cols-[1fr_35%] gap-4 sm:gap-6' : ''}>
+                <div className={showPosterSlot ? 'grid grid-cols-1 md:grid-cols-[1fr_35%] gap-4 sm:gap-6' : ''}>
                   <div className="story-text story-ending story-text-dark">
                     {renderStoryText(endingStory)}
                   </div>
-                  {posterImageUrl && (
-                    <div className="relative rounded-sm overflow-hidden">
-                      <img
-                        src={posterImageUrl}
-                        alt="Generated poster"
-                        className="w-full h-auto rounded-sm"
-                        style={{ filter: 'contrast(1.1) saturate(0.85) sepia(0.15)' }}
-                      />
-                      <div className="film-grain absolute inset-0 pointer-events-none opacity-[0.12]" />
-                      <div className="vignette absolute inset-0 pointer-events-none" />
-                    </div>
+                  {showPosterSlot && (
+                    <SceneImageFrame
+                      variant="poster"
+                      imageUrl={posterImageUrl}
+                      isGenerating={isGeneratingImage}
+                      error={imageError}
+                      onRetry={() => developPoster()}
+                    />
                   )}
                 </div>
               ) : (

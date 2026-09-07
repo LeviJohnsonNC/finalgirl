@@ -60,6 +60,9 @@ const IndexContent = () => {
   const [gameSelection, setGameSelection] = useState<GameSelection | null>(null);
   const [lastGameResult, setLastGameResult] = useState<GameResult | null>(null);
   const [introStory, setIntroStory] = useState<string | undefined>(undefined);
+  // This game's look description, established on Now Playing and reused by the
+  // closing poster so both images read as frames from the same film.
+  const [visualBible, setVisualBible] = useState<string | undefined>(undefined);
   const [endingFormData, setEndingFormData] = useState<EndingFormData | null>(null);
   const { recordGame, updateGame } = useGameHistoryContext();
 
@@ -109,13 +112,15 @@ const IndexContent = () => {
     setGameSelection(null);
     setLastGameResult(null);
     setIntroStory(undefined);
+    setVisualBible(undefined);
     setCurrentPage('dashboard');
   };
 
-  const handleGameEnd = (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string) => {
+  const handleGameEnd = (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, bible?: string) => {
     if (!gameSelection) return;
     
     setIntroStory(story);
+    setVisualBible(bible);
     
     const result = recordGame({
       outcome,
@@ -126,6 +131,7 @@ const IndexContent = () => {
       startingEvent: gameSelection.startingEvent,
       introStory: story,
       sceneImageUrl,
+      visualBible: bible,
     });
     
     setLastGameResult(result);
@@ -142,6 +148,7 @@ const IndexContent = () => {
     setGameSelection(null);
     setLastGameResult(null);
     setIntroStory(undefined);
+    setVisualBible(undefined);
     setEndingFormData(null);
     setCurrentPage('dashboard');
   };
@@ -163,6 +170,7 @@ const IndexContent = () => {
     setGameSelection(null);
     setLastGameResult(null);
     setIntroStory(undefined);
+    setVisualBible(undefined);
     setEndingFormData(null);
     setCurrentPage('stats');
   };
@@ -223,6 +231,7 @@ const IndexContent = () => {
             <TheEnd
               result={lastGameResult}
               introStory={introStory}
+              visualBible={visualBible}
               formData={endingFormData}
               onSave={handleSaveEnding}
               onDiscard={handleDiscardEnding}

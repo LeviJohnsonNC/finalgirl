@@ -98,6 +98,8 @@ export interface GameResult {
   victimsKilled?: number;
   posterImageUrl?: string;
   sceneImageUrl?: string;
+  /** The look description shared by this game's opening still and poster. */
+  visualBible?: string;
   hasLegacyPoster?: boolean;
   hasLegacyScene?: boolean;
 }
@@ -135,6 +137,7 @@ const toDbRow = (result: GameResult, userId: string) => ({
   victims_killed: result.victimsKilled ?? null,
   poster_image_url: sanitizeStoredImageUrl(result.posterImageUrl) ?? null,
   scene_image_url: sanitizeStoredImageUrl(result.sceneImageUrl) ?? null,
+  visual_bible: result.visualBible ?? null,
 });
 
 // Convert snake_case from database to camelCase
@@ -159,6 +162,7 @@ const fromDbRow = (row: Record<string, unknown>): GameResult => ({
   victimsKilled: (row.victims_killed as number) || undefined,
   posterImageUrl: sanitizeStoredImageUrl(row.poster_image_url),
   sceneImageUrl: sanitizeStoredImageUrl(row.scene_image_url),
+  visualBible: (row.visual_bible as string) || undefined,
   hasLegacyPoster: row.has_legacy_poster === true,
   hasLegacyScene: row.has_legacy_scene === true,
 });

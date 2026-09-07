@@ -27,18 +27,30 @@ export const StoryRequestSchema = z.object({
   }).optional().nullable()
 });
 
-// Schema for generate-story-image endpoint
-export const ImageRequestSchema = z.object({
-  position: z.number().min(1).max(4),
-  fullStory: z.string().min(50).max(10000),
-  // Character and location context for dramatic image generation
-  killer: z.string().max(100).optional(),
+// Schema for generate-scene-image endpoint (opening still + closing poster)
+export const SceneImageRequestSchema = z.object({
+  sceneType: z.enum(['beginning', 'ending']),
+  story: z.string().min(50).max(10000),
+  killer: z.string().min(1).max(100),
   killerDescription: z.string().max(3000).optional(),
-  finalGirl: z.string().max(100).optional(),
+  finalGirl: z.string().min(1).max(100),
   finalGirlDescription: z.string().max(3000).optional(),
-  location: z.string().max(100).optional(),
+  location: z.string().min(1).max(100),
   locationDescription: z.string().max(3000).optional(),
-  moduleVisualGuidance: z.string().max(3000).optional()
+  moduleVisualGuidance: z.string().max(3000).optional(),
+  visualBible: z.string().max(1000).optional(),
+  outcome: z.enum(['won', 'lost']).optional(),
+  // Used to name the stored file, and to clean up the image being replaced.
+  gameId: z.string().max(100).optional(),
+  previousImageUrl: z.string().url().max(2000).optional()
+});
+
+// Schema for generate-visual-bible endpoint
+export const VisualBibleRequestSchema = z.object({
+  killer: z.string().min(1).max(100),
+  finalGirl: z.string().min(1).max(100),
+  location: z.string().min(1).max(100),
+  locationDescription: z.string().max(3000).optional()
 });
 
 // Schema for narrate-story endpoint
@@ -78,7 +90,8 @@ export const EndingRequestSchema = z.object({
 });
 
 export type StoryRequest = z.infer<typeof StoryRequestSchema>;
-export type ImageRequest = z.infer<typeof ImageRequestSchema>;
+export type SceneImageRequest = z.infer<typeof SceneImageRequestSchema>;
+export type VisualBibleRequest = z.infer<typeof VisualBibleRequestSchema>;
 export type NarrationRequest = z.infer<typeof NarrationRequestSchema>;
 export type EndingRequest = z.infer<typeof EndingRequestSchema>;
 

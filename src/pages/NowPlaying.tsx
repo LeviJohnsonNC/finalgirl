@@ -16,8 +16,8 @@ import { FILM_THEMES } from '@/data/filmThemes';
 import { toast } from 'sonner';
 import nowPlayingBg from '@/assets/now-playing-bg.png';
 import projectorSound from '@/assets/sounds/projector-start.mp3';
-import { ImagePromptModal } from '@/components/ImagePromptModal';
 import { ImageUploadSlot } from '@/components/ImageUploadSlot';
+import { SceneImageFrame } from '@/components/SceneImageFrame';
 import { renderStoryText } from '@/lib/textFormatting';
 import SceneImageControls from '@/components/SceneImageControls';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
@@ -30,7 +30,7 @@ interface NowPlayingProps {
   startingEvent: string | null;
   filmId: string | null;
   onBack: () => void;
-  onGameEnd: (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string) => void;
+  onGameEnd: (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, visualBible?: string) => void;
 }
 
 const NowPlaying = ({
@@ -52,15 +52,31 @@ const NowPlaying = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sceneImageUrl, setSceneImageUrl] = useState<string>('');
-  const [generatedSceneUrl, setGeneratedSceneUrl] = useState<string | null>(null);
+  const [visualBible, setVisualBible] = useState<string | undefined>(undefined);
+  // Whether the look-book call has finished (successfully or not). The first
+  // image waits for this so it is composed with the same look the poster will use.
+  const [visualBibleSettled, setVisualBibleSettled] = useState(false);
   const { isNarrating, isPlaying, toggleNarration } = useNarration();
-  const { hasApiKey, autoGenerate, generateImage } = useImageGeneration();
+  const {
+    isAuthenticated,
+    autoGenerate,
+    generateImage,
+    generateVisualBible,
+    isGeneratingImage,
+    imageError,
+  } = useImageGeneration();
   const autoGenerateTriggered = useRef(false);
+  // Stable id for this session's stored images, so a reshoot replaces the file
+  // it supersedes instead of orphaning it.
+  const sessionImageId = useRef(crypto.randomUUID());
   // Abort the story stream when the user navigates away mid-generation so the
   // reader loop stops and no further setState fires on an unmounted component.
   const streamAbortRef = useRef<AbortController | null>(null);
   const moduleContext = getModulePromptContext(killer, location);
   const applicableSpecialRules = getApplicableSpecialRules(killer, location);
+  // Reserve the image column as soon as there is something to show there —
+  // a finished still, one developing, or a failure worth retrying.
+  const showImageSlot = Boolean(sceneImageUrl) || isGeneratingImage || Boolean(imageError);
 
   // Auto-generate story on mount
   useEffect(() => {
@@ -68,29 +84,61 @@ const NowPlaying = ({
     return () => streamAbortRef.current?.abort();
   }, []);
 
-  // Auto-generate scene image when story loads (if enabled)
+  // Establish this game's look before the story finishes, so the first image
+  // can already reference it. Cheap enough to be fire-and-forget.
   useEffect(() => {
-    if (story && hasApiKey && autoGenerate && !autoGenerateTriggered.current) {
-      autoGenerateTriggered.current = true;
-      (async () => {
-        const url = await generateImage({
-          story,
-          killer,
-          killerDescription: getKillerDescription(killer),
-          finalGirl,
-          finalGirlDescription: getFinalGirlDescription(finalGirl),
-          location,
-          locationDescription: getLocationDescription(location),
-          moduleVisualGuidance: moduleContext?.visualGuidance,
-          sceneType: 'beginning',
-        });
-        if (url) {
-          setGeneratedSceneUrl(url);
-          setSceneImageUrl(url);
-        }
-      })();
+    if (!isAuthenticated) {
+      setVisualBibleSettled(true);
+      return;
     }
-  }, [story, hasApiKey, autoGenerate]);
+    let cancelled = false;
+    (async () => {
+      const bible = await generateVisualBible({
+        killer,
+        finalGirl,
+        location,
+        locationDescription: getLocationDescription(location),
+      });
+      if (cancelled) return;
+      setVisualBible(bible);
+      setVisualBibleSettled(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, killer, finalGirl, location]);
+
+  const developScene = async (previousImageUrl?: string) => {
+    if (!story) return;
+    const url = await generateImage({
+      story,
+      killer,
+      killerDescription: getKillerDescription(killer),
+      finalGirl,
+      finalGirlDescription: getFinalGirlDescription(finalGirl),
+      location,
+      locationDescription: getLocationDescription(location),
+      moduleVisualGuidance: moduleContext?.visualGuidance,
+      visualBible,
+      sceneType: 'beginning',
+      gameId: sessionImageId.current,
+      previousImageUrl,
+    });
+    if (url) setSceneImageUrl(url);
+  };
+
+  // Images generate on their own now — no API key, no button to find.
+  //
+  // This waits for `isGenerating` to clear rather than firing on `story`: the
+  // stream sets `story` on every token, so an unguarded trigger would shoot the
+  // scene from the first half-sentence of the script.
+  useEffect(() => {
+    if (!story || isGenerating || error) return;
+    if (!isAuthenticated || !autoGenerate || !visualBibleSettled) return;
+    if (autoGenerateTriggered.current) return;
+    autoGenerateTriggered.current = true;
+    developScene();
+  }, [story, isGenerating, error, isAuthenticated, autoGenerate, visualBibleSettled]);
 
   const generateStory = async () => {
     streamAbortRef.current?.abort();
@@ -252,20 +300,14 @@ const NowPlaying = ({
                 </SpecialRulesModal>
               )}
               
-              {/* Row 2: Image Prompt + Upload — side by side on mobile */}
+              {/* Row 2: Reshoot + Replace — side by side on mobile */}
               <div className="flex w-full sm:w-auto gap-2 sm:gap-3 sm:contents">
-                <ImagePromptModal
-                  story={story}
-                  killer={killer}
-                  location={location}
-                  finalGirl={finalGirl}
-                >
-                  <button className="vcr-tape-button flex items-center justify-center gap-2 px-4 sm:px-6 py-3 font-display text-xs sm:text-sm tracking-[0.1em] sm:tracking-[0.15em] uppercase transition-all duration-300 min-h-[44px] flex-1 sm:flex-none">
-                    <ImageIcon className="w-4 h-4 shrink-0" />
-                    <span>Image Prompt</span>
-                  </button>
-                </ImagePromptModal>
-                
+                <SceneImageControls
+                  isGenerating={isGeneratingImage}
+                  hasImage={Boolean(sceneImageUrl)}
+                  onGenerate={() => developScene(sceneImageUrl || undefined)}
+                />
+
                 <div className="flex-1 sm:flex-none">
                   <ImageUploadSlot
                     imageUrl={sceneImageUrl}
@@ -274,24 +316,11 @@ const NowPlaying = ({
                 </div>
               </div>
 
-              {/* Row 3: Generate Scene — full width on mobile */}
-              <SceneImageControls
-                story={story}
-                killer={killer}
-                finalGirl={finalGirl}
-                location={location}
-                sceneType="beginning"
-                generatedImageUrl={generatedSceneUrl}
-                onImageGenerated={(url) => {
-                  setGeneratedSceneUrl(url);
-                  setSceneImageUrl(url);
-                }}
-              />
             </div>
           )}
           
           {/* Story + Image Container */}
-          <div className={`w-full px-1 sm:px-0 ${sceneImageUrl ? 'grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 lg:gap-6' : ''}`}>
+          <div className={`w-full px-1 sm:px-0 ${showImageSlot ? 'grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 lg:gap-6' : ''}`}>
             {/* Story Text */}
             <div className="scenario-description p-4 sm:p-6 rounded-sm">
               {isGenerating ? (
@@ -326,18 +355,16 @@ const NowPlaying = ({
               )}
             </div>
             
-            {/* Scene Image - Shows when uploaded */}
-            {sceneImageUrl && (
-              <div className="relative aspect-[3/4] w-full max-w-[300px] mx-auto lg:mx-0 rounded-sm overflow-hidden border-2 border-border/50 shadow-lg">
-                <img
-                  src={sceneImageUrl}
-                  alt="Scene still"
-                  className="w-full h-full object-cover"
+            {/* Scene Image — develops in place while the story is read */}
+            {showImageSlot && (
+              <div className="w-full max-w-[300px] mx-auto lg:mx-0">
+                <SceneImageFrame
+                  variant="scene"
+                  imageUrl={sceneImageUrl}
+                  isGenerating={isGeneratingImage}
+                  error={imageError}
+                  onRetry={() => developScene()}
                 />
-                {/* Film grain overlay on image */}
-                <div className="film-grain absolute inset-0 pointer-events-none opacity-[0.15]" />
-                {/* Subtle vignette on image */}
-                <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/40 via-transparent to-black/20" />
               </div>
             )}
           </div>
@@ -346,7 +373,7 @@ const NowPlaying = ({
           {story && !isGenerating && !error && (
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mt-6 sm:mt-8 px-2">
               <button
-                onClick={() => onGameEnd('won', story || undefined, sceneImageUrl || undefined)}
+                onClick={() => onGameEnd('won', story || undefined, sceneImageUrl || undefined, visualBible)}
                 className="outcome-btn outcome-btn-won group relative w-full sm:w-auto min-w-[200px] sm:min-w-[240px] h-14 sm:h-16 overflow-hidden rounded-sm transition-all duration-200"
               >
                 <span className="relative z-10 font-display text-xl sm:text-2xl tracking-[0.2em] uppercase text-secondary drop-shadow-lg">
@@ -355,7 +382,7 @@ const NowPlaying = ({
               </button>
               
               <button
-                onClick={() => onGameEnd('lost', story || undefined, sceneImageUrl || undefined)}
+                onClick={() => onGameEnd('lost', story || undefined, sceneImageUrl || undefined, visualBible)}
                 className="outcome-btn outcome-btn-lost group relative w-full sm:w-auto min-w-[200px] sm:min-w-[240px] h-14 sm:h-16 overflow-hidden rounded-sm transition-all duration-200"
               >
                 <span className="relative z-10 font-display text-xl sm:text-2xl tracking-[0.2em] uppercase text-primary drop-shadow-lg">

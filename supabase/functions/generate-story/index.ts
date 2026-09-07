@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getCorsHeaders } from "../_shared/auth.ts";
 import { StoryRequestSchema, validateRequest } from "../_shared/validation.ts";
 import { requireUser } from "../_shared/guard.ts";
+import { statusFor, streamChat, userFacingMessage } from "../_shared/aiGateway.ts";
 
 serve(async (req) => {
   const cors = getCorsHeaders(req.headers.get('origin'));
@@ -98,37 +99,11 @@ ${startingEventInfo}
 Starting Setup Info:
 ${startingSetupInfo}`;
 
-    const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        stream: true,
-      }),
-    });
-
-    if (!upstream.ok || !upstream.body) {
-      const errorText = await upstream.text().catch(() => "");
-      console.error("AI gateway error:", upstream.status, errorText);
-      const status = upstream.status === 429 || upstream.status === 402 ? upstream.status : 500;
-      const message = upstream.status === 429
-        ? "Rate limit exceeded. Please try again in a moment."
-        : upstream.status === 402
-        ? "AI credits depleted. Please add credits to continue."
-        : "Failed to generate story. Please try again.";
-      return new Response(JSON.stringify({ error: message }),
-        { status, headers: { ...cors, "Content-Type": "application/json" } });
-    }
+    const { body: stream, model } = await streamChat({ system: systemPrompt, user: userPrompt });
+    guard.logUsage({ model, kind: "story" });
 
     // Forward the SSE stream directly to the client.
-    return new Response(upstream.body, {
+    return new Response(stream, {
       status: 200,
       headers: {
         ...cors,
@@ -139,7 +114,7 @@ ${startingSetupInfo}`;
     });
   } catch (error) {
     console.error("generate-story error:", error);
-    return new Response(JSON.stringify({ error: "Failed to generate story. Please try again." }),
-      { status: 500, headers: { ...cors, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: userFacingMessage(error) }),
+      { status: statusFor(error), headers: { ...cors, "Content-Type": "application/json" } });
   }
 });

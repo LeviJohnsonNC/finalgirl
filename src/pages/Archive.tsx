@@ -4,7 +4,7 @@ import { FilmToggle } from '@/components/FilmToggle';
 import { FEATURE_FILMS } from '@/types/gameData';
 import { useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { useOwnedFilms } from '@/hooks/useOwnedFilms';
-import ApiKeyManager from '@/components/ApiKeyManager';
+import ImageSettingsPanel from '@/components/ImageSettingsPanel';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -184,7 +184,7 @@ const Archive = () => {
 
       {/* Image Engine — below all collection content */}
       <div className="mt-12 sm:mt-16 px-2">
-        <ApiKeyManager />
+        <ImageSettingsPanel />
       </div>
     </div>
   );
