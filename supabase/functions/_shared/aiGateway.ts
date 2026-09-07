@@ -132,7 +132,134 @@ const withModelFallback = async <T>(
   throw lastError ?? new GatewayError("model_unavailable", "No candidate model was available");
 };
 
-/** Non-streaming text completion. Used for short internal calls (shot briefs, visual bible). */
+// ---------------------------------------------------------------------------
+// Responses API (/v1/responses) — used for `openai/*` text models.
+//
+// Every call here streams, because reasoning-capable models can run for minutes
+// and a buffered request would be severed by a platform timeout. No reasoning
+// options are requested: these are one-shot generations and the app never shows
+// a thinking trace. No abort/deadline is ever wrapped around these fetches.
+// ---------------------------------------------------------------------------
+
+/** Opens a streaming /v1/responses request and hands back the raw SSE body. */
+const postResponsesStream = async (
+  model: string,
+  system: string,
+  user: string,
+): Promise<ReadableStream<Uint8Array>> => {
+  const key = apiKey();
+  const response = await fetch(RESPONSES_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Lovable-API-Key": key,
+      "Content-Type": "application/json",
+      "X-Lovable-AIG-SDK": "fetch",
+    },
+    body: JSON.stringify({
+      model,
+      // No temperature / max_completion_tokens: these models reject a non-default
+      // temperature, and length limits live in the prompt text instead.
+      input: [
+        { role: "system", content: [{ type: "input_text", text: system }] },
+        { role: "user", content: [{ type: "input_text", text: user }] },
+      ],
+      stream: true,
+      store: false,
+    }),
+  });
+
+  if (!response.ok || !response.body) {
+    const text = await response.text().catch(() => "");
+    console.error(`Responses ${model} failed:`, response.status, text.slice(0, 300));
+    throw classify(response.status, text);
+  }
+  return response.body;
+};
+
+/** Walks SSE frames out of a byte stream, yielding each parsed `data:` payload. */
+const eachSseEvent = (chunk: string, buffer: string, onEvent: (event: Record<string, unknown>) => void): string => {
+  buffer += chunk;
+  let idx: number;
+  while ((idx = buffer.indexOf("\n\n")) !== -1) {
+    const frame = buffer.slice(0, idx);
+    buffer = buffer.slice(idx + 2);
+    for (const line of frame.split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith("data:")) continue;
+      const payload = trimmed.slice(5).trim();
+      if (!payload || payload === "[DONE]") continue;
+      try {
+        onEvent(JSON.parse(payload));
+      } catch {
+        /* ignore malformed frame */
+      }
+    }
+  }
+  return buffer;
+};
+
+/**
+ * Re-emits a /v1/responses SSE stream in the OpenAI chat-completions frame shape
+ * the browser already parses, so the client stays untouched.
+ */
+const responsesToChatFrames = (
+  upstream: ReadableStream<Uint8Array>,
+  model: string,
+): ReadableStream<Uint8Array> => {
+  const decoder = new TextDecoder();
+  const encoder = new TextEncoder();
+  let buffer = "";
+
+  return upstream.pipeThrough(
+    new TransformStream<Uint8Array, Uint8Array>({
+      transform(chunk, controller) {
+        buffer = eachSseEvent(decoder.decode(chunk, { stream: true }), buffer, (event) => {
+          if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ model, choices: [{ delta: { content: event.delta } }] })}\n\n`,
+              ),
+            );
+          }
+        });
+      },
+      flush(controller) {
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      },
+    }),
+  );
+};
+
+/** Consumes a streaming /v1/responses call and returns the joined text. */
+const collectResponsesText = async (model: string, system: string, user: string): Promise<string> => {
+  const upstream = await postResponsesStream(model, system, user);
+  const reader = upstream.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let text = "";
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer = eachSseEvent(decoder.decode(value, { stream: true }), buffer, (event) => {
+      if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
+        text += event.delta;
+      }
+    });
+  }
+
+  return text.trim();
+};
+
+/** Turns a token budget into a prompt-level word limit for models that reject max_tokens. */
+const lengthHint = (maxTokens?: number): string =>
+  maxTokens ? `\n\nHard limit: keep the response under ${Math.max(40, Math.round(maxTokens * 0.7))} words.` : "";
+
+/**
+ * Short internal text completion (shot briefs, visual bible). Streams under the
+ * hood on the Responses path and returns the finished text either way.
+ */
 export const generateText = async (opts: {
   system: string;
   user: string;
@@ -140,6 +267,16 @@ export const generateText = async (opts: {
   temperature?: number;
 }): Promise<{ text: string; model: string }> => {
   const { result, model } = await withModelFallback(TEXT_MODEL_CANDIDATES, async (model) => {
+    if (usesResponsesApi(model)) {
+      const text = await collectResponsesText(
+        model,
+        opts.system + lengthHint(opts.maxTokens),
+        opts.user,
+      );
+      if (!text) throw new GatewayError("empty_response", "Gateway returned no text");
+      return text;
+    }
+
     const data = await post({
       model,
       messages: [
