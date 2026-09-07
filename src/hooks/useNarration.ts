@@ -3,12 +3,21 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { createPrimedAudio, base64ToBlob } from '@/lib/audioUtils';
 
+/** Which moment is being narrated, so the edge function can cast a voice. */
+export interface NarrationCasting {
+  kind: 'intro' | 'ending';
+  outcome?: 'won' | 'lost';
+  filmId?: string | null;
+}
+
 /**
  * Shared narrate-story playback logic (extracted from NowPlaying / TheEnd,
  * which carried two identical copies of it).
  *
  * - Primes an Audio element synchronously in the tap handler for iOS.
- * - Fetches TTS audio from the narrate-story edge function.
+ * - Fetches TTS audio from the narrate-story edge function, telling it which
+ *   moment is being read so the narrator can be cast to match (see
+ *   supabase/functions/_shared/voices.ts).
  * - Stops playback and revokes the blob URL on unmount, so audio no longer
  *   keeps playing after the user navigates away mid-narration.
  */
@@ -39,7 +48,7 @@ export const useNarration = () => {
     };
   }, []);
 
-  const toggleNarration = useCallback(async (text: string | null) => {
+  const toggleNarration = useCallback(async (text: string | null, casting?: NarrationCasting) => {
     if (!text) return;
 
     // If already playing, stop and reset
@@ -70,7 +79,12 @@ export const useNarration = () => {
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             Authorization: `Bearer ${session.access_token}`,
           },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({
+            text,
+            kind: casting?.kind,
+            outcome: casting?.outcome,
+            filmId: casting?.filmId ?? undefined,
+          }),
         }
       );
 

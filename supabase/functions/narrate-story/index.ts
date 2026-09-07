@@ -3,6 +3,7 @@ import { decode as base64Decode, encode as base64Encode } from "https://deno.lan
 import { getCorsHeaders } from "../_shared/auth.ts";
 import { NarrationRequestSchema, validateRequest } from "../_shared/validation.ts";
 import { requireUser } from "../_shared/guard.ts";
+import { castVoice } from "../_shared/voices.ts";
 
 
 const MAX_CHUNK_SIZE = 1900; // Inworld limit is 2000, leave margin for safety
@@ -101,50 +102,85 @@ serve(async (req) => {
       );
     }
 
+    // Cast the voice for this moment. An opening and a losing ending should
+    // not be read by the same narrator in the same register.
+    const persona = castVoice({
+      kind: validation.data.kind,
+      outcome: validation.data.outcome,
+      filmId: validation.data.filmId,
+    });
+
     // Split text into chunks if needed
     const chunks = splitTextIntoChunks(text, MAX_CHUNK_SIZE);
 
-    const audioChunks: string[] = [];
+    /** Synthesises one chunk, returning null if this voice id is rejected. */
+    const speak = async (chunk: string, voiceId: string): Promise<string | null> => {
+      const response = await fetch('https://api.inworld.ai/tts/v1/voice', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${INWORLD_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: chunk, voiceId, modelId: 'inworld-tts-1.5-max' }),
+      });
 
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i];
-
-      const response = await fetch(
-        'https://api.inworld.ai/tts/v1/voice',
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Basic ${INWORLD_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            text: chunk,
-            voiceId: 'Blake',
-            modelId: 'inworld-tts-1.5-max'
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Inworld API error:', response.status, errorText);
-        
-        if (response.status === 429) {
-          return new Response(
-            JSON.stringify({ error: 'Too many requests. Please wait a moment.' }),
-            { status: 429, headers: { ...cors, 'Content-Type': 'application/json' } }
-          );
-        }
-        
-        return new Response(
-          JSON.stringify({ error: 'Failed to generate narration. Please try again.' }),
-          { status: 500, headers: { ...cors, 'Content-Type': 'application/json' } }
-        );
+      if (response.ok) {
+        const data = await response.json();
+        return data.audioContent as string;
       }
 
-      const data = await response.json();
-      audioChunks.push(data.audioContent);
+      const errorText = await response.text();
+      console.error(`Inworld error (voice ${voiceId}):`, response.status, errorText);
+
+      // An unknown voice id is a casting problem, not an outage: report it so
+      // the caller can try the next candidate.
+      if (response.status === 400 || response.status === 404) return null;
+      throw new Response(
+        JSON.stringify({
+          error: response.status === 429
+            ? 'Too many requests. Please wait a moment.'
+            : 'Failed to generate narration. Please try again.',
+        }),
+        { status: response.status === 429 ? 429 : 500, headers: { ...cors, 'Content-Type': 'application/json' } },
+      );
+    };
+
+    // Resolve the voice once, on the first chunk, then keep it for the rest —
+    // a narration that changed voice halfway through would be worse than one
+    // that used the fallback throughout.
+    let voiceId: string | null = null;
+    const audioChunks: string[] = [];
+
+    for (const candidate of persona.candidates) {
+      const first = await speak(chunks[0], candidate);
+      if (first !== null) {
+        voiceId = candidate;
+        audioChunks.push(first);
+        break;
+      }
+      console.warn(`Voice ${candidate} unavailable, trying next candidate`);
     }
+
+    if (voiceId === null) {
+      return new Response(
+        JSON.stringify({ error: 'Failed to generate narration. Please try again.' }),
+        { status: 500, headers: { ...cors, 'Content-Type': 'application/json' } },
+      );
+    }
+
+    for (const chunk of chunks.slice(1)) {
+      const audio = await speak(chunk, voiceId);
+      if (audio === null) {
+        // The voice worked a moment ago, so this is not a casting problem.
+        return new Response(
+          JSON.stringify({ error: 'Failed to generate narration. Please try again.' }),
+          { status: 500, headers: { ...cors, 'Content-Type': 'application/json' } },
+        );
+      }
+      audioChunks.push(audio);
+    }
+
+    guard.logUsage({ model: `inworld:${voiceId}`, kind: `narration-${persona.label}` });
 
     // Concatenate all audio chunks
     const combinedAudio = chunks.length === 1 
@@ -153,10 +189,12 @@ serve(async (req) => {
     
 
     return new Response(
-      JSON.stringify({ audioContent: combinedAudio }),
+      JSON.stringify({ audioContent: combinedAudio, voiceId, persona: persona.label }),
       { headers: { ...cors, 'Content-Type': 'application/json' } }
     );
   } catch (error: unknown) {
+    // speak() throws a ready-made Response for upstream failures it cannot retry.
+    if (error instanceof Response) return error;
     console.error('Error generating narration:', error);
     return new Response(
       JSON.stringify({ error: 'Failed to generate narration. Please try again.' }),

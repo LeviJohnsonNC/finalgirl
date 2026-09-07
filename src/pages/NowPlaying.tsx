@@ -225,7 +225,7 @@ const NowPlaying = ({
     }
   };
 
-  const handleNarrate = () => toggleNarration(story);
+  const handleNarrate = () => toggleNarration(story, { kind: 'intro', filmId });
 
   return (
     <div
