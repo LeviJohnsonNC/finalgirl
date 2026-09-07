@@ -1,0 +1,1 @@
+ALTER TABLE public.user_image_settings ADD COLUMN IF NOT EXISTS use_ai_casting_art boolean NOT NULL DEFAULT false;
