@@ -360,6 +360,10 @@ export const streamChat = async (opts: {
   user: string;
 }): Promise<{ body: ReadableStream<Uint8Array>; model: string }> => {
   const { result, model } = await withModelFallback(TEXT_MODEL_CANDIDATES, async (model) => {
+    if (usesResponsesApi(model)) {
+      return responsesToChatFrames(await postResponsesStream(model, opts.system, opts.user), model);
+    }
+
     const response = await fetch(GATEWAY_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey()}`, "Content-Type": "application/json" },
