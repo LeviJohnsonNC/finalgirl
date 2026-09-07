@@ -145,5 +145,13 @@ PALETTE: Draw from the location's natural atmosphere — neon for malls, moonlig
 sodium lamps for streets, fluorescent for institutions. Warmer if she survived, cooler if she fell.
 
 TYPOGRAPHY (painted into the image, not floating): invent a punchy 1-3 word horror title inspired
-by the story, one tagline of at most 10 words reflecting the outcome, and a small billing block at the bottom.`;
+by the story, one tagline of at most 10 words reflecting the outcome, and a small billing block at the bottom.
+
+CREDITS RULE (strict): every name on the poster must be fictional or come from the cast above.
+NEVER use the name of any real person in any credit — no real actors, directors, composers,
+musicians or producers, in ANY role (e.g. no "Nancy Allen", "Donald Pleasence", "Tom Holland",
+"John Carpenter"). Also avoid famous horror film character names (e.g. "Laurie Strode",
+"Billy Loomis", "Michael Myers") even as fictional credits. Use the Final Girl and killer names
+as the stars, and invent plainly fictional names for the rest of the billing block
+(e.g. "MARA VOSS", "MUSIC BY ELLIS CRANE", "DIRECTED BY R.J. CRAVEN").`;
 };
