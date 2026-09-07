@@ -26,8 +26,8 @@ Not endorsed by or affiliated with Van Ryder Games. A footer disclaimer is a har
 - **Auth** (`src/pages/Auth.tsx`) — email/password + Google OAuth.
 - **News Ticker** (`src/components/NewsTicker.tsx`) — decorative horror headline scroller.
 - **Narration playback** — audio via Inworld TTS, chunked and stitched (`src/lib/audioUtils.ts`).
-- **AI image + story generation** — `useImageGeneration`, `StoryGenerator`, `ImagePromptModal`, `PosterPromptModal`.
-- **Bring-your-own image API keys** (`src/components/ApiKeyManager.tsx`, rendered inside `Archive.tsx`) — user saves an encrypted Google / OpenAI / Stability key (`public.user_api_keys`) and toggles auto-generation + preferred provider (`public.user_image_settings`); consumed by `useImageGeneration` and the `generate-scene-image` edge function.
+- **AI image + story generation** — `useImageGeneration`, `StoryGenerator`, `SceneImageFrame`, `SceneImageControls`. Images generate automatically on the platform key.
+- **Image settings** (`src/components/ImageSettingsPanel.tsx`, rendered inside `Archive.tsx`) — two toggles in `public.user_image_settings`: `auto_generate_images` (opening still + closing poster, default on) and `use_ai_casting_art` (AI casting-room art, default off). There is no per-user API key; generation runs on the platform's Lovable AI Gateway key.
 
 ## Main user flows
 1. **First-time sign-in**: Marquee → Sign In → Google OAuth (via `@lovable.dev/cloud-auth-js`) or email/password → session persisted → local guest history migrated to cloud on first authenticated load (per project memory).
@@ -48,7 +48,7 @@ Not endorsed by or affiliated with Van Ryder Games. A footer disclaimer is a har
 - **AI providers** are called from edge functions:
   - Chat/text: Lovable AI Gateway (`https://ai.gateway.lovable.dev`, `LOVABLE_API_KEY`) — confirmed for both `generate-story` and `generate-ending`.
   - Text-to-speech: Inworld (`INWORLD_API_KEY`, see `narrate-story`).
-  - Images: two different key strategies. `generate-story-image` (poster) calls **Google Gemini** with the platform-managed `GOOGLE_API_KEY`. `generate-scene-image` (mid-game scene) uses the **signed-in user's own** provider key, read from `public.user_api_keys`, and dispatches to Google, OpenAI (`images/generations`), or Stability (`stable-image/generate/core`) depending on the stored provider.
+  - Images: Lovable AI Gateway, same `LOVABLE_API_KEY` as the text calls. `generate-scene-image` produces both the opening still and the closing poster, uploads to the `posters` bucket, and returns a public URL.
 - **Caching**: `useLocalStorage` + a slimmed cloud-history cache key (`final-girl-cloud-game-history-cache-v2`); large `data:` URIs are stripped before caching to avoid quota errors.
 
 ## Routes / pages
@@ -80,19 +80,19 @@ Not endorsed by or affiliated with Van Ryder Games. A footer disclaimer is a har
 - **Owned films / assets**: `useOwnedFilms`, `useActiveImages`.
 - **Persistence**: `useLocalStorage` for many small preferences; auth-scoped Supabase storage bucket `posters` for images.
 - **User settings**: `public.user_settings` (holds `owned_films` JSONB; delete policy added in migration `20260329…`).
-- **Image settings**: `public.user_image_settings` (`auto_generate_images`, `preferred_provider`).
-- **API keys**: `public.user_api_keys` (per-user encrypted provider keys for scene-image generation).
+- **Image settings**: `public.user_image_settings` (`auto_generate_images`, `use_ai_casting_art`).
+- **Usage**: `public.ai_usage_events` records function, model and kind per call for rate limiting and cost visibility.
 - **Profiles**: `public.profiles` **does exist** — but it is minimal (`id` referencing `auth.users`, plus timestamps). It carries no roles or privileged columns.
 - **Rate limiting / usage**: `public.ai_usage_events` (used by `_shared/guard.ts`).
 
-Full table set (from `supabase/migrations/`): `profiles`, `game_history`, `user_settings`, `user_image_settings`, `user_api_keys`, `ai_usage_events`. All are RLS-enabled and owner-scoped by `auth.uid()`.
+Full table set (from `supabase/migrations/`): `profiles`, `game_history`, `user_settings`, `user_image_settings`, `ai_usage_events`. All are RLS-enabled and owner-scoped by `auth.uid()`.
 
 ## API / backend / integration points
 Edge functions in `supabase/functions/`:
 - `generate-story/` — AI intro story. Uses `LOVABLE_API_KEY`. Rate limit: 30/hr.
 - `generate-ending/` — AI ending narration. Rate limit: 30/hr.
-- `generate-story-image/` — poster image generation via Google Gemini using platform `GOOGLE_API_KEY`; returns base64. Rate limit: 40/hr.
-- `generate-scene-image/` — scene image generation using the user's own `user_api_keys` provider key (Google/OpenAI/Stability); uploads via service role. Rate limit: 40/hr.
+- `generate-scene-image/` — opening still (3:4) and closing poster (2:3) via the AI Gateway, preceded by a cheap text "shot brief" pass; uploads via service role. Rate limit: 20/hr, 60/day, fails closed.
+- `generate-visual-bible/` — one look-book paragraph per game, shared by both images. Rate limit: 30/hr.
 - `narrate-story/` — Inworld TTS (`INWORLD_API_KEY`) with sentence-boundary chunking; base64 audio in/out. Rate limit: 60/hr.
 - `migrate-legacy-images/` — one-shot migration of inline `data:` posters/scenes into the `posters` bucket. Rate limit: 10/hr.
 - `_shared/auth.ts` — CORS.
@@ -103,7 +103,7 @@ Client hooks that talk to the above: `useImageGeneration`, `StoryGenerator` (cli
 
 Third-party services (from code):
 - **Lovable AI Gateway** — text generation (story + ending).
-- **Google Gemini** — poster image (`generate-story-image`, platform key) and one of the scene-image providers.
+- **Google Gemini** — reached through the Lovable AI Gateway for both text and images; no direct provider key.
 - **OpenAI** and **Stability AI** — alternative scene-image providers (user-supplied keys).
 - **Inworld** — TTS.
 - **Supabase** — Postgres, auth, storage, edge functions.
@@ -113,7 +113,7 @@ Third-party services (from code):
 - Email + password and Google OAuth (Lovable auth wrapper), session managed by `@supabase/supabase-js`.
 - No anonymous sign-ups.
 - Every edge AI function uses `requireUser`; unauthenticated calls return 401 and over-limit calls return 429.
-- RLS is enabled on every user-owned table (`profiles`, `game_history`, `user_settings`, `user_image_settings`, `user_api_keys`, `ai_usage_events`); policies scope by `auth.uid()`. Exact per-table policy wording: see the migrations.
+- RLS is enabled on every user-owned table (`profiles`, `game_history`, `user_settings`, `user_image_settings`, `ai_usage_events`); policies scope by `auth.uid()`. Exact per-table policy wording: see the migrations.
 - No roles system currently in the client. A minimal `profiles` table exists but has no role column — if roles are added later, use a separate `user_roles` table with a `security definer` `has_role` function rather than a column on `profiles`.
 - The `posters` storage bucket is **public-read** and its object policies currently allow open insert/update/delete (created in the pre-auth migration with "since we don't have auth yet" comments) — worth tightening now that auth exists.
 
@@ -137,7 +137,8 @@ Client env vars in `.env` (all `VITE_`-prefixed):
 Edge functions read (via `Deno.env.get`):
 - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (managed by the platform).
 - `LOVABLE_API_KEY` — confirmed in `generate-story` **and** `generate-ending` (text). Image functions do **not** use it.
-- `GOOGLE_API_KEY` — platform key used by `generate-story-image` (poster). `generate-scene-image` does not use a platform image key; it reads the user's key from `public.user_api_keys`.
+- `LOVABLE_API_KEY` — the only AI key. Serves story, ending, shot briefs, visual bibles and both images through the AI Gateway.
+- `LOVABLE_TEXT_MODEL` / `LOVABLE_IMAGE_MODEL` — optional overrides pinning a specific gateway model (see `supabase/functions/_shared/models.ts`).
 - `INWORLD_API_KEY` — confirmed for `narrate-story` TTS.
 
 No secrets or credential values should ever be committed. Do not add secrets to `.env`; use the platform's secret store.

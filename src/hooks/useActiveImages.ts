@@ -12,15 +12,15 @@ import { useImageGeneration } from './useImageGeneration';
 type CastingType = 'killer' | 'location' | 'finalGirl';
 
 export function useActiveImages() {
-  const { autoGenerate } = useImageGeneration();
+  const { useAiCastingArt } = useImageGeneration();
 
   return useMemo(() => {
-    const characterImages = autoGenerate ? CHARACTER_IMAGES_AI : CHARACTER_IMAGES;
-    const locationImages = autoGenerate ? LOCATION_IMAGES_AI : LOCATION_IMAGES;
+    const characterImages = useAiCastingArt ? CHARACTER_IMAGES_AI : CHARACTER_IMAGES;
+    const locationImages = useAiCastingArt ? LOCATION_IMAGES_AI : LOCATION_IMAGES;
 
     const getBoxArt = (film: FeatureFilm | undefined | null): string | undefined => {
       if (!film) return undefined;
-      if (autoGenerate) return film.boxArtAi ?? film.boxArt;
+      if (useAiCastingArt) return film.boxArtAi ?? film.boxArt;
       return film.boxArt;
     };
 
@@ -42,11 +42,11 @@ export function useActiveImages() {
     };
 
     return {
-      aiEnabled: autoGenerate,
+      aiEnabled: useAiCastingArt,
       characterImages,
       locationImages,
       getBoxArt,
       getImageForValue,
     };
-  }, [autoGenerate]);
+  }, [useAiCastingArt]);
 }
