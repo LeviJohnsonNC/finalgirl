@@ -3,7 +3,12 @@
 // Everything AI in this app goes through here so that retry, credit/rate-limit
 // handling and model fallback are written once. Callers get a typed
 // GatewayError they can map to a user-facing message.
-import { IMAGE_MODEL_CANDIDATES, TEXT_MODEL_CANDIDATES, usesResponsesApi } from "./models.ts";
+import {
+  IMAGE_MODEL_CANDIDATES,
+  TEXT_MODEL_CANDIDATES,
+  UTILITY_MODEL_CANDIDATES,
+  usesResponsesApi,
+} from "./models.ts";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const RESPONSES_URL = "https://ai.gateway.lovable.dev/v1/responses";
@@ -200,8 +205,33 @@ const eachSseEvent = (chunk: string, buffer: string, onEvent: (event: Record<str
 };
 
 /**
+ * Pulls a human-readable message out of a terminal Responses event, if this
+ * event is one. A /v1/responses stream reports mid-flight failures as events on
+ * an already-200 response, so these are the only signal that anything went wrong.
+ */
+const terminalErrorMessage = (event: Record<string, unknown>): string | null => {
+  const type = typeof event.type === "string" ? event.type : "";
+  if (type !== "error" && type !== "response.failed" && type !== "response.incomplete") return null;
+
+  const response = event.response as
+    | { status?: string; error?: { message?: string }; incomplete_details?: { reason?: string } }
+    | undefined;
+  return (
+    (event.message as string | undefined) ??
+    response?.error?.message ??
+    response?.incomplete_details?.reason ??
+    `Generation ${type === "response.incomplete" ? "was cut short" : "failed"}`
+  );
+};
+
+/**
  * Re-emits a /v1/responses SSE stream in the OpenAI chat-completions frame shape
  * the browser already parses, so the client stays untouched.
+ *
+ * A failure that arrives mid-stream cannot change the HTTP status — the headers
+ * are long gone — so it is forwarded as an `error` frame, which the client turns
+ * back into a thrown error. Dropping it would leave the reader staring at an
+ * empty story with no indication anything broke.
  */
 const responsesToChatFrames = (
   upstream: ReadableStream<Uint8Array>,
@@ -211,20 +241,31 @@ const responsesToChatFrames = (
   const encoder = new TextEncoder();
   let buffer = "";
 
+  const chatFrame = (payload: unknown) => encoder.encode(`data: ${JSON.stringify(payload)}\n\n`);
+
+  const handle = (controller: TransformStreamDefaultController<Uint8Array>) =>
+    (event: Record<string, unknown>) => {
+      if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
+        controller.enqueue(chatFrame({ model, choices: [{ delta: { content: event.delta } }] }));
+        return;
+      }
+
+      const failure = terminalErrorMessage(event);
+      if (failure) {
+        console.error(`Responses stream ${model} reported failure:`, failure);
+        controller.enqueue(chatFrame({ error: failure }));
+      }
+    };
+
   return upstream.pipeThrough(
     new TransformStream<Uint8Array, Uint8Array>({
       transform(chunk, controller) {
-        buffer = eachSseEvent(decoder.decode(chunk, { stream: true }), buffer, (event) => {
-          if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify({ model, choices: [{ delta: { content: event.delta } }] })}\n\n`,
-              ),
-            );
-          }
-        });
+        buffer = eachSseEvent(decoder.decode(chunk, { stream: true }), buffer, handle(controller));
       },
       flush(controller) {
+        // Drain a trailing frame that arrived without its blank-line terminator,
+        // so the last delta is not lost.
+        eachSseEvent("\n\n", buffer, handle(controller));
         controller.enqueue(encoder.encode("data: [DONE]\n\n"));
       },
     }),
@@ -238,17 +279,25 @@ const collectResponsesText = async (model: string, system: string, user: string)
   const decoder = new TextDecoder();
   let buffer = "";
   let text = "";
+  let failure: string | null = null;
+
+  const handle = (event: Record<string, unknown>) => {
+    if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
+      text += event.delta;
+      return;
+    }
+    failure = failure ?? terminalErrorMessage(event);
+  };
 
   while (true) {
     const { value, done } = await reader.read();
     if (done) break;
-    buffer = eachSseEvent(decoder.decode(value, { stream: true }), buffer, (event) => {
-      if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
-        text += event.delta;
-      }
-    });
+    buffer = eachSseEvent(decoder.decode(value, { stream: true }), buffer, handle);
   }
+  // Drain any frame left without its blank-line terminator.
+  eachSseEvent("\n\n", buffer, handle);
 
+  if (failure) throw new GatewayError("upstream", `Responses stream failed: ${failure}`);
   return text.trim();
 };
 
@@ -257,16 +306,23 @@ const lengthHint = (maxTokens?: number): string =>
   maxTokens ? `\n\nHard limit: keep the response under ${Math.max(40, Math.round(maxTokens * 0.7))} words.` : "";
 
 /**
- * Short internal text completion (shot briefs, visual bible). Streams under the
- * hood on the Responses path and returns the finished text either way.
+ * Short internal text completion (shot briefs, visual bible).
+ *
+ * Runs on the utility chain, not the prose chain: this output is never shown to
+ * the player, it is a note for the image model, and it sits directly in front of
+ * a slow image call. Pass `candidates` to override that.
+ *
+ * Streams under the hood on the Responses path; returns finished text either way.
  */
 export const generateText = async (opts: {
   system: string;
   user: string;
   maxTokens?: number;
   temperature?: number;
+  candidates?: string[];
 }): Promise<{ text: string; model: string }> => {
-  const { result, model } = await withModelFallback(TEXT_MODEL_CANDIDATES, async (model) => {
+  const chain = opts.candidates ?? UTILITY_MODEL_CANDIDATES;
+  const { result, model } = await withModelFallback(chain, async (model) => {
     if (usesResponsesApi(model)) {
       const text = await collectResponsesText(
         model,

@@ -74,16 +74,29 @@ export const streamChatCompletion = async ({
         if (!payload || payload === "[DONE]") continue;
         try {
           const json = JSON.parse(payload);
+          // A failure that happens after the response headers are sent can only
+          // arrive as a frame. Without this it would look like a story that
+          // simply stopped, with nothing shown to the reader.
+          if (typeof json?.error === "string") {
+            throw new Error(json.error);
+          }
           const delta: string | undefined = json?.choices?.[0]?.delta?.content;
           if (delta) {
             accumulated += delta;
             onToken(delta, accumulated);
           }
-        } catch {
-          /* ignore malformed frame */
+        } catch (err) {
+          // Rethrow our own error frame; ignore genuinely malformed JSON.
+          if (err instanceof Error && !(err instanceof SyntaxError)) throw err;
         }
       }
     }
+  }
+
+  // An empty stream is a failure that reported itself as success — treat it as
+  // one rather than handing back a blank story.
+  if (!accumulated.trim()) {
+    throw new Error("The reel came back blank. Try again.");
   }
 
   return accumulated;
