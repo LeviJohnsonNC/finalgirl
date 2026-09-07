@@ -4,14 +4,17 @@
 // opening and a grim ending, across every film. This maps the moment being
 // narrated to a voice, so the app's two halves sound different from each other.
 //
-// IMPORTANT: `Blake` is the only voice id verified against the live Inworld API.
-// Every other id here is a candidate: the narrator tries a persona's candidates
-// in order and falls back to Blake, so an id that does not exist costs one
-// retry and then sounds exactly like today rather than failing. Run the
-// `tts-voices` function to list what Inworld actually offers for this account,
-// then keep the ids that appear and delete the rest.
+// Every id below was confirmed to exist against the live Inworld API (282
+// voices offered; `tts-voices` lists them). They were chosen by name before
+// their descriptions were available, though, so they are a plausible starting
+// cast rather than an auditioned one — run `tts-voices` for each voice's
+// description and tags, listen, and re-cast.
+//
+// The chains are kept anyway: a voice can be withdrawn from the account, and a
+// persona that falls back to Blake still narrates. Never remove Blake from the
+// end of a chain.
 
-/** The one id known to work. Never remove it from the end of a chain. */
+/** The original narrator, and the last resort for every persona. */
 export const FALLBACK_VOICE = "Blake";
 
 export type NarrationKind = "intro" | "ending";
