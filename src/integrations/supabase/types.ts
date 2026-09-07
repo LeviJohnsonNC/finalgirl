@@ -19,18 +19,24 @@ export type Database = {
           created_at: string
           function_name: string
           id: number
+          kind: string | null
+          model: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           function_name: string
           id?: number
+          kind?: string | null
+          model?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           function_name?: string
           id?: number
+          kind?: string | null
+          model?: string | null
           user_id?: string
         }
         Relationships: []
@@ -58,6 +64,7 @@ export type Database = {
           user_id: string
           victims_killed: number | null
           victims_saved: number | null
+          visual_bible: string | null
           weapon_used: string | null
         }
         Insert: {
@@ -82,6 +89,7 @@ export type Database = {
           user_id: string
           victims_killed?: number | null
           victims_saved?: number | null
+          visual_bible?: string | null
           weapon_used?: string | null
         }
         Update: {
@@ -106,6 +114,7 @@ export type Database = {
           user_id?: string
           victims_killed?: number | null
           victims_saved?: number | null
+          visual_bible?: string | null
           weapon_used?: string | null
         }
         Relationships: []
@@ -160,7 +169,6 @@ export type Database = {
           auto_generate_images: boolean
           created_at: string
           id: string
-          preferred_provider: string | null
           updated_at: string
           use_ai_casting_art: boolean
           user_id: string
@@ -169,7 +177,6 @@ export type Database = {
           auto_generate_images?: boolean
           created_at?: string
           id?: string
-          preferred_provider?: string | null
           updated_at?: string
           use_ai_casting_art?: boolean
           user_id: string
@@ -178,7 +185,6 @@ export type Database = {
           auto_generate_images?: boolean
           created_at?: string
           id?: string
-          preferred_provider?: string | null
           updated_at?: string
           use_ai_casting_art?: boolean
           user_id?: string
