@@ -9,6 +9,7 @@ import projectorSound from '@/assets/sounds/projector-start.mp3';
 import { ImageUploadSlot } from '@/components/ImageUploadSlot';
 import { SceneImageFrame } from '@/components/SceneImageFrame';
 import { GameResult } from '@/hooks/useGameHistory';
+import { getFilmIdByLocation } from '@/types/gameData';
 import { getKillerDescription } from '@/data/killerDescriptions';
 import { getFinalGirlDescription } from '@/data/finalGirlDescriptions';
 import { getLocationDescription } from '@/data/locationDescriptions';
@@ -195,7 +196,12 @@ const TheEnd = ({
     }
   };
 
-  const handleNarrate = () => toggleNarration(endingStory);
+  const handleNarrate = () =>
+    toggleNarration(endingStory, {
+      kind: 'ending',
+      outcome: result.outcome,
+      filmId: getFilmIdByLocation(result.location),
+    });
 
   const handleSave = () => {
     if (endingStory) {
