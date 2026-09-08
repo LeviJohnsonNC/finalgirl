@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Marquee } from '@/components/Marquee';
 import { AppHeader } from '@/components/AppHeader';
@@ -181,6 +181,22 @@ const IndexContent = () => {
     setCurrentPage('outcome');
   };
 
+  // The footer is fixed, so everything that stacks above it (the news ticker,
+  // the docked outcome bar) has to know how tall it is. It is not a constant —
+  // safe-area insets and the type scale both move it — so publish the measured
+  // height instead of leaving magic numbers scattered across components.
+  const footerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = footerRef.current;
+    if (!el) return;
+    const publish = () =>
+      document.documentElement.style.setProperty('--app-footer-h', `${el.offsetHeight}px`);
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasStarted]);
+
   // Show Marquee until user starts
   if (!hasStarted) {
     return (
@@ -272,7 +288,10 @@ const IndexContent = () => {
       <NewsTicker />
 
       {/* VHS Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur border-t border-border py-2 z-50 safe-area-bottom">
+      <footer
+        ref={footerRef}
+        className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur border-t border-border py-2 z-50 safe-area-bottom"
+      >
         <div className="container mx-auto px-3 sm:px-4 flex items-center justify-between">
           {/* Left: Back button or Play indicator */}
           {currentPage !== 'dashboard' ? (

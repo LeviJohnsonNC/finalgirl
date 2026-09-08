@@ -46,8 +46,16 @@ export const StickyOutcomeBar = ({ children, enabled }: StickyOutcomeBarProps) =
         {children}
       </div>
 
+      {/* The dock sits on top of the footer and covers the news ticker
+          outright: it is opaque and outranks the ticker's z-40. It used to be
+          bottom-0 / z-40, which put it *under* the z-50 footer and let the
+          ticker scroll across the buttons. While the dock is up the alert crawl
+          is not what you are looking for. */}
       {enabled && docked && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur-sm px-3 py-3 sm:py-4 safe-area-bottom animate-in slide-in-from-bottom duration-300">
+        <div
+          style={{ bottom: 'var(--app-footer-h, 56px)' }}
+          className="fixed left-0 right-0 z-50 border-t border-b border-border/60 bg-background px-3 py-3 sm:py-4 animate-in slide-in-from-bottom duration-300"
+        >
           <div className="scanlines pointer-events-none absolute inset-0 opacity-10" />
           <div className="relative flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center items-center max-w-4xl mx-auto">
             {children}

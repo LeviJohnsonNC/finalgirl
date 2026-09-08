@@ -22,13 +22,15 @@ export const NewsTicker = React.memo(React.forwardRef<HTMLDivElement>(
       return [...shuffled, ...shuffled];
     }, []);
     
-    // bottom-14 (56px) clears the 53px footer at every width. It was
-    // bottom-11 on mobile (44px), which tucked the ticker's lowest 9px behind
-    // the footer and clipped the text.
+    // Sits directly on top of the footer, whose measured height Index
+    // publishes as --app-footer-h. This was a hardcoded bottom-14, which had
+    // already been wrong once: the footer grows with the type scale and with
+    // safe-area insets, and the ticker was tucking its lowest pixels behind it.
     return (
       <div 
         ref={ref}
-        className="fixed bottom-14 left-0 right-0 z-40 bg-black/95 border-t border-b border-primary/30 overflow-hidden"
+        style={{ bottom: 'var(--app-footer-h, 56px)' }}
+        className="fixed left-0 right-0 z-40 bg-black/95 border-t border-b border-primary/30 overflow-hidden"
       >
         <div className="relative h-8 sm:h-9 flex items-center">
           {/* Breaking news badge */}

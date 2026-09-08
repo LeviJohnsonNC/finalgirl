@@ -271,18 +271,21 @@ const TheEnd = ({
             </div>
           )}
           
-          {/* Ending + Poster — the poster is the keepsake, so it gets real
-              size and stays beside the text rather than trailing it. */}
+          {/* Ending + Poster — same layout rules as Now Playing: side by side
+              only from xl up, stacked below that, and the text fills its track
+              instead of being capped in ch of a font it is not set in. The
+              poster is 2:3, so it is held slightly narrower than the 3:4 still
+              to keep it from running past the fold on its own. */}
           <div
             className={`w-full px-1 sm:px-0 ${
               showPosterSlot
-                ? 'grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(340px,420px)] gap-6 lg:gap-10'
+                ? 'grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(380px,460px)] gap-6 xl:gap-10'
                 : 'flex justify-center'
             }`}
           >
             {showPosterSlot && (
-              <div className="order-first lg:order-last w-full max-w-[420px] mx-auto lg:mx-0">
-                <div className="lg:sticky lg:top-24">
+              <div className="order-first xl:order-last w-full max-w-[460px] mx-auto xl:mx-0">
+                <div className="xl:sticky xl:top-24">
                   <SceneImageFrame
                     variant="poster"
                     imageUrl={posterImageUrl}
@@ -295,7 +298,13 @@ const TheEnd = ({
               </div>
             )}
 
-            <div className="scenario-description p-4 sm:p-8 rounded-sm w-full max-w-[68ch]">
+            {/* Capped at a readable measure everywhere except the two-column
+                layout, where the track itself is already the right width. */}
+            <div
+              className={`scenario-description p-4 sm:p-8 rounded-sm w-full max-w-[46rem] mx-auto ${
+                showPosterSlot ? 'xl:max-w-none xl:mx-0' : ''
+              }`}
+            >
               {isGenerating ? (
                 <div className="flex flex-col items-center justify-center py-10 sm:py-16">
                   <ProjectorLeader label="The projector is warming up" />

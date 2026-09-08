@@ -3815,14 +3815,6 @@
     to   { transform: rotate(360deg); }
   }
 
-  /* The numeral on real leader is optically printed and pulses as it passes
-     the gate. One step per second, matching the sweep. */
-  @keyframes leader-numeral {
-    0%   { opacity: 1; }
-    85%  { opacity: 0.9; }
-    100% { opacity: 0.55; }
-  }
-
   /* ========== PROJECTED FILM FRAME ========== */
 
   /* A still presented as a frame of film rather than a bordered image:
