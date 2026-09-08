@@ -25,10 +25,10 @@ const GameOutcome = ({ result, introStory, onContinue, onDiscard }: GameOutcomeP
         </h1>
         
         <div className="space-y-1">
-          <p className="font-vhs text-sm text-muted-foreground">
+          <p className="type-label text-muted-foreground">
             {result.finalGirl} {isWin ? 'survived' : 'fell to'} {result.killer}
           </p>
-          <p className="font-vhs text-xs text-muted-foreground/70">
+          <p className="type-caption text-muted-foreground/70">
             at {result.location}
           </p>
         </div>

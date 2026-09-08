@@ -51,7 +51,7 @@ export const NarrativeBadgeModal = ({
           <DialogTitle className="font-display text-xl tracking-wider text-primary blood-glow uppercase">
             {label}
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground text-xs uppercase tracking-widest">
+          <DialogDescription className="text-muted-foreground type-caption uppercase">
             {value} • {subtext}
           </DialogDescription>
         </DialogHeader>
@@ -67,7 +67,7 @@ export const NarrativeBadgeModal = ({
           </div>
         )}
 
-        <p className="font-body text-sm text-foreground/80 leading-relaxed">
+        <p className="type-body-sm text-foreground/80 leading-relaxed">
           {BADGE_DESCRIPTIONS[label] || 'No data available.'}
         </p>
       </DialogContent>

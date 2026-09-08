@@ -82,7 +82,7 @@ const Scrapbooks = () => {
     <div className="min-h-[calc(100vh-12rem)] flex flex-col">
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center px-4">
-          <p className="text-muted-foreground font-vhs text-sm tracking-widest animate-pulse text-center">
+          <p className="text-muted-foreground type-label animate-pulse text-center">
             RETRIEVING SCRAPBOOK ARCHIVE...
           </p>
         </div>
@@ -96,7 +96,7 @@ const Scrapbooks = () => {
           {!authError && (
             <button
               onClick={retryLoadHistory}
-              className="font-vhs text-xs inline-flex items-center gap-2 border border-primary/40 px-4 py-2 text-primary hover:bg-primary/10 transition-colors"
+              className="type-caption inline-flex items-center gap-2 border border-primary/40 px-4 py-2 text-primary hover:bg-primary/10 transition-colors"
             >
               RETRY SCRAPBOOK LOAD
             </button>
@@ -113,7 +113,7 @@ const Scrapbooks = () => {
       ) : (
       <>
       {isDegraded && (
-        <div className="mx-auto mb-6 max-w-2xl border border-primary/30 bg-background/70 px-4 py-3 text-center font-vhs text-[10px] text-muted-foreground tracking-wider">
+        <div className="mx-auto mb-6 max-w-2xl border border-primary/30 bg-background/70 px-4 py-3 text-center type-caption text-muted-foreground">
           CLOUD ARCHIVE RECONNECTING • SHOWING LAST SAVED SCRAPBOOKS
         </div>
       )}
@@ -137,12 +137,12 @@ const Scrapbooks = () => {
               }}
             />
             {/* Story Count Badge */}
-            <div className="absolute -bottom-3 -right-3 bg-secondary text-secondary-foreground font-vhs text-xs sm:text-sm px-3 py-1.5 rounded-full shadow-lg">
+            <div className="absolute -bottom-3 -right-3 bg-secondary text-secondary-foreground type-label px-3 py-1.5 rounded-full shadow-lg">
               {wonGames.length} {wonGames.length === 1 ? 'STORY' : 'STORIES'}
             </div>
           </div>
           {wonGames.length === 0 && (
-            <p className="font-vhs text-xs text-muted-foreground mt-4 text-center">
+            <p className="type-caption text-muted-foreground mt-4 text-center">
               No victories yet...
             </p>
           )}
@@ -166,12 +166,12 @@ const Scrapbooks = () => {
               }}
             />
             {/* Story Count Badge */}
-            <div className="absolute -bottom-3 -right-3 bg-primary text-primary-foreground font-vhs text-xs sm:text-sm px-3 py-1.5 rounded-full shadow-lg">
+            <div className="absolute -bottom-3 -right-3 bg-primary text-primary-foreground type-label px-3 py-1.5 rounded-full shadow-lg">
               {lostGames.length} {lostGames.length === 1 ? 'VICTIM' : 'VICTIMS'}
             </div>
           </div>
           {lostGames.length === 0 && (
-            <p className="font-vhs text-xs text-muted-foreground mt-4 text-center">
+            <p className="type-caption text-muted-foreground mt-4 text-center">
               No kills recorded...
             </p>
           )}

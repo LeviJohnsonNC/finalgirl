@@ -252,7 +252,7 @@ export const ScrapbookBook = ({ type, games, onClose, onUpdateGame, onDeleteGame
                             ) : (
                               <Upload className="w-6 h-6 text-muted-foreground/40 mb-1" />
                             )}
-                            <span className="font-display text-xs text-muted-foreground/50">
+                            <span className="font-display text-xs text-dim">
                               {isUploading ? 'Uploading...' : 'Upload Poster'}
                             </span>
                           </button>
@@ -273,7 +273,7 @@ export const ScrapbookBook = ({ type, games, onClose, onUpdateGame, onDeleteGame
                       )}
 
                       {isLoadingStory ? (
-                        <p className="font-vhs text-sm text-muted-foreground text-center py-6 animate-pulse">Recovering full case file...</p>
+                        <p className="type-label text-muted-foreground text-center py-6 animate-pulse">Recovering full case file...</p>
                       ) : (
                         <ScrapbookStoryPage game={selectedGame} type={type} onDelete={() => setShowDeleteConfirm(true)} />
                       )}
@@ -315,7 +315,7 @@ export const ScrapbookBook = ({ type, games, onClose, onUpdateGame, onDeleteGame
                             ) : (
                               <Upload className="w-8 h-8 text-muted-foreground/40 mb-2" />
                             )}
-                            <span className="font-display text-sm text-muted-foreground/50">
+                            <span className="font-display text-sm text-dim">
                               {isUploading ? 'Uploading...' : 'Click to Upload Poster'}
                             </span>
                           </button>
@@ -329,18 +329,18 @@ export const ScrapbookBook = ({ type, games, onClose, onUpdateGame, onDeleteGame
                           className="hidden"
                         />
                         <div className="poster-info">
-                          <p className="font-vhs text-xs">{selectedGame.finalGirl}</p>
-                          <p className="font-vhs text-[10px] text-muted-foreground">
+                          <p className="type-caption">{selectedGame.finalGirl}</p>
+                          <p className="type-caption text-muted-foreground">
                             vs {selectedGame.killer}
                           </p>
-                          <p className="font-vhs text-[10px] text-muted-foreground">
+                          <p className="type-caption text-muted-foreground">
                             {selectedGame.location}
                           </p>
                         </div>
                       </div>
                     ) : (
                       <div className="empty-page">
-                        <p className="font-vhs text-sm text-muted-foreground text-center px-4">
+                        <p className="type-label text-muted-foreground text-center px-4">
                           Select a story from the grid to view its poster
                         </p>
                       </div>
@@ -363,7 +363,7 @@ export const ScrapbookBook = ({ type, games, onClose, onUpdateGame, onDeleteGame
                           </button>
                         </div>
                         {isLoadingStory ? (
-                          <p className="font-vhs text-sm text-muted-foreground text-center py-6 animate-pulse">Recovering full case file...</p>
+                          <p className="type-label text-muted-foreground text-center py-6 animate-pulse">Recovering full case file...</p>
                         ) : (
                           <ScrapbookStoryPage game={selectedGame} type={type} onDelete={() => setShowDeleteConfirm(true)} />
                         )}

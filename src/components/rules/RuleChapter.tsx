@@ -95,7 +95,7 @@ export const RuleChapter = ({
           <span className="font-title text-lg sm:text-xl">{chapter.number}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="chapter-file-meta font-vhs text-[9px] sm:text-[10px] uppercase tracking-[0.22em] mb-1">
+          <div className="chapter-file-meta type-caption uppercase mb-1">
             <span>{chapterTag}</span>
             <span>Archive Ref · VHS-001</span>
           </div>
@@ -103,13 +103,13 @@ export const RuleChapter = ({
             {chapter.title}
           </div>
           {chapter.subtitle && (
-            <div className="font-vhs text-[10px] sm:text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-0.5">
+            <div className="type-caption uppercase text-muted-foreground mt-0.5">
               {chapter.subtitle}
             </div>
           )}
         </div>
         {hasHits && (
-          <span className="hits-chip font-vhs text-[10px] uppercase tracking-widest px-2 py-0.5">
+          <span className="hits-chip type-caption uppercase px-2 py-0.5">
             {matchCount} hit{matchCount === 1 ? '' : 's'}
           </span>
         )}
@@ -147,7 +147,7 @@ export const RuleChapter = ({
 
             <button
               onClick={onClose}
-              className="back-to-chapters mt-6 inline-flex items-center gap-2 font-vhs text-[11px] uppercase tracking-[0.2em]"
+              className="back-to-chapters mt-6 inline-flex items-center gap-2 type-caption uppercase"
             >
               <ArrowUp className="w-3.5 h-3.5" />
               Back to Chapters

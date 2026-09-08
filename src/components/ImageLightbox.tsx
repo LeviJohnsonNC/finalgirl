@@ -25,7 +25,7 @@ export const ImageLightbox = ({ imageUrl, caption, children }: ImageLightboxProp
         <div className="film-grain absolute inset-0 pointer-events-none opacity-[0.12]" />
         <div className="vignette absolute inset-0 pointer-events-none" />
       </div>
-      <p className="film-frame-caption font-vhs text-[10px] tracking-[0.25em] uppercase text-muted-foreground px-4 py-3">
+      <p className="film-frame-caption type-caption uppercase text-muted-foreground px-4 py-3">
         {caption}
       </p>
     </DialogContent>

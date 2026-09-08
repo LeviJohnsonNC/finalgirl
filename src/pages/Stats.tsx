@@ -58,7 +58,7 @@ const Stats = () => {
       {/* Loading State */}
       {isLoading ? (
         <div className="stats-content">
-          <p className="text-muted-foreground font-vhs text-sm tracking-widest animate-pulse text-center mb-6">
+          <p className="text-muted-foreground type-label animate-pulse text-center mb-6">
             RETRIEVING SESSION DATA...
           </p>
           {/* Skeleton Record Jacket */}
@@ -87,13 +87,13 @@ const Stats = () => {
           <p className="text-muted-foreground text-center max-w-md mb-4">
             {authError ? 'Your saved sign-in could not be restored. Please sign in again.' : 'The cloud records timed out before the stats reel could be assembled.'}
           </p>
-          <p className="font-vhs text-[10px] text-muted-foreground/70 text-center max-w-md mb-5 break-words">
+          <p className="type-caption text-muted-foreground/70 text-center max-w-md mb-5 break-words">
             {loadError}
           </p>
           {!authError && (
             <button
               onClick={retryLoadHistory}
-              className="font-vhs text-xs inline-flex items-center gap-2 border border-primary/40 px-4 py-2 text-primary hover:bg-primary/10 transition-colors"
+              className="type-caption inline-flex items-center gap-2 border border-primary/40 px-4 py-2 text-primary hover:bg-primary/10 transition-colors"
             >
               <RotateCcw className="w-3 h-3" />
               RETRY ARCHIVE LOAD
@@ -120,7 +120,7 @@ const Stats = () => {
       ) : (
         <div className="stats-content">
           {isDegraded && (
-            <div className="mb-6 border border-primary/30 bg-background/70 px-4 py-3 text-center font-vhs text-[10px] text-muted-foreground tracking-wider">
+            <div className="mb-6 border border-primary/30 bg-background/70 px-4 py-3 text-center type-caption text-muted-foreground">
               CLOUD ARCHIVE RECONNECTING • SHOWING LAST SAVED SESSION DATA
             </div>
           )}

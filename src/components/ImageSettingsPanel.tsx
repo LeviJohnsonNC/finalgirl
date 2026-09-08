@@ -19,7 +19,7 @@ const ImageSettingsPanel = () => {
           <span className="font-display text-sm tracking-[0.15em] text-muted-foreground uppercase">
             Image Engine
           </span>
-          <span className="font-vhs text-[10px] text-muted-foreground/60 ml-auto">
+          <span className="type-caption text-muted-foreground/60 ml-auto">
             SIGN IN TO DEVELOP
           </span>
         </div>
@@ -37,14 +37,14 @@ const ImageSettingsPanel = () => {
           <span className="font-display text-sm tracking-[0.15em] text-foreground uppercase">
             Image Engine
           </span>
-          <span className="ml-auto font-vhs text-[10px] tracking-wider px-2 py-0.5 rounded-sm border text-primary border-primary/30 bg-primary/10 blood-glow">
+          <span className="ml-auto type-caption px-2 py-0.5 rounded-sm border text-primary border-primary/30 bg-primary/10 blood-glow">
             ONLINE
           </span>
         </div>
 
         <div className="pt-3 border-t border-muted-foreground/10 space-y-1.5">
           <div className="flex items-center justify-between gap-3">
-            <p className="font-vhs text-[10px] sm:text-xs text-foreground/80 uppercase tracking-wider">
+            <p className="type-caption text-foreground/80 uppercase">
               Develop Scene Photography
             </p>
             <Switch
@@ -52,7 +52,7 @@ const ImageSettingsPanel = () => {
               onCheckedChange={(checked) => updateSettings({ autoGenerate: checked })}
             />
           </div>
-          <p className="font-vhs text-[9px] sm:text-[10px] text-muted-foreground/70 leading-snug">
+          <p className="type-caption text-muted-foreground/70 leading-snug">
             Shoots an opening still as your story begins and a movie poster when it ends. Turn this
             off to play without pictures.
           </p>
@@ -60,7 +60,7 @@ const ImageSettingsPanel = () => {
 
         <div className="pt-3 border-t border-muted-foreground/10 space-y-1.5">
           <div className="flex items-center justify-between gap-3">
-            <p className="font-vhs text-[10px] sm:text-xs text-foreground/80 uppercase tracking-wider">
+            <p className="type-caption text-foreground/80 uppercase">
               AI Casting Art
             </p>
             <Switch
@@ -68,7 +68,7 @@ const ImageSettingsPanel = () => {
               onCheckedChange={(checked) => updateSettings({ useAiCastingArt: checked })}
             />
           </div>
-          <p className="font-vhs text-[9px] sm:text-[10px] text-muted-foreground/70 leading-snug">
+          <p className="type-caption text-muted-foreground/70 leading-snug">
             Off by default. Replaces the official Van Ryder Games art in the casting room with
             AI-generated artwork.
           </p>

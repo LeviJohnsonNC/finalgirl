@@ -38,7 +38,7 @@ export const SceneImageFrame = ({
     <figure className={`film-frame rounded-sm ${className}`}>
       <div className={`film-frame-gate ${imageUrl ? '' : aspect}`}>{body}</div>
       {showCaption && caption && (
-        <figcaption className="film-frame-caption font-vhs text-[10px] tracking-[0.25em] uppercase text-muted-foreground/70 px-4 py-2 text-center">
+        <figcaption className="film-frame-caption type-caption uppercase text-muted-foreground/70 px-4 py-2 text-center">
           {caption}
         </figcaption>
       )}
@@ -67,14 +67,14 @@ export const SceneImageFrame = ({
           <button
             onClick={onRetry}
             disabled={isGenerating}
-            className="absolute bottom-2 right-2 z-10 flex items-center gap-1.5 px-3 py-2 rounded-sm bg-background/85 border border-border/60 font-vhs text-[10px] tracking-[0.2em] uppercase text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-200 disabled:opacity-50 min-h-[36px]"
+            className="absolute bottom-2 right-2 z-10 flex items-center gap-1.5 px-3 py-2 rounded-sm bg-background/85 border border-border/60 type-caption uppercase text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-200 disabled:opacity-50 min-h-[36px]"
           >
             <RefreshCw className={`w-3 h-3 ${isGenerating ? 'animate-spin' : ''}`} />
             {isGenerating ? 'Developing' : 'Reshoot'}
           </button>
         )}
 
-        <span className="absolute top-2 left-2 z-10 flex items-center gap-1 font-vhs text-[10px] text-muted-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="absolute top-2 left-2 z-10 flex items-center gap-1 type-caption text-muted-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity">
           <Expand className="w-3 h-3" />
         </span>
       </div>,
@@ -97,7 +97,7 @@ export const SceneImageFrame = ({
     return frame(
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4 text-center">
         <AlertTriangle className="w-5 h-5 text-muted-foreground/50" />
-        <p className="font-vhs text-[10px] text-muted-foreground/70">{error}</p>
+        <p className="type-caption text-muted-foreground/70">{error}</p>
         {onRetry && (
           <button
             onClick={onRetry}

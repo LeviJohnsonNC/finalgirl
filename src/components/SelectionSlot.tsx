@@ -77,7 +77,7 @@ export const SelectionSlot = ({
             {value}
           </span>
         ) : (
-          <span className="font-vhs text-muted-foreground text-sm">
+          <span className="type-label text-muted-foreground">
             [ NO SELECTION ]
           </span>
         )}
@@ -96,7 +96,7 @@ export const SelectionSlot = ({
         </Button>
 
         <Select value={value || ''} onValueChange={onSelect}>
-          <SelectTrigger className="flex-1 vcr-button font-vhs text-sm">
+          <SelectTrigger className="flex-1 vcr-button type-label">
             <SelectValue placeholder="SELECT" />
           </SelectTrigger>
           <SelectContent className="glass-card border-border max-h-60">
@@ -104,7 +104,7 @@ export const SelectionSlot = ({
               <SelectItem 
                 key={option} 
                 value={option}
-                className="font-vhs text-sm hover:bg-primary/20 cursor-pointer"
+                className="type-label hover:bg-primary/20 cursor-pointer"
               >
                 {option}
               </SelectItem>

@@ -253,7 +253,7 @@ const Rules = () => {
   const glossaryBody = (
     <div className="space-y-2">
       {filteredGlossary.length === 0 ? (
-        <p className="font-vhs text-xs uppercase tracking-wider text-muted-foreground">
+        <p className="type-caption uppercase text-muted-foreground">
           No terms match "{query}".
         </p>
       ) : (
@@ -266,13 +266,13 @@ const Rules = () => {
               {t.sectionId && (
                 <button
                   onClick={() => handleJumpTo(t.sectionId!)}
-                  className="font-vhs text-[10px] uppercase tracking-widest text-primary/80 hover:text-primary"
+                  className="type-caption uppercase text-primary/80 hover:text-primary"
                 >
                   → see rule
                 </button>
               )}
             </div>
-            <p className="text-sm text-foreground/85 leading-relaxed mt-1">{t.short}</p>
+            <p className="type-body-sm text-foreground/85 leading-relaxed mt-1">{t.short}</p>
           </div>
         ))
       )}
@@ -315,7 +315,7 @@ const Rules = () => {
         <header className="rules-header relative mb-5">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="flex items-center gap-2 mb-3 font-vhs text-[10px] sm:text-xs uppercase tracking-[0.28em] text-muted-foreground">
+              <div className="flex items-center gap-2 mb-3 type-caption uppercase text-muted-foreground">
                 <span className="rec-dot" aria-hidden />
                 <span>Final Girl / Unofficial Case Files</span>
               </div>
@@ -325,7 +325,7 @@ const Rules = () => {
                   Rulebook
                 </h1>
               </div>
-              <p className="mt-3 font-vhs text-[11px] sm:text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="mt-3 type-caption uppercase text-muted-foreground">
                 Unofficial Fan Reference · Recovered Binder Copy ·{' '}
                 <a
                   href="https://gamers-hq.de/media/pdf/22/ba/4a/FinalGirl_Rules.pdf"
@@ -338,9 +338,9 @@ const Rules = () => {
               </p>
             </div>
             <div className="rules-dossier-card">
-              <span className="vhs-spec-label font-vhs text-[10px] uppercase tracking-[0.22em] px-2 py-0.5">CORE · VHS-001 · FAN REF</span>
-              <span className="font-vhs text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Recovered Tape / Evidence Box 07</span>
-              <span className="font-vhs text-[10px] uppercase tracking-[0.2em] text-primary/80">Archive Ref: FG-RULES-{String(visibleChapters.length).padStart(2, '0')}</span>
+              <span className="vhs-spec-label type-caption uppercase px-2 py-0.5">CORE · VHS-001 · FAN REF</span>
+              <span className="type-caption uppercase text-muted-foreground">Recovered Tape / Evidence Box 07</span>
+              <span className="type-caption uppercase text-primary/80">Archive Ref: FG-RULES-{String(visibleChapters.length).padStart(2, '0')}</span>
             </div>
           </div>
         </header>
@@ -355,7 +355,7 @@ const Rules = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="SEARCH RULES, TERMS, ICONS..."
-              className="rules-search-input w-full pl-9 pr-9 py-3 font-vhs text-sm uppercase tracking-wider"
+              className="rules-search-input w-full pl-9 pr-9 py-3 type-label uppercase"
             />
             {query && (
               <button
@@ -386,7 +386,7 @@ const Rules = () => {
           {/* Chapter list */}
           <main className="space-y-2.5 min-w-0">
         {visibleChapters.length === 0 ? (
-          <div className="text-center py-16 font-vhs uppercase tracking-wider text-sm text-muted-foreground">
+          <div className="text-center py-16 type-label uppercase text-muted-foreground">
             No chapters match "{query}".
           </div>
         ) : (
@@ -422,7 +422,7 @@ const Rules = () => {
                 <span className="font-title text-sm uppercase tracking-[0.3em] text-secondary">
                   {label}
                 </span>
-                <span className="font-vhs text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                <span className="type-caption uppercase text-muted-foreground">
                   {hint}
                 </span>
                 <span className="h-px flex-1 bg-secondary/30" />
@@ -452,38 +452,38 @@ const Rules = () => {
 
           <aside className="rules-case-notes hidden xl:block">
             <div className="rules-case-note-card sticky top-28">
-              <div className="flex items-center gap-2 font-vhs text-[10px] uppercase tracking-[0.22em] text-primary/80">
+              <div className="flex items-center gap-2 type-caption uppercase text-primary/80">
                 <Radio className="w-3.5 h-3.5" />
                 Rulebook Status: Indexed
               </div>
               <div className="mt-5">
-                <p className="font-vhs text-[10px] uppercase tracking-[0.24em] text-muted-foreground">Currently Viewing</p>
+                <p className="type-caption uppercase text-muted-foreground">Currently Viewing</p>
                 <h2 className="mt-1 font-title text-xl uppercase tracking-wide text-foreground leading-tight">
                   {activeChapter?.title ?? 'No File Selected'}
                 </h2>
-                <p className="mt-1 font-vhs text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                <p className="mt-1 type-caption uppercase text-muted-foreground">
                   {activeChapter ? `${chapterCategories[activeChapter.id]} · ${activeChapter.number}` : 'Archive standby'}
                 </p>
               </div>
               <div className="mt-5 pt-4 border-t border-dashed border-border/70">
-                <p className="font-vhs text-[10px] uppercase tracking-[0.24em] text-primary/80 flex items-center gap-2">
+                <p className="type-caption uppercase text-primary/80 flex items-center gap-2">
                   <FileText className="w-3.5 h-3.5" /> Related Rules
                 </p>
                 <div className="mt-3 space-y-2">
                   {relatedSections.length > 0 ? relatedSections.map((section) => (
-                    <button key={section.id} onClick={() => handleJumpTo(section.id)} className="rules-related-tab w-full text-left font-vhs text-[10px] uppercase tracking-[0.14em]">
+                    <button key={section.id} onClick={() => handleJumpTo(section.id)} className="rules-related-tab w-full text-left type-caption uppercase">
                       {section.title}
                     </button>
                   )) : (
-                    <p className="font-vhs text-[10px] uppercase tracking-[0.14em] text-muted-foreground">No cross-reference recovered.</p>
+                    <p className="type-caption uppercase text-muted-foreground">No cross-reference recovered.</p>
                   )}
                 </div>
               </div>
               <div className="mt-5 pt-4 border-t border-dashed border-border/70">
-                <p className="font-vhs text-[10px] uppercase tracking-[0.24em] text-primary/80 flex items-center gap-2">
+                <p className="type-caption uppercase text-primary/80 flex items-center gap-2">
                   <AlertTriangle className="w-3.5 h-3.5" /> Survivor Tip
                 </p>
-                <p className="mt-2 text-sm leading-relaxed text-foreground/80">
+                <p className="mt-2 type-body-sm leading-relaxed text-foreground/80">
                   {sidebarTip && 'text' in sidebarTip ? sidebarTip.text : 'Read the phase timing twice before resolving panic, attacks, or finale effects.'}
                 </p>
               </div>
@@ -491,7 +491,7 @@ const Rules = () => {
           </aside>
         </div>
 
-        <div className="mt-10 pt-5 border-t border-border/50 text-[11px] text-muted-foreground/70 font-vhs uppercase tracking-[0.18em] text-center">
+        <div className="mt-10 pt-5 border-t border-border/50 text-muted-foreground/70 type-caption uppercase text-center">
           {module.source}
         </div>
       </div>
@@ -499,12 +499,12 @@ const Rules = () => {
       <div className="rules-bottom-ticker fixed bottom-11 sm:bottom-14 left-0 right-0 z-40 overflow-hidden">
         <div className="relative h-7 sm:h-8 flex items-center">
           <div className="absolute left-0 z-10 h-full flex items-center px-2 sm:px-3 pr-8 rules-ticker-badge">
-            <span className="font-vhs text-[10px] sm:text-xs text-primary uppercase tracking-wider blood-glow">⚠ RULES ⚠</span>
+            <span className="type-caption text-primary uppercase blood-glow">⚠ RULES ⚠</span>
           </div>
           <div className="news-ticker flex items-center whitespace-nowrap pl-24 sm:pl-28">
             {tickerContent.map((headline, idx) => (
               <span key={idx} className="inline-flex items-center">
-                <span className="font-vhs text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">{headline}</span>
+                <span className="type-caption text-muted-foreground uppercase">{headline}</span>
                 <span className="mx-32 sm:mx-48 text-primary/60">◆</span>
               </span>
             ))}

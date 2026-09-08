@@ -153,7 +153,7 @@ export const GameOutcomeForm = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {/* Final Horror Level */}
           <div className="space-y-1">
-            <label className="font-vhs text-xs text-muted-foreground">
+            <label className="type-caption text-muted-foreground">
               Final Horror Level (1-7)
             </label>
             <div className="flex items-center gap-3">
@@ -173,7 +173,7 @@ export const GameOutcomeForm = ({
 
           {/* Weapon Used */}
           <div className="space-y-1">
-            <label className="font-vhs text-xs text-muted-foreground">
+            <label className="type-caption text-muted-foreground">
               Weapon Used
             </label>
             <input
@@ -181,13 +181,13 @@ export const GameOutcomeForm = ({
               value={weaponUsed}
               onChange={(e) => setWeaponUsed(e.target.value)}
               placeholder="Machete, Axe, Fire..."
-              className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm font-vhs text-base text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-colors"
+              className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-colors"
             />
           </div>
 
           {/* Final Girl Health */}
           <div className="space-y-1">
-            <label className="font-vhs text-xs text-muted-foreground">
+            <label className="type-caption text-muted-foreground">
               Final Girl Health (0-{maxFinalGirlHealth})
             </label>
             <input
@@ -200,14 +200,14 @@ export const GameOutcomeForm = ({
                 setFinalGirlHealth(isNaN(val) ? 0 : val);
               }}
               placeholder="0"
-              className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm font-vhs text-base text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+              className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
             />
           </div>
 
           {/* Killer Health — hidden for unkillable killers */}
           {!killerIsUnkillable && (
             <div className="space-y-1">
-              <label className="font-vhs text-xs text-muted-foreground">
+              <label className="type-caption text-muted-foreground">
                 Killer Health (0-{maxKillerHealth})
               </label>
               <input
@@ -220,7 +220,7 @@ export const GameOutcomeForm = ({
                   setKillerHealth(isNaN(val) ? 0 : val);
                 }}
                 placeholder="0"
-                className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm font-vhs text-base text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
               />
             </div>
           )}
@@ -236,7 +236,7 @@ export const GameOutcomeForm = ({
         <div className="grid grid-cols-2 gap-3">
           {/* Victims Saved */}
           <div className="space-y-1">
-            <label className="font-vhs text-xs text-muted-foreground">
+            <label className="type-caption text-muted-foreground">
               Victims Saved
             </label>
             <input
@@ -249,13 +249,13 @@ export const GameOutcomeForm = ({
                 setVictimsSaved(isNaN(val) ? 0 : val);
               }}
               placeholder="0"
-              className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm font-vhs text-base text-foreground focus:outline-none focus:border-secondary/50 transition-colors"
+              className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-secondary/50 transition-colors"
             />
           </div>
 
           {/* Victims Killed */}
           <div className="space-y-1">
-            <label className="font-vhs text-xs text-muted-foreground">
+            <label className="type-caption text-muted-foreground">
               Victims Killed
             </label>
             <input
@@ -268,7 +268,7 @@ export const GameOutcomeForm = ({
                 setVictimsKilled(isNaN(val) ? 0 : val);
               }}
               placeholder="0"
-              className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm font-vhs text-base text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+              className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
             />
           </div>
         </div>
@@ -288,7 +288,7 @@ export const GameOutcomeForm = ({
                 onChange={(e) => setFoundCarolyn(e.target.checked)}
                 className="w-4 h-4 accent-secondary"
               />
-              <span className="font-vhs text-sm text-foreground">Found Carolyn</span>
+              <span className="type-label text-foreground">Found Carolyn</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -297,7 +297,7 @@ export const GameOutcomeForm = ({
                 onChange={(e) => setFoundMrFloppy(e.target.checked)}
                 className="w-4 h-4 accent-secondary"
               />
-              <span className="font-vhs text-sm text-foreground">Found Mr. Floppy</span>
+              <span className="type-label text-foreground">Found Mr. Floppy</span>
             </label>
           </div>
         </div>
@@ -319,7 +319,7 @@ export const GameOutcomeForm = ({
                 onChange={() => setOrganismLossType('caught')}
                 className="accent-primary"
               />
-              <span className="font-vhs text-sm text-foreground">Caught by the Organism</span>
+              <span className="type-label text-foreground">Caught by the Organism</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -330,7 +330,7 @@ export const GameOutcomeForm = ({
                 onChange={() => setOrganismLossType('assimilated')}
                 className="accent-primary"
               />
-              <span className="font-vhs text-sm text-foreground">Assimilated (Horror &gt; 6)</span>
+              <span className="type-label text-foreground">Assimilated (Horror &gt; 6)</span>
             </label>
           </div>
         </div>
@@ -353,7 +353,7 @@ export const GameOutcomeForm = ({
                   onChange={() => setEvomorphStage(stage)}
                   className="accent-primary"
                 />
-                <span className="font-vhs text-sm text-foreground">{stage}</span>
+                <span className="type-label text-foreground">{stage}</span>
               </label>
             ))}
           </div>
@@ -367,7 +367,7 @@ export const GameOutcomeForm = ({
             Asylum Status
           </h3>
           <div className="space-y-1">
-            <label className="font-vhs text-xs text-muted-foreground">
+            <label className="type-caption text-muted-foreground">
               Maniacs on Board at End (0–6)
             </label>
             <input
@@ -380,7 +380,7 @@ export const GameOutcomeForm = ({
                   setManiacCount(isNaN(val) ? 0 : val);
                 }}
                 placeholder="0"
-                className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm font-vhs text-base text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
               />
           </div>
         </div>
@@ -403,7 +403,7 @@ export const GameOutcomeForm = ({
                   onChange={() => setWolfMode(mode)}
                   className="accent-primary"
                 />
-                <span className="font-vhs text-sm text-foreground">{mode}</span>
+                <span className="type-label text-foreground">{mode}</span>
               </label>
             ))}
           </div>
@@ -427,7 +427,7 @@ export const GameOutcomeForm = ({
                   onChange={() => setActiveIntruder(intruder)}
                   className="accent-primary"
                 />
-                <span className="font-vhs text-sm text-foreground">{intruder}</span>
+                <span className="type-label text-foreground">{intruder}</span>
               </label>
             ))}
           </div>
@@ -442,7 +442,7 @@ export const GameOutcomeForm = ({
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="font-vhs text-xs text-muted-foreground">
+              <label className="type-caption text-muted-foreground">
                 Buddies in Play at End (0–7)
               </label>
               <input
@@ -455,7 +455,7 @@ export const GameOutcomeForm = ({
                   setBuddiesInPlay(isNaN(val) ? 0 : val);
                 }}
                 placeholder="0"
-                className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm font-vhs text-base text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
               />
             </div>
             <div className="flex items-end pb-2">
@@ -466,7 +466,7 @@ export const GameOutcomeForm = ({
                   onChange={(e) => setPowerSuppliesShutDown(e.target.checked)}
                   className="w-4 h-4 accent-secondary"
                 />
-                <span className="font-vhs text-sm text-foreground">Power Supplies Shut Down</span>
+                <span className="type-label text-foreground">Power Supplies Shut Down</span>
               </label>
             </div>
           </div>
@@ -481,7 +481,7 @@ export const GameOutcomeForm = ({
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="font-vhs text-xs text-muted-foreground">
+              <label className="type-caption text-muted-foreground">
                 Children Survived (0–3)
               </label>
               <input
@@ -494,7 +494,7 @@ export const GameOutcomeForm = ({
                   setChildrenSurvived(isNaN(val) ? 0 : val);
                 }}
                 placeholder="0"
-                className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm font-vhs text-base text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
               />
             </div>
             <div className="flex items-end pb-2">
@@ -505,7 +505,7 @@ export const GameOutcomeForm = ({
                   onChange={(e) => setHarvestMadnessPeaked(e.target.checked)}
                   className="w-4 h-4 accent-primary"
                 />
-                <span className="font-vhs text-sm text-foreground">Harvest Madness Peaked</span>
+                <span className="type-label text-foreground">Harvest Madness Peaked</span>
               </label>
             </div>
           </div>
@@ -526,11 +526,11 @@ export const GameOutcomeForm = ({
                 onChange={(e) => setUrsulaSaved(e.target.checked)}
                 className="w-4 h-4 accent-secondary"
               />
-              <span className="font-vhs text-sm text-foreground">Ursula Saved</span>
+              <span className="type-label text-foreground">Ursula Saved</span>
             </label>
           )}
           <div>
-            <p className="font-vhs text-xs text-muted-foreground mb-2">L'Armes Abbey Influence</p>
+            <p className="type-caption text-muted-foreground mb-2">L'Armes Abbey Influence</p>
             <div className="flex flex-col sm:flex-row gap-2">
               {(['Blessings Dominated', 'Curses Dominated', 'Balanced'] as const).map((influence) => (
                 <label key={influence} className="flex items-center gap-2 cursor-pointer">
@@ -542,7 +542,7 @@ export const GameOutcomeForm = ({
                     onChange={() => setAbbeyInfluence(influence)}
                     className="accent-primary"
                   />
-                  <span className="font-vhs text-sm text-foreground">{influence}</span>
+                  <span className="type-label text-foreground">{influence}</span>
                 </label>
               ))}
             </div>
@@ -558,13 +558,13 @@ export const GameOutcomeForm = ({
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="font-vhs text-xs text-muted-foreground">
+              <label className="type-caption text-muted-foreground">
                 Final Killer Identity
               </label>
               <select
                 value={finalKillerIdentity}
                 onChange={(e) => setFinalKillerIdentity(e.target.value)}
-                className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm font-vhs text-base text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+                className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
               >
                 {['Unknown', 'Hans', 'Geppetto', 'Dr. Fright', 'Inkanyamba', 'Big Bad Wolf', 'Ratchet Lady', 'Evomorph', 'The Organism', 'The Intruders', 'Mort'].map((identity) => (
                   <option key={identity} value={identity}>{identity}</option>
@@ -579,7 +579,7 @@ export const GameOutcomeForm = ({
                   onChange={(e) => setMortRevealed(e.target.checked)}
                   className="w-4 h-4 accent-primary"
                 />
-                <span className="font-vhs text-sm text-foreground">Mort Revealed</span>
+                <span className="type-label text-foreground">Mort Revealed</span>
               </label>
             </div>
           </div>
@@ -594,7 +594,7 @@ export const GameOutcomeForm = ({
         
         {/* Ending Location */}
         <div className="space-y-1">
-          <label className="font-vhs text-xs text-muted-foreground">
+          <label className="type-caption text-muted-foreground">
             Ending Location
           </label>
           <input
@@ -602,13 +602,13 @@ export const GameOutcomeForm = ({
             value={endingSubLocation}
             onChange={(e) => setEndingSubLocation(e.target.value)}
             placeholder="Kitchen, Basement, Rooftop..."
-            className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm font-vhs text-base text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-colors"
+            className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-colors"
           />
         </div>
 
         {/* Game Highlights */}
         <div className="space-y-1">
-          <label className="font-vhs text-xs text-muted-foreground">
+          <label className="type-caption text-muted-foreground">
             Game Highlights
           </label>
           <textarea
@@ -616,7 +616,7 @@ export const GameOutcomeForm = ({
             onChange={(e) => setGameHighlights(e.target.value)}
             placeholder="Memorable moments, close calls, dramatic kills..."
             rows={3}
-            className="w-full px-3 py-2 bg-muted/50 border border-border/50 rounded-sm font-vhs text-base text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-colors resize-none"
+            className="w-full px-3 py-2 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-colors resize-none"
           />
         </div>
       </div>

@@ -174,15 +174,15 @@ const Auth = () => {
             >
               {user ? 'SIGNED IN' : (isSignUp ? 'JOIN THE CAST' : 'WELCOME BACK')}
             </h1>
-            <p className="font-vhs text-xs text-muted-foreground mt-2">
+            <p className="type-caption text-muted-foreground mt-2">
               {user ? user.email : (isSignUp ? 'CREATE YOUR ACCOUNT' : 'SIGN IN TO CONTINUE')}
             </p>
           </div>
 
           {authError && (
             <div className="mb-5 border border-primary/30 bg-background/70 px-3 py-2 text-center">
-              <p className="font-vhs text-[10px] text-primary tracking-wider">SIGN-IN TEMPORARILY UNAVAILABLE</p>
-              <p className="mt-1 text-xs text-muted-foreground">{authError}</p>
+              <p className="type-caption text-primary">SIGN-IN TEMPORARILY UNAVAILABLE</p>
+              <p className="mt-1 type-caption text-muted-foreground">{authError}</p>
             </div>
           )}
 
@@ -192,14 +192,14 @@ const Auth = () => {
               <Button
                 onClick={handleSignOut}
                 disabled={isSubmitting}
-                className="w-full font-vhs text-sm uppercase tracking-wider bg-primary/20 border border-primary/50 text-primary hover:bg-primary/30"
+                className="w-full type-label uppercase bg-primary/20 border border-primary/50 text-primary hover:bg-primary/30"
               >
                 {isSubmitting ? 'SIGNING OUT...' : 'SIGN OUT'}
               </Button>
               <Button
                 onClick={() => navigate('/')}
                 variant="ghost"
-                className="w-full font-vhs text-xs text-muted-foreground hover:text-foreground"
+                className="w-full type-caption text-muted-foreground hover:text-foreground"
               >
                 ← BACK TO MAIN
               </Button>
@@ -227,14 +227,14 @@ const Auth = () => {
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t border-muted-foreground/30" />
                 </div>
-                <div className="relative flex justify-center text-xs">
+                <div className="relative flex justify-center type-caption">
                   <span className="bg-black/70 px-2 font-vhs text-muted-foreground">OR</span>
                 </div>
               </div>
 
               {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="font-vhs text-xs text-foreground/80">
+                <Label htmlFor="email" className="type-caption text-foreground/80">
                   EMAIL
                 </Label>
                 <Input
@@ -250,7 +250,7 @@ const Auth = () => {
 
               {/* Password */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="font-vhs text-xs text-foreground/80">
+                <Label htmlFor="password" className="type-caption text-foreground/80">
                   PASSWORD
                 </Label>
                 <Input
@@ -269,7 +269,7 @@ const Auth = () => {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full font-vhs text-sm uppercase tracking-wider bg-primary/20 border border-primary/50 text-primary hover:bg-primary/30"
+                className="w-full type-label uppercase bg-primary/20 border border-primary/50 text-primary hover:bg-primary/30"
               >
                 {isSubmitting ? 'PLEASE WAIT...' : (isSignUp ? 'CREATE ACCOUNT' : 'SIGN IN')}
               </Button>
@@ -278,7 +278,7 @@ const Auth = () => {
               <button
                 type="button"
                 onClick={() => setIsSignUp(!isSignUp)}
-                className="w-full font-vhs text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
+                className="w-full type-caption text-muted-foreground hover:text-foreground transition-colors py-2"
               >
                 {isSignUp ? 'ALREADY HAVE AN ACCOUNT? SIGN IN' : "DON'T HAVE AN ACCOUNT? SIGN UP"}
               </button>
@@ -289,7 +289,7 @@ const Auth = () => {
           {!user && (
             <button
               onClick={() => navigate('/')}
-              className="w-full mt-4 font-vhs text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+              className="w-full mt-4 type-caption text-dim hover:text-foreground transition-colors"
             >
               ← CONTINUE AS GUEST
             </button>
