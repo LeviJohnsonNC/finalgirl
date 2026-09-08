@@ -35,7 +35,7 @@ serve(async (req) => {
       temperature: 1,
     });
 
-    guard.logUsage({ model, kind: "visual-bible" });
+    await guard.logUsage({ model, kind: "visual-bible" });
     return json({ visualBible: text, model });
   } catch (error) {
     console.error("Error in generate-visual-bible:", error);

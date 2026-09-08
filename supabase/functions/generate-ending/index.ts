@@ -139,7 +139,7 @@ ${optionalStats ? `Optional Details:\n${optionalStats}` : ''}`.trim();
     }
 
     const { body: stream, model } = await streamChat({ system: systemPrompt, user: userPrompt });
-    guard.logUsage({ model, kind: "ending" });
+    await guard.logUsage({ model, kind: "ending" });
 
     return new Response(stream, {
       status: 200,
