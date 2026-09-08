@@ -16,10 +16,11 @@ import { FILM_THEMES } from '@/data/filmThemes';
 import { toast } from 'sonner';
 import nowPlayingBg from '@/assets/now-playing-bg.png';
 import projectorSound from '@/assets/sounds/projector-start.mp3';
-import { ImageUploadSlot } from '@/components/ImageUploadSlot';
 import { SceneImageFrame } from '@/components/SceneImageFrame';
+import { NarrationTransport } from '@/components/NarrationTransport';
+import { StickyOutcomeBar } from '@/components/StickyOutcomeBar';
+import { ProjectorLeader } from '@/components/ProjectorLeader';
 import { renderStoryText } from '@/lib/textFormatting';
-import SceneImageControls from '@/components/SceneImageControls';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 
 interface NowPlayingProps {
@@ -56,7 +57,7 @@ const NowPlaying = ({
   // Whether the look-book call has finished (successfully or not). The first
   // image waits for this so it is composed with the same look the poster will use.
   const [visualBibleSettled, setVisualBibleSettled] = useState(false);
-  const { isNarrating, isPlaying, toggleNarration } = useNarration();
+  const { isNarrating, isPlaying, progress, toggleNarration } = useNarration();
   const {
     isAuthenticated,
     autoGenerate,
@@ -251,7 +252,7 @@ const NowPlaying = ({
       <div className="vignette fixed inset-0 pointer-events-none" />
       
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center py-6 sm:py-8 pt-16 sm:pt-24 px-3 sm:px-4">
+      <div className="relative z-10 flex flex-col items-center py-6 sm:py-8 pt-16 sm:pt-24 px-3 sm:px-6">
 
         {/* Title */}
         <p className="font-vhs text-xs text-primary/70 tracking-[0.2em] uppercase mb-1 text-center">
@@ -270,10 +271,11 @@ const NowPlaying = ({
         </p>
 
         {/* Story Container */}
-        <div className="w-full max-w-4xl flex flex-col gap-4">
-          {/* Action Buttons - Above text */}
+        <div className="w-full max-w-7xl flex flex-col gap-4 sm:gap-6">
+          {/* Action Buttons — Reshoot now lives on the film frame itself */}
           {story && (
-            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-2 sm:gap-3 px-2">
+            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-2 sm:gap-3 px-2 w-full sm:w-auto">
               {/* Row 1: Narrate — full width on mobile */}
               <button
                 onClick={handleNarrate}
@@ -299,36 +301,43 @@ const NowPlaying = ({
                   </button>
                 </SpecialRulesModal>
               )}
-              
-              {/* Row 2: Reshoot + Replace — side by side on mobile */}
-              <div className="flex w-full sm:w-auto gap-2 sm:gap-3 sm:contents">
-                <SceneImageControls
-                  isGenerating={isGeneratingImage}
-                  hasImage={Boolean(sceneImageUrl)}
-                  onGenerate={() => developScene(sceneImageUrl || undefined)}
-                />
+            </div>
 
-                <div className="flex-1 sm:flex-none">
-                  <ImageUploadSlot
-                    imageUrl={sceneImageUrl}
-                    onImageChange={setSceneImageUrl}
-                  />
-                </div>
-              </div>
-
+            {isPlaying && (
+              <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} />
+            )}
             </div>
           )}
           
-          {/* Story + Image Container */}
-          <div className={`w-full px-1 sm:px-0 ${showImageSlot ? 'grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 lg:gap-6' : ''}`}>
-            {/* Story Text */}
-            <div className="scenario-description p-4 sm:p-6 rounded-sm">
+          {/* Story + Still — the still sticks alongside the story on desktop
+              rather than stranding an empty column beside it, and leads on
+              mobile so it is not buried under a thousand words. */}
+          <div
+            className={`w-full px-1 sm:px-0 ${
+              showImageSlot
+                ? 'grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(360px,440px)] gap-6 lg:gap-10'
+                : 'flex justify-center'
+            }`}
+          >
+            {showImageSlot && (
+              <div className="order-first lg:order-last w-full max-w-[440px] mx-auto lg:mx-0">
+                <div className="lg:sticky lg:top-24">
+                  <SceneImageFrame
+                    variant="scene"
+                    imageUrl={sceneImageUrl}
+                    isGenerating={isGeneratingImage}
+                    error={imageError}
+                    onRetry={() => developScene(sceneImageUrl || undefined)}
+                    caption={`Reel 01 · ${location}`}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="scenario-description p-4 sm:p-8 rounded-sm w-full max-w-[68ch]">
               {isGenerating ? (
-                <div className="flex flex-col items-center justify-center py-8 sm:py-12 gap-4">
-                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="font-vhs text-xs sm:text-sm text-muted-foreground animate-pulse">
-                    The projector is warming up...
-                  </p>
+                <div className="flex flex-col items-center justify-center py-10 sm:py-16">
+                  <ProjectorLeader label="The projector is warming up" />
                 </div>
               ) : error ? (
                 <div className="flex flex-col items-center justify-center py-8 sm:py-12 gap-4">
@@ -354,24 +363,12 @@ const NowPlaying = ({
                 </div>
               )}
             </div>
-            
-            {/* Scene Image — develops in place while the story is read */}
-            {showImageSlot && (
-              <div className="w-full max-w-[300px] mx-auto lg:mx-0">
-                <SceneImageFrame
-                  variant="scene"
-                  imageUrl={sceneImageUrl}
-                  isGenerating={isGeneratingImage}
-                  error={imageError}
-                  onRetry={() => developScene()}
-                />
-              </div>
-            )}
           </div>
 
-          {/* Won/Lost Buttons - Show when story is loaded */}
+          {/* Outcome — also docks to the viewport once scrolled past, so the
+              end of a two-hour game is never a scroll hunt. */}
           {story && !isGenerating && !error && (
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mt-6 sm:mt-8 px-2">
+            <StickyOutcomeBar enabled={Boolean(story) && !isGenerating && !error}>
               <button
                 onClick={() => onGameEnd('won', story || undefined, sceneImageUrl || undefined, visualBible)}
                 className="outcome-btn outcome-btn-won group relative w-full sm:w-auto min-w-[200px] sm:min-w-[240px] h-14 sm:h-16 overflow-hidden rounded-sm transition-all duration-200"
@@ -380,7 +377,7 @@ const NowPlaying = ({
                   WON
                 </span>
               </button>
-              
+
               <button
                 onClick={() => onGameEnd('lost', story || undefined, sceneImageUrl || undefined, visualBible)}
                 className="outcome-btn outcome-btn-lost group relative w-full sm:w-auto min-w-[200px] sm:min-w-[240px] h-14 sm:h-16 overflow-hidden rounded-sm transition-all duration-200"
@@ -389,8 +386,9 @@ const NowPlaying = ({
                   LOST
                 </span>
               </button>
-            </div>
+            </StickyOutcomeBar>
           )}
+
         </div>
       </div>
     </div>
