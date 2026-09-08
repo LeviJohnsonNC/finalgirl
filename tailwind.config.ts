@@ -67,6 +67,20 @@ export default {
           DEFAULT: "hsl(var(--neon-cyan))",
           glow: "hsl(var(--neon-cyan-glow))",
         },
+        // Hyphenated aliases. The codebase has always written these names
+        // (text-blood-red, text-neon-cyan, text-vhs-yellow) but they resolved
+        // to nothing, so every one of those spans silently inherited its
+        // colour. `blood-red` defaults to the legible step because all of its
+        // uses are type; `blood-red-deep` is the original fill colour.
+        "blood-red": {
+          DEFAULT: "hsl(var(--blood-red-legible))",
+          deep: "hsl(var(--blood-red))",
+          glow: "hsl(var(--blood-red-glow))",
+        },
+        "neon-cyan": {
+          DEFAULT: "hsl(var(--neon-cyan))",
+          glow: "hsl(var(--neon-cyan-glow))",
+        },
         vhs: {
           yellow: "hsl(var(--vhs-yellow))",
           static: "hsl(var(--vhs-static))",

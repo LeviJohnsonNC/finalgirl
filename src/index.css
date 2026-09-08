@@ -68,6 +68,10 @@
     /* Custom Horror Tokens */
     --blood-red: 0 100% 31%;
     --blood-red-glow: 0 100% 40%;
+    /* Blood red as *text* on the 4%-lightness page. --blood-red itself is
+       2.3:1 against the background and --blood-red-glow 3.4:1, so neither is
+       readable type; this step clears AA at 5.0:1 and still reads as blood. */
+    --blood-red-legible: 0 100% 52%;
     --neon-cyan: 186 100% 50%;
     --neon-cyan-glow: 186 100% 60%;
     --vhs-yellow: 60 100% 50%;
@@ -2182,9 +2186,9 @@
 
 .stats-subheader {
   font-family: var(--font-vhs);
-  font-size: 10px;
-  color: hsl(0 0% 55%);
-  letter-spacing: 0.25em;
+  font-size: var(--type-caption);
+  color: hsl(var(--text-dim));
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -2193,9 +2197,9 @@
 }
 
 .filter-chip {
-  @apply px-3 py-1.5 rounded-md font-vhs text-[10px] uppercase tracking-wider
-    text-muted-foreground hover:text-foreground hover:bg-muted/50 
-    transition-all min-h-[32px];
+  @apply px-3 py-1.5 rounded-md type-caption uppercase
+    text-dim hover:text-foreground hover:bg-muted/50
+    transition-all min-h-[34px];
 }
 
 .filter-chip-active {
@@ -2319,9 +2323,9 @@
 
 .section-subtitle {
   font-family: var(--font-vhs);
-  font-size: 9px;
-  color: hsl(0 0% 45%);
-  letter-spacing: 0.3em;
+  font-size: var(--type-caption);
+  color: hsl(var(--text-dimmer));
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   margin-top: 2px;
 }
@@ -2387,22 +2391,19 @@
 }
 
 /* Chromatic aberration on axis text */
+/* Tick labels are the reference the marks are read against, so they are not
+   blurred and not dimmed to 60%. The chromatic fringe stays — that is the VHS
+   voice — but it sits on legible text. */
 .chart-container .recharts-text {
-  opacity: 0.6;
-  filter: blur(0.2px);
+  fill: hsl(var(--text-dim));
   text-shadow:
-    -0.5px 0 hsl(0 80% 55% / 0.35),
-    0.5px 0 hsl(200 80% 55% / 0.35);
+    -0.5px 0 hsl(0 80% 55% / 0.3),
+    0.5px 0 hsl(200 80% 55% / 0.3);
 }
 
-/* Subtle neon bloom glow on chart lines */
-.chart-container .recharts-line .recharts-line-curve {
-  filter: drop-shadow(0 0 2px currentColor) drop-shadow(0 0 5px currentColor);
-}
-
-/* Hide dot points */
-.chart-container .recharts-line .recharts-line-dots {
-  display: none;
+/* A soft bloom on the bars, the same trick the old line chart used. */
+.chart-container .recharts-bar-rectangle path {
+  filter: drop-shadow(0 0 3px currentColor);
 }
 
 .chart-header {
@@ -2410,11 +2411,124 @@
 }
 
 .chart-title {
-  @apply font-vhs text-xs text-muted-foreground uppercase;
-  letter-spacing: 0.2em;
+  @apply type-label uppercase text-foreground/85;
   text-shadow:
     -0.6px 0 hsl(0 80% 55% / 0.3),
     0.6px 0 hsl(200 80% 55% / 0.3);
+}
+
+.chart-subtitle {
+  @apply type-caption uppercase text-dimmer mt-1;
+}
+
+.chart-controls {
+  @apply flex items-center gap-2 flex-wrap;
+}
+
+/* Range chips live above the card, in one row, and scope everything in it. */
+.chart-filter-row {
+  @apply flex items-center gap-3 mb-3 flex-wrap;
+}
+
+.chart-filter-label {
+  @apply type-caption uppercase text-dimmer;
+}
+
+.chart-legend {
+  @apply flex items-center gap-4 mb-3 flex-wrap;
+}
+
+.chart-legend-item {
+  @apply flex items-center gap-2 type-caption uppercase text-dim;
+}
+
+.chart-legend-key {
+  @apply inline-block rounded-sm;
+  width: 14px;
+  height: 3px;
+}
+
+.chart-view-btn {
+  @apply flex items-center gap-1.5 type-caption uppercase text-dim px-2.5 sm:px-3 py-1.5 rounded-md
+    transition-colors duration-200 min-h-[34px];
+  border: 1px solid hsl(0 0% 18% / 0.6);
+  background: hsl(220 15% 4% / 0.8);
+}
+
+.chart-view-btn:hover {
+  @apply text-foreground;
+  background: hsl(0 0% 100% / 0.06);
+}
+
+.chart-empty {
+  @apply type-body-sm text-dimmer text-center py-16;
+}
+
+.chart-tooltip {
+  @apply rounded-md px-3 py-2;
+  background: hsl(0 0% 6% / 0.97);
+  border: 1px solid hsl(0 0% 22%);
+  box-shadow: 0 8px 24px hsl(0 0% 0% / 0.6);
+}
+
+.chart-tooltip-head {
+  @apply type-caption uppercase text-dim mb-1.5;
+}
+
+.chart-tooltip-row {
+  @apply flex items-baseline gap-2;
+}
+
+.chart-tooltip-key {
+  @apply inline-block rounded-sm shrink-0;
+  width: 12px;
+  height: 3px;
+  transform: translateY(-3px);
+}
+
+.chart-tooltip-value {
+  @apply type-label text-foreground tabular-nums;
+}
+
+.chart-tooltip-name {
+  @apply type-caption uppercase text-dim;
+}
+
+.chart-tooltip-foot,
+.chart-tooltip-empty {
+  @apply type-caption uppercase text-dimmer mt-1.5;
+}
+
+.chart-table-scroll {
+  @apply overflow-x-auto max-h-[260px] overflow-y-auto;
+}
+
+.chart-table {
+  @apply w-full text-left;
+}
+
+.chart-table th,
+.chart-table td {
+  @apply type-caption px-3 py-2 whitespace-nowrap;
+}
+
+.chart-table thead th {
+  @apply uppercase text-dimmer sticky top-0;
+  background: hsl(220 15% 6%);
+  border-bottom: 1px solid hsl(0 0% 18% / 0.6);
+}
+
+.chart-table tbody th {
+  @apply font-normal text-dim;
+}
+
+.chart-table tbody td {
+  @apply text-foreground/90 tabular-nums;
+}
+
+.chart-table tbody tr:not(:last-child) th,
+.chart-table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid hsl(0 0% 14% / 0.5);
 }
 
 .chart-toggle {
@@ -2424,8 +2538,7 @@
 }
 
 .chart-toggle-btn {
-  @apply font-vhs text-[10px] uppercase px-3 py-1.5 text-muted-foreground/60 transition-all duration-200;
-  letter-spacing: 0.1em;
+  @apply type-caption uppercase px-2.5 sm:px-3 py-1.5 text-dimmer transition-all duration-200 min-h-[34px];
   background: transparent;
   border: none;
   cursor: pointer;
@@ -2436,7 +2549,7 @@
 }
 
 .chart-toggle-btn:hover {
-  @apply text-muted-foreground;
+  @apply text-dim;
   background: hsl(0 0% 100% / 0.03);
 }
 
@@ -2784,22 +2897,20 @@
 }
 
 .narrative-label {
-  @apply font-vhs text-[10px] uppercase text-muted-foreground mb-2;
-  letter-spacing: 0.2em;
+  @apply type-caption uppercase text-dim mb-2;
 }
 
 .narrative-value {
-  @apply font-title text-sm sm:text-base;
+  @apply font-title text-base sm:text-lg;
   text-shadow: 0 1px 4px rgba(0,0,0,0.8);
 }
 
 .narrative-subtext {
-  @apply font-vhs text-[10px] text-muted-foreground mt-1;
-  opacity: 0.7;
+  @apply type-caption text-dim mt-1;
 }
 
 .narrative-unlock {
-  @apply font-vhs text-[9px] text-muted-foreground/50;
+  @apply type-caption text-dimmer;
 }
 
 /* ===== Breakdown Section ===== */
@@ -2827,7 +2938,7 @@
 }
 
 .breakdown-tab {
-  @apply flex-1 font-vhs text-xs sm:text-sm data-[state=active]:bg-primary/20 
+  @apply flex-1 type-label data-[state=active]:bg-primary/20
     data-[state=active]:text-primary data-[state=active]:shadow-[0_0_10px_hsl(var(--primary)/0.2)];
 }
 
@@ -2840,9 +2951,7 @@
 }
 
 .breakdown-table-header th {
-  @apply font-vhs text-xs uppercase text-muted-foreground bg-transparent;
-  letter-spacing: 0.15em;
-  opacity: 0.7;
+  @apply type-caption uppercase text-dim bg-transparent;
 }
 
 .breakdown-table-row {
@@ -3026,9 +3135,8 @@
 }
 
 .archetype-reason {
-  @apply font-vhs text-[10px] sm:text-xs text-muted-foreground leading-relaxed;
-  letter-spacing: 0.1em;
-  opacity: 0.8;
+  @apply type-body-sm text-foreground/75;
+  letter-spacing: 0.02em;
 }
 
 /* ============================================================

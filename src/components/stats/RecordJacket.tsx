@@ -23,7 +23,10 @@ const StatCard = ({ label, value, backgroundImage, backgroundPosition = 'center'
       backgroundPosition 
     }}
   >
+    {/* The label was passed in and never rendered — four numbers with nothing
+        naming them, leaving the background art to say which was which. */}
     <div className="hero-stat-card-content">
+      <div className="hero-stat-label">{label}</div>
       <div className="hero-stat-value">{value}</div>
     </div>
   </div>
