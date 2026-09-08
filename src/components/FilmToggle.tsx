@@ -59,7 +59,7 @@ export const FilmToggle = React.forwardRef<HTMLDivElement, FilmToggleProps>(
               </h3>
 
               <div className="space-y-1 sm:space-y-1.5">
-                <div className="flex items-center gap-2 text-xs sm:text-sm">
+                <div className="flex items-center gap-2 type-label">
                   <Skull className={cn(
                     "w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0",
                     isOwned ? "text-primary" : "text-muted-foreground"
@@ -73,7 +73,7 @@ export const FilmToggle = React.forwardRef<HTMLDivElement, FilmToggleProps>(
                 </div>
 
                 {film.location && (
-                  <div className="flex items-center gap-2 text-xs sm:text-sm">
+                  <div className="flex items-center gap-2 type-label">
                     <MapPin className={cn(
                       "w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0",
                       isOwned ? "text-secondary" : "text-muted-foreground"
@@ -87,7 +87,7 @@ export const FilmToggle = React.forwardRef<HTMLDivElement, FilmToggleProps>(
                   </div>
                 )}
 
-                <div className="flex items-center gap-2 text-xs sm:text-sm">
+                <div className="flex items-center gap-2 type-label">
                   <User className={cn(
                     "w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0",
                     isOwned ? "text-accent" : "text-muted-foreground"
@@ -109,7 +109,7 @@ export const FilmToggle = React.forwardRef<HTMLDivElement, FilmToggleProps>(
                 className="data-[state=checked]:bg-primary scale-90 sm:scale-100"
                 disabled={disabled}
               />
-              <span className="font-vhs text-[9px] sm:text-[10px] text-muted-foreground uppercase">
+              <span className="type-micro text-muted-foreground uppercase">
                 {isOwned ? 'Owned' : 'Unowned'}
               </span>
             </div>

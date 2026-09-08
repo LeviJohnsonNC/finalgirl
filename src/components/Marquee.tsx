@@ -159,8 +159,12 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
         )}
       </div>
       
-      {/* Bottom Navigation - Centered on mobile, spread on desktop */}
-      <div className="absolute bottom-5 left-0 right-0 px-4 sm:px-6 flex justify-center sm:justify-between items-center safe-area-bottom">
+      {/* Bottom bar: nav and disclaimer stacked in one flow. They used to be
+          two separately positioned elements at bottom-5 and bottom-1.5, which
+          only held while the disclaimer was a single 6px line — once it wrapped
+          it grew up into the nav. Stacking them means the gap is structural. */}
+      <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2 pb-3 safe-area-bottom">
+      <div className="px-4 sm:px-6 flex justify-center sm:justify-between items-center">
         {/* Left group: Scrapbooks + Stats + Auth */}
         <div className="flex items-center gap-3 sm:gap-6">
           {onScrapbooks && (
@@ -210,12 +214,11 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
       </div>
 
       {/* Trademark Disclaimer */}
-      <div className="absolute bottom-1.5 left-0 right-0 px-2 text-center safe-area-bottom">
-        <p 
-          className="type-micro text-dimmer leading-snug max-w-4xl mx-auto"
-        >
+      <div className="px-4 text-center">
+        <p className="type-micro text-dimmer leading-snug max-w-3xl mx-auto text-balance">
           Unofficial fan-made app — not endorsed by or affiliated with Van Ryder Games, registered trademark owner of Final Girl and all associated intellectual property rights.
         </p>
+      </div>
       </div>
     </div>
   );

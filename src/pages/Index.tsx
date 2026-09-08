@@ -278,7 +278,7 @@ const IndexContent = () => {
           {currentPage !== 'dashboard' ? (
             <button
               onClick={() => setCurrentPage('dashboard')}
-              className="font-vhs text-[10px] sm:text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
+              className="type-caption text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <ArrowLeft className="w-3 h-3" />
               <span className="hidden sm:inline">BACK</span>
@@ -286,15 +286,15 @@ const IndexContent = () => {
           ) : (
             <div className="hidden sm:flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="font-vhs text-xs text-muted-foreground">PLAY ▶</span>
+              <span className="type-caption text-muted-foreground">PLAY ▶</span>
             </div>
           )}
           
           {/* Center: Title - simplified on mobile */}
-          <div className="font-vhs text-[10px] sm:text-xs text-muted-foreground truncate group relative">
+          <div className="type-caption text-muted-foreground truncate group relative">
             <span className="sm:hidden">FINAL GIRL™</span>
             <span className="hidden sm:inline">FINAL GIRL™ UNOFFICIAL CASE FILES • <VCRDate /></span>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-background/95 border border-border rounded text-[9px] text-muted-foreground/60 leading-relaxed max-w-[320px] text-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-normal">
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-background/95 border border-border rounded type-micro text-dim leading-relaxed max-w-[320px] text-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-normal">
               This is an unofficial fan-made application that is not endorsed by or affiliated with Van Ryder Games who is the registered trademark owner of Final Girl and all associated intellectual property rights.
             </div>
           </div>
@@ -303,28 +303,28 @@ const IndexContent = () => {
           <div className="flex items-center gap-1 sm:gap-3">
             <button
               onClick={() => setCurrentPage('archive')}
-              className="font-vhs text-[10px] sm:text-xs text-muted-foreground hover:text-secondary transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
+              className="type-caption text-muted-foreground hover:text-secondary transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <Library className="w-3 h-3" />
               <span className="hidden sm:inline">COLLECTION</span>
             </button>
             <button
               onClick={() => setCurrentPage('rules')}
-              className="font-vhs text-[10px] sm:text-xs text-muted-foreground hover:text-amber-400 transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
+              className="type-caption text-muted-foreground hover:text-amber-400 transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <BookMarked className="w-3 h-3" />
               <span className="hidden sm:inline">RULES</span>
             </button>
             <button
               onClick={() => setCurrentPage('stats')}
-              className="font-vhs text-[10px] sm:text-xs text-muted-foreground hover:text-green-400 transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
+              className="type-caption text-muted-foreground hover:text-green-400 transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <BarChart3 className="w-3 h-3" />
               <span className="hidden sm:inline">STATS</span>
             </button>
             <button
               onClick={() => setCurrentPage('scrapbooks')}
-              className="font-vhs text-[10px] sm:text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
+              className="type-caption text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <BookOpen className="w-3 h-3" />
               <span className="hidden sm:inline">SCRAPBOOKS</span>
@@ -333,14 +333,14 @@ const IndexContent = () => {
             {!authLoading && (
               <button
                 onClick={() => navigate('/auth')}
-                className="font-vhs text-[10px] sm:text-xs text-muted-foreground/50 hover:text-foreground/70 transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
+                className="type-caption text-dimmer hover:text-foreground transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
               >
                 <User className="w-3 h-3" />
                 <span className="hidden sm:inline">{user ? 'ACCOUNT' : 'SIGN IN'}</span>
               </button>
             )}
             <VCRTime />
-            <span className="hidden sm:inline font-vhs text-xs text-primary">SP</span>
+            <span className="hidden sm:inline type-caption text-primary">SP</span>
           </div>
         </div>
       </footer>
