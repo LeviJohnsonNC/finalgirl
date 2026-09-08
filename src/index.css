@@ -85,6 +85,28 @@
     --shadow-yellow: 0 0 15px hsl(60 100% 50% / 0.4);
 
     /* Fonts */
+    /* ── OPTICAL TYPE SCALE ───────────────────────────────────────────────
+       VT323 is the body font for the whole app, and it is small for its
+       nominal size: measured against a normal UI font it carries a 0.44em
+       x-height where system-ui carries 0.56em, and a 0.40em advance where
+       system-ui carries 0.86em. A 10px VT323 label therefore reads at about
+       7px, which is where "the fonts are hard to read" comes from.
+
+       Every size below is set ~1.35x larger than the optical size it is
+       meant to land on, and 14px is the floor — nothing in VT323 should be
+       smaller than --type-micro. Sizes and tracking travel together in the
+       .type-* classes so the pairing cannot drift apart again. */
+    --type-micro: 0.875rem;    /* 14px → reads ~10px. Badges, timecode. */
+    --type-caption: 0.9375rem; /* 15px → reads ~11px. Most small labels. */
+    --type-label: 1.0625rem;   /* 17px → reads ~13px. UI labels, nav. */
+    --type-body-sm: 1.1875rem; /* 19px → reads ~15px. Secondary prose. */
+
+    /* Dimmed text that still passes AA on this background. Dimming by
+       opacity (text-foreground/30 = 2.3:1, /20 = 1.6:1) fails badly, and
+       fails worse over grain and a photographic backdrop. */
+    --text-dim: 0 0% 55%;      /* 5.9:1 on --background */
+    --text-dimmer: 0 0% 48%;   /* 4.6:1 on --background — the floor */
+
     --font-vhs: 'VT323', monospace;
     --font-title: 'Bebas Neue', sans-serif;
     --font-horror: 'Creepster', cursive;
@@ -3864,4 +3886,50 @@
       filter: contrast(1.1) saturate(0.85) sepia(0.15);
     }
   }
+}
+
+@layer components {
+  /* ========== TYPE SCALE ==========
+     Use these instead of a bare text-[10px] / text-xs on VHS text. Each sets
+     size, tracking and line-height as one unit.
+
+     Tracking narrows as size drops. VT323's advance is 0.40em, so at 10px a
+     character is 4px wide while tracking-[0.25em] adds 2.5px between them —
+     the gaps end up 60% of the glyph width and word shapes fall apart. Wide
+     tracking belongs on display type, where it looks superb; down here it is
+     what makes small text unreadable. */
+
+  .type-micro {
+    font-family: var(--font-vhs);
+    font-size: var(--type-micro);
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+  }
+
+  .type-caption {
+    font-family: var(--font-vhs);
+    font-size: var(--type-caption);
+    letter-spacing: 0.1em;
+    line-height: 1.45;
+  }
+
+  .type-label {
+    font-family: var(--font-vhs);
+    font-size: var(--type-label);
+    letter-spacing: 0.12em;
+    line-height: 1.4;
+  }
+
+  .type-body-sm {
+    font-family: var(--font-vhs);
+    font-size: var(--type-body-sm);
+    letter-spacing: 0.02em;
+    line-height: 1.55;
+  }
+
+  /* Dim text that still clears AA. Prefer these over text-foreground/30. */
+  .text-dim { color: hsl(var(--text-dim)); }
+  .text-dimmer { color: hsl(var(--text-dimmer)); }
+
+  .text-dim-hover:hover { color: hsl(var(--foreground)); }
 }

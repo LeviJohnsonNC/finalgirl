@@ -145,7 +145,6 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
           onMouseLeave={() => setIsButtonHovered(false)}
           disabled={isClicked}
           className="vcr-tape-button group relative px-6 py-3 sm:px-8 md:px-10 md:py-4 text-base sm:text-lg md:text-xl tracking-[0.1em] sm:tracking-[0.15em] uppercase transition-all duration-150 disabled:pointer-events-none min-h-[48px] backdrop-blur-sm bg-black/30 sm:bg-transparent sm:backdrop-blur-none rounded-sm"
-          style={{ fontFamily: 'var(--font-vhs)' }}
         >
           {/* Button content */}
           <span className="relative flex items-center gap-2 sm:gap-2.5 text-foreground/80 group-hover:text-foreground">
@@ -154,7 +153,7 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
           </span>
         </button>
         {authError && (
-          <p className="mt-3 max-w-xs text-center font-vhs text-[9px] tracking-wider text-primary/80">
+          <p className="mt-3 max-w-xs text-center type-caption text-primary">
             SIGN-IN SERVICES RECONNECTING
           </p>
         )}
@@ -167,8 +166,7 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
           {onScrapbooks && (
             <button
               onClick={onScrapbooks}
-              className="text-xs tracking-wider uppercase text-foreground/30 hover:text-primary/60 transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center px-2"
-              style={{ fontFamily: 'var(--font-vhs)' }}
+              className="type-label uppercase text-dim hover:text-primary transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center px-2"
             >
               Scrapbooks
             </button>
@@ -176,8 +174,7 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
           {onStats && (
             <button
               onClick={onStats}
-              className="text-xs tracking-wider uppercase text-foreground/30 hover:text-green-400/60 transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center px-2"
-              style={{ fontFamily: 'var(--font-vhs)' }}
+              className="type-label uppercase text-dim hover:text-green-400 transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center px-2"
             >
               Stats
             </button>
@@ -185,8 +182,7 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
           {onRules && (
             <button
               onClick={onRules}
-              className="text-xs tracking-wider uppercase text-foreground/30 hover:text-amber-400/60 transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center px-2"
-              style={{ fontFamily: 'var(--font-vhs)' }}
+              className="type-label uppercase text-dim hover:text-amber-400 transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center px-2"
             >
               Rules
             </button>
@@ -195,10 +191,9 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
           {!authLoading && (
             <button
               onClick={handleAuthClick}
-              className={`text-xs tracking-wider uppercase text-foreground/20 hover:text-foreground/50 transition-colors duration-300 min-h-[44px] min-w-[44px] items-center justify-center px-2 ${
+              className={`type-label uppercase text-dimmer hover:text-foreground transition-colors duration-300 min-h-[44px] min-w-[44px] items-center justify-center px-2 ${
                 user ? 'hidden sm:flex' : 'flex'
               }`}
-              style={{ fontFamily: 'var(--font-vhs)' }}
             >
               {user ? 'Sign Out' : 'Sign In'}
             </button>
@@ -208,8 +203,7 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
         {/* Right: My Collection */}
         <button
           onClick={onArchive}
-          className="text-xs tracking-wider uppercase text-foreground/30 hover:text-secondary/60 transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center px-2 sm:px-3"
-          style={{ fontFamily: 'var(--font-vhs)' }}
+          className="type-label uppercase text-dim hover:text-secondary transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center px-2 sm:px-3"
         >
           My Collection
         </button>
@@ -218,8 +212,7 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
       {/* Trademark Disclaimer */}
       <div className="absolute bottom-1.5 left-0 right-0 px-2 text-center safe-area-bottom">
         <p 
-          className="text-[6px] sm:text-[7px] text-foreground/15 leading-none whitespace-nowrap"
-          style={{ fontFamily: 'var(--font-vhs)' }}
+          className="type-micro text-dimmer leading-snug max-w-4xl mx-auto"
         >
           Unofficial fan-made app — not endorsed by or affiliated with Van Ryder Games, registered trademark owner of Final Girl and all associated intellectual property rights.
         </p>
