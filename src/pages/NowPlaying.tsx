@@ -309,19 +309,25 @@ const NowPlaying = ({
             </div>
           )}
           
-          {/* Story + Still — the still sticks alongside the story on desktop
-              rather than stranding an empty column beside it, and leads on
-              mobile so it is not buried under a thousand words. */}
+          {/* Story + Still.
+              Two columns only from xl up: below that the pair is stacked with
+              the still leading, because splitting 960px between a 500px picture
+              and a column of prose leaves neither enough room.
+              The story panel fills its track rather than being capped at 68ch.
+              That cap was measured in ch of the *page* font — VT323, whose
+              advance is 0.40em — so it resolved to roughly 435px instead of the
+              ~660px of 19px serif it was meant to describe, and the difference
+              showed up as dead space in the middle of the page. */}
           <div
             className={`w-full px-1 sm:px-0 ${
               showImageSlot
-                ? 'grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(360px,440px)] gap-6 lg:gap-10'
+                ? 'grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(420px,520px)] gap-6 xl:gap-10'
                 : 'flex justify-center'
             }`}
           >
             {showImageSlot && (
-              <div className="order-first lg:order-last w-full max-w-[440px] mx-auto lg:mx-0">
-                <div className="lg:sticky lg:top-24">
+              <div className="order-first xl:order-last w-full max-w-[520px] mx-auto xl:mx-0">
+                <div className="xl:sticky xl:top-24">
                   <SceneImageFrame
                     variant="scene"
                     imageUrl={sceneImageUrl}
@@ -334,7 +340,13 @@ const NowPlaying = ({
               </div>
             )}
 
-            <div className="scenario-description p-4 sm:p-8 rounded-sm w-full max-w-[68ch]">
+            {/* Capped at a readable measure everywhere except the two-column
+                layout, where the track itself is already the right width. */}
+            <div
+              className={`scenario-description p-4 sm:p-8 rounded-sm w-full max-w-[46rem] mx-auto ${
+                showImageSlot ? 'xl:max-w-none xl:mx-0' : ''
+              }`}
+            >
               {isGenerating ? (
                 <div className="flex flex-col items-center justify-center py-10 sm:py-16">
                   <ProjectorLeader label="The projector is warming up" />

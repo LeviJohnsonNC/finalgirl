@@ -74,8 +74,12 @@ export const SceneImageFrame = ({
           </button>
         )}
 
-        <span className="absolute top-2 left-2 z-10 flex items-center gap-1 type-caption text-muted-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* The zoom affordance is visible at rest, not only on hover: on a
+            touch screen there is no hover, and "you can open this" is the one
+            thing about the picture worth advertising. */}
+        <span className="absolute top-2 left-2 z-10 flex items-center gap-1.5 px-2 py-1 rounded-sm bg-background/70 type-caption uppercase text-muted-foreground/80 opacity-70 group-hover:opacity-100 transition-opacity pointer-events-none">
           <Expand className="w-3 h-3" />
+          Expand
         </span>
       </div>,
     );
