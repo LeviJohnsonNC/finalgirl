@@ -3784,3 +3784,84 @@
     text-transform: uppercase;
   }
 }
+
+@layer components {
+  /* ========== PROJECTOR COUNTDOWN LEADER ========== */
+
+  @keyframes leader-sweep {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* The numeral on real leader is optically printed and pulses as it passes
+     the gate. One step per second, matching the sweep. */
+  @keyframes leader-numeral {
+    0%   { opacity: 1; }
+    85%  { opacity: 0.9; }
+    100% { opacity: 0.55; }
+  }
+
+  /* ========== PROJECTED FILM FRAME ========== */
+
+  /* A still presented as a frame of film rather than a bordered image:
+     sprocket holes down both edges, the emulsion darkened at the margins. */
+  .film-frame {
+    position: relative;
+    background: hsl(0 0% 4%);
+    border: 1px solid hsl(0 0% 16%);
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.7),
+      inset 0 0 60px rgba(0, 0, 0, 0.55);
+  }
+
+  .film-frame::before,
+  .film-frame::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 14px;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0 10px,
+      hsl(0 0% 10%) 10px 22px,
+      transparent 22px 32px
+    );
+    background-color: hsl(0 0% 6%);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .film-frame::before { left: 0; border-right: 1px solid hsl(0 0% 12%); }
+  .film-frame::after  { right: 0; border-left: 1px solid hsl(0 0% 12%); }
+
+  /* The image itself is inset so the sprocket rails never cover it. */
+  .film-frame-gate {
+    margin: 0 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Caption strip below the gate — the grease-pencil slug on a work print. */
+  .film-frame-caption {
+    border-top: 1px solid hsl(0 0% 14%);
+    background: hsl(0 0% 5%);
+  }
+
+  /* ========== MOTION PREFERENCES ========== */
+
+  /* This page carries grain, flicker, a sweeping leader and a drifting
+     background. Anyone who has asked for less motion should get a still page,
+     not a slightly calmer one. */
+  @media (prefers-reduced-motion: reduce) {
+    .film-grain,
+    .scanlines::before,
+    .story-image-loaded {
+      animation: none !important;
+    }
+
+    .story-image-loaded {
+      filter: contrast(1.1) saturate(0.85) sepia(0.15);
+    }
+  }
+}

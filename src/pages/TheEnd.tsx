@@ -6,8 +6,10 @@ import { toast } from 'sonner';
 import { useNarration } from '@/hooks/useNarration';
 import nowPlayingBg from '@/assets/now-playing-bg.png';
 import projectorSound from '@/assets/sounds/projector-start.mp3';
-import { ImageUploadSlot } from '@/components/ImageUploadSlot';
 import { SceneImageFrame } from '@/components/SceneImageFrame';
+import { NarrationTransport } from '@/components/NarrationTransport';
+import { StickyOutcomeBar } from '@/components/StickyOutcomeBar';
+import { ProjectorLeader } from '@/components/ProjectorLeader';
 import { GameResult } from '@/hooks/useGameHistory';
 import { getFilmIdByLocation } from '@/types/gameData';
 import { getKillerDescription } from '@/data/killerDescriptions';
@@ -17,7 +19,6 @@ import { getFinalGirlMaxHealth } from '@/data/finalGirlHealth';
 import { getKillerSpecialRules } from '@/data/killerSpecialRules';
 import { getModulePromptContext } from '@/data/rules/moduleRules';
 import { renderStoryText } from '@/lib/textFormatting';
-import SceneImageControls from '@/components/SceneImageControls';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 
 export interface EndingFormData {
@@ -53,7 +54,7 @@ const TheEnd = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [posterImageUrl, setPosterImageUrl] = useState<string>('');
-  const { isNarrating, isPlaying, toggleNarration } = useNarration();
+  const { isNarrating, isPlaying, progress, toggleNarration } = useNarration();
   const {
     isAuthenticated,
     autoGenerate,
@@ -227,7 +228,7 @@ const TheEnd = ({
       <div className="vignette fixed inset-0 pointer-events-none" />
       
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center py-6 sm:py-8 pt-16 sm:pt-24 px-3 sm:px-4">
+      <div className="relative z-10 flex flex-col items-center py-6 sm:py-8 pt-16 sm:pt-24 px-3 sm:px-6">
 
         {/* Title */}
         <h1 
@@ -242,10 +243,11 @@ const TheEnd = ({
         </p>
 
         {/* Story Container */}
-        <div className="w-full max-w-4xl flex flex-col gap-4">
+        <div className="w-full max-w-7xl flex flex-col gap-4 sm:gap-6">
           {/* Action Buttons - Above text */}
           {endingStory && (
-            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-2 sm:gap-3 px-2">
+            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-2 sm:gap-3 px-2 w-full sm:w-auto">
               {/* Row 1: Narrate — full width on mobile */}
               <button
                 onClick={handleNarrate}
@@ -261,36 +263,42 @@ const TheEnd = ({
                 )}
                 {isNarrating ? 'Generating...' : isPlaying ? 'Stop' : 'Narrate'}
               </button>
-              
-              {/* Row 2: Reshoot + Replace — side by side on mobile */}
-              <div className="flex w-full sm:w-auto gap-2 sm:gap-3 sm:contents">
-                <SceneImageControls
-                  isGenerating={isGeneratingImage}
-                  hasImage={Boolean(posterImageUrl)}
-                  onGenerate={() => developPoster(posterImageUrl || undefined)}
-                />
+            </div>
 
-                <div className="flex-1 sm:flex-none">
-                  <ImageUploadSlot
-                    imageUrl={posterImageUrl}
-                    onImageChange={setPosterImageUrl}
-                    gameId={result.id}
-                  />
-                </div>
-              </div>
-
+            {isPlaying && (
+              <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} />
+            )}
             </div>
           )}
           
-          {/* Story Text */}
-          <div className="w-full px-1 sm:px-0">
-            <div className="scenario-description p-4 sm:p-6 rounded-sm">
+          {/* Ending + Poster — the poster is the keepsake, so it gets real
+              size and stays beside the text rather than trailing it. */}
+          <div
+            className={`w-full px-1 sm:px-0 ${
+              showPosterSlot
+                ? 'grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(340px,420px)] gap-6 lg:gap-10'
+                : 'flex justify-center'
+            }`}
+          >
+            {showPosterSlot && (
+              <div className="order-first lg:order-last w-full max-w-[420px] mx-auto lg:mx-0">
+                <div className="lg:sticky lg:top-24">
+                  <SceneImageFrame
+                    variant="poster"
+                    imageUrl={posterImageUrl}
+                    isGenerating={isGeneratingImage}
+                    error={imageError}
+                    onRetry={() => developPoster(posterImageUrl || undefined)}
+                    caption={`${result.finalGirl} vs ${result.killer}`}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="scenario-description p-4 sm:p-8 rounded-sm w-full max-w-[68ch]">
               {isGenerating ? (
-                <div className="flex flex-col items-center justify-center py-8 sm:py-12 gap-4">
-                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="font-vhs text-xs sm:text-sm text-muted-foreground animate-pulse">
-                    The projector is warming up...
-                  </p>
+                <div className="flex flex-col items-center justify-center py-10 sm:py-16">
+                  <ProjectorLeader label="The projector is warming up" />
                 </div>
               ) : error ? (
                 <div className="flex flex-col items-center justify-center py-8 sm:py-12 gap-4">
@@ -305,19 +313,8 @@ const TheEnd = ({
                   </button>
                 </div>
               ) : endingStory ? (
-                <div className={showPosterSlot ? 'grid grid-cols-1 md:grid-cols-[1fr_35%] gap-4 sm:gap-6' : ''}>
-                  <div className="story-text story-ending story-text-dark">
-                    {renderStoryText(endingStory)}
-                  </div>
-                  {showPosterSlot && (
-                    <SceneImageFrame
-                      variant="poster"
-                      imageUrl={posterImageUrl}
-                      isGenerating={isGeneratingImage}
-                      error={imageError}
-                      onRetry={() => developPoster()}
-                    />
-                  )}
+                <div className="story-text story-ending story-text-dark">
+                  {renderStoryText(endingStory)}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12">
@@ -329,19 +326,20 @@ const TheEnd = ({
             </div>
           </div>
 
-          {/* Action Buttons - Show when story is loaded */}
+          {/* Save — docks once scrolled past, same as the outcome buttons. */}
           {endingStory && !isGenerating && !error && (
-            <div className="flex justify-center items-center mt-6 sm:mt-8 px-2">
+            <StickyOutcomeBar enabled={Boolean(endingStory) && !isGenerating && !error}>
               <button
                 onClick={handleSave}
-                className={`outcome-btn ${isWin ? 'outcome-btn-won' : 'outcome-btn-lost'} group relative min-w-[200px] sm:min-w-[240px] h-14 sm:h-16 overflow-hidden rounded-sm transition-all duration-200`}
+                className={`outcome-btn ${isWin ? 'outcome-btn-won' : 'outcome-btn-lost'} group relative w-full sm:w-auto min-w-[200px] sm:min-w-[240px] h-14 sm:h-16 overflow-hidden rounded-sm transition-all duration-200`}
               >
                 <span className={`relative z-10 font-display text-xl sm:text-2xl tracking-[0.2em] uppercase ${isWin ? 'text-secondary' : 'text-primary'} drop-shadow-lg`}>
                   SAVE
                 </span>
               </button>
-            </div>
+            </StickyOutcomeBar>
           )}
+
         </div>
       </div>
     </div>

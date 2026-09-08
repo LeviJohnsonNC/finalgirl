@@ -24,6 +24,9 @@ export interface NarrationCasting {
 export const useNarration = () => {
   const [isNarrating, setIsNarrating] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  // Playback position, so callers can show a transport rather than a bare Stop
+  // button. A narration runs for minutes; "how much is left" is a fair question.
+  const [progress, setProgress] = useState({ elapsed: 0, duration: 0 });
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const blobUrlRef = useRef<string | null>(null);
   const isMountedRef = useRef(true);
@@ -56,6 +59,7 @@ export const useNarration = () => {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       setIsPlaying(false);
+      setProgress({ elapsed: 0, duration: 0 });
       return;
     }
 
@@ -119,8 +123,19 @@ export const useNarration = () => {
 
       audio.src = blobUrl;
 
+      audio.ontimeupdate = () => {
+        if (!isMountedRef.current) return;
+        setProgress({
+          elapsed: audio.currentTime,
+          duration: Number.isFinite(audio.duration) ? audio.duration : 0,
+        });
+      };
+
       audio.onended = () => {
-        if (isMountedRef.current) setIsPlaying(false);
+        if (isMountedRef.current) {
+          setIsPlaying(false);
+          setProgress({ elapsed: 0, duration: 0 });
+        }
         releaseBlobUrl();
       };
 
@@ -145,5 +160,5 @@ export const useNarration = () => {
     }
   }, [isPlaying]);
 
-  return { isNarrating, isPlaying, toggleNarration };
+  return { isNarrating, isPlaying, progress, toggleNarration };
 };

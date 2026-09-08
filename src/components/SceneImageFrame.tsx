@@ -1,4 +1,6 @@
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Expand, RefreshCw } from 'lucide-react';
+import { ProjectorLeader } from '@/components/ProjectorLeader';
+import { ImageLightbox } from '@/components/ImageLightbox';
 
 interface SceneImageFrameProps {
   imageUrl: string;
@@ -7,13 +9,18 @@ interface SceneImageFrameProps {
   onRetry?: () => void;
   /** 'scene' is the 3:4 in-session still; 'poster' is the 2:3 movie poster. */
   variant: 'scene' | 'poster';
+  /** Grease-pencil slug under the gate, e.g. "Reel 01 · Shady Acres". */
+  caption?: string;
   className?: string;
 }
 
 /**
- * The image slot on Now Playing and The End. Images generate on their own, so
- * this shows the developing state in the same place the finished picture will
- * land — the frame never pops into existence, it develops in.
+ * A generated still presented as a frame of film: sprocket rails down both
+ * edges, the picture inset in the gate, a slug beneath it.
+ *
+ * The controls live on the frame rather than in the page's button row —
+ * reshooting is something you do to a picture, so the affordance belongs on
+ * the picture.
  */
 export const SceneImageFrame = ({
   imageUrl,
@@ -21,62 +28,85 @@ export const SceneImageFrame = ({
   error,
   onRetry,
   variant,
+  caption,
   className = '',
 }: SceneImageFrameProps) => {
   const aspect = variant === 'poster' ? 'aspect-[2/3]' : 'aspect-[3/4]';
+  const label = variant === 'poster' ? 'Movie poster' : 'Scene still';
+
+  const frame = (body: React.ReactNode, showCaption = true) => (
+    <figure className={`film-frame rounded-sm ${className}`}>
+      <div className={`film-frame-gate ${imageUrl ? '' : aspect}`}>{body}</div>
+      {showCaption && caption && (
+        <figcaption className="film-frame-caption font-vhs text-[10px] tracking-[0.25em] uppercase text-muted-foreground/70 px-4 py-2 text-center">
+          {caption}
+        </figcaption>
+      )}
+    </figure>
+  );
 
   if (imageUrl) {
-    return (
-      <div className={`relative rounded-sm overflow-hidden border-2 border-border/50 shadow-lg ${className}`}>
-        <img
-          src={imageUrl}
-          alt={variant === 'poster' ? 'Movie poster' : 'Scene still'}
-          className="w-full h-auto"
-          style={variant === 'poster' ? { filter: 'contrast(1.1) saturate(0.85) sepia(0.15)' } : undefined}
-        />
+    return frame(
+      <div className="group relative">
+        <ImageLightbox imageUrl={imageUrl} caption={caption ?? label}>
+          <button
+            type="button"
+            className="block w-full cursor-zoom-in"
+            aria-label={`View ${label.toLowerCase()} full size`}
+          >
+            <img src={imageUrl} alt={label} className="story-image-loaded w-full h-auto" />
+          </button>
+        </ImageLightbox>
+
         <div className="film-grain absolute inset-0 pointer-events-none opacity-[0.14]" />
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/40 via-transparent to-black/20" />
-      </div>
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/50 via-transparent to-black/20" />
+
+        {/* Reshoot rides on the frame, revealed on hover and always available
+            to keyboard users via focus. */}
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            disabled={isGenerating}
+            className="absolute bottom-2 right-2 z-10 flex items-center gap-1.5 px-3 py-2 rounded-sm bg-background/85 border border-border/60 font-vhs text-[10px] tracking-[0.2em] uppercase text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-200 disabled:opacity-50 min-h-[36px]"
+          >
+            <RefreshCw className={`w-3 h-3 ${isGenerating ? 'animate-spin' : ''}`} />
+            {isGenerating ? 'Developing' : 'Reshoot'}
+          </button>
+        )}
+
+        <span className="absolute top-2 left-2 z-10 flex items-center gap-1 font-vhs text-[10px] text-muted-foreground/60 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Expand className="w-3 h-3" />
+        </span>
+      </div>,
     );
   }
 
   if (isGenerating) {
-    return (
-      <div
-        className={`relative ${aspect} w-full rounded-sm overflow-hidden border-2 border-border/50 bg-card/40 ${className}`}
-      >
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="font-vhs text-xs text-muted-foreground animate-pulse text-center tracking-[0.15em] uppercase">
-            Developing...
-          </p>
-        </div>
+    return frame(
+      <div className="absolute inset-0 flex items-center justify-center">
+        <ProjectorLeader label="Developing" />
         <div className="film-grain absolute inset-0 pointer-events-none opacity-[0.2]" />
         <div className="vignette absolute inset-0 pointer-events-none" />
-      </div>
+      </div>,
     );
   }
 
   // Failure is deliberately quiet: the story is the point, the picture is a
   // bonus. No toast, just an offer to try again.
   if (error) {
-    return (
-      <div
-        className={`relative ${aspect} w-full rounded-sm overflow-hidden border-2 border-dashed border-border/40 bg-card/20 ${className}`}
-      >
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4 text-center">
-          <AlertTriangle className="w-5 h-5 text-muted-foreground/50" />
-          <p className="font-vhs text-[10px] text-muted-foreground/70">{error}</p>
-          {onRetry && (
-            <button
-              onClick={onRetry}
-              className="font-display text-[10px] tracking-[0.15em] uppercase px-3 py-2 vcr-tape-button min-h-[36px]"
-            >
-              Try Again
-            </button>
-          )}
-        </div>
-      </div>
+    return frame(
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4 text-center">
+        <AlertTriangle className="w-5 h-5 text-muted-foreground/50" />
+        <p className="font-vhs text-[10px] text-muted-foreground/70">{error}</p>
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            className="font-display text-[10px] tracking-[0.15em] uppercase px-3 py-2 vcr-tape-button min-h-[36px]"
+          >
+            Try Again
+          </button>
+        )}
+      </div>,
     );
   }
 
