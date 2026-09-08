@@ -28,12 +28,12 @@ export class ErrorBoundary extends Component<Props, State> {
           <h1 className="font-display text-4xl text-primary blood-glow relative z-10">
             SIGNAL LOST
           </h1>
-          <p className="font-vhs text-sm text-muted-foreground relative z-10 text-center max-w-sm">
+          <p className="type-label text-muted-foreground relative z-10 text-center max-w-sm">
             Something went wrong. The tape may be damaged.
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="relative z-10 vcr-button font-vhs text-sm uppercase tracking-wider px-6 py-3 text-primary border border-primary/50 hover:bg-primary/10 transition-colors"
+            className="relative z-10 vcr-button type-label uppercase px-6 py-3 text-primary border border-primary/50 hover:bg-primary/10 transition-colors"
           >
             REWIND &amp; RETRY
           </button>

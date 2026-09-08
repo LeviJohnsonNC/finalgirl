@@ -116,7 +116,7 @@ export const LoreInfoModal = ({ type, name }: LoreInfoModalProps) => {
                 <h3 className="font-display text-sm uppercase tracking-widest text-primary">
                   {type === 'killer' ? 'Legend' : type === 'location' ? 'Description' : 'Backstory'}
                 </h3>
-                <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line font-body">
+                <div className="type-body-sm text-foreground/90 leading-relaxed whitespace-pre-line">
                   {lore.backstory}
                 </div>
               </div>

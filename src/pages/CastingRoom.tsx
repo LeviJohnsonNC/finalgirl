@@ -115,7 +115,7 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
         </p>
         <button
           onClick={retryLoadOwnedFilms}
-          className="font-vhs text-xs inline-flex items-center gap-2 border border-primary/40 px-4 py-2 text-primary hover:bg-primary/10 transition-colors"
+          className="type-caption inline-flex items-center gap-2 border border-primary/40 px-4 py-2 text-primary hover:bg-primary/10 transition-colors"
         >
           <RotateCcw className="w-3 h-3" />
           RETRY COLLECTION LOAD
@@ -163,7 +163,7 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center py-8 pt-24">
         {isDegraded && (
-          <div className="mb-6 border border-primary/30 bg-background/70 px-4 py-2 text-center font-vhs text-[10px] text-muted-foreground tracking-wider">
+          <div className="mb-6 border border-primary/30 bg-background/70 px-4 py-2 text-center type-caption text-muted-foreground">
             CLOUD ARCHIVE RECONNECTING • USING SAVED COLLECTION
           </div>
         )}
@@ -201,7 +201,7 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
         {/* Case Options strip */}
         <div className="w-full max-w-3xl px-4 mb-10">
           <div className="border-t border-border/40 pt-4">
-            <div className="font-vhs text-xs text-muted-foreground/70 tracking-[0.25em] mb-3">
+            <div className="type-caption text-muted-foreground/70 mb-3">
               CASE OPTIONS //
             </div>
             <ScenarioDropdowns
@@ -234,7 +234,7 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
           </button>
           <p
             className={`press-play-helper ${
-              isComplete ? 'text-primary/70' : 'text-muted-foreground/40'
+              isComplete ? 'text-primary' : 'text-dim'
             }`}
           >
             {isComplete ? 'Tape ready' : 'Cast your feature to begin'}

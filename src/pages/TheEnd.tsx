@@ -238,7 +238,7 @@ const TheEnd = ({
         >
           The End
         </h1>
-        <p className="font-vhs text-xs sm:text-sm text-muted-foreground mb-6 sm:mb-8 text-center px-2">
+        <p className="type-label text-muted-foreground mb-6 sm:mb-8 text-center px-2">
           {result.finalGirl} {isWin ? 'survived' : 'fell to'} {result.killer} at {result.location}
         </p>
 
@@ -302,7 +302,7 @@ const TheEnd = ({
                 </div>
               ) : error ? (
                 <div className="flex flex-col items-center justify-center py-8 sm:py-12 gap-4">
-                  <p className="font-vhs text-xs sm:text-sm text-destructive text-center px-2">
+                  <p className="type-label text-destructive text-center px-2">
                     {error}
                   </p>
                   <button
@@ -318,7 +318,7 @@ const TheEnd = ({
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12">
-                  <p className="font-vhs text-sm text-muted-foreground">
+                  <p className="type-label text-muted-foreground">
                     Waiting for the ending...
                   </p>
                 </div>

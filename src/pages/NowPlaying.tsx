@@ -255,18 +255,18 @@ const NowPlaying = ({
       <div className="relative z-10 flex flex-col items-center py-6 sm:py-8 pt-16 sm:pt-24 px-3 sm:px-6">
 
         {/* Title */}
-        <p className="font-vhs text-xs text-primary/70 tracking-[0.2em] uppercase mb-1 text-center">
+        <p className="type-caption text-primary/70 uppercase mb-1 text-center">
           Now Playing
         </p>
         <h1 className="font-display text-2xl sm:text-3xl md:text-4xl text-foreground tracking-[0.1em] sm:tracking-[0.15em] uppercase mb-1 sm:mb-1 text-center">
           {film?.name ?? 'Now Playing'}
         </h1>
         {theme?.tagline && (
-          <p className="font-vhs text-xs text-muted-foreground/70 italic mb-2 text-center px-4">
+          <p className="type-caption text-muted-foreground/70 italic mb-2 text-center px-4">
             {theme.tagline}
           </p>
         )}
-        <p className="font-vhs text-xs sm:text-sm text-muted-foreground mb-6 sm:mb-8 text-center px-2">
+        <p className="type-label text-muted-foreground mb-6 sm:mb-8 text-center px-2">
           {killer} vs {finalGirl} at {location}
         </p>
 
@@ -341,7 +341,7 @@ const NowPlaying = ({
                 </div>
               ) : error ? (
                 <div className="flex flex-col items-center justify-center py-8 sm:py-12 gap-4">
-                  <p className="font-vhs text-xs sm:text-sm text-destructive text-center px-2">
+                  <p className="type-label text-destructive text-center px-2">
                     {error}
                   </p>
                   <button
@@ -357,7 +357,7 @@ const NowPlaying = ({
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12">
-                  <p className="font-vhs text-sm text-muted-foreground">
+                  <p className="type-label text-muted-foreground">
                     Waiting for the story...
                   </p>
                 </div>

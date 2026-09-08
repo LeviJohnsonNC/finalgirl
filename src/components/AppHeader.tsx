@@ -15,7 +15,7 @@ export const AppHeader = ({ onNavigateHome }: AppHeaderProps) => {
         FINAL GIRL
       </h1>
       <p 
-        className="text-xs sm:text-base md:text-lg tracking-[0.2em] sm:tracking-[0.3em] uppercase text-foreground/50 drop-shadow-md"
+        className="text-base md:text-lg tracking-[0.2em] sm:tracking-[0.3em] uppercase text-foreground/50 drop-shadow-md"
         style={{ fontFamily: 'var(--font-vhs)', textShadow: '1px 1px 4px rgba(0,0,0,0.8)' }}
       >
         <span className="text-primary/50">Unofficial</span> Case Files

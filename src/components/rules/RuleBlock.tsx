@@ -62,7 +62,7 @@ export const RuleBlock = ({ block, glossary, onJumpTo }: RuleBlockProps) => {
   switch (block.type) {
     case 'paragraph':
       return (
-        <p className="rule-paragraph text-foreground/90 leading-7 text-[15px] sm:text-base">
+        <p className="rule-paragraph text-foreground/90 leading-7 type-body-sm">
           {renderText(block.text, glossary, onJumpTo)}
         </p>
       );
@@ -71,7 +71,7 @@ export const RuleBlock = ({ block, glossary, onJumpTo }: RuleBlockProps) => {
       const Tag = block.ordered ? 'ol' : 'ul';
       return (
         <Tag
-          className={`${block.ordered ? 'list-decimal' : 'list-disc'} pl-6 space-y-1.5 text-foreground/90 text-[15px] sm:text-base marker:text-primary/70`}
+          className={`${block.ordered ? 'list-decimal' : 'list-disc'} pl-6 space-y-1.5 text-foreground/90 type-body-sm marker:text-primary/70`}
         >
           {block.items.map((item, i) => (
             <li key={i} className="leading-relaxed">
@@ -96,16 +96,16 @@ export const RuleBlock = ({ block, glossary, onJumpTo }: RuleBlockProps) => {
       const style = calloutStyles[variant];
       return (
         <div className={`rule-callout ${style.className} my-3`}>
-          <span className="rule-callout-stamp font-vhs text-[9px] uppercase tracking-[0.22em]">
+          <span className="rule-callout-stamp type-micro uppercase">
             {variant === 'critical' ? 'Warning' : variant === 'tip' ? 'Case Note' : 'Archive Ref'}
           </span>
           <div className="rule-callout-header">
             {style.icon}
-            <span className="font-vhs text-[10px] uppercase tracking-[0.2em]">
+            <span className="type-caption uppercase">
               {block.title ?? style.defaultTitle}
             </span>
           </div>
-          <p className="text-sm leading-relaxed">
+          <p className="type-body-sm leading-relaxed">
             {renderText(block.text, glossary, onJumpTo)}
           </p>
         </div>
@@ -115,18 +115,18 @@ export const RuleBlock = ({ block, glossary, onJumpTo }: RuleBlockProps) => {
     case 'example':
       return (
         <div className="rule-example my-3">
-          <span className="rule-callout-stamp font-vhs text-[9px] uppercase tracking-[0.22em]">
+          <span className="rule-callout-stamp type-micro uppercase">
             Case Note
           </span>
           <div className="rule-example-stamp">
-            <span className="font-vhs text-[10px] uppercase tracking-[0.25em]">
+            <span className="type-caption uppercase">
               ◉ Example
             </span>
-            <span className="font-vhs text-[10px] uppercase tracking-widest text-muted-foreground">
+            <span className="type-caption uppercase text-muted-foreground">
               {block.title}
             </span>
           </div>
-          <p className="text-sm text-foreground/85 italic leading-relaxed mt-1.5">
+          <p className="type-body-sm text-foreground/85 italic leading-relaxed mt-1.5">
             {renderText(block.text, glossary, onJumpTo)}
           </p>
         </div>
@@ -135,11 +135,11 @@ export const RuleBlock = ({ block, glossary, onJumpTo }: RuleBlockProps) => {
     case 'table':
       return (
         <div className="rule-table-wrap my-3">
-          <table className="rule-table w-full text-sm">
+          <table className="rule-table w-full type-label">
             <thead>
               <tr>
                 {block.headers.map((h, i) => (
-                  <th key={i} className="font-vhs text-[10px] uppercase tracking-[0.2em]">
+                  <th key={i} className="type-caption uppercase">
                     {h}
                   </th>
                 ))}

@@ -195,7 +195,7 @@ export const CastingSlot = ({
         {/* Dossier metadata strip */}
         <div className="min-h-[1.5rem] flex items-center justify-center gap-1.5">
           {isAnimating ? (
-            <span className="font-vhs text-sm text-muted-foreground/50 animate-pulse tracking-widest">SCANNING...</span>
+            <span className="type-label text-dim animate-pulse">SCANNING...</span>
           ) : displayValue ? (
             <>
               <span className="dossier-meta">
@@ -206,7 +206,7 @@ export const CastingSlot = ({
               <LoreInfoModal type={type} name={displayValue} />
             </>
           ) : (
-            <span className="font-vhs text-xs text-muted-foreground/40 tracking-[0.25em]">
+            <span className="type-caption text-dim">
               {META_TAGS[type]} // ————
             </span>
           )}

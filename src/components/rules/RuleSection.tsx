@@ -37,14 +37,14 @@ export const RuleSection = ({
 
       {seeAlsoSections.length > 0 && (
         <div className="mt-5 pt-3 border-t border-dashed border-primary/20 flex flex-wrap items-center gap-2">
-          <span className="font-vhs text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <span className="type-caption uppercase text-muted-foreground">
             ▸ See also
           </span>
           {seeAlsoSections.map((s) => (
             <button
               key={s.id}
               onClick={() => onJumpTo(s.id)}
-              className="see-also-tape inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-vhs uppercase tracking-wider"
+              className="see-also-tape inline-flex items-center gap-1 px-2.5 py-1 type-caption uppercase"
             >
               {s.title}
               <ArrowRight className="w-3 h-3" />

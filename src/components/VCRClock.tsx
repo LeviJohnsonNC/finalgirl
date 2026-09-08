@@ -19,7 +19,7 @@ const useNow = () => {
 export const VCRTime = memo(() => {
   const now = useNow();
   return (
-    <span className="font-vhs text-[10px] sm:text-xs text-secondary neon-text">
+    <span className="type-caption text-secondary neon-text">
       {now.toLocaleTimeString('en-US', { hour12: false })}
     </span>
   );

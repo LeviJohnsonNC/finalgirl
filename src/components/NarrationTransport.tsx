@@ -20,7 +20,7 @@ export const NarrationTransport = ({ elapsed, duration }: NarrationTransportProp
 
   return (
     <div className="flex items-center gap-3 w-full max-w-md mx-auto px-2">
-      <span className="font-vhs text-[10px] text-secondary neon-text tabular-nums">
+      <span className="type-caption text-secondary neon-text tabular-nums">
         {timecode(elapsed)}
       </span>
 
@@ -38,7 +38,7 @@ export const NarrationTransport = ({ elapsed, duration }: NarrationTransportProp
         />
       </div>
 
-      <span className="font-vhs text-[10px] text-muted-foreground tabular-nums">
+      <span className="type-caption text-muted-foreground tabular-nums">
         {duration > 0 ? timecode(duration) : '--:--'}
       </span>
     </div>

@@ -56,17 +56,17 @@ export const ScrapbookGrid = ({ games, selectedGameId, onSelectGame, type }: Scr
                   />
                 ) : (
                   <div className="thumbnail-placeholder">
-                    <span className="font-vhs text-[10px] text-muted-foreground">
+                    <span className="type-caption text-muted-foreground">
                       NO IMAGE
                     </span>
                   </div>
                 )}
               </div>
               <div className="thumbnail-label">
-                <p className="font-vhs text-[10px] sm:text-xs truncate">
+                <p className="type-caption truncate">
                   {game.finalGirl}
                 </p>
-                <p className="font-vhs text-[8px] sm:text-[10px] text-muted-foreground">
+                <p className="type-caption text-muted-foreground">
                   {format(new Date(game.timestamp), 'MMM d, yyyy')}
                 </p>
               </div>
@@ -76,7 +76,7 @@ export const ScrapbookGrid = ({ games, selectedGameId, onSelectGame, type }: Scr
         {visibleCount < games.length && (
           <button
             onClick={() => setVisibleCount(count => Math.min(count + 12, games.length))}
-            className="mx-auto mb-4 block font-vhs text-xs text-amber-900/80 hover:text-amber-950 underline underline-offset-4"
+            className="mx-auto mb-4 block type-caption text-amber-900/80 hover:text-amber-950 underline underline-offset-4"
           >
             Load more recovered photos
           </button>

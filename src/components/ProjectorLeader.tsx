@@ -76,7 +76,7 @@ export const ProjectorLeader = ({ label, size = 'lg', className = '' }: Projecto
       </div>
 
       {label && (
-        <p className="font-vhs text-[10px] sm:text-xs tracking-[0.25em] uppercase text-muted-foreground text-center px-4">
+        <p className="type-caption uppercase text-muted-foreground text-center px-4">
           {label}
         </p>
       )}

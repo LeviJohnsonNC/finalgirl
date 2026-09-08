@@ -65,10 +65,10 @@ export const SpecialRulesModal = ({ killer, location, children }: SpecialRulesMo
 
         <div className="space-y-6">
           <div>
-            <p className="font-vhs text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-1">
+            <p className="type-caption uppercase text-muted-foreground mb-1">
               {active.kind === 'killer' ? 'Killer' : 'Location'} · {active.entity}
             </p>
-            <p className="font-vhs text-[10px] text-muted-foreground/70 italic">
+            <p className="type-caption text-muted-foreground/70 italic">
               {active.source}
             </p>
           </div>
