@@ -78,23 +78,23 @@ const Archive = () => {
         <h1 className="font-display text-3xl sm:text-4xl md:text-5xl text-primary blood-glow tracking-wider">
           MY COLLECTION
         </h1>
-        <p className="font-vhs text-xs sm:text-sm text-muted-foreground px-2">
+        <p className="type-label text-muted-foreground px-2">
           MANAGE YOUR COLLECTION • CONFIGURE SETTINGS
         </p>
       </div>
 
       {loadError && (
         <div className="mx-auto max-w-2xl border border-primary/30 bg-background/70 px-4 py-3 text-center">
-          <div className="flex items-center justify-center gap-2 font-vhs text-xs tracking-wider text-primary mb-2">
+          <div className="flex items-center justify-center gap-2 type-label text-primary mb-2">
             <AlertTriangle className="w-4 h-4" />
             {isDegraded ? 'CLOUD ARCHIVE RECONNECTING' : 'COLLECTION UNAVAILABLE'}
           </div>
-          <p className="text-sm text-muted-foreground mb-3">
+          <p className="type-body-sm text-muted-foreground mb-3">
             {isDegraded ? 'Showing your last saved collection while the archive reconnects.' : 'Your cloud collection could not be reached. This is not an empty collection.'}
           </p>
           <button
             onClick={retryLoadOwnedFilms}
-            className="font-vhs text-xs inline-flex items-center gap-2 border border-primary/40 px-4 py-2 text-primary hover:bg-primary/10 transition-colors"
+            className="type-label inline-flex items-center gap-2 border border-primary/40 px-4 py-2 text-primary hover:bg-primary/10 transition-colors"
           >
             <RotateCcw className="w-3 h-3" />
             RETRY COLLECTION LOAD
@@ -106,7 +106,7 @@ const Archive = () => {
       <div className="flex justify-end px-2">
         <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <AlertDialogTrigger asChild>
-            <button className="flex items-center gap-1.5 font-vhs text-[10px] sm:text-xs text-muted-foreground hover:text-primary transition-colors border border-muted-foreground/30 hover:border-primary/50 px-2 sm:px-3 py-1.5 rounded bg-muted/20 hover:bg-primary/10">
+            <button className="flex items-center gap-1.5 type-caption text-muted-foreground hover:text-primary transition-colors border border-muted-foreground/30 hover:border-primary/50 px-3 py-2 rounded bg-muted/20 hover:bg-primary/10">
               <Trash2 className="w-3 h-3" />
               <span>RESET MY PLAYS</span>
             </button>
@@ -116,7 +116,7 @@ const Archive = () => {
               <AlertDialogTitle className="font-display text-xl text-primary">
                 Reset All Gameplay Data?
               </AlertDialogTitle>
-              <AlertDialogDescription className="font-vhs text-sm text-muted-foreground">
+              <AlertDialogDescription className="type-body-sm text-muted-foreground">
                 This will permanently erase all of your game history, including wins, losses, stories, and posters. Your collection settings will remain unchanged.
                 <span className="block mt-2 text-primary/80 font-bold">
                   This action cannot be undone.
@@ -124,12 +124,12 @@ const Archive = () => {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="gap-2 sm:gap-0">
-              <AlertDialogCancel className="font-vhs text-xs bg-muted/50 border-muted-foreground/30 hover:bg-muted hover:text-foreground">
+              <AlertDialogCancel className="type-label bg-muted/50 border-muted-foreground/30 hover:bg-muted hover:text-foreground">
                 BACK OUT
               </AlertDialogCancel>
               <AlertDialogAction 
                 onClick={handleResetPlays}
-                className="font-vhs text-xs bg-primary/20 border border-primary/50 text-primary hover:bg-primary/30"
+                className="type-label bg-primary/20 border border-primary/50 text-primary hover:bg-primary/30"
               >
                 CONFIRM RESET
               </AlertDialogAction>
@@ -152,7 +152,7 @@ const Archive = () => {
                   SEASON {season}
                 </h2>
                 {isInDevelopment && (
-                  <span className="font-vhs text-[10px] sm:text-xs bg-muted/50 text-muted-foreground px-2 py-0.5 sm:py-1 rounded uppercase tracking-wider">
+                  <span className="type-caption bg-muted/50 text-muted-foreground px-2 py-1 rounded uppercase">
                     In Development
                   </span>
                 )}

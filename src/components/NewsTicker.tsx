@@ -22,15 +22,18 @@ export const NewsTicker = React.memo(React.forwardRef<HTMLDivElement>(
       return [...shuffled, ...shuffled];
     }, []);
     
+    // bottom-14 (56px) clears the 53px footer at every width. It was
+    // bottom-11 on mobile (44px), which tucked the ticker's lowest 9px behind
+    // the footer and clipped the text.
     return (
       <div 
         ref={ref}
-        className="fixed bottom-11 sm:bottom-14 left-0 right-0 z-40 bg-black/95 border-t border-b border-primary/30 overflow-hidden"
+        className="fixed bottom-14 left-0 right-0 z-40 bg-black/95 border-t border-b border-primary/30 overflow-hidden"
       >
-        <div className="relative h-7 sm:h-8 flex items-center">
+        <div className="relative h-8 sm:h-9 flex items-center">
           {/* Breaking news badge */}
           <div className="absolute left-0 z-10 h-full flex items-center px-2 sm:px-3 bg-gradient-to-r from-black via-black to-transparent pr-8">
-            <span className="font-vhs text-[10px] sm:text-xs text-primary uppercase tracking-wider blood-glow animate-pulse">
+            <span className="type-caption text-primary uppercase blood-glow animate-pulse whitespace-nowrap">
               ⚠ ALERT ⚠
             </span>
           </div>
@@ -39,7 +42,7 @@ export const NewsTicker = React.memo(React.forwardRef<HTMLDivElement>(
           <div className="news-ticker flex items-center whitespace-nowrap pl-24 sm:pl-28">
             {tickerContent.map((headline, idx) => (
               <span key={idx} className="inline-flex items-center">
-                <span className="font-vhs text-[10px] sm:text-xs text-amber-400/90 uppercase tracking-wide">
+                <span className="type-caption text-amber-400 uppercase">
                   {headline}
                 </span>
                 <span className="mx-32 sm:mx-48 text-primary/60">◆</span>
