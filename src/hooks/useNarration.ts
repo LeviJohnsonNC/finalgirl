@@ -98,6 +98,14 @@ export const useNarration = () => {
         throw new Error(data.error);
       }
 
+      // Say which voice actually read it. The edge function falls back through
+      // its candidate chain silently, so without this a rejected cast is
+      // indistinguishable from a stale deploy — which is exactly how the first
+      // casting bug hid.
+      if (data.voiceId) {
+        console.info(`Narrated by ${data.voiceId} (persona: ${data.persona ?? 'unknown'})`);
+      }
+
       // Convert base64 to a Blob URL (avoids iOS data-URI size limits)
       const blob = base64ToBlob(data.audioContent, 'audio/mpeg');
       const blobUrl = URL.createObjectURL(blob);

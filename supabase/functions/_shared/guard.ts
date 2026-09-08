@@ -12,8 +12,11 @@ export interface GuardResult {
   ok: true;
   user: User;
   adminClient: SupabaseClient;
-  /** Records what was actually spent. Call after a successful generation. */
-  logUsage: (details: { model?: string; kind?: string }) => void;
+  /**
+   * Records what was actually spent. Call — and await — after a successful
+   * generation, before returning the response.
+   */
+  logUsage: (details: { model?: string; kind?: string }) => Promise<void>;
 }
 export interface GuardFail {
   ok: false;
@@ -132,17 +135,25 @@ export const requireUser = async (
     return (data as { id: number }).id;
   })();
 
-  const logUsage = (details: { model?: string; kind?: string }) => {
-    reservation
-      .then(async (id) => {
-        if (id === null) return;
-        const { error: updateError } = await adminClient
-          .from("ai_usage_events")
-          .update({ model: details.model ?? null, kind: details.kind ?? null })
-          .eq("id", id);
-        if (updateError) console.error("Failed to annotate usage event:", updateError);
-      })
-      .catch((err) => console.error("Usage annotation failed:", err));
+  // Must be awaited by the caller. An edge isolate stops executing pending work
+  // the moment its response is returned, so a fire-and-forget update here is
+  // issued microseconds before shutdown and never lands — which is exactly how
+  // this column silently stayed null while looking like it was being written.
+  // The reserving insert survives only because it has the whole generation to
+  // complete; the annotation has no such grace.
+  const logUsage = async (details: { model?: string; kind?: string }): Promise<void> => {
+    try {
+      const id = await reservation;
+      if (id === null) return;
+      const { error: updateError } = await adminClient
+        .from("ai_usage_events")
+        .update({ model: details.model ?? null, kind: details.kind ?? null })
+        .eq("id", id);
+      if (updateError) console.error("Failed to annotate usage event:", updateError);
+    } catch (err) {
+      // Telemetry must never take down a generation the user already paid for.
+      console.error("Usage annotation failed:", err);
+    }
   };
 
   return { ok: true, user, adminClient, logUsage };

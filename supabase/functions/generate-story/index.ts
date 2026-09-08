@@ -100,7 +100,7 @@ Starting Setup Info:
 ${startingSetupInfo}`;
 
     const { body: stream, model } = await streamChat({ system: systemPrompt, user: userPrompt });
-    guard.logUsage({ model, kind: "story" });
+    await guard.logUsage({ model, kind: "story" });
 
     // Forward the SSE stream directly to the client.
     return new Response(stream, {

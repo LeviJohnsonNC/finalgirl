@@ -180,7 +180,7 @@ serve(async (req) => {
       audioChunks.push(audio);
     }
 
-    guard.logUsage({ model: `inworld:${voiceId}`, kind: `narration-${persona.label}` });
+    await guard.logUsage({ model: `inworld:${voiceId}`, kind: `narration-${persona.label}` });
 
     // Concatenate all audio chunks
     const combinedAudio = chunks.length === 1 

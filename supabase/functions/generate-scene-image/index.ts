@@ -103,7 +103,7 @@ serve(async (req) => {
       }
     }
 
-    logUsage({ model: [briefModel, image.model].filter(Boolean).join(" + "), kind });
+    await logUsage({ model: [briefModel, image.model].filter(Boolean).join(" + "), kind });
 
     return json({ imageUrl: urlData.publicUrl, model: image.model });
   } catch (error) {
