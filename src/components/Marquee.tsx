@@ -164,13 +164,13 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
           only held while the disclaimer was a single 6px line — once it wrapped
           it grew up into the nav. Stacking them means the gap is structural. */}
       <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2 pb-3 safe-area-bottom">
-      <div className="px-4 sm:px-6 flex justify-center sm:justify-between items-center">
+      <div className="px-3 sm:px-6 flex flex-wrap justify-center items-center gap-x-1 gap-y-0 sm:flex-nowrap sm:justify-between">
         {/* Left group: Scrapbooks + Stats + Auth */}
-        <div className="flex items-center gap-3 sm:gap-6">
+        <div className="contents sm:flex sm:items-center sm:gap-6">
           {onScrapbooks && (
             <button
               onClick={onScrapbooks}
-              className="type-label uppercase text-dim hover:text-primary transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center px-2"
+              className="type-nav uppercase whitespace-nowrap order-1 sm:order-none text-dim hover:text-primary transition-colors duration-300 min-h-[44px] flex items-center justify-center px-2"
             >
               Scrapbooks
             </button>
@@ -178,7 +178,7 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
           {onStats && (
             <button
               onClick={onStats}
-              className="type-label uppercase text-dim hover:text-green-400 transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center px-2"
+              className="type-nav uppercase whitespace-nowrap order-1 sm:order-none text-dim hover:text-green-400 transition-colors duration-300 min-h-[44px] flex items-center justify-center px-2"
             >
               Stats
             </button>
@@ -186,7 +186,7 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
           {onRules && (
             <button
               onClick={onRules}
-              className="type-label uppercase text-dim hover:text-amber-400 transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center px-2"
+              className="type-nav uppercase whitespace-nowrap order-1 sm:order-none text-dim hover:text-amber-400 transition-colors duration-300 min-h-[44px] flex items-center justify-center px-2"
             >
               Rules
             </button>
@@ -195,7 +195,7 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
           {!authLoading && (
             <button
               onClick={handleAuthClick}
-              className={`type-label uppercase text-dimmer hover:text-foreground transition-colors duration-300 min-h-[44px] min-w-[44px] items-center justify-center px-2 ${
+              className={`type-nav uppercase whitespace-nowrap order-4 sm:order-none text-dimmer hover:text-foreground transition-colors duration-300 min-h-[44px] items-center justify-center px-2 ${
                 user ? 'hidden sm:flex' : 'flex'
               }`}
             >
@@ -204,19 +204,29 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
           )}
         </div>
         
+        {/* Mobile-only row break. Signed out there are five links, which will
+            not fit one 390px row; this splits them 3 / 2 instead of leaving a
+            single orphan on the second row. Signed in, "Sign Out" is hidden on
+            mobile and the remaining four fit one row, so no break is rendered. */}
+        {!authLoading && !user && <div className="order-2 basis-full h-0 sm:hidden" aria-hidden="true" />}
+
         {/* Right: My Collection */}
         <button
           onClick={onArchive}
-          className="type-label uppercase text-dim hover:text-secondary transition-colors duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center px-2 sm:px-3"
+          className="type-nav uppercase whitespace-nowrap order-3 sm:order-none text-dim hover:text-secondary transition-colors duration-300 min-h-[44px] flex items-center justify-center px-2 sm:px-3"
         >
-          My Collection
+          <span className="sm:hidden">Collection</span>
+          <span className="hidden sm:inline">My Collection</span>
         </button>
       </div>
 
       {/* Trademark Disclaimer */}
-      <div className="px-4 text-center">
+      <div className="px-3 sm:px-4 text-center">
         <p className="type-micro text-dimmer leading-snug max-w-3xl mx-auto text-balance">
-          Unofficial fan-made app — not endorsed by or affiliated with Van Ryder Games, registered trademark owner of Final Girl and all associated intellectual property rights.
+          <span className="sm:hidden">Fan-made · not endorsed by Van Ryder Games</span>
+          <span className="hidden sm:inline">
+            Unofficial fan-made app — not endorsed by or affiliated with Van Ryder Games, registered trademark owner of Final Girl and all associated intellectual property rights.
+          </span>
         </p>
       </div>
       </div>

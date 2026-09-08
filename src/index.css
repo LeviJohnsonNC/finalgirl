@@ -3920,6 +3920,23 @@
     line-height: 1.4;
   }
 
+  /* Navigation labels, which need to survive a 390px row without breaking
+     mid-label. One step smaller on phones, then the standard label size once
+     there is room. */
+  .type-nav {
+    font-family: var(--font-vhs);
+    font-size: var(--type-caption);
+    letter-spacing: 0.1em;
+    line-height: 1.4;
+  }
+
+  @media (min-width: 640px) {
+    .type-nav {
+      font-size: var(--type-label);
+      letter-spacing: 0.12em;
+    }
+  }
+
   .type-body-sm {
     font-family: var(--font-vhs);
     font-size: var(--type-body-sm);
