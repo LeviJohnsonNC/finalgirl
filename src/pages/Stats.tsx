@@ -5,6 +5,7 @@ import { RecordJacket } from '@/components/stats/RecordJacket';
 import { TrendsSection } from '@/components/stats/TrendsSection';
 import { BreakdownTabs } from '@/components/stats/BreakdownTabs';
 import { PlayerArchetypeBadge } from '@/components/stats/PlayerArchetype';
+import { SessionDetail } from '@/components/stats/SessionDetail';
 import { AlertTriangle, Film, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -127,20 +128,23 @@ const Stats = () => {
           {/* Record Jacket */}
           <RecordJacket stats={stats} />
 
+          {/* Who you are, right under the headline numbers rather than at the
+              foot of a long page where it went unread. */}
+          <PlayerArchetypeBadge
+            archetype={stats.playerArchetype}
+            reason={stats.archetypeReason}
+            profile={stats.archetypeProfile}
+            scores={stats.archetypeScores}
+          />
+
           {/* Trends - with archival subtitle */}
           <TrendsSection stats={stats} games={gameHistory} />
 
           {/* Breakdowns */}
           <BreakdownTabs stats={stats} />
 
-          {/* Player Archetype - Bottom */}
-          <div className="mt-8">
-            <PlayerArchetypeBadge 
-              archetype={stats.playerArchetype} 
-              reason={stats.archetypeReason}
-              profile={stats.archetypeProfile}
-            />
-          </div>
+          {/* Horror spread, weapons, and the last few sessions */}
+          <SessionDetail stats={stats} />
         </div>
       )}
     </div>
