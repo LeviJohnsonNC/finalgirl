@@ -58,7 +58,7 @@ const Stats = () => {
       {/* Loading State */}
       {isLoading ? (
         <div className="stats-content">
-          <p className="text-muted-foreground type-label animate-pulse text-center mb-6">
+          <p className="type-label text-dim animate-pulse text-center mb-6">
             RETRIEVING SESSION DATA...
           </p>
           {/* Skeleton Record Jacket */}
@@ -84,10 +84,10 @@ const Stats = () => {
         <div className="stats-empty border border-destructive/40 bg-background/70">
           <AlertTriangle className="w-16 h-16 text-destructive/70 mb-4" />
           <h2 className="font-title text-xl mb-2">{authError ? 'Session Recovery Failed' : 'Archive Retrieval Failed'}</h2>
-          <p className="text-muted-foreground text-center max-w-md mb-4">
+          <p className="type-body-sm text-dim text-center max-w-md mb-4">
             {authError ? 'Your saved sign-in could not be restored. Please sign in again.' : 'The cloud records timed out before the stats reel could be assembled.'}
           </p>
-          <p className="type-caption text-muted-foreground/70 text-center max-w-md mb-5 break-words">
+          <p className="type-caption text-dimmer text-center max-w-md mb-5 break-words">
             {loadError}
           </p>
           {!authError && (
@@ -104,7 +104,7 @@ const Stats = () => {
         <div className="stats-empty">
           <Film className="w-16 h-16 text-muted-foreground/30 mb-4" />
           <h2 className="font-title text-xl mb-2">Sign In Required</h2>
-          <p className="text-muted-foreground text-center max-w-md">
+          <p className="type-body-sm text-dim text-center max-w-md">
             Sign in to retrieve your cloud session stats.
           </p>
         </div>
@@ -112,7 +112,7 @@ const Stats = () => {
         <div className="stats-empty">
           <Film className="w-16 h-16 text-muted-foreground/30 mb-4" />
           <h2 className="font-title text-xl mb-2">No Games Recorded</h2>
-          <p className="text-muted-foreground text-center max-w-md">
+          <p className="type-body-sm text-dim text-center max-w-md">
             Play your first game and record the outcome to start tracking your stats. 
             Your journey as a Final Girl awaits!
           </p>
@@ -120,7 +120,7 @@ const Stats = () => {
       ) : (
         <div className="stats-content">
           {isDegraded && (
-            <div className="mb-6 border border-primary/30 bg-background/70 px-4 py-3 text-center type-caption text-muted-foreground">
+            <div className="mb-6 border border-primary/30 bg-background/70 px-4 py-3 text-center type-caption text-dim">
               CLOUD ARCHIVE RECONNECTING • SHOWING LAST SAVED SESSION DATA
             </div>
           )}
@@ -128,7 +128,7 @@ const Stats = () => {
           <RecordJacket stats={stats} />
 
           {/* Trends - with archival subtitle */}
-          <TrendsSection stats={stats} />
+          <TrendsSection stats={stats} games={gameHistory} />
 
           {/* Breakdowns */}
           <BreakdownTabs stats={stats} />
