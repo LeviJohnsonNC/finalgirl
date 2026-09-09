@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { GameResult } from './useGameHistory';
 import { computeArchetype } from './useArchetypeScoring';
+import { GameRecord, buildGameRecord } from '@/lib/gameRecord';
 
 export interface FinalGirlStats {
   name: string;
@@ -39,8 +40,8 @@ export interface ComputedStats {
   totalVictimsKilled: number;
   
   // Trends
-  totalWins: number;
-  totalLosses: number;
+  /** Win/loss split, streaks, and recent form — see src/lib/gameRecord.ts. */
+  record: GameRecord;
   
   // Narrative Stats - Killers & Locations
   nemesis: { killer: string; losses: number } | null;
@@ -70,7 +71,6 @@ export const useGameStats = (gameHistory: GameResult[]): ComputedStats => {
     const filteredGames = [...gameHistory];
 
     const wins = filteredGames.filter(g => g.outcome === 'won');
-    const losses = filteredGames.filter(g => g.outcome === 'lost');
     const gamesPlayed = filteredGames.length;
     const winRate = gamesPlayed > 0 ? (wins.length / gamesPlayed) * 100 : 0;
 
@@ -244,8 +244,7 @@ export const useGameStats = (gameHistory: GameResult[]): ComputedStats => {
       winRate,
       totalVictimsSaved,
       totalVictimsKilled,
-      totalWins: wins.length,
-      totalLosses: losses.length,
+      record: buildGameRecord(filteredGames),
       nemesis: nemesisKiller && nemesisLosses >= 2 ? { killer: nemesisKiller, losses: nemesisLosses } : null,
       usualSuspect: usualSuspectKiller && usualSuspectWins >= 2 ? { killer: usualSuspectKiller, wins: usualSuspectWins } : null,
       cursedSite: cursedSiteLocation && cursedSiteLosses >= 2 ? { location: cursedSiteLocation, losses: cursedSiteLosses } : null,
