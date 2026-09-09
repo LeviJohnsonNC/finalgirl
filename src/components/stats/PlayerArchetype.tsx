@@ -90,13 +90,23 @@ export const PlayerArchetypeBadge = ({ archetype, profile, scores }: PlayerArche
 
         {scores.length > 1 && (
           <div className="archetype-scores">
-            <p className="archetype-scores-label">How you score on each</p>
+            <p className="archetype-scores-label">
+              How you score on each · sessions the score is built from
+            </p>
             <dl className="archetype-score-list">
               {scores.map((standing) => {
                 const cfg = archetypeConfig[standing.archetype];
                 return (
                   <div key={standing.archetype} className="archetype-score-row">
-                    <dt className={`archetype-score-name ${standing.archetype === archetype ? cfg.color : 'text-dim'}`}>
+                    <dt
+                      className={`archetype-score-name ${
+                        standing.support === 0
+                          ? 'text-dimmer'
+                          : standing.archetype === archetype
+                            ? cfg.color
+                            : 'text-dim'
+                      }`}
+                    >
                       {cfg.name.replace('The ', '')}
                       <span className="archetype-score-blurb">{cfg.blurb}</span>
                     </dt>
@@ -106,7 +116,16 @@ export const PlayerArchetypeBadge = ({ archetype, profile, scores }: PlayerArche
                         style={{ width: `${standing.score}%` }}
                       />
                     </dd>
-                    <dd className="archetype-score-value">{standing.score}</dd>
+                    <dd className="archetype-score-value">
+                      {standing.score}
+                      {/* What the number is built on. A 71 from four sessions
+                          and a 71 from forty are not the same claim. */}
+                      <span className="archetype-score-support">
+                        {standing.support === 0
+                          ? 'not recorded'
+                          : `${standing.support}/${standing.of}`}
+                      </span>
+                    </dd>
                   </div>
                 );
               })}

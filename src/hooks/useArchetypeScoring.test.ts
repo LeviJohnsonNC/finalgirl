@@ -19,7 +19,7 @@ describe('computeArchetype', () => {
   it('returns newcomer when fewer than 3 games', () => {
     const games = [makeGame(), makeGame()];
     const wins = games.filter((g) => g.outcome === 'won');
-    const result = computeArchetype(games, wins, 100, 10, 0);
+    const result = computeArchetype(games);
     expect(result.archetype).toBe('newcomer');
   });
 
@@ -29,7 +29,7 @@ describe('computeArchetype', () => {
       makeGame({ victimsSaved: 9, victimsKilled: 1, finalHorrorLevel: 4 }),
     );
     const wins = games;
-    const result = computeArchetype(games, wins, 100, 45, 5);
+    const result = computeArchetype(games);
     expect(result.archetype).toBe('protector');
   });
 
@@ -55,7 +55,7 @@ describe('computeArchetype', () => {
     });
     const games = [...clutchWins, normalGame];
     const wins = clutchWins;
-    const result = computeArchetype(games, wins, 80, 4, 28);
+    const result = computeArchetype(games);
     expect(result.archetype).toBe('survivor');
   });
 
@@ -81,7 +81,7 @@ describe('computeArchetype', () => {
     const games = [...winGames, ...lossGames];
     const wins = winGames;
     // total saved: 14, total killed: 28 → 33% save ratio
-    const result = computeArchetype(games, wins, 75, 14, 28);
+    const result = computeArchetype(games);
     expect(result.archetype).toBe('duelist');
   });
 
@@ -99,7 +99,7 @@ describe('computeArchetype', () => {
     );
     const wins = games.filter((g) => g.outcome === 'won');
     // win rate: 50% (3 of 6), save ratio: 40%, not clutch → gambler should win
-    const result = computeArchetype(games, wins, 50, 12, 18);
+    const result = computeArchetype(games);
     expect(result.archetype).toBe('gambler');
   });
 
@@ -127,7 +127,7 @@ describe('computeArchetype', () => {
     const totalKilled = games.reduce((s, g) => s + (g.victimsKilled || 0), 0);
     const winRate = (wins.length / games.length) * 100;
 
-    const result = computeArchetype(games, wins, winRate, totalSaved, totalKilled);
+    const result = computeArchetype(games);
     expect(result.archetype).toBe('duelist');
     expect(result.reason).toContain('%');
   });
@@ -137,7 +137,7 @@ describe('computeArchetype', () => {
       makeGame({ victimsSaved: 8, victimsKilled: 1, finalHorrorLevel: 4 }),
     );
     const wins = games;
-    const result = computeArchetype(games, wins, 100, 32, 4);
+    const result = computeArchetype(games);
     expect(result.archetype).toBe('protector');
     // Reason should contain actual numbers
     expect(result.reason).toMatch(/\d/);
@@ -153,28 +153,34 @@ describe('computeArchetype scores', () => {
   ];
 
   it('reports every archetype, highest first', () => {
-    const { scores, archetype } = computeArchetype(games, games.filter((g) => g.outcome === 'won'), 75, 15, 4);
+    const { scores, archetype } = computeArchetype(games);
 
     expect(scores).toHaveLength(4);
     expect(scores[0].archetype).toBe(archetype);
-    // Ranked, so the runner-up gap is readable rather than thrown away.
-    for (let i = 1; i < scores.length; i++) {
-      expect(scores[i - 1].score).toBeGreaterThanOrEqual(scores[i].score);
-    }
     expect(scores.every((s) => Number.isInteger(s.score))).toBe(true);
+
+    // Measured axes rank by score; an axis with nothing behind it sits on the
+    // prior at 50 and must sort last regardless of that number.
+    const measured = scores.filter((s) => s.support > 0);
+    const blind = scores.filter((s) => s.support === 0);
+    expect(scores.slice(0, measured.length)).toEqual(measured);
+    for (let i = 1; i < measured.length; i++) {
+      expect(measured[i - 1].score).toBeGreaterThanOrEqual(measured[i].score);
+    }
+    expect(blind.every((s) => s.score === 50)).toBe(true);
+
+    // Support is reported as a fraction of the history, so a score built on
+    // three of fifty sessions cannot pass for a settled verdict.
+    expect(scores.every((s) => s.of === games.length)).toBe(true);
   });
 
   it('has no scores to report before the third game', () => {
-    expect(computeArchetype([makeGame()], [], 100, 0, 0).scores).toEqual([]);
+    expect(computeArchetype([makeGame()]).scores).toEqual([]);
   });
 
   it('joins three narrative facts with a single "and", not a stray full stop', () => {
     const { profile } = computeArchetype(
       games,
-      games.filter((g) => g.outcome === 'won'),
-      75,
-      15,
-      4,
       {
         nemesis: { killer: 'Hans', losses: 3 },
         usualSuspect: null,
@@ -188,5 +194,117 @@ describe('computeArchetype scores', () => {
     // Previously "…dragging you back. Alice is your go-to…, and Camp…" — the
     // list-joining map returned its input on both branches.
     expect(profile).toContain('dragging you back, Alice is your go-to with 5 wins, and Camp Happy Trails');
+  });
+});
+
+describe('scoring corrections', () => {
+  const scoreOf = (games: GameResult[], archetype: string) =>
+    computeArchetype(games).scores.find((s) => s.archetype === archetype)!;
+
+  it('does not read an unrecorded health bar as a comfortable win', () => {
+    // Every recorded win was a knife-edge one; the rest simply were not filled
+    // in. Dividing clutch wins by *all* wins scored this player as barely a
+    // Survivor; over the wins that carry the field, they plainly are one.
+    const games = [
+      makeGame({ outcome: 'won', finalGirl: 'Laurie', finalGirlHealth: 1 }),
+      makeGame({ outcome: 'won', finalGirl: 'Laurie', finalGirlHealth: 1 }),
+      makeGame({ outcome: 'won', finalGirl: 'Laurie', finalGirlHealth: 1 }),
+      ...Array.from({ length: 9 }, () => makeGame({ outcome: 'won' })),
+    ];
+
+    const survivor = scoreOf(games, 'survivor');
+    expect(survivor.support).toBe(3);
+    expect(survivor.of).toBe(12);
+    expect(survivor.score).toBeGreaterThan(60);
+  });
+
+  it('does not read an unfilled victim count as nobody saved', () => {
+    const day = 86_400_000;
+    const recorded = Array.from({ length: 3 }, (_, i) =>
+      makeGame({ timestamp: Date.now() - (3 - i) * day, victimsSaved: 6, victimsKilled: 0 }),
+    );
+    const blank = Array.from({ length: 8 }, (_, i) =>
+      makeGame({ timestamp: Date.now() - (11 - i) * day }),
+    );
+
+    const withBlanks = scoreOf([...blank, ...recorded], 'protector');
+
+    // The blank games are absent from the rate, not counted as failures.
+    expect(withBlanks.support).toBe(3);
+    expect(withBlanks.of).toBe(11);
+    expect(withBlanks.score).toBeGreaterThan(60);
+  });
+
+  it('pulls a rate from three games toward the middle, and leaves a long record alone', () => {
+    const perfect = (n: number) =>
+      Array.from({ length: n }, () => makeGame({ victimsSaved: 5, victimsKilled: 0 }));
+
+    const thin = scoreOf(perfect(3), 'protector').score;
+    const thick = scoreOf(perfect(40), 'protector').score;
+
+    // Three flawless games are not a verdict; forty are. The prior keeps the
+    // meter off 100 even then, which is the honest reading — nobody's record
+    // is proof of a perfect tendency.
+    expect(thin).toBeLessThan(70);
+    expect(thick).toBeGreaterThan(82);
+    expect(thick - thin).toBeGreaterThan(15);
+  });
+
+  it('weights recent sessions more heavily than old ones', () => {
+    const day = 86_400_000;
+    // Twenty games of never rescuing, then ten of rescuing everyone.
+    const reformed = [
+      ...Array.from({ length: 20 }, (_, i) =>
+        makeGame({ timestamp: Date.now() - (30 - i) * day, victimsSaved: 0, victimsKilled: 5 }),
+      ),
+      ...Array.from({ length: 10 }, (_, i) =>
+        makeGame({ timestamp: Date.now() - (10 - i) * day, victimsSaved: 5, victimsKilled: 0 }),
+      ),
+    ];
+
+    // The same thirty games in the opposite order — someone who used to save
+    // everyone and stopped.
+    const lapsed = [
+      ...Array.from({ length: 10 }, (_, i) =>
+        makeGame({ timestamp: Date.now() - (30 - i) * day, victimsSaved: 5, victimsKilled: 0 }),
+      ),
+      ...Array.from({ length: 20 }, (_, i) =>
+        makeGame({ timestamp: Date.now() - (20 - i) * day, victimsSaved: 0, victimsKilled: 5 }),
+      ),
+    ];
+
+    // A flat lifetime average cannot tell these two apart — both are 10 saving
+    // games out of 30. Recency reads them as opposite people.
+    expect(scoreOf(reformed, 'protector').score).toBeGreaterThan(45);
+    expect(scoreOf(lapsed, 'protector').score).toBeLessThan(35);
+  });
+
+  it('counts wildness as swing between sessions, not as ending calm', () => {
+    const day = 86_400_000;
+    const steady = Array.from({ length: 10 }, (_, i) =>
+      makeGame({ timestamp: Date.now() - (10 - i) * day, finalHorrorLevel: 1 }),
+    );
+    const wild = Array.from({ length: 10 }, (_, i) =>
+      makeGame({ timestamp: Date.now() - (10 - i) * day, finalHorrorLevel: i % 2 === 0 ? 1 : 7 }),
+    );
+
+    // Ten dominant wins at terror 1 is the most consistent record possible.
+    expect(scoreOf(steady, 'gambler').score).toBeLessThan(25);
+    expect(scoreOf(wild, 'gambler').score).toBeGreaterThan(70);
+  });
+
+  it('never lets an unmeasured axis outrank a measured one', () => {
+    // No terror levels anywhere: Gambler and Duelist have nothing to go on.
+    const games = Array.from({ length: 8 }, () =>
+      makeGame({ outcome: 'lost', victimsSaved: 0, victimsKilled: 6 }),
+    );
+
+    const { scores, archetype } = computeArchetype(games);
+    const gambler = scores.find((s) => s.archetype === 'gambler')!;
+
+    expect(gambler.support).toBe(0);
+    expect(gambler.score).toBe(50);
+    expect(archetype).not.toBe('gambler');
+    expect(scores[scores.length - 1].support).toBe(0);
   });
 });

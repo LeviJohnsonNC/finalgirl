@@ -3646,8 +3646,12 @@
 .archetype-fill-newcomer  { background: hsl(0 0% 60% / 0.5); }
 
 .archetype-score-value {
-  @apply type-label text-dim tabular-nums text-right;
+  @apply flex flex-col items-end type-label text-dim tabular-nums text-right;
   min-width: 2.5ch;
+}
+
+.archetype-score-support {
+  @apply type-caption text-dimmer;
 }
 
 .archetype-profile {
