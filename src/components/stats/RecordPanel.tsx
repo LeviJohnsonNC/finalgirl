@@ -180,7 +180,7 @@ export const RecordPanel = ({ record }: RecordPanelProps) => {
                 so twenty sessions do not leave a void at the right end and five
                 do not become slabs. */}
             <div
-              className="record-form-body"
+              className={`record-form-body ${recent.length >= 20 ? 'record-form-body-fill' : ''}`}
               style={{ '--tick-count': recent.length } as React.CSSProperties}
             >
             <div className="record-form-head">

@@ -2428,6 +2428,7 @@
 /* Range chips live above the card, in one row, and scope everything in it. */
 .chart-filter-row {
   @apply flex items-center gap-3 mb-3 flex-wrap;
+  margin-top: 2rem;
 }
 
 .chart-filter-label {
@@ -2988,6 +2989,13 @@
 .record-form-body {
   @apply w-full space-y-2;
   max-width: calc(var(--tick-count, 20) * 2rem);
+}
+
+/* With a full 20-session strip, let it breathe across the whole tray instead of
+   leaving dead space on the right. Fewer sessions keep the narrower tray so the
+   ticks don't turn into slabs. */
+.record-form-body-fill {
+  max-width: 100%;
 }
 
 .record-form-head {
