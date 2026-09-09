@@ -2839,13 +2839,203 @@
   z-index: 20;
 }
 
+/* --- The gauge mark: where an even record sits --- */
+.winloss-even-mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  transform: translateX(-50%);
+  /* A scribed line, not a drawn one: a dark groove with a lit edge. A single
+     translucent hairline vanished where it crossed the bright cyan; this reads
+     on both liquids and on the empty glass. */
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.55) 33%,
+    rgba(255, 255, 255, 0.75) 34%,
+    rgba(255, 255, 255, 0.75) 66%,
+    rgba(0, 0, 0, 0.45) 67%
+  );
+  opacity: 0.65;
+  /* Broken across the middle band, the way a real gauge mark is. The readout
+     sits on the vertical centre, and a continuous line ran through the gaps
+     between its glyphs at any rate close to even. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 30%, transparent 36% 64%, #000 70% 100%);
+  mask-image: linear-gradient(to bottom, #000 0 30%, transparent 36% 64%, #000 70% 100%);
+  pointer-events: none;
+  /* Above the liquid and the glass sheen, below the outer rim (25). */
+  z-index: 22;
+}
+
+/* Notches read as engraved instrumentation rather than as more liquid. */
+.winloss-even-notch {
+  position: absolute;
+  left: 50%;
+  width: 7px;
+  height: 9px;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.95);
+}
+
+.winloss-even-notch-top { top: 0; }
+.winloss-even-notch-bottom { bottom: 0; }
+
+/* --- The rate, printed on the boundary it describes --- */
+.winloss-readout {
+  position: absolute;
+  top: 50%;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 23;
+  transition: left 0.7s ease-in-out;
+}
+
+@media (min-width: 640px) {
+  .winloss-readout { font-size: 1.875rem; }
+}
+
+/* Dark ink on the bright cyan: ~9:1 even at the liquid's darkest stop. */
+.winloss-readout-inside {
+  transform: translate(calc(-100% - 12px), -50%);
+  color: hsl(196 90% 7%);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+/* Too little cyan to print on — the label moves off the fill and goes light. */
+.winloss-readout-outside {
+  transform: translate(12px, -50%);
+  color: hsl(0 0% 96%);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.95), 0 0 14px rgba(0, 0, 0, 0.8);
+}
+
 .winloss-labels {
-  @apply flex justify-between font-vhs uppercase;
-  font-size: 0.85rem;
-  letter-spacing: 0.15em;
-  opacity: 0.9;
+  @apply relative flex justify-between items-baseline type-label uppercase text-dim;
   padding: 0 6px;
 }
+
+.winloss-count-value {
+  @apply font-display text-xl sm:text-2xl font-bold align-baseline mr-1.5;
+  letter-spacing: 0.03em;
+}
+
+/* Pinned to the tube's midpoint rather than laid out between the counts, so it
+   stays under the gauge mark whatever the counts are wide. */
+/* Centred over a row whose ends grow with the counts, so it is desktop-only —
+   at 390px it lands on top of the loss count. The notched mark on the tube
+   carries the same information at every width. */
+.winloss-even-caption {
+  @apply absolute type-caption uppercase text-dimmer hidden sm:block;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ===== Record panel: runs and recent form ===== */
+.record-panel {
+  @apply space-y-5;
+}
+
+.record-lower {
+  @apply grid gap-3 sm:gap-4;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .record-lower {
+    grid-template-columns: minmax(150px, auto) 1fr;
+    align-items: stretch;
+  }
+
+  /* Too few sessions for a form strip — the run card takes the row. */
+  .record-lower-solo {
+    grid-template-columns: 1fr;
+  }
+}
+
+.record-run {
+  @apply flex flex-col justify-center gap-0.5 py-3 px-4 rounded-lg;
+  background: hsl(220 15% 6% / 0.55);
+  border: 1px solid hsl(0 0% 18% / 0.5);
+}
+
+.record-run-label {
+  @apply type-caption uppercase text-dimmer;
+}
+
+.record-run-value {
+  @apply font-title text-2xl sm:text-3xl leading-none;
+}
+
+.record-run-sub {
+  @apply flex flex-wrap items-baseline gap-x-4 type-caption uppercase text-dimmer mt-1;
+}
+
+.record-form {
+  @apply flex flex-col justify-center gap-2 py-3 px-4 rounded-lg;
+  background: hsl(220 15% 6% / 0.55);
+  border: 1px solid hsl(0 0% 18% / 0.5);
+}
+
+/* Header and strip share one column whose width follows the tick count. */
+.record-form-body {
+  @apply w-full space-y-2;
+  max-width: calc(var(--tick-count, 20) * 2rem);
+}
+
+.record-form-head {
+  @apply flex items-baseline justify-between gap-3;
+}
+
+.record-form-label {
+  @apply type-caption uppercase text-dim;
+}
+
+/* A nicety, and the first thing to go when the header would wrap to two lines. */
+.record-form-hint {
+  @apply type-caption uppercase text-dimmer hidden sm:inline;
+}
+
+/* A strip of frames: each session one mark, in order, with a surface gap
+   between them rather than a border around each. */
+.record-form-strip {
+  @apply flex gap-[3px] items-stretch;
+  height: 22px;
+  padding: 3px;
+  border-radius: 3px;
+  background: hsl(0 0% 4% / 0.9);
+  border: 1px solid hsl(0 0% 14% / 0.8);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.record-form-tick {
+  @apply flex-1 rounded-[1px] relative;
+  min-width: 3px;
+}
+
+.record-form-tick-won {
+  background: linear-gradient(to bottom, hsl(186 100% 62%), hsl(186 96% 44%));
+}
+
+.record-form-tick-lost {
+  background: linear-gradient(to bottom, hsl(0 92% 52%), hsl(0 88% 34%));
+}
+
+/* The most recent session is the one being asked about. Marked from inside the
+   strip — an underline hanging below it read as a rendering artefact. */
+.record-form-tick-latest {
+  box-shadow: 0 0 8px currentColor, inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.record-form-tick-latest.record-form-tick-won { color: hsl(var(--neon-cyan)); }
+.record-form-tick-latest.record-form-tick-lost { color: hsl(var(--blood-red-glow)); }
 
 /* ===== Narrative Badges Grid ===== */
 .narrative-grid {
@@ -3978,8 +4168,18 @@
   @media (prefers-reduced-motion: reduce) {
     .film-grain,
     .scanlines::before,
-    .story-image-loaded {
+    .story-image-loaded,
+    /* The win/loss tube runs bubbles, two caustic sweeps and a boundary swirl
+       on infinite loops. None of it carries meaning — the liquid levels do. */
+    .winloss-bubble,
+    .winloss-liquid-caustic,
+    .winloss-liquid-caustic-2,
+    .winloss-swirl {
       animation: none !important;
+    }
+
+    .winloss-bubble {
+      opacity: 0.5;
     }
 
     .story-image-loaded {
