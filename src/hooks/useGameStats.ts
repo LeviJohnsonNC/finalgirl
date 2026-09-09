@@ -254,14 +254,7 @@ export const useGameStats = (gameHistory: GameResult[]): ComputedStats => {
       reason: archetypeReason,
       profile: archetypeProfile,
       scores: archetypeScores,
-    } = computeArchetype(
-      filteredGames,
-      wins,
-      winRate,
-      totalVictimsSaved,
-      totalVictimsKilled,
-      narrativeCtx,
-    );
+    } = computeArchetype(filteredGames, narrativeCtx);
 
     return {
       gamesPlayed,

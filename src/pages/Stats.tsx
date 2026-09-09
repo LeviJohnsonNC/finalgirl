@@ -133,15 +133,6 @@ const Stats = ({ onOpenSession }: StatsProps) => {
           {/* Record Jacket */}
           <RecordJacket stats={stats} />
 
-          {/* Who you are, right under the headline numbers rather than at the
-              foot of a long page where it went unread. */}
-          <PlayerArchetypeBadge
-            archetype={stats.playerArchetype}
-            reason={stats.archetypeReason}
-            profile={stats.archetypeProfile}
-            scores={stats.archetypeScores}
-          />
-
           {/* Trends - with archival subtitle */}
           <TrendsSection stats={stats} games={gameHistory} />
 
@@ -150,6 +141,15 @@ const Stats = ({ onOpenSession }: StatsProps) => {
 
           {/* Horror spread, weapons, and the last few sessions */}
           <SessionDetail stats={stats} onOpenSession={onOpenSession} />
+
+          {/* The read on how you play, last — it is the summing-up, and it
+              reads better after the evidence than before it. */}
+          <PlayerArchetypeBadge
+            archetype={stats.playerArchetype}
+            reason={stats.archetypeReason}
+            profile={stats.archetypeProfile}
+            scores={stats.archetypeScores}
+          />
         </div>
       )}
     </div>

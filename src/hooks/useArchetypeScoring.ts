@@ -6,13 +6,18 @@ interface ArchetypeScore {
   archetype: PlayerArchetype;
   score: number;
   reason: string;
+  evidence: RateEvidence;
 }
 
 /** One archetype's standing, for the ranked read-out on the stats page. */
 export interface ArchetypeStanding {
   archetype: PlayerArchetype;
-  /** 0–100, rounded. */
+  /** 0–100, rounded. A rate, comparable with the other three. */
   score: number;
+  /** Sessions that carried the fields this score needs. */
+  support: number;
+  /** Sessions in the history, so support reads as a fraction. */
+  of: number;
 }
 
 export interface ArchetypeResult {
@@ -33,118 +38,175 @@ export interface NarrativeContext {
   grinder: { finalGirl: string; plays: number } | null;
 }
 
-// --- Individual scoring functions (0–100) ---
+// --- Scoring ---
+//
+// Every archetype is scored the same way: as a *rate* — the share of the
+// player's games that show that behaviour — so the four numbers mean the same
+// thing and can honestly be ranked against each other. The previous version
+// mixed a ratio (Survivor: clutch wins / wins), a two-part weighted sum
+// (Protector, Duelist) and a standard deviation with a near-automatic +20
+// bonus (Gambler), so "71 vs 70" compared two different scales.
+//
+// Two corrections apply to every rate:
+//
+//  - Recency. Games are weighted with a half-life, so the profile describes
+//    how someone plays now rather than averaging a year of change flat.
+//  - Shrinkage. A rate from three games is pulled toward the middle, so one
+//    lucky night cannot max a meter. With a full history it barely moves.
 
-function scoreProtector(
-  totalSaved: number,
-  totalKilled: number,
-  gamesPlayed: number,
-): ArchetypeScore {
-  const totalVictims = totalSaved + totalKilled;
-  const saveRatio = totalVictims > 0 ? totalSaved / totalVictims : 0;
-  const avgSaved = gamesPlayed > 0 ? totalSaved / gamesPlayed : 0;
+/** Games of history after which a session counts half as much. */
+const RECENCY_HALF_LIFE = 12;
+/** Games-equivalent of "no evidence", pulling a thin rate toward the middle. */
+const PRIOR_WEIGHT = 6;
+const PRIOR_RATE = 0.5;
 
-  const ratioComponent = saveRatio * 60;
-  const volumeComponent = Math.min(avgSaved / 8, 1) * 40;
-  const score = ratioComponent + volumeComponent;
-
-  const pct = Math.round(saveRatio * 100);
-  const reason =
-    avgSaved >= 5
-      ? `You average ${avgSaved.toFixed(1)} rescues per game — ${pct}% of all victims walk away alive.`
-      : `${pct}% of victims survive your games, with ${avgSaved.toFixed(1)} saved per outing.`;
-
-  return { archetype: 'protector', score, reason };
+interface Weighted {
+  game: GameResult;
+  weight: number;
 }
 
-function scoreSurvivor(wins: GameResult[]): ArchetypeScore {
-  if (wins.length === 0) {
-    return { archetype: 'survivor', score: 0, reason: '' };
-  }
+/** Oldest first, weighted so the newest game counts 1 and older ones decay. */
+function weighDecay(games: GameResult[]): Weighted[] {
+  const ordered = [...games].sort((a, b) => a.timestamp - b.timestamp);
+  const last = ordered.length - 1;
+  return ordered.map((game, i) => ({
+    game,
+    weight: Math.pow(0.5, (last - i) / RECENCY_HALF_LIFE),
+  }));
+}
 
-  const clutchWins = wins.filter((g) => {
-    if (g.finalGirlHealth == null) return false;
-    const maxHP = getFinalGirlHealth(g.finalGirl);
-    return g.finalGirlHealth / maxHP <= 0.33;
+interface RateEvidence {
+  /** Weighted sum of per-game shares in 0–1. */
+  hits: number;
+  /** Weighted count of games that carried the fields this rate needs. */
+  weight: number;
+  /** Raw count of those games, for the confidence read-out. */
+  support: number;
+}
+
+const NO_EVIDENCE: RateEvidence = { hits: 0, weight: 0, support: 0 };
+
+/** A rate in 0–100, pulled toward the middle while the evidence is thin. */
+function shrinkToScore(evidence: RateEvidence): number {
+  return ((evidence.hits + PRIOR_WEIGHT * PRIOR_RATE) / (evidence.weight + PRIOR_WEIGHT)) * 100;
+}
+
+/** Collect a per-game share into a rate. `share` returns null when the game
+ *  did not record what this rate needs — which is not the same as a zero. */
+function collect(weighted: Weighted[], share: (game: GameResult) => number | null): RateEvidence {
+  return weighted.reduce<RateEvidence>((acc, { game, weight }) => {
+    const value = share(game);
+    if (value === null) return acc;
+    return { hits: acc.hits + weight * value, weight: acc.weight + weight, support: acc.support + 1 };
+  }, NO_EVIDENCE);
+}
+
+const isClutch = (game: GameResult): boolean => {
+  if (game.finalGirlHealth == null) return false;
+  const maxHP = getFinalGirlHealth(game.finalGirl);
+  return maxHP > 0 && game.finalGirlHealth / maxHP <= 0.33;
+};
+
+function scoreProtector(weighted: Weighted[]): ArchetypeScore {
+  // Share of the victims in play who walked out, per game. Counted per game
+  // rather than per victim so one crowded location cannot carry the score.
+  const evidence = collect(weighted, (game) => {
+    const saved = game.victimsSaved;
+    const killed = game.victimsKilled;
+    // Neither recorded: the game says nothing about rescuing, so it is left
+    // out. Treating it as zero saved is what made an unfilled form read as
+    // callousness.
+    if (saved == null && killed == null) return null;
+    const total = (saved ?? 0) + (killed ?? 0);
+    if (total === 0) return null;
+    return (saved ?? 0) / total;
   });
 
-  const clutchRatio = clutchWins.length / wins.length;
-  const score = clutchRatio * 100;
+  const pct = evidence.weight > 0 ? Math.round((evidence.hits / evidence.weight) * 100) : 0;
+  const reason =
+    evidence.support === 0
+      ? 'No victim counts recorded yet.'
+      : `${pct}% of the victims in your games walk out alive.`;
 
-  const oneHPWins = clutchWins.filter((g) => g.finalGirlHealth === 1).length;
-  let reason: string;
-  if (oneHPWins >= 2) {
-    reason = `You've clawed your way to victory at 1 HP ${oneHPWins} times — death can't keep up with you.`;
-  } else if (clutchWins.length >= 2) {
-    reason = `${clutchWins.length} of your ${wins.length} wins came at a sliver of health. You live on the edge.`;
-  } else if (clutchWins.length === 1) {
-    const g = clutchWins[0];
-    reason = `${g.finalGirl} limped away with just ${g.finalGirlHealth} HP against ${g.killer}. A true survivor moment.`;
-  } else {
-    reason = 'You tend to finish fights with health to spare — not quite the near-death type.';
-  }
-
-  return { archetype: 'survivor', score, reason };
+  return { archetype: 'protector', score: shrinkToScore(evidence), evidence, reason };
 }
 
-function scoreDuelist(
-  winRate: number,
-  wins: GameResult[],
-): ArchetypeScore {
-  const winFactor = Math.min(winRate / 80, 1) * 50;
+function scoreSurvivor(weighted: Weighted[]): ArchetypeScore {
+  const wins = weighted.filter(({ game }) => game.outcome === 'won');
+  // Over wins whose health was recorded. Dividing by *all* wins, as this used
+  // to, meant an unrecorded health bar counted as a comfortable win.
+  const evidence = collect(wins, (game) => (game.finalGirlHealth == null ? null : isClutch(game) ? 1 : 0));
 
-  const winsWithHorror = wins.filter((g) => g.finalHorrorLevel != null);
-  const avgHorrorOnWins =
-    winsWithHorror.length > 0
-      ? winsWithHorror.reduce((s, g) => s + (g.finalHorrorLevel || 0), 0) / winsWithHorror.length
-      : 4;
-  const controlFactor = Math.max(0, 1 - avgHorrorOnWins / 7) * 50;
+  const clutchCount = wins.filter(({ game }) => isClutch(game)).length;
+  const oneHPWins = wins.filter(({ game }) => game.finalGirlHealth === 1).length;
 
-  const score = winFactor + controlFactor;
-
-  const wrPct = Math.round(winRate);
   let reason: string;
-  if (wrPct >= 70 && avgHorrorOnWins <= 2) {
-    reason = `A ${wrPct}% win rate with an average horror of just ${avgHorrorOnWins.toFixed(1)} on wins. Clinical precision.`;
-  } else if (wrPct >= 60) {
-    reason = `${wrPct}% win rate while keeping horror at ${avgHorrorOnWins.toFixed(1)} — controlled and efficient.`;
+  if (evidence.support === 0) {
+    reason = 'No health recorded on your wins yet.';
+  } else if (oneHPWins >= 2) {
+    reason = `You've won at 1 HP ${oneHPWins} times — death can't keep up with you.`;
+  } else if (clutchCount >= 2) {
+    reason = `${clutchCount} of your ${evidence.support} recorded wins came at a sliver of health.`;
+  } else if (clutchCount === 1) {
+    reason = 'One win came down to the last hit point.';
   } else {
-    reason = `You fight smart, maintaining horror at ${avgHorrorOnWins.toFixed(1)} when you win.`;
+    reason = 'You tend to finish fights with health to spare.';
   }
 
-  return { archetype: 'duelist', score, reason };
+  return { archetype: 'survivor', score: shrinkToScore(evidence), evidence, reason };
 }
 
-function scoreGambler(games: GameResult[]): ArchetypeScore {
-  const gamesWithHorror = games.filter((g) => g.finalHorrorLevel != null);
-  if (gamesWithHorror.length < 2) {
-    return { archetype: 'gambler', score: 0, reason: '' };
+function scoreDuelist(weighted: Weighted[]): ArchetypeScore {
+  // One rate: how often a game ends as a *controlled* win. A loss is not a
+  // clean win, so it counts as a zero without needing any terror data; a win
+  // needs the terror level to be judged, and is left out when it is missing.
+  const evidence = collect(weighted, (game) => {
+    if (game.outcome !== 'won') return 0;
+    if (game.finalHorrorLevel == null) return null;
+    return game.finalHorrorLevel <= 3 ? 1 : 0;
+  });
+
+  const wins = weighted.filter(({ game }) => game.outcome === 'won');
+  const clean = wins.filter(({ game }) => game.finalHorrorLevel != null && game.finalHorrorLevel <= 3).length;
+  const pct = evidence.weight > 0 ? Math.round((evidence.hits / evidence.weight) * 100) : 0;
+  const reason =
+    evidence.support === 0
+      ? 'No horror levels recorded yet.'
+      : `${pct}% of your games end as a controlled win — ${clean} of them at horror 3 or below.`;
+
+  return { archetype: 'duelist', score: shrinkToScore(evidence), evidence, reason };
+}
+
+function scoreGambler(weighted: Weighted[]): ArchetypeScore {
+  // Volatility *between* sessions: the share of back-to-back games whose
+  // terror levels are far apart. Two earlier definitions were wrong in the
+  // same way — a standard deviation plus a +20 bonus that fired whenever any
+  // game had ever ended calm and any in carnage (all but automatic over a long
+  // history), and then "ended at either extreme", which counts a dominant win
+  // at terror 1 as wildness and puts this axis in direct conflict with the
+  // Duelist over the very same games. Swing is what "no two games feel the
+  // same" actually means, and nothing else measures it.
+  const recorded = weighted.filter(({ game }) => game.finalHorrorLevel != null);
+
+  let hits = 0;
+  let weight = 0;
+  for (let i = 1; i < recorded.length; i++) {
+    const swing = Math.abs(recorded[i].game.finalHorrorLevel! - recorded[i - 1].game.finalHorrorLevel!);
+    // The later game of the pair carries the weight, so recent swings count most.
+    const pairWeight = recorded[i].weight;
+    hits += pairWeight * (swing >= 3 ? 1 : 0);
+    weight += pairWeight;
   }
+  const evidence: RateEvidence = { hits, weight, support: Math.max(recorded.length - 1, 0) };
 
-  const horrorLevels = gamesWithHorror.map((g) => g.finalHorrorLevel!);
-  const mean = horrorLevels.reduce((a, b) => a + b, 0) / horrorLevels.length;
-  const stdDev = Math.sqrt(
-    horrorLevels.reduce((sum, h) => sum + (h - mean) ** 2, 0) / horrorLevels.length,
-  );
+  const levels = recorded.map(({ game }) => game.finalHorrorLevel!);
+  const pct = weight > 0 ? Math.round((hits / weight) * 100) : 0;
+  const reason =
+    evidence.support === 0
+      ? 'Not enough horror levels recorded to see a pattern yet.'
+      : `${pct}% of your sessions swing to a wildly different horror level than the one before (${Math.min(...levels)}–${Math.max(...levels)}).`;
 
-  const varianceScore = Math.min(stdDev / 3, 1) * 80;
-
-  const hasCalm = horrorLevels.some((h) => h <= 2);
-  const hasChaos = horrorLevels.some((h) => h >= 6);
-  const extremesBonus = hasCalm && hasChaos ? 20 : 0;
-
-  const score = varianceScore + extremesBonus;
-
-  const minH = Math.min(...horrorLevels);
-  const maxH = Math.max(...horrorLevels);
-  let reason: string;
-  if (hasCalm && hasChaos) {
-    reason = `Your horror levels swing from ${minH} to ${maxH} — every game is a coin flip between calm and carnage.`;
-  } else {
-    reason = `With a horror spread of ${minH}–${maxH}, your games are anything but predictable.`;
-  }
-
-  return { archetype: 'gambler', score, reason };
+  return { archetype: 'gambler', score: shrinkToScore(evidence), evidence, reason };
 }
 
 // --- Tie-breaking order (most "dramatic" wins ties) ---
@@ -182,15 +244,18 @@ const ARCHETYPE_INTROS: Record<Exclude<PlayerArchetype, 'newcomer'>, (ctx: Profi
     return `Precision runs through every session. A ${Math.round(ctx.winRate)}% win rate across ${ctx.gamesPlayed} games, with an average horror level of just ${avgHorror} on your victories. You don't scramble — you execute. The board is a problem to be solved, and you solve it with methodical, clinical efficiency. Killers don't scare you; they're just obstacles with a health bar.`;
   },
   gambler: (ctx) => {
-    const gamesWithHorror = ctx.games.filter((g) => g.finalHorrorLevel != null);
-    const horrorLevels = gamesWithHorror.map((g) => g.finalHorrorLevel!);
-    const minH = horrorLevels.length > 0 ? Math.min(...horrorLevels) : 0;
-    const maxH = horrorLevels.length > 0 ? Math.max(...horrorLevels) : 0;
-    const mean = horrorLevels.length > 0 ? horrorLevels.reduce((a, b) => a + b, 0) / horrorLevels.length : 0;
-    const stdDev = horrorLevels.length > 0
-      ? Math.sqrt(horrorLevels.reduce((sum, h) => sum + (h - mean) ** 2, 0) / horrorLevels.length).toFixed(1)
-      : '0';
-    return `Your games are a study in chaos. Horror levels swing from ${minH} to ${maxH} across ${ctx.gamesPlayed} sessions — calm, controlled outings one night, full-blown carnage the next. With a standard deviation of ${stdDev}, no two games feel the same. You don't play for consistency; you play to see what happens.`;
+    const levels = ctx.games
+      .slice()
+      .sort((a, b) => a.timestamp - b.timestamp)
+      .map((g) => g.finalHorrorLevel)
+      .filter((level): level is number => level != null);
+    const minH = levels.length > 0 ? Math.min(...levels) : 0;
+    const maxH = levels.length > 0 ? Math.max(...levels) : 0;
+    let swings = 0;
+    for (let i = 1; i < levels.length; i++) {
+      if (Math.abs(levels[i] - levels[i - 1]) >= 3) swings += 1;
+    }
+    return `Your games are a study in chaos. Horror levels run from ${minH} to ${maxH} across ${ctx.gamesPlayed} sessions, and ${swings} ${swings === 1 ? 'time' : 'times'} a session has landed somewhere wildly different from the one before it — calm, controlled outings one night, full-blown carnage the next. You don't play for consistency; you play to see what happens.`;
   },
 };
 
@@ -207,6 +272,10 @@ interface ProfileBuildContext {
 
 function buildRunnerUpSentence(winner: ArchetypeScore, runnerUp: ArchetypeScore, ctx: ProfileBuildContext): string {
   const gap = winner.score - runnerUp.score;
+  // A close gap between two thinly-supported scores is noise, not a finding.
+  // Calling that "razor-thin" is the kind of confident nonsense that makes a
+  // read-out worth skipping.
+  const wellEvidenced = winner.evidence.support >= 5 && runnerUp.evidence.support >= 5;
   const names: Record<string, string> = {
     protector: 'Protector',
     survivor: 'Survivor',
@@ -216,7 +285,7 @@ function buildRunnerUpSentence(winner: ArchetypeScore, runnerUp: ArchetypeScore,
   const winnerName = names[winner.archetype] || winner.archetype;
   const runnerName = names[runnerUp.archetype] || runnerUp.archetype;
 
-  if (gap <= 15) {
+  if (gap <= 15 && wellEvidenced) {
     // Close — highlight the tension
     const bridges: Record<string, string> = {
       protector: `your ${Math.round((ctx.totalSaved / Math.max(ctx.totalSaved + ctx.totalKilled, 1)) * 100)}% save ratio hints at a Protector's instinct`,
@@ -296,12 +365,16 @@ function buildProfile(
  */
 export function computeArchetype(
   games: GameResult[],
-  wins: GameResult[],
-  winRate: number,
-  totalSaved: number,
-  totalKilled: number,
   narrative?: NarrativeContext,
 ): ArchetypeResult {
+  // Derived here rather than passed in. Every one of these was previously a
+  // parameter the caller computed separately, which meant the scoring could
+  // silently disagree with the numbers on the rest of the page.
+  const wins = games.filter((g) => g.outcome === 'won');
+  const winRate = games.length > 0 ? (wins.length / games.length) * 100 : 0;
+  const totalSaved = games.reduce((sum, g) => sum + (g.victimsSaved || 0), 0);
+  const totalKilled = games.reduce((sum, g) => sum + (g.victimsKilled || 0), 0);
+
   if (games.length < 3) {
     return {
       archetype: 'newcomer',
@@ -311,15 +384,21 @@ export function computeArchetype(
     };
   }
 
+  const weighted = weighDecay(games);
   const scores: ArchetypeScore[] = [
-    scoreProtector(totalSaved, totalKilled, games.length),
-    scoreSurvivor(wins),
-    scoreDuelist(winRate, wins),
-    scoreGambler(games),
+    scoreProtector(weighted),
+    scoreSurvivor(weighted),
+    scoreDuelist(weighted),
+    scoreGambler(weighted),
   ];
 
-  // Sort by score descending, then by tiebreak order
+  // Sort by score descending, then by tiebreak order. An axis with no
+  // supporting games sits on the prior at 50, which must not be allowed to
+  // outrank a measured one — so it sorts last regardless of that number.
   scores.sort((a, b) => {
+    const aBlind = a.evidence.support === 0;
+    const bBlind = b.evidence.support === 0;
+    if (aBlind !== bBlind) return aBlind ? 1 : -1;
     if (b.score !== a.score) return b.score - a.score;
     return TIEBREAK_ORDER.indexOf(a.archetype) - TIEBREAK_ORDER.indexOf(b.archetype);
   });
@@ -353,6 +432,11 @@ export function computeArchetype(
     // All four, ranked. The page used to throw three of them away, which is
     // where the interesting fact lives: a 62/58 split says more about how you
     // play than the winning label does.
-    scores: scores.map(({ archetype, score }) => ({ archetype, score: Math.round(score) })),
+    scores: scores.map(({ archetype, score, evidence }) => ({
+      archetype,
+      score: Math.round(score),
+      support: evidence.support,
+      of: games.length,
+    })),
   };
 }
