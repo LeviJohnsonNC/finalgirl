@@ -81,6 +81,10 @@ export default {
           DEFAULT: "hsl(var(--neon-cyan))",
           glow: "hsl(var(--neon-cyan-glow))",
         },
+        // The Gambler's colour. It used to be text-purple-400 — the only purple
+        // in the app, and one CLAUDE.md rules out by name. Sickly green is the
+        // palette's own fourth voice.
+        "archetype-gambler": "hsl(140 65% 52%)",
         vhs: {
           yellow: "hsl(var(--vhs-yellow))",
           static: "hsl(var(--vhs-static))",

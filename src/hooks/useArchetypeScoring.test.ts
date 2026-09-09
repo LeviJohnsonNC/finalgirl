@@ -143,3 +143,50 @@ describe('computeArchetype', () => {
     expect(result.reason).toMatch(/\d/);
   });
 });
+
+describe('computeArchetype scores', () => {
+  const games = [
+    makeGame({ outcome: 'won', finalHorrorLevel: 1, victimsSaved: 6 }),
+    makeGame({ outcome: 'won', finalHorrorLevel: 7, victimsSaved: 5 }),
+    makeGame({ outcome: 'lost', finalHorrorLevel: 2 }),
+    makeGame({ outcome: 'won', finalHorrorLevel: 6, victimsSaved: 4 }),
+  ];
+
+  it('reports every archetype, highest first', () => {
+    const { scores, archetype } = computeArchetype(games, games.filter((g) => g.outcome === 'won'), 75, 15, 4);
+
+    expect(scores).toHaveLength(4);
+    expect(scores[0].archetype).toBe(archetype);
+    // Ranked, so the runner-up gap is readable rather than thrown away.
+    for (let i = 1; i < scores.length; i++) {
+      expect(scores[i - 1].score).toBeGreaterThanOrEqual(scores[i].score);
+    }
+    expect(scores.every((s) => Number.isInteger(s.score))).toBe(true);
+  });
+
+  it('has no scores to report before the third game', () => {
+    expect(computeArchetype([makeGame()], [], 100, 0, 0).scores).toEqual([]);
+  });
+
+  it('joins three narrative facts with a single "and", not a stray full stop', () => {
+    const { profile } = computeArchetype(
+      games,
+      games.filter((g) => g.outcome === 'won'),
+      75,
+      15,
+      4,
+      {
+        nemesis: { killer: 'Hans', losses: 3 },
+        usualSuspect: null,
+        cursedSite: null,
+        homeTurf: { location: 'Camp Happy Trails', wins: 4 },
+        comfortZone: { finalGirl: 'Alice', wins: 5 },
+        grinder: null,
+      },
+    );
+
+    // Previously "…dragging you back. Alice is your go-to…, and Camp…" — the
+    // list-joining map returned its input on both branches.
+    expect(profile).toContain('dragging you back, Alice is your go-to with 5 wins, and Camp Happy Trails');
+  });
+});

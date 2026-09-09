@@ -3127,9 +3127,17 @@
   border: 1px solid hsl(0 0% 18% / 0.5);
 }
 
+/* Three tabs at type-label overflowed a 298px strip on a phone — the first
+   one started 7px left of its own container and lost its "Fi". */
 .breakdown-tab {
-  @apply flex-1 type-label data-[state=active]:bg-primary/20
+  @apply flex-1 type-caption px-1 data-[state=active]:bg-primary/20
     data-[state=active]:text-primary data-[state=active]:shadow-[0_0_10px_hsl(var(--primary)/0.2)];
+}
+
+@media (min-width: 640px) {
+  .breakdown-tab {
+    @apply type-label px-3;
+  }
 }
 
 .breakdown-content {
@@ -3142,11 +3150,252 @@
 
 .breakdown-table-header th {
   @apply type-caption uppercase text-dim bg-transparent;
+  /* The shadcn head cell is h-12 with p-4 — a 64px row for one word. */
+  height: auto;
+  padding: 0.5rem 0.75rem;
 }
 
 .breakdown-table-row {
   border-bottom: 1px solid hsl(0 0% 15% / 0.3);
   @apply hover:bg-muted/10 transition-colors;
+}
+
+/* The primitive pads every cell 16px on all four sides, which on top of a
+   32px avatar gave 65px rows of mostly nothing. */
+.breakdown-section td {
+  padding: 0.4rem 0.75rem;
+}
+
+/* Numbers are the content here, so they get the label size and align on the
+   decimal; the name column takes the slack instead of it being shared out
+   between six columns as empty space. */
+.breakdown-section td:not(:first-child),
+.breakdown-section th:not(:first-child) {
+  @apply tabular-nums;
+  width: 1%;
+  white-space: nowrap;
+}
+
+.breakdown-section td:not(:first-child) {
+  @apply type-label;
+}
+
+.breakdown-section td:first-child,
+.breakdown-section th:first-child {
+  width: auto;
+}
+
+.breakdown-name {
+  @apply type-label text-foreground/90 truncate;
+}
+
+/* On a phone the column widths are set by the header words, not the numbers,
+   and the table ran 378px inside a 300px card — you had to scroll sideways to
+   reach the win rate. Tighter cells and a capped name column fit it instead. */
+@media (max-width: 639px) {
+  .breakdown-section td,
+  .breakdown-section th {
+    padding-left: 0.45rem;
+    padding-right: 0.45rem;
+  }
+
+  /* A backstop for an unusually long name, well clear of the real ones. */
+  .breakdown-section td:first-child {
+    max-width: 150px;
+  }
+}
+
+/* Hidden on a phone: the avatar plus its gap is 36px of the ~300px the table
+   has, and spending it here is what forced "Veronica" to render as "Vero…".
+   The name is the row's identity; the portrait is decoration. */
+.breakdown-avatar {
+  @apply rounded-full object-cover shrink-0 hidden sm:block;
+  width: 26px;
+  height: 26px;
+  border: 1px solid hsl(0 0% 20%);
+}
+
+/* The rate column earns the width the others gave up: the number alone made
+   the reader compare 33% with 75% by arithmetic. */
+.breakdown-rate {
+  @apply flex items-center gap-2 justify-end;
+}
+
+.breakdown-rate-meter {
+  @apply relative h-1.5 rounded-full overflow-hidden hidden sm:block;
+  width: 72px;
+  background: hsl(0 0% 100% / 0.07);
+}
+
+.breakdown-rate-fill {
+  @apply block h-full rounded-full;
+}
+
+.breakdown-rate-fill-win { background: hsl(var(--neon-cyan) / 0.8); }
+.breakdown-rate-fill-loss { background: hsl(var(--blood-red-legible) / 0.8); }
+
+/* ===== The tape log: horror spread, weapons, recent sessions ===== */
+.session-detail {
+  @apply space-y-4;
+}
+
+.session-detail-grid {
+  @apply grid gap-4;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 900px) {
+  .session-detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .session-card-wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.session-card {
+  @apply p-4 sm:p-5 rounded-xl backdrop-blur border space-y-3;
+  background: hsl(220 15% 6% / 0.5);
+  border-color: hsl(0 0% 18% / 0.6);
+}
+
+.session-card-head {
+  @apply space-y-0.5;
+}
+
+.session-card-title {
+  @apply font-display text-lg text-foreground/85;
+  letter-spacing: 0.08em;
+}
+
+.session-card-sub {
+  @apply type-caption uppercase text-dimmer;
+}
+
+/* --- Horror distribution --- */
+.horror-chart {
+  @apply flex items-end gap-2;
+  height: 132px;
+}
+
+.horror-col {
+  @apply flex-1 flex flex-col items-center gap-1 h-full;
+}
+
+.horror-count {
+  @apply type-caption text-dim tabular-nums;
+  height: 1.1rem;
+}
+
+.horror-track {
+  @apply relative w-full flex-1 flex items-end;
+  /* No fill: at full height behind every column, a visible track reads as a
+     second set of bars all tied at the top. The baseline carries the scale. */
+  border-bottom: 1px solid hsl(0 0% 100% / 0.12);
+}
+
+.horror-bar {
+  @apply block w-full rounded-sm;
+  background: linear-gradient(to top, hsl(var(--blood-red)), hsl(var(--blood-red-glow)));
+  box-shadow: 0 0 8px hsl(var(--blood-red-glow) / 0.35);
+  min-height: 2px;
+  transition: height 0.5s ease-out;
+}
+
+.horror-level {
+  @apply type-caption text-dim tabular-nums;
+}
+
+.horror-scale {
+  @apply flex justify-between type-caption uppercase text-dimmer;
+}
+
+/* --- Weapons --- */
+/* Same shared grid as the archetype ranking, for the same reason: per-row
+   grids left every bar starting at a different x. */
+.weapon-list {
+  @apply grid items-center gap-x-3 gap-y-2;
+  grid-template-columns: minmax(80px, max-content) 1fr auto;
+}
+
+.weapon-row {
+  display: contents;
+}
+
+.weapon-name {
+  @apply type-label text-foreground/85 truncate;
+}
+
+.weapon-meter {
+  @apply relative h-1.5 rounded-full overflow-hidden;
+  background: hsl(0 0% 100% / 0.06);
+}
+
+.weapon-bar {
+  @apply block h-full rounded-full;
+  background: hsl(var(--vhs-yellow) / 0.55);
+}
+
+.weapon-count {
+  @apply flex items-baseline gap-1.5 type-label text-dim tabular-nums;
+}
+
+.weapon-wins {
+  @apply type-caption uppercase text-dimmer;
+}
+
+.weapon-wins::before {
+  content: '·';
+  margin-right: 0.4rem;
+}
+
+/* --- Recent sessions --- */
+.session-list {
+  @apply divide-y;
+  border-color: hsl(0 0% 100% / 0.06);
+}
+
+.session-row {
+  @apply grid items-baseline gap-x-3 gap-y-0.5 py-2;
+  grid-template-columns: 3.5rem 1fr;
+}
+
+@media (min-width: 640px) {
+  .session-row {
+    grid-template-columns: 3.5rem minmax(0, 1.4fr) minmax(0, 1fr) auto;
+  }
+}
+
+.session-outcome {
+  @apply type-caption uppercase;
+}
+
+.session-outcome-won { color: hsl(var(--neon-cyan)); }
+.session-outcome-lost { color: hsl(var(--blood-red-legible)); }
+
+.session-cast {
+  @apply flex flex-wrap items-baseline gap-x-2 type-label text-foreground/85 min-w-0;
+}
+
+.session-vs {
+  @apply type-caption uppercase text-dimmer;
+}
+
+.session-killer {
+  @apply text-dim;
+}
+
+.session-place {
+  @apply type-caption uppercase text-dimmer truncate col-start-2 sm:col-start-3;
+}
+
+.session-meta {
+  @apply flex items-baseline gap-2 type-caption uppercase text-dimmer tabular-nums col-start-2 sm:col-start-4 sm:justify-end;
+}
+
+.session-horror {
+  @apply text-dim;
 }
 
 /* ===== Highlights Section ===== */
@@ -3283,7 +3532,7 @@
 
 /* ===== Player Archetype ===== */
 .archetype-badge {
-  @apply px-5 py-4 rounded-lg border backdrop-blur;
+  @apply px-5 py-5 sm:px-6 sm:py-6 rounded-lg border backdrop-blur;
 }
 
 .archetype-protector {
@@ -3302,8 +3551,8 @@
 }
 
 .archetype-gambler {
-  background: hsl(280 50% 40% / 0.04);
-  border-color: hsl(280 50% 40% / 0.25);
+  background: hsl(140 45% 35% / 0.04);
+  border-color: hsl(140 45% 35% / 0.25);
 }
 
 .archetype-newcomer {
@@ -3312,12 +3561,78 @@
 }
 
 .archetype-content {
-  @apply flex flex-col gap-0.5;
+  @apply flex flex-col gap-4;
+}
+
+.archetype-head {
+  @apply flex flex-wrap items-end justify-between gap-x-4 gap-y-1;
+}
+
+.archetype-eyebrow {
+  @apply type-caption uppercase text-dimmer;
 }
 
 .archetype-name {
-  @apply font-display text-lg sm:text-xl;
-  letter-spacing: 0.1em;
+  @apply font-display text-2xl sm:text-3xl;
+  letter-spacing: 0.08em;
+}
+
+.archetype-margin {
+  @apply type-caption uppercase text-dimmer;
+}
+
+/* ===== Archetype ranking ===== */
+.archetype-scores {
+  @apply pt-4 space-y-2;
+  border-top: 1px solid hsl(0 0% 100% / 0.08);
+}
+
+.archetype-scores-label {
+  @apply type-caption uppercase text-dimmer;
+}
+
+/* One grid for the whole list, with the rows as `display: contents`. A grid
+   per row sizes its own columns, so the bars started at four different x
+   positions and the scores never lined up. */
+.archetype-score-list {
+  @apply grid items-center gap-x-3 gap-y-2;
+  /* Capped, not 1fr: a 900px-long bar is harder to compare against its
+     neighbour than a 260px one, and the row reads as a stretched blank. */
+  grid-template-columns: minmax(96px, max-content) minmax(0, 260px) auto;
+  justify-content: start;
+}
+
+.archetype-score-row {
+  display: contents;
+}
+
+.archetype-score-name {
+  @apply flex flex-col type-label leading-tight;
+}
+
+.archetype-score-blurb {
+  @apply type-caption text-dimmer hidden sm:block;
+}
+
+.archetype-score-meter {
+  @apply relative h-2 rounded-full overflow-hidden;
+  background: hsl(0 0% 100% / 0.06);
+}
+
+.archetype-score-fill {
+  @apply block h-full rounded-full;
+  transition: width 0.6s ease-out;
+}
+
+.archetype-fill-protector { background: hsl(var(--neon-cyan) / 0.75); }
+.archetype-fill-duelist   { background: hsl(var(--vhs-yellow) / 0.7); }
+.archetype-fill-survivor  { background: hsl(var(--blood-red-legible) / 0.75); }
+.archetype-fill-gambler   { background: hsl(140 65% 45% / 0.75); }
+.archetype-fill-newcomer  { background: hsl(0 0% 60% / 0.5); }
+
+.archetype-score-value {
+  @apply type-label text-dim tabular-nums text-right;
+  min-width: 2.5ch;
 }
 
 .archetype-profile {

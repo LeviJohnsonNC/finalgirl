@@ -8,6 +8,21 @@ interface ArchetypeScore {
   reason: string;
 }
 
+/** One archetype's standing, for the ranked read-out on the stats page. */
+export interface ArchetypeStanding {
+  archetype: PlayerArchetype;
+  /** 0–100, rounded. */
+  score: number;
+}
+
+export interface ArchetypeResult {
+  archetype: PlayerArchetype;
+  reason: string;
+  profile: string;
+  /** Every archetype, highest first. Empty until the third game. */
+  scores: ArchetypeStanding[];
+}
+
 /** Narrative context passed in from useGameStats for profile generation */
 export interface NarrativeContext {
   nemesis: { killer: string; losses: number } | null;
@@ -237,7 +252,10 @@ function buildNarrativeCloser(ctx: ProfileBuildContext): string {
   if (parts.length === 0) return '';
   if (parts.length === 1) return parts[0] + '.';
   if (parts.length === 2) return parts[0] + ', and ' + parts[1] + '.';
-  return parts[0] + '. ' + parts.slice(1).map((p, i) => i === parts.length - 2 ? p : p).join(', and ') + '.';
+  // Oxford-ish list: "a, b, and c". The previous version mapped
+  // (p, i) => i === parts.length - 2 ? p : p — both arms returned p, so it was
+  // a no-op and the sentence ran "a. b, and c".
+  return `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}.`;
 }
 
 function buildProfile(
@@ -283,9 +301,14 @@ export function computeArchetype(
   totalSaved: number,
   totalKilled: number,
   narrative?: NarrativeContext,
-): { archetype: PlayerArchetype; reason: string; profile: string } {
+): ArchetypeResult {
   if (games.length < 3) {
-    return { archetype: 'newcomer', reason: 'Play more games to discover your style', profile: 'Play more games to discover your style.' };
+    return {
+      archetype: 'newcomer',
+      reason: 'Play more games to discover your style',
+      profile: 'Play more games to discover your style.',
+      scores: [],
+    };
   }
 
   const scores: ArchetypeScore[] = [
@@ -323,5 +346,13 @@ export function computeArchetype(
 
   const profile = buildProfile(winner, scores, ctx);
 
-  return { archetype: winner.archetype, reason: winner.reason, profile };
+  return {
+    archetype: winner.archetype,
+    reason: winner.reason,
+    profile,
+    // All four, ranked. The page used to throw three of them away, which is
+    // where the interesting fact lives: a 62/58 split says more about how you
+    // play than the winning label does.
+    scores: scores.map(({ archetype, score }) => ({ archetype, score: Math.round(score) })),
+  };
 }

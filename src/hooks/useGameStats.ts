@@ -2,6 +2,15 @@ import { useMemo } from 'react';
 import { GameResult } from './useGameHistory';
 import { computeArchetype } from './useArchetypeScoring';
 import { GameRecord, buildGameRecord } from '@/lib/gameRecord';
+import { ArchetypeStanding } from './useArchetypeScoring';
+import {
+  HorrorBin,
+  SessionEntry,
+  WeaponTally,
+  buildHorrorDistribution,
+  buildRecentSessions,
+  buildWeaponTally,
+} from '@/lib/sessionStats';
 
 export interface FinalGirlStats {
   name: string;
@@ -64,6 +73,14 @@ export interface ComputedStats {
   playerArchetype: PlayerArchetype;
   archetypeReason: string;
   archetypeProfile: string;
+  /** Every archetype ranked, so the near-misses are visible too. */
+  archetypeScores: ArchetypeStanding[];
+
+  // Session detail — fields the app has always collected and never shown.
+  horrorBins: HorrorBin[];
+  horrorRecorded: number;
+  weapons: WeaponTally[];
+  recentSessions: SessionEntry[];
 }
 
 export const useGameStats = (gameHistory: GameResult[]): ComputedStats => {
@@ -230,7 +247,14 @@ export const useGameStats = (gameHistory: GameResult[]): ComputedStats => {
       comfortZone: comfortZoneGirl && comfortZoneWins >= 2 ? { finalGirl: comfortZoneGirl, wins: comfortZoneWins } : null,
       grinder: grinderGirl && grinderPlays >= 2 ? { finalGirl: grinderGirl, plays: grinderPlays } : null,
     };
-    const { archetype: playerArchetype, reason: archetypeReason, profile: archetypeProfile } = computeArchetype(
+    const horror = buildHorrorDistribution(filteredGames);
+
+    const {
+      archetype: playerArchetype,
+      reason: archetypeReason,
+      profile: archetypeProfile,
+      scores: archetypeScores,
+    } = computeArchetype(
       filteredGames,
       wins,
       winRate,
@@ -259,6 +283,11 @@ export const useGameStats = (gameHistory: GameResult[]): ComputedStats => {
       playerArchetype,
       archetypeReason,
       archetypeProfile,
+      archetypeScores,
+      horrorBins: horror.bins,
+      horrorRecorded: horror.recorded,
+      weapons: buildWeaponTally(filteredGames),
+      recentSessions: buildRecentSessions(filteredGames),
     };
   }, [gameHistory]);
 };
