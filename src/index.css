@@ -3357,8 +3357,23 @@
 }
 
 .session-row {
-  @apply grid items-baseline gap-x-3 gap-y-0.5 py-2;
+  @apply grid items-baseline gap-x-3 gap-y-0.5 py-2 w-full text-left;
   grid-template-columns: 3.5rem 1fr;
+}
+
+/* A row that goes somewhere says so on hover and on focus. */
+.session-row-link {
+  @apply rounded-sm px-1 -mx-1 transition-colors;
+}
+
+.session-row-link:hover,
+.session-row-link:focus-visible {
+  background: hsl(0 0% 100% / 0.05);
+}
+
+.session-row-link:hover .session-girl,
+.session-row-link:focus-visible .session-girl {
+  @apply text-foreground;
 }
 
 @media (min-width: 640px) {

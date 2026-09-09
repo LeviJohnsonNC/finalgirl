@@ -9,7 +9,12 @@ import { SessionDetail } from '@/components/stats/SessionDetail';
 import { AlertTriangle, Film, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
-const Stats = () => {
+interface StatsProps {
+  /** Open a recorded session in its scrapbook. */
+  onOpenSession?: (gameId: string) => void;
+}
+
+const Stats = ({ onOpenSession }: StatsProps) => {
   const { gameHistory, isLoading, loadError, retryLoadHistory, isDegraded } = useGameHistoryContext();
   const { user, authError } = useAuth();
   const stats = useGameStats(gameHistory);
@@ -144,7 +149,7 @@ const Stats = () => {
           <BreakdownTabs stats={stats} />
 
           {/* Horror spread, weapons, and the last few sessions */}
-          <SessionDetail stats={stats} />
+          <SessionDetail stats={stats} onOpenSession={onOpenSession} />
         </div>
       )}
     </div>
