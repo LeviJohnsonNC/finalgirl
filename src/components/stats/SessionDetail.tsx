@@ -2,6 +2,8 @@ import { ComputedStats } from '@/hooks/useGameStats';
 
 interface SessionDetailProps {
   stats: ComputedStats;
+  /** Open this session in its scrapbook. Rows are inert without it. */
+  onOpenSession?: (gameId: string) => void;
 }
 
 const formatDate = (ts: number) => {
@@ -17,7 +19,7 @@ const formatDate = (ts: number) => {
  * weaponUsed and the session list — which until now existed only to be fed to
  * the archetype prose.
  */
-export const SessionDetail = ({ stats }: SessionDetailProps) => {
+export const SessionDetail = ({ stats, onOpenSession }: SessionDetailProps) => {
   const { horrorBins, horrorRecorded, weapons, recentSessions } = stats;
   const peakHorror = Math.max(...horrorBins.map((b) => b.games), 1);
   const mostUsed = weapons[0]?.uses ?? 1;
@@ -96,27 +98,49 @@ export const SessionDetail = ({ stats }: SessionDetailProps) => {
               <p className="session-card-sub">Newest first</p>
             </header>
             <ol className="session-list">
-              {recentSessions.map((session) => (
-                <li key={session.id} className="session-row">
-                  <span
-                    className={`session-outcome ${
-                      session.outcome === 'won' ? 'session-outcome-won' : 'session-outcome-lost'
-                    }`}
-                  >
-                    {session.outcome === 'won' ? 'Won' : 'Lost'}
-                  </span>
-                  <span className="session-cast">
-                    <span className="session-girl">{session.finalGirl}</span>
-                    <span className="session-vs">vs</span>
-                    <span className="session-killer">{session.killer}</span>
-                  </span>
-                  <span className="session-place">{session.location}</span>
-                  <span className="session-meta">
-                    {session.horror !== null && <span className="session-horror">H{session.horror}</span>}
-                    <span className="session-date">{formatDate(session.timestamp)}</span>
-                  </span>
-                </li>
-              ))}
+              {recentSessions.map((session) => {
+                const body = (
+                  <>
+                    <span
+                      className={`session-outcome ${
+                        session.outcome === 'won' ? 'session-outcome-won' : 'session-outcome-lost'
+                      }`}
+                    >
+                      {session.outcome === 'won' ? 'Won' : 'Lost'}
+                    </span>
+                    <span className="session-cast">
+                      <span className="session-girl">{session.finalGirl}</span>
+                      <span className="session-vs">vs</span>
+                      <span className="session-killer">{session.killer}</span>
+                    </span>
+                    <span className="session-place">{session.location}</span>
+                    <span className="session-meta">
+                      {session.horror !== null && <span className="session-horror">H{session.horror}</span>}
+                      <span className="session-date">{formatDate(session.timestamp)}</span>
+                    </span>
+                  </>
+                );
+
+                // A row is a button only when there is somewhere for it to go.
+                return (
+                  <li key={session.id} className="session-item">
+                    {onOpenSession ? (
+                      <button
+                        type="button"
+                        className="session-row session-row-link"
+                        onClick={() => onOpenSession(session.id)}
+                      >
+                        {body}
+                        <span className="sr-only">
+                          — open this session in the {session.outcome === 'won' ? 'Final Girl' : 'killer'} scrapbook
+                        </span>
+                      </button>
+                    ) : (
+                      <span className="session-row">{body}</span>
+                    )}
+                  </li>
+                );
+              })}
             </ol>
           </section>
         )}

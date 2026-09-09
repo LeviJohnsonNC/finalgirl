@@ -8,7 +8,14 @@ import { toast } from 'sonner';
 import finalGirlCover from '@/assets/scrapbooks/final-girl-cover.png';
 import killerCover from '@/assets/scrapbooks/killer-cover.png';
 
-const Scrapbooks = () => {
+interface ScrapbooksProps {
+  /** A game to open straight onto, handed over by the stats page. */
+  focusGameId?: string | null;
+  /** Called once the focus has been used, so a later visit starts on the covers. */
+  onFocusHandled?: () => void;
+}
+
+const Scrapbooks = ({ focusGameId, onFocusHandled }: ScrapbooksProps) => {
   const { gameHistory, updateGame, deleteGame, fetchGameDetails, isLoading, loadError, retryLoadHistory, isDegraded } = useGameHistoryContext();
   const { user, authError } = useAuth();
   const [openBook, setOpenBook] = useState<'finalGirl' | 'killer' | null>(null);
@@ -72,7 +79,20 @@ const Scrapbooks = () => {
 
   const handleCloseBook = () => {
     setOpenBook(null);
+    // Spend the focus on close, so reopening the book lands on the covers
+    // rather than jumping back to the game the stats page pointed at.
+    onFocusHandled?.();
   };
+
+  // A session handed over from the stats page picks its own book: a win lives
+  // in the Final Girl's, a loss in the killer's. The history may still be
+  // loading, so this waits for the row to appear rather than giving up.
+  useEffect(() => {
+    if (!focusGameId) return;
+    const game = gameHistory.find((g) => g.id === focusGameId);
+    if (!game) return;
+    setOpenBook(game.outcome === 'won' ? 'finalGirl' : 'killer');
+  }, [focusGameId, gameHistory]);
 
   const handleDeleteGame = async (id: string) => {
     await deleteGame(id);
@@ -183,6 +203,7 @@ const Scrapbooks = () => {
         <ScrapbookBook
           type={openBook}
           games={openBook === 'finalGirl' ? wonGames : lostGames}
+          initialGameId={focusGameId}
           onClose={handleCloseBook}
           onUpdateGame={updateGame}
           onDeleteGame={handleDeleteGame}

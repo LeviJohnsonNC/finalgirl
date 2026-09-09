@@ -57,6 +57,15 @@ const IndexContent = () => {
   const { user, isLoading: authLoading } = useAuth();
   const [hasStarted, setHasStarted] = useState(false);
   const [currentPage, setCurrentPage] = useState<'dashboard' | 'archive' | 'nowPlaying' | 'outcome' | 'ending' | 'scrapbooks' | 'stats' | 'rules'>('dashboard');
+  // A session the stats page asked to open. Set only by that hand-off; every
+  // other route into the scrapbooks clears it, so they start on the covers.
+  const [scrapbookFocusId, setScrapbookFocusId] = useState<string | null>(null);
+
+  const goToScrapbooks = (focusGameId: string | null = null) => {
+    setScrapbookFocusId(focusGameId);
+    setHasStarted(true);
+    setCurrentPage('scrapbooks');
+  };
   const [gameSelection, setGameSelection] = useState<GameSelection | null>(null);
   const [lastGameResult, setLastGameResult] = useState<GameResult | null>(null);
   const [introStory, setIntroStory] = useState<string | undefined>(undefined);
@@ -204,7 +213,7 @@ const IndexContent = () => {
         onStart={handleStart} 
         onArchive={handleArchive} 
         onNavigateHome={handleNavigateHome}
-        onScrapbooks={() => { setHasStarted(true); setCurrentPage('scrapbooks'); }}
+        onScrapbooks={() => goToScrapbooks()}
         onStats={() => { setHasStarted(true); setCurrentPage('stats'); }}
         onRules={() => { setHasStarted(true); setCurrentPage('rules'); }}
       />
@@ -258,9 +267,14 @@ const IndexContent = () => {
       case 'archive':
         return <Archive />;
       case 'scrapbooks':
-        return <Scrapbooks />;
+        return (
+          <Scrapbooks
+            focusGameId={scrapbookFocusId}
+            onFocusHandled={() => setScrapbookFocusId(null)}
+          />
+        );
       case 'stats':
-        return <Stats />;
+        return <Stats onOpenSession={(gameId) => goToScrapbooks(gameId)} />;
       case 'rules':
         return <Rules />;
       default:
@@ -342,7 +356,7 @@ const IndexContent = () => {
               <span className="hidden sm:inline">STATS</span>
             </button>
             <button
-              onClick={() => setCurrentPage('scrapbooks')}
+              onClick={() => goToScrapbooks()}
               className="type-caption text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <BookOpen className="w-3 h-3" />

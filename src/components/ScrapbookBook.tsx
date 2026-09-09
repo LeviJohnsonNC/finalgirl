@@ -15,6 +15,8 @@ import killerCover from '@/assets/scrapbooks/killer-cover.png';
 interface ScrapbookBookProps {
   type: 'finalGirl' | 'killer';
   games: GameResult[];
+  /** Open straight onto this game's page, e.g. arriving from the stats page. */
+  initialGameId?: string | null;
   onClose: () => void;
   onUpdateGame: (id: string, updates: Partial<GameResult>) => void;
   onDeleteGame: (id: string) => Promise<void> | void;
@@ -67,7 +69,7 @@ const resizeImage = (file: File, maxWidth: number = 1200): Promise<Blob> => {
   });
 };
 
-export const ScrapbookBook = ({ type, games, onClose, onUpdateGame, onDeleteGame, onFetchGameDetails }: ScrapbookBookProps) => {
+export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGame, onDeleteGame, onFetchGameDetails }: ScrapbookBookProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedGame, setSelectedGame] = useState<GameResult | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -76,6 +78,7 @@ export const ScrapbookBook = ({ type, games, onClose, onUpdateGame, onDeleteGame
   const isMobile = useIsMobile();
   const { user } = useAuth();
   const [isLoadingStory, setIsLoadingStory] = useState(false);
+  const openedInitialRef = useRef(false);
   // Trigger open animation after mount
   useEffect(() => {
     const timer = setTimeout(() => setIsOpen(true), 50);
@@ -107,6 +110,16 @@ export const ScrapbookBook = ({ type, games, onClose, onUpdateGame, onDeleteGame
       setIsLoadingStory(false);
     }
   }, [onFetchGameDetails]);
+
+  // Arriving with a game in hand (from the stats page) opens the book on that
+  // page rather than on the grid. Once only: after that the book is the user's.
+  useEffect(() => {
+    if (!initialGameId || openedInitialRef.current) return;
+    const target = games.find((g) => g.id === initialGameId);
+    if (!target) return;
+    openedInitialRef.current = true;
+    void handleSelectGame(target);
+  }, [initialGameId, games, handleSelectGame]);
 
   const handlePosterUpload = useCallback(async (file: File) => {
     if (!selectedGame) return;

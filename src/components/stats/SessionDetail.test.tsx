@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { SessionDetail } from './SessionDetail';
 import { ComputedStats } from '@/hooks/useGameStats';
 import { buildHorrorDistribution } from '@/lib/sessionStats';
@@ -63,5 +63,54 @@ describe('SessionDetail', () => {
     expect(screen.getByText('Alice')).toBeInTheDocument();
     expect(screen.getByText('The Organism')).toBeInTheDocument();
     expect(screen.getByText('H5')).toBeInTheDocument();
+  });
+
+  it('opens a session in its scrapbook when there is somewhere to go', () => {
+    const onOpenSession = vi.fn();
+    render(
+      <SessionDetail
+        onOpenSession={onOpenSession}
+        stats={stats({
+          recentSessions: [
+            {
+              id: 'game-7',
+              timestamp: new Date(2026, 2, 30).getTime(),
+              outcome: 'lost',
+              finalGirl: 'Alice',
+              killer: 'The Organism',
+              location: 'Creech Manor',
+              horror: 6,
+            },
+          ],
+        })}
+      />,
+    );
+
+    const row = screen.getByRole('button', { name: /open this session in the killer scrapbook/i });
+    fireEvent.click(row);
+    expect(onOpenSession).toHaveBeenCalledWith('game-7');
+  });
+
+  it('leaves the rows inert when no handler is given', () => {
+    render(
+      <SessionDetail
+        stats={stats({
+          recentSessions: [
+            {
+              id: 'game-7',
+              timestamp: Date.now(),
+              outcome: 'won',
+              finalGirl: 'Alice',
+              killer: 'The Organism',
+              location: 'Creech Manor',
+              horror: null,
+            },
+          ],
+        })}
+      />,
+    );
+
+    expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.getByText('Alice')).toBeInTheDocument();
   });
 });
