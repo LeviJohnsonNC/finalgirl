@@ -48,6 +48,8 @@ interface GameSelection {
   finalGirl: string;
   setupScenario: string | null;
   startingEvent: string | null;
+  /** Falconwood only: the Mission that must be completed to win. */
+  mission: string | null;
   filmId: string | null;
   introStory?: string;
 }
