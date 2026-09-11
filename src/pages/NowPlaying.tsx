@@ -29,6 +29,8 @@ interface NowPlayingProps {
   finalGirl: string;
   setupScenario: string | null;
   startingEvent: string | null;
+  /** Falconwood only: the Mission that must be completed to win. */
+  mission?: string | null;
   filmId: string | null;
   onBack: () => void;
   onGameEnd: (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, visualBible?: string) => void;
@@ -40,6 +42,7 @@ const NowPlaying = ({
   finalGirl,
   setupScenario,
   startingEvent,
+  mission,
   filmId,
   onBack,
   onGameEnd,
