@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ImageIcon, Volume2, VolumeX, Loader2, ScrollText } from 'lucide-react';
 import { SpecialRulesModal, getApplicableSpecialRules } from '@/components/SpecialRulesModal';
 import { getModulePromptContext } from '@/data/rules/moduleRules';
+import { getMissionByName } from '@/data/falconwoodMissions';
 import { streamChatCompletion } from '@/lib/streamChatCompletion';
 
 import { useNarration } from '@/hooks/useNarration';
