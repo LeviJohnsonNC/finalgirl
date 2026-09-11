@@ -78,6 +78,7 @@ const NowPlaying = ({
   // reader loop stops and no further setState fires on an unmounted component.
   const streamAbortRef = useRef<AbortController | null>(null);
   const moduleContext = getModulePromptContext(killer, location);
+  const missionData = getMissionByName(mission);
   const applicableSpecialRules = getApplicableSpecialRules(killer, location);
   // Reserve the image column as soon as there is something to show there —
   // a finished still, one developing, or a failure worth retrying.
