@@ -136,6 +136,21 @@ export const GameOutcomeForm = ({
       shriekParts.push(mortRevealed ? 'Mort was revealed' : 'Mort remained hidden');
       highlights = highlights ? `${highlights}. ${shriekParts.join('. ')}` : shriekParts.join('. ');
     }
+    if (showFalconwood) {
+      const falconParts: string[] = [];
+      if (result.mission) falconParts.push(`Mission: ${result.mission}`);
+      if (missionCompleted) {
+        falconParts.push('Mission completed — the killer could finally be finished');
+        if (friendJoined.trim()) falconParts.push(`Friend who joined the fight: ${friendJoined.trim()}`);
+      } else {
+        falconParts.push('Mission NOT completed — the killer could not be finished');
+        if (missionProgress.trim()) falconParts.push(`Mission progress: ${missionProgress.trim()}`);
+      }
+      falconParts.push(`Ended in: ${endingDimension}`);
+      highlights = highlights ? `${highlights}. ${falconParts.join('. ')}` : falconParts.join('. ');
+    }
+
+
 
     const formData: EndingFormData = {
       finalHorrorLevel,
