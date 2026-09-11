@@ -413,7 +413,166 @@ const wingardCottage: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage];
+// ─── Falconwood (Location) — The Falconwood Files ─────────────────────────
+const falconwood: EntityRuleModule = {
+  entity: 'Falconwood',
+  kind: 'location',
+  filmId: 's3-falconwood-files',
+  source: 'The Falconwood Files — Location Sheet',
+  credits: { design: 'Mike Martins', art: 'Vincent Dutrait' },
+  tags: ['falconwood', 'bridge', 'river crossing', 'mission', 'friends', 'd20', 'location'],
+  setup: [
+    {
+      type: 'list',
+      items: [
+        'Set aside the "Survive the Hunt" Terror card, both Mission Item cards, and the Friend cards. They will only be used when instructed by the Mission rules.',
+        'Before normal setup, randomly select a Mission and follow the setup instructions on that Mission sheet.',
+      ],
+    },
+  ],
+  rules: [
+    { type: 'heading', level: 3, text: 'Definitions' },
+    {
+      type: 'list',
+      items: [
+        'BRIDGE: Refers to the paths with roads that cross the river and the Bridge token (if it has been placed on the board).',
+        'RIVER CROSSING: Refers to the paths with blue lines that cross the river.',
+      ],
+    },
+    { type: 'heading', level: 3, text: 'River Crossings' },
+    {
+      type: 'paragraph',
+      text: 'You will normally not be able to use River Crossings, but some effects will allow you to use them. Victims may follow you as normal. Enemies cannot use River Crossings. The spaces connected by a River Crossing are not considered adjacent nor connected for the purpose of determining range (or when resolving effects that refer to adjacent spaces).',
+    },
+    { type: 'heading', level: 3, text: 'Missions' },
+    {
+      type: 'paragraph',
+      text: 'Each Mission sheet will have specific instructions on how to setup and complete the Mission. Completing the Mission is mandatory to win the game. The Killer can only lose their final health and reveal their Final Health token after the Mission is completed. Any damage that would reveal the Killer\u2019s Final Health token before the Mission is completed is ignored. If there is more than one Killer, this only applies to the last remaining Killer.',
+    },
+    {
+      type: 'paragraph',
+      text: 'Some cards will instruct you to Gain Progress or Lose Progress on the Mission. Refer to the Mission sheet for an explanation on how to resolve this and place a Tracking marker on the marked space as a reminder of the progress effect.',
+    },
+    { type: 'heading', level: 3, text: 'Friends' },
+    {
+      type: 'paragraph',
+      text: 'When you complete a Mission, a Friend will join you to help you defeat the Killer. Friends are considered Special Victims but have three important differences:',
+    },
+    {
+      type: 'list',
+      items: [
+        'Friends will follow you into the Killer\u2019s space.',
+        'Other Victims in the same space as a Friend will be attacked before Friends are attacked.',
+        'Friends will not panic if they are in your space.',
+      ],
+    },
+    { type: 'heading', level: 3, text: 'Twenty-Sided Die' },
+    {
+      type: 'paragraph',
+      text: 'Many cards will instruct you to roll the 20-sided die, or d20, as indicated by the d20 symbol.',
+    },
+  ],
+};
+
+// ─── Slayer (Killer) — The Falconwood Files ───────────────────────────────
+const slayer: EntityRuleModule = {
+  entity: 'Slayer',
+  kind: 'killer',
+  filmId: 's3-falconwood-files',
+  source: 'The Falconwood Files — Killer Sheet',
+  credits: { design: 'Mike Martins', art: 'Vincent Dutrait' },
+  tags: ['slayer', 'mirror dimension', 'rift', 'killer'],
+  setup: [
+    {
+      type: 'list',
+      items: [
+        'Place the Dimension Tracker card near the play area.',
+        'Place the Final Girl and Special Victim tokens in the "Our Dimension" half of the Dimension Tracker card.',
+        'Add a Mirror Dimension Victim (gray meeple) on your space.',
+        'Add a Mirror Dimension Victim on the closest Interact space to Slayer.',
+        'Add the Open a Rift Action cards to the Action Tableau.',
+      ],
+    },
+  ],
+  rules: [
+    { type: 'heading', level: 3, text: 'The Mirror Dimension' },
+    {
+      type: 'paragraph',
+      text: 'The Mirror Dimension is a dark, dreary version of Our Dimension and both are represented on the same Location board. The following rules apply:',
+    },
+    {
+      type: 'list',
+      items: [
+        'Slayer only moves in the Mirror Dimension, unless an effect says otherwise.',
+        'Victims in Our Dimension are represented by yellow meeples, and Victims in the Mirror Dimension are represented by gray meeples.',
+        'The dimension you and any Special Victims are currently in is indicated by their token on the Dimension Tracker card. A token on the upper half means that the character is in Our Dimension, and a token on the lower half means the Mirror Dimension.',
+        'Normal movement rules apply. However, only Victims in your current Dimension will follow you.',
+        'A Victim can only be saved when both you and the Victim are at an Interact space in Our Dimension.',
+        'Interact spaces can be interacted with in both dimensions.',
+        'For simplicity, tokens on spaces, and location effects in general, apply to both dimensions unless the dimension is specified. If a token or location effect targets a Victim on a space and there are Victims in both Our Dimension as well as the Mirror Dimension, then Victims in Our Dimension are targeted first, unless Mirror Dimension Victims are specifically targeted.',
+      ],
+    },
+    { type: 'heading', level: 3, text: 'Pulling Victims into the Mirror Dimension' },
+    {
+      type: 'paragraph',
+      text: 'Victims can be pulled from Our Dimension into the Mirror Dimension. When you see this symbol, Slayer targets the closest Victim in Our Dimension. Perform the following:',
+    },
+    {
+      type: 'list',
+      items: [
+        'For a normal Victim, replace the yellow meeple with a gray meeple. If all the gray meeples are already on the board, then the Mirror Dimension Victim farthest from Slayer is immediately killed. That gray meeple is then used for the new Victim pulled into the Mirror Dimension.',
+        'For a Special Victim, move their token to the Mirror Dimension half of the Dimension Tracker card.',
+        'Panic the Victim.',
+        'If no Victim was pulled into the Mirror Dimension, increase Terror instead.',
+      ],
+    },
+    { type: 'heading', level: 3, text: 'Entering the Mirror Dimension' },
+    {
+      type: 'paragraph',
+      text: 'When the rifts started appearing, it awakened a power within you. During the Action phase, with intense mental energy, you can open a rift to the Mirror Dimension in your space. Resolve the Open a Rift Action card. Special Victims on your space may cross with you into the Mirror Dimension but normal (yellow) Victims cannot. When entering the Mirror Dimension, move the associated tokens to the Mirror Dimension half of the Dimension Tracker card.',
+    },
+    { type: 'heading', level: 3, text: 'Returning to Our Dimension' },
+    {
+      type: 'paragraph',
+      text: 'During the Action phase, you may return to Our Dimension at any time (except while in the middle of resolving an Action card). Move your token on the Dimension Tracker card to Our Dimension. Any Victims on your space may also come back to Our Dimension with you by replacing the gray meeple with a yellow meeple. For Special Victims, move their token to the Our Dimension half of the Dimension Tracker card.',
+    },
+    {
+      type: 'callout',
+      variant: 'critical',
+      text: 'If you are in the Mirror Dimension during the Upkeep phase, lose 1 Health.',
+    },
+    { type: 'heading', level: 3, text: 'Attacking' },
+    {
+      type: 'paragraph',
+      text: 'To attack Slayer, you must be in the same dimension to perform actions or use Items that deal damage. The exception is when you\u2019re attacked while you\u2019re in Our Dimension and play a Reaction card that deals damage.',
+    },
+    { type: 'heading', level: 3, text: 'Targeting' },
+    {
+      type: 'paragraph',
+      text: 'Slayer has a mental connection with you and can sense you regardless of which dimension you are in, but it can only sense Victims in the Mirror Dimension.',
+    },
+    {
+      type: 'list',
+      items: [
+        'When targeting Final Girl or Victim (whichever is closer), Slayer will target a Victim in the Mirror Dimension, or you, whichever is closer. Note that if Slayer is attacking on a space with only you and other Victims in Our Dimension, Slayer will attack you, ignoring the Victims in Our Dimension.',
+        'When targeting a Victim, it will target the closest Mirror Dimension Victim. If there are none, it will instead resolve the move symbol and ignore the rest of that Killer Action. Continue to resolve the rest of the Terror card if there are additional effects.',
+        'When targeting the Final Girl, it will target you regardless of which dimension you are in.',
+      ],
+    },
+    { type: 'heading', level: 3, text: 'Panic Phase' },
+    {
+      type: 'paragraph',
+      text: 'During the Panic phase, do not panic Victims in Our Dimension (unless the Interdimensional Rift Collapse Finale card is in play).',
+    },
+    {
+      type: 'example',
+      title: 'Panic Phase Example',
+      text: 'Slayer is in the Mirror Dimension and at the start of the Panic phase is in a space with 2 Victims in Our Dimension and 2 Mirror Dimension Victims. Since a Victim was killed earlier this turn, the Mirror Dimension Victims will panic but the Victims in Our Dimension will not.',
+    },
+  ],
+};
+
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -441,6 +600,16 @@ const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
     narrativeGuidance: 'Wingard Cottage is a lakeside family getaway with a long, buried history of tragedy. The story should move between INDOOR spaces (Kitchen, Bedrooms, Bathroom, Family Room, Foyer, Laundry Room, Garage, Shed, Boathouse) and OUTDOOR spaces (yard, dock, woods\' edge, driveway). Emphasize scavenging for supplies (Discarded Tools, Nails, Rope, Wood) and improvising crafted weapons (e.g. a Nail Bat from a Wooden Bat + Nails, a Sawed-off Shotgun, a Porcupine from a Trashcan Lid). The cottage feels charming on the surface but hides generations of violence.',
     visualGuidance: 'Depict a rustic wooden cottage on the edge of a pristine lake at night: warm yellow interior windows, a shed and boathouse, a dock, surrounding pine woods, and a violet/purple sky. Interiors show a lived-in family kitchen, bedrooms, and family room with makeshift weapons (nail-studded bats, sawed-off shotguns, trashcan lids). Include stashes of Supply Items (piles of nails, rope, wood, discarded tools).',
     rulesSummary: 'Spaces are classified as HOUSE, INDOORS (house + shed + boathouse), or OUTDOOR. Four Supply Item types (Discarded Tools, Nails, Rope, Wood) can be gathered from marked spaces at the cost of 1 Time and stored in a Backpack. Crafted Items are built by discarding required Items/Supply Items and spending Time; discarded Crafted and Supply Item cards return to the play area to be gained/crafted again. Limited-use Item charges carry over into their Crafted upgrades.',
+  },
+  Slayer: {
+    narrativeGuidance: 'Slayer hunts from the Mirror Dimension — a dark, drained reflection of Falconwood laid over the same streets. It has a mental connection to the Final Girl and can always sense her, but can only sense other victims once they are dragged through a rift. Emphasize rifts opening, people vanishing mid-sentence, static, and the toll of staying too long on the other side (it drains her health). Slayer can be fought only when she stands in the same dimension it does.',
+    visualGuidance: 'Depict a tall, gaunt, spider-limbed reptilian creature crackling with electricity, seen through a desaturated mirror-world version of a small town: washed-out colors, floating debris, drifting ash, glowing tears in the air, and reflections that move on their own. Contrast warm ordinary streets with the cold blue-gray Mirror Dimension.',
+    rulesSummary: 'Slayer moves only in the Mirror Dimension. Victims exist in either dimension (yellow = Our Dimension, gray = Mirror). The Final Girl may Open a Rift to cross over and may return during the Action phase, but loses health during Upkeep while in the Mirror Dimension. She can only damage Slayer while in the same dimension. Slayer pulls victims through rifts, always senses the Final Girl, and only senses Mirror Dimension victims. Our Dimension victims do not panic during the Panic phase.',
+  },
+  Falconwood: {
+    narrativeGuidance: 'Falconwood is a shrinking rural town (peak population 16,715) poisoned by a government lab: mysterious deaths, disappearances, families fleeing, and locals who either play dumb or are desperate to expose the truth. A river splits the town — bridges are the only reliable crossings, while river crossings are usually impassable. The Final Girl is pursuing a specific mission (exposing the lab, rescuing a friend), and completing it is what finally makes the killer vulnerable. Completing the mission also earns a Friend who fights alongside her.',
+    visualGuidance: 'Depict a small 1980s American town split by a river: a green Falconwood road sign, bridges, a shopping mall, a fenced government lab, woods, farmland, a pizza delivery van, and washed-out overcast light.',
+    rulesSummary: 'Bridges cross the river; River Crossings normally cannot be used and do not count as adjacent. A randomly selected Mission must be completed to win — the Killer cannot lose its final health until then. Cards can grant or lose Mission Progress. Completing the Mission grants a Friend (a Special Victim who follows into the Killer\u2019s space, is attacked last, and never panics beside you). Some cards call for a 20-sided die roll.',
   },
 };
 
