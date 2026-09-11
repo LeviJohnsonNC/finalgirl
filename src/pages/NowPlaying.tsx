@@ -277,9 +277,21 @@ const NowPlaying = ({
             {theme.tagline}
           </p>
         )}
-        <p className="type-label text-muted-foreground mb-6 sm:mb-8 text-center px-2">
+        <p className={`type-label text-muted-foreground text-center px-2 ${missionData ? 'mb-2' : 'mb-6 sm:mb-8'}`}>
           {killer} vs {finalGirl} at {location}
         </p>
+
+        {/* Mission — Falconwood's mandatory objective */}
+        {missionData && (
+          <div className="mb-6 sm:mb-8 max-w-xl text-center px-3">
+            <p className="type-caption uppercase text-primary tracking-[0.2em]">
+              Mission · {missionData.name}
+            </p>
+            <p className="type-caption text-muted-foreground/80 italic mt-1">
+              {missionData.description}
+            </p>
+          </div>
+        )}
 
         {/* Story Container */}
         <div className="w-full max-w-7xl flex flex-col gap-4 sm:gap-6">
