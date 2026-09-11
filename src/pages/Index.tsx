@@ -48,6 +48,8 @@ interface GameSelection {
   finalGirl: string;
   setupScenario: string | null;
   startingEvent: string | null;
+  /** Falconwood only: the Mission that must be completed to win. */
+  mission: string | null;
   filmId: string | null;
   introStory?: string;
 }
@@ -108,6 +110,7 @@ const IndexContent = () => {
     finalGirl: string;
     setupScenario: string | null;
     startingEvent: string | null;
+    mission: string | null;
   }) => {
     const filmId = getFilmIdByLocation(selection.location);
     setGameSelection({
@@ -138,12 +141,15 @@ const IndexContent = () => {
       finalGirl: gameSelection.finalGirl,
       setupScenario: gameSelection.setupScenario,
       startingEvent: gameSelection.startingEvent,
+      mission: gameSelection.mission,
       introStory: story,
       sceneImageUrl,
       visualBible: bible,
     });
     
-    setLastGameResult(result);
+    // The Mission has no column of its own; keep it on the in-session record so
+    // the results form can offer the Falconwood fields.
+    setLastGameResult({ ...result, mission: gameSelection.mission });
     setCurrentPage('outcome');
   };
 
@@ -231,6 +237,7 @@ const IndexContent = () => {
               finalGirl={gameSelection.finalGirl}
               setupScenario={gameSelection.setupScenario}
               startingEvent={gameSelection.startingEvent}
+              mission={gameSelection.mission}
               filmId={gameSelection.filmId}
               onBack={handleBackFromNowPlaying}
               onGameEnd={handleGameEnd}

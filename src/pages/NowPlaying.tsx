@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ImageIcon, Volume2, VolumeX, Loader2, ScrollText } from 'lucide-react';
 import { SpecialRulesModal, getApplicableSpecialRules } from '@/components/SpecialRulesModal';
 import { getModulePromptContext } from '@/data/rules/moduleRules';
+import { getMissionByName } from '@/data/falconwoodMissions';
 import { streamChatCompletion } from '@/lib/streamChatCompletion';
 
 import { useNarration } from '@/hooks/useNarration';
@@ -29,6 +30,8 @@ interface NowPlayingProps {
   finalGirl: string;
   setupScenario: string | null;
   startingEvent: string | null;
+  /** Falconwood only: the Mission that must be completed to win. */
+  mission?: string | null;
   filmId: string | null;
   onBack: () => void;
   onGameEnd: (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, visualBible?: string) => void;
@@ -40,6 +43,7 @@ const NowPlaying = ({
   finalGirl,
   setupScenario,
   startingEvent,
+  mission,
   filmId,
   onBack,
   onGameEnd,
@@ -74,6 +78,7 @@ const NowPlaying = ({
   // reader loop stops and no further setState fires on an unmounted component.
   const streamAbortRef = useRef<AbortController | null>(null);
   const moduleContext = getModulePromptContext(killer, location);
+  const missionData = getMissionByName(mission);
   const applicableSpecialRules = getApplicableSpecialRules(killer, location);
   // Reserve the image column as soon as there is something to show there —
   // a finished still, one developing, or a failure worth retrying.
@@ -172,6 +177,12 @@ const NowPlaying = ({
       const moduleSpecialRules = moduleContext
         ? [moduleContext.rulesSummary, moduleContext.narrativeGuidance].filter(Boolean).join('\n')
         : undefined;
+      // Falconwood's Mission is the spine of the story, so it rides along with
+      // the location's special rules rather than needing a new payload field.
+      const missionNote = missionData
+        ? `MISSION (the Final Girl's mandatory objective this game — build the story around it): ${missionData.name} — ${missionData.description} She cannot finish the killer until this is done.`
+        : undefined;
+      const locationSpecialRules = [moduleSpecialRules, missionNote].filter(Boolean).join('\n');
 
       // Build payload with complete objects matching the edge function's StoryRequest interface
       const payload = {
@@ -185,7 +196,7 @@ const NowPlaying = ({
         location: {
           name: location,
           description: locationDetails?.description || `A dangerous place called ${location}.`,
-          ...(moduleSpecialRules && { specialRules: moduleSpecialRules }),
+          ...(locationSpecialRules && { specialRules: locationSpecialRules }),
         },
         finalGirl: {
           name: finalGirl,
@@ -266,9 +277,21 @@ const NowPlaying = ({
             {theme.tagline}
           </p>
         )}
-        <p className="type-label text-muted-foreground mb-6 sm:mb-8 text-center px-2">
+        <p className={`type-label text-muted-foreground text-center px-2 ${missionData ? 'mb-2' : 'mb-6 sm:mb-8'}`}>
           {killer} vs {finalGirl} at {location}
         </p>
+
+        {/* Mission — Falconwood's mandatory objective */}
+        {missionData && (
+          <div className="mb-6 sm:mb-8 max-w-xl text-center px-3">
+            <p className="type-caption uppercase text-primary tracking-[0.2em]">
+              Mission · {missionData.name}
+            </p>
+            <p className="type-caption text-muted-foreground/80 italic mt-1">
+              {missionData.description}
+            </p>
+          </div>
+        )}
 
         {/* Story Container */}
         <div className="w-full max-w-7xl flex flex-col gap-4 sm:gap-6">

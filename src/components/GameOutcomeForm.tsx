@@ -35,6 +35,9 @@ export const GameOutcomeForm = ({
   const isGrimlash = result.killer === 'Grimlash';
   const isBerith = result.killer === 'Berith' || result.location === "L'Armes Abbey";
   const isShriek = result.killer === 'Mort the Teenage Dirtbag' || result.location === 'MegaBGCon';
+  const isFalconwood = result.location === 'Falconwood';
+  const isSlayer = result.killer === 'Slayer';
+  const showFalconwood = isFalconwood || isSlayer;
   
   // Local form state - use character-specific max health for defaults
   const [finalHorrorLevel, setFinalHorrorLevel] = useState(result.finalHorrorLevel ?? 4);
@@ -70,6 +73,11 @@ export const GameOutcomeForm = ({
   // Shriek / MegaBGCon
   const [mortRevealed, setMortRevealed] = useState(false);
   const [finalKillerIdentity, setFinalKillerIdentity] = useState('Unknown');
+  // Falconwood / Slayer
+  const [missionCompleted, setMissionCompleted] = useState(isWin);
+  const [missionProgress, setMissionProgress] = useState('');
+  const [friendJoined, setFriendJoined] = useState('');
+  const [endingDimension, setEndingDimension] = useState<'Our Dimension' | 'Mirror Dimension'>('Our Dimension');
 
   const handleContinue = () => {
     // Augment gameHighlights with killer-specific conditions so the LLM gets full context
@@ -128,6 +136,21 @@ export const GameOutcomeForm = ({
       shriekParts.push(mortRevealed ? 'Mort was revealed' : 'Mort remained hidden');
       highlights = highlights ? `${highlights}. ${shriekParts.join('. ')}` : shriekParts.join('. ');
     }
+    if (showFalconwood) {
+      const falconParts: string[] = [];
+      if (result.mission) falconParts.push(`Mission: ${result.mission}`);
+      if (missionCompleted) {
+        falconParts.push('Mission completed — the killer could finally be finished');
+        if (friendJoined.trim()) falconParts.push(`Friend who joined the fight: ${friendJoined.trim()}`);
+      } else {
+        falconParts.push('Mission NOT completed — the killer could not be finished');
+        if (missionProgress.trim()) falconParts.push(`Mission progress: ${missionProgress.trim()}`);
+      }
+      falconParts.push(`Ended in: ${endingDimension}`);
+      highlights = highlights ? `${highlights}. ${falconParts.join('. ')}` : falconParts.join('. ');
+    }
+
+
 
     const formData: EndingFormData = {
       finalHorrorLevel,
@@ -585,6 +608,78 @@ export const GameOutcomeForm = ({
           </div>
         </div>
       )}
+
+      {/* Section: Falconwood / Slayer */}
+      {showFalconwood && (
+        <div className="space-y-3">
+          <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
+            The Mission
+          </h3>
+          {result.mission && (
+            <p className="type-caption text-muted-foreground/80 italic">
+              {result.mission}
+            </p>
+          )}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={missionCompleted}
+              onChange={(e) => setMissionCompleted(e.target.checked)}
+              className="w-4 h-4 accent-secondary"
+            />
+            <span className="type-label text-foreground">Mission Completed</span>
+          </label>
+
+          {missionCompleted ? (
+            <div className="space-y-1">
+              <label className="type-caption text-muted-foreground">
+                Friend Who Joined You
+              </label>
+              <input
+                type="text"
+                value={friendJoined}
+                onChange={(e) => setFriendJoined(e.target.value)}
+                placeholder="Your father, your friend, the researcher..."
+                className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-secondary/50 transition-colors"
+              />
+            </div>
+          ) : (
+            <div className="space-y-1">
+              <label className="type-caption text-muted-foreground">
+                Mission Progress
+              </label>
+              <input
+                type="text"
+                value={missionProgress}
+                onChange={(e) => setMissionProgress(e.target.value)}
+                placeholder="One clue short, halfway through the code..."
+                className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-colors"
+              />
+            </div>
+          )}
+
+          <div>
+            <p className="type-caption text-muted-foreground mb-2">Dimension at the End</p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              {(['Our Dimension', 'Mirror Dimension'] as const).map((dimension) => (
+                <label key={dimension} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="endingDimension"
+                    value={dimension}
+                    checked={endingDimension === dimension}
+                    onChange={() => setEndingDimension(dimension)}
+                    className="accent-primary"
+                  />
+                  <span className="type-label text-foreground">{dimension}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+
 
       {/* Section: Narrative */}
       <div className="space-y-3">

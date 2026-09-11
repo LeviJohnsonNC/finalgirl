@@ -85,6 +85,12 @@ export interface GameResult {
   finalGirl: string;
   setupScenario?: string | null;
   startingEvent?: string | null;
+  /**
+   * Falconwood only: the Mission drawn for this game. Carried in memory for the
+   * current session (and folded into gameHighlights on the results form) — it
+   * has no column of its own.
+   */
+  mission?: string | null;
   // Extended fields for game details
   introStory?: string;
   endingNarration?: string;

@@ -21,6 +21,7 @@ interface CastingRoomProps {
     finalGirl: string;
     setupScenario: string | null;
     startingEvent: string | null;
+    mission: string | null;
   }) => void;
   onGoToArchive?: () => void;
 }
@@ -37,6 +38,8 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
   // Track scenario selections
   const [selectedSetup, setSelectedSetup] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  const [selectedMission, setSelectedMission] = useState<string | null>(null);
+  
   
   const [isShufflingAll, setIsShufflingAll] = useState(false);
   const [shufflingSlot, setShufflingSlot] = useState<'killer' | 'location' | 'finalGirl' | null>(null);
@@ -93,8 +96,9 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
       finalGirl: selection.finalGirl,
       setupScenario: selectedSetup,
       startingEvent: selectedEvent,
+      mission: selectedMission,
     });
-  }, [isComplete, selection, selectedSetup, selectedEvent, onStartGame]);
+  }, [isComplete, selection, selectedSetup, selectedEvent, selectedMission, onStartGame]);
 
   if (isLoading) {
     return (
@@ -208,6 +212,7 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
               selectedLocation={selection.location}
               onSetupChange={setSelectedSetup}
               onEventChange={setSelectedEvent}
+              onMissionChange={setSelectedMission}
             />
           </div>
         </div>
