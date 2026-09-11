@@ -35,6 +35,9 @@ export const GameOutcomeForm = ({
   const isGrimlash = result.killer === 'Grimlash';
   const isBerith = result.killer === 'Berith' || result.location === "L'Armes Abbey";
   const isShriek = result.killer === 'Mort the Teenage Dirtbag' || result.location === 'MegaBGCon';
+  const isFalconwood = result.location === 'Falconwood';
+  const isSlayer = result.killer === 'Slayer';
+  const showFalconwood = isFalconwood || isSlayer;
   
   // Local form state - use character-specific max health for defaults
   const [finalHorrorLevel, setFinalHorrorLevel] = useState(result.finalHorrorLevel ?? 4);
@@ -70,6 +73,11 @@ export const GameOutcomeForm = ({
   // Shriek / MegaBGCon
   const [mortRevealed, setMortRevealed] = useState(false);
   const [finalKillerIdentity, setFinalKillerIdentity] = useState('Unknown');
+  // Falconwood / Slayer
+  const [missionCompleted, setMissionCompleted] = useState(isWin);
+  const [missionProgress, setMissionProgress] = useState('');
+  const [friendJoined, setFriendJoined] = useState('');
+  const [endingDimension, setEndingDimension] = useState<'Our Dimension' | 'Mirror Dimension'>('Our Dimension');
 
   const handleContinue = () => {
     // Augment gameHighlights with killer-specific conditions so the LLM gets full context
