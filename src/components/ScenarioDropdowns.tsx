@@ -132,7 +132,54 @@ export const ScenarioDropdowns = ({
             </SelectContent>
           </Select>
         </div>
+
+        {/* Mission — Falconwood only. Drawn at random by the official rules,
+            so the dice button sits beside the list. */}
+        {showMissions && (
+          <div className="flex flex-col gap-2 md:col-span-2">
+            <label className="font-display text-xs text-muted-foreground tracking-[0.2em] uppercase">
+              Mission
+            </label>
+            <div className="flex items-stretch gap-2">
+              <Select
+                value={selectedMission || undefined}
+                onValueChange={handleMissionChange}
+              >
+                <SelectTrigger className="scenario-dropdown font-display text-xs sm:text-sm tracking-wider uppercase min-h-[44px] flex-1">
+                  <SelectValue placeholder="Select Mission..." />
+                </SelectTrigger>
+                <SelectContent className="scenario-dropdown-content" side="top">
+                  {FALCONWOOD_MISSIONS.map((mission) => (
+                    <SelectItem
+                      key={mission.name}
+                      value={mission.name}
+                      className="font-display text-xs sm:text-sm tracking-wide uppercase cursor-pointer focus:bg-primary/20 focus:text-primary-foreground data-[highlighted]:bg-primary/20 data-[highlighted]:text-foreground min-h-[44px]"
+                    >
+                      {mission.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <button
+                type="button"
+                onClick={handleRandomMission}
+                aria-label="Draw a random mission"
+                title="Draw a random mission"
+                className="vcr-tape-button flex items-center justify-center gap-2 px-4 min-h-[44px] font-display text-xs tracking-[0.15em] uppercase"
+              >
+                <Dices className="w-4 h-4 text-primary" />
+                <span className="hidden sm:inline">Draw</span>
+              </button>
+            </div>
+            {selectedMissionData && (
+              <p className="type-caption text-muted-foreground/80 italic">
+                {selectedMissionData.description}
+              </p>
+            )}
+          </div>
+        )}
       </div>
+
     </div>
   );
 };
