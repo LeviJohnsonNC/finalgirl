@@ -55,38 +55,38 @@ export const CastingPicker = ({ type, options, onSelect, onClose }: CastingPicke
         <span className="evidence-drawer__tape evidence-drawer__tape--tr hidden sm:block" />
 
         {/* Sticky header */}
-        <div className="row-start-1 sticky top-0 z-10 flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-primary/20 bg-background/85 backdrop-blur-sm">
-          <div className="flex items-center gap-3 min-w-0">
-            <span className="hidden sm:inline-block w-2 h-2 rounded-full bg-blood animate-pulse" />
-            <h2 className="font-display text-xl sm:text-2xl md:text-3xl text-foreground tracking-[0.18em] truncate">
-              {PICKER_TITLES[type]}
-            </h2>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="relative hidden sm:flex items-center">
-              <Search className="absolute left-2.5 w-4 h-4 text-muted-foreground pointer-events-none" />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search files..."
-                className="h-9 pl-9 pr-3 w-44 md:w-56 bg-background/60 border border-border/50 rounded-sm text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 transition-colors font-vhs"
-                aria-label="Search files"
-              />
+        <div className="row-start-1 sticky top-0 z-10 flex flex-col gap-3 px-4 sm:px-6 py-4 border-b border-primary/20 bg-background/85 backdrop-blur-sm">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="hidden sm:inline-block w-2 h-2 rounded-full bg-blood animate-pulse" />
+              <h2 className="font-display text-xl sm:text-2xl md:text-3xl text-foreground tracking-[0.18em] truncate">
+                {PICKER_TITLES[type]}
+              </h2>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 min-h-[40px] min-w-[40px] flex items-center justify-center text-muted-foreground hover:text-foreground border border-border/50 hover:border-primary/60 transition-colors"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="relative hidden sm:flex items-center">
+                <Search className="absolute left-2.5 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search files..."
+                  className="h-9 pl-9 pr-3 w-44 md:w-56 bg-background/60 border border-border/50 rounded-sm text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 transition-colors font-vhs"
+                  aria-label="Search files"
+                />
+              </div>
+              <button
+                onClick={onClose}
+                className="p-2 min-h-[40px] min-w-[40px] flex items-center justify-center text-muted-foreground hover:text-foreground border border-border/50 hover:border-primary/60 transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Mobile search — sits just below header */}
-        <div className="sm:hidden px-4 pb-3 border-b border-primary/20 bg-background/85">
-          <div className="relative flex items-center">
+          {/* Mobile search */}
+          <div className="sm:hidden relative flex items-center">
             <Search className="absolute left-2.5 w-4 h-4 text-muted-foreground pointer-events-none" />
             <input
               type="text"
