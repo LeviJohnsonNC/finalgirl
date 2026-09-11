@@ -21,6 +21,7 @@ interface CastingRoomProps {
     finalGirl: string;
     setupScenario: string | null;
     startingEvent: string | null;
+    mission: string | null;
   }) => void;
   onGoToArchive?: () => void;
 }
