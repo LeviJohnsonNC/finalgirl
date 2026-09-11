@@ -742,8 +742,70 @@ The town isn't just a place; it's a thin spot in reality. People here don't just
 Falconwood is a quiet, unassuming small town where the veneer of suburban normalcy has begun to crack. For years, the town has been the site of "peculiar things"—unexplained phenomena, shadowy government experiments, and a string of disappearances that the local authorities have been unable (or unwilling) to solve.
 
 The town's history is being documented by a group of local youths in a collective journal known as The Falconwood Files. What started as a hobby to track local urban legends and "government spooks" turned into a grim reality when people began vanishing into thin air, pulled into a dark, parallel world.`,
-      setupCards: [],
-      events: []
+      setupCards: [
+        {
+          name: '4th of July Weekend',
+          description: 'The town is out celebrating Independence Day weekend.'
+        },
+        {
+          name: 'Back to School',
+          description: 'Summer is over and the kids of Falconwood are heading back to school.'
+        },
+        {
+          name: 'Halloween',
+          description: 'It\'s Halloween night in Falconwood — costumes, candy, and something far worse stalking the streets.'
+        },
+        {
+          name: 'Election Day',
+          description: 'The town turns out to vote on Election Day.'
+        },
+        {
+          name: 'New Year\'s Eve',
+          description: 'Falconwood rings in the New Year — but not everyone will see midnight.'
+        }
+      ],
+      events: [
+        {
+          name: 'Packed Bridge',
+          description: 'It is harder to cross bridges now.'
+        },
+        {
+          name: 'Bridge Repair',
+          description: 'One of the bridges is under construction and can no longer be used.'
+        },
+        {
+          name: 'Grand Opening',
+          description: 'A new bridge has been built!'
+        },
+        {
+          name: 'Conspiracy Theorist',
+          description: 'There is a conspiracy theorist at the shopping mall.'
+        },
+        {
+          name: 'Head Researcher',
+          description: 'There is a head researcher now at the government lab.'
+        },
+        {
+          name: 'Pizza Delivery',
+          description: 'You have access to a van.'
+        },
+        {
+          name: 'Helping Hands',
+          description: 'Gain early progress in your mission.'
+        },
+        {
+          name: 'Dry Spell',
+          description: 'You can use all river crossings until it rains.'
+        },
+        {
+          name: 'Freaks and Geeks',
+          description: 'One less victim will follow you now.'
+        },
+        {
+          name: 'Game of Chance',
+          description: 'Luck is in the air — you feel like you\'ve got some especially good or bad luck coming up soon.'
+        }
+      ]
     },
     killer: {
       name: 'Slayer',
