@@ -175,6 +175,12 @@ const NowPlaying = ({
       const moduleSpecialRules = moduleContext
         ? [moduleContext.rulesSummary, moduleContext.narrativeGuidance].filter(Boolean).join('\n')
         : undefined;
+      // Falconwood's Mission is the spine of the story, so it rides along with
+      // the location's special rules rather than needing a new payload field.
+      const missionNote = missionData
+        ? `MISSION (the Final Girl's mandatory objective this game — build the story around it): ${missionData.name} — ${missionData.description} She cannot finish the killer until this is done.`
+        : undefined;
+      const locationSpecialRules = [moduleSpecialRules, missionNote].filter(Boolean).join('\n');
 
       // Build payload with complete objects matching the edge function's StoryRequest interface
       const payload = {
@@ -188,7 +194,7 @@ const NowPlaying = ({
         location: {
           name: location,
           description: locationDetails?.description || `A dangerous place called ${location}.`,
-          ...(moduleSpecialRules && { specialRules: moduleSpecialRules }),
+          ...(locationSpecialRules && { specialRules: locationSpecialRules }),
         },
         finalGirl: {
           name: finalGirl,
