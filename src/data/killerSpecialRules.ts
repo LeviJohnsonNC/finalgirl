@@ -95,7 +95,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   'Slayer': {
     narrativeNote:
-      'A reptilian creature crackling with electrical energy — lightning erupts from its body, it is fast, and it hunts through the Falconwood swamp. Electricity is both its weapon and its vulnerability.',
+      'A tall, gaunt, spider-limbed creature from the Mirror Dimension — a dark reflection of Falconwood it pulls victims into through rifts. It moves only in the Mirror Dimension and can be attacked only by someone in the same dimension, but it always senses the Final Girl no matter which dimension she is in. Do NOT describe Slayer being hurt by attacks from Our Dimension.',
   },
 
   'The Hunter': {
