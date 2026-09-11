@@ -1,7 +1,13 @@
 import { useState, useMemo } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Dices } from 'lucide-react';
 import { getFilmIdByLocation, FEATURE_FILMS } from '@/types/gameData';
 import { getSetupCardsForLocation, getEventsForLocation } from '@/types/featureFilmDetails';
+import {
+  FALCONWOOD_MISSIONS,
+  getMissionByName,
+  getRandomMission,
+  locationHasMissions,
+} from '@/data/falconwoodMissions';
 import {
   Select,
   SelectContent,
@@ -14,15 +20,18 @@ interface ScenarioDropdownsProps {
   selectedLocation: string | null;
   onSetupChange?: (setup: string | null) => void;
   onEventChange?: (event: string | null) => void;
+  onMissionChange?: (mission: string | null) => void;
 }
 
 export const ScenarioDropdowns = ({ 
   selectedLocation, 
   onSetupChange, 
-  onEventChange 
+  onEventChange,
+  onMissionChange
 }: ScenarioDropdownsProps) => {
   const [selectedSetup, setSelectedSetup] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  const [selectedMission, setSelectedMission] = useState<string | null>(null);
 
   const filmId = selectedLocation ? getFilmIdByLocation(selectedLocation) : null;
   
@@ -37,6 +46,8 @@ export const ScenarioDropdowns = ({
   }, [filmId]);
 
   const hasData = setupCards.length > 0 || events.length > 0;
+  const showMissions = locationHasMissions(selectedLocation);
+  const selectedMissionData = getMissionByName(selectedMission);
 
   const selectedSetupData = setupCards.find(s => s.name === selectedSetup);
   const selectedEventData = events.find(e => e.name === selectedEvent);
@@ -51,9 +62,19 @@ export const ScenarioDropdowns = ({
     onEventChange?.(value);
   };
 
+  const handleMissionChange = (value: string) => {
+    setSelectedMission(value);
+    onMissionChange?.(value);
+  };
+
+  const handleRandomMission = () => {
+    handleMissionChange(getRandomMission().name);
+  };
+
   if (!selectedLocation) {
     return null;
   }
+
 
   return (
     <div className="w-full max-w-2xl mx-auto px-2 sm:px-4 mb-6 sm:mb-8">
