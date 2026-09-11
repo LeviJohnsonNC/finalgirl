@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { X, Search } from 'lucide-react';
 import { useActiveImages } from '@/hooks/useActiveImages';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
@@ -16,9 +16,22 @@ const PICKER_TITLES = {
   finalGirl: 'SELECT FINAL GIRL FILE',
 };
 
+const sortOptions = (type: CastingPickerProps['type'], options: string[]) => {
+  if (type !== 'finalGirl') return options;
+  return [...options].sort((a, b) => a.localeCompare(b));
+};
+
 export const CastingPicker = ({ type, options, onSelect, onClose }: CastingPickerProps) => {
   const { getImageForValue } = useActiveImages();
   const isLocation = type === 'location';
+  const [query, setQuery] = useState('');
+
+  const sortedOptions = useMemo(() => sortOptions(type, options), [type, options]);
+  const filteredOptions = useMemo(() => {
+    const trimmed = query.trim().toLowerCase();
+    if (!trimmed) return sortedOptions;
+    return sortedOptions.filter((option) => option.toLowerCase().includes(trimmed));
+  }, [sortedOptions, query]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
