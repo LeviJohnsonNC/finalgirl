@@ -572,7 +572,65 @@ const slayer: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer];
+// ─── Marrek Warehouse (Location) — The Marrek Murders ─────────────────────
+const marrekWarehouse: EntityRuleModule = {
+  entity: 'Marrek Warehouse',
+  kind: 'location',
+  filmId: 's3-marrek-murders',
+  source: 'The Marrek Murders — Location Sheet',
+  credits: { design: 'A.J. Porfirio', art: 'Agnieszka Dabrowiecka' },
+  tags: ['marrek warehouse', 'locked exits', 'rack spaces', 'climb', 'leap', 'the pit', 'forklift', 'location'],
+  setup: [
+    {
+      type: 'list',
+      items: [
+        'Place the Forklift token in The Pit space. It will only be used if you find the Forklift Keys Item card.',
+        'Place a Locked token on each of the Exit spaces.',
+        'Set aside the 3 "Click" Terror cards before setting up the Terror deck as normal. After the Terror deck is set up, set aside the top 2 cards and shuffle the 3 "Click" Terror cards in with the remaining cards in the Terror deck. Then return the 2 set aside cards to the top of the deck.',
+        'Place the Climb and Leap Action cards in the Action Tableau.',
+      ],
+    },
+  ],
+  rules: [
+    { type: 'heading', level: 3, text: 'Locked Exits' },
+    {
+      type: 'paragraph',
+      text: 'The warehouse has been locked by the Killer! While an Exit is Locked, no Victims may be saved at that Exit. The spaces themselves can be moved into, but to save Victims you will have to find a way to Unlock the Exits or wait for the automatic timers (the "Click" Terror cards) to open them. When an Exit becomes Unlocked, discard the Locked token from that space.',
+    },
+    { type: 'heading', level: 3, text: 'Rack Spaces' },
+    {
+      type: 'paragraph',
+      text: 'These spaces represent the top of the warehouse\u2019s storage racks. Unless noted on a card or effect, Enemies and Victims can move to and from Rack spaces normally.',
+    },
+    { type: 'heading', level: 3, text: 'Climb & Leap Action Cards' },
+    {
+      type: 'paragraph',
+      text: 'These cards are like other Action cards except that they cannot be acquired in the normal way. Instead, at any time during the Action phase, you may:',
+    },
+    {
+      type: 'list',
+      items: [
+        'Discard a Walk card to take Climb OR Leap into your hand.',
+        'Discard a Sprint card to take Climb AND Leap into your hand.',
+      ],
+    },
+    {
+      type: 'paragraph',
+      text: 'CLIMB: You will have to use Climb to move to an adjacent Rack space. Victims may follow you when you Climb. You may not use Climb to move out of a Rack space. Instead, simply use normal movement actions or effects (i.e. Walk, Sprint, etc) to do so.',
+    },
+    {
+      type: 'paragraph',
+      text: 'LEAP: Use Leap to jump from one Rack space to another. Victims may follow you when you Leap. If you fail the Leap Action you will end up on the ground. Victims following you do not suffer damage, they just climb down the rack onto your space (to see if you\u2019re ok).',
+    },
+    { type: 'heading', level: 3, text: 'The Pit' },
+    {
+      type: 'paragraph',
+      text: 'The workers in the warehouse call the area in the middle of the warehouse "The Pit". When panicking someone from this space, roll 2 dice instead of 1 to determine the direction they panic.',
+    },
+  ],
+};
+
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer, marrekWarehouse];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
