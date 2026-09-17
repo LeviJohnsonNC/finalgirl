@@ -572,7 +572,65 @@ const slayer: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer];
+// ─── Marrek Warehouse (Location) — The Marrek Murders ─────────────────────
+const marrekWarehouse: EntityRuleModule = {
+  entity: 'Marrek Warehouse',
+  kind: 'location',
+  filmId: 's3-marrek-murders',
+  source: 'The Marrek Murders — Location Sheet',
+  credits: { design: 'A.J. Porfirio', art: 'Agnieszka Dabrowiecka' },
+  tags: ['marrek warehouse', 'locked exits', 'rack spaces', 'climb', 'leap', 'the pit', 'forklift', 'location'],
+  setup: [
+    {
+      type: 'list',
+      items: [
+        'Place the Forklift token in The Pit space. It will only be used if you find the Forklift Keys Item card.',
+        'Place a Locked token on each of the Exit spaces.',
+        'Set aside the 3 "Click" Terror cards before setting up the Terror deck as normal. After the Terror deck is set up, set aside the top 2 cards and shuffle the 3 "Click" Terror cards in with the remaining cards in the Terror deck. Then return the 2 set aside cards to the top of the deck.',
+        'Place the Climb and Leap Action cards in the Action Tableau.',
+      ],
+    },
+  ],
+  rules: [
+    { type: 'heading', level: 3, text: 'Locked Exits' },
+    {
+      type: 'paragraph',
+      text: 'The warehouse has been locked by the Killer! While an Exit is Locked, no Victims may be saved at that Exit. The spaces themselves can be moved into, but to save Victims you will have to find a way to Unlock the Exits or wait for the automatic timers (the "Click" Terror cards) to open them. When an Exit becomes Unlocked, discard the Locked token from that space.',
+    },
+    { type: 'heading', level: 3, text: 'Rack Spaces' },
+    {
+      type: 'paragraph',
+      text: 'These spaces represent the top of the warehouse\u2019s storage racks. Unless noted on a card or effect, Enemies and Victims can move to and from Rack spaces normally.',
+    },
+    { type: 'heading', level: 3, text: 'Climb & Leap Action Cards' },
+    {
+      type: 'paragraph',
+      text: 'These cards are like other Action cards except that they cannot be acquired in the normal way. Instead, at any time during the Action phase, you may:',
+    },
+    {
+      type: 'list',
+      items: [
+        'Discard a Walk card to take Climb OR Leap into your hand.',
+        'Discard a Sprint card to take Climb AND Leap into your hand.',
+      ],
+    },
+    {
+      type: 'paragraph',
+      text: 'CLIMB: You will have to use Climb to move to an adjacent Rack space. Victims may follow you when you Climb. You may not use Climb to move out of a Rack space. Instead, simply use normal movement actions or effects (i.e. Walk, Sprint, etc) to do so.',
+    },
+    {
+      type: 'paragraph',
+      text: 'LEAP: Use Leap to jump from one Rack space to another. Victims may follow you when you Leap. If you fail the Leap Action you will end up on the ground. Victims following you do not suffer damage, they just climb down the rack onto your space (to see if you\u2019re ok).',
+    },
+    { type: 'heading', level: 3, text: 'The Pit' },
+    {
+      type: 'paragraph',
+      text: 'The workers in the warehouse call the area in the middle of the warehouse "The Pit". When panicking someone from this space, roll 2 dice instead of 1 to determine the direction they panic.',
+    },
+  ],
+};
+
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer, marrekWarehouse];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -610,6 +668,16 @@ const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
     narrativeGuidance: 'Falconwood is a shrinking rural town (peak population 16,715) poisoned by a government lab: mysterious deaths, disappearances, families fleeing, and locals who either play dumb or are desperate to expose the truth. A river splits the town — bridges are the only reliable crossings, while river crossings are usually impassable. The Final Girl is pursuing a specific mission (exposing the lab, rescuing a friend), and completing it is what finally makes the killer vulnerable. Completing the mission also earns a Friend who fights alongside her.',
     visualGuidance: 'Depict a small 1980s American town split by a river: a green Falconwood road sign, bridges, a shopping mall, a fenced government lab, woods, farmland, a pizza delivery van, and washed-out overcast light.',
     rulesSummary: 'Bridges cross the river; River Crossings normally cannot be used and do not count as adjacent. A randomly selected Mission must be completed to win — the Killer cannot lose its final health until then. Cards can grant or lose Mission Progress. Completing the Mission grants a Friend (a Special Victim who follows into the Killer\u2019s space, is attacked last, and never panics beside you). Some cards call for a 20-sided die roll.',
+  },
+  'Marrek Warehouse': {
+    narrativeGuidance: 'Marrek Warehouse is a locked-down industrial storage facility: the Killer has locked the exits, so victims cannot be saved until a lock is opened or an automatic timer "clicks" it open. Emphasize the dread of countdown timers and mechanical locks, climbing and leaping across the tops of towering storage racks, and "The Pit" — the chaotic open middle of the warehouse where panicked people scatter unpredictably. A forklift sits in The Pit, useful only if its keys are found.',
+    visualGuidance: 'Depict a cavernous industrial warehouse at night: towering steel storage racks, pallets and crates, a forklift in a wide open central pit area, chained and padlocked exit doors, buzzing uneven fluorescent lights, oil-stained concrete, and long shadows between rack rows.',
+    rulesSummary: 'All Exits start Locked — Victims cannot be saved there until unlocked by an effect or by one of the 3 "Click" Terror cards. Rack spaces are the tops of storage racks; the Climb and Leap Action cards (gained by discarding Walk or Sprint) are the only way onto and between them, and Victims may follow. Failing a Leap drops the Final Girl to the ground. Panicking someone out of The Pit rolls 2 dice for direction instead of 1. A Forklift token waits in The Pit for whoever finds the Forklift Keys Item.',
+  },
+  'The Tormentor': {
+    narrativeGuidance: 'The Tormentor is a calm, methodical engineer of fear rather than a raging brute. She works through locks, timers, and traps — she is often unseen, felt only through a sprung mechanism, a chained exit, or a click that promises mercy and delivers none. Emphasize the cruelty of rules written to betray the victim.',
+    visualGuidance: 'Depict a lean, athletic masked woman in a deep red hooded vest, wearing a smooth white porcelain-like mask with a single jagged bloodstain running down the left eye. She carries tools — wrenches, pliers, remote triggers — not a machete. Industrial warehouse setting, cold shadows, mechanical timers and padlocks in frame.',
+    rulesSummary: 'A patient trap-setter who uses the warehouse\u2019s locking system and rack maze to isolate and corner victims, forcing choices under a timer.',
   },
 };
 
