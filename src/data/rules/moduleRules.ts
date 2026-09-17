@@ -669,6 +669,16 @@ const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
     visualGuidance: 'Depict a small 1980s American town split by a river: a green Falconwood road sign, bridges, a shopping mall, a fenced government lab, woods, farmland, a pizza delivery van, and washed-out overcast light.',
     rulesSummary: 'Bridges cross the river; River Crossings normally cannot be used and do not count as adjacent. A randomly selected Mission must be completed to win — the Killer cannot lose its final health until then. Cards can grant or lose Mission Progress. Completing the Mission grants a Friend (a Special Victim who follows into the Killer\u2019s space, is attacked last, and never panics beside you). Some cards call for a 20-sided die roll.',
   },
+  'Marrek Warehouse': {
+    narrativeGuidance: 'Marrek Warehouse is a locked-down industrial storage facility: the Killer has locked the exits, so victims cannot be saved until a lock is opened or an automatic timer "clicks" it open. Emphasize the dread of countdown timers and mechanical locks, climbing and leaping across the tops of towering storage racks, and "The Pit" — the chaotic open middle of the warehouse where panicked people scatter unpredictably. A forklift sits in The Pit, useful only if its keys are found.',
+    visualGuidance: 'Depict a cavernous industrial warehouse at night: towering steel storage racks, pallets and crates, a forklift in a wide open central pit area, chained and padlocked exit doors, buzzing uneven fluorescent lights, oil-stained concrete, and long shadows between rack rows.',
+    rulesSummary: 'All Exits start Locked — Victims cannot be saved there until unlocked by an effect or by one of the 3 "Click" Terror cards. Rack spaces are the tops of storage racks; the Climb and Leap Action cards (gained by discarding Walk or Sprint) are the only way onto and between them, and Victims may follow. Failing a Leap drops the Final Girl to the ground. Panicking someone out of The Pit rolls 2 dice for direction instead of 1. A Forklift token waits in The Pit for whoever finds the Forklift Keys Item.',
+  },
+  'The Tormentor': {
+    narrativeGuidance: 'The Tormentor is a calm, methodical engineer of fear rather than a raging brute. She works through locks, timers, and traps — she is often unseen, felt only through a sprung mechanism, a chained exit, or a click that promises mercy and delivers none. Emphasize the cruelty of rules written to betray the victim.',
+    visualGuidance: 'Depict a lean, athletic masked woman in a deep red hooded vest, wearing a smooth white porcelain-like mask with a single jagged bloodstain running down the left eye. She carries tools — wrenches, pliers, remote triggers — not a machete. Industrial warehouse setting, cold shadows, mechanical timers and padlocks in frame.',
+    rulesSummary: 'A patient trap-setter who uses the warehouse\u2019s locking system and rack maze to isolate and corner victims, forcing choices under a timer.',
+  },
 };
 
 export function getModulePromptContext(killer: string, location: string): ModulePromptContext | null {
