@@ -110,8 +110,9 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   'The Tormentor': {
     narrativeNote:
-      'A calculated, silent killer who uses the industrial warehouse maze to isolate and corner victims. She plans her kills.',
+      'A calculated, silent killer who has locked down Marrek Warehouse and uses its timers, padlocks, and towering storage racks to isolate and corner victims. She plans her kills: no victim can be led out an exit until a lock opens, and escape routes run across the racks or through the chaotic open "Pit" in the middle of the warehouse.',
   },
+
 
   'The Eyeless': {
     narrativeNote:
