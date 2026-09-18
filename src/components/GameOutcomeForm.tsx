@@ -37,7 +37,6 @@ export const GameOutcomeForm = ({
   const isShriek = result.killer === 'Mort the Teenage Dirtbag' || result.location === 'MegaBGCon';
   const isFalconwood = result.location === 'Falconwood';
   const isSlayer = result.killer === 'Slayer';
-  const showFalconwood = isFalconwood || isSlayer;
   
   // Local form state - use character-specific max health for defaults
   const [finalHorrorLevel, setFinalHorrorLevel] = useState(result.finalHorrorLevel ?? 4);
@@ -136,7 +135,7 @@ export const GameOutcomeForm = ({
       shriekParts.push(mortRevealed ? 'Mort was revealed' : 'Mort remained hidden');
       highlights = highlights ? `${highlights}. ${shriekParts.join('. ')}` : shriekParts.join('. ');
     }
-    if (showFalconwood) {
+    if (isFalconwood) {
       const falconParts: string[] = [];
       if (result.mission) falconParts.push(`Mission: ${result.mission}`);
       if (missionCompleted) {
@@ -146,8 +145,11 @@ export const GameOutcomeForm = ({
         falconParts.push('Mission NOT completed — the killer could not be finished');
         if (missionProgress.trim()) falconParts.push(`Mission progress: ${missionProgress.trim()}`);
       }
-      falconParts.push(`Ended in: ${endingDimension}`);
       highlights = highlights ? `${highlights}. ${falconParts.join('. ')}` : falconParts.join('. ');
+    }
+    if (isSlayer) {
+      const dimensionPart = `Ended in: ${endingDimension}`;
+      highlights = highlights ? `${highlights}. ${dimensionPart}` : dimensionPart;
     }
 
 
@@ -609,8 +611,8 @@ export const GameOutcomeForm = ({
         </div>
       )}
 
-      {/* Section: Falconwood / Slayer */}
-      {showFalconwood && (
+      {/* Section: Falconwood Mission */}
+      {isFalconwood && (
         <div className="space-y-3">
           <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
             The Mission
@@ -657,7 +659,15 @@ export const GameOutcomeForm = ({
               />
             </div>
           )}
+        </div>
+      )}
 
+      {/* Section: Slayer Mirror Dimension */}
+      {isSlayer && (
+        <div className="space-y-3">
+          <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
+            The Mirror Dimension
+          </h3>
           <div>
             <p className="type-caption text-muted-foreground mb-2">Dimension at the End</p>
             <div className="flex flex-col sm:flex-row gap-2">
