@@ -37,7 +37,6 @@ export const GameOutcomeForm = ({
   const isShriek = result.killer === 'Mort the Teenage Dirtbag' || result.location === 'MegaBGCon';
   const isFalconwood = result.location === 'Falconwood';
   const isSlayer = result.killer === 'Slayer';
-  const showFalconwood = isFalconwood || isSlayer;
   
   // Local form state - use character-specific max health for defaults
   const [finalHorrorLevel, setFinalHorrorLevel] = useState(result.finalHorrorLevel ?? 4);
