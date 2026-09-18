@@ -612,8 +612,8 @@ export const GameOutcomeForm = ({
         </div>
       )}
 
-      {/* Section: Falconwood / Slayer */}
-      {showFalconwood && (
+      {/* Section: Falconwood Mission */}
+      {isFalconwood && (
         <div className="space-y-3">
           <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
             The Mission
