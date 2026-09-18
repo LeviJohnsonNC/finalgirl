@@ -136,7 +136,7 @@ export const GameOutcomeForm = ({
       shriekParts.push(mortRevealed ? 'Mort was revealed' : 'Mort remained hidden');
       highlights = highlights ? `${highlights}. ${shriekParts.join('. ')}` : shriekParts.join('. ');
     }
-    if (showFalconwood) {
+    if (isFalconwood) {
       const falconParts: string[] = [];
       if (result.mission) falconParts.push(`Mission: ${result.mission}`);
       if (missionCompleted) {
@@ -146,8 +146,11 @@ export const GameOutcomeForm = ({
         falconParts.push('Mission NOT completed — the killer could not be finished');
         if (missionProgress.trim()) falconParts.push(`Mission progress: ${missionProgress.trim()}`);
       }
-      falconParts.push(`Ended in: ${endingDimension}`);
       highlights = highlights ? `${highlights}. ${falconParts.join('. ')}` : falconParts.join('. ');
+    }
+    if (isSlayer) {
+      const dimensionPart = `Ended in: ${endingDimension}`;
+      highlights = highlights ? `${highlights}. ${dimensionPart}` : dimensionPart;
     }
 
 
