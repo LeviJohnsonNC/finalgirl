@@ -660,7 +660,15 @@ export const GameOutcomeForm = ({
               />
             </div>
           )}
+        </div>
+      )}
 
+      {/* Section: Slayer Mirror Dimension */}
+      {isSlayer && (
+        <div className="space-y-3">
+          <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
+            The Mirror Dimension
+          </h3>
           <div>
             <p className="type-caption text-muted-foreground mb-2">Dimension at the End</p>
             <div className="flex flex-col sm:flex-row gap-2">
