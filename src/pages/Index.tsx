@@ -22,6 +22,7 @@ const Stats = lazy(() => import('./Stats'));
 const Rules = lazy(() => import('./Rules'));
 import type { EndingFormData, ActiveGame } from '@/lib/activeGame';
 import { useActiveGame } from '@/hooks/useActiveGame';
+import { usePageNavigation } from '@/hooks/usePageNavigation';
 import { Library, BookOpen, BarChart3, ArrowLeft, User, BookMarked } from 'lucide-react';
 import { getFilmIdByLocation } from '@/types/gameData';
 import { GameResult } from '@/hooks/useGameHistory';
@@ -50,15 +51,14 @@ const prefetchLikelyPages = () => {
 const IndexContent = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
-  const [hasStarted, setHasStarted] = useState(false);
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'archive' | 'nowPlaying' | 'outcome' | 'ending' | 'scrapbooks' | 'stats' | 'rules'>('dashboard');
+  const { page: currentPage, navigate: setCurrentPage, back: goBack, canGoBack } = usePageNavigation<'home' | 'dashboard' | 'archive' | 'nowPlaying' | 'outcome' | 'ending' | 'scrapbooks' | 'stats' | 'rules'>('home');
+  const hasStarted = currentPage !== 'home';
   // A session the stats page asked to open. Set only by that hand-off; every
   // other route into the scrapbooks clears it, so they start on the covers.
   const [scrapbookFocusId, setScrapbookFocusId] = useState<string | null>(null);
 
   const goToScrapbooks = (focusGameId: string | null = null) => {
     setScrapbookFocusId(focusGameId);
-    setHasStarted(true);
     setCurrentPage('scrapbooks');
   };
   const { activeGame, save: saveActiveGame, checkpoint, updateFormDraft, appendPlayEvent } = useActiveGame();
@@ -94,19 +94,14 @@ const IndexContent = () => {
   }, []);
 
   const handleStart = () => {
-    setHasStarted(true);
     setCurrentPage(activeGame?.phase ?? 'dashboard');
   };
 
   const handleArchive = () => {
-    setHasStarted(true);
     setCurrentPage('archive');
   };
 
-  const handleNavigateHome = () => {
-    setHasStarted(false);
-    setCurrentPage('dashboard');
-  };
+  const handleNavigateHome = () => setCurrentPage('home');
 
   const handleStartGame = (selection: {
     killer: string; location: string; finalGirl: string;
@@ -120,7 +115,7 @@ const IndexContent = () => {
       selection: { ...selection, filmId: getFilmIdByLocation(selection.location) } })) setCurrentPage('nowPlaying');
   };
 
-  const handleBackFromNowPlaying = () => setCurrentPage('dashboard');
+  const handleBackFromNowPlaying = goBack;
 
   const handleGameEnd = (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, bible?: string) => {
     if (!activeGame) return;
@@ -181,13 +176,13 @@ const IndexContent = () => {
     </div>}
     {!activeGame && (hasStarted ? cloudPlay.remoteGames : cloudPlay.remoteGames.slice(1)).map(row => <div key={row.id} className="border border-secondary/30 bg-background p-3 type-caption max-w-2xl mx-auto">
       CLOUD GAME · {row.state.selection.finalGirl} vs {row.state.selection.killer}
-      <button className="min-h-[44px] ml-3 underline text-secondary" onClick={() => { if (cloudPlay.adopt(row,saveActiveGame)) { setHasStarted(true); setCurrentPage(row.state.phase); } }}>RESUME CLOUD GAME</button>
+      <button className="min-h-[44px] ml-3 underline text-secondary" onClick={() => { if (cloudPlay.adopt(row,saveActiveGame)) { setCurrentPage(row.state.phase); } }}>RESUME CLOUD GAME</button>
     </div>)}
   </>;
   const resumeNotice = activeGame ? (
     <div role="status" className="mb-4 border border-primary/30 bg-card px-4 py-3 type-caption text-foreground">
       A GAME IS IN PROGRESS · {activeGame.selection.finalGirl} vs {activeGame.selection.killer}
-      <button className="ml-3 text-primary underline min-h-[44px]" onClick={() => { setHasStarted(true); setCurrentPage(activeGame.phase); }}>RESUME GAME</button>
+      <button className="ml-3 text-primary underline min-h-[44px]" onClick={() => { setCurrentPage(activeGame.phase); }}>RESUME GAME</button>
       <button className="ml-3 text-muted-foreground underline min-h-[44px]" onClick={() => {
         if (window.confirm('Discard this unfinished game? Any result already recorded stays in your archive.')) handlePlayAgain();
       }}>DISCARD DRAFT</button>
@@ -217,22 +212,22 @@ const IndexContent = () => {
       <Marquee 
         onStart={() => {
           if (cloudGame) {
-            if (cloudPlay.adopt(cloudGame, saveActiveGame)) { setHasStarted(true); setCurrentPage(cloudGame.state.phase); }
+            if (cloudPlay.adopt(cloudGame, saveActiveGame)) { setCurrentPage(cloudGame.state.phase); }
           } else handleStart();
         }}
         resumeGame={activeGame ?? cloudGame?.state}
         resumeFromCloud={Boolean(cloudGame)}
         onStartAnother={() => {
           if (activeGame && !handlePlayAgain()) return false;
-          setHasStarted(true); setCurrentPage('dashboard'); return true;
+          setCurrentPage('dashboard'); return true;
         }}
         recoveryNotice={<>{cloudNotice}{cloudPlay.error && !cloudPlay.conflict && <p role="status" className="theater-status">{cloudPlay.error} <button className="underline min-h-[44px] px-2" onClick={cloudPlay.refresh}>Retry cloud sync</button></p>}</>}
         onArchive={handleArchive} 
         onNavigateHome={handleNavigateHome}
         onScrapbooks={() => goToScrapbooks()}
         onOpenCaseFile={goToScrapbooks}
-        onStats={() => { setHasStarted(true); setCurrentPage('stats'); }}
-        onRules={() => { setHasStarted(true); setCurrentPage('rules'); }}
+        onStats={() => { setCurrentPage('stats'); }}
+        onRules={() => { setCurrentPage('rules'); }}
       />
     );
   }
@@ -268,7 +263,7 @@ const IndexContent = () => {
             />
           );
         }
-        return <CastingRoom onStartGame={handleStartGame} onGoToArchive={() => setCurrentPage('archive')} />;
+        return <CastingRoom onStartGame={handleStartGame} onGoToArchive={handleArchive} />;
       case 'outcome':
         if (lastGameResult) {
           return (
@@ -283,7 +278,7 @@ const IndexContent = () => {
             />
           );
         }
-        return <CastingRoom onStartGame={handleStartGame} onGoToArchive={() => setCurrentPage('archive')} />;
+        return <CastingRoom onStartGame={handleStartGame} onGoToArchive={handleArchive} />;
       case 'ending':
         if (lastGameResult && endingFormData) {
           return (
@@ -300,7 +295,7 @@ const IndexContent = () => {
             />
           );
         }
-        return <CastingRoom onStartGame={handleStartGame} onGoToArchive={() => setCurrentPage('archive')} />;
+        return <CastingRoom onStartGame={handleStartGame} onGoToArchive={handleArchive} />;
       case 'archive':
         return <Archive />;
       case 'scrapbooks':
@@ -315,7 +310,7 @@ const IndexContent = () => {
       case 'rules':
         return <Rules />;
       default:
-        return <CastingRoom onStartGame={handleStartGame} onGoToArchive={() => setCurrentPage('archive')} />;
+        return <CastingRoom onStartGame={handleStartGame} onGoToArchive={handleArchive} />;
     }
   };
 
@@ -347,9 +342,10 @@ const IndexContent = () => {
       >
         <div className="container mx-auto px-3 sm:px-4 flex items-center justify-between">
           {/* Left: Back button or Play indicator */}
-          {currentPage !== 'dashboard' ? (
+          {canGoBack ? (
             <button
-              onClick={() => setCurrentPage('dashboard')}
+              onClick={goBack}
+              aria-label="Back"
               className="type-caption text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <ArrowLeft className="w-3 h-3" />
@@ -374,7 +370,7 @@ const IndexContent = () => {
           {/* Right: Collection + Stats + Scrapbooks + Time */}
           <div className="flex items-center gap-1 sm:gap-3">
             <button
-              onClick={() => setCurrentPage('archive')}
+              onClick={handleArchive}
               aria-label="COLLECTION"
               className="type-caption text-muted-foreground hover:text-secondary transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
