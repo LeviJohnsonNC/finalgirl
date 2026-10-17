@@ -33,3 +33,37 @@ have not reached the cloud. The pending-save notice must remain visible until
 the archive acknowledges those changes.
 
 Stages 2–4 will append their migration and deployment instructions here.
+
+## Stage 2
+
+Apply **20261017041000_atomic_allowances_and_collection.sql** once, before deploying
+this stage's frontend or edge functions. It adds two RPCs, restricts usage-ledger
+writes to the service role, and reconciles poster ownership policies. No game
+records, images, or collection preferences are deleted or rewritten.
+
+1. Review `supabase migration list` and run `tests/database/preflight.sql` against
+   the target project with your usual read-only database access. Live inspection
+   from this task was unavailable because the Lovable connection lacks the scope
+   required by its query tool. Do not assume the live migration ledger matches git.
+2. Apply only the new migration using the project's normal migration deployment.
+   Do not reset the production database or replay the historical SQL files.
+3. Deploy all edge functions that import `_shared/guard.ts`: `generate-story`,
+   `generate-ending`, `generate-scene-image`, `generate-visual-bible`, `narrate-story`,
+   `migrate-legacy-images`, `ai-capabilities`, and `tts-voices`.
+4. Deploy the frontend. Collection saves now use `apply_collection_delta`.
+5. Verify a signed-in collection edit and one generation. An unavailable quota
+   database should produce 503 without starting a paid request. Exhaustion is 429.
+
+The historical policy/drop fixes affect **fresh installs only**. The repeated
+September backfill no longer overwrites explicit image preferences. Already
+changed preferences cannot be reconstructed; users can choose their desired art
+in My Collection. The new migration does not guess at their earlier preferences.
+
+Rollback: the additive database functions can remain. Reverting the frontend
+restores the old collection path. Reverting the edge guard loses atomic allowance
+protection; prefer fixing forward. Do not restore permissive storage policies.
+
+For disposable PostgreSQL testing only:
+`TEST_DATABASE_URL=postgresql://... bash scripts/test-database.sh`.
+The script creates schemas/roles and replays every migration; never point it at
+an existing project database. It checks RLS and concurrent reservations/deltas.

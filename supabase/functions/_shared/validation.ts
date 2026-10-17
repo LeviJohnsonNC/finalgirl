@@ -102,7 +102,8 @@ export type EndingRequest = z.infer<typeof EndingRequestSchema>;
 
 export function validateRequest<T>(
   schema: z.ZodSchema<T>,
-  data: unknown
+  data: unknown,
+  responseCors: HeadersInit = corsHeaders
 ): { success: true; data: T } | { success: false; error: Response } {
   try {
     const validated = schema.parse(data);
@@ -114,7 +115,7 @@ export function validateRequest<T>(
         success: false,
         error: new Response(
           JSON.stringify({ error: 'Invalid request format' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 400, headers: { ...responseCors, 'Content-Type': 'application/json' } }
         )
       };
     }
@@ -122,8 +123,9 @@ export function validateRequest<T>(
       success: false,
       error: new Response(
         JSON.stringify({ error: 'Invalid request' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...responseCors, 'Content-Type': 'application/json' } }
       )
     };
   }
 }
+

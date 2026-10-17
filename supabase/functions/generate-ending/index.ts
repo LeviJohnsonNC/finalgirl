@@ -20,7 +20,7 @@ serve(async (req) => {
     const body = await req.json();
 
     // Validate request
-    const validation = validateRequest(EndingRequestSchema, body);
+    const validation = validateRequest(EndingRequestSchema, body, cors);
     if (!validation.success) {
       return validation.error;
     }
@@ -158,3 +158,4 @@ ${optionalStats ? `Optional Details:\n${optionalStats}` : ''}`.trim();
     );
   }
 });
+

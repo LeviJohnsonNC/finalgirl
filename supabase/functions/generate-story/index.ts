@@ -17,7 +17,7 @@ serve(async (req) => {
     if (!guard.ok) return guard.response;
 
     const body = await req.json();
-    const validation = validateRequest(StoryRequestSchema, body);
+    const validation = validateRequest(StoryRequestSchema, body, cors);
     if (!validation.success) return validation.error;
 
     const { killer, location, finalGirl, startingEvent, startingSetup } = validation.data;
@@ -118,3 +118,4 @@ ${startingSetupInfo}`;
       { status: statusFor(error), headers: { ...cors, "Content-Type": "application/json" } });
   }
 });
+
