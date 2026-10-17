@@ -268,3 +268,16 @@ test('unrecorded totals remain blank after reload while an explicit zero is save
   await expect.poll(() => archive.history[0]?.victims_killed).toBeNull();
   await expect.poll(() => archive.history[0]?.rounds_played).toBeNull();
 });
+
+test('Play controls remain reachable on small phones, landscape, tablets and wide screens',async({page,archive},info)=>{
+ test.setTimeout(90000);await archive.install(page,{draft:tracked});await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+ let saved=0;
+ for(const viewport of [{width:320,height:640},{width:844,height:390},{width:1024,height:768},{width:1536,height:864}]){
+  await page.setViewportSize(viewport);
+  const save=page.getByRole('button',{name:'Save one victim',exact:true});await save.click();saved++;
+  await expect(save).toContainText(String(saved));
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  expect(await save.evaluate(button=>{const r=button.getBoundingClientRect();const e=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return e===button||button.contains(e);})).toBe(true);
+  if(viewport.width===844)await page.screenshot({path:info.outputPath('play-landscape.png'),fullPage:true});
+ }
+});

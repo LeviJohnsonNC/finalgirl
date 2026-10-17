@@ -17,7 +17,7 @@
 /** The original narrator, and the last resort for every persona. */
 export const FALLBACK_VOICE = "Blake";
 
-export type NarrationKind = "intro" | "ending";
+export type NarrationKind = "intro" | "ending" | "death";
 export type Outcome = "won" | "lost";
 
 export interface VoicePersona {
@@ -115,6 +115,7 @@ export const castVoice = (opts: {
   const override = opts.filmId ? FILM_PERSONA[opts.filmId] : undefined;
   if (override && PERSONAS[override]) return PERSONAS[override];
 
+  if (opts.kind === "death") return PERSONAS.cold;
   if (opts.kind === "ending") {
     return opts.outcome === "won" ? PERSONAS.survivor : PERSONAS.cold;
   }

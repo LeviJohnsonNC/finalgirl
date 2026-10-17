@@ -1,3 +1,5 @@
+import { DeathNarration } from './DeathNarration';
+import { getFilmIdByLocation } from '@/types/gameData';
 import { useEffect, useState } from 'react';
 import { useDeathScenes } from '@/hooks/play/useDeathScenes';
 import { deathFacts, deathSignature } from '@/lib/play/death';
@@ -36,11 +38,18 @@ export function RecordedDeathScenes({ game }: { game: GameResult }) {
         {scenes.map((r) => (
           <section key={r.id}>
             <p className="font-vhs text-primary text-sm mb-2">
-              {deathFacts(game,game.playEvents!,r.event_id)?.room || game.location} // TAKE {r.take + 1} // ORIGINAL FICTION
+              {deathFacts(game, game.playEvents!, r.event_id)?.room ||
+                game.location}{' '}
+              // TAKE {r.take + 1} // ORIGINAL FICTION
             </p>
             <p className="type-body-sm text-foreground leading-relaxed">
               {r.scene_text}
             </p>
+            <DeathNarration
+              key={r.id}
+              scene={r}
+              filmId={getFilmIdByLocation(game.location)}
+            />
           </section>
         ))}
         {error && (

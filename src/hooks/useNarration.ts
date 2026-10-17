@@ -1,164 +1,203 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { createPrimedAudio, base64ToBlob } from '@/lib/audioUtils';
-
-/** Which moment is being narrated, so the edge function can cast a voice. */
+import {
+  getNarrationClip,
+  putNarrationClip,
+  narrationKey,
+} from '@/lib/play/narrationCache';
+import { claimNarrator } from '@/lib/play/narrationCoordinator';
 export interface NarrationCasting {
-  kind: 'intro' | 'ending';
+  kind: 'intro' | 'ending' | 'death';
   outcome?: 'won' | 'lost';
   filmId?: string | null;
+  deathSceneId?: string;
 }
 
-/**
- * Shared narrate-story playback logic (extracted from NowPlaying / TheEnd,
- * which carried two identical copies of it).
- *
- * - Primes an Audio element synchronously in the tap handler for iOS.
- * - Fetches TTS audio from the narrate-story edge function, telling it which
- *   moment is being read so the narrator can be cast to match (see
- *   supabase/functions/_shared/voices.ts).
- * - Stops playback and revokes the blob URL on unmount, so audio no longer
- *   keeps playing after the user navigates away mid-narration.
- */
+/** Manual playback, synchronous iOS priming, owned replay caching and one narrator at a time. */
 export const useNarration = () => {
-  const [isNarrating, setIsNarrating] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  // Playback position, so callers can show a transport rather than a bare Stop
-  // button. A narration runs for minutes; "how much is left" is a fair question.
+  const { user } = useAuth();
+  const owner = user?.id ?? 'guest';
+  const ownerRef = useRef(owner);
+  ownerRef.current = owner;
+  const [isNarrating, setIsNarrating] = useState(false),
+    [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState({ elapsed: 0, duration: 0 });
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const blobUrlRef = useRef<string | null>(null);
-  const isMountedRef = useRef(true);
-
-  const releaseBlobUrl = () => {
-    if (blobUrlRef.current) {
-      URL.revokeObjectURL(blobUrlRef.current);
-      blobUrlRef.current = null;
+  const alive = useRef(true),
+    serial = useRef(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null),
+    urlRef = useRef<string | null>(null);
+  const controllerRef = useRef<AbortController | null>(null),
+    releaseRef = useRef<(() => void) | null>(null);
+  const cleanup = useCallback(() => {
+    const audio = audioRef.current;
+    audioRef.current = null;
+    if (audio) {
+      audio.onended = null;
+      audio.onerror = null;
+      audio.ontimeupdate = null;
+      audio.pause();
+      audio.src = '';
     }
-  };
-
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        audioRef.current = null;
-      }
-      releaseBlobUrl();
-    };
+    if (urlRef.current) {
+      URL.revokeObjectURL(urlRef.current);
+      urlRef.current = null;
+    }
+    releaseRef.current?.();
+    releaseRef.current = null;
   }, []);
-
-  const toggleNarration = useCallback(async (text: string | null, casting?: NarrationCasting) => {
-    if (!text) return;
-
-    // If already playing, stop and reset
-    if (isPlaying && audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+  const stopNarration = useCallback(() => {
+    serial.current++;
+    controllerRef.current?.abort();
+    controllerRef.current = null;
+    cleanup();
+    if (alive.current) {
+      setIsNarrating(false);
       setIsPlaying(false);
       setProgress({ elapsed: 0, duration: 0 });
-      return;
     }
-
-    // Prime an Audio element immediately (synchronously in the tap handler)
-    // so iOS Safari marks it as user-gesture-activated.
-    const audio = createPrimedAudio();
-    audioRef.current = audio;
-
-    setIsNarrating(true);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        throw new Error('You must be signed in to narrate.');
-      }
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-story`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({
-            text,
-            kind: casting?.kind,
-            outcome: casting?.outcome,
-            filmId: casting?.filmId ?? undefined,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Narration request failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      // Say which voice actually read it. The edge function falls back through
-      // its candidate chain silently, so without this a rejected cast is
-      // indistinguishable from a stale deploy — which is exactly how the first
-      // casting bug hid.
-      if (data.voiceId) {
-        console.info(`Narrated by ${data.voiceId} (persona: ${data.persona ?? 'unknown'})`);
-      }
-
-      // Convert base64 to a Blob URL (avoids iOS data-URI size limits)
-      const blob = base64ToBlob(data.audioContent, 'audio/mpeg');
-      const blobUrl = URL.createObjectURL(blob);
-      blobUrlRef.current = blobUrl;
-
-      if (!isMountedRef.current) {
-        // Unmounted while the fetch was in flight — don't start playback.
-        releaseBlobUrl();
+  }, [cleanup]);
+  useEffect(() => {
+    alive.current = true;
+    stopNarration();
+    return () => {
+      alive.current = false;
+      stopNarration();
+    };
+  }, [owner, stopNarration]);
+  const toggleNarration = useCallback(
+    async (text: string | null, casting?: NarrationCasting) => {
+      if (!text) return;
+      // Ref guards cover a second tap before React has painted its disabled state.
+      if (audioRef.current) {
+        stopNarration();
         return;
       }
-
-      audio.src = blobUrl;
-
-      audio.ontimeupdate = () => {
-        if (!isMountedRef.current) return;
-        setProgress({
-          elapsed: audio.currentTime,
-          duration: Number.isFinite(audio.duration) ? audio.duration : 0,
-        });
-      };
-
-      audio.onended = () => {
-        if (isMountedRef.current) {
-          setIsPlaying(false);
-          setProgress({ elapsed: 0, duration: 0 });
+      const requestOwner = owner;
+      releaseRef.current = claimNarrator(stopNarration);
+      const request = ++serial.current;
+      const controller = new AbortController();
+      controllerRef.current = controller;
+      const current = () =>
+        alive.current &&
+        serial.current === request &&
+        ownerRef.current === requestOwner &&
+        !controller.signal.aborted;
+      // This call must precede every await for iOS user-gesture activation.
+      const audio = createPrimedAudio();
+      audioRef.current = audio;
+      setIsNarrating(true);
+      setIsPlaying(false);
+      const timer = setTimeout(
+        () => controller.abort(),
+        casting?.kind === 'death' ? 45000 : 150000,
+      );
+      try {
+        if (requestOwner === 'guest')
+          throw new Error('You must be signed in to narrate.');
+        const key = await narrationKey(text, casting ?? { kind: 'intro' });
+        if (!current()) return;
+        let blob = await getNarrationClip(requestOwner, key);
+        if (!current()) return;
+        if (!blob) {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+          if (!current()) return;
+          if (!session?.access_token || session.user.id !== requestOwner)
+            throw new Error('Sign in to narrate this story.');
+          const response = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-story`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({
+                text,
+                kind: casting?.kind,
+                outcome: casting?.outcome,
+                filmId: casting?.filmId ?? undefined,
+                deathSceneId: casting?.deathSceneId,
+              }),
+              signal: controller.signal,
+            },
+          );
+          const data = await response.json();
+          if (!current()) return;
+          if (!response.ok || data.error)
+            throw new Error(
+              typeof data.error === 'string'
+                ? data.error.slice(0, 200)
+                : 'Narration is unavailable. Try again later.',
+            );
+          if (
+            typeof data.audioContent !== 'string' ||
+            !data.audioContent.length ||
+            data.audioContent.length > 18000000
+          )
+            throw new Error('The narration response was invalid.');
+          blob = base64ToBlob(data.audioContent, 'audio/mpeg');
+          // Playback does not wait on device storage, and memory is populated synchronously.
+          void putNarrationClip(requestOwner, key, blob);
         }
-        releaseBlobUrl();
-      };
-
-      audio.onerror = () => {
-        if (isMountedRef.current) {
-          setIsPlaying(false);
-          toast.error('Audio playback failed');
+        if (!current()) return;
+        const url = URL.createObjectURL(blob);
+        urlRef.current = url;
+        audio.src = url;
+        audio.ontimeupdate = () => {
+          if (current())
+            setProgress({
+              elapsed: audio.currentTime,
+              duration: Number.isFinite(audio.duration) ? audio.duration : 0,
+            });
+        };
+        audio.onended = () => {
+          if (current()) stopNarration();
+        };
+        audio.onerror = () => {
+          if (current()) {
+            stopNarration();
+            toast.error(
+              'Audio playback failed. The saved clip can be replayed.',
+            );
+          }
+        };
+        await audio.play();
+        if (current()) setIsPlaying(true);
+      } catch (reason) {
+        if (current()) {
+          toast.error('Narration failed', {
+            description:
+              reason instanceof Error ? reason.message : 'Try again later.',
+          });
+          cleanup();
+        } else if (
+          alive.current &&
+          serial.current === request &&
+          ownerRef.current === requestOwner
+        ) {
+          cleanup();
+          toast.error('Narration timed out. Your story is still saved.');
         }
-        releaseBlobUrl();
-      };
-
-      await audio.play();
-      if (isMountedRef.current) setIsPlaying(true);
-    } catch (err) {
-      console.error('Narration error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to generate narration';
-      if (isMountedRef.current) {
-        toast.error('Narration failed', { description: errorMessage });
+      } finally {
+        clearTimeout(timer);
+        if (
+          alive.current &&
+          serial.current === request &&
+          ownerRef.current === requestOwner
+        ) {
+          setIsNarrating(false);
+          if (!audioRef.current) setIsPlaying(false);
+          controllerRef.current = null;
+        }
       }
-    } finally {
-      if (isMountedRef.current) setIsNarrating(false);
-    }
-  }, [isPlaying]);
-
-  return { isNarrating, isPlaying, progress, toggleNarration };
+    },
+    [owner, cleanup, stopNarration],
+  );
+  return { isNarrating, isPlaying, progress, toggleNarration, stopNarration };
 };

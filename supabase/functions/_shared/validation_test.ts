@@ -239,3 +239,10 @@ Deno.test('DeathRequestSchema - allows only stable IDs and three explicit takes'
  assertEquals(validateRequest(DeathRequestSchema,request).success,true);
  for(const bad of [{...request,take:3},{...request,take:1.5},{...request,eventId:'bad'},{...request,killer:'someone else'}])assertEquals(validateRequest(DeathRequestSchema,bad).success,false);
 });
+
+Deno.test('NarrationRequestSchema - death narration requires a saved scene UUID',()=>{
+ const base={text:'An original saved death scene.',kind:'death'};
+ assertEquals(validateRequest(NarrationRequestSchema,base).success,false);
+ assertEquals(validateRequest(NarrationRequestSchema,{...base,deathSceneId:'not-an-id'}).success,false);
+ assertEquals(validateRequest(NarrationRequestSchema,{...base,deathSceneId:'11111111-1111-4111-8111-111111111111'}).success,true);
+});

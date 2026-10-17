@@ -38,4 +38,4 @@ done
 for pid in "${pids[@]}"; do wait "$pid"; done
 generations=$(cat "$result_dir"/death-* | awk '$0 == "generate" { count++ } END { print count+0 }')
 if [[ "$generations" != 1 ]]; then echo "Expected one death generation lease; got $generations" >&2; exit 1; fi
-echo 'Migration replay, ownership, allowance/collection concurrency and death-scene leases passed.' 
+echo 'Migration replay, ownership, allowance/collection concurrency and death-scene leases passed.'

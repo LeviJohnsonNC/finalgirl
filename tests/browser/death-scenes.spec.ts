@@ -1,4 +1,4 @@
-import { test, expect, activeGame } from './fixtures';
+import { test, expect, activeGame, installTestAudio } from './fixtures';
 const start = {
   id: '22222222-2222-4222-8222-222222222222',
   at: 1,
@@ -155,16 +155,147 @@ test('AI failure and a late death response cannot lose or revive a recorded coun
   ).toContainText('0');
 });
 
-test('a conflicting phone or desktop keeps both versions before explicit handoff',async({page,archive})=>{
- await archive.install(page,{draft});await resume(page);
- await expect.poll(()=>archive.sessions.length).toBe(1);
- archive.sessions[0].revision=42;
- archive.sessions[0].state={...archive.sessions[0].state,playEvents:[start,{id:'55555555-5555-4555-8555-555555555555',at:3,kind:'saved',quantity:3}]};
- await page.getByRole('button',{name:'Record one victim killed',exact:true}).click();
- await expect(page.getByRole('alert')).toContainText('Another device changed this game.');
- await page.getByRole('button',{name:'Keep this device’s version',exact:true}).click();
- await expect(page.getByRole('alert')).toHaveCount(0);
- await expect.poll(()=>archive.sessions[0].revision).toBeGreaterThan(42);
- const backup=await page.evaluate(()=>JSON.parse(localStorage.getItem('final-girl-play-backup-v1:aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa:11111111-1111-4111-8111-111111111111')??'{}'));
- expect(backup.local.playEvents.at(-1).kind).toBe('killed');expect(backup.cloud.state.playEvents.at(-1).kind).toBe('saved');
+test('a conflicting phone or desktop keeps both versions before explicit handoff', async ({
+  page,
+  archive,
+}) => {
+  await archive.install(page, { draft });
+  await resume(page);
+  await expect.poll(() => archive.sessions.length).toBe(1);
+  archive.sessions[0].revision = 42;
+  archive.sessions[0].state = {
+    ...archive.sessions[0].state,
+    playEvents: [
+      start,
+      {
+        id: '55555555-5555-4555-8555-555555555555',
+        at: 3,
+        kind: 'saved',
+        quantity: 3,
+      },
+    ],
+  };
+  await page
+    .getByRole('button', { name: 'Record one victim killed', exact: true })
+    .click();
+  await expect(page.getByRole('alert')).toContainText(
+    'Another device changed this game.',
+  );
+  await page
+    .getByRole('button', { name: 'Keep this device’s version', exact: true })
+    .click();
+  await expect(page.getByRole('alert')).toHaveCount(0);
+  await expect.poll(() => archive.sessions[0].revision).toBeGreaterThan(42);
+  const backup = await page.evaluate(() =>
+    JSON.parse(
+      localStorage.getItem(
+        'final-girl-play-backup-v1:aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa:11111111-1111-4111-8111-111111111111',
+      ) ?? '{}',
+    ),
+  );
+  expect(backup.local.playEvents.at(-1).kind).toBe('killed');
+  expect(backup.cloud.state.playEvents.at(-1).kind).toBe('saved');
+});
+
+test('manual death narration stops the intro and replays from device cache after reload', async ({
+  page,
+  archive,
+}, info) => {
+  test.setTimeout(90000);
+  await archive.install(page, { draft });
+  await installTestAudio(page);
+  await resume(page);
+  await page
+    .getByRole('button', { name: 'Narrate introduction', exact: true })
+    .click();
+  await expect(
+    page.getByRole('button', { name: 'Stop introduction', exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole('button', { name: 'Record one victim killed', exact: true })
+    .click();
+  await page.getByRole('button', { name: 'Latest death scene' }).click();
+  await page
+    .getByRole('button', { name: 'Develop death scene · uses AI', exact: true })
+    .click();
+  await page
+    .getByRole('button', { name: 'Narrate death scene', exact: true })
+    .click();
+  await expect(
+    page.getByRole('button', { name: 'Stop death narration', exact: true }),
+  ).toBeVisible();
+  const audio = () =>
+    page.evaluate(() => {
+      const a = (
+        window as unknown as {
+          __qaNarrators: { count: () => number; max: () => number };
+        }
+      ).__qaNarrators;
+      return { count: a.count(), max: a.max() };
+    });
+  expect(await audio()).toEqual({ count: 1, max: 1 });
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          new Promise<number>((resolve, reject) => {
+            const request = indexedDB.open('final-girl-narration-cache-v1');
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => {
+              const db = request.result;
+              const q = db
+                .transaction('clips', 'readonly')
+                .objectStore('clips')
+                .count();
+              q.onsuccess = () => {
+                db.close();
+                resolve(q.result);
+              };
+              q.onerror = () => reject(q.error);
+            };
+          }),
+      ),
+    )
+    .toBe(2);
+  await page
+    .getByRole('button', { name: 'Back to the game', exact: true })
+    .click();
+  await expect(
+    page.getByRole('button', { name: 'Narrate introduction', exact: true }),
+  ).toBeVisible();
+  expect((await audio()).count).toBe(0);
+  await page.reload();
+  await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
+  await page.getByRole('button', { name: 'Latest death scene' }).click();
+  await page
+    .getByRole('button', { name: 'Narrate death scene', exact: true })
+    .click();
+  await expect(
+    page.getByRole('button', { name: 'Stop death narration', exact: true }),
+  ).toBeVisible();
+  expect(archive.calls.filter((c) => c === 'narrate-story')).toHaveLength(2);
+  expect(
+    archive.calls.filter((c) => c === 'generate-death-scene'),
+  ).toHaveLength(1);
+  const body = archive.generationRequests
+    .filter((r) => r.name === 'narrate-story')
+    .at(-1)!.body;
+  expect(body).toMatchObject({
+    kind: 'death',
+    deathSceneId: archive.deathScenes[0].id,
+  });
+  await page.screenshot({
+    path: info.outputPath('death-narration.png'),
+    fullPage: true,
+  });
+  await page
+    .getByRole('button', { name: 'Stop death narration', exact: true })
+    .click();
+  expect((await audio()).count).toBe(0);
+  await page
+    .getByRole('button', { name: 'Back to the game', exact: true })
+    .click();
+  await expect(
+    page.getByRole('button', { name: 'Record one victim killed', exact: true }),
+  ).toContainText('1');
 });

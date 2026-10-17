@@ -222,6 +222,7 @@ export function PlayScreen(props: PlayScreenProps) {
               </button>
             )}
           </div>
+          <span className="sr-only" aria-live="polite" aria-atomic="true">{summary.tracked ? `Victims saved: ${summary.saved}. Victims killed: ${summary.killed}. Current round: ${summary.round ?? 'unrecorded'}.` : ''}</span>
           {!summary.tracked ? (
             <>
               <p className="hidden lg:block type-body-sm text-muted-foreground mb-5">

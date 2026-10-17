@@ -52,6 +52,7 @@ export class ArchiveMock {
       if (path.includes('/functions/v1/')) {
         const name = path.split('/').pop()!; this.calls.push(name);
         this.generationRequests.push({ name, body: request.postDataJSON() });
+        if(name==='narrate-story')return json({audioContent:'UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=',voiceId:'Test',persona:'cold'});
         if(name==='generate-death-scene') {
           if(this.failDeaths)return json({error:'Scene unavailable. The death is still recorded.'},503);
           const b=request.postDataJSON();const session=this.sessions.find(r=>r.id===b.sessionId);
@@ -122,3 +123,19 @@ export class ArchiveMock {
 }
 export const test = base.extend<{ archive: ArchiveMock }>({ archive: async ({ page: _page }, provide) => { await provide(new ArchiveMock()); } });
 export { expect };
+
+/** A silent deterministic audio device. The tests still exercise the real hook/cache. */
+export async function installTestAudio(page:Page) {
+ await page.addInitScript(()=>{
+  const state={active:new Set<MockAudio>(),maxActive:0};
+  class MockAudio extends EventTarget {
+   src:string;currentTime=0;duration=60;volume=1;paused=true;
+   onended:(()=>void)|null=null;onerror:(()=>void)|null=null;ontimeupdate:(()=>void)|null=null;
+   constructor(src=''){super();this.src=src;}
+   play(){this.paused=false;if(this.src.startsWith('blob:')){state.active.add(this);state.maxActive=Math.max(state.maxActive,state.active.size);this.ontimeupdate?.();}return Promise.resolve();}
+   pause(){this.paused=true;state.active.delete(this);}
+  }
+  Object.defineProperty(window,'Audio',{configurable:true,value:MockAudio});
+  Object.defineProperty(window,'__qaNarrators',{value:{count:()=>state.active.size,max:()=>state.maxActive}});
+ });
+}

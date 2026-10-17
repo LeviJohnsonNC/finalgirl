@@ -309,7 +309,7 @@ const IndexContent = () => {
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">
       {/* Shared App Header — hidden on mobile when scrapbook is open */}
-      <div className={isScrapbookOpen ? 'hidden sm:block' : ''}>
+      <div className={isScrapbookOpen ? 'hidden sm:block' : currentPage==='nowPlaying' && activeGame?.playMode ? 'play-active-header' : ''}>
         <AppHeader onNavigateHome={handleNavigateHome} />
       </div>
       
