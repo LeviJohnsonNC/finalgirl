@@ -12,6 +12,9 @@ export class ArchiveMock {
   films = ['s1-camp-happy-trails'];
   history: Array<Record<string, unknown>> = [];
   calls: string[] = [];
+  generationRequests: Array<{ name: string; body: Record<string, unknown> }> = [];
+  storyText = opening;
+  endingText = 'Laurie reached the road. She had survived the night.';
   failWrites = false;
   failStory = false;
   autoImages = false;
@@ -39,9 +42,10 @@ export class ArchiveMock {
       if (path.endsWith('/auth/v1/logout')) return route.fulfill({ status: 204, headers: cors });
       if (path.includes('/functions/v1/')) {
         const name = path.split('/').pop()!; this.calls.push(name);
+        this.generationRequests.push({ name, body: request.postDataJSON() });
         if (name === 'generate-story' || name === 'generate-ending') {
           if (this.failStory) return json({ error: 'Generation temporarily unavailable' }, 503);
-          const text = name === 'generate-story' ? opening : 'Laurie reached the road. She had survived the night.';
+          const text = name === 'generate-story' ? this.storyText : this.endingText;
           return route.fulfill({ headers: cors, contentType: 'text/event-stream', body: 'data: ' + JSON.stringify({ choices: [{ delta: { content: text } }] }) + '\n\ndata: [DONE]\n\n' });
         }
         if (name === 'generate-visual-bible') return json({ visualBible: 'Cold moonlight and worn red cabins.' });

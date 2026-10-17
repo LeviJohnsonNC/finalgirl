@@ -80,6 +80,9 @@ function buildImageMap(
 // filenames on disk should match these values (kebab-case, .png).
 
 const CHARACTER_FILES: Record<string, string> = {
+  'Billy the Bear': 'billy-the-bear.png',
+  'Rena': 'rena.png',
+  'Gwynn': 'gwynn.png',
   'Hans': 'hans.png',
   'Laurie': 'laurie.png',
   'Reiko': 'reiko.png',
@@ -140,6 +143,7 @@ const CHARACTER_FILES: Record<string, string> = {
 };
 
 const LOCATION_FILES: Record<string, string> = {
+  'Buddyland': 'buddyland.png',
   'Camp Happy Trails': 'camp-happy-trails.png',
   'Maple Lane': 'maple-lane.png',
   'Carnival of Blood': 'carnival-of-blood.png',
@@ -178,6 +182,7 @@ const FILM_BOX_ART_FILES: Record<string, string> = {
   's3-marrek-murders': 'the-marrek-murders.png',
   's3-dont-make-sound': 'dont-make-a-sound.png',
   's3-terror-from-destiny': 'terror-from-destiny.png',
+  's4-buddyland': 'bad-times-at-buddyland.png',
   's4-shriek': 'shriek.png',
   's4-rotten-harvest': 'rotten-harvest.png',
 };
@@ -267,7 +272,7 @@ const BASE_FEATURE_FILMS: Omit<FeatureFilm, 'boxArt' | 'boxArtAi'>[] = [
   // Season 4
   { id: 's4-shriek', name: 'Shriek', season: 4, killer: 'Mort the Teenage Dirtbag', location: 'MegaBGCon', finalGirls: ['Adrianne', 'Maureen'] },
   { id: 's4-demon-shadows', name: 'A Demon in the Shadows', season: 4, killer: 'TBD', location: 'TBD', finalGirls: ['TBD', 'TBD'] },
-  { id: 's4-buddyland', name: 'Bad Times at Buddyland', season: 4, killer: 'TBD', location: 'TBD', finalGirls: ['TBD', 'TBD'] },
+  { id: 's4-buddyland', name: 'Bad Times at Buddyland', season: 4, killer: 'Billy the Bear', location: 'Buddyland', finalGirls: ['Rena', 'Gwynn'] },
   { id: 's4-rotten-harvest', name: 'A Rotten Harvest', season: 4, killer: 'Grimlash', location: 'Shady Acres', finalGirls: ['Joy', 'Vicky'] },
   { id: 's4-green-terror', name: 'The Green Terror', season: 4, killer: 'TBD', location: 'TBD', finalGirls: ['TBD', 'TBD'] },
 ];

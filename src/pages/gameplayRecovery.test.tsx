@@ -20,6 +20,57 @@ const formData = { finalHorrorLevel: 4, finalGirlHealth: 1, killerHealth: 0, wea
 const opening = 'The lights went out at camp. Laurie stepped into the darkness and heard a branch snap.';
 
 describe('gameplay without AI dependencies', () => {
+  it('keeps Billy outcome details with Billy at another Location and checkpoints them', () => {
+    const save = vi.fn(); const draft = vi.fn().mockReturnValue(true);
+    render(<GameOutcomeForm result={{ ...result, killer: 'Billy the Bear', finalGirl: 'Rena' }} initialDraft={{ buddiesInPlay: 2, powerSuppliesShutDown: true }} onDraftChange={draft} onSaveResult={save} onContinue={vi.fn()} onDiscard={vi.fn()} />);
+    expect(screen.getByLabelText('Buddies in Play at End (0–7)')).toHaveValue('2');
+    expect(screen.getByLabelText('All Power Sources Inactive')).toBeChecked();
+    fireEvent.change(screen.getByLabelText('Buddies in Play at End (0–7)'), { target: { value: '1' } });
+    expect(draft).toHaveBeenCalledWith({ buddiesInPlay: 1 });
+    fireEvent.click(screen.getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION' }));
+    expect(save.mock.calls[0][0]).toMatchObject({ finalGirlHealth: 6 });
+    expect(save.mock.calls[0][0].gameHighlights).toContain('Buddies in play at end: 1');
+    expect(save.mock.calls[0][0].gameHighlights).toContain('All Power Sources Inactive');
+  });
+  it('does not attach Billy mechanics to a different killer visiting Buddyland', () => {
+    const save = vi.fn();
+    render(<GameOutcomeForm result={{ ...result, location: 'Buddyland', finalGirl: 'Gwynn' }} onSaveResult={save} onContinue={vi.fn()} onDiscard={vi.fn()} />);
+    expect(screen.queryByLabelText('All Power Sources Inactive')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION' }));
+    expect(save.mock.calls[0][0]).toMatchObject({ finalGirlHealth: 5, gameHighlights: '' });
+  });
+  it('keeps an unreported Buddy count unknown and records the Power Surge ending explicitly', () => {
+    const save = vi.fn();
+    render(<GameOutcomeForm result={{ ...result, killer: 'Billy the Bear' }} onSaveResult={save} onContinue={vi.fn()} onDiscard={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION' }));
+    expect(save.mock.calls[0][0].gameHighlights).toBe('');
+    fireEvent.change(screen.getByLabelText('Billy Finale (optional)'), { target: { value: 'Power Surge' } });
+    fireEvent.change(screen.getByLabelText('Boris at Game End'), { target: { value: 'defeated' } });
+    fireEvent.click(screen.getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION' }));
+    expect(save.mock.calls[1][0].gameHighlights).toContain('Billy Finale: Power Surge. Boris: defeated');
+  });
+  it('sends Buddyland cards and the selected biography to opening generation', async () => {
+    mock.stream.mockResolvedValue('Rena stepped between the silent arcade cabinets.');
+    render(<NowPlaying killer="Billy the Bear" location="Buddyland" finalGirl="Rena" sessionId={result.id} filmId="s4-buddyland" setupScenario="Birthday Bash" startingEvent="Birthday Girl" onBack={vi.fn()} onCheckpoint={vi.fn()} onGameEnd={vi.fn()} />);
+    await waitFor(() => expect(mock.stream).toHaveBeenCalled());
+    const { body } = mock.stream.mock.calls[0][0];
+    expect(JSON.stringify(body)).toContain('therapist');
+    expect(JSON.stringify(body)).toContain('4 Time');
+    expect(JSON.stringify(body)).toContain('Six Victims');
+    expect(JSON.stringify(body)).toContain('1 Time');
+  });
+  it('gives the ending the selected biography and reported Power Surge state', async () => {
+    mock.autoGenerate = false;
+    mock.stream.mockResolvedValue('Gwynn put down her tools. The machines were finally silent.');
+    render(<TheEnd result={{ ...result, killer: 'Billy the Bear', location: 'Buddyland', finalGirl: 'Gwynn' }} introStory="Gwynn heard a motor turning behind the Prize Counter." formData={{ ...formData, gameHighlights: 'Billy Finale: Power Surge. Boris: defeated', victimsSaved: 4 }} onCheckpoint={vi.fn()} onSave={vi.fn()} onDiscard={vi.fn()} />);
+    await waitFor(() => expect(mock.stream).toHaveBeenCalled());
+    const { body } = mock.stream.mock.calls[0][0];
+    expect(body.finalGirl.backstory).toContain('mechanic');
+    expect(body.finalGirlMaxHealth).toBe(5);
+    expect(body.gameHighlights).toContain('Boris: defeated');
+    expect(body.killer.specialRules).toContain('cannot be attacked');
+    expect(body.victimsSaved).toBe(4);
+  });
   it('records a result when opening generation fails', async () => {
     mock.stream.mockRejectedValue(new Error('Credits unavailable'));
     const end = vi.fn();

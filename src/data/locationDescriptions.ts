@@ -1,9 +1,12 @@
+import { BUDDYLAND_VISUALS } from './buddyland';
+
 /**
  * Visual descriptions for Location settings
  * Used to augment AI image generation with accurate environment depictions
  */
 
 export const LOCATION_DESCRIPTIONS: Record<string, string> = {
+  'Buddyland': BUDDYLAND_VISUALS.location,
   // Season 3 - Don't Make a Sound
   'Utopia': `A desolate, sun-scorched desert outpost comprised of weathered, single-story structures huddled together against the encroaching dunes. The town feels like a relic of the mid-20th century, forgotten by time and buried under layers of fine, orange sand. The buildings are modest and functional, built from wood and corrugated metal that has rusted and bleached under an unforgiving sun.
 

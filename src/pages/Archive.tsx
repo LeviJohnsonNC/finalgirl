@@ -75,6 +75,7 @@ const Archive = () => {
     // Season 4
     's4-rotten-harvest',
     's4-shriek',
+    's4-buddyland',
   ];
 
   return (

@@ -1,8 +1,12 @@
+import { BUDDYLAND_DETAILS } from '@/data/buddyland';
+
 // Detailed feature film data for story generation
 
 export interface FinalGirlDetail {
   name: string;
   backstory: string;
+  ultimateAbility?: string;
+  additionalSaveReward?: string;
 }
 
 export interface LocationDetail {
@@ -27,6 +31,7 @@ export interface FeatureFilmDetail {
 }
 
 export const FEATURE_FILM_DETAILS: Record<string, FeatureFilmDetail> = {
+  's4-buddyland': BUDDYLAND_DETAILS,
   's1-camp-happy-trails': {
     filmId: 's1-camp-happy-trails',
     finalGirls: [
