@@ -1,0 +1,114 @@
+@font-face {
+  font-family: 'Case Photo';
+  src: url('../assets/fonts/caveat-semibold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* One scene, flanked by physical portrait prints; the controls sit off the photos. */
+.casting-tableau {
+  container-type: inline-size;
+  display: grid; grid-template-columns: 24% 52% 24%; align-items: start;
+  width: calc(100% - 3rem); max-width: 1160px; margin: 24px auto 48px;
+}
+.casting-slot { position: relative; display: flex; flex-direction: column; min-width: 0; gap: 30px; }
+.casting-slot--killer, .casting-slot--finalGirl { z-index: 2; }
+.casting-slot--location { z-index: 1; }
+.casting-slot-top { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.casting-slot-heading {
+  display: block; width: 100%; min-height: 24px; text-align: center;
+  font-family: var(--font-vhs); font-size: clamp(12px, 1.9cqw, 23px); line-height: 1;
+  color: hsl(var(--foreground) / .78); letter-spacing: .25em; text-transform: uppercase;
+}
+.casting-slot--killer .casting-slot-heading { transform: rotate(-8deg); }
+.casting-slot--finalGirl .casting-slot-heading { transform: rotate(8deg); }
+.casting-photo {
+  position: relative; isolation: isolate; display: block; width: 100%; height: 36cqw;
+  padding: 0; border: 0; background: transparent; cursor: pointer;
+  filter: drop-shadow(0 14px 12px hsl(var(--background) / .7));
+  transition: filter .18s ease;
+}
+.casting-slot--killer .casting-photo { transform: rotate(-6deg) translateY(6px); }
+.casting-slot--finalGirl .casting-photo { transform: rotate(6deg) translateY(6px); }
+.casting-slot--location .casting-photo { width: 108%; }
+.casting-photo::before {
+  content: ''; position: absolute; z-index: -1; inset: -7px -5px 3px 6px;
+  background: hsl(var(--background) / .6); border: 1px solid hsl(var(--secondary) / .5);
+  box-shadow: inset 0 0 0 3px hsl(var(--secondary) / .08), 0 0 9px hsl(var(--secondary) / .14);
+}
+.casting-slot--killer .casting-photo::before { transform: rotate(5deg) translate(12px, -6px); }
+.casting-slot--finalGirl .casting-photo::before {
+  transform: rotate(-3deg) translate(7px, -1px); border-color: hsl(var(--blood-red-legible) / .65);
+  box-shadow: inset 0 0 0 3px hsl(var(--blood-red) / .2), 0 0 12px hsl(var(--blood-red-legible) / .25);
+}
+.casting-slot--location .casting-photo::before { inset: -4px; border-color: hsl(var(--secondary) / .35); }
+.casting-photo-window {
+  display: block; position: absolute; inset: 3px; overflow: hidden;
+  background: hsl(var(--background)); border: 1px solid hsl(var(--foreground) / .12);
+}
+.casting-photo-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(.84) saturate(.86) contrast(1.04); }
+.casting-photo-glass {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, hsl(var(--foreground) / .05), transparent 32% 76%, hsl(var(--background) / .14));
+  box-shadow: inset 0 0 22px hsl(var(--background) / .35);
+}
+.casting-photo-border {
+  position: absolute; inset: 0; pointer-events: none; z-index: 3;
+  border: 4px solid transparent;
+  border-image: url('../assets/casting-photo-rim.webp') 20 / 4px / 0 stretch;
+  opacity: .84;
+}
+.casting-slot--location .casting-photo-border {
+  border: 1px solid hsl(var(--foreground) / .28); border-image: none; opacity: .7;
+  box-shadow: 0 0 0 3px hsl(var(--background) / .65);
+}
+.casting-photo-caption {
+  position: absolute; bottom: 0; left: 0; right: 0; padding: 38px 8px 13px;
+  background: linear-gradient(transparent, hsl(var(--background) / .75));
+  color: hsl(var(--foreground)); font-family: 'Case Photo', cursive; font-weight: 600;
+  font-size: clamp(15px, 2.8cqw, 34px); line-height: 1; text-align: center;
+  text-transform: uppercase; text-shadow: 0 2px 3px hsl(var(--background));
+}
+.casting-photo-tape {
+  position: absolute; width: 22%; height: 7%; z-index: 4; pointer-events: none;
+  background: repeating-linear-gradient(90deg, hsl(36 35% 38% / .48) 0 2px, hsl(36 35% 43% / .48) 2px 4px);
+  box-shadow: 0 1px 2px hsl(var(--background) / .3), inset 0 0 3px hsl(36 30% 70% / .2);
+  clip-path: polygon(1% 0, 98% 3%, 100% 20%, 98% 44%, 100% 70%, 98% 100%, 0 97%, 2% 77%, 0 48%, 2% 20%);
+}
+.casting-photo-tape--top { top: -4%; left: 5%; transform: rotate(7deg); }
+.casting-photo-tape--bottom { bottom: -4%; right: 8%; transform: rotate(8deg); }
+.casting-slot--killer .casting-photo-tape--top {
+  top: -4%; left: 62%; width: 31%; height: 6%; transform: rotate(-3deg);
+  background: linear-gradient(100deg, hsl(var(--foreground) / .13), hsl(var(--foreground) / .25), hsl(var(--foreground) / .1));
+}
+.casting-photo-placeholder {
+  display: grid; place-items: center; height: 100%; padding: 8px;
+  font-family: var(--font-vhs); font-size: clamp(11px, 1.4cqw, 17px); letter-spacing: .08em;
+  color: hsl(var(--muted-foreground) / .65);
+  background: radial-gradient(ellipse, hsl(var(--muted) / .3), transparent);
+}
+.casting-slot-controls { width: 100%; max-width: 320px; margin: 0 auto; padding: 0 4px; }
+.casting-slot-meta { display: flex; justify-content: center; align-items: center; gap: 5px; min-height: 44px; }
+.casting-slot-buttons { display: flex; gap: 8px; }
+.casting-slot-buttons .plate-btn { flex: 1; min-width: 0; padding: 0 8px; }
+.casting-photo:focus-visible { outline: 2px solid hsl(var(--secondary)); outline-offset: 8px; }
+.casting-photo:disabled { cursor: default; }
+@media (hover: hover) { .casting-photo:hover:not(:disabled) { filter: brightness(1.08) drop-shadow(0 14px 12px hsl(var(--background) / .7)); } }
+@media (max-width: 639px) {
+  .casting-tableau { width: calc(100% - 1.5rem); margin: 12px auto 28px; }
+  .casting-slot { gap: 16px; }
+  .casting-slot-top { gap: 9px; }
+  .casting-slot-heading { min-height: 15px; letter-spacing: .12em; font-size: clamp(9px, 2.4cqw, 14px); }
+  .casting-photo-border { border-width: 3px; border-image-width: 3px; }
+  .casting-photo-caption { padding: 22px 3px 6px; font-size: clamp(11px, 3.1cqw, 19px); }
+  .casting-photo::before { inset: -3px -2px 2px 3px; }
+  .casting-slot--killer .casting-photo::before { transform: rotate(5deg) translate(4px, -3px); }
+  .casting-slot--finalGirl .casting-photo::before { transform: rotate(-3deg) translate(3px, -1px); }
+  .casting-slot-controls { padding: 0 3px; }
+  .casting-slot-meta { gap: 0; flex-direction: column; min-height: 68px; }
+  .casting-slot-meta > span { font-size: 10px; letter-spacing: 0; }
+  .casting-slot-buttons { flex-direction: column; gap: 2px; }
+  .casting-slot-buttons .plate-btn { flex: auto; height: 44px; font-size: 11px; letter-spacing: .08em; padding: 0 2px; }
+}
+@media (prefers-reduced-motion: reduce) { .casting-photo { transition: none; } }

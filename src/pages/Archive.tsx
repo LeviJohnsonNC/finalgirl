@@ -4,7 +4,6 @@ import { FilmToggle } from '@/components/FilmToggle';
 import { FEATURE_FILMS } from '@/types/gameData';
 import { useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { useOwnedFilms } from '@/hooks/useOwnedFilms';
-import ImageSettingsPanel from '@/components/ImageSettingsPanel';
 import { SyncNotice } from '@/components/SyncNotice';
 import { toast } from 'sonner';
 import {
@@ -87,7 +86,7 @@ const Archive = () => {
           MY COLLECTION
         </h1>
         <p className="type-label text-muted-foreground px-2">
-          MANAGE YOUR COLLECTION • CONFIGURE SETTINGS
+          CHOOSE THE FEATURE FILMS ON YOUR SHELF
         </p>
       </div>
 
@@ -192,10 +191,6 @@ const Archive = () => {
         );
       })}
 
-      {/* Image Engine — below all collection content */}
-      <div className="mt-12 sm:mt-16 px-2">
-        <ImageSettingsPanel />
-      </div>
     </div>
   );
 };
