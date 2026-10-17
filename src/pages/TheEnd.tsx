@@ -11,7 +11,8 @@ import { NarrationTransport } from '@/components/NarrationTransport';
 import { StickyOutcomeBar } from '@/components/StickyOutcomeBar';
 import { ProjectorLeader } from '@/components/ProjectorLeader';
 import { GameResult } from '@/hooks/useGameHistory';
-import { getFilmIdByLocation } from '@/types/gameData';
+import { getFilmIdByLocation, getFilmIdByFinalGirl } from '@/types/gameData';
+import { getFilmDetails } from '@/types/featureFilmDetails';
 import { getKillerDescription } from '@/data/killerDescriptions';
 import { getFinalGirlDescription } from '@/data/finalGirlDescriptions';
 import { getLocationDescription } from '@/data/locationDescriptions';
@@ -133,7 +134,10 @@ const TheEnd = ({
     try {
       // Look up character descriptions
       const killerDescription = getKillerDescription(result.killer);
-      const finalGirlBackstory = getFinalGirlDescription(result.finalGirl);
+      const finalGirlFilmId = getFilmIdByFinalGirl(result.finalGirl);
+      const finalGirlBackstory = (finalGirlFilmId
+        ? getFilmDetails(finalGirlFilmId)?.finalGirls.find(girl => girl.name === result.finalGirl)?.backstory
+        : undefined) ?? getFinalGirlDescription(result.finalGirl);
       const locationDescription = getLocationDescription(result.location);
       const killerRules = getKillerSpecialRules(result.killer);
       const moduleSpecialRules = moduleContext

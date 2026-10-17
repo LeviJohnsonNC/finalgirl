@@ -42,7 +42,7 @@ export const GameOutcomeForm = ({
   const isRatchetLady = result.killer === 'Ratchet Lady';
   const isBigBadWolf = result.killer === 'Big Bad Wolf';
   const isIntruders = result.killer === 'The Intruders';
-  const isBuddyland = result.killer === 'Billy the Bear' || result.location === 'Buddyland';
+  const isBilly = result.killer === 'Billy the Bear';
   const isGrimlash = result.killer === 'Grimlash';
   const isBerith = result.killer === 'Berith' || result.location === "L'Armes Abbey";
   const isShriek = result.killer === 'Mort the Teenage Dirtbag' || result.location === 'MegaBGCon';
@@ -72,8 +72,10 @@ export const GameOutcomeForm = ({
   // The Intruders - active killer at game end
   const [activeIntruder, setActiveIntruder] = useDraftField<'Trish' | 'Baghead' | 'Zeke'>('activeIntruder', 'Trish', initialDraft, onDraftChange);
   // Buddyland - Buddies + power supplies
-  const [buddiesInPlay, setBuddiesInPlay] = useDraftField('buddiesInPlay', 0, initialDraft, onDraftChange);
+  const [buddiesInPlay, setBuddiesInPlay] = useDraftField<number | null>('buddiesInPlay', null, initialDraft, onDraftChange);
   const [powerSuppliesShutDown, setPowerSuppliesShutDown] = useDraftField('powerSuppliesShutDown', false, initialDraft, onDraftChange);
+  const [billyFinale, setBillyFinale] = useDraftField('billyFinale', '', initialDraft, onDraftChange);
+  const [borisStatus, setBorisStatus] = useDraftField('borisStatus', '', initialDraft, onDraftChange);
   // Grimlash / A Rotten Harvest
   const [childrenSurvived, setChildrenSurvived] = useDraftField('childrenSurvived', 0, initialDraft, onDraftChange);
   const [harvestMadnessPeaked, setHarvestMadnessPeaked] = useDraftField('harvestMadnessPeaked', false, initialDraft, onDraftChange);
@@ -125,10 +127,13 @@ export const GameOutcomeForm = ({
         ? `${highlights}. Active Intruder at end: ${activeIntruder}`
         : `Active Intruder at end: ${activeIntruder}`;
     }
-    if (isBuddyland) {
-      const buddyParts = [`Buddies in play at end: ${buddiesInPlay}`];
-      if (powerSuppliesShutDown) buddyParts.push('Power supplies shut down');
-      highlights = highlights ? `${highlights}. ${buddyParts.join('. ')}` : buddyParts.join('. ');
+    if (isBilly) {
+      const buddyParts: string[] = [];
+      if (buddiesInPlay !== null) buddyParts.push(`Buddies in play at end: ${buddiesInPlay}`);
+      if (powerSuppliesShutDown) buddyParts.push('All Power Sources Inactive');
+      if (billyFinale) buddyParts.push(`Billy Finale: ${billyFinale}`);
+      if (billyFinale === 'Power Surge') buddyParts.push(`Boris: ${borisStatus || 'fate not recorded'}`);
+      if (buddyParts.length) highlights = highlights ? `${highlights}. ${buddyParts.join('. ')}` : buddyParts.join('. ');
     }
     if (isGrimlash) {
       const harvestParts = [`Children survived: ${childrenSurvived}`];
@@ -477,26 +482,27 @@ export const GameOutcomeForm = ({
       )}
 
       {/* Section: Buddyland - Buddies + power supplies */}
-      {isBuddyland && (
+      {isBilly && (
         <div className="space-y-3">
           <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
-            Buddyland Status
+            Billy’s Buddies & Power
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="type-caption text-muted-foreground">
+              <label htmlFor="buddies-in-play" className="type-caption text-muted-foreground">
                 Buddies in Play at End (0–7)
               </label>
               <input
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                value={buddiesInPlay === 0 ? '' : String(buddiesInPlay)}
+                placeholder="Not recorded"
+                id="buddies-in-play"
+                value={buddiesInPlay === null ? '' : String(buddiesInPlay)}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? 0 : Math.min(7, Math.max(0, Math.trunc(Number(e.target.value))));
-                  setBuddiesInPlay(isNaN(val) ? 0 : val);
+                  const val = e.target.value === '' ? null : Math.min(7, Math.max(0, Math.trunc(Number(e.target.value))));
+                  setBuddiesInPlay(val !== null && isNaN(val) ? null : val);
                 }}
-                placeholder="0"
                 className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
               />
             </div>
@@ -508,10 +514,28 @@ export const GameOutcomeForm = ({
                   onChange={(e) => setPowerSuppliesShutDown(e.target.checked)}
                   className="w-4 h-4 accent-secondary"
                 />
-                <span className="type-label text-foreground">Power Supplies Shut Down</span>
+                <span className="type-label text-foreground">All Power Sources Inactive</span>
               </label>
             </div>
           </div>
+        </div>
+      )}
+
+      {isBilly && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <label htmlFor="billy-finale" className="type-caption text-muted-foreground">Billy Finale (optional)</label>
+            <select id="billy-finale" value={billyFinale} onChange={e => setBillyFinale(e.target.value)} className="w-full h-11 px-3 bg-muted border border-border/50 rounded-sm text-base text-foreground">
+              <option value="">Not recorded</option><option value="Power Surge">Power Surge</option><option value="Other Finale">Other Finale</option>
+            </select>
+          </div>
+          {billyFinale === 'Power Surge' && <div className="space-y-1">
+            <label htmlFor="boris-status" className="type-caption text-muted-foreground">Boris at Game End</label>
+            <select id="boris-status" value={borisStatus} onChange={e => setBorisStatus(e.target.value)} className="w-full h-11 px-3 bg-muted border border-border/50 rounded-sm text-base text-foreground">
+              <option value="">Not recorded</option><option value="defeated">Defeated</option><option value="still in play">Still in play</option>
+            </select>
+            <p className="type-caption text-muted-foreground">Power Surge requires defeating both Billy and Boris to win.</p>
+          </div>}
         </div>
       )}
 

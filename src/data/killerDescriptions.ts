@@ -1,9 +1,12 @@
+import { BUDDYLAND_VISUALS } from './buddyland';
+
 /**
  * Visual descriptions for Killer characters
  * Used to augment AI image generation with accurate character appearances
  */
 
 export const KILLER_DESCRIPTIONS: Record<string, string> = {
+  'Billy the Bear': BUDDYLAND_VISUALS.billy,
   // Season 3 - Don't Make a Sound
   'The Eyeless': `A humanoid creature with a pale, greyish-beige complexion and a powerful, lean muscularity. The skin is highly textured with visible veins, mottled discoloration, and a matte, leathery quality that suggests practical prosthetic makeup rather than digital effects. The most striking feature is a large, fan-like crest extending from the forehead and temples, ribbed with bony ridges and parchment-like membranes that appear both ancient and organic.
 

@@ -133,6 +133,11 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   // ── Season 4 ─────────────────────────────────────────────────────────────
 
+  'Billy the Bear': {
+    narrativeNote: 'An animatronic bear supported by separate Buddy Minions. A Buddy sharing his space prevents attacks on Billy. Active Power Sources allow the battery-heart effect to restore 1 Health; this is not passive healing. Turning off every source does not itself win the game. Use the reported Finale and Buddy state, and keep the selected Location even when it is not Buddyland.',
+    winCondition: 'Defeat Billy under the revealed Finale rules. With Power Surge, both Billy and Boris must be defeated.',
+  },
+
   'Grimlash': {
     narrativeNote:
       'A pumpkin-headed, fire-wielding entity that emerges from the harvest fields of Shady Acres. Fire is both its weapon and its essence — the autumnal setting amplifies its menace.',

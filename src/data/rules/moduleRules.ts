@@ -1,4 +1,5 @@
 import { RuleBlock, RuleSection, RuleChapter } from './types';
+import { billyRules, buddylandRules, BILLY_PROMPT_CONTEXT, BUDDYLAND_PROMPT_CONTEXT } from './buddylandRules';
 
 export interface EntityRuleModule {
   /** Entity name as it appears in FEATURE_FILMS (e.g. 'Grimlash', 'Storybook Woods') */
@@ -630,7 +631,7 @@ const marrekWarehouse: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer, marrekWarehouse];
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer, marrekWarehouse];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -639,6 +640,8 @@ export interface ModulePromptContext {
 }
 
 const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
+  'Billy the Bear': BILLY_PROMPT_CONTEXT,
+  Buddyland: BUDDYLAND_PROMPT_CONTEXT,
   'Mort the Teenage Dirtbag': {
     narrativeGuidance: 'Mort is not openly present at first: he is hidden among ten costumed Suspects at MegaBGCon, and the story should emphasize paranoia, mistaken identity, clue-gathering, and convention attendees who might only be pretending to be victims, heroes, or killers. Do not reveal Mort’s true disguise in the opening unless the game state explicitly says he has been revealed.',
     visualGuidance: 'Use a convention-floor slasher look: a hooded Ghostface-like mask with one oversized eye, charcoal hoodie, red-and-black pants, crowds of costumed boardgame fans, suspect miniatures, clue cards, and fluorescent convention lighting. If final killer identity is known, show that specific disguised suspect or reveal moment rather than generic Mort.',

@@ -89,7 +89,7 @@ const ScenarioDropdownsForLocation = ({
             onValueChange={handleSetupChange}
             disabled={setupCards.length === 0}
           >
-            <SelectTrigger className="scenario-dropdown font-display text-xs sm:text-sm tracking-wider uppercase min-h-[44px]">
+            <SelectTrigger aria-label="Setup Scenario" className="scenario-dropdown font-display text-xs sm:text-sm tracking-wider uppercase min-h-[44px]">
               <SelectValue placeholder={setupCards.length > 0 ? "Select Setup..." : "Coming Soon"} />
             </SelectTrigger>
             <SelectContent className="scenario-dropdown-content" side="top">
@@ -116,7 +116,7 @@ const ScenarioDropdownsForLocation = ({
             onValueChange={handleEventChange}
             disabled={events.length === 0}
           >
-            <SelectTrigger className="scenario-dropdown font-display text-xs sm:text-sm tracking-wider uppercase min-h-[44px]">
+            <SelectTrigger aria-label="Starting Event" className="scenario-dropdown font-display text-xs sm:text-sm tracking-wider uppercase min-h-[44px]">
               <SelectValue placeholder={events.length > 0 ? "Select Event..." : "Coming Soon"} />
             </SelectTrigger>
             <SelectContent className="scenario-dropdown-content" side="top">
@@ -179,6 +179,17 @@ const ScenarioDropdownsForLocation = ({
           </div>
         )}
       </div>
+
+      {selectedLocation === 'Buddyland' && (selectedSetupData || selectedEventData) && (
+        <div aria-live="polite" className="mt-5 space-y-4 border-l-2 border-secondary/50 pl-4">
+          {[selectedSetupData, selectedEventData].map(card => card && (
+            <div key={card.name}>
+              <h3 className="font-display text-sm text-secondary uppercase tracking-wide">{card.name}</h3>
+              <p className="type-body-sm text-muted-foreground mt-1">{card.description}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
     </div>
   );

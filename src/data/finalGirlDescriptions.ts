@@ -1,9 +1,13 @@
+import { BUDDYLAND_VISUALS } from './buddyland';
+
 /**
  * Visual descriptions for Final Girl characters
  * Used to augment AI image generation with accurate character appearances
  */
 
 export const FINAL_GIRL_DESCRIPTIONS: Record<string, string> = {
+  Rena: BUDDYLAND_VISUALS.rena,
+  Gwynn: BUDDYLAND_VISUALS.gwynn,
   // Season 2 - Terror From the Grave (Vignette)
   'Patsy': `A woman in her early 20s with a slim, lithe build and a wary, observant presence. She has fair, pale skin densely dusted with natural freckles across her bridge of her nose and cheeks. Her face is delicate but sharp, featuring a narrow nose, high forehead, and a thin, set mouth. She has green eyes with a suspicious, sidelong glance, her gaze fixed on something just out of frame, conveying a mix of anxiety and quiet alertness.
 
