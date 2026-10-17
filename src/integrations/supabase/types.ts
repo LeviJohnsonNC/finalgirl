@@ -125,6 +125,59 @@ export type Database = {
         }
         Relationships: []
       }
+      play_death_scenes: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          lease: string
+          lease_until: string
+          model: string | null
+          scene_text: string | null
+          session_id: string
+          signature: string
+          status: string
+          take: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          lease?: string
+          lease_until?: string
+          model?: string | null
+          scene_text?: string | null
+          session_id: string
+          signature: string
+          status: string
+          take?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          lease?: string
+          lease_until?: string
+          model?: string | null
+          scene_text?: string | null
+          session_id?: string
+          signature?: string
+          status?: string
+          take?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "play_death_scenes_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "play_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       play_sessions: {
         Row: {
           closed: boolean
@@ -228,6 +281,16 @@ export type Database = {
     Functions: {
       apply_collection_delta: {
         Args: { p_add: string[]; p_remove: string[] }
+        Returns: Json
+      }
+      claim_death_scene: {
+        Args: {
+          p_event_id: string
+          p_session_id: string
+          p_signature: string
+          p_take: number
+          p_user_id: string
+        }
         Returns: Json
       }
       get_game_history_summary: { Args: never; Returns: Json[] }

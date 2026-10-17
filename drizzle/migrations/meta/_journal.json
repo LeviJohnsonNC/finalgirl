@@ -15,6 +15,13 @@
       "when": 1792253897053,
       "tag": "0001_play_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792253915848,
+      "tag": "0002_play_death_scenes",
+      "breakpoints": true
     }
   ]
 }
