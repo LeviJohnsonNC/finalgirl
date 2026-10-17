@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AlertTriangle, Play, Loader2, RotateCcw } from 'lucide-react';
 import { CastingSlot } from '@/components/CastingSlot';
 import { CastingPicker } from '@/components/CastingPicker';
@@ -39,6 +39,11 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
   const [selectedSetup, setSelectedSetup] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [selectedMission, setSelectedMission] = useState<string | null>(null);
+  useEffect(() => {
+    setSelectedSetup(null);
+    setSelectedEvent(null);
+    setSelectedMission(null);
+  }, [selection.location]);
   
   
   const [isShufflingAll, setIsShufflingAll] = useState(false);
@@ -267,3 +272,4 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
 };
 
 export default CastingRoom;
+

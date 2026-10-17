@@ -18,7 +18,8 @@ const TheEnd = lazy(() => import('./TheEnd'));
 const Scrapbooks = lazy(() => import('./Scrapbooks'));
 const Stats = lazy(() => import('./Stats'));
 const Rules = lazy(() => import('./Rules'));
-import type { EndingFormData } from './TheEnd';
+import type { EndingFormData, ActiveGame } from '@/lib/activeGame';
+import { useActiveGame } from '@/hooks/useActiveGame';
 import { Library, BookOpen, BarChart3, ArrowLeft, User, BookMarked } from 'lucide-react';
 import { getFilmIdByLocation } from '@/types/gameData';
 import { GameResult } from '@/hooks/useGameHistory';
@@ -44,18 +45,6 @@ const prefetchLikelyPages = () => {
 };
 
 
-interface GameSelection {
-  killer: string;
-  location: string;
-  finalGirl: string;
-  setupScenario: string | null;
-  startingEvent: string | null;
-  /** Falconwood only: the Mission that must be completed to win. */
-  mission: string | null;
-  filmId: string | null;
-  introStory?: string;
-}
-
 const IndexContent = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
@@ -70,14 +59,26 @@ const IndexContent = () => {
     setHasStarted(true);
     setCurrentPage('scrapbooks');
   };
-  const [gameSelection, setGameSelection] = useState<GameSelection | null>(null);
-  const [lastGameResult, setLastGameResult] = useState<GameResult | null>(null);
-  const [introStory, setIntroStory] = useState<string | undefined>(undefined);
-  // This game's look description, established on Now Playing and reused by the
-  // closing poster so both images read as frames from the same film.
-  const [visualBible, setVisualBible] = useState<string | undefined>(undefined);
-  const [endingFormData, setEndingFormData] = useState<EndingFormData | null>(null);
+  const { activeGame, save: saveActiveGame, checkpoint, updateFormDraft } = useActiveGame();
+  const gameSelection = activeGame?.selection ?? null;
+  const lastGameResult = activeGame?.result ?? null;
+  const introStory = activeGame?.introStory;
+  const visualBible = activeGame?.visualBible;
+  const endingFormData = activeGame?.formData ?? null;
   const { recordGame, updateGame, pendingSaveCount, retryPendingSaves } = useGameHistoryContext();
+  const recordedIds = useRef(new Set<string>());
+  if (activeGame?.result) recordedIds.current.add(activeGame.id);
+  const checkpointGame = (id: string, updates: Partial<ActiveGame>) => {
+    checkpoint(id, updates);
+    // A late image can land after SAVE unmounts its screen. Queue the attachment
+    // against the stable record ID, even after the active draft was cleared.
+    if (recordedIds.current.has(id)) {
+      try {
+        if (updates.sceneImageUrl) updateGame(id, { sceneImageUrl: updates.sceneImageUrl });
+        if (updates.posterImageUrl) updateGame(id, { posterImageUrl: updates.posterImageUrl });
+      } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save the image.'); }
+    }
+  };
 
   // Scroll to top when page changes
   useEffect(() => {
@@ -91,7 +92,7 @@ const IndexContent = () => {
 
   const handleStart = () => {
     setHasStarted(true);
-    setCurrentPage('dashboard');
+    setCurrentPage(activeGame?.phase ?? 'dashboard');
   };
 
   const handleArchive = () => {
@@ -101,110 +102,76 @@ const IndexContent = () => {
 
   const handleNavigateHome = () => {
     setHasStarted(false);
-    setGameSelection(null);
-    setLastGameResult(null);
     setCurrentPage('dashboard');
   };
 
   const handleStartGame = (selection: {
-    killer: string;
-    location: string;
-    finalGirl: string;
-    setupScenario: string | null;
-    startingEvent: string | null;
-    mission: string | null;
+    killer: string; location: string; finalGirl: string;
+    setupScenario: string | null; startingEvent: string | null; mission: string | null;
   }) => {
-    const filmId = getFilmIdByLocation(selection.location);
-    setGameSelection({
-      ...selection,
-      filmId,
-    });
-    setCurrentPage('nowPlaying');
+    if (activeGame) {
+      toast.error('Resume or discard the current game before casting a new one.');
+      return;
+    }
+    if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
+      selection: { ...selection, filmId: getFilmIdByLocation(selection.location) } })) setCurrentPage('nowPlaying');
   };
 
-  const handleBackFromNowPlaying = () => {
-    setGameSelection(null);
-    setLastGameResult(null);
-    setIntroStory(undefined);
-    setVisualBible(undefined);
-    setCurrentPage('dashboard');
-  };
+  const handleBackFromNowPlaying = () => setCurrentPage('dashboard');
 
   const handleGameEnd = (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, bible?: string) => {
-    if (!gameSelection) return;
-    
-    setIntroStory(story);
-    setVisualBible(bible);
-    
+    if (!activeGame) return;
     try {
-    const result = recordGame({
-      outcome,
-      killer: gameSelection.killer,
-      location: gameSelection.location,
-      finalGirl: gameSelection.finalGirl,
-      setupScenario: gameSelection.setupScenario,
-      startingEvent: gameSelection.startingEvent,
-      mission: gameSelection.mission,
-      introStory: story,
-      sceneImageUrl,
-      visualBible: bible,
-    });
-    
-    // The Mission has no column of its own; keep it on the in-session record so
-    // the results form can offer the Falconwood fields.
-    setLastGameResult({ ...result, mission: gameSelection.mission });
-    setCurrentPage('outcome');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not save your game. Please try again.');
-    }
-  };
-
-  const handleUpdateGame = (updates: Partial<GameResult>) => {
-    if (lastGameResult) {
-      updateGame(lastGameResult.id, updates);
-    }
+      const result = activeGame.result ?? recordGame({ outcome, ...activeGame.selection,
+        introStory: story, sceneImageUrl, visualBible: bible }, activeGame.id);
+      recordedIds.current.add(activeGame.id);
+      if (checkpoint(activeGame.id, { phase: 'outcome', result, introStory: story, sceneImageUrl, visualBible: bible })) {
+        setCurrentPage('outcome');
+      }
+    } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save your game.'); }
   };
 
   const handlePlayAgain = () => {
-    setGameSelection(null);
-    setLastGameResult(null);
-    setIntroStory(undefined);
-    setVisualBible(undefined);
-    setEndingFormData(null);
-    setCurrentPage('dashboard');
+    if (saveActiveGame(null)) setCurrentPage('dashboard');
   };
 
   const handleContinueToEnding = (formData: EndingFormData) => {
-    setEndingFormData(formData);
-    setCurrentPage('ending');
+    if (!activeGame?.result) return;
+    try {
+      updateGame(activeGame.result.id, formData);
+      if (checkpoint(activeGame.id, { phase: 'ending', formData })) setCurrentPage('ending');
+    } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save your result.'); }
   };
 
   const handleSaveEnding = (endingNarration: string, posterImageUrl?: string) => {
+    if (!lastGameResult || !endingFormData) return;
     try {
-    if (lastGameResult && endingFormData) {
-      updateGame(lastGameResult.id, {
-        ...endingFormData,
-        endingNarration,
-        posterImageUrl,
-      });
-    }
-    // Navigate to scrapbooks after saving
-    setGameSelection(null);
-    setLastGameResult(null);
-    setIntroStory(undefined);
-    setVisualBible(undefined);
-    setEndingFormData(null);
-    setCurrentPage('stats');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not save the ending. Please try again.');
-    }
+      updateGame(lastGameResult.id, { ...endingFormData, endingNarration: endingNarration || undefined, posterImageUrl });
+      if (saveActiveGame(null)) setCurrentPage('stats');
+    } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save the ending.'); }
+  };
+
+  const handleSaveResult = (formData: EndingFormData) => {
+    if (!lastGameResult) return;
+    try {
+      updateGame(lastGameResult.id, formData);
+      if (saveActiveGame(null)) setCurrentPage('stats');
+    } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save your result.'); }
   };
 
   const handleDiscardEnding = () => {
-    // Go back to outcome form without saving the ending
-    setEndingFormData(null);
-    setCurrentPage('outcome');
+    if (activeGame && checkpoint(activeGame.id, { phase: 'outcome' })) setCurrentPage('outcome');
   };
+
+  const resumeNotice = activeGame ? (
+    <div role="status" className="mb-4 border border-primary/30 bg-card px-4 py-3 type-caption text-foreground">
+      A GAME IS IN PROGRESS · {activeGame.selection.finalGirl} vs {activeGame.selection.killer}
+      <button className="ml-3 text-primary underline min-h-[44px]" onClick={() => { setHasStarted(true); setCurrentPage(activeGame.phase); }}>RESUME GAME</button>
+      <button className="ml-3 text-muted-foreground underline min-h-[44px]" onClick={() => {
+        if (window.confirm('Discard this unfinished game? Any result already recorded stays in your archive.')) handlePlayAgain();
+      }}>DISCARD DRAFT</button>
+    </div>
+  ) : null;
 
   // The footer is fixed, so everything that stacks above it (the news ticker,
   // the docked outcome bar) has to know how tall it is. It is not a constant —
@@ -225,6 +192,8 @@ const IndexContent = () => {
   // Show Marquee until user starts
   if (!hasStarted) {
     return (
+      <>
+      {activeGame && <div className="fixed bottom-16 inset-x-4 z-[60] max-w-2xl mx-auto">{resumeNotice}</div>}
       <Marquee 
         onStart={handleStart} 
         onArchive={handleArchive} 
@@ -233,6 +202,7 @@ const IndexContent = () => {
         onStats={() => { setHasStarted(true); setCurrentPage('stats'); }}
         onRules={() => { setHasStarted(true); setCurrentPage('rules'); }}
       />
+      </>
     );
   }
 
@@ -249,6 +219,12 @@ const IndexContent = () => {
               startingEvent={gameSelection.startingEvent}
               mission={gameSelection.mission}
               filmId={gameSelection.filmId}
+              key={activeGame.id}
+              sessionId={activeGame.id}
+              initialStory={activeGame.introStory}
+              initialSceneImageUrl={activeGame.sceneImageUrl}
+              initialVisualBible={activeGame.visualBible}
+              onCheckpoint={(updates) => checkpointGame(activeGame.id, updates)}
               onBack={handleBackFromNowPlaying}
               onGameEnd={handleGameEnd}
             />
@@ -261,6 +237,9 @@ const IndexContent = () => {
             <GameOutcome
               result={lastGameResult}
               introStory={introStory}
+              initialDraft={activeGame.formDraft}
+              onDraftChange={(fields) => updateFormDraft(activeGame.id, fields)}
+              onSaveResult={handleSaveResult}
               onContinue={handleContinueToEnding}
               onDiscard={handlePlayAgain}
             />
@@ -274,6 +253,9 @@ const IndexContent = () => {
               result={lastGameResult}
               introStory={introStory}
               visualBible={visualBible}
+              initialEndingStory={activeGame.endingStory}
+              initialPosterImageUrl={activeGame.posterImageUrl}
+              onCheckpoint={(updates) => checkpointGame(activeGame.id, updates)}
               formData={endingFormData}
               onSave={handleSaveEnding}
               onDiscard={handleDiscardEnding}
@@ -312,6 +294,7 @@ const IndexContent = () => {
       <main className="container mx-auto px-3 sm:px-4 pt-24 sm:pt-32 pb-28 relative z-10">
         <Suspense fallback={<PageLoading />}>
           <SyncNotice count={pendingSaveCount} onRetry={retryPendingSaves} />
+          {activeGame && currentPage !== activeGame.phase && resumeNotice}
           {renderPage()}
         </Suspense>
       </main>

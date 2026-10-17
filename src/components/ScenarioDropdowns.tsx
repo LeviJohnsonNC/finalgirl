@@ -23,7 +23,7 @@ interface ScenarioDropdownsProps {
   onMissionChange?: (mission: string | null) => void;
 }
 
-export const ScenarioDropdowns = ({ 
+const ScenarioDropdownsForLocation = ({ 
   selectedLocation, 
   onSetupChange, 
   onEventChange,
@@ -183,3 +183,8 @@ export const ScenarioDropdowns = ({
     </div>
   );
 };
+
+
+export const ScenarioDropdowns = (props: ScenarioDropdownsProps) => (
+  <ScenarioDropdownsForLocation key={props.selectedLocation ?? 'none'} {...props} />
+);
