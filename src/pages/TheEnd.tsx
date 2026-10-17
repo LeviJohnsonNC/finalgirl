@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ImageIcon, Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { streamChatCompletion } from '@/lib/streamChatCompletion';
 
@@ -21,18 +21,13 @@ import { getModulePromptContext } from '@/data/rules/moduleRules';
 import { renderStoryText } from '@/lib/textFormatting';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 
-export interface EndingFormData {
-  finalHorrorLevel: number;
-  finalGirlHealth: number;
-  killerHealth: number;
-  weaponUsed: string;
-  victimsSaved: number;
-  victimsKilled: number;
-  endingSubLocation: string;
-  gameHighlights: string;
-}
+import type { EndingFormData, ActiveGame } from '@/lib/activeGame';
+export type { EndingFormData } from '@/lib/activeGame';
 
 interface TheEndProps {
+  initialEndingStory?: string;
+  initialPosterImageUrl?: string;
+  onCheckpoint: (updates: Partial<ActiveGame>) => void;
   result: GameResult;
   introStory?: string;
   /** This game's look description, established on Now Playing. */
@@ -43,6 +38,7 @@ interface TheEndProps {
 }
 
 const TheEnd = ({
+  initialEndingStory, initialPosterImageUrl, onCheckpoint,
   result,
   introStory,
   visualBible,
@@ -50,18 +46,21 @@ const TheEnd = ({
   onSave,
   onDiscard,
 }: TheEndProps) => {
-  const [endingStory, setEndingStory] = useState<string | null>(null);
+  const [endingStory, setEndingStory] = useState<string | null>(initialEndingStory ?? null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [posterImageUrl, setPosterImageUrl] = useState<string>('');
+  const [posterImageUrl, setPosterImageUrl] = useState<string>(initialPosterImageUrl ?? '');
   const { isNarrating, isPlaying, progress, toggleNarration } = useNarration();
   const {
     isAuthenticated,
     autoGenerate,
+    settingsReady,
     generateImage,
     isGeneratingImage,
     imageError,
   } = useImageGeneration();
+  const checkpointRef = useRef(onCheckpoint);
+  checkpointRef.current = onCheckpoint;
   const autoGenerateTriggered = useRef(false);
   // Abort the ending stream when the user navigates away mid-generation.
   const streamAbortRef = useRef<AbortController | null>(null);
@@ -73,11 +72,13 @@ const TheEnd = ({
 
   // Auto-generate ending story on mount
   useEffect(() => {
-    generateEnding();
+    if (!initialEndingStory) void generateEnding();
     return () => streamAbortRef.current?.abort();
-  }, []);
+    // Initial content belongs to this mounted record. Retry is explicit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result.id]);
 
-  const developPoster = async (previousImageUrl?: string) => {
+  const developPoster = useCallback(async (previousImageUrl?: string) => {
     if (!endingStory) return;
     const url = await generateImage({
       story: endingStory,
@@ -95,8 +96,8 @@ const TheEnd = ({
       gameId: result.id,
       previousImageUrl,
     });
-    if (url) setPosterImageUrl(url);
-  };
+    if (url) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
+  }, [endingStory, result.killer, result.finalGirl, result.location, result.outcome, result.id, moduleContext?.visualGuidance, visualBible, generateImage]);
 
   // The poster develops on its own once the ending narration lands.
   //
@@ -105,15 +106,15 @@ const TheEnd = ({
   // half-sentence would be worse than no poster.
   useEffect(() => {
     if (!endingStory || isGenerating || error) return;
-    if (!isAuthenticated || !autoGenerate) return;
+    if (!settingsReady || posterImageUrl || !isAuthenticated || !autoGenerate) return;
     if (autoGenerateTriggered.current) return;
     autoGenerateTriggered.current = true;
     developPoster();
-  }, [endingStory, isGenerating, error, isAuthenticated, autoGenerate]);
+  }, [endingStory, isGenerating, error, isAuthenticated, autoGenerate, settingsReady, posterImageUrl, developPoster]);
 
   const generateEnding = async () => {
     if (!introStory) {
-      setError('Missing intro story. Cannot generate ending.');
+      setError('Your result is saved. An opening story is needed to generate an ending.');
       return;
     }
 
@@ -181,6 +182,7 @@ const TheEnd = ({
       });
 
       if (!full) throw new Error('No ending returned from the generator');
+      checkpointRef.current({ endingStory: full });
       setEndingStory(full);
 
     } catch (err) {
@@ -205,9 +207,7 @@ const TheEnd = ({
     });
 
   const handleSave = () => {
-    if (endingStory) {
-      onSave(endingStory, posterImageUrl || undefined);
-    }
+    onSave(!isGenerating && !error ? endingStory ?? '' : '', posterImageUrl || undefined);
   };
 
   return (
@@ -251,7 +251,7 @@ const TheEnd = ({
               {/* Row 1: Narrate — full width on mobile */}
               <button
                 onClick={handleNarrate}
-                disabled={isNarrating}
+                disabled={isNarrating || isGenerating}
                 className="vcr-tape-button flex items-center justify-center gap-2 px-4 sm:px-6 py-3 font-display text-xs sm:text-sm tracking-[0.1em] sm:tracking-[0.15em] uppercase transition-all duration-300 disabled:opacity-50 min-h-[44px] w-full sm:w-auto"
               >
                 {isNarrating ? (
@@ -336,14 +336,14 @@ const TheEnd = ({
           </div>
 
           {/* Save — docks once scrolled past, same as the outcome buttons. */}
-          {endingStory && !isGenerating && !error && (
-            <StickyOutcomeBar enabled={Boolean(endingStory) && !isGenerating && !error}>
+          {(
+            <StickyOutcomeBar enabled>
               <button
                 onClick={handleSave}
                 className={`outcome-btn ${isWin ? 'outcome-btn-won' : 'outcome-btn-lost'} group relative w-full sm:w-auto min-w-[200px] sm:min-w-[240px] h-14 sm:h-16 overflow-hidden rounded-sm transition-all duration-200`}
               >
                 <span className={`relative z-10 font-display text-xl sm:text-2xl tracking-[0.2em] uppercase ${isWin ? 'text-secondary' : 'text-primary'} drop-shadow-lg`}>
-                  SAVE
+                  {endingStory && !isGenerating && !error ? 'SAVE' : 'SAVE RESULT'}
                 </span>
               </button>
             </StickyOutcomeBar>
@@ -356,3 +356,4 @@ const TheEnd = ({
 };
 
 export default TheEnd;
+

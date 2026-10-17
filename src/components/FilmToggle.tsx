@@ -104,6 +104,7 @@ export const FilmToggle = React.forwardRef<HTMLDivElement, FilmToggleProps>(
 
             <div className="flex flex-col items-center gap-1 min-w-[48px]">
               <Switch
+                aria-label={`Own ${film.name}`}
                 checked={isOwned}
                 onCheckedChange={() => onToggle(film.id)}
                 className="data-[state=checked]:bg-primary scale-90 sm:scale-100"
@@ -121,3 +122,4 @@ export const FilmToggle = React.forwardRef<HTMLDivElement, FilmToggleProps>(
 );
 
 FilmToggle.displayName = 'FilmToggle';
+

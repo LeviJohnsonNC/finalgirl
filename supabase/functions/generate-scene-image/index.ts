@@ -44,7 +44,7 @@ serve(async (req) => {
     if (!guard.ok) return guard.response;
     const { user, logUsage } = guard;
 
-    const validation = validateRequest(SceneImageRequestSchema, await req.json());
+    const validation = validateRequest(SceneImageRequestSchema, await req.json(), cors);
     if (!validation.success) return validation.error;
     const body = validation.data;
 
@@ -93,13 +93,23 @@ serve(async (req) => {
 
     const { data: urlData } = adminClient.storage.from("posters").getPublicUrl(path);
 
-    // Regeneration replaces the previous image; clean up the file it orphaned.
-    if (body.previousImageUrl) {
+    // A closing poster can finish after SAVE or a browser reload. Attach it
+    // server-side if the corresponding owned record already exists.
+    let attached = false;
+    if (body.gameId) {
+      const column = isPoster ? 'poster_image_url' : 'scene_image_url';
+      const { data: rows, error: attachError } = await adminClient.from('game_history')
+        .update({ [column]: urlData.publicUrl }).eq('id', body.gameId).eq('user_id', user.id).select('id');
+      if (attachError) console.warn('Image attachment will need a client retry:', attachError);
+      attached = !attachError && Boolean(rows?.length);
+    }
+
+    // Never delete an archived image until its replacement is attached.
+    if (attached && body.previousImageUrl) {
       const previousPath = body.previousImageUrl.match(/\/posters\/(.+)$/)?.[1];
       if (previousPath && previousPath.startsWith(`game-posters/${user.id}/`)) {
-        adminClient.storage.from("posters").remove([previousPath]).then(({ error }) => {
-          if (error) console.warn("Could not remove replaced image:", error);
-        });
+        const { error } = await adminClient.storage.from('posters').remove([previousPath]);
+        if (error) console.warn('Could not remove replaced image:', error);
       }
     }
 
@@ -111,3 +121,4 @@ serve(async (req) => {
     return json({ error: userFacingMessage(error) }, statusFor(error));
   }
 });
+

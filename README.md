@@ -1,73 +1,58 @@
-# Welcome to your Lovable project
+# Final Girl — Unofficial Case Files
 
-## Project info
+A fan-made web app for casting Final Girl games, generating cinematic stories
+and artwork, and keeping a scrapbook of completed plays. It is not endorsed by
+or affiliated with Van Ryder Games.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Development
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Use **Node 22** (`nvm use`). npm and `package-lock.json` are the CI dependency source.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm ci
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The tracked environment file contains public project configuration only. Local
+builds require `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Provider
+credentials and service-role keys belong in the deployment secret store, never
+in a Vite environment variable or the repository.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+npm run check          # lint, typecheck, unit and edge/schema tests
+npm run check:assets   # verify original artwork, reject stubs
+npm run build
+npm run test:browser   # after build; install Chromium with npx playwright install chromium
+```
 
-**Use GitHub Codespaces**
+`npm run test:edge` executes the actual guard/schema sources with mocked clients.
+GitHub Actions also runs native Deno schema tests and checks the edge entrypoints.
+The browser suite covers desktop and mobile with a fully mocked archive: no real
+accounts, provider calls, or AI credits are used. Reports and screenshots appear
+in `playwright-report/` and `test-results/`.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Data and recovery
 
-## What technologies are used for this project?
+Cloud writes are first persisted to an account-scoped device outbox. Failed saves
+remain visible and retry after reconnect, reload, or RETRY SAVE. An active draft
+preserves the cast, completed prose/images, and outcome form; RESUME GAME restores
+it. Game results can be saved without AI narration. Clearing browser site data
+removes device-only drafts and writes that have not reached the archive.
 
-This project is built with:
+## Database and deployment
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+See [the reliability rollout](docs/RELIABILITY_ROLLOUT.md) for PR merge order,
+migration deployment, edge-function updates, preflight checks, and rollback notes.
+Do not reset production or replay historical migrations.
 
-## How can I deploy this project?
+To test all migrations against a **new disposable PostgreSQL database**:
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+```sh
+TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/finalgirl_test npm run test:database
+```
 
-## Can I connect a custom domain to my Lovable project?
+This creates test schemas/roles, replays migrations, and checks row ownership and
+concurrent AI reservations/collection edits. Never use an existing project URL.
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+The UI is deployed through the linked [Lovable project](https://lovable.dev/projects/d59a27fc-afa4-4428-82bf-1d9eb9c59108).
+Pull requests and CI do not apply production migrations or publish the app.

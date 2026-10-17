@@ -25,7 +25,7 @@ serve(async (req) => {
     });
     if (!guard.ok) return guard.response;
 
-    const validation = validateRequest(VisualBibleRequestSchema, await req.json());
+    const validation = validateRequest(VisualBibleRequestSchema, await req.json(), cors);
     if (!validation.success) return validation.error;
 
     const { text, model } = await generateText({
@@ -42,3 +42,4 @@ serve(async (req) => {
     return json({ error: userFacingMessage(error) }, statusFor(error));
   }
 });
+

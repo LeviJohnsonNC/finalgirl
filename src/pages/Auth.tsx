@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
@@ -23,13 +23,6 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showFlicker, showFrameJump } = useScreenEffects();
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (user && !isLoading) {
-      navigate('/');
-    }
-  }, [user, isLoading, navigate]);
 
   const validateForm = (): boolean => {
     try {
@@ -301,3 +294,4 @@ const Auth = () => {
 };
 
 export default Auth;
+

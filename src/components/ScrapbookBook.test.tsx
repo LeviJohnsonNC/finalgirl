@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { ScrapbookBook } from './ScrapbookBook';
 import { GameResult } from '@/hooks/useGameHistory';
 
@@ -80,4 +80,18 @@ describe('ScrapbookBook', () => {
 
     await waitFor(() => expect(screen.queryByText('The ending of a.')).toBeNull());
   });
+});
+
+
+it('ignores an older detail response after a newer selection', async () => {
+  let finish: (value: GameResult) => void;
+  render(<ScrapbookBook {...props} games={[game('a', { endingNarration: undefined }), game('b')]} initialGameId="a"
+    onFetchGameDetails={id => id === 'a' ? new Promise(resolve => { finish = resolve; }) : Promise.resolve(game('b'))} />);
+  await waitFor(() => expect(finish).toBeDefined());
+  fireEvent.click(screen.getByRole('button', { name: /Back to Grid/ }));
+  fireEvent.click(document.querySelectorAll('.scrapbook-thumbnail')[1]);
+  expect(await screen.findByText('The ending of b.')).toBeInTheDocument();
+  await act(async () => { finish!(game('a', { endingNarration: 'Late response should stay closed.' })); });
+  expect(screen.queryByText('Late response should stay closed.')).toBeNull();
+  expect(screen.getByText('The ending of b.')).toBeInTheDocument();
 });

@@ -4,7 +4,7 @@ import type { GameStats } from '@/hooks/useGameHistory';
 
 interface GameHistoryContextValue {
   gameHistory: GameResult[];
-  recordGame: (result: Omit<GameResult, 'id' | 'timestamp'>) => GameResult;
+  recordGame: (result: Omit<GameResult, 'id' | 'timestamp'>, gameId?: string) => GameResult;
   updateGame: (id: string, updates: Partial<GameResult>) => void;
   deleteGame: (id: string) => Promise<void>;
   getStats: () => GameStats;

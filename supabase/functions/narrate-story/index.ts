@@ -83,7 +83,7 @@ serve(async (req) => {
 
     // Parse and validate request body
     const body = await req.json();
-    const validation = validateRequest(NarrationRequestSchema, body);
+    const validation = validateRequest(NarrationRequestSchema, body, cors);
 
 
     
@@ -202,3 +202,4 @@ serve(async (req) => {
     );
   }
 });
+

@@ -8,12 +8,23 @@ import { getKillerMaxHealth, isKillerUnkillable } from '@/data/killerHealth';
 interface GameOutcomeFormProps {
   result: GameResult;
   introStory?: string;
+  initialDraft?: Record<string, unknown>;
+  onDraftChange?: (fields: Record<string, unknown>) => boolean;
+  onSaveResult?: (formData: EndingFormData) => void;
   onContinue: (formData: EndingFormData) => void;
   onDiscard: () => void;
 }
 
+function useDraftField<T>(name: string, fallback: T, draft?: Record<string, unknown>, onChange?: (fields: Record<string, unknown>) => boolean) {
+  const [value, setValue] = useState<T>(() => (draft?.[name] as T | undefined) ?? fallback);
+  const set = (next: T) => {
+    if (onChange?.({ [name]: next }) !== false) setValue(next);
+  };
+  return [value, set] as const;
+}
+
 export const GameOutcomeForm = ({
-  result,
+  result, initialDraft, onDraftChange, onSaveResult,
   introStory,
   onContinue,
   onDiscard,
@@ -39,46 +50,46 @@ export const GameOutcomeForm = ({
   const isSlayer = result.killer === 'Slayer';
   
   // Local form state - use character-specific max health for defaults
-  const [finalHorrorLevel, setFinalHorrorLevel] = useState(result.finalHorrorLevel ?? 4);
-  const [finalGirlHealth, setFinalGirlHealth] = useState(result.finalGirlHealth ?? (isWin ? maxFinalGirlHealth : 0));
-  const [killerHealth, setKillerHealth] = useState(result.killerHealth ?? (isWin ? 0 : Math.ceil(maxKillerHealth / 2)));
-  const [weaponUsed, setWeaponUsed] = useState(result.weaponUsed ?? '');
-  const [victimsSaved, setVictimsSaved] = useState(result.victimsSaved ?? 0);
-  const [victimsKilled, setVictimsKilled] = useState(result.victimsKilled ?? 0);
-  const [endingSubLocation, setEndingSubLocation] = useState(result.endingSubLocation ?? '');
-  const [gameHighlights, setGameHighlights] = useState(result.gameHighlights ?? '');
+  const [finalHorrorLevel, setFinalHorrorLevel] = useDraftField('finalHorrorLevel', result.finalHorrorLevel ?? 4, initialDraft, onDraftChange);
+  const [finalGirlHealth, setFinalGirlHealth] = useDraftField('finalGirlHealth', result.finalGirlHealth ?? (isWin ? maxFinalGirlHealth : 0), initialDraft, onDraftChange);
+  const [killerHealth, setKillerHealth] = useDraftField('killerHealth', result.killerHealth ?? (isWin ? 0 : Math.ceil(maxKillerHealth / 2)), initialDraft, onDraftChange);
+  const [weaponUsed, setWeaponUsed] = useDraftField('weaponUsed', result.weaponUsed ?? '', initialDraft, onDraftChange);
+  const [victimsSaved, setVictimsSaved] = useDraftField('victimsSaved', result.victimsSaved ?? 0, initialDraft, onDraftChange);
+  const [victimsKilled, setVictimsKilled] = useDraftField('victimsKilled', result.victimsKilled ?? 0, initialDraft, onDraftChange);
+  const [endingSubLocation, setEndingSubLocation] = useDraftField('endingSubLocation', result.endingSubLocation ?? '', initialDraft, onDraftChange);
+  const [gameHighlights, setGameHighlights] = useDraftField('gameHighlights', result.gameHighlights ?? '', initialDraft, onDraftChange);
   // Poltergeist-specific win condition fields
-  const [foundCarolyn, setFoundCarolyn] = useState(false);
-  const [foundMrFloppy, setFoundMrFloppy] = useState(false);
+  const [foundCarolyn, setFoundCarolyn] = useDraftField('foundCarolyn', false, initialDraft, onDraftChange);
+  const [foundMrFloppy, setFoundMrFloppy] = useDraftField('foundMrFloppy', false, initialDraft, onDraftChange);
   // Organism-specific loss type
-  const [organismLossType, setOrganismLossType] = useState<'caught' | 'assimilated'>('caught');
+  const [organismLossType, setOrganismLossType] = useDraftField<'caught' | 'assimilated'>('organismLossType', 'caught', initialDraft, onDraftChange);
   // Evomorph evolution stage
-  const [evomorphStage, setEvomorphStage] = useState<'Hatchling' | 'Youngling' | 'Adult'>('Hatchling');
+  const [evomorphStage, setEvomorphStage] = useDraftField<'Hatchling' | 'Youngling' | 'Adult'>('evomorphStage', 'Hatchling', initialDraft, onDraftChange);
   // Ratchet Lady maniac count
-  const [maniacCount, setManiacCount] = useState(0);
+  const [maniacCount, setManiacCount] = useDraftField('maniacCount', 0, initialDraft, onDraftChange);
   // Big Bad Wolf mode
-  const [wolfMode, setWolfMode] = useState<'TRACK' | 'SLAY' | 'Killing Machine'>('SLAY');
+  const [wolfMode, setWolfMode] = useDraftField<'TRACK' | 'SLAY' | 'Killing Machine'>('wolfMode', 'SLAY', initialDraft, onDraftChange);
   // The Intruders - active killer at game end
-  const [activeIntruder, setActiveIntruder] = useState<'Trish' | 'Baghead' | 'Zeke'>('Trish');
+  const [activeIntruder, setActiveIntruder] = useDraftField<'Trish' | 'Baghead' | 'Zeke'>('activeIntruder', 'Trish', initialDraft, onDraftChange);
   // Buddyland - Buddies + power supplies
-  const [buddiesInPlay, setBuddiesInPlay] = useState(0);
-  const [powerSuppliesShutDown, setPowerSuppliesShutDown] = useState(false);
+  const [buddiesInPlay, setBuddiesInPlay] = useDraftField('buddiesInPlay', 0, initialDraft, onDraftChange);
+  const [powerSuppliesShutDown, setPowerSuppliesShutDown] = useDraftField('powerSuppliesShutDown', false, initialDraft, onDraftChange);
   // Grimlash / A Rotten Harvest
-  const [childrenSurvived, setChildrenSurvived] = useState(0);
-  const [harvestMadnessPeaked, setHarvestMadnessPeaked] = useState(false);
+  const [childrenSurvived, setChildrenSurvived] = useDraftField('childrenSurvived', 0, initialDraft, onDraftChange);
+  const [harvestMadnessPeaked, setHarvestMadnessPeaked] = useDraftField('harvestMadnessPeaked', false, initialDraft, onDraftChange);
   // Berith / A Demon in the Shadows
-  const [ursulaSaved, setUrsulaSaved] = useState(false);
-  const [abbeyInfluence, setAbbeyInfluence] = useState<'Blessings Dominated' | 'Curses Dominated' | 'Balanced'>('Balanced');
+  const [ursulaSaved, setUrsulaSaved] = useDraftField('ursulaSaved', false, initialDraft, onDraftChange);
+  const [abbeyInfluence, setAbbeyInfluence] = useDraftField<'Blessings Dominated' | 'Curses Dominated' | 'Balanced'>('abbeyInfluence', 'Balanced', initialDraft, onDraftChange);
   // Shriek / MegaBGCon
-  const [mortRevealed, setMortRevealed] = useState(false);
-  const [finalKillerIdentity, setFinalKillerIdentity] = useState('Unknown');
+  const [mortRevealed, setMortRevealed] = useDraftField('mortRevealed', false, initialDraft, onDraftChange);
+  const [finalKillerIdentity, setFinalKillerIdentity] = useDraftField('finalKillerIdentity', 'Unknown', initialDraft, onDraftChange);
   // Falconwood / Slayer
-  const [missionCompleted, setMissionCompleted] = useState(isWin);
-  const [missionProgress, setMissionProgress] = useState('');
-  const [friendJoined, setFriendJoined] = useState('');
-  const [endingDimension, setEndingDimension] = useState<'Our Dimension' | 'Mirror Dimension'>('Our Dimension');
+  const [missionCompleted, setMissionCompleted] = useDraftField('missionCompleted', isWin, initialDraft, onDraftChange);
+  const [missionProgress, setMissionProgress] = useDraftField('missionProgress', '', initialDraft, onDraftChange);
+  const [friendJoined, setFriendJoined] = useDraftField('friendJoined', '', initialDraft, onDraftChange);
+  const [endingDimension, setEndingDimension] = useDraftField<'Our Dimension' | 'Mirror Dimension'>('endingDimension', 'Our Dimension', initialDraft, onDraftChange);
 
-  const handleContinue = () => {
+  const buildFormData = (): EndingFormData => {
     // Augment gameHighlights with killer-specific conditions so the LLM gets full context
     let highlights = gameHighlights || '';
     if (isPoltergeist && isWin) {
@@ -164,8 +175,9 @@ export const GameOutcomeForm = ({
       endingSubLocation: endingSubLocation || '',
       gameHighlights: highlights,
     };
-    onContinue(formData);
+    return formData;
   };
+  const handleContinue = () => onContinue(buildFormData());
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-4 sm:space-y-5">
@@ -187,7 +199,7 @@ export const GameOutcomeForm = ({
                 min="1"
                 max="7"
                 value={finalHorrorLevel}
-                onChange={(e) => setFinalHorrorLevel(Number(e.target.value))}
+                onChange={(e) => setFinalHorrorLevel(Math.trunc(Number(e.target.value)))}
                 className="flex-1 h-2 bg-muted rounded-sm appearance-none cursor-pointer accent-primary"
               />
               <span className="font-display text-lg text-primary w-6 text-center">
@@ -203,6 +215,7 @@ export const GameOutcomeForm = ({
             </label>
             <input
               type="text"
+              aria-label="Weapon Used"
               value={weaponUsed}
               onChange={(e) => setWeaponUsed(e.target.value)}
               placeholder="Machete, Axe, Fire..."
@@ -219,9 +232,10 @@ export const GameOutcomeForm = ({
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
+              aria-label="Final Girl Health"
               value={finalGirlHealth === 0 ? '' : String(finalGirlHealth)}
               onChange={(e) => {
-                const val = e.target.value === '' ? 0 : Math.min(maxFinalGirlHealth, Math.max(0, Number(e.target.value)));
+                const val = e.target.value === '' ? 0 : Math.min(maxFinalGirlHealth, Math.max(0, Math.trunc(Number(e.target.value))));
                 setFinalGirlHealth(isNaN(val) ? 0 : val);
               }}
               placeholder="0"
@@ -239,9 +253,10 @@ export const GameOutcomeForm = ({
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                value={killerHealth === 0 ? '' : String(killerHealth)}
+                aria-label="Killer Health"
+              value={killerHealth === 0 ? '' : String(killerHealth)}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? 0 : Math.min(maxKillerHealth, Math.max(0, Number(e.target.value)));
+                  const val = e.target.value === '' ? 0 : Math.min(maxKillerHealth, Math.max(0, Math.trunc(Number(e.target.value))));
                   setKillerHealth(isNaN(val) ? 0 : val);
                 }}
                 placeholder="0"
@@ -268,9 +283,10 @@ export const GameOutcomeForm = ({
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
+              aria-label="Victims Saved"
               value={victimsSaved === 0 ? '' : String(victimsSaved)}
               onChange={(e) => {
-                const val = e.target.value === '' ? 0 : Math.max(0, Number(e.target.value));
+                const val = e.target.value === '' ? 0 : Math.max(0, Math.trunc(Number(e.target.value)));
                 setVictimsSaved(isNaN(val) ? 0 : val);
               }}
               placeholder="0"
@@ -287,9 +303,10 @@ export const GameOutcomeForm = ({
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
+              aria-label="Victims Killed"
               value={victimsKilled === 0 ? '' : String(victimsKilled)}
               onChange={(e) => {
-                const val = e.target.value === '' ? 0 : Math.max(0, Number(e.target.value));
+                const val = e.target.value === '' ? 0 : Math.max(0, Math.trunc(Number(e.target.value)));
                 setVictimsKilled(isNaN(val) ? 0 : val);
               }}
               placeholder="0"
@@ -401,7 +418,7 @@ export const GameOutcomeForm = ({
                 pattern="[0-9]*"
                 value={maniacCount === 0 ? '' : String(maniacCount)}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? 0 : Math.min(6, Math.max(0, Number(e.target.value)));
+                  const val = e.target.value === '' ? 0 : Math.min(6, Math.max(0, Math.trunc(Number(e.target.value))));
                   setManiacCount(isNaN(val) ? 0 : val);
                 }}
                 placeholder="0"
@@ -476,7 +493,7 @@ export const GameOutcomeForm = ({
                 pattern="[0-9]*"
                 value={buddiesInPlay === 0 ? '' : String(buddiesInPlay)}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? 0 : Math.min(7, Math.max(0, Number(e.target.value)));
+                  const val = e.target.value === '' ? 0 : Math.min(7, Math.max(0, Math.trunc(Number(e.target.value))));
                   setBuddiesInPlay(isNaN(val) ? 0 : val);
                 }}
                 placeholder="0"
@@ -515,7 +532,7 @@ export const GameOutcomeForm = ({
                 pattern="[0-9]*"
                 value={childrenSurvived === 0 ? '' : String(childrenSurvived)}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? 0 : Math.min(3, Math.max(0, Number(e.target.value)));
+                  const val = e.target.value === '' ? 0 : Math.min(3, Math.max(0, Math.trunc(Number(e.target.value))));
                   setChildrenSurvived(isNaN(val) ? 0 : val);
                 }}
                 placeholder="0"
@@ -704,7 +721,8 @@ export const GameOutcomeForm = ({
           </label>
           <input
             type="text"
-            value={endingSubLocation}
+            aria-label="Ending Location"
+              value={endingSubLocation}
             onChange={(e) => setEndingSubLocation(e.target.value)}
             placeholder="Kitchen, Basement, Rooftop..."
             className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-colors"
@@ -717,7 +735,8 @@ export const GameOutcomeForm = ({
             Game Highlights
           </label>
           <textarea
-            value={gameHighlights}
+            aria-label="Game Highlights"
+              value={gameHighlights}
             onChange={(e) => setGameHighlights(e.target.value)}
             placeholder="Memorable moments, close calls, dramatic kills..."
             rows={3}
@@ -727,7 +746,8 @@ export const GameOutcomeForm = ({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-center pt-4 border-t border-border/30">
+      <div className="flex flex-wrap gap-3 justify-center pt-4 border-t border-border/30">
+        {onSaveResult && <button onClick={() => onSaveResult(buildFormData())} className="vcr-tape-button type-label px-4 py-3 min-h-[44px]">SAVE RESULT WITHOUT NARRATION</button>}
         <button
           onClick={handleContinue}
           className={`outcome-btn ${isWin ? 'outcome-btn-won' : 'outcome-btn-lost'} group relative min-w-[200px] sm:min-w-[240px] h-12 overflow-hidden rounded-sm transition-all duration-200 flex items-center justify-center gap-2`}
@@ -741,3 +761,4 @@ export const GameOutcomeForm = ({
     </div>
   );
 };
+

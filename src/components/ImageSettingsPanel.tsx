@@ -8,7 +8,7 @@ import { useImageGeneration } from '@/hooks/useImageGeneration';
  * about what the player wants to see.
  */
 const ImageSettingsPanel = () => {
-  const { isAuthenticated, autoGenerate, useAiCastingArt, updateSettings } = useImageGeneration();
+  const { isAuthenticated, autoGenerate, useAiCastingArt, updateSettings, settingsReady, settingsError, retryLoadSettings, isSavingSettings } = useImageGeneration();
 
   if (!isAuthenticated) {
     return (
@@ -32,6 +32,10 @@ const ImageSettingsPanel = () => {
       <div className="scanlines pointer-events-none absolute inset-0 opacity-15" />
 
       <div className="relative px-4 py-3 space-y-4">
+        {settingsError && <div role="alert" className="type-caption text-primary">
+          Image preferences could not be loaded or saved.
+          <button className="ml-2 underline min-h-[44px]" onClick={() => { void retryLoadSettings(); }}>RETRY</button>
+        </div>}
         <div className="flex items-center gap-3">
           <Film className="w-4 h-4 text-primary/70 shrink-0" />
           <span className="font-display text-sm tracking-[0.15em] text-foreground uppercase">
@@ -48,6 +52,7 @@ const ImageSettingsPanel = () => {
               Develop Scene Photography
             </p>
             <Switch
+              disabled={!settingsReady || isSavingSettings}
               checked={autoGenerate}
               onCheckedChange={(checked) => updateSettings({ autoGenerate: checked })}
             />
@@ -64,6 +69,7 @@ const ImageSettingsPanel = () => {
               AI Casting Art
             </p>
             <Switch
+              disabled={!settingsReady || isSavingSettings}
               checked={useAiCastingArt}
               onCheckedChange={(checked) => updateSettings({ useAiCastingArt: checked })}
             />
@@ -79,3 +85,4 @@ const ImageSettingsPanel = () => {
 };
 
 export default ImageSettingsPanel;
+

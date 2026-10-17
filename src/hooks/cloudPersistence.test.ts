@@ -12,9 +12,16 @@ const mock = vi.hoisted(() => ({
 vi.mock('./useAuth', () => ({ useAuth: () => mock.auth }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {
-  rpc: () => ({ abortSignal: () => mock.summary ? mock.summary() : Promise.resolve({
+  rpc: (name: string, args: { p_add: string[]; p_remove: string[] }) => ({ abortSignal: () => {
+    if (name === 'apply_collection_delta') {
+      if (mock.failRead || mock.failSave) return Promise.resolve({ data: null, error: { message: 'offline' } });
+      mock.films = [...new Set([...mock.films.filter(id => !args.p_remove.includes(id)), ...args.p_add])];
+      mock.writes.push({ owned_films: mock.films });
+      return Promise.resolve({ data: mock.films, error: null });
+    }
+    return mock.summary ? mock.summary() : Promise.resolve({
     data: [...mock.history.values()], error: mock.failRead ? { message: 'offline' } : null,
-  }) }),
+  }); } }),
   from: (table: string) => {
     let mode = 'select'; let payload: Record<string, unknown>; let id: string;
     const execute = () => {
@@ -49,6 +56,12 @@ afterEach(cleanup);
 const sample = { outcome: 'won' as const, killer: 'Hans', location: 'Camp Happy Trails', finalGirl: 'Laurie' };
 
 describe('cloud history write-ahead log', () => {
+  it('preserves recorded zero health and victim counts from the cloud', async () => {
+    mock.history.set('zero', { id: 'zero', timestamp: 1, outcome: 'lost', killer: 'Hans', location: 'Camp Happy Trails', final_girl: 'Laurie', final_girl_health: 0, killer_health: 0, victims_saved: 0, victims_killed: 0 });
+    const { result } = renderHook(useGameHistory);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.gameHistory[0]).toMatchObject({ finalGirlHealth: 0, killerHealth: 0, victimsSaved: 0, victimsKilled: 0 });
+  });
   it('keeps failed inserts across unmount and replays them with the same id', async () => {
     mock.failSave = true;
     const first = renderHook(useGameHistory);
