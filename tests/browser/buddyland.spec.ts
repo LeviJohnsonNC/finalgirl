@@ -23,13 +23,16 @@ test('unlock Buddyland, cast both girls, choose cards and save a complete game',
   await choose(page, 1, 'Buddyland');
   await choose(page, 2, 'Rena');
   await page.getByRole('button', { name: 'View Rena info' }).click();
-  await expect(page.getByRole('dialog').getByText('6 STARTING HEALTH')).toBeVisible();
-  await expect(page.getByRole('dialog').getByText(/0 Time from your discard/)).toBeVisible();
+  await expect(page.getByRole('dialog').getByText(/therapist/)).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('Ultimate Ability', { exact: true })).toHaveCount(0);
   await page.screenshot({ path: info.outputPath('rena-dossier.png'), fullPage: true });
   await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
   await choose(page, 2, 'Gwynn');
-  await page.getByText('GWYNN // 5 HEALTH', { exact: false }).click();
-  await expect(page.getByRole('region', { name: 'Buddyland case notes' }).getByText(/regardless of the Horror Level/)).toBeVisible();
+  await page.getByRole('button', { name: 'View Gwynn info' }).click();
+  await expect(page.getByRole('dialog').getByText(/mechanic/)).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('Ultimate Ability', { exact: true })).toHaveCount(0);
+  await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Buddyland case notes' })).toHaveCount(0);
   for (const name of ['Billy the Bear', 'Buddyland', 'Gwynn']) {
     const image = page.getByRole('img', { name, exact: true });
     await expect(image).toBeVisible();
@@ -103,4 +106,23 @@ test('a different killer at Buddyland has no Billy-only outcome fields', async (
   await page.getByRole('button', { name: 'WON', exact: true }).first().click();
   await expect(page.getByLabel('All Power Sources Inactive')).toHaveCount(0);
   await expect(page.getByLabel('Final Girl Health', { exact: true })).toHaveValue('5');
+});
+
+
+test('casting file pickers keep every category in alphabetical order', async ({ page, archive }) => {
+  archive.films = ['s1-maple-lane', 's4-buddyland', 's1-camp-happy-trails'];
+  await archive.install(page);
+  await page.goto('/');
+  await page.getByRole('button', { name: 'START THE TAPE' }).click();
+  const expected = [
+    ['Billy the Bear', 'Dr. Fright', 'Hans'],
+    ['Buddyland', 'Camp Happy Trails', 'Maple Lane'],
+    ['Gwynn', 'Laurie', 'Nancy', 'Reiko', 'Rena', 'Sheila'],
+  ];
+  for (const [index, names] of expected.entries()) {
+    await page.getByRole('button', { name: 'Choose', exact: true }).nth(index).click();
+    await expect(page.getByRole('dialog').locator('.dossier-meta__value')).toHaveText(names);
+    await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
+  }
+  expect(archive.calls).toEqual([]);
 });

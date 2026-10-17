@@ -2,7 +2,6 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AlertTriangle, Play, Loader2, RotateCcw } from 'lucide-react';
 import { CastingSlot } from '@/components/CastingSlot';
 import { CastingPicker } from '@/components/CastingPicker';
-import { BuddylandBriefing } from '@/components/BuddylandBriefing';
 import { ScenarioDropdowns } from '@/components/ScenarioDropdowns';
 import { GameIcon } from '@/components/GameIcon';
 import { getOwnedContent } from '@/types/gameData';
@@ -207,8 +206,6 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
             shuffleKey={shuffleKey}
           />
         </div>
-
-        <BuddylandBriefing {...selection} />
 
         {/* Case Options strip */}
         <div className="w-full max-w-3xl px-4 mb-10">

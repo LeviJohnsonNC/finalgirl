@@ -13,7 +13,6 @@ import { LOCATION_DESCRIPTIONS } from '@/data/locationDescriptions';
 import { FINAL_GIRL_DESCRIPTIONS } from '@/data/finalGirlDescriptions';
 import { FEATURE_FILMS } from '@/types/gameData';
 import { useActiveImages } from '@/hooks/useActiveImages';
-import { getFinalGirlHealth } from '@/data/finalGirlHealth';
 
 interface LoreInfoModalProps {
   type: 'killer' | 'location' | 'finalGirl';
@@ -45,8 +44,6 @@ const getLoreDetails = (type: 'killer' | 'location' | 'finalGirl', name: string)
       if (finalGirl) {
         return {
           backstory: finalGirl.backstory,
-          ultimateAbility: finalGirl.ultimateAbility,
-          additionalSaveReward: finalGirl.additionalSaveReward,
           visualDescription: FINAL_GIRL_DESCRIPTIONS[name],
           filmName: FEATURE_FILMS.find(f => f.id === filmDetails.filmId)?.name,
         };
@@ -114,17 +111,6 @@ export const LoreInfoModal = ({ type, name }: LoreInfoModalProps) => {
             )}
 
             {/* Backstory */}
-            {'ultimateAbility' in lore && lore.ultimateAbility && (
-              <section className="border border-secondary/30 bg-secondary/5 p-4 space-y-3" aria-label={`${name} ability reference`}>
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="font-display text-sm uppercase tracking-widest text-secondary">Ultimate Ability</h3>
-                  <span className="font-vhs text-secondary whitespace-nowrap">{getFinalGirlHealth(name)} STARTING HEALTH</span>
-                </div>
-                <p className="type-body-sm text-foreground/90">{lore.ultimateAbility}</p>
-                <p className="type-body-sm text-muted-foreground">{lore.additionalSaveReward}</p>
-                <p className="type-caption text-muted-foreground">Unlock by saving Victims as shown on your Final Girl card.</p>
-              </section>
-            )}
             {lore.backstory && (
               <div className="space-y-2">
                 <h3 className="font-display text-sm uppercase tracking-widest text-primary">
