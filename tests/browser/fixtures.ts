@@ -18,6 +18,9 @@ export class ArchiveMock {
   holdDeath=false;
   releaseDeath:(()=>void)|null=null;
   deathText='The ceiling gave a soft, dusty sigh. Nobody looked up until the light fitting dropped, trailing a bright knot of wires. A scream vanished beneath the crash. When the dust cleared, the broken fixture still swung against the wall, tapping out the last few seconds of someone’s night.';
+  holdCollection=false;
+  collectionWaiters:Array<()=>void>=[];
+  releaseCollection=()=>{this.holdCollection=false;this.collectionWaiters.splice(0).forEach(done=>done());};
   films = ['s1-camp-happy-trails'];
   history: Array<Record<string, unknown>> = [];
   calls: string[] = [];
@@ -99,7 +102,7 @@ export class ArchiveMock {
         return json(this.films);
       }
       if (path.endsWith('/user_image_settings')) return json(request.headers().accept?.includes('vnd.pgrst.object') ? { auto_generate_images: this.autoImages, use_ai_casting_art: false } : [{ auto_generate_images: this.autoImages, use_ai_casting_art: false }]);
-      if (path.endsWith('/user_settings')) return json({ owned_films: this.films });
+      if (path.endsWith('/user_settings')) {if(this.holdCollection && request.method()==='GET')await new Promise<void>(done=>this.collectionWaiters.push(done));return json({ owned_films: this.films });}
       if (path.endsWith('/game_history')) {
         const id = url.searchParams.get('id')?.replace(/^eq\./, '');
         if (request.method() === 'POST') {

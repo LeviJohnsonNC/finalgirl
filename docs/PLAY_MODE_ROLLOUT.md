@@ -73,3 +73,5 @@ The final local check passes 176 frontend tests and 38 edge/guard/handler checks
 Audio tests use a silent deterministic device while exercising the real playback hook and IndexedDB cache, including replay after reload. Desktop/phone captures are review fixtures, not live provider auditions or physical-device Safari certification. The deployment smoke test remains necessary for the real provider/voice and hosting environment.
 
 Review captures: [phone Play](images/play-overview-mobile.jpg), [quiet Play](images/play-quiet-mobile.jpg), [landscape](images/play-landscape.jpg), [outcome](images/tracked-outcome-mobile.jpg), [round statistics](images/tracked-statistics-desktop.jpg), [death scene](images/death-scene-mobile.jpg), [manual narration](images/death-narration-mobile.jpg).
+
+The final regression pass also fixes rules searching while collection data arrives late: matching expansion chapters now reopen when the owned-module results change. Its browser check deliberately holds the collection response until after the query is entered, so this race is tested without relying on network timing.

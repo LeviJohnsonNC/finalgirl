@@ -177,11 +177,10 @@ const Rules = () => {
       // Find the first matching section inside, set it as initial sub
       const firstSec = firstMatch.sectionIds.find((sid) => (sectionMatchCounts[sid] ?? 0) > 0);
       if (firstSec) {
-        setInitialSubBySection((prev) => ({ ...prev, [firstMatch.id]: firstSec }));
+        setInitialSubBySection((prev) => prev[firstMatch.id] === firstSec ? prev : ({ ...prev, [firstMatch.id]: firstSec }));
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
+  }, [query, module.chapters, chapterMatchCounts, sectionMatchCounts, setOpenChapterId]);
 
   const handleToggle = useCallback(
     (chapterId: string) => {
