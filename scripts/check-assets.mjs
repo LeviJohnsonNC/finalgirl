@@ -5,7 +5,7 @@ function visit(directory) {
   for (const item of readdirSync(directory, { withFileTypes: true })) {
     const file = join(directory, item.name);
     if (item.isDirectory()) visit(file);
-    else if (file.endsWith('.png')) images.push(file);
+    else if (/\.(png|jpe?g|webp)$/i.test(file)) images.push(file);
   }
 }
 visit('src/assets');

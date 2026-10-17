@@ -1,12 +1,12 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Play } from 'lucide-react';
-import marqueeBg from '@/assets/marquee-bg.png';
-import { AppHeader } from './AppHeader';
+import { ArrowUpRight, Play, Ticket } from 'lucide-react';
+import theaterBackdrop from '@/assets/theater-backdrop.jpg';
+import openingStill from '@/assets/locations/ai/camp-happy-trails.png';
 import { useAuth } from '@/hooks/useAuth';
-import { useScreenEffects } from '@/hooks/useScreenEffects';
 import { useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { ProjectorSlideshow } from './ProjectorSlideshow';
+import '@/styles/theater.css';
 
 interface MarqueeProps {
   onStart: () => void;
@@ -17,218 +17,72 @@ interface MarqueeProps {
   onRules?: () => void;
 }
 
-const MARQUEE_IMAGE_SIZE = {
-  width: 1536,
-  height: 1024,
-} as const;
-
-const MARQUEE_SCREEN_RECT = {
-  x: 530,
-  y: 238,
-  width: 590,
-  height: 252,
-} as const;
-
 export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onStats, onRules }: MarqueeProps) => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading, authError } = useAuth();
   const { gameHistory } = useGameHistoryContext();
-  const [isClicked, setIsClicked] = useState(false);
-  const [isButtonHovered, setIsButtonHovered] = useState(false);
-  const [viewportSize, setViewportSize] = useState(() => ({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  }));
-  const { showFlicker, showFrameJump } = useScreenEffects();
-
-  useEffect(() => {
-    const handleResize = () => {
-      setViewportSize({ width: window.innerWidth, height: window.innerHeight });
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Extract all available images from game history
-  const projectorImages = useMemo(() =>
-    gameHistory
-      .map(g => g.sceneImageUrl)
-      .filter((url): url is string => !!url),
-    [gameHistory]
-  );
-
-  const projectorStyle = useMemo(() => {
-    const { width: viewportWidth, height: viewportHeight } = viewportSize;
-    const isMobile = viewportWidth < 640;
-
-    // On mobile, shift bg-x to center the projector screen (screen center is at x=825 in 1536px image)
-    const bgPositionX = isMobile ? 0.567 : 0.5;
-    const bgPositionY = isMobile ? 0.5 : 0.5;
-
-    const scale = Math.max(
-      viewportWidth / MARQUEE_IMAGE_SIZE.width,
-      viewportHeight / MARQUEE_IMAGE_SIZE.height,
-    );
-
-    const renderedWidth = MARQUEE_IMAGE_SIZE.width * scale;
-    const renderedHeight = MARQUEE_IMAGE_SIZE.height * scale;
-
-    const offsetX = (viewportWidth - renderedWidth) * bgPositionX;
-    const offsetY = (viewportHeight - renderedHeight) * bgPositionY;
-
-    return {
-      left: `${offsetX + MARQUEE_SCREEN_RECT.x * scale}px`,
-      top: `${offsetY + MARQUEE_SCREEN_RECT.y * scale}px`,
-      width: `${MARQUEE_SCREEN_RECT.width * scale}px`,
-      height: `${MARQUEE_SCREEN_RECT.height * scale}px`,
-      transform: 'rotate(0.5deg)',
-      transformOrigin: 'center center',
-    };
-  }, [viewportSize]);
-
-  const handleStart = () => {
-    setIsClicked(true);
-    // Brief delay for static burst effect before transition
-    setTimeout(() => {
-      onStart();
-    }, 600);
-  };
-
-  const handleAuthClick = () => {
-    navigate('/auth');
-  };
+  const projectorImages = useMemo(() => gameHistory.map(g => g.sceneImageUrl).filter((url): url is string => !!url), [gameHistory]);
 
   return (
-    <div className={`fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden transition-opacity duration-500 ${isClicked ? 'opacity-0' : 'opacity-100'}`}>
-      {/* Background Image with VHS Effects + Projector Pulse + Hover Response */}
-      <div 
-        className={`absolute inset-0 bg-cover bg-[56.7%_50%] sm:bg-center bg-no-repeat projector-pulse ${showFrameJump ? 'frame-jump' : ''} ${isButtonHovered ? 'screen-hover-flicker' : ''}`}
-        style={{ 
-          backgroundImage: `url(${marqueeBg})`,
-        }}
-      />
-      
-      {/* Projector Slideshow — projected onto the outdoor screen */}
-      {projectorImages.length > 0 && (
-        <ProjectorSlideshow images={projectorImages} style={projectorStyle} />
-      )}
+    <div className="theater" style={{ backgroundImage: `url(${theaterBackdrop})` }}>
+      <div className="theater-atmosphere" aria-hidden="true" />
+      <div className="theater-shell">
+        <header className="theater-header">
+          <button className="theater-brand" onClick={onNavigateHome} aria-label="Final Girl home">
+            <h1>FINAL GIRL</h1>
+            <span><span className="theater-unofficial">Unofficial</span> Case Files</span>
+          </button>
+          <div className="theater-admission">
+            <span className="theater-edition" aria-hidden="true">The midnight drive-in</span>
+            {!authLoading && <button className="theater-account" onClick={() => navigate('/auth')}>
+              <Ticket size={16} aria-hidden="true" />{user ? 'Account' : 'Sign in'}
+            </button>}
+          </div>
+        </header>
 
-      {/* Screen Flicker Overlay */}
-      {showFlicker && (
-        <div className="absolute inset-0 bg-white/10 screen-flicker pointer-events-none z-10" />
-      )}
-      
-      {/* Film Grain Overlay */}
-      <div className="film-grain absolute inset-0 pointer-events-none" />
-      
-      {/* Scanlines Overlay */}
-      <div className="absolute inset-0 pointer-events-none scanlines-overlay" />
-      
-      {/* Vignette */}
-      <div className="vignette absolute inset-0 pointer-events-none" />
-      
-      {/* Static Burst on Click */}
-      {isClicked && (
-        <div className="static-burst absolute inset-0 z-40 pointer-events-none" />
-      )}
-      
-      {/* App Header - clickable to return home */}
-      <AppHeader onNavigateHome={onNavigateHome} />
-      
-      {/* Content - Button positioned below projector screen on mobile, centered on desktop */}
-      <div className="absolute top-[62%] left-1/2 sm:top-[52%] sm:left-[52%] -translate-x-1/2 z-10 flex flex-col items-center">
-        {/* Main Button - The Ritual Action */}
-        <button
-          onClick={handleStart}
-          onMouseEnter={() => setIsButtonHovered(true)}
-          onMouseLeave={() => setIsButtonHovered(false)}
-          disabled={isClicked}
-          className="vcr-tape-button group relative px-6 py-3 sm:px-8 md:px-10 md:py-4 text-base sm:text-lg md:text-xl tracking-[0.1em] sm:tracking-[0.15em] uppercase transition-all duration-150 disabled:pointer-events-none min-h-[48px] backdrop-blur-sm bg-black/30 sm:bg-transparent sm:backdrop-blur-none rounded-sm"
-        >
-          {/* Button content */}
-          <span className="relative flex items-center gap-2 sm:gap-2.5 text-foreground/80 group-hover:text-foreground">
-            <Play className="w-4 h-4 md:w-5 md:h-5 fill-current" />
-            START THE TAPE
-          </span>
-        </button>
-        {authError && (
-          <p className="mt-3 max-w-xs text-center type-caption text-primary">
-            SIGN-IN SERVICES RECONNECTING
-          </p>
-        )}
-      </div>
-      
-      {/* Bottom bar: nav and disclaimer stacked in one flow. They used to be
-          two separately positioned elements at bottom-5 and bottom-1.5, which
-          only held while the disclaimer was a single 6px line — once it wrapped
-          it grew up into the nav. Stacking them means the gap is structural. */}
-      <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2 pb-3 safe-area-bottom">
-      <div className="px-3 sm:px-6 flex flex-wrap justify-center items-center gap-x-1 gap-y-0 sm:flex-nowrap sm:justify-between">
-        {/* Left group: Scrapbooks + Stats + Auth */}
-        <div className="contents sm:flex sm:items-center sm:gap-6">
-          {onScrapbooks && (
-            <button
-              onClick={onScrapbooks}
-              className="type-nav uppercase whitespace-nowrap order-1 sm:order-none text-dim hover:text-primary transition-colors duration-300 min-h-[44px] flex items-center justify-center px-2"
-            >
-              Scrapbooks
-            </button>
-          )}
-          {onStats && (
-            <button
-              onClick={onStats}
-              className="type-nav uppercase whitespace-nowrap order-1 sm:order-none text-dim hover:text-green-400 transition-colors duration-300 min-h-[44px] flex items-center justify-center px-2"
-            >
-              Stats
-            </button>
-          )}
-          {onRules && (
-            <button
-              onClick={onRules}
-              className="type-nav uppercase whitespace-nowrap order-1 sm:order-none text-dim hover:text-amber-400 transition-colors duration-300 min-h-[44px] flex items-center justify-center px-2"
-            >
-              Rules
-            </button>
-          )}
-          {/* Auth link - subtle. Hide "Sign Out" on mobile to reduce clutter. */}
-          {!authLoading && (
-            <button
-              onClick={handleAuthClick}
-              className={`type-nav uppercase whitespace-nowrap order-4 sm:order-none text-dimmer hover:text-foreground transition-colors duration-300 min-h-[44px] items-center justify-center px-2 ${
-                user ? 'hidden sm:flex' : 'flex'
-              }`}
-            >
-              {user ? 'Sign Out' : 'Sign In'}
-            </button>
-          )}
-        </div>
-        
-        {/* Mobile-only row break. Signed out there are five links, which will
-            not fit one 390px row; this splits them 3 / 2 instead of leaving a
-            single orphan on the second row. Signed in, "Sign Out" is hidden on
-            mobile and the remaining four fit one row, so no break is rendered. */}
-        {!authLoading && !user && <div className="order-2 basis-full h-0 sm:hidden" aria-hidden="true" />}
+        <main className="theater-main" aria-label="The drive-in theater">
+          <div className="theater-billing"><span />{projectorImages.length ? 'From your case files' : 'Tonight’s feature'}<span /></div>
+          <div className="theater-screen-wrap">
+            <div className="theater-screen">
+              {projectorImages.length ? <ProjectorSlideshow key={user?.id ?? 'guest'} images={projectorImages} /> : (
+                <div className="theater-title-card">
+                  <img src={openingStill} alt="" className="theater-title-art" />
+                  <div className="theater-title-copy">
+                    <span className="theater-kicker">An evening of terrible possibilities</span>
+                    <h2>Some nights<br /><em>stay with you.</em></h2>
+                    <span className="theater-title-rule" />
+                    <p>Your cast. Your story. Your last chance.</p>
+                  </div>
+                </div>
+              )}
+              <div className="theater-screen-texture" aria-hidden="true" />
+            </div>
+            <span className="theater-screen-foot theater-screen-foot-left" aria-hidden="true" />
+            <span className="theater-screen-foot theater-screen-foot-right" aria-hidden="true" />
+          </div>
 
-        {/* Right: My Collection */}
-        <button
-          onClick={onArchive}
-          className="type-nav uppercase whitespace-nowrap order-3 sm:order-none text-dim hover:text-secondary transition-colors duration-300 min-h-[44px] flex items-center justify-center px-2 sm:px-3"
-        >
-          <span className="sm:hidden">Collection</span>
-          <span className="hidden sm:inline">My Collection</span>
-        </button>
-      </div>
+          <div className="theater-program">
+            <p className="theater-program-line">{projectorImages.length ? 'Every game leaves a story.' : 'The screen is waiting for your first story.'}</p>
+          </div>
+          <div className="theater-actions">
+            <button className="theater-play" onClick={onStart}>
+              <span className="theater-play-icon"><Play size={16} fill="currentColor" aria-hidden="true" /></span>
+              <span>START THE TAPE</span><ArrowUpRight size={17} aria-hidden="true" />
+            </button>
+            <p className="theater-action-hint">Choose your cast. See how the night ends.</p>
+            {authError && <p role="status" className="theater-status">Sign-in services reconnecting</p>}
+          </div>
+        </main>
 
-      {/* Trademark Disclaimer */}
-      <div className="px-3 sm:px-4 text-center">
-        <p className="type-micro text-dimmer leading-snug max-w-3xl mx-auto text-balance">
-          <span className="sm:hidden">Fan-made · not endorsed by Van Ryder Games</span>
-          <span className="hidden sm:inline">
-            Unofficial fan-made app — not endorsed by or affiliated with Van Ryder Games, registered trademark owner of Final Girl and all associated intellectual property rights.
-          </span>
-        </p>
-      </div>
+        <footer className="theater-footer">
+          <nav aria-label="Theater navigation">
+            {onScrapbooks && <button onClick={onScrapbooks}>Scrapbooks</button>}
+            {onStats && <button onClick={onStats}>Stats</button>}
+            {onRules && <button onClick={onRules}>Rules</button>}
+            <button onClick={onArchive}>Collection</button>
+          </nav>
+          <p className="theater-disclaimer">Unofficial fan-made app · Not endorsed by or affiliated with Van Ryder Games.<span> Final Girl and associated intellectual property belong to their respective owners.</span></p>
+        </footer>
       </div>
     </div>
   );
