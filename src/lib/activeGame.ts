@@ -1,3 +1,4 @@
+import { validPlayLog, type PlayEvent } from './play/events';
 import type { GameResult } from '@/hooks/useGameHistory';
 
 export interface GameSelection {
@@ -12,6 +13,8 @@ export interface EndingFormData {
 }
 export interface ActiveGame {
   version: 1;
+  playEvents?: PlayEvent[];
+  playMode?: boolean;
   id: string;
   selection: GameSelection;
   phase: 'nowPlaying' | 'outcome' | 'ending';
@@ -24,9 +27,11 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if (game.playEvents !== undefined && !validPlayLog(game.playEvents)) return false;
+  if (game.playMode !== undefined && typeof game.playMode !== 'boolean') return false;
   const textFields = [game.introStory, game.sceneImageUrl, game.visualBible, game.endingStory, game.posterImageUrl];
   if (!textFields.every(field => field === undefined || typeof field === 'string')) return false;
-  if (game.formDraft && (typeof game.formDraft !== 'object' || Array.isArray(game.formDraft) || !Object.values(game.formDraft).every(field => ['string', 'number', 'boolean'].includes(typeof field)))) return false;
+  if (game.formDraft && (typeof game.formDraft !== 'object' || Array.isArray(game.formDraft) || !Object.values(game.formDraft).every(field => field === null || ['string', 'number', 'boolean'].includes(typeof field)))) return false;
   if (game.phase === 'ending' && !game.formData) return false;
   return game.version === 1 && typeof game.id === 'string' &&
     Boolean(game.selection && typeof game.selection.killer === 'string' &&

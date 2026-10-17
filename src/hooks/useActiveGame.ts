@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 import { useLocalStorage } from './useLocalStorage';
+import { isPlayEvent, type PlayEvent } from '@/lib/play/events';
 import { ActiveGame, isActiveGame } from '@/lib/activeGame';
 
 export function useActiveGame() {
@@ -24,5 +25,16 @@ export function useActiveGame() {
     if (!ok) toast.error('This device could not save the form. Free browser storage and try again.');
     return ok;
   }, [setStored]);
-  return { activeGame, save, checkpoint, updateFormDraft };
+  const appendPlayEvent = useCallback((id: string, event: PlayEvent) => {
+    if (!isPlayEvent(event)) return false;
+    let applied = false;
+    const ok = setStored(previous => {
+      if (previous?.id !== id || (previous.playEvents?.length ?? 0) >= 1000 || previous.playEvents?.some(e => e.id === event.id)) return previous;
+      applied = true;
+      return { ...previous, playEvents: [...(previous.playEvents ?? []), event] };
+    });
+    if (!ok) toast.error('This change could not be saved. Free device storage and try again.');
+    return ok && applied;
+  }, [setStored]);
+  return { activeGame, save, checkpoint, updateFormDraft, appendPlayEvent };
 }
