@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
-import { ArrowUpRight, ChevronLeft, ChevronRight, Expand, Pause, Play, RotateCcw } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Pause, Play, RotateCcw } from 'lucide-react';
 import type { GameResult } from '@/hooks/useGameHistory';
 import { useTheaterReel } from '@/hooks/useTheaterReel';
 import { activeScreeningStatus, screeningDate } from '@/lib/theater';
 import type { ActiveGame } from '@/lib/activeGame';
 import openingStill from '@/assets/theater-opening.jpg';
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ProjectorSlideshow } from './ProjectorSlideshow';
 
 interface TheaterReelProps {
@@ -20,29 +19,15 @@ interface TheaterReelProps {
 export const TheaterReel = ({ games, loading, historyError, onRetryHistory, onOpenCaseFile, activeGame }: TheaterReelProps) => {
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const active = !showArchive ? activeGame : null;
-  const reel = useTheaterReel(games, hovered || focused || expanded, active);
+  const reel = useTheaterReel(games, hovered || focused, active);
   const { current, previous } = reel;
   const selection = active?.selection ?? current;
   const title = selection ? `${selection.finalGirl} vs. ${selection.killer}` : '';
   const imageUrl = current?.imageUrl;
-  const imageKind = current?.kind;
-  const pictureKey = current?.key;
   const warming = loading || (reel.pending && !current);
   const unavailable = !warming && !current && (reel.failedCount > 0 || Boolean(historyError));
-
-  useEffect(() => { setExpanded(false); }, [pictureKey]);
-
-  const viewer = imageUrl && selection ? <Dialog open={expanded} onOpenChange={setExpanded}>
-    <DialogTrigger asChild><button aria-label="View projected artwork full size"><Expand size={17} aria-hidden="true" /></button></DialogTrigger>
-    <DialogContent className="theater-lightbox max-w-[94vw] sm:max-w-5xl p-3 sm:p-5 bg-background border-border">
-      <DialogTitle className="pr-12 font-display text-xl">{title}</DialogTitle>
-      <img src={imageUrl} alt={`${imageKind === 'scene' ? 'Scene' : 'Poster'} for ${title} at ${selection.location}`} className="w-full max-h-[72dvh] object-contain" />
-      <DialogDescription className="font-vhs text-lg text-muted-foreground">{selection.location} · {imageKind === 'scene' ? 'Original scene still' : 'Movie poster'}</DialogDescription>
-    </DialogContent>
-  </Dialog> : null;
 
   return (
     <section className="theater-reel" aria-label="Personal screenings" aria-roledescription="carousel"
@@ -51,7 +36,7 @@ export const TheaterReel = ({ games, loading, historyError, onRetryHistory, onOp
       {activeGame ? <div className="theater-mode-switch" role="group" aria-label="Screening selection">
         <button aria-pressed={!showArchive} onClick={() => setShowArchive(false)}>Now playing</button>
         <button aria-pressed={showArchive} onClick={() => setShowArchive(true)}>Past screenings</button>
-      </div> : <div className="theater-billing"><span />{current ? 'From your case files' : 'Tonight’s feature'}<span /></div>}
+      </div> : !current && <div className="theater-billing"><span />Tonight’s feature<span /></div>}
       <div className="theater-screen-wrap">
         <div className="theater-screen" aria-busy={reel.pending || (!active && loading)}>
           {current ? <ProjectorSlideshow current={current} previous={previous} reducedMotion={reel.reducedMotion} onImageError={reel.fail} /> : (
@@ -74,8 +59,11 @@ export const TheaterReel = ({ games, loading, historyError, onRetryHistory, onOp
       <div className={`theater-program ${selection ? 'theater-program-personal' : ''}`}>
         {selection ? <>
           <div className="theater-caption" aria-live={active || reel.playing ? 'off' : 'polite'} aria-atomic="true">
-            <h2>{title}</h2>
-            <p>{selection.location}<span aria-hidden="true"> · </span><span className={active ? 'theater-in-progress' : current?.outcome === 'won' ? 'theater-survived' : 'theater-lost'}>{active ? 'In progress' : current?.outcome === 'won' ? 'Survived' : 'Lost to the night'}</span></p>
+            <div className="theater-caption-line">
+              <h2>{title}</h2><span aria-hidden="true"> · </span>
+              <span>{selection.location}</span><span aria-hidden="true"> · </span>
+              <span className={active ? 'theater-in-progress' : current?.outcome === 'won' ? 'theater-survived' : 'theater-lost'}>{active ? 'In progress' : current?.outcome === 'won' ? 'Survived' : 'Lost to the night'}</span>
+            </div>
             <div className="theater-case-line">
               {active ? <p className="theater-progress-line">{activeScreeningStatus(active)}</p> : current && <>
                 {screeningDate(current.timestamp) && <time dateTime={new Date(current.timestamp).toISOString()}>{screeningDate(current.timestamp)}</time>}
@@ -83,17 +71,15 @@ export const TheaterReel = ({ games, loading, historyError, onRetryHistory, onOp
               </>}
             </div>
           </div>
-          {(!active || imageUrl) && <div className="theater-reel-controls">
+          {!active && <div className="theater-reel-controls">
             <div className="theater-transport" role="group" aria-label="Projection controls">
-              {!active && <><button onClick={() => reel.move(-1)} disabled={reel.screenings.length < 2} aria-label="Previous scene"><ChevronLeft size={19} aria-hidden="true" /></button>
+              <button onClick={() => reel.move(-1)} disabled={reel.screenings.length < 2} aria-label="Previous scene"><ChevronLeft size={15} aria-hidden="true" /></button>
               <button onClick={() => reel.setPaused(!reel.paused)} disabled={reel.reducedMotion || reel.screenings.length < 2}
                 aria-label={reel.reducedMotion ? 'Automatic playback off for reduced motion' : reel.paused ? 'Play slideshow' : 'Pause slideshow'}>
-                {reel.paused || reel.reducedMotion ? <Play size={15} aria-hidden="true" /> : <Pause size={15} aria-hidden="true" />}
+                {reel.paused || reel.reducedMotion ? <Play size={12} aria-hidden="true" /> : <Pause size={12} aria-hidden="true" />}
               </button>
-              <button onClick={() => reel.move(1)} disabled={reel.screenings.length < 2} aria-label="Next scene"><ChevronRight size={19} aria-hidden="true" /></button></>}
-              {viewer}
+              <button onClick={() => reel.move(1)} disabled={reel.screenings.length < 2} aria-label="Next scene"><ChevronRight size={15} aria-hidden="true" /></button>
             </div>
-            {!active && <span className="theater-reel-position" role="status">{reel.pending ? 'Loading scene…' : `${String(reel.currentIndex + 1).padStart(2, '0')} / ${String(reel.screenings.length).padStart(2, '0')}`}</span>}
           </div>}
         </> : <div>
           <p className="theater-program-line">{warming ? 'Bringing your stories to the screen.' : unavailable ? 'Stills unavailable. Your case files are safe.' : games.length ? 'Your case files are ready. New scenes will appear here.' : 'The screen is waiting for your first story.'}</p>

@@ -1,4 +1,4 @@
-import { ArrowUpRight, Play } from 'lucide-react';
+import { Play } from 'lucide-react';
 import type { ActiveGame } from '@/lib/activeGame';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
@@ -13,7 +13,7 @@ export const TheaterActions = ({ game, cloud, onStart, onStartAnother }: Theater
   <div className="theater-actions">
     <button className="theater-play" onClick={onStart}>
       <span className="theater-play-icon"><Play size={16} fill="currentColor" aria-hidden="true" /></span>
-      <span>{game ? cloud ? 'RESUME CLOUD GAME' : 'RESUME GAME' : 'START THE TAPE'}</span><ArrowUpRight size={17} aria-hidden="true" />
+      <span>{game ? cloud ? 'RESUME CLOUD GAME' : 'RESUME GAME' : 'START THE TAPE'}</span>
     </button>
     {game ? <>
       <p className="theater-action-hint">{game.selection.finalGirl} vs. {game.selection.killer}</p>
@@ -32,6 +32,6 @@ export const TheaterActions = ({ game, cloud, onStart, onStartAnother }: Theater
           </AlertDialogContent>
         </AlertDialog>
       ))}
-    </> : <p className="theater-action-hint">Choose your cast. See how the night ends.</p>}
+    </> : null}
   </div>
 );
