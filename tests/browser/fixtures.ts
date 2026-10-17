@@ -9,6 +9,7 @@ export const opening = 'The lights went out at Camp Happy Trails. Laurie heard a
 export const activeGame = { version: 1, id: gameId, phase: 'nowPlaying', selection, introStory: opening };
 
 export class ArchiveMock {
+  sessions: Array<{id:string;revision:number;state:Record<string,unknown>;closed:boolean}> = [];
   films = ['s1-camp-happy-trails'];
   history: Array<Record<string, unknown>> = [];
   calls: string[] = [];
@@ -58,6 +59,15 @@ export class ArchiveMock {
           return json({ imageUrl });
         }
         return json({ error: 'Unmocked generation' }, 500);
+      }
+      if (path.endsWith('/play_sessions')) return json(this.sessions.filter(row=>!row.closed));
+      if (path.endsWith('/rpc/save_play_session')) {
+        if(this.failWrites) return json({message:'offline'},503);
+        const b=request.postDataJSON();let row=this.sessions.find(r=>r.id===b.p_id);
+        if(!row){row={id:b.p_id,revision:1,state:b.p_state,closed:b.p_closed};this.sessions.push(row);return json({ok:true,revision:1});}
+        if(JSON.stringify(row.state)===JSON.stringify(b.p_state)&&row.closed===b.p_closed)return json({ok:true,revision:row.revision});
+        if(b.p_revision!==row.revision)return json({ok:false,...row});
+        Object.assign(row,{revision:row.revision+1,state:b.p_state,closed:b.p_closed});return json({ok:true,revision:row.revision});
       }
       if (path.endsWith('/rpc/get_game_history_summary')) return json(this.history);
       if (path.endsWith('/rpc/apply_collection_delta')) {

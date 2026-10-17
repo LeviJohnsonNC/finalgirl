@@ -1,3 +1,5 @@
+import { PlayScreen } from '@/components/play/PlayScreen';
+import type { PlayEvent } from '@/lib/play/events';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ImageIcon, Volume2, VolumeX, Loader2, ScrollText } from 'lucide-react';
 import { SpecialRulesModal, getApplicableSpecialRules } from '@/components/SpecialRulesModal';
@@ -28,6 +30,11 @@ import type { ActiveGame } from '@/lib/activeGame';
 
 interface NowPlayingProps {
   sessionId: string;
+  playEvents?: PlayEvent[];
+  playMode?: boolean;
+  onPlayEvent?: (event: PlayEvent) => boolean;
+  syncStatus?: string;
+  onRetrySync?: () => void;
   initialStory?: string;
   initialSceneImageUrl?: string;
   initialVisualBible?: string;
@@ -45,6 +52,7 @@ interface NowPlayingProps {
 }
 
 const NowPlaying = ({
+  playEvents = [], playMode = false, onPlayEvent, syncStatus, onRetrySync,
   sessionId, initialStory, initialSceneImageUrl, initialVisualBible, onCheckpoint,
   killer,
   location,
@@ -252,6 +260,13 @@ const NowPlaying = ({
 
   const handleNarrate = () => toggleNarration(story, { kind: 'intro', filmId });
 
+  if (playMode && onPlayEvent) return <PlayScreen killer={killer} location={location} finalGirl={finalGirl}
+    imageUrl={sceneImageUrl || bgImage} events={playEvents} onEvent={onPlayEvent}
+    onExit={() => onCheckpoint({ playMode: false })}
+    onFinish={outcome => onGameEnd(outcome, !isGenerating && !error ? story || undefined : undefined, sceneImageUrl || undefined, visualBible)}
+    onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying} hasStory={Boolean(story)}
+    syncStatus={syncStatus} onRetrySync={onRetrySync}/>;
+
   return (
     <div
       className="relative min-h-[80vh]"
@@ -305,6 +320,8 @@ const NowPlaying = ({
             </p>
           </div>
         )}
+
+        {onPlayEvent && <button onClick={() => onCheckpoint({ playMode: true })} className="vcr-tape-button min-h-[48px] px-6 py-3 mb-6 font-display text-secondary tracking-widest uppercase">Enter Play mode</button>}
 
         {/* Story Container */}
         <div className="w-full max-w-7xl flex flex-col gap-4 sm:gap-6">
