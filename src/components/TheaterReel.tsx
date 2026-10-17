@@ -5,6 +5,7 @@ import { useTheaterReel } from '@/hooks/useTheaterReel';
 import { activeScreeningStatus, screeningDate } from '@/lib/theater';
 import type { ActiveGame } from '@/lib/activeGame';
 import openingStill from '@/assets/theater-opening.jpg';
+import { DriveInScreen } from './DriveInScreen';
 import { ProjectorSlideshow } from './ProjectorSlideshow';
 
 interface TheaterReelProps {
@@ -37,24 +38,19 @@ export const TheaterReel = ({ games, loading, historyError, onRetryHistory, onOp
         <button aria-pressed={!showArchive} onClick={() => setShowArchive(false)}>Now playing</button>
         <button aria-pressed={showArchive} onClick={() => setShowArchive(true)}>Past screenings</button>
       </div> : !current && <div className="theater-billing"><span />Tonight’s feature<span /></div>}
-      <div className="theater-screen-wrap">
-        <div className="theater-screen" aria-busy={reel.pending || (!active && loading)}>
-          {current ? <ProjectorSlideshow current={current} previous={previous} reducedMotion={reel.reducedMotion} onImageError={reel.fail} /> : (
-            <div className="theater-title-card">
-              <img src={openingStill} alt="" className="theater-title-art" />
-              <div className="theater-title-copy">
-                <span className="theater-kicker">{active ? 'A feature in progress' : warming ? 'Projector warming up…' : 'An evening of terrible possibilities'}</span>
-                <h2>{active ? <>The night<br /><em>isn’t over.</em></> : <>Some nights<br /><em>stay with you.</em></>}</h2>
-                <span className="theater-title-rule" />
-                <p>{active ? 'Your story is right where you left it.' : 'Your cast. Your story. Your last chance.'}</p>
-              </div>
+      <DriveInScreen busy={reel.pending || (!active && loading)}>
+        {current ? <ProjectorSlideshow current={current} previous={previous} reducedMotion={reel.reducedMotion} onImageError={reel.fail} /> : (
+          <div className="theater-title-card">
+            <img src={openingStill} alt="" className="theater-title-art" />
+            <div className="theater-title-copy">
+              <span className="theater-kicker">{active ? 'A feature in progress' : warming ? 'Projector warming up…' : 'An evening of terrible possibilities'}</span>
+              <h2>{active ? <>The night<br /><em>isn’t over.</em></> : <>Some nights<br /><em>stay with you.</em></>}</h2>
+              <span className="theater-title-rule" />
+              <p>{active ? 'Your story is right where you left it.' : 'Your cast. Your story. Your last chance.'}</p>
             </div>
-          )}
-          <div className="theater-screen-texture" aria-hidden="true" />
-        </div>
-        <span className="theater-screen-foot theater-screen-foot-left" aria-hidden="true" />
-        <span className="theater-screen-foot theater-screen-foot-right" aria-hidden="true" />
-      </div>
+          </div>
+        )}
+      </DriveInScreen>
 
       <div className={`theater-program ${selection ? 'theater-program-personal' : ''}`}>
         {selection ? <>

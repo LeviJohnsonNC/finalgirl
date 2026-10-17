@@ -5,8 +5,26 @@ test('the theater keeps the screen and controls inside narrow and wide layouts',
   await archive.install(page, { signedIn: false });
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /Some nights/ })).toBeVisible();
-  for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 844, height: 390 }, { width: 1440, height: 900 }]) {
+  for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 639, height: 900 }, { width: 640, height: 900 }, { width: 844, height: 390 }, { width: 1440, height: 900 }, { width: 2048, height: 1152 }]) {
     await page.setViewportSize(viewport);
+    const portrait = viewport.width < 640;
+    await expect(page.locator('.theater-screen-wrap')).toHaveAttribute('data-composition', portrait ? 'portrait' : 'landscape');
+    const scenery = page.locator('.theater-scenery');
+    await scenery.evaluate((image: HTMLImageElement) => image.decode());
+    const naturalWidth = await scenery.evaluate((image: HTMLImageElement) => image.naturalWidth);
+    expect(naturalWidth).toBe(portrait ? 1024 : 1536);
+    const photo = (await scenery.boundingBox())!;
+    const screen = (await page.locator('.theater-screen').boundingBox())!;
+    // Pixel bounds measured from the physical aperture in each photograph.
+    const aperture = portrait ? { x: 70, y: 359, width: 888, height: 383, ground: 940 }
+      : { x: 280, y: 125, width: 977, height: 410, ground: 700 };
+    const scale = photo.width / naturalWidth;
+    expect(Math.abs(screen.x - (photo.x + aperture.x * scale))).toBeLessThan(1);
+    expect(Math.abs(screen.y - (photo.y + aperture.y * scale))).toBeLessThan(1);
+    expect(Math.abs(screen.width - aperture.width * scale)).toBeLessThan(1);
+    expect(Math.abs(screen.height - aperture.height * scale)).toBeLessThan(1);
+    expect((await page.locator('.theater-program').boundingBox())!.y).toBeGreaterThan(photo.y + aperture.ground * scale);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewport.width);
     for (const selector of ['.theater-screen', '.theater-play', '.theater-footer nav', '.theater-account']) {
       const box = await page.locator(selector).boundingBox();
       expect(box, selector).not.toBeNull();
@@ -17,6 +35,53 @@ test('the theater keeps the screen and controls inside narrow and wide layouts',
     await expect(page.getByRole('button', { name: 'Collection', exact: true })).toBeInViewport();
   }
   await page.screenshot({ path: testInfo.outputPath('theater-first-visit.png'), fullPage: true });
+  expect(archive.calls).toEqual([]);
+});
+
+test('a delayed composition download never separates the projection from its frame', async ({ page, archive }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await archive.install(page, { signedIn: false });
+  let release!: () => void;
+  let requested = false;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route('**/theater-drive-in-portrait*.webp', async route => {
+    requested = true;
+    await gate;
+    await route.continue();
+  });
+  await page.goto('/');
+  await page.locator('.theater-scenery').evaluate((image: HTMLImageElement) => image.decode());
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect.poll(() => requested).toBe(true);
+  await expect(page.locator('.theater-screen-wrap')).toHaveAttribute('data-composition', 'landscape');
+  expect(await page.locator('.theater-scenery').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(1536);
+  // Return to desktop before the pending portrait arrives: it must not win.
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+  const delivered = page.waitForResponse('**/theater-drive-in-portrait*.webp');
+  release();
+  await (await delivered).finished();
+  await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+  await expect(page.locator('.theater-screen-wrap')).toHaveAttribute('data-composition', 'landscape');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator('.theater-screen-wrap')).toHaveAttribute('data-composition', 'portrait');
+  expect(await page.locator('.theater-scenery').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(1024);
+  expect(archive.calls).toEqual([]);
+});
+
+test('an unavailable alternate composition keeps the existing scene and controls', async ({ page, archive }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await archive.install(page);
+  await page.route('**/theater-drive-in-portrait*.webp', route => route.abort());
+  await page.goto('/');
+  await page.locator('.theater-scenery').evaluate((image: HTMLImageElement) => image.decode());
+  const failed = page.waitForEvent('requestfailed', request => request.url().includes('theater-drive-in-portrait'));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await failed;
+  await expect(page.locator('.theater-screen-wrap')).toHaveAttribute('data-composition', 'landscape');
+  expect(await page.locator('.theater-scenery').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(1536);
+  await page.getByRole('button', { name: 'START THE TAPE' }).click();
+  await expect(page.getByRole('button', { name: /Choose KILLER/i })).toBeVisible();
   expect(archive.calls).toEqual([]);
 });
 

@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { Ticket } from 'lucide-react';
-import theaterBackdrop from '@/assets/theater-backdrop.jpg';
 import { useAuth } from '@/hooks/useAuth';
 import { useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { TheaterReel } from './TheaterReel';
@@ -30,8 +29,7 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
   const { gameHistory, isLoading, loadError, retryLoadHistory } = useGameHistoryContext();
 
   return (
-    <div className="theater" style={{ backgroundImage: `url(${theaterBackdrop})` }}>
-      <div className="theater-atmosphere" aria-hidden="true" />
+    <div className="theater">
       <div className="theater-shell">
         <header className="theater-header">
           <button className="theater-brand" onClick={onNavigateHome} aria-label="Final Girl home">
