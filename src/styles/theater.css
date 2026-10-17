@@ -21,14 +21,48 @@
 .theater-main { flex: 1; width: 100%; max-width: clamp(680px, calc(100svh * 1.1 - 130px), 950px); margin: auto; padding: 12px 32px 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 .theater-billing { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; margin: 0 0 20px; color: hsl(var(--theater-paper)); font-family: var(--font-vhs); font-size: 16px; text-transform: uppercase; letter-spacing: .2em; }
 .theater-billing > span { width: 44px; height: 1px; background: hsl(var(--theater-metal) / .5); }
-.theater-screen-wrap { position: relative; width: 100%; }
-.theater-screen { position: relative; isolation: isolate; overflow: hidden; width: 100%; aspect-ratio: 2.15; background: hsl(var(--theater-screen)); border: 5px solid hsl(var(--theater-metal)); outline: 1px solid hsl(var(--background)); box-shadow: 0 0 0 2px hsl(var(--theater-metal) / .3), 0 0 65px hsl(var(--secondary) / .1), 0 20px 70px hsl(var(--background) / .6); }
-.theater-screen::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 4; box-shadow: inset 0 0 25px hsl(var(--background) / .25); }
-.theater-screen-foot { position: absolute; top: 100%; width: 8px; height: 65px; z-index: -1; background: linear-gradient(90deg, hsl(var(--background)), hsl(var(--theater-metal) / .7), hsl(var(--background))); opacity: .6; }
+/* The image sits on a lit outdoor screen, with light falling back into the lot. */
+.theater-screen-wrap { position: relative; isolation: isolate; width: 100%; }
+.theater-screen-wrap::before {
+  content: ''; position: absolute; z-index: -1; pointer-events: none;
+  inset: -20% -18% -32%;
+  background: radial-gradient(ellipse at 50% 40%, hsl(var(--theater-paper) / .14), hsl(var(--secondary) / .07) 42%, transparent 70%);
+  filter: blur(24px);
+}
+.theater-screen-wrap::after {
+  content: ''; position: absolute; z-index: -1; pointer-events: none;
+  left: 0; right: 0; top: 24%; height: 155%;
+  clip-path: polygon(0 0, 100% 0, 58% 100%, 42% 100%);
+  background: linear-gradient(180deg, hsl(var(--theater-paper) / .055), hsl(var(--secondary) / .035) 55%, transparent);
+  filter: blur(18px);
+}
+.theater-screen {
+  position: relative; isolation: isolate; z-index: 1; overflow: hidden; width: 100%; aspect-ratio: 2.15;
+  background: hsl(var(--theater-paper)); border: 2px solid hsl(var(--theater-metal) / .8);
+  outline: 1px solid hsl(var(--background) / .75);
+  box-shadow: 0 0 0 3px hsl(var(--theater-metal) / .28),
+    0 0 24px hsl(var(--theater-paper) / .23), 0 0 85px hsl(var(--secondary) / .17),
+    0 18px 45px hsl(var(--background) / .45);
+}
+.theater-screen::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 4;
+  background: radial-gradient(ellipse at 48% 38%, hsl(var(--theater-paper) / .12), transparent 72%),
+    linear-gradient(hsl(var(--theater-paper) / .045), hsl(var(--theater-paper) / .025));
+  box-shadow: inset 0 0 28px hsl(var(--background) / .2), inset 0 0 2px hsl(var(--theater-paper) / .65);
+}
+.theater-screen-foot {
+  position: absolute; top: 100%; width: 12px; height: 94px; z-index: 0; pointer-events: none;
+  background: linear-gradient(90deg, hsl(var(--background)), hsl(var(--theater-metal) / .85) 46%, hsl(var(--background)));
+  box-shadow: 4px 4px 10px hsl(var(--background) / .5); opacity: .65;
+}
 .theater-screen-foot-left { left: 12%; }.theater-screen-foot-right { right: 12%; }
-.theater-screen-texture { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: .17; background: repeating-linear-gradient(0deg, transparent, transparent 3px, hsl(var(--background) / .35) 3px, hsl(var(--background) / .35) 4px); }
+.theater-screen-texture {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: .4;
+  background: repeating-linear-gradient(0deg, transparent 0 2px, hsl(var(--theater-paper) / .12) 2px 3px),
+    repeating-linear-gradient(90deg, transparent 0 4px, hsl(var(--background) / .1) 4px 5px);
+}
 .theater-title-card { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; background: hsl(var(--background)); }
-.theater-title-art { position: absolute; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; opacity: .38; filter: saturate(.55); }
+.theater-title-art { position: absolute; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; opacity: .48; filter: saturate(.55) brightness(1.15); }
 .theater-title-card::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse, hsl(var(--background) / .12), hsl(var(--background) / .7)); }
 .theater-title-copy { position: relative; z-index: 1; padding: 22px; color: hsl(var(--theater-paper)); }
 .theater-kicker { font-family: var(--font-vhs); font-size: 15px; letter-spacing: .16em; text-transform: uppercase; }
@@ -39,14 +73,14 @@
 .theater-projection { position: absolute; inset: 0; background: hsl(var(--theater-screen)); }
 .theater-projection-enter { animation: theater-picture-in 3s ease-in-out; }
 .theater-projection-fill { position: absolute; inset: -6%; width: 112%; height: 112%; object-fit: cover; filter: blur(24px) brightness(.48) saturate(.65); }
-.theater-projection-art { position: absolute; width: 100%; height: 100%; object-fit: contain; }
+.theater-projection-art { position: absolute; width: 100%; height: 100%; object-fit: contain; filter: brightness(1.12) contrast(.9) saturate(.86); }
 .theater-program { position: relative; width: 100%; text-align: center; padding: 22px 12px 20px; min-height: 70px; }
 .theater-program-line { color: hsl(var(--theater-paper)); font-family: var(--font-vhs); font-size: 19px; }
 .theater-actions { display: flex; flex-direction: column; align-items: center; width: 100%; gap: 12px; }
 /* The reference's fractured glass is actual artwork; CSS only handles motion. */
 .theater-play {
-  position: relative; isolation: isolate; display: block;
-  width: min(100%, 560px); aspect-ratio: 1680 / 367; min-height: 60px;
+  position: relative; isolation: isolate; container-type: inline-size; display: block;
+  width: min(78%, 300px); aspect-ratio: 1680 / 367; min-height: 48px;
   margin: 4px 0 10px; padding: 0; border: 0; border-radius: 18px;
   background: transparent; cursor: pointer;
   transition: transform .16s ease, filter .16s ease;
@@ -67,12 +101,12 @@
 .theater-play-label {
   position: absolute; left: 29%; right: 7%; top: 50%; transform: translateY(-50%);
   color: hsl(var(--theater-paper)); font-family: var(--font-vhs);
-  font-size: clamp(22px, 5vw, 42px); line-height: 1; letter-spacing: .15em;
+  font-size: clamp(17px, 7.5cqw, 24px); line-height: 1; letter-spacing: .15em;
   text-align: center; white-space: nowrap; pointer-events: none;
   text-shadow: 0 0 2px hsl(var(--theater-paper) / .8), 0 0 8px hsl(var(--blood-red-legible)),
     0 2px 2px hsl(var(--background));
 }
-.theater-play--cloud .theater-play-label { font-size: clamp(16px, 3.6vw, 30px); }
+.theater-play--cloud .theater-play-label { font-size: clamp(12px, 5.6cqw, 18px); }
 @media (hover: hover) {
   .theater-play:hover { transform: translateY(-2px); filter: brightness(1.08); }
 }
@@ -124,7 +158,8 @@
   .theater-main { max-width: 100%; padding: 14px 18px 24px; justify-content: center; }
   .theater-billing { font-size: 15px; letter-spacing: .14em; margin-bottom: 16px; gap: 12px; }
   .theater-billing > span { width: 25px; }
-  .theater-screen { aspect-ratio: 1.35; border-width: 3px; }
+  .theater-screen { aspect-ratio: 1.35; border-width: 2px; }
+  .theater-screen-foot { width: 8px; height: 74px; }
   .theater-kicker { font-size: 14px; letter-spacing: .07em; }
   .theater-title-copy { padding: 16px 10px; }
   .theater-title-copy h2 { font-size: clamp(35px, 9.5vw, 54px); margin: 16px 0; }
@@ -135,7 +170,7 @@
   .theater-case-line { justify-content: center; }
   .theater-caption-line { font-size: 16px; letter-spacing: .02em; }
   .theater-transport button { width: 44px; height: 44px; }
-  .theater-play { width: 100%; max-width: 420px; border-radius: 12px; }
+  .theater-play { width: min(80%, 260px); border-radius: 10px; }
   .theater-disclaimer { font-size: clamp(8px, 2.3vw, 10px); }
   .theater-footer { padding-left: 14px; padding-right: 14px; }
   .theater-footer nav { gap: 2px 6px; }
