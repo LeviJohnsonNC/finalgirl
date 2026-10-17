@@ -96,3 +96,37 @@ describe("useLocalStorage", () => {
     expect(result2.current[0]).toBe("value2");
   });
 });
+
+
+describe('durable local storage', () => {
+  it('retains the last saved value when storage is full', () => {
+    localStorage.setItem('history', JSON.stringify(['previous']));
+    const { result } = renderHook(() => useLocalStorage('history', [] as string[]));
+    const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new DOMException('full', 'QuotaExceededError'); });
+    act(() => { expect(result.current[1](['next'])).toBe(false); });
+    expect(result.current[0]).toEqual(['previous']);
+    expect(JSON.parse(localStorage.getItem('history')!)).toEqual(['previous']);
+    spy.mockRestore();
+  });
+
+  it('switches keys without showing or writing the previous account value', () => {
+    localStorage.setItem('A', JSON.stringify(['private']));
+    const { result, rerender } = renderHook(({ key }) => useLocalStorage(key, [] as string[]), { initialProps: { key: 'A' } });
+    rerender({ key: 'B' });
+    expect(result.current[0]).toEqual([]);
+    act(() => { result.current[1](['B only']); });
+    expect(JSON.parse(localStorage.getItem('A')!)).toEqual(['private']);
+    expect(JSON.parse(localStorage.getItem('B')!)).toEqual(['B only']);
+  });
+
+  it('keeps functional updates in one event and other consumers in sync', () => {
+    const first = renderHook(() => useLocalStorage('shared', 0));
+    const second = renderHook(() => useLocalStorage('shared', 0));
+    act(() => {
+      first.result.current[1](value => value + 1);
+      first.result.current[1](value => value + 1);
+    });
+    expect(first.result.current[0]).toBe(2);
+    expect(second.result.current[0]).toBe(2);
+  });
+});

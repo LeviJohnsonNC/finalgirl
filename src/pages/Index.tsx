@@ -25,6 +25,8 @@ import { GameResult } from '@/hooks/useGameHistory';
 import { GameHistoryProvider, useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { NewsTicker } from '@/components/NewsTicker';
 import { useAuth } from '@/hooks/useAuth';
+import { SyncNotice } from '@/components/SyncNotice';
+import { toast } from 'sonner';
 
 // Warm the chunks the user reaches first (dashboard = CastingRoom, plus the
 // Archive) once the browser is idle, so the marquee → dashboard transition
@@ -75,7 +77,7 @@ const IndexContent = () => {
   // closing poster so both images read as frames from the same film.
   const [visualBible, setVisualBible] = useState<string | undefined>(undefined);
   const [endingFormData, setEndingFormData] = useState<EndingFormData | null>(null);
-  const { recordGame, updateGame } = useGameHistoryContext();
+  const { recordGame, updateGame, pendingSaveCount, retryPendingSaves } = useGameHistoryContext();
 
   // Scroll to top when page changes
   useEffect(() => {
@@ -134,6 +136,7 @@ const IndexContent = () => {
     setIntroStory(story);
     setVisualBible(bible);
     
+    try {
     const result = recordGame({
       outcome,
       killer: gameSelection.killer,
@@ -151,6 +154,9 @@ const IndexContent = () => {
     // the results form can offer the Falconwood fields.
     setLastGameResult({ ...result, mission: gameSelection.mission });
     setCurrentPage('outcome');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not save your game. Please try again.');
+    }
   };
 
   const handleUpdateGame = (updates: Partial<GameResult>) => {
@@ -174,6 +180,7 @@ const IndexContent = () => {
   };
 
   const handleSaveEnding = (endingNarration: string, posterImageUrl?: string) => {
+    try {
     if (lastGameResult && endingFormData) {
       updateGame(lastGameResult.id, {
         ...endingFormData,
@@ -188,6 +195,9 @@ const IndexContent = () => {
     setVisualBible(undefined);
     setEndingFormData(null);
     setCurrentPage('stats');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not save the ending. Please try again.');
+    }
   };
 
   const handleDiscardEnding = () => {
@@ -301,6 +311,7 @@ const IndexContent = () => {
       {/* Main Content — one Suspense boundary covers every lazy page */}
       <main className="container mx-auto px-3 sm:px-4 pt-24 sm:pt-32 pb-28 relative z-10">
         <Suspense fallback={<PageLoading />}>
+          <SyncNotice count={pendingSaveCount} onRetry={retryPendingSaves} />
           {renderPage()}
         </Suspense>
       </main>
@@ -395,3 +406,4 @@ const Index = () => (
 );
 
 export default Index;
+

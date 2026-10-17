@@ -5,6 +5,8 @@ import { FEATURE_FILMS } from '@/types/gameData';
 import { useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { useOwnedFilms } from '@/hooks/useOwnedFilms';
 import ImageSettingsPanel from '@/components/ImageSettingsPanel';
+import { SyncNotice } from '@/components/SyncNotice';
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const Archive = () => {
-  const { ownedFilms, setOwnedFilms, loadError, isDegraded, retryLoadOwnedFilms } = useOwnedFilms();
+  const { ownedFilms, setOwnedFilms, loadError, isDegraded, isLoading, retryLoadOwnedFilms, pendingSaveCount, retryPendingSaves } = useOwnedFilms();
   const { clearHistory } = useGameHistoryContext();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -38,9 +40,14 @@ const Archive = () => {
     );
   };
 
-  const handleResetPlays = () => {
-    clearHistory();
-    setIsDialogOpen(false);
+  const handleResetPlays = async () => {
+    try {
+      await clearHistory();
+      setIsDialogOpen(false);
+      toast.success('Your plays have been reset');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not reset your plays.');
+    }
   };
 
   // Seasons that are in development (show "In Development" badge)
@@ -101,6 +108,8 @@ const Archive = () => {
           </button>
         </div>
       )}
+
+      <SyncNotice count={pendingSaveCount} onRetry={retryPendingSaves} />
 
       {/* Reset Plays Button - Right aligned */}
       <div className="flex justify-end px-2">
@@ -172,7 +181,7 @@ const Archive = () => {
                       film={film}
                       isOwned={ownedFilms.includes(film.id)}
                       onToggle={handleToggleFilm}
-                      disabled={!isAvailable}
+                      disabled={!isAvailable || isLoading || Boolean(loadError)}
                     />
                   </div>
                 );
@@ -191,3 +200,4 @@ const Archive = () => {
 };
 
 export default Archive;
+
