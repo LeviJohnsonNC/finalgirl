@@ -1,3 +1,4 @@
+import {playStoryBeats} from '@/lib/play/events';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ImageIcon, Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { streamChatCompletion } from '@/lib/streamChatCompletion';
@@ -171,8 +172,10 @@ const TheEnd = ({
         ...(formData.weaponUsed && { weaponUsed: formData.weaponUsed }),
         ...(formData.finalGirlHealth !== undefined && { finalGirlHealth: formData.finalGirlHealth }),
         ...(formData.killerHealth !== undefined && { killerHealth: formData.killerHealth }),
-        ...(formData.victimsSaved !== undefined && { victimsSaved: formData.victimsSaved }),
-        ...(formData.victimsKilled !== undefined && { victimsKilled: formData.victimsKilled }),
+        ...(formData.victimsSaved != null && { victimsSaved: formData.victimsSaved }),
+        ...(formData.victimsKilled != null && { victimsKilled: formData.victimsKilled }),
+        ...(formData.roundsPlayed != null && {roundsPlayed:formData.roundsPlayed}),
+        ...(result.playEvents?.length && {playSummary:playStoryBeats(result.playEvents)}),
         ...(formData.endingSubLocation && { endingSubLocation: formData.endingSubLocation }),
         ...(formData.gameHighlights && { gameHighlights: formData.gameHighlights }),
       };

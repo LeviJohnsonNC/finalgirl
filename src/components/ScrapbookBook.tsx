@@ -1,3 +1,4 @@
+import {createPortal} from 'react-dom';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Upload, Loader2, ArrowLeft } from 'lucide-react';
 import { GameResult } from '@/hooks/useGameHistory';
@@ -185,7 +186,7 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
   const selectedPosterUrl = selectedGame?.posterImageUrl;
   const selectedSceneUrl = selectedGame?.sceneImageUrl;
 
-  return (
+  return createPortal(
     <div className={`fixed inset-0 z-50 ${isMobile ? 'overflow-y-auto' : 'flex items-center justify-center'}`}>
       {/* Backdrop */}
       <div 
@@ -422,7 +423,7 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleDeleteConfirm}
       />
-    </div>
+    </div>, document.body
   );
 };
 

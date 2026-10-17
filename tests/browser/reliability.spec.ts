@@ -43,7 +43,7 @@ test('resume form edits and retry a failed save without losing the result', asyn
   await page.getByRole('button', { name: 'RETRY SAVE' }).click();
   await expect.poll(() => archive.history.length).toBe(1);
   await expect.poll(() => archive.history[0].weapon_used).toBe('Axe');
-  expect(archive.history[0].victims_saved).toBe(0);
+  expect(archive.history[0].victims_saved).toBeNull();
   await expect(page.getByText(/saved on this device and waiting/)).toHaveCount(0);
   await page.reload();
   await expect(page.getByRole('button', { name: 'RESUME GAME' })).toHaveCount(0);

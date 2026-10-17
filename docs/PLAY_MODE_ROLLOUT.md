@@ -19,3 +19,11 @@ Generated deaths will attach to stable death-event IDs. No retry, replay or gene
 ## Checks
 
 `npm run check`, migration replay/concurrency tests in CI, `npm run check:assets`, production build, desktop/mobile browser tests. All external backend/provider requests are mocked in browser tests. Screenshots and deployment steps accompany the feature PRs.
+
+## Tracker semantics
+
+Start from round 1 for a fresh game. A midgame baseline can omit its round; no earlier rescues/deaths or rounds are invented. Next round marks the start of the next round. The final-round field includes the round in which play ended. Finish opens an editable review, so an accidental extra round tap is easy to correct.
+
+Blank victim counts and rounds are stored as null. A deliberately entered zero remains zero after reload. Victim averages use a separate denominator for each recorded field; round averages exclude historical games without a recorded round. Health/Horror remain the existing suggested outcome defaults unless an observation supplies them; the review asks players to check these values.
+
+The ending receives up to ten active observations within 1,800 characters. Undone events are excluded. The reviewed outcome/totals override earlier observations. The complete immutable log is saved with the result and loaded on demand in the scrapbook, rather than transferred with every history summary.

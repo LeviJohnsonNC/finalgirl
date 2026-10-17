@@ -158,3 +158,113 @@ test('cloud handoff resumes a session on a fresh device without creating another
   expect(archive.sessions).toHaveLength(1);
   expect(archive.history).toHaveLength(0);
 });
+
+test('reviewed tracked totals drive the ending, statistics and saved case notes', async ({
+  page,
+  archive,
+}, info) => {
+  test.setTimeout(90000);
+  const e = (id: string, fields: Record<string, unknown>) => ({
+    id: id.padStart(8, '0') + '-3333-4333-8333-333333333333',
+    at: Number(id),
+    ...fields,
+  });
+  const death = e('3', { kind: 'killed', quantity: 2, cause: 'event' });
+  await archive.install(page, {
+    draft: {
+      ...activeGame,
+      playMode: true,
+      playEvents: [
+        e('1', { kind: 'start', saved: 3, killed: 1, round: 5 }),
+        e('2', { kind: 'state', field: 'finalGirlHealth', value: 1 }),
+        death,
+        e('4', { kind: 'undo', target: death.id }),
+        e('5', { kind: 'moment', text: 'Barricaded the cabins.' }),
+      ],
+    },
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
+  await page.getByRole('button', { name: 'Finish game', exact: true }).click();
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Won', exact: true })
+    .click();
+  await expect(page.getByLabel('Victims Saved', { exact: true })).toHaveValue(
+    '3',
+  );
+  await expect(page.getByLabel('Victims Killed', { exact: true })).toHaveValue(
+    '1',
+  );
+  await expect(page.getByLabel('Final round', { exact: true })).toHaveValue(
+    '5',
+  );
+  await expect(
+    page.getByLabel('Final Girl Health', { exact: true }),
+  ).toHaveValue('1');
+  await page.getByLabel('Victims Saved', { exact: true }).fill('4');
+  await page.screenshot({
+    path: info.outputPath('tracked-outcome.png'),
+    fullPage: true,
+  });
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(
+    page.getByText(archive.endingText, { exact: true }),
+  ).toBeVisible();
+  const request = archive.generationRequests.find(
+    (r) => r.name === 'generate-ending',
+  )!;
+  expect(request.body).toMatchObject({
+    victimsSaved: 4,
+    victimsKilled: 1,
+    roundsPlayed: 5,
+    finalGirlHealth: 1,
+  });
+  expect(request.body.playSummary).toContain('Barricaded the cabins.');
+  expect(request.body.playSummary).not.toContain('2 victims killed');
+  await page.getByRole('button', { name: 'SAVE', exact: true }).first().click();
+  await expect
+    .poll(() => archive.history[0])
+    .toMatchObject({ victims_saved: 4, victims_killed: 1, rounds_played: 5 });
+  expect(archive.history[0].play_events).toHaveLength(5);
+  await expect(
+    page.getByRole('region', { name: 'Recorded play statistics' }),
+  ).toContainText('5.0');
+  await page.getByRole('region',{name:'Recorded play statistics'}).screenshot({path:info.outputPath('tracked-statistics.png')});
+  await page.locator('.session-row-link').first().click();
+  await page.getByText('OPEN THE CASE NOTES', { exact: true }).click();
+  await expect(
+    page
+      .getByRole('region', { name: 'Game timeline' })
+      .getByRole('paragraph')
+      .filter({ hasText: 'Barricaded the cabins.' }),
+  ).toBeVisible();
+});
+
+test('unrecorded totals remain blank after reload while an explicit zero is saved', async ({
+  page,
+  archive,
+}) => {
+  await archive.install(page, { draft: activeGame });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
+  await page.getByRole('button', { name: 'WON', exact: true }).first().click();
+  await expect(page.getByLabel('Victims Killed', { exact: true })).toHaveValue(
+    '',
+  );
+  await page.getByLabel('Victims Saved', { exact: true }).fill('0');
+  await page.getByLabel('Final round', { exact: true }).fill('3');
+  await page.getByLabel('Final round', { exact: true }).fill('');
+  await page.reload();
+  await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
+  await expect(page.getByLabel('Victims Saved', { exact: true })).toHaveValue(
+    '0',
+  );
+  await expect(page.getByLabel('Final round', { exact: true })).toHaveValue('');
+  await page
+    .getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION', exact: true })
+    .click();
+  await expect.poll(() => archive.history[0]?.victims_saved).toBe(0);
+  await expect.poll(() => archive.history[0]?.victims_killed).toBeNull();
+  await expect.poll(() => archive.history[0]?.rounds_played).toBeNull();
+});

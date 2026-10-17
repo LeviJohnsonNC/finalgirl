@@ -24,15 +24,59 @@ export const SessionDetail = ({ stats, onOpenSession }: SessionDetailProps) => {
   const peakHorror = Math.max(...horrorBins.map((b) => b.games), 1);
   const mostUsed = weapons[0]?.uses ?? 1;
 
-  if (horrorRecorded === 0 && weapons.length === 0 && recentSessions.length === 0) return null;
+  if (
+    horrorRecorded === 0 &&
+    weapons.length === 0 &&
+    recentSessions.length === 0
+  )
+    return null;
 
   return (
     <div className="session-detail">
       <h3 className="section-title">// THE TAPE LOG</h3>
 
       <div className="session-detail-grid">
+        {stats.playStats && (
+          <section
+            className="session-card"
+            aria-label="Recorded play statistics"
+          >
+            <header className="session-card-head">
+              <h4 className="session-card-title">How long the night lasted</h4>
+              <p className="session-card-sub">
+                {stats.playStats.roundsRecorded} of {stats.gamesPlayed} sessions
+                recorded rounds
+              </p>
+            </header>
+            <p className="font-vhs text-4xl text-secondary">
+              {stats.playStats.averageRounds?.toFixed(1) ?? '—'}{' '}
+              <span className="type-caption text-muted-foreground">
+                rounds on average
+              </span>
+            </p>
+            <dl className="type-body-sm text-muted-foreground mt-3 space-y-2">
+              <div className="flex justify-between">
+                <dt>Wins</dt>
+                <dd>{stats.playStats.wonAverageRounds?.toFixed(1) ?? '—'}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt>Losses</dt>
+                <dd>{stats.playStats.lostAverageRounds?.toFixed(1) ?? '—'}</dd>
+              </div>
+            </dl>
+            <p className="type-caption text-muted-foreground mt-4">
+              Victim totals recorded: {stats.playStats.savedRecorded} saved /{' '}
+              {stats.playStats.killedRecorded} killed sessions. Missing values
+              are excluded from averages.
+            </p>
+          </section>
+        )}
+
         {horrorRecorded > 0 && (
-          <section className="session-card" aria-label="Horror level at the end of each game">
+          <section
+            className="session-card"
+            aria-label="Horror level at the end of each game"
+          >
             <header className="session-card-head">
               <h4 className="session-card-title">Horror at the end</h4>
               <p className="session-card-sub">
@@ -53,7 +97,8 @@ export const SessionDetail = ({ stats, onOpenSession }: SessionDetailProps) => {
                   </span>
                   <span className="horror-level">{bin.level}</span>
                   <span className="sr-only">
-                    {bin.games} {bin.games === 1 ? 'game' : 'games'} ended at horror level {bin.level}
+                    {bin.games} {bin.games === 1 ? 'game' : 'games'} ended at
+                    horror level {bin.level}
                   </span>
                 </li>
               ))}
@@ -76,7 +121,10 @@ export const SessionDetail = ({ stats, onOpenSession }: SessionDetailProps) => {
                 <div key={weapon.name} className="weapon-row">
                   <dt className="weapon-name">{weapon.name}</dt>
                   <dd className="weapon-meter">
-                    <span className="weapon-bar" style={{ width: `${(weapon.uses / mostUsed) * 100}%` }} />
+                    <span
+                      className="weapon-bar"
+                      style={{ width: `${(weapon.uses / mostUsed) * 100}%` }}
+                    />
                   </dd>
                   <dd className="weapon-count">
                     <span aria-hidden="true">{weapon.uses}</span>
@@ -92,7 +140,10 @@ export const SessionDetail = ({ stats, onOpenSession }: SessionDetailProps) => {
         )}
 
         {recentSessions.length > 0 && (
-          <section className="session-card session-card-wide" aria-label="Recent sessions">
+          <section
+            className="session-card session-card-wide"
+            aria-label="Recent sessions"
+          >
             <header className="session-card-head">
               <h4 className="session-card-title">Recent sessions</h4>
               <p className="session-card-sub">Newest first</p>
@@ -103,7 +154,9 @@ export const SessionDetail = ({ stats, onOpenSession }: SessionDetailProps) => {
                   <>
                     <span
                       className={`session-outcome ${
-                        session.outcome === 'won' ? 'session-outcome-won' : 'session-outcome-lost'
+                        session.outcome === 'won'
+                          ? 'session-outcome-won'
+                          : 'session-outcome-lost'
                       }`}
                     >
                       {session.outcome === 'won' ? 'Won' : 'Lost'}
@@ -115,8 +168,14 @@ export const SessionDetail = ({ stats, onOpenSession }: SessionDetailProps) => {
                     </span>
                     <span className="session-place">{session.location}</span>
                     <span className="session-meta">
-                      {session.horror !== null && <span className="session-horror">H{session.horror}</span>}
-                      <span className="session-date">{formatDate(session.timestamp)}</span>
+                      {session.horror !== null && (
+                        <span className="session-horror">
+                          H{session.horror}
+                        </span>
+                      )}
+                      <span className="session-date">
+                        {formatDate(session.timestamp)}
+                      </span>
                     </span>
                   </>
                 );
@@ -132,7 +191,9 @@ export const SessionDetail = ({ stats, onOpenSession }: SessionDetailProps) => {
                       >
                         {body}
                         <span className="sr-only">
-                          — open this session in the {session.outcome === 'won' ? 'Final Girl' : 'killer'} scrapbook
+                          — open this session in the{' '}
+                          {session.outcome === 'won' ? 'Final Girl' : 'killer'}{' '}
+                          scrapbook
                         </span>
                       </button>
                     ) : (
