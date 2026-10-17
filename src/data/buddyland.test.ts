@@ -35,7 +35,9 @@ describe('Bad Times at Buddyland', () => {
     expect(new Set(['Billy the Bear', 'Rena', 'Gwynn'].map(n => CHARACTER_IMAGES[n])).size).toBe(3);
     expect(LOCATION_IMAGES.Buddyland).toMatch(/buddyland\.png/);
     expect(LOCATION_IMAGES_AI.Buddyland).toBe(LOCATION_IMAGES.Buddyland);
-    expect(FEATURE_FILMS.find(f => f.id === 's4-buddyland')?.boxArt).toMatch(/bad-times-at-buddyland\.png/);
+    const film = FEATURE_FILMS.find(f => f.id === 's4-buddyland')!;
+    expect(film.boxArt).toMatch(/bad-times-at-buddyland\.png/);
+    expect(film.boxArtAi).toMatch(/bad-times-at-buddyland\.png/);
   });
 
   it('keeps killer mechanics and location context independent in mixed games', () => {

@@ -83,7 +83,7 @@ const Archive = () => {
 
       {/* Header */}
       <div className="text-center space-y-1 sm:space-y-2">
-        <h1 className="font-display text-3xl sm:text-4xl md:text-5xl text-primary blood-glow tracking-wider">
+        <h1 className="collection-title font-display text-3xl sm:text-4xl md:text-5xl tracking-wider">
           MY COLLECTION
         </h1>
         <p className="type-label text-muted-foreground px-2">
