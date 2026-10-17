@@ -56,7 +56,9 @@ export type Database = {
           killer_health: number | null
           location: string
           outcome: string
+          play_events: Json | null
           poster_image_url: string | null
+          rounds_played: number | null
           scene_image_url: string | null
           setup_scenario: string | null
           starting_event: string | null
@@ -81,7 +83,9 @@ export type Database = {
           killer_health?: number | null
           location: string
           outcome: string
+          play_events?: Json | null
           poster_image_url?: string | null
+          rounds_played?: number | null
           scene_image_url?: string | null
           setup_scenario?: string | null
           starting_event?: string | null
@@ -106,7 +110,9 @@ export type Database = {
           killer_health?: number | null
           location?: string
           outcome?: string
+          play_events?: Json | null
           poster_image_url?: string | null
+          rounds_played?: number | null
           scene_image_url?: string | null
           setup_scenario?: string | null
           starting_event?: string | null
@@ -116,6 +122,33 @@ export type Database = {
           victims_saved?: number | null
           visual_bible?: string | null
           weapon_used?: string | null
+        }
+        Relationships: []
+      }
+      play_sessions: {
+        Row: {
+          closed: boolean
+          id: string
+          revision: number
+          state: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          closed?: boolean
+          id: string
+          revision?: number
+          state: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          closed?: boolean
+          id?: string
+          revision?: number
+          state?: Json
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -197,31 +230,7 @@ export type Database = {
         Args: { p_add: string[]; p_remove: string[] }
         Returns: Json
       }
-      get_game_history_summary: {
-        Args: never
-        Returns: {
-          ending_sub_location: string
-          final_girl: string
-          final_girl_health: number
-          final_horror_level: number
-          has_legacy_poster: boolean
-          has_legacy_scene: boolean
-          id: string
-          killer: string
-          killer_health: number
-          location: string
-          outcome: string
-          poster_image_url: string
-          scene_image_url: string
-          setup_scenario: string
-          starting_event: string
-          timestamp: number
-          user_id: string
-          victims_killed: number
-          victims_saved: number
-          weapon_used: string
-        }[]
-      }
+      get_game_history_summary: { Args: never; Returns: Json[] }
       reserve_ai_usage: {
         Args: {
           p_daily_limit?: number
@@ -234,6 +243,15 @@ export type Database = {
           event_id: number
           reason: string
         }[]
+      }
+      save_play_session: {
+        Args: {
+          p_closed?: boolean
+          p_id: string
+          p_revision: number
+          p_state: Json
+        }
+        Returns: Json
       }
     }
     Enums: {
