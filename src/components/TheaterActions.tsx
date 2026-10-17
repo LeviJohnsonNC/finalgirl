@@ -12,8 +12,8 @@ interface TheaterActionsProps {
 export const TheaterActions = ({ game, cloud, onStart, onStartAnother }: TheaterActionsProps) => (
   <div className="theater-actions">
     <button className="theater-play" onClick={onStart}>
-      <span className="theater-play-icon"><Play size={16} fill="currentColor" aria-hidden="true" /></span>
-      <span>{game ? cloud ? 'RESUME CLOUD GAME' : 'RESUME GAME' : 'START THE TAPE'}</span>
+      <span className="theater-play-icon"><Play size={22} fill="currentColor" aria-hidden="true" /></span>
+      <span className="theater-play-label">{game ? cloud ? 'RESUME CLOUD GAME' : 'RESUME GAME' : 'START THE TAPE'}</span>
     </button>
     {game ? <>
       <p className="theater-action-hint">{game.selection.finalGirl} vs. {game.selection.killer}</p>
@@ -35,3 +35,4 @@ export const TheaterActions = ({ game, cloud, onStart, onStartAnother }: Theater
     </> : null}
   </div>
 );
+
