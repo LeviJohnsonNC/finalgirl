@@ -1,3 +1,4 @@
+import {validPlayLog, type PlayEvent} from '@/lib/play/events';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { useLocalStorage } from './useLocalStorage';
@@ -88,8 +89,10 @@ export interface GameResult {
   killerHealth?: number;
   weaponUsed?: string;
   endingSubLocation?: string;
-  victimsSaved?: number;
-  victimsKilled?: number;
+  victimsSaved?: number | null;
+  victimsKilled?: number | null;
+  roundsPlayed?: number | null;
+  playEvents?: PlayEvent[];
   posterImageUrl?: string;
   sceneImageUrl?: string;
   /** The look description shared by this game's opening still and poster. */
@@ -132,6 +135,8 @@ const toDbRow = (result: GameResult, userId: string) => ({
   poster_image_url: sanitizeStoredImageUrl(result.posterImageUrl) ?? null,
   scene_image_url: sanitizeStoredImageUrl(result.sceneImageUrl) ?? null,
   visual_bible: result.visualBible ?? null,
+  rounds_played: result.roundsPlayed ?? null,
+  play_events: result.playEvents ?? null,
 });
 
 // Convert snake_case from database to camelCase
@@ -157,6 +162,8 @@ const fromDbRow = (row: Record<string, unknown>): GameResult => ({
   posterImageUrl: sanitizeStoredImageUrl(row.poster_image_url),
   sceneImageUrl: sanitizeStoredImageUrl(row.scene_image_url),
   visualBible: (row.visual_bible as string) || undefined,
+  roundsPlayed: (row.rounds_played as number | null) ?? undefined,
+  playEvents: validPlayLog(row.play_events) ? row.play_events : undefined,
   hasLegacyPoster: row.has_legacy_poster === true,
   hasLegacyScene: row.has_legacy_scene === true,
 });
@@ -170,7 +177,7 @@ const updateColumns: Partial<Record<keyof GameResult, string>> = {
   finalHorrorLevel: 'final_horror_level', finalGirlHealth: 'final_girl_health', killerHealth: 'killer_health',
   weaponUsed: 'weapon_used', endingSubLocation: 'ending_sub_location', victimsSaved: 'victims_saved',
   victimsKilled: 'victims_killed', posterImageUrl: 'poster_image_url', sceneImageUrl: 'scene_image_url',
-  visualBible: 'visual_bible',
+  visualBible: 'visual_bible', roundsPlayed: 'rounds_played', playEvents: 'play_events',
 };
 
 function applyWrite(games: GameResult[], write: GameWrite): GameResult[] {
@@ -249,6 +256,7 @@ export const useGameHistory = () => {
         return { ...existing, ...summary,
           introStory: existing?.introStory, endingNarration: existing?.endingNarration,
           gameHighlights: existing?.gameHighlights, visualBible: existing?.visualBible,
+          playEvents: existing?.playEvents,
         };
       });
       replaceBase(games);

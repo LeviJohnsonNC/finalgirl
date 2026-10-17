@@ -8,7 +8,8 @@ export interface GameSelection {
 }
 export interface EndingFormData {
   finalHorrorLevel: number; finalGirlHealth: number; killerHealth: number;
-  weaponUsed: string; victimsSaved: number; victimsKilled: number;
+  weaponUsed: string; victimsSaved: number | null; victimsKilled: number | null;
+  roundsPlayed?: number | null;
   endingSubLocation: string; gameHighlights: string;
 }
 export interface ActiveGame {

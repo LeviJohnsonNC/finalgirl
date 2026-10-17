@@ -226,3 +226,10 @@ Deno.test('EndingRequestSchema - rejects fractional health and victim counts', (
   const request = { introStory: 'A long enough opening story for the ending generator to maintain continuity.', outcome: 'won', killer: { name: 'Hans' }, location: { name: 'Camp Happy Trails' }, finalGirl: { name: 'Laurie' }, victimsSaved: 1.5 };
   assertEquals(validateRequest(EndingRequestSchema, request).success, false);
 });
+
+Deno.test('EndingRequestSchema - bounds recorded rounds and timeline context',()=>{
+ const base={introStory:'A long enough opening story for the ending generator to maintain continuity.',outcome:'won',killer:{name:'Hans'},location:{name:'Camp Happy Trails'},finalGirl:{name:'Laurie'}};
+ assertEquals(validateRequest(EndingRequestSchema,{...base,roundsPlayed:5,playSummary:'Round 2: Saved 1 victim',victimsSaved:0}).success,true);
+ for(const roundsPlayed of [0,1.5,1000])assertEquals(validateRequest(EndingRequestSchema,{...base,roundsPlayed}).success,false);
+ assertEquals(validateRequest(EndingRequestSchema,{...base,playSummary:'x'.repeat(1801)}).success,false);
+});

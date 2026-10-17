@@ -1,3 +1,4 @@
+import {playStatistics} from '@/lib/play/statistics';
 import { useMemo } from 'react';
 import { GameResult } from './useGameHistory';
 import { computeArchetype } from './useArchetypeScoring';
@@ -43,6 +44,7 @@ export type PlayerArchetype = 'protector' | 'duelist' | 'survivor' | 'gambler' |
 
 export interface ComputedStats {
   // Record Jacket
+  playStats: ReturnType<typeof playStatistics>;
   gamesPlayed: number;
   winRate: number;
   totalVictimsSaved: number;
@@ -125,18 +127,19 @@ export const useGameStats = (gameHistory: GameResult[]): ComputedStats => {
 
     const byKiller: KillerStats[] = Array.from(killerMap.entries()).map(([name, games]) => {
       const kWins = games.filter(g => g.outcome === 'won');
-      const gamesWithVictims = games.filter(g => g.victimsSaved != null || g.victimsKilled != null);
+      const savedGames = games.filter(g => g.victimsSaved != null);
+      const killedGames = games.filter(g => g.victimsKilled != null);
       
       return {
         name,
         plays: games.length,
         wins: kWins.length,
         winRate: (kWins.length / games.length) * 100,
-        avgVictimsSaved: gamesWithVictims.length > 0
-          ? gamesWithVictims.reduce((sum, g) => sum + (g.victimsSaved || 0), 0) / gamesWithVictims.length
+        avgVictimsSaved: savedGames.length > 0
+          ? savedGames.reduce((sum, g) => sum + g.victimsSaved!, 0) / savedGames.length
           : null,
-        avgVictimsKilled: gamesWithVictims.length > 0
-          ? gamesWithVictims.reduce((sum, g) => sum + (g.victimsKilled || 0), 0) / gamesWithVictims.length
+        avgVictimsKilled: killedGames.length > 0
+          ? killedGames.reduce((sum, g) => sum + g.victimsKilled!, 0) / killedGames.length
           : null,
       };
     }).sort((a, b) => b.plays - a.plays);
@@ -257,6 +260,7 @@ export const useGameStats = (gameHistory: GameResult[]): ComputedStats => {
     } = computeArchetype(filteredGames, narrativeCtx);
 
     return {
+      playStats:playStatistics(filteredGames),
       gamesPlayed,
       winRate,
       totalVictimsSaved,

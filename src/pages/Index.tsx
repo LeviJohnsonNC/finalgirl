@@ -1,3 +1,4 @@
+import {trackedOutcome} from '@/lib/play/outcome';
 import { usePlaySessionSync } from '@/hooks/play/usePlaySessionSync';
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -124,7 +125,7 @@ const IndexContent = () => {
   const handleGameEnd = (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, bible?: string) => {
     if (!activeGame) return;
     try {
-      const result = activeGame.result ?? recordGame({ outcome, ...activeGame.selection,
+      const result = activeGame.result ?? recordGame({ outcome, ...activeGame.selection, ...trackedOutcome(activeGame.playEvents),
         introStory: story, sceneImageUrl, visualBible: bible }, activeGame.id);
       recordedIds.current.add(activeGame.id);
       if (checkpoint(activeGame.id, { phase: 'outcome', result, introStory: story, sceneImageUrl, visualBible: bible })) {

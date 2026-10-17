@@ -1,3 +1,4 @@
+import { PlayTimeline } from '@/components/play/PlayTimeline';
 import { GameResult } from '@/hooks/useGameHistory';
 import { format } from 'date-fns';
 import { getFinalGirlMaxHealth } from '@/data/finalGirlHealth';
@@ -9,7 +10,11 @@ interface ScrapbookStoryPageProps {
   onDelete?: () => void;
 }
 
-export const ScrapbookStoryPage = ({ game, type, onDelete }: ScrapbookStoryPageProps) => {
+export const ScrapbookStoryPage = ({
+  game,
+  type,
+  onDelete,
+}: ScrapbookStoryPageProps) => {
   const maxFinalGirlHealth = getFinalGirlMaxHealth(game.finalGirl);
   const isWin = game.outcome === 'won';
 
@@ -31,7 +36,6 @@ export const ScrapbookStoryPage = ({ game, type, onDelete }: ScrapbookStoryPageP
         </h4>
         {game.introStory ? (
           <div className="story-text story-intro">
-
             {renderStoryText(game.introStory)}
           </div>
         ) : (
@@ -54,10 +58,9 @@ export const ScrapbookStoryPage = ({ game, type, onDelete }: ScrapbookStoryPageP
           </div>
         ) : (
           <p className="story-text story-missing">
-            {type === 'finalGirl' 
-              ? "How she survived remains unwritten..."
-              : "The final moments fade to black..."
-            }
+            {type === 'finalGirl'
+              ? 'How she survived remains unwritten...'
+              : 'The final moments fade to black...'}
           </p>
         )}
       </div>
@@ -97,10 +100,17 @@ export const ScrapbookStoryPage = ({ game, type, onDelete }: ScrapbookStoryPageP
         game.finalGirlHealth !== undefined ||
         game.killerHealth !== undefined ||
         game.weaponUsed ||
-        game.victimsSaved !== undefined ||
-        game.victimsKilled !== undefined ||
+        game.victimsSaved != null ||
+        game.victimsKilled != null ||
         game.endingSubLocation) && (
-        <div className="story-footer" style={{ marginTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.5rem' }}>
+        <div
+          className="story-footer"
+          style={{
+            marginTop: '0.5rem',
+            borderTop: '1px solid rgba(255,255,255,0.1)',
+            paddingTop: '0.5rem',
+          }}
+        >
           {game.finalHorrorLevel !== undefined && (
             <div className="footer-detail">
               <span className="detail-label">Horror:</span>
@@ -110,7 +120,9 @@ export const ScrapbookStoryPage = ({ game, type, onDelete }: ScrapbookStoryPageP
           {game.finalGirlHealth !== undefined && (
             <div className="footer-detail">
               <span className="detail-label">HP:</span>
-              <span className="detail-value">{game.finalGirlHealth}/{maxFinalGirlHealth}</span>
+              <span className="detail-value">
+                {game.finalGirlHealth}/{maxFinalGirlHealth}
+              </span>
             </div>
           )}
           {game.killerHealth !== undefined && game.killerHealth > 0 && (
@@ -125,11 +137,12 @@ export const ScrapbookStoryPage = ({ game, type, onDelete }: ScrapbookStoryPageP
               <span className="detail-value">{game.weaponUsed}</span>
             </div>
           )}
-          {(game.victimsSaved !== undefined || game.victimsKilled !== undefined) && (
+          {(game.victimsSaved != null || game.victimsKilled != null) && (
             <div className="footer-detail">
               <span className="detail-label">Victims:</span>
               <span className="detail-value">
-                {game.victimsSaved ?? 0} saved / {game.victimsKilled ?? 0} lost
+                {game.victimsSaved ?? '—'} saved / {game.victimsKilled ?? '—'}{' '}
+                lost
               </span>
             </div>
           )}
@@ -142,6 +155,21 @@ export const ScrapbookStoryPage = ({ game, type, onDelete }: ScrapbookStoryPageP
         </div>
       )}
 
+      {game.roundsPlayed != null && (
+        <p className="type-caption text-muted-foreground mt-3">
+          FINAL ROUND // {game.roundsPlayed}
+        </p>
+      )}
+      {game.playEvents?.length ? (
+        <details className="mt-4 border-t border-border pt-3">
+          <summary className="font-vhs text-secondary cursor-pointer min-h-[44px]">
+            OPEN THE CASE NOTES
+          </summary>
+          <div className="bg-background p-4">
+            <PlayTimeline events={game.playEvents} />
+          </div>
+        </details>
+      ) : null}
       {/* Delete button — tucked at the very bottom */}
       {onDelete && (
         <div className="mt-4 flex justify-start">

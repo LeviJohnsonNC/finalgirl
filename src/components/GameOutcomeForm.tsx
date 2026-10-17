@@ -15,8 +15,17 @@ interface GameOutcomeFormProps {
   onDiscard: () => void;
 }
 
-function useDraftField<T>(name: string, fallback: T, draft?: Record<string, unknown>, onChange?: (fields: Record<string, unknown>) => boolean) {
-  const [value, setValue] = useState<T>(() => (draft?.[name] as T | undefined) ?? fallback);
+function useDraftField<T>(
+  name: string,
+  fallback: T,
+  draft?: Record<string, unknown>,
+  onChange?: (fields: Record<string, unknown>) => boolean,
+) {
+  const [value, setValue] = useState<T>(() =>
+    draft && Object.prototype.hasOwnProperty.call(draft, name)
+      ? (draft[name] as T)
+      : fallback,
+  );
   const set = (next: T) => {
     if (onChange?.({ [name]: next }) !== false) setValue(next);
   };
@@ -24,18 +33,30 @@ function useDraftField<T>(name: string, fallback: T, draft?: Record<string, unkn
 }
 
 export const GameOutcomeForm = ({
-  result, initialDraft, onDraftChange, onSaveResult,
+  result,
+  initialDraft,
+  onDraftChange,
+  onSaveResult,
   introStory,
   onContinue,
   onDiscard,
 }: GameOutcomeFormProps) => {
   const isWin = result.outcome === 'won';
-  
+
   // Get the Final Girl's max health based on character data
-  const maxFinalGirlHealth = useMemo(() => getFinalGirlMaxHealth(result.finalGirl), [result.finalGirl]);
+  const maxFinalGirlHealth = useMemo(
+    () => getFinalGirlMaxHealth(result.finalGirl),
+    [result.finalGirl],
+  );
   // Get killer-specific HP and flags
-  const maxKillerHealth = useMemo(() => getKillerMaxHealth(result.killer), [result.killer]);
-  const killerIsUnkillable = useMemo(() => isKillerUnkillable(result.killer), [result.killer]);
+  const maxKillerHealth = useMemo(
+    () => getKillerMaxHealth(result.killer),
+    [result.killer],
+  );
+  const killerIsUnkillable = useMemo(
+    () => isKillerUnkillable(result.killer),
+    [result.killer],
+  );
   const isPoltergeist = result.killer === 'Poltergeist';
   const isOrganism = result.killer === 'The Organism';
   const isEvomorph = result.killer === 'Evomorph';
@@ -44,52 +65,188 @@ export const GameOutcomeForm = ({
   const isIntruders = result.killer === 'The Intruders';
   const isBilly = result.killer === 'Billy the Bear';
   const isGrimlash = result.killer === 'Grimlash';
-  const isBerith = result.killer === 'Berith' || result.location === "L'Armes Abbey";
-  const isShriek = result.killer === 'Mort the Teenage Dirtbag' || result.location === 'MegaBGCon';
+  const isBerith =
+    result.killer === 'Berith' || result.location === "L'Armes Abbey";
+  const isShriek =
+    result.killer === 'Mort the Teenage Dirtbag' ||
+    result.location === 'MegaBGCon';
   const isFalconwood = result.location === 'Falconwood';
   const isSlayer = result.killer === 'Slayer';
-  
+
   // Local form state - use character-specific max health for defaults
-  const [finalHorrorLevel, setFinalHorrorLevel] = useDraftField('finalHorrorLevel', result.finalHorrorLevel ?? 4, initialDraft, onDraftChange);
-  const [finalGirlHealth, setFinalGirlHealth] = useDraftField('finalGirlHealth', result.finalGirlHealth ?? (isWin ? maxFinalGirlHealth : 0), initialDraft, onDraftChange);
-  const [killerHealth, setKillerHealth] = useDraftField('killerHealth', result.killerHealth ?? (isWin ? 0 : Math.ceil(maxKillerHealth / 2)), initialDraft, onDraftChange);
-  const [weaponUsed, setWeaponUsed] = useDraftField('weaponUsed', result.weaponUsed ?? '', initialDraft, onDraftChange);
-  const [victimsSaved, setVictimsSaved] = useDraftField('victimsSaved', result.victimsSaved ?? 0, initialDraft, onDraftChange);
-  const [victimsKilled, setVictimsKilled] = useDraftField('victimsKilled', result.victimsKilled ?? 0, initialDraft, onDraftChange);
-  const [endingSubLocation, setEndingSubLocation] = useDraftField('endingSubLocation', result.endingSubLocation ?? '', initialDraft, onDraftChange);
-  const [gameHighlights, setGameHighlights] = useDraftField('gameHighlights', result.gameHighlights ?? '', initialDraft, onDraftChange);
+  const [finalHorrorLevel, setFinalHorrorLevel] = useDraftField(
+    'finalHorrorLevel',
+    result.finalHorrorLevel ?? 4,
+    initialDraft,
+    onDraftChange,
+  );
+  const [finalGirlHealth, setFinalGirlHealth] = useDraftField(
+    'finalGirlHealth',
+    result.finalGirlHealth ?? (isWin ? maxFinalGirlHealth : 0),
+    initialDraft,
+    onDraftChange,
+  );
+  const [killerHealth, setKillerHealth] = useDraftField(
+    'killerHealth',
+    result.killerHealth ?? (isWin ? 0 : Math.ceil(maxKillerHealth / 2)),
+    initialDraft,
+    onDraftChange,
+  );
+  const [weaponUsed, setWeaponUsed] = useDraftField(
+    'weaponUsed',
+    result.weaponUsed ?? '',
+    initialDraft,
+    onDraftChange,
+  );
+  const [victimsSaved, setVictimsSaved] = useDraftField<number | null>(
+    'victimsSaved',
+    result.victimsSaved ?? null,
+    initialDraft,
+    onDraftChange,
+  );
+  const [victimsKilled, setVictimsKilled] = useDraftField<number | null>(
+    'victimsKilled',
+    result.victimsKilled ?? null,
+    initialDraft,
+    onDraftChange,
+  );
+  const [roundsPlayed, setRoundsPlayed] = useDraftField<number | null>(
+    'roundsPlayed',
+    result.roundsPlayed ?? null,
+    initialDraft,
+    onDraftChange,
+  );
+  const [endingSubLocation, setEndingSubLocation] = useDraftField(
+    'endingSubLocation',
+    result.endingSubLocation ?? '',
+    initialDraft,
+    onDraftChange,
+  );
+  const [gameHighlights, setGameHighlights] = useDraftField(
+    'gameHighlights',
+    result.gameHighlights ?? '',
+    initialDraft,
+    onDraftChange,
+  );
   // Poltergeist-specific win condition fields
-  const [foundCarolyn, setFoundCarolyn] = useDraftField('foundCarolyn', false, initialDraft, onDraftChange);
-  const [foundMrFloppy, setFoundMrFloppy] = useDraftField('foundMrFloppy', false, initialDraft, onDraftChange);
+  const [foundCarolyn, setFoundCarolyn] = useDraftField(
+    'foundCarolyn',
+    false,
+    initialDraft,
+    onDraftChange,
+  );
+  const [foundMrFloppy, setFoundMrFloppy] = useDraftField(
+    'foundMrFloppy',
+    false,
+    initialDraft,
+    onDraftChange,
+  );
   // Organism-specific loss type
-  const [organismLossType, setOrganismLossType] = useDraftField<'caught' | 'assimilated'>('organismLossType', 'caught', initialDraft, onDraftChange);
+  const [organismLossType, setOrganismLossType] = useDraftField<
+    'caught' | 'assimilated'
+  >('organismLossType', 'caught', initialDraft, onDraftChange);
   // Evomorph evolution stage
-  const [evomorphStage, setEvomorphStage] = useDraftField<'Hatchling' | 'Youngling' | 'Adult'>('evomorphStage', 'Hatchling', initialDraft, onDraftChange);
+  const [evomorphStage, setEvomorphStage] = useDraftField<
+    'Hatchling' | 'Youngling' | 'Adult'
+  >('evomorphStage', 'Hatchling', initialDraft, onDraftChange);
   // Ratchet Lady maniac count
-  const [maniacCount, setManiacCount] = useDraftField('maniacCount', 0, initialDraft, onDraftChange);
+  const [maniacCount, setManiacCount] = useDraftField(
+    'maniacCount',
+    0,
+    initialDraft,
+    onDraftChange,
+  );
   // Big Bad Wolf mode
-  const [wolfMode, setWolfMode] = useDraftField<'TRACK' | 'SLAY' | 'Killing Machine'>('wolfMode', 'SLAY', initialDraft, onDraftChange);
+  const [wolfMode, setWolfMode] = useDraftField<
+    'TRACK' | 'SLAY' | 'Killing Machine'
+  >('wolfMode', 'SLAY', initialDraft, onDraftChange);
   // The Intruders - active killer at game end
-  const [activeIntruder, setActiveIntruder] = useDraftField<'Trish' | 'Baghead' | 'Zeke'>('activeIntruder', 'Trish', initialDraft, onDraftChange);
+  const [activeIntruder, setActiveIntruder] = useDraftField<
+    'Trish' | 'Baghead' | 'Zeke'
+  >('activeIntruder', 'Trish', initialDraft, onDraftChange);
   // Buddyland - Buddies + power supplies
-  const [buddiesInPlay, setBuddiesInPlay] = useDraftField<number | null>('buddiesInPlay', null, initialDraft, onDraftChange);
-  const [powerSuppliesShutDown, setPowerSuppliesShutDown] = useDraftField('powerSuppliesShutDown', false, initialDraft, onDraftChange);
-  const [billyFinale, setBillyFinale] = useDraftField('billyFinale', '', initialDraft, onDraftChange);
-  const [borisStatus, setBorisStatus] = useDraftField('borisStatus', '', initialDraft, onDraftChange);
+  const [buddiesInPlay, setBuddiesInPlay] = useDraftField<number | null>(
+    'buddiesInPlay',
+    null,
+    initialDraft,
+    onDraftChange,
+  );
+  const [powerSuppliesShutDown, setPowerSuppliesShutDown] = useDraftField(
+    'powerSuppliesShutDown',
+    false,
+    initialDraft,
+    onDraftChange,
+  );
+  const [billyFinale, setBillyFinale] = useDraftField(
+    'billyFinale',
+    '',
+    initialDraft,
+    onDraftChange,
+  );
+  const [borisStatus, setBorisStatus] = useDraftField(
+    'borisStatus',
+    '',
+    initialDraft,
+    onDraftChange,
+  );
   // Grimlash / A Rotten Harvest
-  const [childrenSurvived, setChildrenSurvived] = useDraftField('childrenSurvived', 0, initialDraft, onDraftChange);
-  const [harvestMadnessPeaked, setHarvestMadnessPeaked] = useDraftField('harvestMadnessPeaked', false, initialDraft, onDraftChange);
+  const [childrenSurvived, setChildrenSurvived] = useDraftField(
+    'childrenSurvived',
+    0,
+    initialDraft,
+    onDraftChange,
+  );
+  const [harvestMadnessPeaked, setHarvestMadnessPeaked] = useDraftField(
+    'harvestMadnessPeaked',
+    false,
+    initialDraft,
+    onDraftChange,
+  );
   // Berith / A Demon in the Shadows
-  const [ursulaSaved, setUrsulaSaved] = useDraftField('ursulaSaved', false, initialDraft, onDraftChange);
-  const [abbeyInfluence, setAbbeyInfluence] = useDraftField<'Blessings Dominated' | 'Curses Dominated' | 'Balanced'>('abbeyInfluence', 'Balanced', initialDraft, onDraftChange);
+  const [ursulaSaved, setUrsulaSaved] = useDraftField(
+    'ursulaSaved',
+    false,
+    initialDraft,
+    onDraftChange,
+  );
+  const [abbeyInfluence, setAbbeyInfluence] = useDraftField<
+    'Blessings Dominated' | 'Curses Dominated' | 'Balanced'
+  >('abbeyInfluence', 'Balanced', initialDraft, onDraftChange);
   // Shriek / MegaBGCon
-  const [mortRevealed, setMortRevealed] = useDraftField('mortRevealed', false, initialDraft, onDraftChange);
-  const [finalKillerIdentity, setFinalKillerIdentity] = useDraftField('finalKillerIdentity', 'Unknown', initialDraft, onDraftChange);
+  const [mortRevealed, setMortRevealed] = useDraftField(
+    'mortRevealed',
+    false,
+    initialDraft,
+    onDraftChange,
+  );
+  const [finalKillerIdentity, setFinalKillerIdentity] = useDraftField(
+    'finalKillerIdentity',
+    'Unknown',
+    initialDraft,
+    onDraftChange,
+  );
   // Falconwood / Slayer
-  const [missionCompleted, setMissionCompleted] = useDraftField('missionCompleted', isWin, initialDraft, onDraftChange);
-  const [missionProgress, setMissionProgress] = useDraftField('missionProgress', '', initialDraft, onDraftChange);
-  const [friendJoined, setFriendJoined] = useDraftField('friendJoined', '', initialDraft, onDraftChange);
-  const [endingDimension, setEndingDimension] = useDraftField<'Our Dimension' | 'Mirror Dimension'>('endingDimension', 'Our Dimension', initialDraft, onDraftChange);
+  const [missionCompleted, setMissionCompleted] = useDraftField(
+    'missionCompleted',
+    isWin,
+    initialDraft,
+    onDraftChange,
+  );
+  const [missionProgress, setMissionProgress] = useDraftField(
+    'missionProgress',
+    '',
+    initialDraft,
+    onDraftChange,
+  );
+  const [friendJoined, setFriendJoined] = useDraftField(
+    'friendJoined',
+    '',
+    initialDraft,
+    onDraftChange,
+  );
+  const [endingDimension, setEndingDimension] = useDraftField<
+    'Our Dimension' | 'Mirror Dimension'
+  >('endingDimension', 'Our Dimension', initialDraft, onDraftChange);
 
   const buildFormData = (): EndingFormData => {
     // Augment gameHighlights with killer-specific conditions so the LLM gets full context
@@ -99,7 +256,9 @@ export const GameOutcomeForm = ({
       if (foundCarolyn) parts.push('Found Carolyn');
       if (foundMrFloppy) parts.push('Recovered Mr. Floppy');
       if (parts.length > 0) {
-        highlights = highlights ? `${highlights}. Win condition: ${parts.join(', ')}` : `Win condition: ${parts.join(', ')}`;
+        highlights = highlights
+          ? `${highlights}. Win condition: ${parts.join(', ')}`
+          : `Win condition: ${parts.join(', ')}`;
       }
     }
     if (isOrganism && !isWin && organismLossType === 'assimilated') {
@@ -129,46 +288,69 @@ export const GameOutcomeForm = ({
     }
     if (isBilly) {
       const buddyParts: string[] = [];
-      if (buddiesInPlay !== null) buddyParts.push(`Buddies in play at end: ${buddiesInPlay}`);
+      if (buddiesInPlay !== null)
+        buddyParts.push(`Buddies in play at end: ${buddiesInPlay}`);
       if (powerSuppliesShutDown) buddyParts.push('All Power Sources Inactive');
       if (billyFinale) buddyParts.push(`Billy Finale: ${billyFinale}`);
-      if (billyFinale === 'Power Surge') buddyParts.push(`Boris: ${borisStatus || 'fate not recorded'}`);
-      if (buddyParts.length) highlights = highlights ? `${highlights}. ${buddyParts.join('. ')}` : buddyParts.join('. ');
+      if (billyFinale === 'Power Surge')
+        buddyParts.push(`Boris: ${borisStatus || 'fate not recorded'}`);
+      if (buddyParts.length)
+        highlights = highlights
+          ? `${highlights}. ${buddyParts.join('. ')}`
+          : buddyParts.join('. ');
     }
     if (isGrimlash) {
       const harvestParts = [`Children survived: ${childrenSurvived}`];
       if (harvestMadnessPeaked) harvestParts.push('Harvest Madness peaked');
-      highlights = highlights ? `${highlights}. ${harvestParts.join('. ')}` : harvestParts.join('. ');
+      highlights = highlights
+        ? `${highlights}. ${harvestParts.join('. ')}`
+        : harvestParts.join('. ');
     }
     if (isBerith) {
       const demonParts: string[] = [];
       if (isWin && ursulaSaved) demonParts.push('Ursula saved');
       demonParts.push(`L'Armes Abbey influence: ${abbeyInfluence}`);
-      highlights = highlights ? `${highlights}. ${demonParts.join('. ')}` : demonParts.join('. ');
+      highlights = highlights
+        ? `${highlights}. ${demonParts.join('. ')}`
+        : demonParts.join('. ');
     }
     if (isShriek) {
       const shriekParts = [`Final killer identity: ${finalKillerIdentity}`];
-      shriekParts.push(mortRevealed ? 'Mort was revealed' : 'Mort remained hidden');
-      highlights = highlights ? `${highlights}. ${shriekParts.join('. ')}` : shriekParts.join('. ');
+      shriekParts.push(
+        mortRevealed ? 'Mort was revealed' : 'Mort remained hidden',
+      );
+      highlights = highlights
+        ? `${highlights}. ${shriekParts.join('. ')}`
+        : shriekParts.join('. ');
     }
     if (isFalconwood) {
       const falconParts: string[] = [];
       if (result.mission) falconParts.push(`Mission: ${result.mission}`);
       if (missionCompleted) {
-        falconParts.push('Mission completed — the killer could finally be finished');
-        if (friendJoined.trim()) falconParts.push(`Friend who joined the fight: ${friendJoined.trim()}`);
+        falconParts.push(
+          'Mission completed — the killer could finally be finished',
+        );
+        if (friendJoined.trim())
+          falconParts.push(
+            `Friend who joined the fight: ${friendJoined.trim()}`,
+          );
       } else {
-        falconParts.push('Mission NOT completed — the killer could not be finished');
-        if (missionProgress.trim()) falconParts.push(`Mission progress: ${missionProgress.trim()}`);
+        falconParts.push(
+          'Mission NOT completed — the killer could not be finished',
+        );
+        if (missionProgress.trim())
+          falconParts.push(`Mission progress: ${missionProgress.trim()}`);
       }
-      highlights = highlights ? `${highlights}. ${falconParts.join('. ')}` : falconParts.join('. ');
+      highlights = highlights
+        ? `${highlights}. ${falconParts.join('. ')}`
+        : falconParts.join('. ');
     }
     if (isSlayer) {
       const dimensionPart = `Ended in: ${endingDimension}`;
-      highlights = highlights ? `${highlights}. ${dimensionPart}` : dimensionPart;
+      highlights = highlights
+        ? `${highlights}. ${dimensionPart}`
+        : dimensionPart;
     }
-
-
 
     const formData: EndingFormData = {
       finalHorrorLevel,
@@ -177,6 +359,7 @@ export const GameOutcomeForm = ({
       weaponUsed: weaponUsed || '',
       victimsSaved,
       victimsKilled,
+      roundsPlayed,
       endingSubLocation: endingSubLocation || '',
       gameHighlights: highlights,
     };
@@ -186,12 +369,24 @@ export const GameOutcomeForm = ({
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-4 sm:space-y-5">
+      {result.playEvents?.length ? (
+        <p className="border border-secondary/30 bg-card p-3 type-body-sm text-muted-foreground">
+          Your recorded totals are ready. Review them below; these final values
+          take precedence in your ending and statistics. Health and Horror
+          defaults should also be checked.
+        </p>
+      ) : (
+        <p className="type-body-sm text-muted-foreground">
+          Record as much as you like. Blank victim totals and rounds stay
+          unrecorded. Review the suggested Health and Horror values.
+        </p>
+      )}
       {/* Section: Combat Stats */}
       <div className="space-y-3">
         <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
           Combat Stats
         </h3>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {/* Final Horror Level */}
           <div className="space-y-1">
@@ -204,7 +399,9 @@ export const GameOutcomeForm = ({
                 min="1"
                 max="7"
                 value={finalHorrorLevel}
-                onChange={(e) => setFinalHorrorLevel(Math.trunc(Number(e.target.value)))}
+                onChange={(e) =>
+                  setFinalHorrorLevel(Math.trunc(Number(e.target.value)))
+                }
                 className="flex-1 h-2 bg-muted rounded-sm appearance-none cursor-pointer accent-primary"
               />
               <span className="font-display text-lg text-primary w-6 text-center">
@@ -240,7 +437,13 @@ export const GameOutcomeForm = ({
               aria-label="Final Girl Health"
               value={finalGirlHealth === 0 ? '' : String(finalGirlHealth)}
               onChange={(e) => {
-                const val = e.target.value === '' ? 0 : Math.min(maxFinalGirlHealth, Math.max(0, Math.trunc(Number(e.target.value))));
+                const val =
+                  e.target.value === ''
+                    ? 0
+                    : Math.min(
+                        maxFinalGirlHealth,
+                        Math.max(0, Math.trunc(Number(e.target.value))),
+                      );
                 setFinalGirlHealth(isNaN(val) ? 0 : val);
               }}
               placeholder="0"
@@ -259,9 +462,15 @@ export const GameOutcomeForm = ({
                 inputMode="numeric"
                 pattern="[0-9]*"
                 aria-label="Killer Health"
-              value={killerHealth === 0 ? '' : String(killerHealth)}
+                value={killerHealth === 0 ? '' : String(killerHealth)}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? 0 : Math.min(maxKillerHealth, Math.max(0, Math.trunc(Number(e.target.value))));
+                  const val =
+                    e.target.value === ''
+                      ? 0
+                      : Math.min(
+                          maxKillerHealth,
+                          Math.max(0, Math.trunc(Number(e.target.value))),
+                        );
                   setKillerHealth(isNaN(val) ? 0 : val);
                 }}
                 placeholder="0"
@@ -277,7 +486,7 @@ export const GameOutcomeForm = ({
         <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
           Rescue Stats
         </h3>
-        
+
         <div className="grid grid-cols-2 gap-3">
           {/* Victims Saved */}
           <div className="space-y-1">
@@ -289,12 +498,18 @@ export const GameOutcomeForm = ({
               inputMode="numeric"
               pattern="[0-9]*"
               aria-label="Victims Saved"
-              value={victimsSaved === 0 ? '' : String(victimsSaved)}
+              value={victimsSaved === null ? '' : String(victimsSaved)}
               onChange={(e) => {
-                const val = e.target.value === '' ? 0 : Math.max(0, Math.trunc(Number(e.target.value)));
-                setVictimsSaved(isNaN(val) ? 0 : val);
+                const val =
+                  e.target.value === ''
+                    ? null
+                    : Math.min(
+                        999,
+                        Math.max(0, Math.trunc(Number(e.target.value))),
+                      );
+                setVictimsSaved(val !== null && isNaN(val) ? null : val);
               }}
-              placeholder="0"
+              placeholder="Not recorded"
               className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-secondary/50 transition-colors"
             />
           </div>
@@ -309,18 +524,48 @@ export const GameOutcomeForm = ({
               inputMode="numeric"
               pattern="[0-9]*"
               aria-label="Victims Killed"
-              value={victimsKilled === 0 ? '' : String(victimsKilled)}
+              value={victimsKilled === null ? '' : String(victimsKilled)}
               onChange={(e) => {
-                const val = e.target.value === '' ? 0 : Math.max(0, Math.trunc(Number(e.target.value)));
-                setVictimsKilled(isNaN(val) ? 0 : val);
+                const val =
+                  e.target.value === ''
+                    ? null
+                    : Math.min(
+                        999,
+                        Math.max(0, Math.trunc(Number(e.target.value))),
+                      );
+                setVictimsKilled(val !== null && isNaN(val) ? null : val);
               }}
-              placeholder="0"
+              placeholder="Not recorded"
               className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
             />
           </div>
         </div>
       </div>
 
+      <label className="block space-y-1 type-caption text-muted-foreground">
+        Final round (optional)
+        <input
+          aria-label="Final round"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          value={roundsPlayed ?? ''}
+          placeholder="Not recorded"
+          onChange={(e) => {
+            const n =
+              e.target.value === '' ? null : Math.trunc(Number(e.target.value));
+            setRoundsPlayed(
+              n !== null && (!Number.isFinite(n) || n < 1 || n > 999)
+                ? null
+                : n,
+            );
+          }}
+          className="w-full h-12 px-3 bg-muted border border-border text-base text-foreground"
+        />
+        <span className="block type-caption">
+          The round in which the game ended, including that round.
+        </span>
+      </label>
       {/* Section: Poltergeist win conditions */}
       {isPoltergeist && isWin && (
         <div className="space-y-3">
@@ -344,7 +589,9 @@ export const GameOutcomeForm = ({
                 onChange={(e) => setFoundMrFloppy(e.target.checked)}
                 className="w-4 h-4 accent-secondary"
               />
-              <span className="type-label text-foreground">Found Mr. Floppy</span>
+              <span className="type-label text-foreground">
+                Found Mr. Floppy
+              </span>
             </label>
           </div>
         </div>
@@ -366,7 +613,9 @@ export const GameOutcomeForm = ({
                 onChange={() => setOrganismLossType('caught')}
                 className="accent-primary"
               />
-              <span className="type-label text-foreground">Caught by the Organism</span>
+              <span className="type-label text-foreground">
+                Caught by the Organism
+              </span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -377,7 +626,9 @@ export const GameOutcomeForm = ({
                 onChange={() => setOrganismLossType('assimilated')}
                 className="accent-primary"
               />
-              <span className="type-label text-foreground">Assimilated (Horror &gt; 6)</span>
+              <span className="type-label text-foreground">
+                Assimilated (Horror &gt; 6)
+              </span>
             </label>
           </div>
         </div>
@@ -391,7 +642,10 @@ export const GameOutcomeForm = ({
           </h3>
           <div className="flex flex-col sm:flex-row gap-2">
             {(['Hatchling', 'Youngling', 'Adult'] as const).map((stage) => (
-              <label key={stage} className="flex items-center gap-2 cursor-pointer">
+              <label
+                key={stage}
+                className="flex items-center gap-2 cursor-pointer"
+              >
                 <input
                   type="radio"
                   name="evomorphStage"
@@ -418,17 +672,23 @@ export const GameOutcomeForm = ({
               Maniacs on Board at End (0–6)
             </label>
             <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={maniacCount === 0 ? '' : String(maniacCount)}
-                onChange={(e) => {
-                  const val = e.target.value === '' ? 0 : Math.min(6, Math.max(0, Math.trunc(Number(e.target.value))));
-                  setManiacCount(isNaN(val) ? 0 : val);
-                }}
-                placeholder="0"
-                className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
-              />
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={maniacCount === 0 ? '' : String(maniacCount)}
+              onChange={(e) => {
+                const val =
+                  e.target.value === ''
+                    ? 0
+                    : Math.min(
+                        6,
+                        Math.max(0, Math.trunc(Number(e.target.value))),
+                      );
+                setManiacCount(isNaN(val) ? 0 : val);
+              }}
+              placeholder="0"
+              className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+            />
           </div>
         </div>
       )}
@@ -441,7 +701,10 @@ export const GameOutcomeForm = ({
           </h3>
           <div className="flex flex-col sm:flex-row gap-2">
             {(['TRACK', 'SLAY', 'Killing Machine'] as const).map((mode) => (
-              <label key={mode} className="flex items-center gap-2 cursor-pointer">
+              <label
+                key={mode}
+                className="flex items-center gap-2 cursor-pointer"
+              >
                 <input
                   type="radio"
                   name="wolfMode"
@@ -465,7 +728,10 @@ export const GameOutcomeForm = ({
           </h3>
           <div className="flex flex-col sm:flex-row gap-2">
             {(['Trish', 'Baghead', 'Zeke'] as const).map((intruder) => (
-              <label key={intruder} className="flex items-center gap-2 cursor-pointer">
+              <label
+                key={intruder}
+                className="flex items-center gap-2 cursor-pointer"
+              >
                 <input
                   type="radio"
                   name="activeIntruder"
@@ -489,7 +755,10 @@ export const GameOutcomeForm = ({
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label htmlFor="buddies-in-play" className="type-caption text-muted-foreground">
+              <label
+                htmlFor="buddies-in-play"
+                className="type-caption text-muted-foreground"
+              >
                 Buddies in Play at End (0–7)
               </label>
               <input
@@ -500,7 +769,13 @@ export const GameOutcomeForm = ({
                 id="buddies-in-play"
                 value={buddiesInPlay === null ? '' : String(buddiesInPlay)}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? null : Math.min(7, Math.max(0, Math.trunc(Number(e.target.value))));
+                  const val =
+                    e.target.value === ''
+                      ? null
+                      : Math.min(
+                          7,
+                          Math.max(0, Math.trunc(Number(e.target.value))),
+                        );
                   setBuddiesInPlay(val !== null && isNaN(val) ? null : val);
                 }}
                 className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
@@ -514,7 +789,9 @@ export const GameOutcomeForm = ({
                   onChange={(e) => setPowerSuppliesShutDown(e.target.checked)}
                   className="w-4 h-4 accent-secondary"
                 />
-                <span className="type-label text-foreground">All Power Sources Inactive</span>
+                <span className="type-label text-foreground">
+                  All Power Sources Inactive
+                </span>
               </label>
             </div>
           </div>
@@ -524,18 +801,46 @@ export const GameOutcomeForm = ({
       {isBilly && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1">
-            <label htmlFor="billy-finale" className="type-caption text-muted-foreground">Billy Finale (optional)</label>
-            <select id="billy-finale" value={billyFinale} onChange={e => setBillyFinale(e.target.value)} className="w-full h-11 px-3 bg-muted border border-border/50 rounded-sm text-base text-foreground">
-              <option value="">Not recorded</option><option value="Power Surge">Power Surge</option><option value="Other Finale">Other Finale</option>
+            <label
+              htmlFor="billy-finale"
+              className="type-caption text-muted-foreground"
+            >
+              Billy Finale (optional)
+            </label>
+            <select
+              id="billy-finale"
+              value={billyFinale}
+              onChange={(e) => setBillyFinale(e.target.value)}
+              className="w-full h-11 px-3 bg-muted border border-border/50 rounded-sm text-base text-foreground"
+            >
+              <option value="">Not recorded</option>
+              <option value="Power Surge">Power Surge</option>
+              <option value="Other Finale">Other Finale</option>
             </select>
           </div>
-          {billyFinale === 'Power Surge' && <div className="space-y-1">
-            <label htmlFor="boris-status" className="type-caption text-muted-foreground">Boris at Game End</label>
-            <select id="boris-status" value={borisStatus} onChange={e => setBorisStatus(e.target.value)} className="w-full h-11 px-3 bg-muted border border-border/50 rounded-sm text-base text-foreground">
-              <option value="">Not recorded</option><option value="defeated">Defeated</option><option value="still in play">Still in play</option>
-            </select>
-            <p className="type-caption text-muted-foreground">Power Surge requires defeating both Billy and Boris to win.</p>
-          </div>}
+          {billyFinale === 'Power Surge' && (
+            <div className="space-y-1">
+              <label
+                htmlFor="boris-status"
+                className="type-caption text-muted-foreground"
+              >
+                Boris at Game End
+              </label>
+              <select
+                id="boris-status"
+                value={borisStatus}
+                onChange={(e) => setBorisStatus(e.target.value)}
+                className="w-full h-11 px-3 bg-muted border border-border/50 rounded-sm text-base text-foreground"
+              >
+                <option value="">Not recorded</option>
+                <option value="defeated">Defeated</option>
+                <option value="still in play">Still in play</option>
+              </select>
+              <p className="type-caption text-muted-foreground">
+                Power Surge requires defeating both Billy and Boris to win.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -556,7 +861,13 @@ export const GameOutcomeForm = ({
                 pattern="[0-9]*"
                 value={childrenSurvived === 0 ? '' : String(childrenSurvived)}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? 0 : Math.min(3, Math.max(0, Math.trunc(Number(e.target.value))));
+                  const val =
+                    e.target.value === ''
+                      ? 0
+                      : Math.min(
+                          3,
+                          Math.max(0, Math.trunc(Number(e.target.value))),
+                        );
                   setChildrenSurvived(isNaN(val) ? 0 : val);
                 }}
                 placeholder="0"
@@ -571,7 +882,9 @@ export const GameOutcomeForm = ({
                   onChange={(e) => setHarvestMadnessPeaked(e.target.checked)}
                   className="w-4 h-4 accent-primary"
                 />
-                <span className="type-label text-foreground">Harvest Madness Peaked</span>
+                <span className="type-label text-foreground">
+                  Harvest Madness Peaked
+                </span>
               </label>
             </div>
           </div>
@@ -596,10 +909,17 @@ export const GameOutcomeForm = ({
             </label>
           )}
           <div>
-            <p className="type-caption text-muted-foreground mb-2">L'Armes Abbey Influence</p>
+            <p className="type-caption text-muted-foreground mb-2">
+              L'Armes Abbey Influence
+            </p>
             <div className="flex flex-col sm:flex-row gap-2">
-              {(['Blessings Dominated', 'Curses Dominated', 'Balanced'] as const).map((influence) => (
-                <label key={influence} className="flex items-center gap-2 cursor-pointer">
+              {(
+                ['Blessings Dominated', 'Curses Dominated', 'Balanced'] as const
+              ).map((influence) => (
+                <label
+                  key={influence}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
                   <input
                     type="radio"
                     name="abbeyInfluence"
@@ -608,7 +928,9 @@ export const GameOutcomeForm = ({
                     onChange={() => setAbbeyInfluence(influence)}
                     className="accent-primary"
                   />
-                  <span className="type-label text-foreground">{influence}</span>
+                  <span className="type-label text-foreground">
+                    {influence}
+                  </span>
                 </label>
               ))}
             </div>
@@ -632,8 +954,22 @@ export const GameOutcomeForm = ({
                 onChange={(e) => setFinalKillerIdentity(e.target.value)}
                 className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
               >
-                {['Unknown', 'Hans', 'Geppetto', 'Dr. Fright', 'Inkanyamba', 'Big Bad Wolf', 'Ratchet Lady', 'Evomorph', 'The Organism', 'The Intruders', 'Mort'].map((identity) => (
-                  <option key={identity} value={identity}>{identity}</option>
+                {[
+                  'Unknown',
+                  'Hans',
+                  'Geppetto',
+                  'Dr. Fright',
+                  'Inkanyamba',
+                  'Big Bad Wolf',
+                  'Ratchet Lady',
+                  'Evomorph',
+                  'The Organism',
+                  'The Intruders',
+                  'Mort',
+                ].map((identity) => (
+                  <option key={identity} value={identity}>
+                    {identity}
+                  </option>
                 ))}
               </select>
             </div>
@@ -645,7 +981,9 @@ export const GameOutcomeForm = ({
                   onChange={(e) => setMortRevealed(e.target.checked)}
                   className="w-4 h-4 accent-primary"
                 />
-                <span className="type-label text-foreground">Mort Revealed</span>
+                <span className="type-label text-foreground">
+                  Mort Revealed
+                </span>
               </label>
             </div>
           </div>
@@ -670,7 +1008,9 @@ export const GameOutcomeForm = ({
               onChange={(e) => setMissionCompleted(e.target.checked)}
               className="w-4 h-4 accent-secondary"
             />
-            <span className="type-label text-foreground">Mission Completed</span>
+            <span className="type-label text-foreground">
+              Mission Completed
+            </span>
           </label>
 
           {missionCompleted ? (
@@ -710,34 +1050,41 @@ export const GameOutcomeForm = ({
             The Mirror Dimension
           </h3>
           <div>
-            <p className="type-caption text-muted-foreground mb-2">Dimension at the End</p>
+            <p className="type-caption text-muted-foreground mb-2">
+              Dimension at the End
+            </p>
             <div className="flex flex-col sm:flex-row gap-2">
-              {(['Our Dimension', 'Mirror Dimension'] as const).map((dimension) => (
-                <label key={dimension} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="endingDimension"
-                    value={dimension}
-                    checked={endingDimension === dimension}
-                    onChange={() => setEndingDimension(dimension)}
-                    className="accent-primary"
-                  />
-                  <span className="type-label text-foreground">{dimension}</span>
-                </label>
-              ))}
+              {(['Our Dimension', 'Mirror Dimension'] as const).map(
+                (dimension) => (
+                  <label
+                    key={dimension}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="endingDimension"
+                      value={dimension}
+                      checked={endingDimension === dimension}
+                      onChange={() => setEndingDimension(dimension)}
+                      className="accent-primary"
+                    />
+                    <span className="type-label text-foreground">
+                      {dimension}
+                    </span>
+                  </label>
+                ),
+              )}
             </div>
           </div>
         </div>
       )}
-
-
 
       {/* Section: Narrative */}
       <div className="space-y-3">
         <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
           Narrative
         </h3>
-        
+
         {/* Ending Location */}
         <div className="space-y-1">
           <label className="type-caption text-muted-foreground">
@@ -746,7 +1093,7 @@ export const GameOutcomeForm = ({
           <input
             type="text"
             aria-label="Ending Location"
-              value={endingSubLocation}
+            value={endingSubLocation}
             onChange={(e) => setEndingSubLocation(e.target.value)}
             placeholder="Kitchen, Basement, Rooftop..."
             className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-colors"
@@ -760,7 +1107,7 @@ export const GameOutcomeForm = ({
           </label>
           <textarea
             aria-label="Game Highlights"
-              value={gameHighlights}
+            value={gameHighlights}
             onChange={(e) => setGameHighlights(e.target.value)}
             placeholder="Memorable moments, close calls, dramatic kills..."
             rows={3}
@@ -771,18 +1118,28 @@ export const GameOutcomeForm = ({
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-3 justify-center pt-4 border-t border-border/30">
-        {onSaveResult && <button onClick={() => onSaveResult(buildFormData())} className="vcr-tape-button type-label px-4 py-3 min-h-[44px]">SAVE RESULT WITHOUT NARRATION</button>}
+        {onSaveResult && (
+          <button
+            onClick={() => onSaveResult(buildFormData())}
+            className="vcr-tape-button type-label px-4 py-3 min-h-[44px]"
+          >
+            SAVE RESULT WITHOUT NARRATION
+          </button>
+        )}
         <button
           onClick={handleContinue}
           className={`outcome-btn ${isWin ? 'outcome-btn-won' : 'outcome-btn-lost'} group relative min-w-[200px] sm:min-w-[240px] h-12 overflow-hidden rounded-sm transition-all duration-200 flex items-center justify-center gap-2`}
         >
-          <span className={`relative z-10 font-display text-base tracking-[0.15em] uppercase ${isWin ? 'text-secondary' : 'text-primary'} drop-shadow-lg`}>
+          <span
+            className={`relative z-10 font-display text-base tracking-[0.15em] uppercase ${isWin ? 'text-secondary' : 'text-primary'} drop-shadow-lg`}
+          >
             Continue
           </span>
-          <ArrowRight className={`relative z-10 w-4 h-4 ${isWin ? 'text-secondary' : 'text-primary'}`} />
+          <ArrowRight
+            className={`relative z-10 w-4 h-4 ${isWin ? 'text-secondary' : 'text-primary'}`}
+          />
         </button>
       </div>
     </div>
   );
 };
-

@@ -88,10 +88,12 @@ export const EndingRequestSchema = z.object({
   finalGirlHealth: z.number().int().min(0).max(10).optional(),  // Max 6 in official game, buffer for custom
   killerHealth: z.number().int().min(0).max(20).optional(),
   finalGirlMaxHealth: z.number().int().min(5).max(6).optional(),  // Character-specific max health
-  victimsSaved: z.number().int().min(0).max(50).optional(),
-  victimsKilled: z.number().int().min(0).max(50).optional(),
+  victimsSaved: z.number().int().min(0).max(999).optional(),
+  victimsKilled: z.number().int().min(0).max(999).optional(),
   endingSubLocation: z.string().max(200).optional(),
-  gameHighlights: z.string().max(2000).optional()
+  gameHighlights: z.string().max(2000).optional(),
+  roundsPlayed:z.number().int().min(1).max(999).optional(),
+  playSummary:z.string().max(1800).optional()
 });
 
 export type StoryRequest = z.infer<typeof StoryRequestSchema>;
