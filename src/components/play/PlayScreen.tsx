@@ -69,6 +69,7 @@ export function PlayScreen(props: PlayScreenProps) {
   } = props;
   const summary = summarizePlay(events);
   const [startOpen, setStartOpen] = useState(false);
+  const [roundStartOpen, setRoundStartOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [finishOpen, setFinishOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -116,7 +117,9 @@ export function PlayScreen(props: PlayScreenProps) {
     }
   };
   const last = [...summary.entries].reverse().find((e) => e.kind !== 'start');
-  const lastDeath = [...summary.entries].reverse().find(e=>e.kind==='killed');
+  const lastDeath = [...summary.entries]
+    .reverse()
+    .find((e) => e.kind === 'killed');
   const start = () => {
     setSaved('0');
     setKilled('0');
@@ -186,7 +189,11 @@ export function PlayScreen(props: PlayScreenProps) {
           <img
             src={imageUrl}
             alt={`${finalGirl}'s night at ${location}`}
-            style={{ height: mobile ? `max(180px,calc(100dvh - ${!summary.tracked ? 440 : collapsed ? 420 : 510}px))` : undefined }}
+            style={{
+              height: mobile
+                ? `max(180px,calc(100dvh - ${!summary.tracked ? 440 : collapsed ? 420 : 510}px))`
+                : undefined,
+            }}
             className="relative w-full object-contain h-[max(180px,calc(100dvh-510px))] lg:h-[max(260px,calc(100dvh-330px))]"
           />
           <div className="film-grain pointer-events-none absolute inset-0 opacity-[0.06]" />
@@ -222,7 +229,11 @@ export function PlayScreen(props: PlayScreenProps) {
               </button>
             )}
           </div>
-          <span className="sr-only" aria-live="polite" aria-atomic="true">{summary.tracked ? `Victims saved: ${summary.saved}. Victims killed: ${summary.killed}. Current round: ${summary.round ?? 'unrecorded'}.` : ''}</span>
+          <span className="sr-only" aria-live="polite" aria-atomic="true">
+            {summary.tracked
+              ? `Victims saved: ${summary.saved}. Victims killed: ${summary.killed}. Current round: ${summary.round ?? 'unrecorded'}.`
+              : ''}
+          </span>
           {!summary.tracked ? (
             <>
               <p className="hidden lg:block type-body-sm text-muted-foreground mb-5">
@@ -281,7 +292,12 @@ export function PlayScreen(props: PlayScreenProps) {
                         ? 'Start round tracking'
                         : 'Next round'
                     }
-                    onClick={() => commit({ kind: 'round' })}
+                    onClick={() => {
+                      if (summary.round === null) {
+                        setRound('');
+                        setRoundStartOpen(true);
+                      } else commit({ kind: 'round' });
+                    }}
                     className="play-counter play-counter-round"
                   >
                     <Clapperboard className="w-4 h-4" />
@@ -302,7 +318,15 @@ export function PlayScreen(props: PlayScreenProps) {
                   <Undo2 className="w-4 h-4" />
                   Undo
                 </button>
-                {props.onDeath && lastDeath && <button className="min-h-[44px] min-w-[44px] flex items-center justify-center text-primary" aria-label="Latest death scene" onClick={()=>props.onDeath?.(lastDeath)}><Skull className="w-4 h-4"/></button>}
+                {props.onDeath && lastDeath && (
+                  <button
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-primary"
+                    aria-label="Latest death scene"
+                    onClick={() => props.onDeath?.(lastDeath)}
+                  >
+                    <Skull className="w-4 h-4" />
+                  </button>
+                )}
                 <button
                   onClick={showDetails}
                   className="type-caption text-secondary min-h-[44px] px-2 flex gap-2 items-center"
@@ -349,6 +373,51 @@ export function PlayScreen(props: PlayScreenProps) {
       >
         {message}
       </p>
+      <Dialog open={roundStartOpen} onOpenChange={setRoundStartOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase">
+              Start round tracking
+            </DialogTitle>
+            <DialogDescription>
+              Enter the round you are on now. Earlier rounds stay unrecorded.
+            </DialogDescription>
+          </DialogHeader>
+          <input
+            aria-label="Current round"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={round}
+            onChange={(e) => setRound(e.target.value)}
+            placeholder="Current round (1–999)"
+            className={inputClass}
+          />
+          <button
+            className={`${buttonClass} text-secondary`}
+            onClick={() => {
+              const n = parseCount(round);
+              if (
+                n !== null &&
+                n >= 1 &&
+                commit({
+                  kind: 'adjust',
+                  saved: summary.saved!,
+                  killed: summary.killed!,
+                  round: n,
+                })
+              )
+                setRoundStartOpen(false);
+              else setMessage('Enter the current round from 1 to 999.');
+            }}
+          >
+            Use current round
+          </button>
+          <p role="status" className="type-caption text-primary">
+            {message}
+          </p>
+        </DialogContent>
+      </Dialog>
       <Dialog open={startOpen} onOpenChange={setStartOpen}>
         <DialogContent className="bg-background max-h-[85dvh] overflow-auto">
           <DialogHeader>
@@ -596,7 +665,10 @@ export function PlayScreen(props: PlayScreenProps) {
               onToggle={(event, undone) =>
                 commit({ kind: undone ? 'restore' : 'undo', target: event.id })
               }
-              onDeath={event=>{setDetailsOpen(false);props.onDeath?.(event);}}
+              onDeath={(event) => {
+                setDetailsOpen(false);
+                props.onDeath?.(event);
+              }}
             />
             {awake.supported && (
               <button

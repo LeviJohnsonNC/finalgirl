@@ -22,7 +22,7 @@ Generated deaths will attach to stable death-event IDs. No retry, replay or gene
 
 ## Tracker semantics
 
-Start from round 1 for a fresh game. A midgame baseline can omit its round; no earlier rescues/deaths or rounds are invented. Next round marks the start of the next round. The final-round field includes the round in which play ended. Finish opens an editable review, so an accidental extra round tap is easy to correct.
+Start from round 1 for a fresh game. A midgame baseline can omit its round; no earlier rescues/deaths or rounds are invented. Starting round tracking later asks for the current physical round instead of assuming round 1. Next round marks the start of the next round. The final-round field includes the round in which play ended. Finish opens an editable review, so an accidental extra round tap is easy to correct.
 
 Blank victim counts and rounds are stored as null. A deliberately entered zero remains zero after reload. Victim averages use a separate denominator for each recorded field; round averages exclude historical games without a recorded round. Health/Horror remain the existing suggested outcome defaults unless an observation supplies them; the review asks players to check these values.
 
