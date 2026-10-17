@@ -1,4 +1,5 @@
-import { Play } from 'lucide-react';
+import tapeStart from '@/assets/tape-start.webp';
+import tapeResume from '@/assets/tape-resume.webp';
 import type { ActiveGame } from '@/lib/activeGame';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
@@ -11,9 +12,11 @@ interface TheaterActionsProps {
 
 export const TheaterActions = ({ game, cloud, onStart, onStartAnother }: TheaterActionsProps) => (
   <div className="theater-actions">
-    <button className="theater-play" onClick={onStart}>
-      <span className="theater-play-icon"><Play size={22} fill="currentColor" aria-hidden="true" /></span>
-      <span className="theater-play-label">{game ? cloud ? 'RESUME CLOUD GAME' : 'RESUME GAME' : 'START THE TAPE'}</span>
+    <button type="button" className={`theater-play${game && cloud ? ' theater-play--cloud' : ''}`} onClick={onStart}
+      aria-label={game ? cloud ? 'RESUME CLOUD GAME' : 'RESUME GAME' : 'START THE TAPE'}>
+      <img className="theater-play-art" src={game ? tapeResume : tapeStart} alt="" aria-hidden="true"
+        width={1680} height={367} draggable={false} />
+      {game && <span className="theater-play-label" aria-hidden="true">{cloud ? 'RESUME CLOUD GAME' : 'RESUME GAME'}</span>}
     </button>
     {game ? <>
       <p className="theater-action-hint">{game.selection.finalGirl} vs. {game.selection.killer}</p>
