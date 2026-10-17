@@ -215,6 +215,7 @@ const IndexContent = () => {
         onArchive={handleArchive} 
         onNavigateHome={handleNavigateHome}
         onScrapbooks={() => goToScrapbooks()}
+        onOpenCaseFile={goToScrapbooks}
         onStats={() => { setHasStarted(true); setCurrentPage('stats'); }}
         onRules={() => { setHasStarted(true); setCurrentPage('rules'); }}
       />
