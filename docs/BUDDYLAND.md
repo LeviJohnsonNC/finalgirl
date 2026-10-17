@@ -45,3 +45,11 @@ Run `npm run check`, `npm run check:assets`, `npm run build` and `npm run test:b
 New coverage verifies cast ownership and lookup, Health, all Setup/Event options, real art registration under both preferences, source-backed rules, mixed-module narrative context, opening/ending generation payloads, Billy-only outcomes, Power Surge and Boris, and draft recovery before saving. Desktop and mobile browser artifacts include Collection, casting, Rena's dossier, rules and outcome screenshots.
 
 Manual review: enable the film in My Collection; cast Billy / Buddyland / Rena or Gwynn; inspect the info buttons and ability reference; choose a Setup and Event; search the owned rules; record a result, reload and resume, then save without narration. Try Billy at Camp Happy Trails and Hans at Buddyland to check independent modules.
+
+## Review screenshots
+
+Captured from passing browser tests with a fictional account and mocked generation. The screenshots include the complete casting flow at desktop and mobile widths; the CI `browser-results` artifact also contains dossiers, rules and outcomes. External fonts are blocked in these isolated tests.
+
+[Desktop casting](images/buddyland-desktop.jpg) · [Mobile casting](images/buddyland-mobile.jpg)
+
+![Buddyland casting on desktop](images/buddyland-desktop.jpg)
