@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { GameResult } from '@/hooks/useGameHistory';
-import { buildScreenings, screeningDate } from './theater';
+import { activeScreenings, activeScreeningStatus, buildScreenings, screeningDate } from './theater';
+import type { ActiveGame } from './activeGame';
 
 const game = (id: string, timestamp: number, overrides: Partial<GameResult> = {}): GameResult => ({ id, timestamp, outcome: 'won', killer: 'Hans', location: 'Camp Happy Trails', finalGirl: 'Laurie', sceneImageUrl: `https://test.invalid/${id}.png`, ...overrides });
 
@@ -31,5 +32,22 @@ describe('personal screening selection', () => {
     expect(buildScreenings([game('a', 1, { sceneImageUrl: undefined })])).toEqual([]);
     expect(buildScreenings([game('a', 1, { sceneImageUrl: undefined, posterImageUrl: 'https://test.invalid/p.png' })])[0].kind).toBe('poster');
     for (const value of [0, NaN, Infinity, 1e30]) expect(screeningDate(value)).toBe('');
+  });
+});
+
+describe('unfinished screening', () => {
+  const draft: ActiveGame = { version: 1, id: 'draft', phase: 'nowPlaying', selection: { killer: 'Hans', location: 'Camp Happy Trails', finalGirl: 'Laurie', setupScenario: null, startingEvent: null, mission: null, filmId: 's1-camp-happy-trails' } };
+  it('keeps unrecorded rounds unknown and labels the real continuation stage', () => {
+    expect(activeScreeningStatus(draft)).toBe('Ready for the opening scene');
+    expect(activeScreeningStatus({ ...draft, phase: 'outcome' })).toBe('Your result is waiting for review');
+    expect(activeScreeningStatus({ ...draft, phase: 'ending' })).toBe('Your ending is waiting');
+    const tracked = { ...draft, playEvents: [{ id: 'a', at: 1, kind: 'start' as const, saved: 2, killed: 1, round: null }] };
+    expect(activeScreeningStatus(tracked)).toBe('Round not recorded · 2 saved · 1 killed');
+  });
+  it('uses actual draft artwork without fabricating an outcome or date', () => {
+    const withArt = { ...draft, sceneImageUrl: 'https://test.invalid/scene.png', posterImageUrl: 'https://test.invalid/poster.png' };
+    expect(activeScreenings(withArt, new Set())[0]).toMatchObject({ kind: 'scene', timestamp: 0 });
+    expect(activeScreenings(withArt, new Set())[0].outcome).toBeUndefined();
+    expect(activeScreenings(withArt, new Set([withArt.sceneImageUrl]))[0].kind).toBe('poster');
   });
 });

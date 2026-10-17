@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import type { GameResult } from '@/hooks/useGameHistory';
-import { buildScreenings } from '@/lib/theater';
+import { activeScreenings, buildScreenings } from '@/lib/theater';
+import type { ActiveGame } from '@/lib/activeGame';
 import { useReducedMotion } from './useReducedMotion';
 
 const subscribeVisibility = (notify: () => void) => {
@@ -8,11 +9,11 @@ const subscribeVisibility = (notify: () => void) => {
   return () => document.removeEventListener('visibilitychange', notify);
 };
 
-export function useTheaterReel(games: GameResult[], interacting: boolean) {
+export function useTheaterReel(games: GameResult[], interacting: boolean, activeGame?: ActiveGame | null) {
   const reducedMotion = useReducedMotion();
   const visible = useSyncExternalStore(subscribeVisibility, () => !document.hidden, () => true);
   const [failed, setFailed] = useState<Set<string>>(() => new Set());
-  const screenings = useMemo(() => buildScreenings(games, failed), [games, failed]);
+  const screenings = useMemo(() => activeGame ? activeScreenings(activeGame, failed) : buildScreenings(games, failed), [games, failed, activeGame]);
   const [requestedId, setRequestedId] = useState<string | null>(null);
   const target = screenings.find(s => s.id === requestedId) ?? screenings[0];
   const [projection, setProjection] = useState<{ key: string | null; previous: string | null }>({ key: null, previous: null });

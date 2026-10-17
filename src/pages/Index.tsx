@@ -135,8 +135,13 @@ const IndexContent = () => {
   };
 
   const handlePlayAgain = () => {
-    if (!cloudPlay.close()) { toast.error('Resolve the cloud version before closing this game.'); return; }
-    if (saveActiveGame(null)) setCurrentPage('dashboard');
+    if (!cloudPlay.close()) {
+      toast.error(cloudPlay.conflict ? 'Resolve the cloud version before closing this game.' : 'Could not save the request to close this game. Your game is still open; check device storage and retry.');
+      return false;
+    }
+    if (!saveActiveGame(null)) return false;
+    setCurrentPage('dashboard');
+    return true;
   };
 
   const handleContinueToEnding = (formData: EndingFormData) => {
@@ -170,11 +175,11 @@ const IndexContent = () => {
   };
 
   const cloudNotice = <>
-    {cloudPlay.conflict && <div role="alert" className="fixed top-24 inset-x-3 z-[70] border border-accent/40 bg-background p-4 shadow-2xl type-body-sm max-w-2xl mx-auto">
+    {cloudPlay.conflict && <div role="alert" className={`${hasStarted ? 'fixed top-24 inset-x-3 z-[70]' : ''} border border-accent/40 bg-background p-4 shadow-2xl type-body-sm max-w-2xl mx-auto`}>
       <p>Another device changed this game. Both versions will be preserved before you choose.</p>
       <div className="flex flex-wrap gap-3"><button className="min-h-[44px] text-secondary underline" onClick={() => { const row = cloudPlay.conflict!; if(cloudPlay.adopt(row,saveActiveGame)) setCurrentPage(row.state.phase); }}>Use cloud version</button><button className="min-h-[44px] text-accent underline" onClick={cloudPlay.keepLocal}>Keep this device’s version</button></div>
     </div>}
-    {!activeGame && cloudPlay.remoteGames.map(row => <div key={row.id} className="border border-secondary/30 bg-background p-3 type-caption max-w-2xl mx-auto">
+    {!activeGame && (hasStarted ? cloudPlay.remoteGames : cloudPlay.remoteGames.slice(1)).map(row => <div key={row.id} className="border border-secondary/30 bg-background p-3 type-caption max-w-2xl mx-auto">
       CLOUD GAME · {row.state.selection.finalGirl} vs {row.state.selection.killer}
       <button className="min-h-[44px] ml-3 underline text-secondary" onClick={() => { if (cloudPlay.adopt(row,saveActiveGame)) { setHasStarted(true); setCurrentPage(row.state.phase); } }}>RESUME CLOUD GAME</button>
     </div>)}
@@ -207,11 +212,21 @@ const IndexContent = () => {
 
   // Show Marquee until user starts
   if (!hasStarted) {
+    const cloudGame = !activeGame ? cloudPlay.remoteGames[0] : undefined;
     return (
-      <>
-      <div className="fixed bottom-16 inset-x-4 z-[60] max-w-2xl mx-auto">{resumeNotice}{cloudNotice}</div>
       <Marquee 
-        onStart={handleStart} 
+        onStart={() => {
+          if (cloudGame) {
+            if (cloudPlay.adopt(cloudGame, saveActiveGame)) { setHasStarted(true); setCurrentPage(cloudGame.state.phase); }
+          } else handleStart();
+        }}
+        resumeGame={activeGame ?? cloudGame?.state}
+        resumeFromCloud={Boolean(cloudGame)}
+        onStartAnother={() => {
+          if (activeGame && !handlePlayAgain()) return false;
+          setHasStarted(true); setCurrentPage('dashboard'); return true;
+        }}
+        recoveryNotice={<>{cloudNotice}{cloudPlay.error && !cloudPlay.conflict && <p role="status" className="theater-status">{cloudPlay.error} <button className="underline min-h-[44px] px-2" onClick={cloudPlay.refresh}>Retry cloud sync</button></p>}</>}
         onArchive={handleArchive} 
         onNavigateHome={handleNavigateHome}
         onScrapbooks={() => goToScrapbooks()}
@@ -219,7 +234,6 @@ const IndexContent = () => {
         onStats={() => { setHasStarted(true); setCurrentPage('stats'); }}
         onRules={() => { setHasStarted(true); setCurrentPage('rules'); }}
       />
-      </>
     );
   }
 

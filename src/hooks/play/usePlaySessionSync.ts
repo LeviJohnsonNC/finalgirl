@@ -20,7 +20,9 @@ export function usePlaySessionSync(game: ActiveGame | null) {
   const revisionKey = `final-girl-play-revisions-v1:${owner}`;
   const [revisions, setRevisions] = useLocalStorage<Record<string, number>>(revisionKey, {});
   const [remoteGames, setRemoteGames] = useState<RemotePlaySession[]>([]);
+  const remoteOwner = useRef<string | null>(null);
   const [conflict, setConflict] = useState<RemotePlaySession | null>(null);
+  const conflictOwner = useRef<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const latest = useRef({ owner, game, signedIn: Boolean(user), revisions });
   latest.current = { owner, game, signedIn: Boolean(user), revisions };
@@ -41,10 +43,11 @@ export function usePlaySessionSync(game: ActiveGame | null) {
     if (!reply || !Number.isSafeInteger(reply.revision) || reply.revision < 1 || typeof reply.ok !== 'boolean') throw new Error('The archive returned an invalid session. Your local game is safe.');
     if (!reply.ok) {
       const row = { id: snapshot.id, revision: reply.revision, state: reply.state, closed: reply.closed };
-      if (validRow(row)) setConflict(row);
+      if (validRow(row)) { conflictOwner.current = owner; setConflict(row); }
       throw new Error('Another device changed this game. Choose which version to continue.');
     }
     if (!setRevisions(previous => ({ ...previous, [snapshot.id]: reply.revision }))) throw new Error('Cloud saved; this device could not acknowledge it. Retry safely.');
+    if (snapshot.closed) setRemoteGames(rows => rows.filter(row => row.id !== snapshot.id));
   }, [owner, revisionKey, setRevisions]);
   const { pending, enqueue, flush, error } = useDurableQueue<Snapshot>(`final-girl-play-outbox-v1:${owner}`, Boolean(user && isAuthReady), send);
 
@@ -67,6 +70,7 @@ export function usePlaySessionSync(game: ActiveGame | null) {
           .eq('closed', false).order('updated_at', { ascending: false }).limit(10).abortSignal(AbortSignal.timeout(20000));
         if (cancelled || latest.current.owner !== owner) return;
         if (error) throw new Error('Cloud games could not be loaded. Local tracking still works.');
+        remoteOwner.current = owner;
         setRemoteGames(Array.isArray(data) ? (data as unknown[]).filter(validRow) : []);
       } catch (reason) { if (!cancelled) setLoadError(reason instanceof Error ? reason.message : 'Cloud games unavailable.'); }
     })();
@@ -76,10 +80,10 @@ export function usePlaySessionSync(game: ActiveGame | null) {
   const close = useCallback(() => {
     const state = latest.current.game;
     if (!state || !user) return true;
-    if (conflict) return false;
+    if (conflict && conflictOwner.current === owner) return false;
     try { enqueue({ id: state.id, state, closed: true }); return true; }
     catch { setLoadError('Keep this page open: the archive close could not be saved locally.'); return false; }
-  }, [user, enqueue, conflict]);
+  }, [user, enqueue, conflict, owner]);
 
   const adopt = useCallback((row: RemotePlaySession, persist: (state: ActiveGame) => boolean) => {
     if (!validRow(row) || latest.current.owner !== owner) return false;
@@ -114,8 +118,9 @@ export function usePlaySessionSync(game: ActiveGame | null) {
   }, [user,conflict,owner,enqueue,flush]);
   return {
     syncNow,
-    remoteGames: remoteGames.filter(row => !pending.some(p => p.id === row.id && p.closed)),
-    pendingCount: pending.length, error: error || loadError, conflict,
+    // Hide a prior account's rows on the very first render, before effects reset.
+    remoteGames: remoteOwner.current === owner ? remoteGames.filter(row => !pending.some(p => p.id === row.id && p.closed)) : [],
+    pendingCount: pending.length, error: error || loadError, conflict: conflictOwner.current === owner ? conflict : null,
     refresh: () => { setRefreshIndex(n => n + 1); void flush(); }, retry: flush, close, adopt, keepLocal,
   };
 }

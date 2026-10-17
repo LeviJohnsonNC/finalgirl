@@ -1,9 +1,12 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowUpRight, Play, Ticket } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { Ticket } from 'lucide-react';
 import theaterBackdrop from '@/assets/theater-backdrop.jpg';
 import { useAuth } from '@/hooks/useAuth';
 import { useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { TheaterReel } from './TheaterReel';
+import { TheaterActions } from './TheaterActions';
+import type { ActiveGame } from '@/lib/activeGame';
 import '@/styles/theater.css';
 
 interface MarqueeProps {
@@ -14,9 +17,14 @@ interface MarqueeProps {
   onStats?: () => void;
   onRules?: () => void;
   onOpenCaseFile?: (id: string) => void;
+  resumeGame?: ActiveGame | null;
+  resumeFromCloud?: boolean;
+  onStartAnother?: () => boolean;
+  recoveryNotice?: ReactNode;
 }
 
-export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onStats, onRules, onOpenCaseFile }: MarqueeProps) => {
+export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onStats, onRules, onOpenCaseFile,
+  resumeGame, resumeFromCloud, onStartAnother, recoveryNotice }: MarqueeProps) => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading, authError } = useAuth();
   const { gameHistory, isLoading, loadError, retryLoadHistory } = useGameHistoryContext();
@@ -40,15 +48,10 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
 
         <main className="theater-main" aria-label="The drive-in theater">
           <TheaterReel key={user?.id ?? 'guest'} games={authLoading ? [] : gameHistory} loading={authLoading || isLoading}
-            historyError={loadError} onRetryHistory={retryLoadHistory} onOpenCaseFile={user ? onOpenCaseFile : undefined} />
-          <div className="theater-actions">
-            <button className="theater-play" onClick={onStart}>
-              <span className="theater-play-icon"><Play size={16} fill="currentColor" aria-hidden="true" /></span>
-              <span>START THE TAPE</span><ArrowUpRight size={17} aria-hidden="true" />
-            </button>
-            <p className="theater-action-hint">Choose your cast. See how the night ends.</p>
-            {authError && <p role="status" className="theater-status">Sign-in services reconnecting</p>}
-          </div>
+            historyError={loadError} onRetryHistory={retryLoadHistory} onOpenCaseFile={user ? onOpenCaseFile : undefined} activeGame={resumeGame} />
+          <div className="theater-recovery">{recoveryNotice}</div>
+          <TheaterActions game={resumeGame} cloud={resumeFromCloud} onStart={onStart} onStartAnother={onStartAnother} />
+          {authError && <p role="status" className="theater-status">Sign-in services reconnecting</p>}
         </main>
 
         <footer className="theater-footer">
