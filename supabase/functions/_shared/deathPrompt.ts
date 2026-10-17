@@ -1,4 +1,4 @@
-import type { DeathFacts } from '../../../src/lib/play/death.ts';
+import type { DeathFacts } from './play/death.ts';
 import { DEATH_KILLER_CUES, DEATH_LOCATION_CUES } from './deathLore.ts';
 export function deathPrompt(facts: DeathFacts, previous: string[]) {
   return {

@@ -10,8 +10,8 @@ import {
 } from '../_shared/aiGateway.ts';
 import { DEATH_MODEL_CANDIDATES } from '../_shared/models.ts';
 import { deathPrompt } from '../_shared/deathPrompt.ts';
-import { deathFacts, deathSignature } from '../../../src/lib/play/death.ts';
-import { validPlayLog } from '../../../src/lib/play/events.ts';
+import { deathFacts, deathSignature } from '../_shared/play/death.ts';
+import { validPlayLog } from '../_shared/play/events.ts';
 
 type ClaimSlot = {action:'cached';id:string;text:string;model?:string}|{action:'busy';id:string}|{action:'generate';id:string;lease:string};
 function isClaimSlot(value:unknown):value is ClaimSlot {
