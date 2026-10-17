@@ -13,6 +13,16 @@ import { deathPrompt } from '../_shared/deathPrompt.ts';
 import { deathFacts, deathSignature } from '../../../src/lib/play/death.ts';
 import { validPlayLog } from '../../../src/lib/play/events.ts';
 
+type ClaimSlot = {action:'cached';id:string;text:string;model?:string}|{action:'busy';id:string}|{action:'generate';id:string;lease:string};
+function isClaimSlot(value:unknown):value is ClaimSlot {
+ if(!value||typeof value!=='object')return false;
+ const v=value as Record<string,unknown>;
+ if(typeof v.id!=='string'||!v.id.length)return false;
+ if(v.action==='cached')return typeof v.text==='string'&&v.text.length>=10&&v.text.length<=1600&&(v.model===undefined||v.model===null||typeof v.model==='string');
+ if(v.action==='busy')return true;
+ return v.action==='generate'&&typeof v.lease==='string'&&v.lease.length>0;
+}
+
 serve(async (req) => {
   const cors = getCorsHeaders(req.headers.get('origin'));
   const json = (body: unknown, status = 200) =>
@@ -77,7 +87,7 @@ serve(async (req) => {
       return json({ error: 'That death is not active in this game.' }, 409);
     const signature = await deathSignature(facts);
     admin = createClient(url, serviceKey);
-    const { data: slot, error: claimError } = await admin.rpc(
+    const { data: rawSlot, error: claimError } = await admin.rpc(
       'claim_death_scene',
       {
         p_user_id: user.id,
@@ -87,11 +97,12 @@ serve(async (req) => {
         p_take: take,
       },
     );
-    if (claimError || !slot)
+    if (claimError || !isClaimSlot(rawSlot))
       return json(
         { error: 'Could not reserve this scene. Your recorded death is safe.' },
         503,
       );
+    const slot=rawSlot;
     const scene = (id: string, text: string, model?: string) => ({
       id,
       session_id: sessionId,
