@@ -1,3 +1,5 @@
+import { DeathNarration } from './DeathNarration';
+import { getFilmIdByLocation } from '@/types/gameData';
 import { useEffect, useState, useRef } from 'react';
 import {
   Dialog,
@@ -43,7 +45,7 @@ export function DeathSceneDialog({
   onEvent,
   syncNow,
 }: Props) {
-  const contentRef=useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const facts = deathFacts(selection, events, eventId);
   const [room, setRoom] = useState(facts?.room ?? '');
   const [cause, setCause] = useState<DeathCause>(facts?.cause ?? 'unspecified');
@@ -69,8 +71,10 @@ export function DeathSceneDialog({
     .filter((r) => r.event_id === eventId && r.signature === signature)
     .sort((a, b) => a.take - b.take);
   const selected = takes.find((r) => r.take === take) ?? takes[0];
-  const selectedId=selected?.id;
-  useEffect(()=>{ if(selectedId) contentRef.current?.scrollTo({top:0}); },[selectedId]);
+  const selectedId = selected?.id;
+  useEffect(() => {
+    if (selectedId) contentRef.current?.scrollTo({ top: 0 });
+  }, [selectedId]);
   const dirty =
     !!facts &&
     (room !== facts.room ||
@@ -110,7 +114,10 @@ export function DeathSceneDialog({
   if (!facts) return null; // An undone death never shows a stale response or narration.
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent ref={contentRef} className="bg-background max-w-xl max-h-[90dvh] overflow-y-auto">
+      <DialogContent
+        ref={contentRef}
+        className="bg-background max-w-xl max-h-[90dvh] overflow-y-auto"
+      >
         <DialogHeader>
           <p className="font-vhs text-primary tracking-widest text-sm flex gap-2 items-center">
             <Skull className="w-4 h-4" />
@@ -205,6 +212,11 @@ export function DeathSceneDialog({
               TAKE {selected.take + 1} // ORIGINAL FICTION
             </p>
             <p className="type-body leading-relaxed">{selected.scene_text}</p>
+            <DeathNarration
+              key={selected.id}
+              scene={selected}
+              filmId={getFilmIdByLocation(selection.location)}
+            />
             <p className="type-caption text-muted-foreground mt-4">
               Saved with this death. Reopening it uses no new generation.
             </p>
@@ -239,7 +251,7 @@ export function DeathSceneDialog({
               )}
             </button>
           ) : (
-            Math.max(...takes.map(r=>r.take)) < 2 && (
+            Math.max(...takes.map((r) => r.take)) < 2 && (
               <button
                 disabled={scenes.busy}
                 className={`${button} text-primary flex-1`}

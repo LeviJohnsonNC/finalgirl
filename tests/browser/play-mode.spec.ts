@@ -136,6 +136,30 @@ test('joining midgame preserves an unknown round and offline taps until retry', 
   await expect
     .poll(() => archive.sessions[0]?.state.playEvents)
     .toHaveLength(2);
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Close', exact: true })
+    .click();
+  await page
+    .getByRole('button', { name: 'Start round tracking', exact: true })
+    .click();
+  await expect(page.getByLabel('Current round', { exact: true })).toHaveValue(
+    '',
+  );
+  await page.getByLabel('Current round', { exact: true }).fill('6');
+  await page
+    .getByRole('button', { name: 'Use current round', exact: true })
+    .click();
+  await expect(
+    page.getByRole('button', { name: 'Next round', exact: true }),
+  ).toContainText('6');
+  await expect(
+    page.getByRole('button', { name: 'Save one victim', exact: true }),
+  ).toContainText('5');
+  await page.getByRole('button', { name: 'Next round', exact: true }).click();
+  await expect(
+    page.getByRole('button', { name: 'Next round', exact: true }),
+  ).toContainText('7');
 });
 
 test('cloud handoff resumes a session on a fresh device without creating another game', async ({
@@ -230,7 +254,9 @@ test('reviewed tracked totals drive the ending, statistics and saved case notes'
   await expect(
     page.getByRole('region', { name: 'Recorded play statistics' }),
   ).toContainText('5.0');
-  await page.getByRole('region',{name:'Recorded play statistics'}).screenshot({path:info.outputPath('tracked-statistics.png')});
+  await page
+    .getByRole('region', { name: 'Recorded play statistics' })
+    .screenshot({ path: info.outputPath('tracked-statistics.png') });
   await page.locator('.session-row-link').first().click();
   await page.getByText('OPEN THE CASE NOTES', { exact: true }).click();
   await expect(
@@ -267,4 +293,50 @@ test('unrecorded totals remain blank after reload while an explicit zero is save
   await expect.poll(() => archive.history[0]?.victims_saved).toBe(0);
   await expect.poll(() => archive.history[0]?.victims_killed).toBeNull();
   await expect.poll(() => archive.history[0]?.rounds_played).toBeNull();
+});
+
+test('Play controls remain reachable on small phones, landscape, tablets and wide screens', async ({
+  page,
+  archive,
+}, info) => {
+  test.setTimeout(90000);
+  await archive.install(page, { draft: tracked });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
+  let saved = 0;
+  for (const viewport of [
+    { width: 320, height: 640 },
+    { width: 844, height: 390 },
+    { width: 1024, height: 768 },
+    { width: 1536, height: 864 },
+  ]) {
+    await page.setViewportSize(viewport);
+    const save = page.getByRole('button', {
+      name: 'Save one victim',
+      exact: true,
+    });
+    await save.click();
+    saved++;
+    await expect(save).toContainText(String(saved));
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    expect(
+      await save.evaluate((button) => {
+        const r = button.getBoundingClientRect();
+        const e = document.elementFromPoint(
+          r.x + r.width / 2,
+          r.y + r.height / 2,
+        );
+        return e === button || button.contains(e);
+      }),
+    ).toBe(true);
+    if (viewport.width === 844)
+      await page.screenshot({
+        path: info.outputPath('play-landscape.png'),
+        fullPage: true,
+      });
+  }
 });

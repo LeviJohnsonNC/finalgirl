@@ -4615,3 +4615,16 @@
   .play-counter > strong { font-size: 1.75rem; }
 }
 @media (prefers-reduced-motion: reduce) { .play-counter { transition: none; } }
+
+/* Short landscape phones keep the picture beside the controls. */
+@media (max-height: 600px) and (min-width: 640px) and (max-width: 1023px) {
+  .play-active-header { display: none; }
+  .play-screen { top: 8px; padding-bottom: 8px; }
+  .play-screen > header { margin-bottom: 8px; }
+  .play-screen > header p { display: none; }
+  .play-screen > header h1 { font-size: 1.5rem; line-height: 1.75rem; margin: 0; }
+  .play-screen > .grid { grid-template-columns: minmax(0,1fr) 220px; gap: 12px; }
+  .play-screen aside { position: static; }
+  .play-screen figure img { height: max(140px,calc(100dvh - 160px)) !important; }
+  .play-screen figure figcaption { font-size: .75rem; }
+}

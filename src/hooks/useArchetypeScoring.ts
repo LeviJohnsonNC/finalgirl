@@ -113,10 +113,10 @@ function scoreProtector(weighted: Weighted[]): ArchetypeScore {
   const evidence = collect(weighted, (game) => {
     const saved = game.victimsSaved;
     const killed = game.victimsKilled;
-    // Neither recorded: the game says nothing about rescuing, so it is left
+    // Either count missing: the rescue share is unknown, so it is left
     // out. Treating it as zero saved is what made an unfilled form read as
     // callousness.
-    if (saved == null && killed == null) return null;
+    if (saved == null || killed == null) return null;
     const total = (saved ?? 0) + (killed ?? 0);
     if (total === 0) return null;
     return (saved ?? 0) / total;
@@ -125,8 +125,8 @@ function scoreProtector(weighted: Weighted[]): ArchetypeScore {
   const pct = evidence.weight > 0 ? Math.round((evidence.hits / evidence.weight) * 100) : 0;
   const reason =
     evidence.support === 0
-      ? 'No victim counts recorded yet.'
-      : `${pct}% of the victims in your games walk out alive.`;
+      ? 'No complete victim totals recorded yet.'
+      : `${pct}% of victims walk out alive in games with both totals recorded.`;
 
   return { archetype: 'protector', score: shrinkToScore(evidence), evidence, reason };
 }
@@ -216,10 +216,13 @@ const TIEBREAK_ORDER: PlayerArchetype[] = ['survivor', 'gambler', 'duelist', 'pr
 
 const ARCHETYPE_INTROS: Record<Exclude<PlayerArchetype, 'newcomer'>, (ctx: ProfileBuildContext) => string> = {
   protector: (ctx) => {
-    const totalVictims = ctx.totalSaved + ctx.totalKilled;
-    const saveRatio = totalVictims > 0 ? Math.round((ctx.totalSaved / totalVictims) * 100) : 0;
-    const avgSaved = ctx.gamesPlayed > 0 ? (ctx.totalSaved / ctx.gamesPlayed).toFixed(1) : '0';
-    return `The body count matters to you — but not the way it does for most. Across ${ctx.gamesPlayed} sessions, ${saveRatio}% of all victims have walked away alive, averaging ${avgSaved} rescues per game. You don't just fight the killer; you fight the clock, the board, and the odds to drag one more survivor out of the dark. Every victim lost is personal.`;
+    const complete = ctx.games.filter(g=>g.victimsSaved!=null && g.victimsKilled!=null);
+    const completeSaved = complete.reduce((n,g)=>n+g.victimsSaved!,0);
+    const totalVictims = complete.reduce((n,g)=>n+g.victimsSaved!+g.victimsKilled!,0);
+    const saveRatio = totalVictims > 0 ? Math.round((completeSaved / totalVictims) * 100) : 0;
+    const savedGames = ctx.games.filter(g=>g.victimsSaved!=null);
+    const avgSaved = savedGames.length > 0 ? (ctx.totalSaved / savedGames.length).toFixed(1) : '0';
+    return `The body count matters to you — but not the way it does for most. In games with both victim totals recorded, ${saveRatio}% have walked away alive. Your recorded rescue totals average ${avgSaved} per recorded game. You don't just fight the killer; you fight the clock, the board, and the odds to drag one more survivor out of the dark. Every victim lost is personal.`;
   },
   survivor: (ctx) => {
     const clutchWins = ctx.wins.filter((g) => {

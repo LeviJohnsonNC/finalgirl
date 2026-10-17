@@ -58,10 +58,11 @@ export const NarrationRequestSchema = z.object({
   text: z.string().min(10).max(10000),
   // Which moment is being read, so the narrator can be cast to match it.
   // Optional: an omitted kind reads as the opening, which is the old behaviour.
-  kind: z.enum(['intro', 'ending']).optional(),
+  kind: z.enum(['intro', 'ending', 'death']).optional(),
   outcome: z.enum(['won', 'lost']).optional(),
-  filmId: z.string().max(100).optional()
-});
+  filmId: z.string().max(100).optional(),
+  deathSceneId:z.string().uuid().optional()
+}).refine(value=>value.kind!=='death'||Boolean(value.deathSceneId),{message:'Death narration requires a saved scene',path:['deathSceneId']});
 
 // Schema for generate-ending endpoint
 export const EndingRequestSchema = z.object({

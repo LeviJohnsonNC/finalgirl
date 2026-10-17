@@ -168,20 +168,21 @@ const Rules = () => {
     return counts;
   }, [module, sectionMatchCounts, glossaryHits]);
 
-  // Auto-expand first matching chapter when searching
+  // Match IDs also change when owned expansions finish loading. Use the
+  // actual target IDs so unrelated renders cannot reopen a manually closed chapter.
+  const firstSearchChapter = query.trim()
+    ? module.chapters.find(c => (chapterMatchCounts[c.id] ?? 0) > 0)
+    : undefined;
+  const firstSearchChapterId = firstSearchChapter?.id;
+  const firstSearchSectionId = firstSearchChapter?.sectionIds.find(sid => (sectionMatchCounts[sid] ?? 0) > 0);
   useEffect(() => {
-    if (!query.trim()) return;
-    const firstMatch = module.chapters.find((c) => (chapterMatchCounts[c.id] ?? 0) > 0);
-    if (firstMatch) {
-      setOpenChapterId(firstMatch.id);
-      // Find the first matching section inside, set it as initial sub
-      const firstSec = firstMatch.sectionIds.find((sid) => (sectionMatchCounts[sid] ?? 0) > 0);
-      if (firstSec) {
-        setInitialSubBySection((prev) => ({ ...prev, [firstMatch.id]: firstSec }));
-      }
+    if (!query.trim() || !firstSearchChapterId) return;
+    setOpenChapterId(firstSearchChapterId);
+    if (firstSearchSectionId) {
+      setInitialSubBySection(prev => prev[firstSearchChapterId] === firstSearchSectionId
+        ? prev : { ...prev, [firstSearchChapterId]: firstSearchSectionId });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
+  }, [query, firstSearchChapterId, firstSearchSectionId, setOpenChapterId]);
 
   const handleToggle = useCallback(
     (chapterId: string) => {

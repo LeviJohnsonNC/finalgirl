@@ -204,6 +204,7 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
         {/* Close Button — desktop: floats outside book; mobile: fixed top-right corner */}
         <button
           onClick={handleClose}
+          aria-label="Close scrapbook"
           className={
             isMobile
               ? 'fixed top-4 right-4 z-[60] p-2 rounded-full bg-background/80 backdrop-blur border border-border text-foreground shadow-lg'

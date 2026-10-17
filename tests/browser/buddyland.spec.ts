@@ -74,10 +74,13 @@ test('unlock Buddyland, cast both girls, choose cards and save a complete game',
 
 test('owned Buddyland rules are searchable with the correct power cost', async ({ page, archive }, info) => {
   archive.films = ['s4-buddyland'];
+  archive.holdCollection=true;
   await archive.install(page); await page.goto('/');
   await page.getByRole('button', { name: 'Rules', exact: true }).click();
   const search = page.getByPlaceholder('SEARCH RULES, TERMS, ICONS...');
   await search.fill('battery-heart');
+  await expect(page.getByText(/No chapters match/)).toBeVisible();
+  archive.releaseCollection();
   await expect(page.getByText(/Spend 1 Time while in a Power Source/)).toBeVisible();
   await expect(page.locator('#killer-billy-the-bear-rules').getByText(/not automatic healing every turn/)).toBeVisible();
   await page.screenshot({ path: info.outputPath('billy-rules.png'), fullPage: true });

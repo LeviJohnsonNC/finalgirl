@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json",
-    "test:edge": "node --test scripts/guard.test.mjs scripts/validation.test.mjs scripts/image-attachment.test.mjs scripts/death-scene.test.mjs",
+    "test:edge": "node --test scripts/guard.test.mjs scripts/validation.test.mjs scripts/image-attachment.test.mjs scripts/death-scene.test.mjs scripts/narration-canonical.test.mjs",
     "test:database": "bash scripts/test-database.sh",
     "test:browser": "playwright test",
     "check:assets": "node scripts/check-assets.mjs",

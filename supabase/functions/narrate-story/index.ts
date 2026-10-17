@@ -1,3 +1,5 @@
+import {deathFacts,deathSignature} from '../../../src/lib/play/death.ts';
+import {validPlayLog} from '../../../src/lib/play/events.ts';
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { decode as base64Decode, encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 import { getCorsHeaders } from "../_shared/auth.ts";
@@ -91,7 +93,16 @@ serve(async (req) => {
       return validation.error;
     }
 
-    const { text } = validation.data;
+    let { text } = validation.data;
+    if(validation.data.kind==='death') {
+      const {data:scene,error:sceneError}=await guard.adminClient.from('play_death_scenes').select('scene_text,session_id,event_id,signature,status').eq('id',validation.data.deathSceneId!).eq('user_id',guard.user.id).maybeSingle();
+      if(sceneError||!scene||scene.status!=='ready')return new Response(JSON.stringify({error:'Saved death scene unavailable.'}),{status:404,headers:{...cors,'Content-Type':'application/json'}});
+      const {data:session}=await guard.adminClient.from('play_sessions').select('state').eq('id',scene.session_id).eq('user_id',guard.user.id).maybeSingle();
+      const state=session?.state;
+      const facts=state&&validPlayLog(state.playEvents)&&state.selection?deathFacts(state.selection,state.playEvents,scene.event_id):null;
+      if(!facts||await deathSignature(facts)!==scene.signature)return new Response(JSON.stringify({error:'That death was changed or undone.'}),{status:409,headers:{...cors,'Content-Type':'application/json'}});
+      text=scene.scene_text;
+    }
 
     const INWORLD_API_KEY = Deno.env.get('INWORLD_API_KEY');
     if (!INWORLD_API_KEY) {
@@ -121,6 +132,7 @@ serve(async (req) => {
           'Authorization': `Basic ${INWORLD_API_KEY}`,
           'Content-Type': 'application/json',
         },
+        signal:validation.data.kind==='death'?AbortSignal.timeout(25000):undefined,
         body: JSON.stringify({ text: chunk, voiceId, modelId: 'inworld-tts-1.5-max' }),
       });
 

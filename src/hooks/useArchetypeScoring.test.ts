@@ -308,3 +308,10 @@ describe('scoring corrections', () => {
     expect(scores[scores.length - 1].support).toBe(0);
   });
 });
+
+
+it('does not treat a missing killed count as zero when scoring rescues',()=>{
+ const result=computeArchetype([makeGame({victimsSaved:5,victimsKilled:null}),makeGame({victimsSaved:null,victimsKilled:2}),makeGame({victimsSaved:0,victimsKilled:2})]);
+ const protector=result.scores.find(s=>s.archetype==='protector')!;
+ expect(protector.support).toBe(1);expect(protector.of).toBe(3);
+});
