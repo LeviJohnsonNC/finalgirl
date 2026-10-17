@@ -215,6 +215,7 @@ export const GameOutcomeForm = ({
             </label>
             <input
               type="text"
+              aria-label="Weapon Used"
               value={weaponUsed}
               onChange={(e) => setWeaponUsed(e.target.value)}
               placeholder="Machete, Axe, Fire..."
@@ -231,6 +232,7 @@ export const GameOutcomeForm = ({
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
+              aria-label="Final Girl Health"
               value={finalGirlHealth === 0 ? '' : String(finalGirlHealth)}
               onChange={(e) => {
                 const val = e.target.value === '' ? 0 : Math.min(maxFinalGirlHealth, Math.max(0, Math.trunc(Number(e.target.value))));
@@ -251,7 +253,8 @@ export const GameOutcomeForm = ({
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                value={killerHealth === 0 ? '' : String(killerHealth)}
+                aria-label="Killer Health"
+              value={killerHealth === 0 ? '' : String(killerHealth)}
                 onChange={(e) => {
                   const val = e.target.value === '' ? 0 : Math.min(maxKillerHealth, Math.max(0, Math.trunc(Number(e.target.value))));
                   setKillerHealth(isNaN(val) ? 0 : val);
@@ -280,6 +283,7 @@ export const GameOutcomeForm = ({
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
+              aria-label="Victims Saved"
               value={victimsSaved === 0 ? '' : String(victimsSaved)}
               onChange={(e) => {
                 const val = e.target.value === '' ? 0 : Math.max(0, Math.trunc(Number(e.target.value)));
@@ -299,6 +303,7 @@ export const GameOutcomeForm = ({
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
+              aria-label="Victims Killed"
               value={victimsKilled === 0 ? '' : String(victimsKilled)}
               onChange={(e) => {
                 const val = e.target.value === '' ? 0 : Math.max(0, Math.trunc(Number(e.target.value)));
@@ -716,7 +721,8 @@ export const GameOutcomeForm = ({
           </label>
           <input
             type="text"
-            value={endingSubLocation}
+            aria-label="Ending Location"
+              value={endingSubLocation}
             onChange={(e) => setEndingSubLocation(e.target.value)}
             placeholder="Kitchen, Basement, Rooftop..."
             className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-colors"
@@ -729,7 +735,8 @@ export const GameOutcomeForm = ({
             Game Highlights
           </label>
           <textarea
-            value={gameHighlights}
+            aria-label="Game Highlights"
+              value={gameHighlights}
             onChange={(e) => setGameHighlights(e.target.value)}
             placeholder="Memorable moments, close calls, dramatic kills..."
             rows={3}

@@ -37,7 +37,7 @@ Stages 2–4 will append their migration and deployment instructions here.
 ## Stage 2
 
 Apply **20261017041000_atomic_allowances_and_collection.sql** once, before deploying
-this stage's frontend or edge functions. It adds two RPCs, restricts usage-ledger
+this stage's frontend or edge functions (before merging #32 if merges publish automatically). It adds two RPCs, restricts usage-ledger
 writes to the service role, and reconciles poster ownership policies. No game
 records, images, or collection preferences are deleted or rewritten.
 
@@ -71,7 +71,9 @@ an existing project database. It checks RLS and concurrent reservations/deltas.
 ## Stage 3
 
 No additional SQL migration is required. This stage depends on Stage 2's RPCs.
-Redeploy `generate-scene-image` with this stage, then deploy the frontend: a late
+Redeploy `generate-scene-image`, `generate-story`, `generate-ending`,
+`generate-visual-bible`, and `narrate-story` with this stage to pick up the shared
+validation update, then deploy the frontend: a late
 poster/still now attaches server-side to an existing owned record, and old images
 are only removed after the replacement is attached. The client also keeps late
 attachments in the durable outbox if the screen has already closed.
@@ -88,3 +90,28 @@ WON/LOST and SAVE RESULT work without AI service access or an opening story.
 Outcome details are saved before optional ending generation. Image generation
 waits for saved preferences, honors opt-out, and reuses an existing completed
 image instead of regenerating it on every visit.
+
+## Stage 4
+
+No migration or function deployment is needed. Use Node 22 (`nvm use`, then
+`npm ci`). npm/package-lock.json is the CI installation path; Bun lockfiles are
+retained for compatibility but are not a second CI source of dependency versions.
+
+- `npm run check`: authored-source lint, frontend/build-config typecheck, unit
+  tests, and edge guard/schema tests. Generated integration files stay under
+  typecheck but are excluded from authored-source lint.
+- `npm run check:assets`: rejects missing/stub artwork. Local compilation used
+  artwork stubs because binary retrieval was unavailable; the CI checkout checks
+  and builds the actual tracked artwork.
+- `npm run test:database`: fresh migration replay, ownership policies, 12
+  concurrent allowance requests, and 8 concurrent collection changes against a
+  disposable PostgreSQL database. See Stage 2 for the required test URL.
+- `npm run build && npm run test:browser`: desktop/mobile login, collection,
+  resume, failed-save retry, no-AI completion, and late-poster flows. All external
+  backend/provider requests are mocked; tests cannot spend credits or alter
+  production accounts. Screenshots and traces are retained as browser-results.
+- GitHub Actions also runs native Deno schema tests and checks every edge entry.
+
+Local browser execution was blocked by the execution sandbox and local-file
+browser policy. The supported visual verification path is the CI browser job's
+screenshots; no production visual verification is claimed by the local checks.
