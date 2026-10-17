@@ -64,6 +64,16 @@
 .theater-caption > p { font-family: var(--font-vhs); font-size: 18px; color: hsl(var(--theater-paper)); margin-top: 7px; }
 .theater-survived { color: hsl(var(--secondary)); }
 .theater-lost { color: hsl(var(--blood-red-legible)); }
+.theater-in-progress { color: hsl(var(--accent)); }
+.theater-progress-line { padding: 10px 0; }
+.theater-mode-switch { display: flex; align-items: center; justify-content: center; gap: 24px; margin: 0 0 16px; }
+.theater-mode-switch button { min-height: 44px; padding: 4px 2px; font-family: var(--font-vhs); font-size: 17px; letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--theater-muted)); border-bottom: 1px solid transparent; }
+.theater-mode-switch button[aria-pressed=true] { color: hsl(var(--theater-paper)); border-color: hsl(var(--blood-red-legible)); }
+.theater-new-tape { min-height: 44px; padding: 4px 12px; font-family: var(--font-vhs); font-size: 18px; color: hsl(var(--theater-paper)); text-decoration: underline; text-underline-offset: 5px; }
+.theater-actions:has(.theater-new-tape) { gap: 6px; }
+.theater-recovery { width: 100%; display: grid; gap: 12px; }
+.theater-recovery:not(:empty) { margin-bottom: 12px; }
+.theater-confirm button:focus-visible { outline: 2px solid hsl(var(--secondary)); outline-offset: 3px; }
 .theater-case-line { display: flex; flex-wrap: wrap; align-items: center; gap: 0 16px; font-family: var(--font-vhs); font-size: 16px; color: hsl(var(--theater-muted)); }
 .theater-case-line button { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; color: hsl(var(--theater-paper)); text-decoration: underline; text-underline-offset: 4px; }
 .theater-case-line button:hover { color: hsl(var(--secondary)); }
@@ -105,5 +115,5 @@
   .theater-disclaimer span { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .theater *, .theater *::after, .theater *::before, .theater-lightbox { animation: none !important; transition: none !important; }
+  .theater *, .theater *::after, .theater *::before, .theater-lightbox, .theater-confirm { animation: none !important; transition: none !important; }
 }

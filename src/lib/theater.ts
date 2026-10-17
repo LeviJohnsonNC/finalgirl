@@ -1,4 +1,6 @@
 import type { GameResult } from '@/hooks/useGameHistory';
+import type { ActiveGame } from '@/lib/activeGame';
+import { summarizePlay } from '@/lib/play/events';
 
 export interface Screening {
   id: string;
@@ -8,7 +10,7 @@ export interface Screening {
   finalGirl: string;
   killer: string;
   location: string;
-  outcome: 'won' | 'lost';
+  outcome?: 'won' | 'lost';
   timestamp: number;
 }
 
@@ -42,4 +44,20 @@ export function screeningDate(timestamp: number): string {
   return Number.isFinite(new Date(timestamp).getTime()) && timestamp > 0
     ? new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(timestamp)
     : '';
+}
+
+export function activeScreeningStatus(game: ActiveGame): string {
+  if (game.phase === 'outcome') return 'Your result is waiting for review';
+  if (game.phase === 'ending') return 'Your ending is waiting';
+  const summary = summarizePlay(game.playEvents);
+  if (!summary.tracked) return game.introStory ? 'The night is still unfolding' : 'Ready for the opening scene';
+  return [summary.round !== null ? `Round ${summary.round}` : 'Round not recorded',
+    summary.saved !== null ? `${summary.saved} saved` : '', summary.killed !== null ? `${summary.killed} killed` : ''].filter(Boolean).join(' · ');
+}
+
+export function activeScreenings(game: ActiveGame, failed: ReadonlySet<string>): Screening[] {
+  const scene = game.sceneImageUrl && !failed.has(game.sceneImageUrl) ? game.sceneImageUrl : null;
+  const poster = game.posterImageUrl && !failed.has(game.posterImageUrl) ? game.posterImageUrl : null;
+  const imageUrl = scene || poster;
+  return imageUrl ? [{ ...game.selection, id: game.id, key: `${game.id}:${imageUrl}`, imageUrl, kind: scene ? 'scene' : 'poster', timestamp: 0 }] : [];
 }
