@@ -69,7 +69,8 @@ export function DeathSceneDialog({
     .filter((r) => r.event_id === eventId && r.signature === signature)
     .sort((a, b) => a.take - b.take);
   const selected = takes.find((r) => r.take === take) ?? takes[0];
-  useEffect(()=>{ if(selected) contentRef.current?.scrollTo({top:0}); },[selected?.id]);
+  const selectedId=selected?.id;
+  useEffect(()=>{ if(selectedId) contentRef.current?.scrollTo({top:0}); },[selectedId]);
   const dirty =
     !!facts &&
     (room !== facts.room ||
