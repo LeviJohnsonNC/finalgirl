@@ -1,6 +1,7 @@
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useActiveGame } from './useActiveGame';
+import { newPlayEvent, summarizePlay } from '@/lib/play/events';
 import type { ActiveGame } from '@/lib/activeGame';
 const mock = vi.hoisted(() => ({ user: { id: 'A' } as { id: string } | null }));
 vi.mock('./useAuth', () => ({ useAuth: () => ({ user: mock.user, isAuthReady: true }) }));
@@ -12,6 +13,20 @@ const game: ActiveGame = { version: 1, id: 'session-A', phase: 'nowPlaying', sel
 } };
 
 describe('recoverable active game', () => {
+  it('atomically appends rapid taps, ignores duplicate IDs and keeps unknown fields recoverable', () => {
+    const { result } = renderHook(useActiveGame);
+    act(() => { result.current.save(game); });
+    const start = newPlayEvent({kind:'start',saved:0,killed:0,round:1});
+    act(() => {
+      result.current.appendPlayEvent(game.id,start);
+      for (let n=0;n<10;n++) result.current.appendPlayEvent(game.id,newPlayEvent({kind:'saved',quantity:1}));
+      expect(result.current.appendPlayEvent(game.id,start)).toBe(false);
+      result.current.updateFormDraft(game.id,{buddiesInPlay:null});
+    });
+    expect(summarizePlay(result.current.activeGame.playEvents).saved).toBe(10);
+    expect(result.current.activeGame.formDraft.buddiesInPlay).toBeNull();
+  });
+
   it('restores completed story and all edited fields after unmount', () => {
     const first = renderHook(useActiveGame);
     act(() => { first.result.current.save(game); });
