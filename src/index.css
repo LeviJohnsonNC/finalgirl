@@ -4592,3 +4592,26 @@
 
   .text-dim-hover:hover { color: hsl(var(--foreground)); }
 }
+
+/* Play mode: a small VCR remote beside the film, within thumb reach on phones. */
+.play-counter {
+  display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+  border: 1px solid hsl(var(--border)); background: hsl(var(--card));
+  padding: .75rem; min-height: 64px; font-family: var(--font-vhs);
+  transition: background .15s, transform .15s;
+}
+.play-counter strong { font-size: 2rem; line-height: 1; font-weight: 400; }
+.play-counter span { font-size: .85rem; letter-spacing: .08em; }
+.play-counter:hover { background: hsl(var(--muted)); }
+.play-counter:active { transform: translateY(1px); }
+.play-counter:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.play-counter-save { color: hsl(var(--secondary)); border-color: hsl(var(--secondary) / .35); }
+.play-counter-killed { color: hsl(var(--primary)); border-color: hsl(var(--primary) / .35); }
+.play-counter-round { color: hsl(var(--accent)); border-color: hsl(var(--accent) / .35); }
+@media (max-width: 1023px) {
+  .play-counter { flex-wrap: wrap; justify-content: center; gap: .25rem .45rem; padding: .5rem; }
+  .play-counter > svg { display: none; }
+  .play-counter > span:first-of-type { width: 100%; text-align: center; font-size: .75rem; }
+  .play-counter > strong { font-size: 1.75rem; }
+}
+@media (prefers-reduced-motion: reduce) { .play-counter { transition: none; } }

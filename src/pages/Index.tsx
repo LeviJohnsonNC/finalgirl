@@ -1,3 +1,4 @@
+import { usePlaySessionSync } from '@/hooks/play/usePlaySessionSync';
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Marquee } from '@/components/Marquee';
@@ -59,7 +60,8 @@ const IndexContent = () => {
     setHasStarted(true);
     setCurrentPage('scrapbooks');
   };
-  const { activeGame, save: saveActiveGame, checkpoint, updateFormDraft } = useActiveGame();
+  const { activeGame, save: saveActiveGame, checkpoint, updateFormDraft, appendPlayEvent } = useActiveGame();
+  const cloudPlay = usePlaySessionSync(activeGame);
   const gameSelection = activeGame?.selection ?? null;
   const lastGameResult = activeGame?.result ?? null;
   const introStory = activeGame?.introStory;
@@ -132,6 +134,7 @@ const IndexContent = () => {
   };
 
   const handlePlayAgain = () => {
+    if (!cloudPlay.close()) { toast.error('Resolve the cloud version before closing this game.'); return; }
     if (saveActiveGame(null)) setCurrentPage('dashboard');
   };
 
@@ -147,6 +150,7 @@ const IndexContent = () => {
     if (!lastGameResult || !endingFormData) return;
     try {
       updateGame(lastGameResult.id, { ...endingFormData, endingNarration: endingNarration || undefined, posterImageUrl });
+      if (!cloudPlay.close()) { toast.error('Resolve the cloud version before closing this game.'); return; }
       if (saveActiveGame(null)) setCurrentPage('stats');
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save the ending.'); }
   };
@@ -155,6 +159,7 @@ const IndexContent = () => {
     if (!lastGameResult) return;
     try {
       updateGame(lastGameResult.id, formData);
+      if (!cloudPlay.close()) { toast.error('Resolve the cloud version before closing this game.'); return; }
       if (saveActiveGame(null)) setCurrentPage('stats');
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save your result.'); }
   };
@@ -163,6 +168,16 @@ const IndexContent = () => {
     if (activeGame && checkpoint(activeGame.id, { phase: 'outcome' })) setCurrentPage('outcome');
   };
 
+  const cloudNotice = <>
+    {cloudPlay.conflict && <div role="alert" className="border border-accent/40 bg-background p-4 type-body-sm max-w-2xl mx-auto">
+      <p>Another device changed this game. Both versions will be preserved before you choose.</p>
+      <div className="flex flex-wrap gap-3"><button className="min-h-[44px] text-secondary underline" onClick={() => { const row = cloudPlay.conflict!; if(cloudPlay.adopt(row,saveActiveGame)) setCurrentPage(row.state.phase); }}>Use cloud version</button><button className="min-h-[44px] text-accent underline" onClick={cloudPlay.keepLocal}>Keep this device’s version</button></div>
+    </div>}
+    {!activeGame && cloudPlay.remoteGames.map(row => <div key={row.id} className="border border-secondary/30 bg-background p-3 type-caption max-w-2xl mx-auto">
+      CLOUD GAME · {row.state.selection.finalGirl} vs {row.state.selection.killer}
+      <button className="min-h-[44px] ml-3 underline text-secondary" onClick={() => { if (cloudPlay.adopt(row,saveActiveGame)) { setHasStarted(true); setCurrentPage(row.state.phase); } }}>RESUME CLOUD GAME</button>
+    </div>)}
+  </>;
   const resumeNotice = activeGame ? (
     <div role="status" className="mb-4 border border-primary/30 bg-card px-4 py-3 type-caption text-foreground">
       A GAME IS IN PROGRESS · {activeGame.selection.finalGirl} vs {activeGame.selection.killer}
@@ -193,7 +208,7 @@ const IndexContent = () => {
   if (!hasStarted) {
     return (
       <>
-      {activeGame && <div className="fixed bottom-16 inset-x-4 z-[60] max-w-2xl mx-auto">{resumeNotice}</div>}
+      <div className="fixed bottom-16 inset-x-4 z-[60] max-w-2xl mx-auto">{resumeNotice}{cloudNotice}</div>
       <Marquee 
         onStart={handleStart} 
         onArchive={handleArchive} 
@@ -221,6 +236,11 @@ const IndexContent = () => {
               filmId={gameSelection.filmId}
               key={activeGame.id}
               sessionId={activeGame.id}
+              playEvents={activeGame.playEvents}
+              playMode={activeGame.playMode}
+              onPlayEvent={event => appendPlayEvent(activeGame.id, event)}
+              syncStatus={cloudPlay.conflict ? 'Another device has changes. Open the cloud notice to choose a version.' : !user ? 'Saved on this device · sign in for cloud recovery' : cloudPlay.error || (cloudPlay.pendingCount ? 'Saved on this device · cloud sync pending' : 'Saved on this device · cloud up to date')}
+              onRetrySync={user ? () => { void cloudPlay.retry(); } : undefined}
               initialStory={activeGame.introStory}
               initialSceneImageUrl={activeGame.sceneImageUrl}
               initialVisualBible={activeGame.visualBible}
@@ -295,12 +315,12 @@ const IndexContent = () => {
         <Suspense fallback={<PageLoading />}>
           <SyncNotice count={pendingSaveCount} onRetry={retryPendingSaves} />
           {activeGame && currentPage !== activeGame.phase && resumeNotice}
-          {renderPage()}
+          {cloudPlay.conflict && cloudNotice}{renderPage()}
         </Suspense>
       </main>
 
       {/* News Ticker - above footer */}
-      <NewsTicker />
+      {!(currentPage === 'nowPlaying' && activeGame?.playMode) && <NewsTicker />}
 
       {/* VHS Footer */}
       <footer
