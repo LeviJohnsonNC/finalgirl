@@ -56,7 +56,7 @@ test('resume form edits and retry a failed save without losing the result', asyn
 test('record and save a result through an AI outage', async ({ page, archive }, testInfo) => {
   archive.failStory = true;
   await archive.install(page, { draft: { ...activeGame, introStory: undefined } }); await resume(page);
-  await expect(page.getByText('Generation temporarily unavailable', { exact: true })).toBeVisible();
+  await expect(page.locator('.scenario-description').getByText('Generation temporarily unavailable', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'LOST', exact: true }).first().click();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page.getByText('Your result is saved. An opening story is needed to generate an ending.')).toBeVisible();

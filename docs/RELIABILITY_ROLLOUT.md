@@ -37,7 +37,7 @@ Stages 2–4 will append their migration and deployment instructions here.
 ## Stage 2
 
 Apply **20261017041000_atomic_allowances_and_collection.sql** once, before deploying
-this stage's frontend or edge functions. It adds two RPCs, restricts usage-ledger
+this stage's frontend or edge functions (before merging #32 if merges publish automatically). It adds two RPCs, restricts usage-ledger
 writes to the service role, and reconciles poster ownership policies. No game
 records, images, or collection preferences are deleted or rewritten.
 
@@ -71,7 +71,9 @@ an existing project database. It checks RLS and concurrent reservations/deltas.
 ## Stage 3
 
 No additional SQL migration is required. This stage depends on Stage 2's RPCs.
-Redeploy `generate-scene-image` with this stage, then deploy the frontend: a late
+Redeploy `generate-scene-image`, `generate-story`, `generate-ending`,
+`generate-visual-bible`, and `narrate-story` with this stage to pick up the shared
+validation update, then deploy the frontend: a late
 poster/still now attaches server-side to an existing owned record, and old images
 are only removed after the replacement is attached. The client also keeps late
 attachments in the durable outbox if the screen has already closed.
