@@ -233,7 +233,7 @@ test('manual death narration stops the intro and replays from device cache after
       ).__qaNarrators;
       return { count: a.count(), max: a.max() };
     });
-  expect(await audio()).toEqual({ count: 1, max: 1 });
+  await expect.poll(audio).toEqual({ count: 1, max: 1 });
   await expect
     .poll(() =>
       page.evaluate(
@@ -273,6 +273,7 @@ test('manual death narration stops the intro and replays from device cache after
   await expect(
     page.getByRole('button', { name: 'Stop death narration', exact: true }),
   ).toBeVisible();
+  await expect.poll(async () => (await audio()).count).toBe(1);
   expect(archive.calls.filter((c) => c === 'narrate-story')).toHaveLength(2);
   expect(
     archive.calls.filter((c) => c === 'generate-death-scene'),
@@ -298,4 +299,23 @@ test('manual death narration stops the intro and replays from device cache after
   await expect(
     page.getByRole('button', { name: 'Record one victim killed', exact: true }),
   ).toContainText('1');
+  await page.getByRole('button', { name: 'Finish game', exact: true }).click();
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Won', exact: true })
+    .click();
+  await page
+    .getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION', exact: true })
+    .click();
+  await page.locator('.session-row-link').first().click();
+  const savedScenes = page
+    .locator('summary')
+    .filter({ hasText: 'DEATH SCENES' });
+  await savedScenes.click();
+  await page
+    .getByRole('button', { name: 'Narrate death scene', exact: true })
+    .click();
+  await expect.poll(async () => (await audio()).count).toBe(1);
+  await savedScenes.click();
+  await expect.poll(async () => (await audio()).count).toBe(0);
 });
