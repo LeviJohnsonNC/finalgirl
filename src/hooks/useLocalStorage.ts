@@ -1,47 +1,57 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-const isQuotaError = (error: unknown): boolean => {
-  if (!(error instanceof Error)) return false;
-  return (
-    error.name === 'QuotaExceededError' ||
-    error.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
-    /quota/i.test(error.message)
-  );
-};
+const CHANGE_EVENT = 'final-girl-storage-change';
 
-export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
-    }
-  });
+export function readStoredValue<T>(key: string, fallback: T): T {
+  try {
+    const item = window.localStorage.getItem(key);
+    return item === null ? fallback : JSON.parse(item);
+  } catch (error) {
+    console.error('Error reading localStorage key "' + key + '":', error);
+    return fallback;
+  }
+}
 
-  const setValue = useCallback((value: T | ((val: T) => T)) => {
-    setStoredValue((currentValue) => {
-      const valueToStore = value instanceof Function ? value(currentValue) : value;
-      // Persist to localStorage outside of state-derivation; never throw from updater.
-      try {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
-      } catch (error) {
-        if (isQuotaError(error)) {
-          // Best-effort: drop this cache entry so future writes don't keep failing.
-          try {
-            window.localStorage.removeItem(key);
-          } catch {
-            // ignore
-          }
-          console.warn(`localStorage quota exceeded for key "${key}"; cache disabled for this session.`);
-        } else {
-          console.error(`Error setting localStorage key "${key}":`, error);
-        }
-      }
-      return valueToStore;
-    });
+/** Persist before acknowledging a change. Never erase the last good value. */
+export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((previous: T) => T)) => boolean] {
+  const initialRef = useRef(initialValue);
+  const [entry, setEntry] = useState(() => ({ key, value: readStoredValue(key, initialRef.current) }));
+  // Never show the previous account's value while the key changes.
+  const value = entry.key === key ? entry.value : readStoredValue(key, initialRef.current);
+  const current = useRef({ key, value });
+  current.current = { key, value };
+
+  useEffect(() => {
+    const refresh = (event: Event) => {
+      const changedKey = event instanceof StorageEvent ? event.key : (event as CustomEvent<string>).detail;
+      if (changedKey !== null && changedKey !== key) return;
+      const next = readStoredValue(key, initialRef.current);
+      current.current = { key, value: next };
+      setEntry({ key, value: next });
+    };
+    window.addEventListener('storage', refresh);
+    window.addEventListener(CHANGE_EVENT, refresh);
+    return () => {
+      window.removeEventListener('storage', refresh);
+      window.removeEventListener(CHANGE_EVENT, refresh);
+    };
   }, [key]);
 
-  return [storedValue, setValue];
+  const setValue = useCallback((next: T | ((previous: T) => T)): boolean => {
+    const previous = readStoredValue(key, current.current.key === key ? current.current.value : initialRef.current);
+    const valueToStore = typeof next === 'function' ? (next as (value: T) => T)(previous) : next;
+    try {
+      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+    } catch (error) {
+      console.error('Error setting localStorage key "' + key + '":', error);
+      return false;
+    }
+    current.current = { key, value: valueToStore };
+    setEntry({ key, value: valueToStore });
+    window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: key }));
+    return true;
+  }, [key]);
+
+  return [value, setValue];
 }
+

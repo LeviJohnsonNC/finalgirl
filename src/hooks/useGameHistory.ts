@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { useLocalStorage } from './useLocalStorage';
 import { useAuth } from './useAuth';
+import { useDurableQueue } from './useDurableQueue';
 import { supabase } from '@/integrations/supabase/client';
 
 // Extract storage path from public URL for cleanup
@@ -44,19 +45,6 @@ const slimGameForCache = (game: GameResult): GameResult => {
 };
 
 const slimGamesForCache = (games: GameResult[]): GameResult[] => games.map(slimGameForCache);
-
-// Cheap equality: length + first/last id + first/last timestamp. Good enough
-// to detect list changes without JSON.stringify'ing megabytes of data.
-const listsShallowEqual = (a: GameResult[], b: GameResult[]): boolean => {
-  if (a === b) return true;
-  if (a.length !== b.length) return false;
-  if (a.length === 0) return true;
-  return (
-    a[0].id === b[0].id &&
-    a[0].timestamp === b[0].timestamp &&
-    a[a.length - 1].id === b[b.length - 1].id
-  );
-};
 
 const sanitizeStoredImageUrl = (value: unknown): string | undefined => {
   if (typeof value !== 'string') return undefined;
@@ -173,230 +161,141 @@ const fromDbRow = (row: Record<string, unknown>): GameResult => ({
   hasLegacyScene: row.has_legacy_scene === true,
 });
 
+type GameWrite =
+  | { kind: 'record'; game: GameResult }
+  | { kind: 'update'; id: string; updates: Partial<GameResult> };
+
+const updateColumns: Partial<Record<keyof GameResult, string>> = {
+  introStory: 'intro_story', endingNarration: 'ending_narration', gameHighlights: 'game_highlights',
+  finalHorrorLevel: 'final_horror_level', finalGirlHealth: 'final_girl_health', killerHealth: 'killer_health',
+  weaponUsed: 'weapon_used', endingSubLocation: 'ending_sub_location', victimsSaved: 'victims_saved',
+  victimsKilled: 'victims_killed', posterImageUrl: 'poster_image_url', sceneImageUrl: 'scene_image_url',
+  visualBible: 'visual_bible',
+};
+
+function applyWrite(games: GameResult[], write: GameWrite): GameResult[] {
+  if (write.kind === 'record') {
+    // A retried insert must not overwrite a later ending already in the archive.
+    return games.some(game => game.id === write.game.id) ? games : [write.game, ...games];
+  }
+  return games.map(game => game.id === write.id ? { ...game, ...write.updates } : game);
+}
+
 export const useGameHistory = () => {
   const { user, isLoading: authLoading, isAuthReady, authError } = useAuth();
+  const userId = user?.id ?? null;
+  const ownerRef = useRef(userId);
+  ownerRef.current = userId;
   const [localGameHistory, setLocalGameHistory] = useLocalStorage<GameResult[]>('final-girl-game-history', []);
-  // v2 cache key: older caches captured null poster/scene URLs for legacy rows
-  // while the summary RPC was still stripping data: URIs. Bump the key so
-  // clients ignore that stale snapshot and rehydrate from the RPC.
-  const [cachedCloudGameHistory, setCachedCloudGameHistory] = useLocalStorage<GameResult[]>('final-girl-cloud-game-history-cache-v2', []);
-  const [dbGameHistory, setDbGameHistory] = useState<GameResult[]>([]);
+  // Deliberately do not import the old unowned cache: its account is unknown.
+  const [cachedGames, setCachedGames] = useLocalStorage<GameResult[]>(`final-girl-history-v3:${userId ?? 'guest'}`, []);
+  const [remote, setRemote] = useState<{ owner: string; games: GameResult[] } | null>(null);
   const [isDbLoading, setIsDbLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [isDegraded, setIsDegraded] = useState(false);
-  const [hasMigrated, setHasMigrated] = useState(false);
-  const fetchIdRef = useRef(0);
+  const [loadedOwner, setLoadedOwner] = useState<string | null>(null);
+  const fetchId = useRef(0);
+  const base = userId && remote?.owner === userId ? remote.games : cachedGames;
+  const baseRef = useRef(base);
+  baseRef.current = base;
 
-  // Mirror the cached history in a ref so fetchFromDb can read the latest
-  // cache for its degraded-mode fallback WITHOUT depending on it. When it was
-  // a dependency, every successful fetch that updated the cache minted a new
-  // fetchFromDb identity, which re-ran the mount effect and issued the summary
-  // RPC a second time on every sign-in.
-  const cachedCloudGameHistoryRef = useRef(cachedCloudGameHistory);
-  cachedCloudGameHistoryRef.current = cachedCloudGameHistory;
+  const replaceBase = useCallback((games: GameResult[]) => {
+    if (!userId || ownerRef.current !== userId) return;
+    baseRef.current = games;
+    const cached = slimGamesForCache(games);
+    if (setCachedGames(cached)) setRemote(null);
+    else setRemote({ owner: userId, games });
+  }, [userId, setCachedGames]);
 
-  // Determine which history to use
-  const gameHistory = user ? dbGameHistory : localGameHistory;
+  const send = useCallback(async (write: GameWrite) => {
+    if (!userId || ownerRef.current !== userId) throw new Error('Please sign in to finish saving your records.');
+    if (write.kind === 'record') {
+      const { error } = await supabase.from('game_history')
+        .upsert(toDbRow(write.game, userId), { onConflict: 'id', ignoreDuplicates: true })
+        .abortSignal(AbortSignal.timeout(20000));
+      if (error) throw new Error(error.message);
+    } else {
+      const updates: Record<string, unknown> = {};
+      Object.entries(write.updates).forEach(([key, value]) => {
+        const column = updateColumns[key as keyof GameResult];
+        if (!column || value === undefined) return;
+        updates[column] = key === 'posterImageUrl' || key === 'sceneImageUrl'
+          ? sanitizeStoredImageUrl(value) ?? null : value;
+      });
+      if (Object.keys(updates).length) {
+        const { data, error } = await supabase.from('game_history').update(updates)
+          .eq('id', write.id).eq('user_id', userId).select('id').abortSignal(AbortSignal.timeout(20000)).maybeSingle();
+        if (error || !data) throw new Error(error?.message || 'The record was not found. Your changes remain on this device.');
+      }
+    }
+    if (ownerRef.current === userId) replaceBase(applyWrite(baseRef.current, write));
+  }, [userId, replaceBase]);
+
+  const { pending, enqueue, flush, error: saveError } = useDurableQueue<GameWrite>(`final-girl-history-outbox-v1:${userId ?? 'guest'}`, Boolean(userId && isAuthReady && (loadedOwner === userId || loadError)), send);
+  const gameHistory = userId ? pending.reduce(applyWrite, base) : localGameHistory;
 
   const fetchFromDb = useCallback(async () => {
-    if (!user) return;
-
-    const fetchId = fetchIdRef.current + 1;
-    fetchIdRef.current = fetchId;
-
+    if (!userId) return;
+    const requestId = ++fetchId.current;
     setIsDbLoading(true);
     setLoadError(null);
-    setIsDegraded(false);
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 20000);
-
     try {
-      // Use the summary RPC — it strips out legacy inline data: URIs from
-      // poster_image_url / scene_image_url so we don't ship megabytes on load.
-      const { data, error } = await supabase
-        .rpc('get_game_history_summary')
-        .abortSignal(controller.signal);
-
-      if (error) {
-        console.error('Error fetching game history:', error);
-        if (fetchIdRef.current === fetchId) {
-          const cached = cachedCloudGameHistoryRef.current;
-          setLoadError(error.message || 'Failed to retrieve session data.');
-          setIsDegraded(cached.length > 0);
-          if (cached.length > 0) setDbGameHistory(cached);
-        }
-        return;
-      }
-
-      if (data && fetchIdRef.current === fetchId) {
-        const games = (data as Array<Record<string, unknown>>).map(row => fromDbRow(row));
-        setDbGameHistory(games);
-        const slimmed = slimGamesForCache(games);
-        setCachedCloudGameHistory(prev => listsShallowEqual(prev, slimmed) ? prev : slimmed);
-      }
-    } catch (err) {
-      console.error('Game history fetch failed:', err);
-      if (fetchIdRef.current === fetchId) {
-        const message = err instanceof DOMException && err.name === 'AbortError'
-          ? 'Cloud records did not respond within 20 seconds.'
-          : err instanceof Error ? err.message : 'Failed to retrieve session data.';
-        const cached = cachedCloudGameHistoryRef.current;
-        setLoadError(message);
-        setIsDegraded(cached.length > 0);
-        if (cached.length > 0) setDbGameHistory(cached);
+      const { data, error } = await supabase.rpc('get_game_history_summary').abortSignal(AbortSignal.timeout(20000));
+      if (error) throw new Error(error.message || 'Failed to retrieve session data.');
+      if (requestId !== fetchId.current || ownerRef.current !== userId) return;
+      const games = (data ?? []).map(row => {
+        const summary = fromDbRow(row as unknown as Record<string, unknown>);
+        const existing = baseRef.current.find(game => game.id === summary.id);
+        // The summary intentionally omits narrative fields, not their existence.
+        return { ...existing, ...summary,
+          introStory: existing?.introStory, endingNarration: existing?.endingNarration,
+          gameHighlights: existing?.gameHighlights, visualBible: existing?.visualBible,
+        };
+      });
+      replaceBase(games);
+      setLoadedOwner(userId);
+    } catch (error) {
+      if (requestId === fetchId.current && ownerRef.current === userId) {
+        setLoadError(error instanceof Error ? error.message : 'Failed to retrieve session data.');
       }
     } finally {
-      window.clearTimeout(timeoutId);
-      if (fetchIdRef.current === fetchId) {
-        setIsDbLoading(false);
-      }
+      if (requestId === fetchId.current && ownerRef.current === userId) setIsDbLoading(false);
     }
-  }, [user, setCachedCloudGameHistory]);
+  }, [userId, replaceBase]);
 
-  // Fetch from database when authenticated
   useEffect(() => {
-    if (!isAuthReady) return;
+    if (isAuthReady && userId) void fetchFromDb();
+    return () => { fetchId.current += 1; };
+  }, [isAuthReady, userId, fetchFromDb]);
 
-    if (!user) {
-      fetchIdRef.current += 1;
-      setIsDbLoading(false);
-      setLoadError(authError);
-      setDbGameHistory([]);
-      return;
+  useEffect(() => {
+    if (!userId || loadedOwner !== userId || loadError || !localGameHistory.length) return;
+    try {
+      // Idempotent inserts merge guest history even into a non-empty archive.
+      // Do not erase the guest copy until every entry has a durable owner log.
+      localGameHistory.forEach(game => {
+        if (!pending.some(write => write.kind === 'record' && write.game.id === game.id)) {
+          enqueue({ kind: 'record', game });
+        }
+      });
+      setLocalGameHistory([]);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not import saved games.');
     }
+  }, [userId, loadedOwner, loadError, localGameHistory, enqueue, pending, setLocalGameHistory]);
 
-    fetchFromDb();
-  }, [user, isAuthReady, authError, fetchFromDb]);
-
-  // Migrate localStorage data on first sign-in
-  useEffect(() => {
-    if (!user || !isAuthReady || hasMigrated || isDbLoading) return;
-    if (localGameHistory.length === 0) return;
-    if (dbGameHistory.length > 0) return; // Already has data in DB
-
-    const migrateData = async () => {
-      setHasMigrated(true);
-      
-      try {
-        // Upload all local games to database
-        const records = localGameHistory.map(game => toDbRow(game, user.id));
-
-        const { error } = await supabase
-          .from('game_history')
-          .insert(records);
-
-        if (error) {
-          console.error('Error migrating game history:', error);
-          return;
-        }
-
-        // Clear localStorage after successful migration
-        setLocalGameHistory([]);
-        
-        // Refresh from database
-        const { data } = await supabase
-          .from('game_history')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('timestamp', { ascending: false });
-
-        if (data) {
-          const games = data.map(row => fromDbRow(row as Record<string, unknown>));
-          setDbGameHistory(games);
-          const slimmed = slimGamesForCache(games);
-          setCachedCloudGameHistory(prev => listsShallowEqual(prev, slimmed) ? prev : slimmed);
-        }
-      } catch (err) {
-        console.error('Migration error:', err);
-      }
-    };
-
-    migrateData();
-  }, [user, isAuthReady, localGameHistory, dbGameHistory, hasMigrated, isDbLoading, setLocalGameHistory, setCachedCloudGameHistory]);
-
-  // recordGame returns synchronously but may do async work in background
   const recordGame = useCallback((result: Omit<GameResult, 'id' | 'timestamp'>): GameResult => {
-    const newResult: GameResult = {
-      ...result,
-      id: crypto.randomUUID(),
-      timestamp: Date.now(),
-    };
-    
-    if (user) {
-      // Optimistically update local state
-      setDbGameHistory(prev => [newResult, ...prev]);
-      setCachedCloudGameHistory(prev => [slimGameForCache(newResult), ...prev]);
-      
-      // Save to database in background
-      supabase
-        .from('game_history')
-        .insert(toDbRow(newResult, user.id))
-        .then(({ error }) => {
-          if (error) {
-            console.error('Error recording game:', error);
-            toast.error('Failed to save game', { description: 'Your game was not saved to the cloud. Please try again.' });
-            // Rollback on error
-            setDbGameHistory(prev => prev.filter(g => g.id !== newResult.id));
-            setCachedCloudGameHistory(prev => prev.filter(g => g.id !== newResult.id));
-          }
-        });
-    } else {
-      // Save to localStorage
-      setLocalGameHistory(prev => [newResult, ...prev]);
-    }
-    
-    return newResult;
-  }, [user, setLocalGameHistory, setCachedCloudGameHistory]);
+    const game = { ...result, id: crypto.randomUUID(), timestamp: Date.now() };
+    if (userId) enqueue({ kind: 'record', game });
+    else if (!setLocalGameHistory(games => [game, ...games])) throw new Error('This device could not save the game. Free some browser storage and try again.');
+    return game;
+  }, [userId, enqueue, setLocalGameHistory]);
 
   const updateGame = useCallback((id: string, updates: Partial<GameResult>) => {
-    if (user) {
-      // Optimistically update local state
-      setDbGameHistory(prev => 
-        prev.map(game => 
-          game.id === id ? { ...game, ...updates } : game
-        )
-      );
-      setCachedCloudGameHistory(prev =>
-        prev.map(game =>
-          game.id === id ? slimGameForCache({ ...game, ...updates }) : game
-        )
-      );
-      
-      // Build update object for database
-      const dbUpdates: Record<string, unknown> = {};
-      if (updates.introStory !== undefined) dbUpdates.intro_story = updates.introStory;
-      if (updates.endingNarration !== undefined) dbUpdates.ending_narration = updates.endingNarration;
-      if (updates.gameHighlights !== undefined) dbUpdates.game_highlights = updates.gameHighlights;
-      if (updates.finalHorrorLevel !== undefined) dbUpdates.final_horror_level = updates.finalHorrorLevel;
-      if (updates.finalGirlHealth !== undefined) dbUpdates.final_girl_health = updates.finalGirlHealth;
-      if (updates.killerHealth !== undefined) dbUpdates.killer_health = updates.killerHealth;
-      if (updates.weaponUsed !== undefined) dbUpdates.weapon_used = updates.weaponUsed;
-      if (updates.endingSubLocation !== undefined) dbUpdates.ending_sub_location = updates.endingSubLocation;
-      if (updates.victimsSaved !== undefined) dbUpdates.victims_saved = updates.victimsSaved;
-      if (updates.victimsKilled !== undefined) dbUpdates.victims_killed = updates.victimsKilled;
-      if (updates.posterImageUrl !== undefined) dbUpdates.poster_image_url = sanitizeStoredImageUrl(updates.posterImageUrl) ?? null;
-      if (updates.sceneImageUrl !== undefined) dbUpdates.scene_image_url = sanitizeStoredImageUrl(updates.sceneImageUrl) ?? null;
-
-      // Update database in background
-      supabase
-        .from('game_history')
-        .update(dbUpdates)
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .then(({ error }) => {
-          if (error) {
-            console.error('Error updating game:', error);
-            toast.error('Failed to update game', { description: 'Your changes were not saved to the cloud.' });
-          }
-        });
-    } else {
-      setLocalGameHistory(prev => 
-        prev.map(game => 
-          game.id === id ? { ...game, ...updates } : game
-        )
-      );
+    if (userId) enqueue({ kind: 'update', id, updates });
+    else if (!setLocalGameHistory(games => games.map(game => game.id === id ? { ...game, ...updates } : game))) {
+      throw new Error('This device could not save the changes. Please try again.');
     }
-  }, [user, setLocalGameHistory, setCachedCloudGameHistory]);
+  }, [userId, enqueue, setLocalGameHistory]);
 
   const getStats = useCallback((): GameStats => {
     const history = gameHistory;
@@ -452,110 +351,56 @@ export const useGameHistory = () => {
   }, [gameHistory]);
 
   const fetchGameDetails = useCallback(async (id: string): Promise<GameResult | null> => {
-    const existing = gameHistory.find(g => g.id === id);
-    if (!user) return existing ?? null;
-    if (existing?.introStory || existing?.endingNarration || existing?.gameHighlights) return existing;
-
-    const { data, error } = await supabase
-      .from('game_history')
-      .select('*')
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (error) {
-      console.error('Error fetching game details:', error);
-      toast.error('Failed to load story details');
-      return existing ?? null;
-    }
-    if (!data) return existing ?? null;
-
-    const fullGame = fromDbRow(data as unknown as Record<string, unknown>);
-    setDbGameHistory(prev => prev.map(game => game.id === id ? { ...game, ...fullGame } : game));
-    return fullGame;
-  }, [user, gameHistory]);
+    const existing = gameHistory.find(game => game.id === id);
+    if (!userId) return existing ?? null;
+    const { data, error } = await supabase.from('game_history').select('*')
+      .eq('id', id).eq('user_id', userId).abortSignal(AbortSignal.timeout(20000)).maybeSingle();
+    if (ownerRef.current !== userId) return null;
+    if (error || !data) return existing ?? null;
+    const full = fromDbRow(data as unknown as Record<string, unknown>);
+    replaceBase(baseRef.current.map(game => game.id === id ? full : game));
+    // Pending edits take precedence over a possibly older server response.
+    return pending.reduce(applyWrite, [full])[0];
+  }, [gameHistory, userId, replaceBase, pending]);
 
   const deleteGame = useCallback(async (id: string) => {
-    // Find the game to get image URLs before deletion
-    const gameToDelete = gameHistory.find(g => g.id === id);
-
-    if (user) {
-      // Optimistically update state AND the cloud cache — a stale cache entry
-      // would resurrect the deleted game in degraded mode.
-      setDbGameHistory(prev => prev.filter(game => game.id !== id));
-      setCachedCloudGameHistory(prev => prev.filter(game => game.id !== id));
-
-      // Delete the row first. Storage cleanup happens only after the row is
-      // gone: deleting the images before a failed row-delete would roll the
-      // game back with its poster/scene irrecoverably destroyed.
-      const { error } = await supabase
-        .from('game_history')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('Error deleting game:', error);
-        // Rollback optimistic update on error
-        if (gameToDelete) {
-          setDbGameHistory(prev => [...prev, gameToDelete].sort((a, b) => b.timestamp - a.timestamp));
-          setCachedCloudGameHistory(prev =>
-            [...prev, slimGameForCache(gameToDelete)].sort((a, b) => b.timestamp - a.timestamp)
-          );
-        }
-        return;
-      }
-
-      // Row is gone — now remove the orphaned storage files (best effort).
-      if (gameToDelete) {
-        await deleteStorageFiles(gameToDelete);
-      }
-    } else {
-      setLocalGameHistory(prev => prev.filter(game => game.id !== id));
+    const game = gameHistory.find(item => item.id === id);
+    if (!userId) {
+      if (!setLocalGameHistory(games => games.filter(item => item.id !== id))) throw new Error('Could not delete the local record.');
+      return;
     }
-  }, [user, gameHistory, setLocalGameHistory, setCachedCloudGameHistory]);
+    if (!await flush()) throw new Error('Your saved changes must reach the archive before deleting records. Retry the pending saves first.');
+    const { error } = await supabase.from('game_history').delete().eq('id', id).eq('user_id', userId)
+      .abortSignal(AbortSignal.timeout(20000));
+    if (error) throw new Error(error.message);
+    if (ownerRef.current !== userId) return;
+    replaceBase(baseRef.current.filter(item => item.id !== id));
+    if (game) await deleteStorageFiles(game);
+  }, [gameHistory, userId, flush, replaceBase, setLocalGameHistory]);
 
   const clearHistory = useCallback(async () => {
-    if (user) {
-      const gamesToClear = [...dbGameHistory];
-
-      // Optimistically clear state and the cloud cache together.
-      setDbGameHistory([]);
-      setCachedCloudGameHistory([]);
-
-      // Delete rows first, storage files after — same ordering rationale as
-      // deleteGame: never destroy images for rows that might survive.
-      const { error } = await supabase
-        .from('game_history')
-        .delete()
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('Error clearing history:', error);
-        // Rollback so the UI reflects that the rows still exist.
-        setDbGameHistory(gamesToClear);
-        setCachedCloudGameHistory(slimGamesForCache(gamesToClear));
-        return;
-      }
-
-      // Best effort, in parallel.
-      await Promise.all(gamesToClear.map(game => deleteStorageFiles(game)));
-    } else {
-      setLocalGameHistory([]);
+    if (!userId) {
+      if (!setLocalGameHistory([])) throw new Error('Could not clear local records.');
+      return;
     }
-  }, [user, dbGameHistory, setLocalGameHistory, setCachedCloudGameHistory]);
+    if (!await flush()) throw new Error('Retry pending saves before resetting your plays.');
+    const games = [...baseRef.current];
+    const { error } = await supabase.from('game_history').delete().eq('user_id', userId)
+      .abortSignal(AbortSignal.timeout(20000));
+    if (error) throw new Error(error.message);
+    if (ownerRef.current !== userId) return;
+    replaceBase([]);
+    await Promise.all(games.map(deleteStorageFiles));
+  }, [userId, flush, replaceBase, setLocalGameHistory]);
 
   return {
-    gameHistory,
-    recordGame,
-    updateGame,
-    deleteGame,
-    getStats,
-    fetchGameDetails,
-    clearHistory,
+    gameHistory, recordGame, updateGame, deleteGame, getStats, fetchGameDetails, clearHistory,
     retryLoadHistory: fetchFromDb,
-    isLoading: !isAuthReady || authLoading || isDbLoading,
-    loadError,
-    isDegraded,
+    retryPendingSaves: flush,
+    pendingSaveCount: userId ? pending.length : 0,
+    saveError: saveError,
+    isLoading: !isAuthReady || authLoading || Boolean(userId && isDbLoading),
+    loadError: userId ? loadError : authError,
+    isDegraded: Boolean(userId && loadError && gameHistory.length),
   };
 };

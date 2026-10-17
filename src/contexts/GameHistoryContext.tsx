@@ -11,6 +11,9 @@ interface GameHistoryContextValue {
   fetchGameDetails: (id: string) => Promise<GameResult | null>;
   clearHistory: () => Promise<void>;
   retryLoadHistory: () => Promise<void>;
+  pendingSaveCount: number;
+  saveError: string | null;
+  retryPendingSaves: () => Promise<boolean>;
   isLoading: boolean;
   loadError: string | null;
   isDegraded: boolean;
@@ -34,3 +37,4 @@ export const useGameHistoryContext = (): GameHistoryContextValue => {
   }
   return ctx;
 };
+
