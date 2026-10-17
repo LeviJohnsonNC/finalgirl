@@ -11,6 +11,13 @@ afterEach(cleanup);
 beforeEach(() => { mock.load.mockReset(); mock.user = { id: 'A' }; });
 
 describe('image preference readiness', () => {
+  it('enables casting artwork and scene photography for a player without saved preferences', async () => {
+    mock.load.mockResolvedValue({ data: null, error: null });
+    const { result } = renderHook(useImageGeneration);
+    await waitFor(() => expect(result.current.settingsReady).toBe(true));
+    expect(result.current.autoGenerate).toBe(true);
+    expect(result.current.useAiCastingArt).toBe(true);
+  });
   it('does not authorize auto-generation until the saved opt-out loads', async () => {
     let complete: (value: unknown) => void;
     mock.load.mockReturnValue(new Promise(resolve => { complete = resolve; }));
@@ -37,3 +44,4 @@ describe('image preference readiness', () => {
     expect(result.current.useAiCastingArt).toBe(false);
   });
 });
+

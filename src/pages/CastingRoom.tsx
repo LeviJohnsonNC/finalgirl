@@ -6,6 +6,7 @@ import { ScenarioDropdowns } from '@/components/ScenarioDropdowns';
 import { GameIcon } from '@/components/GameIcon';
 import { getOwnedContent } from '@/types/gameData';
 import { useOwnedFilms } from '@/hooks/useOwnedFilms';
+import '@/styles/casting.css';
 import castingRoomBg from '@/assets/casting-room-bg.png';
 
 interface CastingSelection {
@@ -170,14 +171,14 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
       <div className="vignette fixed inset-0 pointer-events-none" />
       
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center py-8 pt-24">
+      <div className="casting-content relative z-10 flex flex-col items-center py-8">
         {isDegraded && (
           <div className="mb-6 border border-primary/30 bg-background/70 px-4 py-2 text-center type-caption text-muted-foreground">
             CLOUD ARCHIVE RECONNECTING • USING SAVED COLLECTION
           </div>
         )}
-        {/* Three Casting Slots — files-on-a-desk layout, same height */}
-        <div className="flex flex-col md:flex-row items-center md:items-stretch justify-center gap-6 md:gap-8 mb-10 md:mb-12 w-full px-4">
+        {/* A landscape scene behind two overlapping portrait photographs */}
+        <div className="casting-tableau">
           <CastingSlot
             type="killer"
             value={selection.killer}

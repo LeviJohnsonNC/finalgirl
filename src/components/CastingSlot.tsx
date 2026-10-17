@@ -3,9 +3,6 @@ import shuffleSound from '@/assets/sounds/card-shuffle.mp3';
 import { LoreInfoModal } from './LoreInfoModal';
 import shufflePlate from '@/assets/buttons/shuffle-plate.png.asset.json';
 import choosePlate from '@/assets/buttons/choose-plate.png.asset.json';
-import emptyKillerFrame from '@/assets/frames/empty-killer.png.asset.json';
-import emptyLocationFrame from '@/assets/frames/empty-location.png.asset.json';
-import emptyFinalGirlFrame from '@/assets/frames/empty-finalgirl.png.asset.json';
 import { useActiveImages } from '@/hooks/useActiveImages';
 
 interface CastingSlotProps {
@@ -34,12 +31,6 @@ const META_TAGS = {
   killer: 'KILLER',
   location: 'SITE',
   finalGirl: 'SURVIVOR',
-};
-
-const EMPTY_FRAME = {
-  killer: emptyKillerFrame.url,
-  location: emptyLocationFrame.url,
-  finalGirl: emptyFinalGirlFrame.url,
 };
 
 const getObjectPosition = (type: 'killer' | 'location' | 'finalGirl', value: string | null): string => {
@@ -112,126 +103,58 @@ export const CastingSlot = ({
   const isEmpty = !displayValue && !isAnimating;
   const isLocation = type === 'location';
 
-  // Portrait for killer/final girl (2:3). Landscape for location (3:2).
-  // Widths chosen so the location card is ~1.5x the portrait width, same visual height.
-  const slotDimensions = isLocation
-    ? 'w-[22rem] md:w-[26rem] aspect-[3/2]'
-    : 'w-[14.5rem] md:w-[17.25rem] aspect-[2/3]';
-
   return (
-    <div className="casting-slot flex flex-col items-center shrink-0 min-w-0 self-stretch justify-between gap-3">
-      {/* Top block: label + card */}
-      <div className="flex flex-col items-center gap-3 w-full">
-        {/* Slot label */}
-        <span className="font-display text-xs text-muted-foreground tracking-[0.28em] uppercase">
-          {SLOT_LABELS[type]}
+    <div className={`casting-slot casting-slot--${type}`}>
+      <div className="casting-slot-top">
+        <span className="casting-slot-heading">
+          {isLocation && displayValue ? displayValue : SLOT_LABELS[type]}
         </span>
-
-        {/* The card */}
-        <div className={`relative ${slotDimensions}`}>
-          {isEmpty ? (
-            <button
-              type="button"
-              onClick={onChoose}
-              className="evidence-frame w-full h-full"
-              aria-label={`Choose ${SLOT_LABELS[type]}`}
-            >
-              <img src={EMPTY_FRAME[type]} alt="" className="frame-png" />
-              <span className="evidence-frame__label">{EMPTY_LABELS[type]}</span>
-            </button>
-          ) : (
-            <div
-              className="case-frame w-full h-full cursor-pointer"
-              onClick={!isAnimating ? onChoose : undefined}
-              style={{ cursor: isAnimating ? 'default' : 'pointer' }}
-            >
-              <span className="case-frame__cnr-bl" />
-              <span className="case-frame__cnr-br" />
-              <span className="case-frame__crosshair" />
-
-              {isAnimating && shuffleSequence.length > 0 ? (
-                <div
-                  key={shuffleKey}
-                  className="slot-reel absolute inset-0"
-                  style={{ '--item-count': shuffleSequence.length } as React.CSSProperties}
-                  onAnimationEnd={handleAnimationEnd}
-                >
-                  {shuffleSequence.map((option, idx) => {
-                    const img = getImageForValue(type, option);
-                    const positionClass = getObjectPosition(type, option);
-                    return img ? (
-                      <img
-                        key={idx}
-                        src={img}
-                        alt={option}
-                        className={`w-full h-full object-cover flex-shrink-0 ${positionClass}`}
-                        loading="eager"
-                      />
-                    ) : (
-                      <div key={idx} className="w-full h-full mystery-static flex-shrink-0" />
-                    );
-                  })}
-                </div>
-              ) : cardImage ? (
-                <img
-                  src={cardImage}
-                  alt={displayValue || ''}
-                  className={`absolute inset-0 w-full h-full object-cover ${getObjectPosition(type, displayValue)}`}
-                />
-              ) : (
-                <div className="absolute inset-0 mystery-static" />
-              )}
-
-              <div className="absolute inset-0 vhs-softness pointer-events-none" />
-              <div className="absolute inset-0 film-grain pointer-events-none opacity-70" />
-              <div className="absolute inset-0 scanlines-overlay pointer-events-none opacity-40" />
-            </div>
-          )}
-        </div>
+        <button type="button" className={`casting-photo ${isEmpty ? 'casting-photo--empty' : ''}`}
+          onClick={onChoose} disabled={isAnimating}
+          aria-label={`Choose ${SLOT_LABELS[type]}${displayValue ? ': ' + displayValue : ''}`}>
+          <span className="casting-photo-window">
+            {isEmpty ? (
+              <span className="casting-photo-placeholder">{EMPTY_LABELS[type]}</span>
+            ) : isAnimating && shuffleSequence.length > 0 ? (
+              <span key={shuffleKey} className="slot-reel absolute inset-0"
+                style={{ '--item-count': shuffleSequence.length } as React.CSSProperties}
+                onAnimationEnd={handleAnimationEnd}>
+                {shuffleSequence.map((option, idx) => {
+                  const img = getImageForValue(type, option);
+                  return img ? (
+                    <img key={idx} src={img} alt={option}
+                      className={`w-full h-full object-cover flex-shrink-0 ${getObjectPosition(type, option)}`} loading="eager" />
+                  ) : <span key={idx} className="block w-full h-full mystery-static flex-shrink-0" />;
+                })}
+              </span>
+            ) : cardImage ? (
+              <img src={cardImage} alt={displayValue || ''}
+                className={`casting-photo-image ${getObjectPosition(type, displayValue)}`} />
+            ) : <span className="absolute inset-0 mystery-static" />}
+            <span className="casting-photo-glass" aria-hidden="true" />
+            {!isLocation && displayValue && !isAnimating &&
+              <span className="casting-photo-caption" aria-hidden="true">{displayValue}</span>}
+          </span>
+          <span className="casting-photo-border" aria-hidden="true" />
+          {!isLocation && <>
+            <span className="casting-photo-tape casting-photo-tape--top" aria-hidden="true" />
+            {type === 'finalGirl' && <span className="casting-photo-tape casting-photo-tape--bottom" aria-hidden="true" />}
+          </>}
+        </button>
       </div>
 
-      {/* Bottom block: dossier meta + plate buttons, bottom-aligned across all slots */}
-      <div className="flex flex-col items-center gap-3 w-full">
-        {/* Dossier metadata strip */}
-        <div className="min-h-[1.5rem] flex items-center justify-center gap-1.5">
-          {isAnimating ? (
-            <span className="type-label text-dim animate-pulse">SCANNING...</span>
-          ) : displayValue ? (
-            <>
-              <span className="dossier-meta">
-                <span className="dossier-meta__tag">{META_TAGS[type]}</span>
-                <span className="dossier-meta__sep">//</span>
-                <span className="dossier-meta__value">{displayValue}</span>
-              </span>
-              <LoreInfoModal type={type} name={displayValue} />
-            </>
-          ) : (
-            <span className="type-caption text-dim">
-              {META_TAGS[type]} // ————
-            </span>
-          )}
+      <div className="casting-slot-controls">
+        <div className="casting-slot-meta">
+          <span className="type-caption text-dim">{isAnimating ? 'SCANNING...' : META_TAGS[type]}</span>
+          {displayValue && !isAnimating && <LoreInfoModal type={type} name={displayValue} />}
         </div>
-
-        {/* Plate buttons — equal-width row */}
-        <div className="flex gap-3 w-full">
-          <button
-            type="button"
-            onClick={onShuffle}
-            disabled={isAnimating || options.length === 0}
-            className="plate-btn plate-btn--shuffle flex-1"
-            style={{ backgroundImage: `url(${shufflePlate.url})` }}
-            aria-label="Shuffle"
-          >
+        <div className="casting-slot-buttons">
+          <button type="button" onClick={onShuffle} disabled={isAnimating || options.length === 0}
+            className="plate-btn plate-btn--shuffle" style={{ backgroundImage: `url(${shufflePlate.url})` }} aria-label="Shuffle">
             <span className="plate-btn__label">SHUFFLE</span>
           </button>
-          <button
-            type="button"
-            onClick={onChoose}
-            disabled={options.length === 0}
-            className="plate-btn plate-btn--choose flex-1"
-            style={{ backgroundImage: `url(${choosePlate.url})` }}
-            aria-label="Choose"
-          >
+          <button type="button" onClick={onChoose} disabled={options.length === 0}
+            className="plate-btn plate-btn--choose" style={{ backgroundImage: `url(${choosePlate.url})` }} aria-label="Choose">
             <span className="plate-btn__label">CHOOSE</span>
           </button>
         </div>

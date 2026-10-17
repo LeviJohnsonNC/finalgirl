@@ -5,13 +5,13 @@ import { useAuth } from '@/hooks/useAuth';
 interface ImageSettings {
   /** Auto-generate the opening still and closing poster. On by default. */
   autoGenerate: boolean;
-  /** Show the AI-rendered casting art instead of the photographic variants. */
+  /** Show AI casting art instead of official art. On by default. */
   useAiCastingArt: boolean;
 }
 
 const DEFAULT_SETTINGS: ImageSettings = {
   autoGenerate: true,
-  useAiCastingArt: false,
+  useAiCastingArt: true,
 };
 
 export interface GenerateImageContext {
@@ -84,7 +84,7 @@ export const useImageGeneration = () => {
       if (ownerRef.current !== userId || id !== requestId.current) return;
       setState({ owner: userId, ready: true, settings: {
         autoGenerate: data?.auto_generate_images ?? true,
-        useAiCastingArt: data?.use_ai_casting_art ?? false,
+        useAiCastingArt: data?.use_ai_casting_art ?? true,
       } });
       setSettingsError(null);
     } catch (error) {
