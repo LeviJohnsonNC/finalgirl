@@ -1,3 +1,4 @@
+import type { Json } from '@/integrations/supabase/types';
 import {validPlayLog, type PlayEvent} from '@/lib/play/events';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
@@ -136,7 +137,7 @@ const toDbRow = (result: GameResult, userId: string) => ({
   scene_image_url: sanitizeStoredImageUrl(result.sceneImageUrl) ?? null,
   visual_bible: result.visualBible ?? null,
   rounds_played: result.roundsPlayed ?? null,
-  play_events: result.playEvents ?? null,
+  play_events: (result.playEvents ?? null) as unknown as Json,
 });
 
 // Convert snake_case from database to camelCase

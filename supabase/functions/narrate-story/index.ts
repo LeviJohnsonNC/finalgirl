@@ -1,5 +1,5 @@
-import {deathFacts,deathSignature} from '../../../src/lib/play/death.ts';
-import {validPlayLog} from '../../../src/lib/play/events.ts';
+import {deathFacts,deathSignature} from '../_shared/play/death.ts';
+import {validPlayLog} from '../_shared/play/events.ts';
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { decode as base64Decode, encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 import { getCorsHeaders } from "../_shared/auth.ts";

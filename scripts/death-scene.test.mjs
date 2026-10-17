@@ -19,8 +19,8 @@ function moduleAt(path, imports) {
   }, ex);
   return ex;
 }
-const events = moduleAt('../src/lib/play/events.ts', {});
-const death = moduleAt('../src/lib/play/death.ts', { './events.ts': events });
+const events = moduleAt('../supabase/functions/_shared/play/events.ts', {});
+const death = moduleAt('../supabase/functions/_shared/play/death.ts', { './events.ts': events });
 const schemas = moduleAt('../supabase/functions/_shared/validation.ts', {
   'https://deno.land/x/zod@v3.22.4/mod.ts': require('zod'),
   './auth.ts': { corsHeaders: {} },
@@ -148,8 +148,8 @@ function fixture(options = {}) {
         return { system: 'original', user: JSON.stringify(facts) };
       },
     },
-    '../../../src/lib/play/death.ts': death,
-    '../../../src/lib/play/events.ts': events,
+    '../_shared/play/death.ts': death,
+    '../_shared/play/events.ts': events,
   };
   new Function(
     'require',
