@@ -170,7 +170,7 @@ const IndexContent = () => {
   };
 
   const cloudNotice = <>
-    {cloudPlay.conflict && <div role="alert" className="border border-accent/40 bg-background p-4 type-body-sm max-w-2xl mx-auto">
+    {cloudPlay.conflict && <div role="alert" className="fixed top-24 inset-x-3 z-[70] border border-accent/40 bg-background p-4 shadow-2xl type-body-sm max-w-2xl mx-auto">
       <p>Another device changed this game. Both versions will be preserved before you choose.</p>
       <div className="flex flex-wrap gap-3"><button className="min-h-[44px] text-secondary underline" onClick={() => { const row = cloudPlay.conflict!; if(cloudPlay.adopt(row,saveActiveGame)) setCurrentPage(row.state.phase); }}>Use cloud version</button><button className="min-h-[44px] text-accent underline" onClick={cloudPlay.keepLocal}>Keep this device’s version</button></div>
     </div>}
@@ -239,6 +239,8 @@ const IndexContent = () => {
               sessionId={activeGame.id}
               playEvents={activeGame.playEvents}
               playMode={activeGame.playMode}
+              showDeathPanel={activeGame.showDeathPanel}
+              syncPlayNow={cloudPlay.syncNow}
               onPlayEvent={event => appendPlayEvent(activeGame.id, event)}
               syncStatus={cloudPlay.conflict ? 'Another device has changes. Open the cloud notice to choose a version.' : !user ? 'Saved on this device · sign in for cloud recovery' : cloudPlay.error || (cloudPlay.pendingCount ? 'Saved on this device · cloud sync pending' : 'Saved on this device · cloud up to date')}
               onRetrySync={user ? () => { void cloudPlay.retry(); } : undefined}

@@ -1,5 +1,5 @@
 import { assertEquals, assertExists } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { StoryRequestSchema, SceneImageRequestSchema, EndingRequestSchema, NarrationRequestSchema, validateRequest } from "./validation.ts";
+import { StoryRequestSchema, SceneImageRequestSchema, EndingRequestSchema, NarrationRequestSchema, DeathRequestSchema, validateRequest } from "./validation.ts";
 
 // ============== StoryRequestSchema Tests ==============
 
@@ -232,4 +232,10 @@ Deno.test('EndingRequestSchema - bounds recorded rounds and timeline context',()
  assertEquals(validateRequest(EndingRequestSchema,{...base,roundsPlayed:5,playSummary:'Round 2: Saved 1 victim',victimsSaved:0}).success,true);
  for(const roundsPlayed of [0,1.5,1000])assertEquals(validateRequest(EndingRequestSchema,{...base,roundsPlayed}).success,false);
  assertEquals(validateRequest(EndingRequestSchema,{...base,playSummary:'x'.repeat(1801)}).success,false);
+});
+
+Deno.test('DeathRequestSchema - allows only stable IDs and three explicit takes',()=>{
+ const request={sessionId:'11111111-1111-4111-8111-111111111111',eventId:'22222222-2222-4222-8222-222222222222'};
+ assertEquals(validateRequest(DeathRequestSchema,request).success,true);
+ for(const bad of [{...request,take:3},{...request,take:1.5},{...request,eventId:'bad'},{...request,killer:'someone else'}])assertEquals(validateRequest(DeathRequestSchema,bad).success,false);
 });

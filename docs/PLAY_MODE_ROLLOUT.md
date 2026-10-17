@@ -27,3 +27,15 @@ Start from round 1 for a fresh game. A midgame baseline can omit its round; no e
 Blank victim counts and rounds are stored as null. A deliberately entered zero remains zero after reload. Victim averages use a separate denominator for each recorded field; round averages exclude historical games without a recorded round. Health/Horror remain the existing suggested outcome defaults unless an observation supplies them; the review asks players to check these values.
 
 The ending receives up to ten active observations within 1,800 characters. Undone events are excluded. The reviewed outcome/totals override earlier observations. The complete immutable log is saved with the result and loaded on demand in the scrapbook, rather than transferred with every history summary.
+
+## Death scenes
+
+Stage 4 migration: `20261017160000_play_death_scenes.sql`. Apply after the play-session migration, then deploy `generate-death-scene`, then publish the stage 4 frontend. Existing platform credentials are reused. `LOVABLE_DEATH_MODEL` optionally overrides the separate Flash-tier candidate chain in `_shared/models.ts`; availability falls back on explicit model rejection. No claim of live provider cost or latency is made by mocked checks.
+
+A kill records immediately. The skull shortcut opens optional location/cause/name/notes; a per-game preference can open this panel automatically, but **never generates or plays audio automatically**. Buddyland suggestions use already verified board names; other locations accept the player's optional space name rather than invented official labels. Killer and location context remain independent for mixed expansions.
+
+Develop explicitly syncs the durable observation first. The server re-reads the owned session and rejects missing/undone deaths. Scenes are cached by event ID, context signature and take (three maximum per context). A service-only atomic lease prevents simultaneous requests spending twice. Cache hits and busy replies precede allowance reservation. New calls fail closed at 60/hour and 200/rolling day per account; each vignette requests at most 200 tokens with a 20-second provider deadline. Ambiguous upstream failures are not automatically retried. A player may check saved scenes before explicitly retrying. A failed generation leaves the observation unchanged.
+
+Correcting context preserves earlier cached versions but shows only the matching version. Undo hides its scenes; restoring the observation makes the matching cache available again. All saved takes for active observations can be read in the scrapbook. Narrative scenes are original optional fiction and never become additional deaths, rule changes or authoritative statistics. The ending receives recorded facts rather than treating generated details as events.
+
+After deployment, smoke-test one signed-in scene and replay it to confirm the configured model and cache. Browser tests use mocked provider responses and do not establish live prose quality or provider availability. No production credits or migrations are used by this development workflow.

@@ -82,16 +82,17 @@ interface GatewayCall {
  * POSTs one request, retrying once on a transient failure (5xx or rate limit).
  * Model-level rejections are thrown immediately so the caller can fall back.
  */
-const post = async (body: GatewayCall): Promise<Record<string, unknown>> => {
+const post = async (body: GatewayCall, options?: {signal?: AbortSignal; singleAttempt?: boolean}): Promise<Record<string, unknown>> => {
   let lastError: GatewayError | null = null;
 
-  for (let attempt = 0; attempt < 2; attempt++) {
+  for (let attempt = 0; attempt < (options?.singleAttempt ? 1 : 2); attempt++) {
     if (attempt > 0) await sleep(600);
 
     const response = await fetch(GATEWAY_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey()}`, "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      signal: options?.signal,
     });
 
     if (response.ok) return await response.json();
@@ -151,6 +152,7 @@ const postResponsesStream = async (
   model: string,
   system: string,
   user: string,
+  signal?: AbortSignal,
 ): Promise<ReadableStream<Uint8Array>> => {
   const key = apiKey();
   const response = await fetch(RESPONSES_URL, {
@@ -161,6 +163,7 @@ const postResponsesStream = async (
       "Content-Type": "application/json",
       "X-Lovable-AIG-SDK": "fetch",
     },
+    signal,
     body: JSON.stringify({
       model,
       // No temperature / max_completion_tokens: these models reject a non-default
@@ -273,8 +276,8 @@ const responsesToChatFrames = (
 };
 
 /** Consumes a streaming /v1/responses call and returns the joined text. */
-const collectResponsesText = async (model: string, system: string, user: string): Promise<string> => {
-  const upstream = await postResponsesStream(model, system, user);
+const collectResponsesText = async (model: string, system: string, user: string, signal?: AbortSignal): Promise<string> => {
+  const upstream = await postResponsesStream(model, system, user, signal);
   const reader = upstream.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
@@ -320,6 +323,8 @@ export const generateText = async (opts: {
   maxTokens?: number;
   temperature?: number;
   candidates?: string[];
+  signal?: AbortSignal;
+  singleAttempt?: boolean;
 }): Promise<{ text: string; model: string }> => {
   const chain = opts.candidates ?? UTILITY_MODEL_CANDIDATES;
   const { result, model } = await withModelFallback(chain, async (model) => {
@@ -328,6 +333,7 @@ export const generateText = async (opts: {
         model,
         opts.system + lengthHint(opts.maxTokens),
         opts.user,
+        opts.signal,
       );
       if (!text) throw new GatewayError("empty_response", "Gateway returned no text");
       return text;
@@ -341,7 +347,7 @@ export const generateText = async (opts: {
       ],
       max_tokens: opts.maxTokens ?? 400,
       temperature: opts.temperature ?? 0.9,
-    });
+    }, {signal:opts.signal,singleAttempt:opts.singleAttempt});
 
     const choices = data.choices as Array<{ message?: { content?: string } }> | undefined;
     const text = choices?.[0]?.message?.content?.trim();

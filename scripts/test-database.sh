@@ -7,6 +7,7 @@ for migration in supabase/migrations/*.sql; do
 done
 psql "$TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f tests/database/assertions.sql
 psql "$TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f tests/database/play-sessions.sql
+psql "$TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f tests/database/death-scenes.sql
 result_dir=$(mktemp -d)
 trap 'rm -rf "$result_dir"' EXIT
 pids=()
@@ -28,4 +29,13 @@ for index in {1..8}; do
 done
 for pid in "${pids[@]}"; do wait "$pid"; done
 psql "$TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -c "DO \$\$ BEGIN ASSERT (SELECT jsonb_array_length(owned_films) FROM public.user_settings WHERE user_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa') = 10; END \$\$;"
-echo 'Migration replay, row ownership, allowance concurrency, and collection concurrency passed.'
+# Simultaneous scene requests must permit exactly one paid generation.
+pids=()
+for index in {1..8}; do
+  psql "$TEST_DATABASE_URL" -X -qAt -v ON_ERROR_STOP=1 -c "SET ROLE service_role; SELECT public.claim_death_scene('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','22222222-2222-4222-8222-222222222222','44444444-4444-4444-8444-444444444444',repeat('b',64),0)->>'action';" > "$result_dir/death-$index" &
+  pids+=("$!")
+done
+for pid in "${pids[@]}"; do wait "$pid"; done
+generations=$(cat "$result_dir"/death-* | awk '$0 == "generate" { count++ } END { print count+0 }')
+if [[ "$generations" != 1 ]]; then echo "Expected one death generation lease; got $generations" >&2; exit 1; fi
+echo 'Migration replay, ownership, allowance/collection concurrency and death-scene leases passed.' 

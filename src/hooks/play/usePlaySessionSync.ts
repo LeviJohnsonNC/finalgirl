@@ -103,7 +103,17 @@ export function usePlaySessionSync(game: ActiveGame | null) {
     try { enqueue({ id: local.id, state: local, closed: false }); void flush(); return true; }
     catch { return false; }
   }, [conflict, owner, setRevisions, enqueue, flush]);
+  const syncNow = useCallback(async () => {
+    if (!user || conflict || latest.current.owner !== owner) return false;
+    const state = readStoredValue<ActiveGame | null>(`final-girl-active-game-v1:${owner}`, latest.current.game);
+    if (!isActiveGame(state) || state.id !== latest.current.game?.id) return false;
+    // An edit and its Generate tap can occur before React rerenders. Read the durable copy.
+    latest.current.game = state;
+    try { enqueue({id:state.id,state,closed:false}); return await flush(); }
+    catch { return false; }
+  }, [user,conflict,owner,enqueue,flush]);
   return {
+    syncNow,
     remoteGames: remoteGames.filter(row => !pending.some(p => p.id === row.id && p.closed)),
     pendingCount: pending.length, error: error || loadError, conflict,
     refresh: () => { setRefreshIndex(n => n + 1); void flush(); }, retry: flush, close, adopt, keepLocal,

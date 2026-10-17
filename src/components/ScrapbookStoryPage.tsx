@@ -1,3 +1,4 @@
+import {RecordedDeathScenes} from '@/components/play/RecordedDeathScenes';
 import { PlayTimeline } from '@/components/play/PlayTimeline';
 import { GameResult } from '@/hooks/useGameHistory';
 import { format } from 'date-fns';
@@ -170,6 +171,7 @@ export const ScrapbookStoryPage = ({
           </div>
         </details>
       ) : null}
+      {game.playEvents?.length ? <RecordedDeathScenes game={game}/> : null}
       {/* Delete button — tucked at the very bottom */}
       {onDelete && (
         <div className="mt-4 flex justify-start">

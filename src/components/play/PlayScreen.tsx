@@ -116,6 +116,7 @@ export function PlayScreen(props: PlayScreenProps) {
     }
   };
   const last = [...summary.entries].reverse().find((e) => e.kind !== 'start');
+  const lastDeath = [...summary.entries].reverse().find(e=>e.kind==='killed');
   const start = () => {
     setSaved('0');
     setKilled('0');
@@ -300,6 +301,7 @@ export function PlayScreen(props: PlayScreenProps) {
                   <Undo2 className="w-4 h-4" />
                   Undo
                 </button>
+                {props.onDeath && lastDeath && <button className="min-h-[44px] min-w-[44px] flex items-center justify-center text-primary" aria-label="Latest death scene" onClick={()=>props.onDeath?.(lastDeath)}><Skull className="w-4 h-4"/></button>}
                 <button
                   onClick={showDetails}
                   className="type-caption text-secondary min-h-[44px] px-2 flex gap-2 items-center"
@@ -593,7 +595,7 @@ export function PlayScreen(props: PlayScreenProps) {
               onToggle={(event, undone) =>
                 commit({ kind: undone ? 'restore' : 'undo', target: event.id })
               }
-              onDeath={props.onDeath}
+              onDeath={event=>{setDetailsOpen(false);props.onDeath?.(event);}}
             />
             {awake.supported && (
               <button
