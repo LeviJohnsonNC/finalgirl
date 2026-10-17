@@ -19,8 +19,8 @@ const load = (path, imports) => {
   }, ex);
   return ex;
 };
-const events = load('../src/lib/play/events.ts', {}),
-  death = load('../src/lib/play/death.ts', { './events.ts': events });
+const events = load('../supabase/functions/_shared/play/events.ts', {}),
+  death = load('../supabase/functions/_shared/play/death.ts', { './events.ts': events });
 const schemas = load('../supabase/functions/_shared/validation.ts', {
   'https://deno.land/x/zod@v3.22.4/mod.ts': require('zod'),
   './auth.ts': { corsHeaders: {} },
@@ -115,8 +115,8 @@ async function fixture({
         return { candidates: ['test'], label: 'cold' };
       },
     },
-    '../../../src/lib/play/death.ts': death,
-    '../../../src/lib/play/events.ts': events,
+    '../_shared/play/death.ts': death,
+    '../_shared/play/events.ts': events,
   };
   new Function(
     'require',
