@@ -57,3 +57,10 @@ export const IMAGE_MODEL = IMAGE_MODEL_CANDIDATES[0];
 
 /** True when the gateway serves this model through /v1/responses. */
 export const usesResponsesApi = (model: string): boolean => model.startsWith("openai/");
+
+// Short original death vignettes: a separate configurable low-latency slot.
+export const DEATH_MODEL_CANDIDATES = [
+  ...envOverride('LOVABLE_DEATH_MODEL'),
+  'google/gemini-3.8-flash',
+  'google/gemini-2.5-flash',
+];

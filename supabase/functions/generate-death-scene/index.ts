@@ -1,0 +1,188 @@
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
+import { getCorsHeaders } from '../_shared/auth.ts';
+import { requireUser } from '../_shared/guard.ts';
+import { DeathRequestSchema, validateRequest } from '../_shared/validation.ts';
+import {
+  generateText,
+  statusFor,
+  userFacingMessage,
+} from '../_shared/aiGateway.ts';
+import { DEATH_MODEL_CANDIDATES } from '../_shared/models.ts';
+import { deathPrompt } from '../_shared/deathPrompt.ts';
+import { deathFacts, deathSignature } from '../../../src/lib/play/death.ts';
+import { validPlayLog } from '../../../src/lib/play/events.ts';
+
+serve(async (req) => {
+  const cors = getCorsHeaders(req.headers.get('origin'));
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: {
+        ...cors,
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
+      },
+    });
+  if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
+  if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+  let admin: ReturnType<typeof createClient> | undefined;
+  let claim: { id: string; lease: string } | undefined;
+  try {
+    const parsed = validateRequest(DeathRequestSchema, await req.json(), cors);
+    if (!parsed.success) return parsed.error;
+    const { sessionId, eventId, take } = parsed.data;
+    const auth = req.headers.get('Authorization');
+    if (!auth)
+      return json({ error: 'Sign in to generate a death scene.' }, 401);
+    const url = Deno.env.get('SUPABASE_URL'),
+      anonKey = Deno.env.get('SUPABASE_ANON_KEY'),
+      serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !anonKey || !serviceKey)
+      return json({ error: 'Scene service unavailable.' }, 503);
+    const client = createClient(url, anonKey, {
+      global: { headers: { Authorization: auth } },
+    });
+    const {
+      data: { user },
+      error: authError,
+    } = await client.auth.getUser();
+    if (authError || !user)
+      return json({ error: 'Sign in to generate a death scene.' }, 401);
+    const { data: session, error: sessionError } = await client
+      .from('play_sessions')
+      .select('state')
+      .eq('id', sessionId)
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (sessionError)
+      return json(
+        { error: 'Cloud game unavailable. Your recorded death is safe.' },
+        503,
+      );
+    const state = session?.state;
+    if (
+      !state ||
+      !validPlayLog(state.playEvents) ||
+      !state.selection ||
+      ![
+        state.selection.killer,
+        state.selection.location,
+        state.selection.finalGirl,
+      ].every((x) => typeof x === 'string' && x.length <= 100)
+    )
+      return json({ error: 'Sync this game before generating a scene.' }, 409);
+    const facts = deathFacts(state.selection, state.playEvents, eventId);
+    if (!facts)
+      return json({ error: 'That death is not active in this game.' }, 409);
+    const signature = await deathSignature(facts);
+    admin = createClient(url, serviceKey);
+    const { data: slot, error: claimError } = await admin.rpc(
+      'claim_death_scene',
+      {
+        p_user_id: user.id,
+        p_session_id: sessionId,
+        p_event_id: eventId,
+        p_signature: signature,
+        p_take: take,
+      },
+    );
+    if (claimError || !slot)
+      return json(
+        { error: 'Could not reserve this scene. Your recorded death is safe.' },
+        503,
+      );
+    const scene = (id: string, text: string, model?: string) => ({
+      id,
+      session_id: sessionId,
+      event_id: eventId,
+      signature,
+      take,
+      scene_text: text,
+      model,
+      status: 'ready',
+    });
+    if (slot.action === 'cached')
+      return json({
+        scene: scene(slot.id, slot.text, slot.model),
+        cached: true,
+      });
+    if (slot.action === 'busy')
+      return json(
+        {
+          error:
+            'This scene is already developing. Check saved scenes in a moment.',
+          busy: true,
+        },
+        409,
+      );
+    if (
+      slot.action !== 'generate' ||
+      typeof slot.id !== 'string' ||
+      typeof slot.lease !== 'string'
+    )
+      return json({ error: 'Scene service unavailable.' }, 503);
+    claim = { id: slot.id, lease: slot.lease };
+    // Cache and concurrency claim precede the allowance; a replay never reserves paid work.
+    const guard = await requireUser(req, cors, {
+      functionName: 'generate-death-scene',
+      hourlyLimit: 60,
+      dailyLimit: 200,
+    });
+    if (!guard.ok) {
+      await admin
+        .from('play_death_scenes')
+        .update({ status: 'failed' })
+        .eq('id', claim.id)
+        .eq('lease', claim.lease);
+      return guard.response;
+    }
+    if (guard.user.id !== user.id) throw new Error('Account changed');
+    const { data: earlier } = await client
+      .from('play_death_scenes')
+      .select('scene_text')
+      .eq('session_id', sessionId)
+      .eq('status', 'ready')
+      .order('created_at', { ascending: false })
+      .limit(3);
+    const prompt = deathPrompt(
+      facts,
+      (earlier ?? []).map((r) => r.scene_text),
+    );
+    const { text, model } = await generateText({
+      ...prompt,
+      candidates: DEATH_MODEL_CANDIDATES,
+      maxTokens: 200,
+      temperature: 0.95,
+      signal: AbortSignal.timeout(20000),
+      singleAttempt: true,
+    });
+    if (text.length < 10 || text.length > 1600)
+      throw new Error('Scene length invalid');
+    await guard.logUsage({ model, kind: 'death' });
+    const { data: saved, error: saveError } = await admin
+      .from('play_death_scenes')
+      .update({ status: 'ready', scene_text: text, model })
+      .eq('id', claim.id)
+      .eq('lease', claim.lease)
+      .select('id')
+      .maybeSingle();
+    if (saveError || !saved) throw new Error('Scene could not be saved');
+    return json({ scene: scene(claim.id, text, model), cached: false });
+  } catch (error) {
+    if (admin && claim)
+      await admin
+        .from('play_death_scenes')
+        .update({ status: 'failed' })
+        .eq('id', claim.id)
+        .eq('lease', claim.lease)
+        .eq('status', 'pending');
+    console.error('Death scene failed:', error);
+    return json(
+      {
+        error: `${userFacingMessage(error)} The death is still recorded. Retry is optional and may use another AI call.`,
+      },
+      statusFor(error),
+    );
+  }
+});

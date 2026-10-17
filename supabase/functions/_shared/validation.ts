@@ -131,3 +131,5 @@ export function validateRequest<T>(
   }
 }
 
+
+export const DeathRequestSchema=z.object({sessionId:z.string().uuid(),eventId:z.string().uuid(),take:z.number().int().min(0).max(2).default(0)}).strict();

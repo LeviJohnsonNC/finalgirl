@@ -1,3 +1,6 @@
+import {deathFacts,deathSignature} from '../../src/lib/play/death';
+import type {PlayEvent} from '../../src/lib/play/events';
+import type {DeathScene} from '../../src/lib/play/death';
 import { test as base, expect, Page } from '@playwright/test';
 
 export const userId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -10,6 +13,11 @@ export const activeGame = { version: 1, id: gameId, phase: 'nowPlaying', selecti
 
 export class ArchiveMock {
   sessions: Array<{id:string;revision:number;state:Record<string,unknown>;closed:boolean}> = [];
+  deathScenes: DeathScene[] = [];
+  failDeaths=false;
+  holdDeath=false;
+  releaseDeath:(()=>void)|null=null;
+  deathText='The ceiling gave a soft, dusty sigh. Nobody looked up until the light fitting dropped, trailing a bright knot of wires. A scream vanished beneath the crash. When the dust cleared, the broken fixture still swung against the wall, tapping out the last few seconds of someone’s night.';
   films = ['s1-camp-happy-trails'];
   history: Array<Record<string, unknown>> = [];
   calls: string[] = [];
@@ -44,7 +52,19 @@ export class ArchiveMock {
       if (path.includes('/functions/v1/')) {
         const name = path.split('/').pop()!; this.calls.push(name);
         this.generationRequests.push({ name, body: request.postDataJSON() });
-        if (name === 'generate-story' || name === 'generate-ending') {
+        if(name==='generate-death-scene') {
+          if(this.failDeaths)return json({error:'Scene unavailable. The death is still recorded.'},503);
+          const b=request.postDataJSON();const session=this.sessions.find(r=>r.id===b.sessionId);
+          const f=session?deathFacts(session.state.selection as typeof selection,session.state.playEvents as PlayEvent[],b.eventId):null;
+          if(!f)return json({error:'Sync the recorded death first.'},409);
+          const signature=await deathSignature(f);
+          let scene=this.deathScenes.find(r=>r.session_id===b.sessionId&&r.event_id===b.eventId&&r.signature===signature&&r.take===b.take);
+          const cached=!!scene;
+          if(!scene){scene={id:String(this.deathScenes.length+1).padStart(8,'0')+'-dddd-4ddd-8ddd-dddddddddddd',session_id:b.sessionId,event_id:b.eventId,signature,take:b.take,scene_text:this.deathText,model:'test-cheap',status:'ready'};this.deathScenes.push(scene);}
+          if(this.holdDeath)await new Promise<void>(r=>{this.releaseDeath=r;});
+          return json({scene,cached});
+        }
+        if (name === 'generate-story'  || name === 'generate-ending') {
           if (this.failStory) return json({ error: 'Generation temporarily unavailable' }, 503);
           const text = name === 'generate-story' ? this.storyText : this.endingText;
           return route.fulfill({ headers: cors, contentType: 'text/event-stream', body: 'data: ' + JSON.stringify({ choices: [{ delta: { content: text } }] }) + '\n\ndata: [DONE]\n\n' });
@@ -60,6 +80,7 @@ export class ArchiveMock {
         }
         return json({ error: 'Unmocked generation' }, 500);
       }
+      if(path.endsWith('/play_death_scenes'))return json(this.deathScenes.filter(r=>r.session_id===url.searchParams.get('session_id')?.replace(/^eq\./,'')));
       if (path.endsWith('/play_sessions')) return json(this.sessions.filter(row=>!row.closed));
       if (path.endsWith('/rpc/save_play_session')) {
         if(this.failWrites) return json({message:'offline'},503);

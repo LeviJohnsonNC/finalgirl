@@ -1,3 +1,4 @@
+import {DeathSceneDialog} from '@/components/play/DeathSceneDialog';
 import { PlayScreen } from '@/components/play/PlayScreen';
 import type { PlayEvent } from '@/lib/play/events';
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -32,6 +33,8 @@ interface NowPlayingProps {
   sessionId: string;
   playEvents?: PlayEvent[];
   playMode?: boolean;
+  showDeathPanel?: boolean;
+  syncPlayNow?: ()=>Promise<boolean>;
   onPlayEvent?: (event: PlayEvent) => boolean;
   syncStatus?: string;
   onRetrySync?: () => void;
@@ -52,7 +55,7 @@ interface NowPlayingProps {
 }
 
 const NowPlaying = ({
-  playEvents = [], playMode = false, onPlayEvent, syncStatus, onRetrySync,
+  playEvents = [], playMode = false, showDeathPanel = false, syncPlayNow, onPlayEvent, syncStatus, onRetrySync,
   sessionId, initialStory, initialSceneImageUrl, initialVisualBible, onCheckpoint,
   killer,
   location,
@@ -69,6 +72,7 @@ const NowPlaying = ({
   const { locationImages } = useActiveImages();
   const bgImage = locationImages[location] ?? nowPlayingBg;
 
+  const [deathEventId,setDeathEventId]=useState<string|null>(null);
   const [story, setStory] = useState<string | null>(initialStory ?? null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -260,12 +264,21 @@ const NowPlaying = ({
 
   const handleNarrate = () => toggleNarration(story, { kind: 'intro', filmId });
 
-  if (playMode && onPlayEvent) return <PlayScreen killer={killer} location={location} finalGirl={finalGirl}
-    imageUrl={sceneImageUrl || bgImage} events={playEvents} onEvent={onPlayEvent}
+  const recordPlayEvent = (event:PlayEvent) => {
+    if (!onPlayEvent?.(event)) return false;
+    if (event.kind==='killed' && showDeathPanel) setDeathEventId(event.id);
+    return true;
+  };
+  if (playMode && onPlayEvent) return <><PlayScreen killer={killer} location={location} finalGirl={finalGirl}
+    imageUrl={sceneImageUrl || bgImage} events={playEvents} onEvent={recordPlayEvent}
     onExit={() => onCheckpoint({ playMode: false })}
     onFinish={outcome => onGameEnd(outcome, !isGenerating && !error ? story || undefined : undefined, sceneImageUrl || undefined, visualBible)}
     onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying} hasStory={Boolean(story)}
-    syncStatus={syncStatus} onRetrySync={onRetrySync}/>;
+    syncStatus={syncStatus} onRetrySync={onRetrySync}
+    deathControls={<label className="type-caption text-muted-foreground flex gap-3 items-start"><input type="checkbox" className="mt-1 accent-primary" checked={showDeathPanel} onChange={e=>onCheckpoint({showDeathPanel:e.target.checked})}/><span>Open death details after a kill. Scene generation stays optional.</span></label>}
+    onDeath={event=>setDeathEventId(event.id)}/>
+    {deathEventId && syncPlayNow && <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl}} events={playEvents} eventId={deathEventId} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/>}
+    </>;
 
   return (
     <div
