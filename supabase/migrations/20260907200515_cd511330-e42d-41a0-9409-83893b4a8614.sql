@@ -13,17 +13,14 @@
 ALTER TABLE public.user_image_settings
   ADD COLUMN IF NOT EXISTS use_ai_casting_art BOOLEAN NOT NULL DEFAULT false;
 
-UPDATE public.user_image_settings
-  SET use_ai_casting_art = auto_generate_images;
+-- Already backfilled by 20260907120000. Do not overwrite explicit preferences.
 
 -- Auto-generation is now the default behaviour rather than an opt-in that
 -- required pasting in an API key.
 ALTER TABLE public.user_image_settings
   ALTER COLUMN auto_generate_images SET DEFAULT true;
 
-UPDATE public.user_image_settings
-  SET auto_generate_images = true
-  WHERE auto_generate_images = false;
+-- The initial default change was applied by 20260907120000.
 
 -- preferred_provider described which third-party provider's key to use. There
 -- is only one provider now, and the app no longer reads this column.

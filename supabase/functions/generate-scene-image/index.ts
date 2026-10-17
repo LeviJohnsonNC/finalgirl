@@ -44,7 +44,7 @@ serve(async (req) => {
     if (!guard.ok) return guard.response;
     const { user, logUsage } = guard;
 
-    const validation = validateRequest(SceneImageRequestSchema, await req.json());
+    const validation = validateRequest(SceneImageRequestSchema, await req.json(), cors);
     if (!validation.success) return validation.error;
     const body = validation.data;
 
@@ -111,3 +111,4 @@ serve(async (req) => {
     return json({ error: userFacingMessage(error) }, statusFor(error));
   }
 });
+

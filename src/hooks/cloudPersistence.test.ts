@@ -12,9 +12,16 @@ const mock = vi.hoisted(() => ({
 vi.mock('./useAuth', () => ({ useAuth: () => mock.auth }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {
-  rpc: () => ({ abortSignal: () => mock.summary ? mock.summary() : Promise.resolve({
+  rpc: (name: string, args: { p_add: string[]; p_remove: string[] }) => ({ abortSignal: () => {
+    if (name === 'apply_collection_delta') {
+      if (mock.failRead || mock.failSave) return Promise.resolve({ data: null, error: { message: 'offline' } });
+      mock.films = [...new Set([...mock.films.filter(id => !args.p_remove.includes(id)), ...args.p_add])];
+      mock.writes.push({ owned_films: mock.films });
+      return Promise.resolve({ data: mock.films, error: null });
+    }
+    return mock.summary ? mock.summary() : Promise.resolve({
     data: [...mock.history.values()], error: mock.failRead ? { message: 'offline' } : null,
-  }) }),
+  }); } }),
   from: (table: string) => {
     let mode = 'select'; let payload: Record<string, unknown>; let id: string;
     const execute = () => {

@@ -23,15 +23,14 @@ export const useOwnedFilms = () => {
 
   const send = useCallback(async (change: CollectionChange) => {
     if (!userId || ownerRef.current !== userId) throw new Error('Sign in to finish saving your collection.');
-    // Apply the delta to a fresh server value, never an empty/loading snapshot.
-    const { data, error } = await supabase.from('user_settings').select('owned_films')
-      .eq('user_id', userId).abortSignal(AbortSignal.timeout(20000)).maybeSingle();
-    if (error) throw new Error(error.message);
-    const films = applyChange(Array.isArray(data?.owned_films) ? data.owned_films as string[] : [], change);
-    const { error: saveError } = await supabase.from('user_settings')
-      .upsert({ user_id: userId, owned_films: films }, { onConflict: 'user_id' })
+    // Narrow boundary until the platform regenerates its schema types for this
+    // additive RPC. The generated integration files are intentionally untouched.
+    const { data, error } = await supabase.rpc('apply_collection_delta' as never,
+      { p_add: change.add, p_remove: change.remove } as never)
       .abortSignal(AbortSignal.timeout(20000));
-    if (saveError) throw new Error(saveError.message);
+    if (error) throw new Error(error.message);
+    if (!Array.isArray(data)) throw new Error('The archive returned an invalid collection.');
+    const films = data as string[];
     if (ownerRef.current === userId && !setCachedFilms(films)) throw new Error('This device could not acknowledge the saved collection. Please free browser storage.');
   }, [userId, setCachedFilms]);
 

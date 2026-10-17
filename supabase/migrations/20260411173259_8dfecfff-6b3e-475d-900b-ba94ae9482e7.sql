@@ -41,7 +41,9 @@ USING (
 );
 
 -- Fix 2: Add missing DELETE policy on user_settings
+DROP POLICY IF EXISTS "Users can delete their own settings" ON public.user_settings;
 CREATE POLICY "Users can delete their own settings"
 ON public.user_settings
 FOR DELETE
 USING (auth.uid() = user_id);
+
