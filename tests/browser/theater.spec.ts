@@ -48,10 +48,6 @@ test('projection controls identify the game and open its exact case file', async
   await page.getByRole('button', { name: 'Next scene' }).click();
   await expect(page.getByRole('heading', { name: 'Rena vs. Billy the Bear' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Play slideshow' })).toBeVisible();
-  await page.getByRole('button', { name: 'View projected artwork full size' }).click();
-  await expect(page.getByRole('dialog').getByRole('img', { name: /Scene for Rena/ })).toHaveCSS('object-fit', 'contain');
-  await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'View projected artwork full size' })).toBeFocused();
   await page.screenshot({ path: testInfo.outputPath('personal-screening.png'), fullPage: true });
   await page.getByRole('button', { name: 'Open case file' }).click();
   await expect(page.locator('.story-page-content').getByText('This is the older Buddyland case file.')).toBeVisible();

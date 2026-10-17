@@ -39,7 +39,6 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
             <span><span className="theater-unofficial">Unofficial</span> Case Files</span>
           </button>
           <div className="theater-admission">
-            <span className="theater-edition" aria-hidden="true">The midnight drive-in</span>
             {!authLoading && <button className="theater-account" onClick={() => navigate('/auth')}>
               <Ticket size={16} aria-hidden="true" />{user ? 'Account' : 'Sign in'}
             </button>}
