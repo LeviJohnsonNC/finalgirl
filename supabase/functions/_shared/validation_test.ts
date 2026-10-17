@@ -1,5 +1,5 @@
 import { assertEquals, assertExists } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { StoryRequestSchema, ImageRequestSchema, EndingRequestSchema, NarrationRequestSchema, validateRequest } from "./validation.ts";
+import { StoryRequestSchema, SceneImageRequestSchema, EndingRequestSchema, NarrationRequestSchema, validateRequest } from "./validation.ts";
 
 // ============== StoryRequestSchema Tests ==============
 
@@ -81,62 +81,26 @@ Deno.test("StoryRequestSchema - rejects overly long description", () => {
   assertEquals(result.success, false);
 });
 
-// ============== ImageRequestSchema Tests ==============
-
-Deno.test("ImageRequestSchema - valid request with all fields", () => {
-  const validRequest = {
-    position: 2,
-    fullStory: "A dark and atmospheric story that is at least 50 characters long for validation purposes.",
-    killer: "Dr. Fright",
-    killerDescription: "A deranged scientist",
-    finalGirl: "Nancy",
-    finalGirlDescription: "A resourceful survivor",
-    location: "Creech Manor",
-    locationDescription: "An abandoned mansion",
-  };
-
-  const result = validateRequest(ImageRequestSchema, validRequest);
-  assertEquals(result.success, true);
+// ============== SceneImageRequestSchema Tests ==============
+const scene = {
+  sceneType: 'beginning', story: 'A dark story that is long enough to pass the minimum character requirement.',
+  killer: 'Hans', finalGirl: 'Laurie', location: 'Camp Happy Trails',
+};
+Deno.test('SceneImageRequestSchema - accepts scene and poster requests', () => {
+  assertEquals(validateRequest(SceneImageRequestSchema, scene).success, true);
+  assertEquals(validateRequest(SceneImageRequestSchema, { ...scene, sceneType: 'ending', outcome: 'won', gameId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' }).success, true);
 });
-
-Deno.test("ImageRequestSchema - valid request with minimal fields", () => {
-  const minimalRequest = {
-    position: 1,
-    fullStory: "A story that needs to be at least 50 characters long to pass validation requirements.",
-  };
-
-  const result = validateRequest(ImageRequestSchema, minimalRequest);
-  assertEquals(result.success, true);
+Deno.test('SceneImageRequestSchema - rejects invalid kinds and short stories', () => {
+  assertEquals(validateRequest(SceneImageRequestSchema, { ...scene, sceneType: 'middle' }).success, false);
+  assertEquals(validateRequest(SceneImageRequestSchema, { ...scene, story: 'Too short' }).success, false);
 });
-
-Deno.test("ImageRequestSchema - invalid position below 1", () => {
-  const invalidRequest = {
-    position: 0,
-    fullStory: "A story that needs to be at least 50 characters long to pass validation requirements.",
-  };
-
-  const result = validateRequest(ImageRequestSchema, invalidRequest);
+Deno.test('SceneImageRequestSchema - rejects arbitrary storage path identifiers', () => {
+  assertEquals(validateRequest(SceneImageRequestSchema, { ...scene, gameId: '../someone-else' }).success, false);
+});
+Deno.test('validateRequest - preserves caller CORS on errors', () => {
+  const result = validateRequest(SceneImageRequestSchema, {}, { 'Access-Control-Allow-Origin': 'https://preview.lovable.app' });
   assertEquals(result.success, false);
-});
-
-Deno.test("ImageRequestSchema - invalid position above 4", () => {
-  const invalidRequest = {
-    position: 5,
-    fullStory: "A story that needs to be at least 50 characters long to pass validation requirements.",
-  };
-
-  const result = validateRequest(ImageRequestSchema, invalidRequest);
-  assertEquals(result.success, false);
-});
-
-Deno.test("ImageRequestSchema - rejects story under 50 characters", () => {
-  const invalidRequest = {
-    position: 1,
-    fullStory: "Too short",
-  };
-
-  const result = validateRequest(ImageRequestSchema, invalidRequest);
-  assertEquals(result.success, false);
+  if (!result.success) assertEquals(result.error.headers.get('Access-Control-Allow-Origin'), 'https://preview.lovable.app');
 });
 
 // ============== EndingRequestSchema Tests ==============
@@ -255,4 +219,10 @@ Deno.test("validateRequest - returns error response for null input", () => {
   if (!result.success) {
     assertExists(result.error);
   }
+});
+
+
+Deno.test('EndingRequestSchema - rejects fractional health and victim counts', () => {
+  const request = { introStory: 'A long enough opening story for the ending generator to maintain continuity.', outcome: 'won', killer: { name: 'Hans' }, location: { name: 'Camp Happy Trails' }, finalGirl: { name: 'Laurie' }, victimsSaved: 1.5 };
+  assertEquals(validateRequest(EndingRequestSchema, request).success, false);
 });

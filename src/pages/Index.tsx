@@ -337,6 +337,7 @@ const IndexContent = () => {
           <div className="flex items-center gap-1 sm:gap-3">
             <button
               onClick={() => setCurrentPage('archive')}
+              aria-label="COLLECTION"
               className="type-caption text-muted-foreground hover:text-secondary transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <Library className="w-3 h-3" />
@@ -344,6 +345,7 @@ const IndexContent = () => {
             </button>
             <button
               onClick={() => setCurrentPage('rules')}
+              aria-label="RULES"
               className="type-caption text-muted-foreground hover:text-amber-400 transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <BookMarked className="w-3 h-3" />
@@ -351,6 +353,7 @@ const IndexContent = () => {
             </button>
             <button
               onClick={() => setCurrentPage('stats')}
+              aria-label="STATS"
               className="type-caption text-muted-foreground hover:text-green-400 transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <BarChart3 className="w-3 h-3" />
@@ -358,6 +361,7 @@ const IndexContent = () => {
             </button>
             <button
               onClick={() => goToScrapbooks()}
+              aria-label="SCRAPBOOKS"
               className="type-caption text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <BookOpen className="w-3 h-3" />
@@ -367,6 +371,7 @@ const IndexContent = () => {
             {!authLoading && (
               <button
                 onClick={() => navigate('/auth')}
+                aria-label={user ? 'ACCOUNT' : 'SIGN IN'}
                 className="type-caption text-dimmer hover:text-foreground transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
               >
                 <User className="w-3 h-3" />
