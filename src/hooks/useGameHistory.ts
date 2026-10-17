@@ -147,13 +147,13 @@ const fromDbRow = (row: Record<string, unknown>): GameResult => ({
   introStory: (row.intro_story as string) || undefined,
   endingNarration: (row.ending_narration as string) || undefined,
   gameHighlights: (row.game_highlights as string) || undefined,
-  finalHorrorLevel: (row.final_horror_level as number) || undefined,
-  finalGirlHealth: (row.final_girl_health as number) || undefined,
-  killerHealth: (row.killer_health as number) || undefined,
+  finalHorrorLevel: (row.final_horror_level as number | null) ?? undefined,
+  finalGirlHealth: (row.final_girl_health as number | null) ?? undefined,
+  killerHealth: (row.killer_health as number | null) ?? undefined,
   weaponUsed: (row.weapon_used as string) || undefined,
   endingSubLocation: (row.ending_sub_location as string) || undefined,
-  victimsSaved: (row.victims_saved as number) || undefined,
-  victimsKilled: (row.victims_killed as number) || undefined,
+  victimsSaved: (row.victims_saved as number | null) ?? undefined,
+  victimsKilled: (row.victims_killed as number | null) ?? undefined,
   posterImageUrl: sanitizeStoredImageUrl(row.poster_image_url),
   sceneImageUrl: sanitizeStoredImageUrl(row.scene_image_url),
   visualBible: (row.visual_bible as string) || undefined,
@@ -283,8 +283,8 @@ export const useGameHistory = () => {
     }
   }, [userId, loadedOwner, loadError, localGameHistory, enqueue, pending, setLocalGameHistory]);
 
-  const recordGame = useCallback((result: Omit<GameResult, 'id' | 'timestamp'>): GameResult => {
-    const game = { ...result, id: crypto.randomUUID(), timestamp: Date.now() };
+  const recordGame = useCallback((result: Omit<GameResult, 'id' | 'timestamp'>, gameId?: string): GameResult => {
+    const game = { ...result, id: gameId ?? crypto.randomUUID(), timestamp: Date.now() };
     if (userId) enqueue({ kind: 'record', game });
     else if (!setLocalGameHistory(games => [game, ...games])) throw new Error('This device could not save the game. Free some browser storage and try again.');
     return game;
@@ -360,7 +360,7 @@ export const useGameHistory = () => {
     const full = fromDbRow(data as unknown as Record<string, unknown>);
     replaceBase(baseRef.current.map(game => game.id === id ? full : game));
     // Pending edits take precedence over a possibly older server response.
-    return pending.reduce(applyWrite, [full])[0];
+    return pending.reduce(applyWrite, [full]).find(game => game.id === id) ?? full;
   }, [gameHistory, userId, replaceBase, pending]);
 
   const deleteGame = useCallback(async (id: string) => {

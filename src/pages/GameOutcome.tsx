@@ -5,11 +5,14 @@ import { EndingFormData } from './TheEnd';
 interface GameOutcomeProps {
   result: GameResult;
   introStory?: string;
+  initialDraft?: Record<string, unknown>;
+  onDraftChange?: (fields: Record<string, unknown>) => boolean;
+  onSaveResult?: (formData: EndingFormData) => void;
   onContinue: (formData: EndingFormData) => void;
   onDiscard: () => void;
 }
 
-const GameOutcome = ({ result, introStory, onContinue, onDiscard }: GameOutcomeProps) => {
+const GameOutcome = ({ result, introStory, onContinue, onDiscard, initialDraft, onDraftChange, onSaveResult }: GameOutcomeProps) => {
   const isWin = result.outcome === 'won';
 
   return (
@@ -38,6 +41,9 @@ const GameOutcome = ({ result, introStory, onContinue, onDiscard }: GameOutcomeP
       <GameOutcomeForm
         result={result}
         introStory={introStory}
+        initialDraft={initialDraft}
+        onDraftChange={onDraftChange}
+        onSaveResult={onSaveResult}
         onContinue={onContinue}
         onDiscard={onDiscard}
       />
@@ -46,3 +52,4 @@ const GameOutcome = ({ result, introStory, onContinue, onDiscard }: GameOutcomeP
 };
 
 export default GameOutcome;
+

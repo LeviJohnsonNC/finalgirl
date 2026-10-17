@@ -56,6 +56,12 @@ afterEach(cleanup);
 const sample = { outcome: 'won' as const, killer: 'Hans', location: 'Camp Happy Trails', finalGirl: 'Laurie' };
 
 describe('cloud history write-ahead log', () => {
+  it('preserves recorded zero health and victim counts from the cloud', async () => {
+    mock.history.set('zero', { id: 'zero', timestamp: 1, outcome: 'lost', killer: 'Hans', location: 'Camp Happy Trails', final_girl: 'Laurie', final_girl_health: 0, killer_health: 0, victims_saved: 0, victims_killed: 0 });
+    const { result } = renderHook(useGameHistory);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.gameHistory[0]).toMatchObject({ finalGirlHealth: 0, killerHealth: 0, victimsSaved: 0, victimsKilled: 0 });
+  });
   it('keeps failed inserts across unmount and replays them with the same id', async () => {
     mock.failSave = true;
     const first = renderHook(useGameHistory);

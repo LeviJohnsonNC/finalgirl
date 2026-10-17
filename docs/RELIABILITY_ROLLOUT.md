@@ -67,3 +67,24 @@ For disposable PostgreSQL testing only:
 `TEST_DATABASE_URL=postgresql://... bash scripts/test-database.sh`.
 The script creates schemas/roles and replays every migration; never point it at
 an existing project database. It checks RLS and concurrent reservations/deltas.
+
+## Stage 3
+
+No additional SQL migration is required. This stage depends on Stage 2's RPCs.
+Redeploy `generate-scene-image` with this stage, then deploy the frontend: a late
+poster/still now attaches server-side to an existing owned record, and old images
+are only removed after the replacement is attached. The client also keeps late
+attachments in the durable outbox if the screen has already closed.
+
+An active draft is stored under `final-girl-active-game-v1:<account-id>` (or
+`guest` for signed-out play). Navigation preserves it; RESUME GAME restores the
+cast, completed stories, images, and outcome fields. Starting a new game requires
+finishing or explicitly discarding the existing draft. Saving a result clears the
+draft only after the history write has been durably queued. A reload during an
+unfinished text stream may require generating that text again; partial prose is
+not represented as a completed story.
+
+WON/LOST and SAVE RESULT work without AI service access or an opening story.
+Outcome details are saved before optional ending generation. Image generation
+waits for saved preferences, honors opt-out, and reuses an existing completed
+image instead of regenerating it on every visit.

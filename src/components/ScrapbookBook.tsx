@@ -78,6 +78,7 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
   const isMobile = useIsMobile();
   const { user } = useAuth();
   const [isLoadingStory, setIsLoadingStory] = useState(false);
+  const selectedIdRef = useRef<string | null>(null);
   const openedInitialRef = useRef(false);
   // Trigger open animation after mount
   useEffect(() => {
@@ -104,14 +105,14 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
   };
 
   const handleSelectGame = useCallback(async (game: GameResult) => {
+    selectedIdRef.current = game.id;
     setSelectedGame(game);
-    if (game.introStory || game.endingNarration || game.gameHighlights) return;
     setIsLoadingStory(true);
     try {
       const fullGame = await onFetchGameDetails(game.id);
-      if (fullGame) setSelectedGame(fullGame);
+      if (fullGame && selectedIdRef.current === game.id) setSelectedGame(fullGame);
     } finally {
-      setIsLoadingStory(false);
+      if (selectedIdRef.current === game.id) setIsLoadingStory(false);
     }
   }, [onFetchGameDetails]);
 
@@ -160,7 +161,7 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
         .getPublicUrl(filePath);
 
       onUpdateGame(selectedGame.id, { posterImageUrl: urlData.publicUrl });
-      setSelectedGame(prev => prev ? { ...prev, posterImageUrl: urlData.publicUrl } : null);
+      setSelectedGame(prev => prev?.id === selectedGame.id ? { ...prev, posterImageUrl: urlData.publicUrl } : prev);
       toast.success('Poster added!');
     } catch (error) {
       console.error('Image processing error:', error);
@@ -238,7 +239,7 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
                       {/* Back button row */}
                       <div className="flex items-center mb-3">
                         <button
-                          onClick={() => setSelectedGame(null)}
+                          onClick={() => { selectedIdRef.current = null; setIsLoadingStory(false); setSelectedGame(null); }}
                           className="back-to-grid flex items-center gap-1"
                         >
                           <ArrowLeft className="w-3 h-3" />
@@ -373,7 +374,7 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
                         {/* Back button row */}
                         <div className="flex justify-between items-center mb-2">
                           <button
-                            onClick={() => setSelectedGame(null)}
+                            onClick={() => { selectedIdRef.current = null; setIsLoadingStory(false); setSelectedGame(null); }}
                             className="back-to-grid"
                           >
                             ← Back to Grid

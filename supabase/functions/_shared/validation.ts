@@ -41,7 +41,7 @@ export const SceneImageRequestSchema = z.object({
   visualBible: z.string().max(1000).optional(),
   outcome: z.enum(['won', 'lost']).optional(),
   // Used to name the stored file, and to clean up the image being replaced.
-  gameId: z.string().max(100).optional(),
+  gameId: z.string().uuid().optional(),
   previousImageUrl: z.string().url().max(2000).optional()
 });
 
@@ -83,13 +83,13 @@ export const EndingRequestSchema = z.object({
     backstory: z.string().max(3000).optional()
   }),
   // Optional game stats
-  finalHorrorLevel: z.number().min(1).max(7).optional(),
+  finalHorrorLevel: z.number().int().min(1).max(7).optional(),
   weaponUsed: z.string().max(100).optional(),
-  finalGirlHealth: z.number().min(0).max(10).optional(),  // Max 6 in official game, buffer for custom
-  killerHealth: z.number().min(0).max(20).optional(),
-  finalGirlMaxHealth: z.number().min(5).max(6).optional(),  // Character-specific max health
-  victimsSaved: z.number().min(0).max(50).optional(),
-  victimsKilled: z.number().min(0).max(50).optional(),
+  finalGirlHealth: z.number().int().min(0).max(10).optional(),  // Max 6 in official game, buffer for custom
+  killerHealth: z.number().int().min(0).max(20).optional(),
+  finalGirlMaxHealth: z.number().int().min(5).max(6).optional(),  // Character-specific max health
+  victimsSaved: z.number().int().min(0).max(50).optional(),
+  victimsKilled: z.number().int().min(0).max(50).optional(),
   endingSubLocation: z.string().max(200).optional(),
   gameHighlights: z.string().max(2000).optional()
 });

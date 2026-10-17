@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ImageIcon, Volume2, VolumeX, Loader2, ScrollText } from 'lucide-react';
 import { SpecialRulesModal, getApplicableSpecialRules } from '@/components/SpecialRulesModal';
 import { getModulePromptContext } from '@/data/rules/moduleRules';
@@ -24,7 +24,14 @@ import { ProjectorLeader } from '@/components/ProjectorLeader';
 import { renderStoryText } from '@/lib/textFormatting';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 
+import type { ActiveGame } from '@/lib/activeGame';
+
 interface NowPlayingProps {
+  sessionId: string;
+  initialStory?: string;
+  initialSceneImageUrl?: string;
+  initialVisualBible?: string;
+  onCheckpoint: (updates: Partial<ActiveGame>) => void;
   killer: string;
   location: string;
   finalGirl: string;
@@ -38,6 +45,7 @@ interface NowPlayingProps {
 }
 
 const NowPlaying = ({
+  sessionId, initialStory, initialSceneImageUrl, initialVisualBible, onCheckpoint,
   killer,
   location,
   finalGirl,
@@ -53,11 +61,11 @@ const NowPlaying = ({
   const { locationImages } = useActiveImages();
   const bgImage = locationImages[location] ?? nowPlayingBg;
 
-  const [story, setStory] = useState<string | null>(null);
+  const [story, setStory] = useState<string | null>(initialStory ?? null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sceneImageUrl, setSceneImageUrl] = useState<string>('');
-  const [visualBible, setVisualBible] = useState<string | undefined>(undefined);
+  const [sceneImageUrl, setSceneImageUrl] = useState<string>(initialSceneImageUrl ?? '');
+  const [visualBible, setVisualBible] = useState<string | undefined>(initialVisualBible);
   // Whether the look-book call has finished (successfully or not). The first
   // image waits for this so it is composed with the same look the poster will use.
   const [visualBibleSettled, setVisualBibleSettled] = useState(false);
@@ -65,6 +73,7 @@ const NowPlaying = ({
   const {
     isAuthenticated,
     autoGenerate,
+    settingsReady,
     generateImage,
     generateVisualBible,
     isGeneratingImage,
@@ -73,7 +82,9 @@ const NowPlaying = ({
   const autoGenerateTriggered = useRef(false);
   // Stable id for this session's stored images, so a reshoot replaces the file
   // it supersedes instead of orphaning it.
-  const sessionImageId = useRef(crypto.randomUUID());
+  const sessionImageId = useRef(sessionId);
+  const checkpointRef = useRef(onCheckpoint);
+  checkpointRef.current = onCheckpoint;
   // Abort the story stream when the user navigates away mid-generation so the
   // reader loop stops and no further setState fires on an unmounted component.
   const streamAbortRef = useRef<AbortController | null>(null);
@@ -86,17 +97,17 @@ const NowPlaying = ({
 
   // Auto-generate story on mount
   useEffect(() => {
-    generateStory();
+    if (!initialStory) void generateStory();
     return () => streamAbortRef.current?.abort();
-  }, []);
+    // A mounted screen is keyed by the persisted session id. Retry is explicit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId]);
 
   // Establish this game's look before the story finishes, so the first image
   // can already reference it. Cheap enough to be fire-and-forget.
   useEffect(() => {
-    if (!isAuthenticated) {
-      setVisualBibleSettled(true);
-      return;
-    }
+    if (!settingsReady) return;
+    if (!isAuthenticated || !autoGenerate || initialVisualBible) { setVisualBibleSettled(true); return; }
     let cancelled = false;
     (async () => {
       const bible = await generateVisualBible({
@@ -107,14 +118,15 @@ const NowPlaying = ({
       });
       if (cancelled) return;
       setVisualBible(bible);
+      checkpointRef.current({ visualBible: bible });
       setVisualBibleSettled(true);
     })();
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, killer, finalGirl, location]);
+  }, [isAuthenticated, autoGenerate, settingsReady, initialVisualBible, killer, finalGirl, location, generateVisualBible]);
 
-  const developScene = async (previousImageUrl?: string) => {
+  const developScene = useCallback(async (previousImageUrl?: string) => {
     if (!story) return;
     const url = await generateImage({
       story,
@@ -130,8 +142,8 @@ const NowPlaying = ({
       gameId: sessionImageId.current,
       previousImageUrl,
     });
-    if (url) setSceneImageUrl(url);
-  };
+    if (url) { setSceneImageUrl(url); checkpointRef.current({ sceneImageUrl: url }); }
+  }, [story, killer, finalGirl, location, moduleContext?.visualGuidance, visualBible, generateImage]);
 
   // Images generate on their own now — no API key, no button to find.
   //
@@ -140,11 +152,11 @@ const NowPlaying = ({
   // scene from the first half-sentence of the script.
   useEffect(() => {
     if (!story || isGenerating || error) return;
-    if (!isAuthenticated || !autoGenerate || !visualBibleSettled) return;
+    if (!settingsReady || sceneImageUrl || !isAuthenticated || !autoGenerate || !visualBibleSettled) return;
     if (autoGenerateTriggered.current) return;
     autoGenerateTriggered.current = true;
     developScene();
-  }, [story, isGenerating, error, isAuthenticated, autoGenerate, visualBibleSettled]);
+  }, [story, isGenerating, error, isAuthenticated, autoGenerate, settingsReady, sceneImageUrl, visualBibleSettled, developScene]);
 
   const generateStory = async () => {
     streamAbortRef.current?.abort();
@@ -221,6 +233,7 @@ const NowPlaying = ({
       });
 
       if (!full) throw new Error('No story returned from the generator');
+      checkpointRef.current({ introStory: full });
       setStory(full);
 
     } catch (err) {
@@ -302,7 +315,7 @@ const NowPlaying = ({
               {/* Row 1: Narrate — full width on mobile */}
               <button
                 onClick={handleNarrate}
-                disabled={isNarrating}
+                disabled={isNarrating || isGenerating}
                 className="vcr-tape-button flex items-center justify-center gap-2 px-4 sm:px-6 py-3 font-display text-xs sm:text-sm tracking-[0.1em] sm:tracking-[0.15em] uppercase transition-all duration-300 disabled:opacity-50 min-h-[44px] w-full sm:w-auto"
               >
                 {isNarrating ? (
@@ -402,10 +415,10 @@ const NowPlaying = ({
 
           {/* Outcome — also docks to the viewport once scrolled past, so the
               end of a two-hour game is never a scroll hunt. */}
-          {story && !isGenerating && !error && (
-            <StickyOutcomeBar enabled={Boolean(story) && !isGenerating && !error}>
+          {(
+            <StickyOutcomeBar enabled>
               <button
-                onClick={() => onGameEnd('won', story || undefined, sceneImageUrl || undefined, visualBible)}
+                onClick={() => onGameEnd('won', !isGenerating && !error ? story || undefined : undefined, sceneImageUrl || undefined, visualBible)}
                 className="outcome-btn outcome-btn-won group relative w-full sm:w-auto min-w-[200px] sm:min-w-[240px] h-14 sm:h-16 overflow-hidden rounded-sm transition-all duration-200"
               >
                 <span className="relative z-10 font-display text-xl sm:text-2xl tracking-[0.2em] uppercase text-secondary drop-shadow-lg">
@@ -414,7 +427,7 @@ const NowPlaying = ({
               </button>
 
               <button
-                onClick={() => onGameEnd('lost', story || undefined, sceneImageUrl || undefined, visualBible)}
+                onClick={() => onGameEnd('lost', !isGenerating && !error ? story || undefined : undefined, sceneImageUrl || undefined, visualBible)}
                 className="outcome-btn outcome-btn-lost group relative w-full sm:w-auto min-w-[200px] sm:min-w-[240px] h-14 sm:h-16 overflow-hidden rounded-sm transition-all duration-200"
               >
                 <span className="relative z-10 font-display text-xl sm:text-2xl tracking-[0.2em] uppercase text-primary drop-shadow-lg">
@@ -431,3 +444,4 @@ const NowPlaying = ({
 };
 
 export default NowPlaying;
+

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -60,58 +60,73 @@ const callFunction = async <T>(name: string, body: unknown): Promise<T> => {
  */
 export const useImageGeneration = () => {
   const { user, isAuthenticated } = useAuth();
-  const [settings, setSettings] = useState<ImageSettings>(DEFAULT_SETTINGS);
+  const userId = user?.id ?? null;
+  const ownerRef = useRef(userId);
+  ownerRef.current = userId;
+  const [state, setState] = useState<{ owner: string | null; settings: ImageSettings; ready: boolean }>({ owner: null, settings: DEFAULT_SETTINGS, ready: false });
+  const settings = state.owner === userId ? state.settings : DEFAULT_SETTINGS;
+  const settingsReady = !userId || state.owner === userId && state.ready;
+  const [settingsError, setSettingsError] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
+  const requestId = useRef(0);
+  const savingRef = useRef(false);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+
+  const retryLoadSettings = useCallback(async () => {
+    if (!userId) return;
+    const id = ++requestId.current;
+    try {
+      const { data, error } = await supabase.from('user_image_settings')
+        .select('auto_generate_images, use_ai_casting_art').eq('user_id', userId)
+        .abortSignal(AbortSignal.timeout(20000)).maybeSingle();
+      if (error) throw new Error(error.message);
+      if (ownerRef.current !== userId || id !== requestId.current) return;
+      setState({ owner: userId, ready: true, settings: {
+        autoGenerate: data?.auto_generate_images ?? true,
+        useAiCastingArt: data?.use_ai_casting_art ?? false,
+      } });
+      setSettingsError(null);
+    } catch (error) {
+      if (ownerRef.current === userId && id === requestId.current) {
+        setSettingsError(error instanceof Error ? error.message : 'Could not load image preferences.');
+      }
+    }
+  }, [userId]);
 
   useEffect(() => {
-    if (!isAuthenticated || !user) {
-      setSettings(DEFAULT_SETTINGS);
-      return;
-    }
-
-    let cancelled = false;
-    (async () => {
-      const { data } = await supabase
-        .from('user_image_settings')
-        .select('auto_generate_images, use_ai_casting_art')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (cancelled || !data) return;
-      setSettings({
-        autoGenerate: data.auto_generate_images ?? true,
-        useAiCastingArt: data.use_ai_casting_art ?? false,
-      });
-    })();
-
-    return () => {
-      cancelled = true;
+    void retryLoadSettings();
+    const changed = (event: Event) => {
+      const detail = (event as CustomEvent<{ owner: string; settings: ImageSettings }>).detail;
+      if (detail.owner !== userId) return;
+      requestId.current += 1;
+      setState({ owner: userId, ready: true, settings: detail.settings });
     };
-  }, [isAuthenticated, user?.id]);
+    window.addEventListener('final-girl-image-settings', changed);
+    return () => { requestId.current += 1; window.removeEventListener('final-girl-image-settings', changed); };
+  }, [userId, retryLoadSettings]);
 
-  const updateSettings = useCallback(
-    async (updates: Partial<ImageSettings>) => {
-      if (!user) return;
-      const next = { ...settings, ...updates };
-      setSettings(next);
-
-      const { error } = await supabase.from('user_image_settings').upsert(
-        {
-          user_id: user.id,
-          auto_generate_images: next.autoGenerate,
-          use_ai_casting_art: next.useAiCastingArt,
-        },
-        { onConflict: 'user_id' }
-      );
-
-      if (error) {
-        console.error('Failed to update image settings:', error);
-        setSettings(settings); // Roll back the optimistic update.
-      }
-    },
-    [user, settings]
-  );
+  const updateSettings = useCallback(async (updates: Partial<ImageSettings>) => {
+    if (!userId || !settingsReady || savingRef.current) return;
+    savingRef.current = true;
+    setIsSavingSettings(true);
+    try {
+      const patch: { user_id: string; auto_generate_images?: boolean; use_ai_casting_art?: boolean } = { user_id: userId };
+      if (updates.autoGenerate !== undefined) patch.auto_generate_images = updates.autoGenerate;
+      if (updates.useAiCastingArt !== undefined) patch.use_ai_casting_art = updates.useAiCastingArt;
+      const { error } = await supabase.from('user_image_settings').upsert(patch, { onConflict: 'user_id' })
+        .abortSignal(AbortSignal.timeout(20000));
+      if (error) throw new Error(error.message);
+      if (ownerRef.current !== userId) return;
+      setSettingsError(null);
+      window.dispatchEvent(new CustomEvent('final-girl-image-settings', { detail: { owner: userId, settings: { ...settings, ...updates } } }));
+    } catch {
+      if (ownerRef.current === userId) setSettingsError('Your image preferences could not be saved. Please try again.');
+    } finally {
+      savingRef.current = false;
+      setIsSavingSettings(false);
+    }
+  }, [userId, settingsReady, settings]);
 
   /**
    * Generates a scene still or poster. Returns a storage URL, or null on
@@ -120,7 +135,7 @@ export const useImageGeneration = () => {
    */
   const generateImage = useCallback(
     async (context: GenerateImageContext): Promise<string | null> => {
-      if (!user) return null;
+      if (!userId) return null;
 
       setIsGeneratingImage(true);
       setImageError(null);
@@ -136,7 +151,7 @@ export const useImageGeneration = () => {
         setIsGeneratingImage(false);
       }
     },
-    [user]
+    [userId]
   );
 
   /** One short look-book paragraph per game, shared by both of its images. */
@@ -147,7 +162,7 @@ export const useImageGeneration = () => {
       location: string;
       locationDescription?: string;
     }): Promise<string | undefined> => {
-      if (!user) return undefined;
+      if (!userId) return undefined;
       try {
         const data = await callFunction<{ visualBible?: string }>('generate-visual-bible', context);
         return data.visualBible;
@@ -157,11 +172,11 @@ export const useImageGeneration = () => {
         return undefined;
       }
     },
-    [user]
+    [userId]
   );
 
   return {
-    isAuthenticated,
+    isAuthenticated, settingsReady, settingsError, retryLoadSettings, isSavingSettings,
     autoGenerate: settings.autoGenerate,
     useAiCastingArt: settings.useAiCastingArt,
     isGeneratingImage,
@@ -171,3 +186,4 @@ export const useImageGeneration = () => {
     generateVisualBible,
   };
 };
+
