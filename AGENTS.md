@@ -1,0 +1,1 @@
+- Play-log/death logic shared by the app and edge functions lives in supabase/functions/_shared/play/; src/lib/play/{events,death}.ts only re-export it, because edge bundles cannot import from src/.
