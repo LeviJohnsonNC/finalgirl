@@ -16,17 +16,12 @@ const PICKER_TITLES = {
   finalGirl: 'SELECT FINAL GIRL FILE',
 };
 
-const sortOptions = (type: CastingPickerProps['type'], options: string[]) => {
-  if (type !== 'finalGirl') return options;
-  return [...options].sort((a, b) => a.localeCompare(b));
-};
-
 export const CastingPicker = ({ type, options, onSelect, onClose }: CastingPickerProps) => {
   const { getImageForValue } = useActiveImages();
   const isLocation = type === 'location';
   const [query, setQuery] = useState('');
 
-  const sortedOptions = useMemo(() => sortOptions(type, options), [type, options]);
+  const sortedOptions = useMemo(() => [...options].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })), [options]);
   const filteredOptions = useMemo(() => {
     const trimmed = query.trim().toLowerCase();
     if (!trimmed) return sortedOptions;
