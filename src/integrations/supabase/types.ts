@@ -193,6 +193,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_collection_delta: {
+        Args: { p_add: string[]; p_remove: string[] }
+        Returns: Json
+      }
       get_game_history_summary: {
         Args: never
         Returns: {
@@ -216,6 +220,19 @@ export type Database = {
           victims_killed: number
           victims_saved: number
           weapon_used: string
+        }[]
+      }
+      reserve_ai_usage: {
+        Args: {
+          p_daily_limit?: number
+          p_function_name: string
+          p_hourly_limit: number
+          p_user_id: string
+        }
+        Returns: {
+          allowed: boolean
+          event_id: number
+          reason: string
         }[]
       }
     }
