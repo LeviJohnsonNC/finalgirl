@@ -1,11 +1,9 @@
-import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpRight, Play, Ticket } from 'lucide-react';
 import theaterBackdrop from '@/assets/theater-backdrop.jpg';
-import openingStill from '@/assets/locations/ai/camp-happy-trails.png';
 import { useAuth } from '@/hooks/useAuth';
 import { useGameHistoryContext } from '@/contexts/GameHistoryContext';
-import { ProjectorSlideshow } from './ProjectorSlideshow';
+import { TheaterReel } from './TheaterReel';
 import '@/styles/theater.css';
 
 interface MarqueeProps {
@@ -15,13 +13,13 @@ interface MarqueeProps {
   onScrapbooks?: () => void;
   onStats?: () => void;
   onRules?: () => void;
+  onOpenCaseFile?: (id: string) => void;
 }
 
-export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onStats, onRules }: MarqueeProps) => {
+export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onStats, onRules, onOpenCaseFile }: MarqueeProps) => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading, authError } = useAuth();
-  const { gameHistory } = useGameHistoryContext();
-  const projectorImages = useMemo(() => gameHistory.map(g => g.sceneImageUrl).filter((url): url is string => !!url), [gameHistory]);
+  const { gameHistory, isLoading, loadError, retryLoadHistory } = useGameHistoryContext();
 
   return (
     <div className="theater" style={{ backgroundImage: `url(${theaterBackdrop})` }}>
@@ -41,29 +39,8 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
         </header>
 
         <main className="theater-main" aria-label="The drive-in theater">
-          <div className="theater-billing"><span />{projectorImages.length ? 'From your case files' : 'Tonight’s feature'}<span /></div>
-          <div className="theater-screen-wrap">
-            <div className="theater-screen">
-              {projectorImages.length ? <ProjectorSlideshow key={user?.id ?? 'guest'} images={projectorImages} /> : (
-                <div className="theater-title-card">
-                  <img src={openingStill} alt="" className="theater-title-art" />
-                  <div className="theater-title-copy">
-                    <span className="theater-kicker">An evening of terrible possibilities</span>
-                    <h2>Some nights<br /><em>stay with you.</em></h2>
-                    <span className="theater-title-rule" />
-                    <p>Your cast. Your story. Your last chance.</p>
-                  </div>
-                </div>
-              )}
-              <div className="theater-screen-texture" aria-hidden="true" />
-            </div>
-            <span className="theater-screen-foot theater-screen-foot-left" aria-hidden="true" />
-            <span className="theater-screen-foot theater-screen-foot-right" aria-hidden="true" />
-          </div>
-
-          <div className="theater-program">
-            <p className="theater-program-line">{projectorImages.length ? 'Every game leaves a story.' : 'The screen is waiting for your first story.'}</p>
-          </div>
+          <TheaterReel key={user?.id ?? 'guest'} games={authLoading ? [] : gameHistory} loading={authLoading || isLoading}
+            historyError={loadError} onRetryHistory={retryLoadHistory} onOpenCaseFile={user ? onOpenCaseFile : undefined} />
           <div className="theater-actions">
             <button className="theater-play" onClick={onStart}>
               <span className="theater-play-icon"><Play size={16} fill="currentColor" aria-hidden="true" /></span>

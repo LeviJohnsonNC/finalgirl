@@ -34,3 +34,56 @@ test('projected scenes preserve the full artwork and the theater opens casting',
   await expect(page.getByRole('button', { name: /Choose KILLER/i })).toBeVisible();
   expect(archive.calls).toEqual([]);
 });
+
+test('projection controls identify the game and open its exact case file', async ({ page, archive }, testInfo) => {
+  const olderId = '22222222-2222-4222-8222-222222222222';
+  archive.history = [
+    { id: gameId, timestamp: 2000, outcome: 'won', killer: 'Hans', location: 'Camp Happy Trails', final_girl: 'Laurie', scene_image_url: 'http://127.0.0.1:4173/theater-a.png' },
+    { id: olderId, timestamp: 1000, outcome: 'lost', killer: 'Billy the Bear', location: 'Buddyland', final_girl: 'Rena', scene_image_url: 'http://127.0.0.1:4173/theater-b.png', intro_story: 'This is the older Buddyland case file.' },
+  ];
+  await archive.install(page);
+  await page.route(/\/theater-[ab]\.png$/, route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/buddyland.png') }));
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Laurie vs. Hans' })).toBeVisible();
+  await page.getByRole('button', { name: 'Next scene' }).click();
+  await expect(page.getByRole('heading', { name: 'Rena vs. Billy the Bear' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Play slideshow' })).toBeVisible();
+  await page.getByRole('button', { name: 'View projected artwork full size' }).click();
+  await expect(page.getByRole('dialog').getByRole('img', { name: /Scene for Rena/ })).toHaveCSS('object-fit', 'contain');
+  await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'View projected artwork full size' })).toBeFocused();
+  await page.screenshot({ path: testInfo.outputPath('personal-screening.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Open case file' }).click();
+  await expect(page.locator('.story-page-content').getByText('This is the older Buddyland case file.')).toBeVisible();
+  expect(archive.calls).toEqual([]);
+});
+
+test('broken artwork falls back to the same game’s poster and an exhausted reel can retry', async ({ page, archive }) => {
+  archive.history = [{ id: gameId, timestamp: 1, outcome: 'won', killer: 'Hans', location: 'Camp Happy Trails', final_girl: 'Laurie', scene_image_url: 'http://127.0.0.1:4173/broken-scene.png', poster_image_url: 'http://127.0.0.1:4173/recoverable-poster.png' }];
+  await archive.install(page);
+  await page.route('**/broken-scene.png', route => route.abort());
+  let working = false;
+  await page.route('**/recoverable-poster.png', route => working ? route.fulfill({ contentType: 'image/png', path: resolve('src/assets/characters/ai/laurie.png') }) : route.abort());
+  await page.goto('/');
+  await expect(page.getByText('Stills unavailable. Your case files are safe.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'START THE TAPE' })).toBeEnabled();
+  working = true;
+  await page.getByRole('button', { name: 'Retry projection' }).click();
+  await expect(page.getByRole('img', { name: /Poster from Laurie/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Next scene' })).toBeDisabled();
+  expect(archive.calls).toEqual([]);
+});
+
+test('reduced motion keeps the reel still while manual navigation works', async ({ page, archive }) => {
+  archive.history = ['a', 'b'].map((id, i) => ({ id: i ? '22222222-2222-4222-8222-222222222222' : gameId, timestamp: 2000 - i, outcome: 'won', killer: 'Hans', location: 'Camp Happy Trails', final_girl: i ? 'Reiko' : 'Laurie', scene_image_url: `http://127.0.0.1:4173/theater-${id}.png` }));
+  await archive.install(page);
+  await page.route(/\/theater-[ab]\.png$/, route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/camp-happy-trails.png') }));
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Laurie vs. Hans' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Automatic playback off for reduced motion' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Next scene' }).click();
+  await expect(page.getByRole('heading', { name: 'Reiko vs. Hans' })).toBeVisible();
+  await expect(page.locator('.theater-projection')).toHaveCount(1);
+  await expect(page.locator('.theater-projection')).toHaveCSS('animation-name', 'none');
+});

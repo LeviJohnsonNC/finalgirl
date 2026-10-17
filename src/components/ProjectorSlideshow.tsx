@@ -1,20 +1,21 @@
-import { useState, useEffect } from 'react';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
+import type { Screening } from '@/lib/theater';
 
-export const ProjectorSlideshow = ({ images }: { images: string[] }) => {
-  const [index, setIndex] = useState(0);
-  const reducedMotion = useReducedMotion();
-  useEffect(() => {
-    if (images.length < 2 || reducedMotion) return;
-    const timer = window.setInterval(() => setIndex(i => (i + 1) % images.length), 16000);
-    return () => window.clearInterval(timer);
-  }, [images.length, reducedMotion]);
-  const image = images[index % images.length];
-  if (!image) return null;
-  return (
-    <div className="theater-projection" key={image}>
-      <img src={image} className="theater-projection-fill" alt="" aria-hidden="true" />
-      <img src={image} className="theater-projection-art" alt="A scene from a previous game" />
+interface ProjectorSlideshowProps {
+  current: Screening;
+  previous?: Screening;
+  reducedMotion: boolean;
+  onImageError: (url: string) => void;
+}
+
+export const ProjectorSlideshow = ({ current, previous, reducedMotion, onImageError }: ProjectorSlideshowProps) => {
+  const frame = (screening: Screening, old: boolean) => (
+    <div key={screening.key} className={`theater-projection ${!old && previous && !reducedMotion ? 'theater-projection-enter' : ''}`} aria-hidden={old || undefined}>
+      <img src={screening.imageUrl} className="theater-projection-fill" alt="" aria-hidden="true" />
+      <img src={screening.imageUrl} className="theater-projection-art" alt={old ? '' : `${screening.kind === 'scene' ? 'Scene' : 'Poster'} from ${screening.finalGirl} vs. ${screening.killer} at ${screening.location}`}
+        onError={old ? undefined : () => onImageError(screening.imageUrl)} />
     </div>
+  );
+  return (
+    <>{previous && !reducedMotion && frame(previous, true)}{frame(current, false)}</>
   );
 };
