@@ -17,10 +17,14 @@
 .casting-slot--location { z-index: 1; }
 .casting-slot-top { display: flex; flex-direction: column; align-items: center; gap: 22px; }
 .casting-slot-heading {
-  display: block; width: 100%; min-height: 24px; text-align: center;
+  display: flex; align-items: center; justify-content: center; width: 100%; min-height: 24px; text-align: center;
   font-family: var(--font-vhs); font-size: clamp(12px, 1.9cqw, 23px); line-height: 1;
   color: hsl(var(--foreground) / .78); letter-spacing: .25em; text-transform: uppercase;
 }
+.casting-heading-text { position: relative; max-width: calc(100% - 32px); }
+.casting-slot--killer .casting-heading-text, .casting-slot--finalGirl .casting-heading-text { max-width: none; white-space: nowrap; }
+.casting-heading-info { position: absolute; left: 100%; top: 50%; transform: translateY(-50%); letter-spacing: 0; }
+.casting-heading-info button { padding: 0; }
 .casting-slot--killer .casting-slot-heading { transform: rotate(-8deg); }
 .casting-slot--finalGirl .casting-slot-heading { transform: rotate(8deg); }
 .casting-photo {
@@ -89,7 +93,6 @@
   background: radial-gradient(ellipse, hsl(var(--muted) / .3), transparent);
 }
 .casting-slot-controls { width: 100%; max-width: 320px; margin: 0 auto; padding: 0 4px; }
-.casting-slot-meta { display: flex; justify-content: center; align-items: center; gap: 5px; min-height: 44px; }
 .casting-slot-buttons { display: flex; gap: 8px; }
 .casting-slot-buttons .plate-btn { flex: 1; min-width: 0; padding: 0 8px; }
 .casting-photo:focus-visible { outline: 2px solid hsl(var(--secondary)); outline-offset: 8px; }
@@ -106,8 +109,6 @@
   .casting-slot--killer .casting-photo::before { transform: rotate(5deg) translate(4px, -3px); }
   .casting-slot--finalGirl .casting-photo::before { transform: rotate(-3deg) translate(3px, -1px); }
   .casting-slot-controls { padding: 0 3px; }
-  .casting-slot-meta { gap: 0; flex-direction: column; min-height: 68px; }
-  .casting-slot-meta > span { font-size: 10px; letter-spacing: 0; }
   .casting-slot-buttons { flex-direction: column; gap: 2px; }
   .casting-slot-buttons .plate-btn { flex: auto; height: 44px; font-size: 11px; letter-spacing: .08em; padding: 0 2px; }
 }
@@ -191,7 +192,7 @@
 .casting-console-play:active:not(:disabled) { transform: translateY(1px); }
 .casting-console-play:focus-visible { outline: 2px solid hsl(var(--secondary)); outline-offset: 5px; }
 .casting-console-play:disabled { opacity: .4; cursor: not-allowed; box-shadow: inset 0 0 8px hsl(var(--background)); }
-.casting-console-help { margin-top: 10px; text-align: center; color: hsl(var(--muted-foreground)); font-family: var(--font-vhs); font-size: 14px; }
+.casting-console-help { min-height: 20px; line-height: 20px; margin-top: 10px; text-align: center; color: hsl(var(--muted-foreground)); font-family: var(--font-vhs); font-size: 14px; }
 @media (max-width: 639px) {
   .casting-console { width: calc(100% - 1.5rem); padding: 29px 23px 26px; }
   .casting-console::before { border-image-width: 27px; }
@@ -216,7 +217,6 @@
   .casting-tableau { max-width: min(1160px, max(555px, calc((100dvh - 600px) / .36))); margin-block: 8px 16px; }
   .casting-slot-top { gap: 14px; }
   .casting-slot { gap: 14px; }
-  .casting-slot-meta { min-height: 28px; }
   .casting-slot-controls { position: relative; left: 50%; transform: translateX(-50%); min-width: 180px; margin-inline: 0; }
   .casting-slot-buttons .plate-btn { font-size: 12px; letter-spacing: .1em; }
   .casting-slot--location .casting-slot-controls { max-width: 220px; }
@@ -228,9 +228,13 @@
 @media (min-width: 1024px) and (max-height: 799px) {
   .casting-tableau { margin-block: 4px 10px; }
   .casting-slot-top, .casting-slot { gap: 8px; }
-  .casting-slot-meta { min-height: 24px; }
   .casting-slot-buttons .plate-btn { height: 44px; }
   .casting-console { padding-top: 25px; }
   .casting-console-playback { margin-top: 12px; }
   .casting-console-help { margin-top: 6px; }
+}
+
+@media (max-width: 639px) {
+  .casting-heading-info { left: calc(100% - 4px); }
+  .casting-heading-info svg { width: 12px; height: 12px; }
 }

@@ -337,7 +337,7 @@ const IndexContent = () => {
       {/* VHS Footer */}
       <footer
         ref={footerRef}
-        className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur border-t border-border py-2 z-50 safe-area-bottom"
+        className="app-footer fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur border-t border-border py-2 z-50 safe-area-bottom"
       >
         <div className="container mx-auto px-3 sm:px-4 flex items-center justify-between">
           {/* Left: Back button or Play indicator */}
@@ -371,6 +371,7 @@ const IndexContent = () => {
             <button
               onClick={handleArchive}
               aria-label="COLLECTION"
+              aria-current={currentPage === 'archive' ? 'page' : undefined}
               className="type-caption text-muted-foreground hover:text-secondary transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <Library className="w-3 h-3" />
@@ -379,6 +380,7 @@ const IndexContent = () => {
             <button
               onClick={() => setCurrentPage('rules')}
               aria-label="RULES"
+              aria-current={currentPage === 'rules' ? 'page' : undefined}
               className="type-caption text-muted-foreground hover:text-amber-400 transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <BookMarked className="w-3 h-3" />
@@ -387,6 +389,7 @@ const IndexContent = () => {
             <button
               onClick={() => setCurrentPage('stats')}
               aria-label="STATS"
+              aria-current={currentPage === 'stats' ? 'page' : undefined}
               className="type-caption text-muted-foreground hover:text-green-400 transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <BarChart3 className="w-3 h-3" />
@@ -395,6 +398,7 @@ const IndexContent = () => {
             <button
               onClick={() => goToScrapbooks()}
               aria-label="SCRAPBOOKS"
+              aria-current={currentPage === 'scrapbooks' ? 'page' : undefined}
               className="type-caption text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >
               <BookOpen className="w-3 h-3" />

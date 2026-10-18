@@ -27,12 +27,6 @@ const EMPTY_LABELS = {
   finalGirl: 'UNASSIGNED',
 };
 
-const META_TAGS = {
-  killer: 'KILLER',
-  location: 'SITE',
-  finalGirl: 'SURVIVOR',
-};
-
 const getObjectPosition = (type: 'killer' | 'location' | 'finalGirl', value: string | null): string => {
   if (value === 'Dr. Fright') return 'object-center';
   if (value === 'Poltergeist') return 'object-center';
@@ -107,7 +101,10 @@ export const CastingSlot = ({
     <div className={`casting-slot casting-slot--${type}`}>
       <div className="casting-slot-top">
         <span className="casting-slot-heading">
-          {isLocation && displayValue ? displayValue : SLOT_LABELS[type]}
+          <span className="casting-heading-text">
+            {isLocation && displayValue ? displayValue : SLOT_LABELS[type]}
+            {displayValue && !isAnimating && <span className="casting-heading-info"><LoreInfoModal type={type} name={displayValue} /></span>}
+          </span>
         </span>
         <button type="button" className={`casting-photo ${isEmpty ? 'casting-photo--empty' : ''}`}
           onClick={onChoose} disabled={isAnimating}
@@ -144,10 +141,6 @@ export const CastingSlot = ({
       </div>
 
       <div className="casting-slot-controls">
-        <div className="casting-slot-meta">
-          <span className="type-caption text-dim">{isAnimating ? 'SCANNING...' : META_TAGS[type]}</span>
-          {displayValue && !isAnimating && <LoreInfoModal type={type} name={displayValue} />}
-        </div>
         <div className="casting-slot-buttons">
           <button type="button" onClick={onShuffle} disabled={isAnimating || options.length === 0}
             className="plate-btn plate-btn--shuffle" style={{ backgroundImage: `url(${shufflePlate.url})` }} aria-label="Shuffle">

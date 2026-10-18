@@ -303,34 +303,13 @@
   .stats-page *, .stats-page *::before, .stats-page *::after { animation: none !important; transition: none !important; }
 }
 
-/* Stats keeps the existing navigation actions, but places them above the
-   evidence rather than floating a news broadcast over the charts. */
+/* Keep the archive artwork behind the page and the news ticker quiet. */
 body:has(.stats-page) main > .stats-page .stats-bg-plate { position: absolute; top: -128px; bottom: 0; left: calc(50% - 50vw); right: auto; width: 100vw; background: linear-gradient(#02090ba6, #02090b9c), url('../assets/stats/archive-woods.webp') center / cover no-repeat, #03090b; }
 body:has(.stats-page) .fixed:has(.news-ticker) { display: none; }
-body:has(.stats-page) footer { position: absolute; top: 38px; bottom: auto; left: auto; right: 38px; width: auto; padding: 0; background: none; border: 0; backdrop-filter: none; }
-body:has(.stats-page) footer > .container { width: auto; max-width: none; padding: 0; gap: 14px; }
-body:has(.stats-page) footer .container > div.type-caption { display: none; }
-body:has(.stats-page) footer .container > .flex { gap: 7px; }
-body:has(.stats-page) footer button { color: #bac6c9; font: 12px/1.4 var(--archive-label); letter-spacing: .035em; }
-body:has(.stats-page) footer button:hover { color: #f5ead9; }
-body:has(.stats-page) footer button[aria-label=STATS] { color: #f4d7cf; box-shadow: inset 0 -1px #b45a50; }
-body:has(.stats-page) footer .container > div.flex > :not(button) { display: none; }
 .stats-legal { position: relative; z-index: 1; margin: 28px auto 0; max-width: 720px; align-self: center; padding: 10px 8px 0; text-align: center; font: 11px/1.6 var(--archive-label); color: #859396; }
-@media (max-width: 1099px) and (min-width: 768px) {
-  body:has(.stats-page) footer { right: 20px; top: 22px; }
-  body:has(.stats-page) footer button { padding-inline: 5px; font-size: 11px; }
-  body:has(.stats-page) footer > .container { gap: 4px; }
-  body:has(.stats-page) footer .container > .flex { gap: 0; }
-}
+
 @media (max-width: 767px) {
-  body:has(.stats-page) main { padding-top: 154px; padding-bottom: 36px; }
-  body:has(.stats-page) footer { top: 88px; right: 12px; left: 12px; border-block: 1px solid #91a8ad33; background: #02090b80; }
-  body:has(.stats-page) footer > .container { width: 100%; justify-content: space-between; gap: 0; }
-  body:has(.stats-page) footer button { min-width: 44px; min-height: 44px; padding: 5px; }
-  body:has(.stats-page) footer button svg { width: 15px; height: 15px; }
-  body:has(.stats-page) footer button span { display: none; }
-  body:has(.stats-page) footer .container > .flex { gap: 6px; }
-  body:has(.stats-page) main > .stats-page .stats-bg-plate { top: -154px; bottom: 0; }
+  body:has(.stats-page) main > .stats-page .stats-bg-plate { top: -96px; bottom: 0; }
   .stats-scene-note { display: none; }
   .stats-page .stats-subheader { font-size: 11px; }
 }
@@ -384,7 +363,7 @@ body:has(.stats-page) .stats-bg-plate::before { content: ''; position: absolute;
 
 /* End at the content edge; decorative layers must never lengthen the page. */
 html:has(.stats-page), body:has(.stats-page) { overscroll-behavior-y: none; }
-body:has(.stats-page) main { padding-bottom: 24px; }
+body:has(.stats-page) main { padding-bottom: calc(var(--app-footer-h, 64px) + 24px); }
 .stats-page { min-height: 0; padding-bottom: 0; }
 .stats-page button, .stats-page input, .stats-page select,
 .stats-page .type-caption, .stats-page .type-label, .stats-page .type-body-sm { font-family: var(--archive-label); }
