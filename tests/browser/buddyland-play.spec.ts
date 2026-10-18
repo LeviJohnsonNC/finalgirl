@@ -180,7 +180,7 @@ test("Buddyland observations survive reload and reach deaths and ending review",
     page.getByRole("combobox", { name: "Terror card", exact: true }),
   ).toHaveCount(0);
   await page
-    .getByRole("button", { name: "Gruesome Death · uses AI", exact: true })
+    .getByRole("button", { name: "Gruesome Death", exact: true })
     .click();
   await expect(
     page.getByRole("region", { name: "Generated death scene", exact: true }),
@@ -189,7 +189,7 @@ test("Buddyland observations survive reload and reach deaths and ending review",
     archive.calls.filter((c) => c === "generate-death-scene"),
   ).toHaveLength(1);
   await page
-    .getByRole("button", { name: "Back to the game", exact: true })
+    .getByRole("button", { name: "Save and exit", exact: true })
     .click();
   await expect
     .poll(() =>

@@ -1365,3 +1365,514 @@ body:has(.play-workspace) .app-shell {
     min-height: 44px;
   }
 }
+
+/* Tactile controls and a full-width moment board. */
+.play-count-add > svg {
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  border-radius: 9px;
+  stroke-width: 2.6;
+  color: #f4ffe8;
+  background: linear-gradient(#4c7750, #2c4b31);
+  border: 1px solid #a4cba080;
+  box-shadow:
+    0 2px 8px #000b,
+    inset 0 1px #e6ffcb45;
+}
+.play-count--killed .play-count-add > svg {
+  background: linear-gradient(#c04634, #84251d);
+  border-color: #eead8d88;
+  color: #fff1df;
+}
+.play-count--round .play-count-add > svg {
+  background: linear-gradient(#656b61, #363e39);
+  border-color: #cbd0be77;
+  color: #fff7e7;
+}
+.play-count-minus {
+  border-radius: 8px;
+  color: #d6e4cc;
+  background: linear-gradient(#24312a, #121c17);
+  border-color: #9fae8760;
+  box-shadow: inset 0 1px #ddd4b21a;
+}
+.play-count-add:focus-visible > svg,
+.play-count-add:hover > svg {
+  filter: brightness(1.15);
+}
+.play-state .play-stat-art {
+  width: 100%;
+  opacity: 0.48;
+  mask-image: linear-gradient(90deg, transparent 5%, #000 70%);
+  object-position: center;
+}
+.play-state--finalHorrorLevel {
+  background: #0b1718;
+}
+.play-state--bloodlust {
+  background: #20100f;
+}
+.play-state > span {
+  text-shadow: 0 1px 4px #000;
+}
+.play-state-stepper {
+  border-radius: 7px;
+}
+.play-state .play-state-stepper {
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  border: 0;
+  background: #080e0a88;
+}
+.play-state .play-state-stepper button {
+  position: relative;
+  isolation: isolate;
+  min-height: 44px;
+  color: #f2ecd8;
+}
+.play-state .play-state-stepper button:not(:nth-child(2))::before {
+  content: "";
+  position: absolute;
+  inset: 5px 4px;
+  border-radius: 7px;
+  z-index: -1;
+  border: 1px solid #a0ab8a70;
+  background: linear-gradient(#333e32, #172219);
+  box-shadow:
+    0 2px 5px #0009,
+    inset 0 1px #e0ebbc22;
+}
+.play-state .play-state-stepper button:last-child::before {
+  background: linear-gradient(#4a6945, #29472c);
+  border-color: #a3c28d99;
+}
+.play-state .play-state-stepper button:nth-child(2) {
+  font:
+    28px/1 Georgia,
+    serif;
+  text-shadow: 0 2px 6px #000;
+}
+.play-state .play-state-stepper button svg {
+  stroke-width: 2.3;
+}
+.play-moment-choices {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: none;
+  gap: 9px;
+}
+.play-moment-choices button {
+  width: 100%;
+  min-height: 60px;
+  text-align: left;
+  line-height: 1.4;
+  font-size: 12px;
+  border-radius: 5px;
+  gap: 9px;
+  padding: 10px 12px;
+  background: linear-gradient(120deg, #14201adf, #0a110edb);
+}
+.play-moment-choices svg {
+  flex: none;
+  width: 19px;
+  height: 19px;
+  color: #c4c9aa;
+}
+.play-moment-choices button:hover {
+  background: #2b3926;
+  border-color: #c3ba8b;
+}
+.play-moment-editor > button {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 7px;
+  border-color: #c8876b;
+  color: #fff1d8;
+  background: linear-gradient(#a03e2d, #6f221b);
+  padding: 11px 22px;
+  box-shadow:
+    0 3px 9px #0007,
+    inset 0 1px #e6b18440;
+}
+.play-moment-editor > button:hover {
+  filter: brightness(1.18);
+}
+
+/* Photographic case-file modal, with worn brass and red lacquer. */
+.play-death-modal--illustrated {
+  max-width: 820px !important;
+  border: 2px solid #9f805899 !important;
+  border-radius: 11px !important;
+  background:
+    linear-gradient(118deg, #0c1311f2, #080b0bf2),
+    url("../assets/play/bloodlust-stain.webp") center/cover !important;
+  box-shadow:
+    0 25px 100px #000,
+    inset 0 0 0 4px #1b120cb3,
+    0 0 0 1px #4c3628 !important;
+  padding: 0 25px 24px !important;
+  gap: 20px;
+}
+.play-death-modal--illustrated::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 7px;
+  pointer-events: none;
+  border: 1px dashed #d7a7734d;
+  border-bottom: 0;
+  z-index: 0;
+}
+.play-death-modal--illustrated .play-death-heading {
+  margin: 0 -25px;
+  padding: 28px 58px 24px 25px;
+  min-height: 162px;
+  background:
+    linear-gradient(90deg, #070d0df7 30%, #0c0b0b99 69%, #11070715),
+    url("../assets/play/death-mask.webp") right 41% / cover;
+  border-bottom: 1px solid #b1996c77;
+}
+.play-death-modal--illustrated .play-death-heading h2 {
+  font-size: 43px;
+  letter-spacing: -0.03em;
+  margin: 7px 0 11px;
+  text-shadow: 0 3px 10px #000;
+}
+.play-death-modal--illustrated .play-death-heading .play-eyebrow {
+  color: #d8d4bf;
+}
+.play-death-modal--illustrated .play-death-heading p:last-child {
+  color: #e0ddcf;
+  max-width: 510px;
+  text-shadow: 0 1px 5px #000;
+}
+.play-death-modal--illustrated > button:last-child {
+  border-radius: 6px;
+  border-color: #9c8d6870;
+  background: #101612f2;
+}
+.play-death-modal--illustrated .play-cause-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 23px;
+}
+.play-death-modal--illustrated .play-cause-section h3::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, #b59b6677, transparent);
+}
+.play-death-modal--illustrated .play-cause-choices {
+  gap: 11px;
+}
+.play-death-modal--illustrated .play-cause-tile {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 109px;
+  display: flex;
+  align-items: flex-end;
+  padding: 13px;
+  border: 1px solid #b49a6b99;
+  border-radius: 8px;
+  color: #f2e5ce;
+  background: #101916;
+  box-shadow:
+    inset 0 0 0 3px #080b09b3,
+    0 3px 6px #0008;
+}
+.play-cause-tile::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background:
+    linear-gradient(0deg, #030807f0, transparent 98%),
+    linear-gradient(90deg, #040a0b66, transparent);
+  pointer-events: none;
+}
+.play-cause-tile::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px dashed #d2b38740;
+  border-radius: 5px;
+  pointer-events: none;
+  z-index: 1;
+}
+.play-cause-tile > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 45%;
+  z-index: -1;
+  opacity: 0.85;
+  transition: transform 0.2s;
+}
+.play-cause-tile > svg {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 1;
+  width: 25px;
+  height: 25px;
+  color: #d1b995;
+  filter: drop-shadow(0 2px 4px #000);
+}
+.play-cause-tile > span {
+  position: relative;
+  z-index: 1;
+  font:
+    17px/1.2 Georgia,
+    serif;
+  text-shadow: 0 2px 4px #000;
+}
+.play-death-modal--illustrated .play-cause-tile[aria-pressed="true"] {
+  border-color: #f15a40;
+  background: #4a0c0a;
+  box-shadow:
+    inset 0 0 0 2px #cc3222,
+    0 0 14px #a6151944;
+}
+.play-cause-tile[aria-pressed="true"]::before {
+  background:
+    linear-gradient(0deg, #3d0704e8, transparent),
+    linear-gradient(90deg, #ab120b66, #ba1e1444);
+}
+.play-cause-tile[aria-pressed="true"] > svg {
+  color: #ffcfad;
+}
+.play-cause-tile:hover > img {
+  transform: scale(1.04);
+}
+.play-death-modal--illustrated .play-select-trigger,
+.play-death-modal--illustrated textarea {
+  border-radius: 5px !important;
+  border-color: #a28a5d60 !important;
+}
+.play-death-payoff {
+  scroll-margin-block: 14px;
+  position: relative;
+  border: 1px solid #a48d6266;
+  border-left: 3px solid #a33f2c;
+  border-radius: 6px;
+  padding: 23px;
+  background: linear-gradient(120deg, #23221beb, #111813f2);
+  box-shadow:
+    inset 0 1px #f4e1b21a,
+    0 5px 15px #0005;
+  outline: none;
+}
+.play-death-modal--illustrated [aria-label="Generated death scene"] {
+  border: 0;
+  padding: 0;
+  background: none;
+}
+.play-death-story-heading {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 13px;
+  color: #ccaf7f;
+}
+.play-death-story-heading h3 {
+  font:
+    23px/1.3 Georgia,
+    serif;
+  color: #e5d7b9;
+}
+.play-death-story-heading > span {
+  margin-left: auto;
+  font:
+    10px Arial,
+    sans-serif;
+  letter-spacing: 0.15em;
+  color: #a9aa93;
+}
+.play-death-modal--illustrated
+  [aria-label="Generated death scene"]
+  > .play-death-prose {
+  font:
+    19px/1.75 Georgia,
+    serif;
+  color: #f0e5ce;
+  letter-spacing: 0.003em;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  margin-top: 13px;
+}
+.play-death-story-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 17px;
+}
+.play-death-story-tools button {
+  min-height: 44px;
+  padding: 8px 10px;
+  font:
+    11px Arial,
+    sans-serif;
+  border: 1px solid #8d936c66;
+  border-radius: 5px;
+}
+.play-death-story-tools [role="group"] {
+  display: flex;
+  gap: 5px;
+}
+.play-death-story-tools [aria-pressed="true"] {
+  background: #394331;
+  color: #f1e7c7;
+}
+.play-death-loading {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-height: 95px;
+  color: #bfa477;
+}
+.play-death-loading h3 {
+  font:
+    23px Georgia,
+    serif;
+  color: #e5d7b9;
+  margin-bottom: 7px;
+}
+.play-death-loading p,
+.play-death-payoff > [role="status"],
+.play-death-payoff > [role="alert"] {
+  font:
+    13px/1.6 Arial,
+    sans-serif;
+  color: #d5c9ac;
+}
+.play-death-payoff > [role="alert"] {
+  color: #ffbcb0;
+  margin-top: 12px;
+}
+.play-death-modal--illustrated .play-death-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.5fr;
+  gap: 10px;
+  padding-top: 8px;
+}
+.play-death-modal--illustrated .play-death-actions > button {
+  min-height: 52px;
+  border-radius: 7px;
+  border: 1px solid #ad936075;
+  font:
+    17px/1.25 Georgia,
+    serif;
+  padding: 12px;
+  background: linear-gradient(#1c2420, #0d1511);
+  color: #e8e1ce;
+  box-shadow:
+    inset 0 1px #dcc9a41a,
+    0 3px 7px #0009;
+}
+.play-death-modal--illustrated .play-death-actions > .play-gruesome-action {
+  background: linear-gradient(125deg, #bb3021, #7a120f);
+  border-color: #f16c4599;
+  color: #fff1d9;
+  box-shadow:
+    0 0 18px #a4222026,
+    inset 0 1px #ffb17e55;
+}
+.play-death-actions > button:hover:not(:disabled) {
+  filter: brightness(1.18);
+}
+@media (max-width: 900px) {
+  .play-moment-choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 639px) {
+  .play-count-add > svg {
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+    border-radius: 8px;
+  }
+  .play-moment-choices {
+    gap: 8px;
+  }
+  .play-moment-choices button {
+    font-size: 11px;
+    padding: 10px 9px;
+    min-height: 64px;
+  }
+  .play-moment-choices svg {
+    width: 17px;
+    height: 17px;
+  }
+  .play-moment-editor {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .play-moment-editor > button {
+    align-self: flex-end;
+    min-width: 110px;
+  }
+  .play-death-modal--illustrated {
+    padding: 0 15px 17px !important;
+    border-radius: 9px !important;
+  }
+  .play-death-modal--illustrated .play-death-heading {
+    margin: 0 -15px;
+    padding: 25px 45px 21px 15px;
+    min-height: 155px;
+    background-position: right 40%;
+  }
+  .play-death-modal--illustrated .play-death-heading h2 {
+    font-size: 34px;
+  }
+  .play-death-modal--illustrated .play-death-heading p:last-child {
+    font-size: 12px;
+  }
+  .play-death-modal--illustrated .play-cause-choices {
+    gap: 9px;
+  }
+  .play-death-modal--illustrated .play-cause-tile {
+    min-height: 103px;
+    padding: 11px;
+  }
+  .play-cause-tile > span {
+    font-size: 16px;
+  }
+  .play-cause-tile > svg {
+    top: 12px;
+    left: 12px;
+    width: 23px;
+    height: 23px;
+  }
+  .play-death-modal--illustrated .play-death-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .play-death-modal--illustrated .play-death-actions > .play-gruesome-action {
+    grid-column: 1/-1;
+    grid-row: 1;
+    min-height: 53px;
+  }
+  .play-death-modal--illustrated .play-death-actions > button {
+    font-size: 16px;
+  }
+  .play-death-payoff {
+    padding: 17px;
+  }
+  .play-death-modal--illustrated
+    [aria-label="Generated death scene"]
+    > .play-death-prose {
+    font-size: 18px;
+    line-height: 1.7;
+  }
+  .play-death-story-heading h3 {
+    font-size: 21px;
+  }
+}

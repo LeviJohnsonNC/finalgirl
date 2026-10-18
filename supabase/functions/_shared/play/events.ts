@@ -29,6 +29,8 @@ export type MomentType =
   | "ultimate-used"
   | "escape"
   | "turning-point"
+  | "girl-revived"
+  | "killer-revived"
   | "other";
 export type PlayKind =
   | "start"
@@ -118,6 +120,8 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
       "ultimate-used",
       "escape",
       "turning-point",
+      "girl-revived",
+      "killer-revived",
       "other",
     ].includes(e.momentType)
   )

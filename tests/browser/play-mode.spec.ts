@@ -53,7 +53,7 @@ test("Play starts immediately, corrects matching counters, saves moments and res
   await page
     .getByLabel("Moment detail", { exact: true })
     .fill("Barricaded the arcade with a broken cabinet.");
-  await page.getByRole("button", { name: "Done", exact: true }).click();
+  await page.getByRole("button", { name: "Record", exact: true }).click();
   await page
     .getByRole("button", { name: "Decrease killed", exact: true })
     .click();

@@ -23,6 +23,9 @@ test("optional observations preserve zero, survive reload, and reach the ending"
     await page
       .getByRole("button", { name: `Track ${label}`, exact: true })
       .click();
+    await page
+      .getByRole("button", { name: `Set ${label}`, exact: true })
+      .click();
     await page.getByLabel(`${label} value`, { exact: true }).fill(value);
     await page.getByRole("button", { name: "Set", exact: true }).click();
   }
@@ -39,7 +42,7 @@ test("optional observations preserve zero, survive reload, and reach the ending"
     .getByRole("button", { name: "Found a weapon or key item", exact: true })
     .click();
   await searchPick(page, "Moment detail", "Axe from the cabins");
-  await page.getByRole("button", { name: "Done", exact: true }).click();
+  await page.getByRole("button", { name: "Record", exact: true }).click();
   await page.reload();
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
   await expect(
@@ -86,6 +89,7 @@ test("stopping Horror tracking keeps it unrecorded through the ending", async ({
   await archive.install(page, { draft: { ...activeGame, playMode: true } });
   await resume(page);
   await page.getByRole("button", { name: "Track Horror", exact: true }).click();
+  await page.getByRole("button", { name: "Set Horror", exact: true }).click();
   await page.getByLabel("Horror value", { exact: true }).fill("3");
   await page.getByRole("button", { name: "Set", exact: true }).click();
   await page
@@ -158,7 +162,9 @@ test("cause-first modal preserves separate death drafts and discards hidden fact
     page.getByRole("combobox", { name: "Terror card", exact: true }),
   ).toHaveCount(0);
   await searchPick(page, "Death location", "Kitchen");
-  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Save and exit", exact: true })
+    .click();
   await expect(modal).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "Record one victim killed", exact: true }),

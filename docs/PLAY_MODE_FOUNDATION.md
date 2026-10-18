@@ -2,9 +2,9 @@
 
 Play begins tracking once on entry (zero saved/killed, round one), resumes saved sessions, and records locally before acknowledging an observation. Existing unknown rounds and legacy group records remain readable. Saved/Killed/Round have independent correction buttons. Corrections target the latest matching record, preserve unrelated moments, and invalidate death scenes whose factual identity changes.
 
-The main trackers and expandable activity history live in one document scroll. Optional death details open in a dismissible modal. Optional health, Horror and Bloodlust values are unset until entered. Stopping a tracker makes it unrecorded again. No automatic game-rule effects or win/loss decisions are inferred. Horror zero now survives tracking, result review, generation and statistics.
+The main trackers and expandable activity history live in one document scroll. Optional death details open in a dismissible modal. Optional health, Horror and Bloodlust values remain unset until the player opts in. Track starts immediately with an editable starting suggestion: Rena 6, Gwynn 5, Billy 8, Hans 12, Laurie 5, Horror 4, Bloodlust 0. Other casts fall back to 5 Final Girl health and 10 Killer health; these are suggestions rather than researched rules. Existing observations, including zero, are never reset. Stopping a tracker makes it unrecorded again. No automatic game-rule effects or win/loss decisions are inferred. Horror zero now survives tracking, result review, generation and statistics.
 
-Moments record immediately and optionally accept detail. Drafts are saved per event in the active session, merge across independent edits, survive reload, and sync through the existing durable session queue. Death details are checked by default, can be disabled for the session, and open automatically in the Gruesome Death modal after the kill is saved. Closing, Escape, or returning to the game preserves the death and its per-event draft. Cause is selected first; switching it clears incompatible attacker, card, and mechanism fields before checkpointing or generation. Details save when closing or continuing; finishing flushes any remaining drafts and reads the latest durable game snapshot.
+Moments record immediately and optionally accept detail. Drafts are saved per event in the active session, merge across independent edits, survive reload, and sync through the existing durable session queue. Death details are checked by default, can be disabled for the session, and open automatically in the Gruesome Death modal after the kill is saved. Cancel, the close button, and Escape discard edits back to the latest saved death facts while preserving the recorded kill. Save and exit commits details and closes. Gruesome Death commits details and generates without closing. Cause is presented first and remains optional; switching it clears incompatible attacker, card, and mechanism fields before checkpointing or generation. Details save only through Save and exit or Gruesome Death; finishing flushes any remaining drafts and reads the latest durable game snapshot.
 
 The existing AI scene generator and narration cache remain in use. New mechanism/card facts affect scene signatures. Absent additions are omitted so legacy scene signatures remain valid. Only explicitly selected, applicable cards with researched effects add effect context; unverified names never become inferred rules or additional deaths.
 
@@ -60,7 +60,7 @@ Deploy the shared edge changes with the frontend: `generate-death-scene`, `narra
 
 The dashboard uses the actual session scene, the selected cast portraits, and six compressed atmospheric background plates. Optional module panels share the main surface in two desktop columns and one phone column. The night so far is collapsed initially and opens to the existing undo, restore, and death-detail actions.
 
-Status menus use themed Radix Select controls. Searchable card/space pickers support keyboard selection and custom facts where appropriate. Rules explanations and photo provenance remain in the researched data for AI context, without appearing under selected options. The Terror reference, Bloodlust token notes, and manual scene-refresh control have been removed from this surface; existing saved observations are retained.
+Status menus use themed Radix Select controls. Searchable card/space pickers support keyboard selection and custom facts where appropriate. The default Regular victim is stored as an unnamed victim, not a fictional name. Rules explanations and photo provenance remain in the researched data for AI context, without appearing under selected options. The Terror reference, Bloodlust token notes, and manual scene-refresh control have been removed from this surface; existing saved observations are retained.
 
 Deploy `generate-death-scene` and `narrate-story` with this frontend because the shared death-cause validator now accepts `terror`. No database migration is required.
 
@@ -70,3 +70,16 @@ Deploy `generate-death-scene` and `narrate-story` with this frontend because the
 | -------------- | --------------------------------------------- | ----------------------------------------- |
 | Play dashboard | [Desktop](images/play-cinematic-desktop.webp) | [Phone](images/play-cinematic-phone.webp) |
 | Gruesome Death | [Desktop](images/gruesome-death-desktop.webp) | [Phone](images/gruesome-death-phone.webp) |
+| Death-story payoff | [Desktop](images/gruesome-death-payoff-desktop.webp) | [Phone](images/gruesome-death-payoff-phone.webp) |
+
+## Death-story payoff and control refinements
+
+Nine photographic assets provide Horror/Bloodlust tracker art, the mask banner and six cause tiles. Increment/decrement controls have rounded visible surfaces. Remember this uses all available width, eight distinct icons, and a prominent Record control. Second wind and Back from the dead record the two black Final Health token reversals as separate moment types; they never change tracked health automatically.
+
+The death action works without a selected cause. It immediately displays progress, scrolls the result into view, and renders one or two prose paragraphs between the fields and three primary actions. Errors appear in the same visible result area. Saved takes and narration remain available there. Opening legacy records preserves their signatures until facts change. Token-refresh events for the same user no longer tear down an in-flight request.
+
+The scene prompt asks for a specific 100–150-word miniature horror story with an unsettling turn and memorable final image. It preserves supplied facts, adult-victim safeguards and the ban on em dashes. Generation remains one low-latency Flash call with a 340-token output cap and the existing 20-second provider timeout; it does not generate artwork during play.
+
+Starting-stat evidence: owner photo IMG_9308.jpg for Rena/Gwynn; [photographed Billy board](https://dudetakeyourturn.ca/2026/03/25/cuddle-bears-of-death-final-girl-bad-times-at-buddyland-review/) for 8 Health and 4 Horror; [core rulebook](https://cdn.svc.asmodee.net/production-asmodeeca/uploads/2025/10/Final-Girl-Rules.pdf) for Hans/Laurie and the starting Bloodlust position.
+
+Deploy `generate-death-scene` and `narrate-story` with the frontend so their shared log validator accepts both new moment types. The former also contains the new story prompt and token budget. No database migration is needed.
