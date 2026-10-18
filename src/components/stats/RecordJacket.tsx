@@ -1,64 +1,23 @@
 import { ComputedStats } from '@/hooks/useGameStats';
-import gamesBg from '@/assets/stats/games-bg.png';
-import winrateBg from '@/assets/stats/winrate-bg.png';
-import savedBg from '@/assets/stats/saved-bg.png';
-import killedBg from '@/assets/stats/killed-bg.png';
+import gamesBg from '@/assets/stats/archive-games.webp';
+import winrateBg from '@/assets/stats/archive-winrate.webp';
+import savedBg from '@/assets/stats/archive-saved.webp';
+import killedBg from '@/assets/stats/archive-killed.webp';
 
-interface RecordJacketProps {
-  stats: ComputedStats;
-}
-
-interface StatCardProps {
-  label: string;
-  value: string | number;
-  backgroundImage: string;
-  backgroundPosition?: string;
-}
-
-const StatCard = ({ label, value, backgroundImage, backgroundPosition = 'center' }: StatCardProps) => (
-  <div 
-    className="hero-stat-card-image"
-    aria-label={`${label}: ${value}`}
-    style={{ 
-      backgroundImage: `url(${backgroundImage})`,
-      backgroundPosition 
-    }}
-  >
-    <div className="hero-stat-card-content">
-      <div className="hero-stat-value">{value}</div>
-    </div>
-  </div>
+export const RecordJacket = ({ stats }: { stats: ComputedStats }) => (
+  <section className="record-jacket" aria-label="All-time session totals">
+    <dl className="stats-summary-grid">
+      {[
+        { label: 'Games', value: stats.gamesPlayed, image: gamesBg },
+        { label: 'Win rate', value: `${Math.round(stats.winRate)}%`, image: winrateBg },
+        { label: 'Saved', value: stats.playStats.savedRecorded ? stats.totalVictimsSaved : '—', image: savedBg },
+        { label: 'Killed', value: stats.playStats.killedRecorded ? stats.totalVictimsKilled : '—', image: killedBg },
+      ].map(card => (
+        <div key={card.label} className="stats-summary-card" style={{ backgroundImage: `url(${card.image})` }}>
+          <dt>{card.label}</dt>
+          <dd>{card.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
 );
-
-export const RecordJacket = ({ stats }: RecordJacketProps) => {
-  return (
-    <div className="record-jacket">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard
-          label="Games"
-          value={stats.gamesPlayed}
-          backgroundImage={gamesBg}
-          backgroundPosition="center 38%"
-        />
-        <StatCard
-          label="Win Rate"
-          value={`${Math.round(stats.winRate)}%`}
-          backgroundImage={winrateBg}
-          backgroundPosition="center 30%"
-        />
-        <StatCard
-          label="Saved"
-          value={stats.totalVictimsSaved}
-          backgroundImage={savedBg}
-          backgroundPosition="center 15%"
-        />
-        <StatCard
-          label="Killed"
-          value={stats.totalVictimsKilled}
-          backgroundImage={killedBg}
-          backgroundPosition="center 15%"
-        />
-      </div>
-    </div>
-  );
-};

@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import { Table2, BarChart3 } from 'lucide-react';
 import { GameResult } from '@/hooks/useGameHistory';
-import { RANGE_OPTIONS, TrendBucket, TrendRange, buildTrend } from '@/lib/statsTrends';
+import { RANGE_OPTIONS, TrendBucket, TrendRange, buildTrend, rangeStart } from '@/lib/statsTrends';
 
 type ChartView = 'victims' | 'games' | 'winloss';
 
@@ -90,7 +90,16 @@ export const TrendsChart = ({ games }: TrendsChartProps) => {
   const [view, setView] = useState<ChartView>('victims');
   const [asTable, setAsTable] = useState(false);
 
-  const trend = useMemo(() => buildTrend(games, range), [games, range]);
+  const trend = useMemo(() => {
+    const now = Date.now();
+    const from = rangeStart(range, games, now);
+    const recorded = games.filter(game => game.timestamp >= from && game.timestamp <= now);
+    return { ...buildTrend(games, range, now),
+      savedRecorded: recorded.filter(game => game.victimsSaved != null).length,
+      killedRecorded: recorded.filter(game => game.victimsKilled != null).length,
+    };
+  }, [games, range]);
+  const noVictimData = view === 'victims' && trend.savedRecorded === 0 && trend.killedRecorded === 0;
   const series = SERIES[view];
   const viewMeta = VIEW_OPTIONS.find((v) => v.key === view)!;
   const rangeMeta = RANGE_OPTIONS.find((r) => r.key === range)!;
@@ -119,9 +128,9 @@ export const TrendsChart = ({ games }: TrendsChartProps) => {
       <div className="chart-container">
         <div className="chart-header">
           <div>
-            <h4 className="chart-title">
+            <h2 className="chart-title">
               {viewMeta.title} per {GRANULARITY_NOUN[trend.granularity]}
-            </h4>
+            </h2>
             <p className="chart-subtitle">
               {rangeMeta.full} · {trend.gamesInRange} {trend.gamesInRange === 1 ? 'session' : 'sessions'}
             </p>
@@ -163,10 +172,15 @@ export const TrendsChart = ({ games }: TrendsChartProps) => {
           </div>
         )}
 
+        {view === 'victims' && !noVictimData && (trend.savedRecorded < trend.gamesInRange || trend.killedRecorded < trend.gamesInRange) && (
+          <p className="chart-coverage">Saved recorded in {trend.savedRecorded}/{trend.gamesInRange} sessions · killed in {trend.killedRecorded}/{trend.gamesInRange}. Totals include recorded values only.</p>
+        )}
         {trend.gamesInRange === 0 ? (
           <p className="chart-empty">
             No sessions in this window. Try a wider one.
           </p>
+        ) : noVictimData ? (
+          <p className="chart-empty">Victim totals were not recorded for these sessions. Choose Games or W / L to view the recorded activity.</p>
         ) : asTable ? (
           <div className="chart-table-scroll">
             <table className="chart-table">
@@ -200,7 +214,7 @@ export const TrendsChart = ({ games }: TrendsChartProps) => {
             </table>
           </div>
         ) : (
-          <div className="h-[260px]">
+          <div className="chart-plot">
             <ResponsiveContainer width="100%" height="100%">
               {/* Bars, not a line. The periods with no play are real periods
                   with a real value of zero; a spline through them draws games
@@ -236,6 +250,7 @@ export const TrendsChart = ({ games }: TrendsChartProps) => {
                     key={s.key}
                     dataKey={s.key}
                     stackId="a"
+                    isAnimationActive={false}
                     fill={s.color}
                     name={s.name}
                     // Painted in the surface colour, this reads as a gap between

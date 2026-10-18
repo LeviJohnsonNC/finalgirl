@@ -63,7 +63,7 @@ export const PlayerArchetypeBadge = ({ archetype, profile, scores }: PlayerArche
       <div className="archetype-content">
         <header className="archetype-head">
           <div>
-            <p className="archetype-eyebrow">Your style</p>
+            <p className="archetype-eyebrow">// Your style</p>
             <h3 className={`archetype-name ${config.color}`}>{config.name}</h3>
           </div>
           {margin !== null && (
@@ -81,11 +81,13 @@ export const PlayerArchetypeBadge = ({ archetype, profile, scores }: PlayerArche
         </header>
 
         <div className="archetype-profile">
-          {paragraphs.map((p, i) => (
-            <p key={i} className="archetype-reason">
-              {p}
-            </p>
-          ))}
+          {paragraphs[0] && <p className="archetype-reason">{paragraphs[0]}</p>}
+          {paragraphs.length > 1 && (
+            <details className="archetype-more">
+              <summary>Read the full profile</summary>
+              {paragraphs.slice(1).map((p, i) => <p key={i} className="archetype-reason">{p}</p>)}
+            </details>
+          )}
         </div>
 
         {scores.length > 1 && (

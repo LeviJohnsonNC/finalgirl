@@ -1,6 +1,6 @@
 import { ComputedStats } from '@/hooks/useGameStats';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useActiveImages } from '@/hooks/useActiveImages';
 
 interface BreakdownTabsProps {
@@ -20,7 +20,7 @@ const RateCell = ({ rate }: { rate: number }) => {
       <span className="breakdown-rate-meter">
         <span
           className={`breakdown-rate-fill ${winning ? 'breakdown-rate-fill-win' : 'breakdown-rate-fill-loss'}`}
-          style={{ width: `${Math.max(rounded, 2)}%` }}
+          style={{ width: `${rate}%` }}
         />
       </span>
       <span className={winning ? 'text-neon-cyan' : 'text-blood-red'}>{rounded}%</span>
@@ -51,16 +51,16 @@ export const BreakdownTabs = ({ stats }: BreakdownTabsProps) => {
         </TabsList>
 
         <TabsContent value="finalGirls" className="breakdown-content">
-          <div className="overflow-x-auto">
-            <Table>
+          <div className="breakdown-scroll" tabIndex={0} role="region" aria-label="Scroll all records">
+            <table className="w-full caption-bottom text-sm">
               <TableHeader>
                 <TableRow className="breakdown-table-header">
-                  <TableHead>Final Girl</TableHead>
-                  <TableHead className="text-right">Plays</TableHead>
-                  <TableHead className="text-right">Wins</TableHead>
-                  <TableHead className="text-right">Win %</TableHead>
-                  <TableHead className="text-right hidden sm:table-cell">Saved</TableHead>
-                  <TableHead className="text-right hidden sm:table-cell">Killed</TableHead>
+                  <TableHead scope="col">Final Girl</TableHead>
+                  <TableHead scope="col" className="text-right">Plays</TableHead>
+                  <TableHead scope="col" className="text-right">Wins</TableHead>
+                  <TableHead scope="col" className="text-right">Win %</TableHead>
+                  <TableHead scope="col" className="text-right hidden sm:table-cell">Saved</TableHead>
+                  <TableHead scope="col" className="text-right hidden sm:table-cell">Killed</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -69,9 +69,9 @@ export const BreakdownTabs = ({ stats }: BreakdownTabsProps) => {
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2.5 min-w-0">
                         {CHARACTER_IMAGES[fg.name] && (
-                          <img src={CHARACTER_IMAGES[fg.name]} alt="" className="breakdown-avatar" />
+                          <img src={CHARACTER_IMAGES[fg.name]} alt="" className="breakdown-avatar" loading="lazy" onError={event => { event.currentTarget.style.display = 'none'; }} />
                         )}
-                        <span className="breakdown-name">{fg.name}</span>
+                        <span className="breakdown-name" title={fg.name}>{fg.name}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">{fg.plays}</TableCell>
@@ -88,21 +88,21 @@ export const BreakdownTabs = ({ stats }: BreakdownTabsProps) => {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+            </table>
           </div>
         </TabsContent>
 
         <TabsContent value="killers" className="breakdown-content">
-          <div className="overflow-x-auto">
-            <Table>
+          <div className="breakdown-scroll" tabIndex={0} role="region" aria-label="Scroll all records">
+            <table className="w-full caption-bottom text-sm">
               <TableHeader>
                 <TableRow className="breakdown-table-header">
-                  <TableHead>Killer</TableHead>
-                  <TableHead className="text-right">Faced</TableHead>
-                  <TableHead className="text-right">Escaped</TableHead>
-                  <TableHead className="text-right">Escape %</TableHead>
-                  <TableHead className="text-right hidden sm:table-cell">Avg Saved</TableHead>
-                  <TableHead className="text-right hidden sm:table-cell">Avg Killed</TableHead>
+                  <TableHead scope="col">Killer</TableHead>
+                  <TableHead scope="col" className="text-right">Faced</TableHead>
+                  <TableHead scope="col" className="text-right">Wins</TableHead>
+                  <TableHead scope="col" className="text-right">Win %</TableHead>
+                  <TableHead scope="col" className="text-right hidden sm:table-cell">Avg Saved</TableHead>
+                  <TableHead scope="col" className="text-right hidden sm:table-cell">Avg Killed</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -111,9 +111,9 @@ export const BreakdownTabs = ({ stats }: BreakdownTabsProps) => {
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2.5 min-w-0">
                         {CHARACTER_IMAGES[k.name] && (
-                          <img src={CHARACTER_IMAGES[k.name]} alt="" className="breakdown-avatar" />
+                          <img src={CHARACTER_IMAGES[k.name]} alt="" className="breakdown-avatar" loading="lazy" onError={event => { event.currentTarget.style.display = 'none'; }} />
                         )}
-                        <span className="breakdown-name">{k.name}</span>
+                        <span className="breakdown-name" title={k.name}>{k.name}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">{k.plays}</TableCell>
@@ -130,21 +130,21 @@ export const BreakdownTabs = ({ stats }: BreakdownTabsProps) => {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+            </table>
           </div>
         </TabsContent>
 
         <TabsContent value="locations" className="breakdown-content">
-          <div className="overflow-x-auto">
-            <Table>
+          <div className="breakdown-scroll" tabIndex={0} role="region" aria-label="Scroll all records">
+            <table className="w-full caption-bottom text-sm">
               <TableHeader>
                 <TableRow className="breakdown-table-header">
-                  <TableHead>Location</TableHead>
-                  <TableHead className="text-right">Plays</TableHead>
-                  <TableHead className="text-right">Wins</TableHead>
-                  <TableHead className="text-right">Win %</TableHead>
-                  <TableHead className="text-right hidden sm:table-cell">Saved</TableHead>
-                  <TableHead className="text-right hidden sm:table-cell">Killed</TableHead>
+                  <TableHead scope="col">Location</TableHead>
+                  <TableHead scope="col" className="text-right">Plays</TableHead>
+                  <TableHead scope="col" className="text-right">Wins</TableHead>
+                  <TableHead scope="col" className="text-right">Win %</TableHead>
+                  <TableHead scope="col" className="text-right hidden sm:table-cell">Saved</TableHead>
+                  <TableHead scope="col" className="text-right hidden sm:table-cell">Killed</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -155,7 +155,9 @@ export const BreakdownTabs = ({ stats }: BreakdownTabsProps) => {
                         {LOCATION_IMAGES[loc.name] && (
                           <img 
                             src={LOCATION_IMAGES[loc.name]} 
-                            alt={loc.name}
+                            alt=""
+                            loading="lazy"
+                            onError={event => { event.currentTarget.style.display = 'none'; }}
                             className="absolute inset-0 w-full h-full object-cover"
                           />
                         )}
@@ -181,7 +183,7 @@ export const BreakdownTabs = ({ stats }: BreakdownTabsProps) => {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+            </table>
           </div>
         </TabsContent>
       </Tabs>

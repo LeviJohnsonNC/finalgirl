@@ -283,7 +283,7 @@ export const useGameStats = (gameHistory: GameResult[]): ComputedStats => {
       archetypeScores,
       horrorBins: horror.bins,
       horrorRecorded: horror.recorded,
-      weapons: buildWeaponTally(filteredGames),
+      weapons: buildWeaponTally(filteredGames, Infinity),
       recentSessions: buildRecentSessions(filteredGames),
     };
   }, [gameHistory]);
