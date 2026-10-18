@@ -17,7 +17,7 @@ The photograph overscans wide displays. At narrow tablet widths its scale is cap
 
 ## Live marquee
 
-The dark metal/glass marquee is roughly 88% of projection width. It contains the matchup, location, recorded date, exact case action, outcome and 44px transport targets. Phone content stacks into readable rows. Active games put Now playing / Past screenings inside the marquee, with their actual round and victim summary.
+The dark metal/glass marquee is roughly 88% of projection width. It contains the matchup, location, recorded date, exact case action, and a larger outcome label. Phone content stacks into readable rows. Active games put Now playing / Past screenings inside the marquee, with their actual round and victim summary. The larger cyan outcome occupies the space previously used by transport controls; longer outcomes wrap at a balanced size.
 
 Outcome labels respect recorded health: a win with health above zero is Survived; a simultaneous-death win is Sacrificial victory; older wins without recorded health say Victory. Unknown dates are omitted. Case identifiers and survival are never invented.
 
@@ -25,7 +25,7 @@ The centered brand, compact Account control, 300px desktop / 260px phone tape ac
 
 ## Projection and accessibility
 
-The screen's black light layer varies opacity from .006 to .018 over an irregular 5.9-second sequence. It affects only projected light. Pause, interaction with the screen/marquee, and document visibility suspend it. Background and tape-action interaction do not unnecessarily pause the reel. Explicit Play works while its control retains focus. Reduced motion removes the animation and attenuation; manual scene navigation remains available.
+The screen's black light layer varies opacity from .006 to .018 over an irregular 5.9-second sequence. It affects only projected light. The reel plays automatically without playback or scene-navigation controls. Interaction with the screen/marquee and document visibility suspend it while a case is being read. Background and tape-action interaction do not unnecessarily pause it. Reduced motion removes the animation and automatic rotation; case files remain available through the case action and Scrapbooks.
 
 ## Review
 

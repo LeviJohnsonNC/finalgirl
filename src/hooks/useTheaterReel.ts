@@ -17,7 +17,6 @@ export function useTheaterReel(games: GameResult[], interacting: boolean, active
   const [requestedId, setRequestedId] = useState<string | null>(null);
   const target = screenings.find(s => s.id === requestedId) ?? screenings[0];
   const [projection, setProjection] = useState<{ key: string | null; previous: string | null }>({ key: null, previous: null });
-  const [paused, setPaused] = useState(false);
   const current = screenings.find(s => s.key === projection.key);
   const previous = current ? screenings.find(s => s.key === projection.previous) : undefined;
   const currentIndex = current ? screenings.indexOf(current) : -1;
@@ -69,7 +68,7 @@ export function useTheaterReel(games: GameResult[], interacting: boolean, active
     return () => { image.onerror = null; };
   }, [nextUrl, visible, fail]);
 
-  const playing = !paused && !reducedMotion && visible && !interacting;
+  const playing = !reducedMotion && visible && !interacting;
   const currentKey = current?.key;
   const currentId = current?.id;
   const nextId = next?.id;
@@ -79,18 +78,12 @@ export function useTheaterReel(games: GameResult[], interacting: boolean, active
     return () => window.clearTimeout(timer);
   }, [playing, currentKey, currentId, targetKey, nextId]);
 
-  const move = (direction: number) => {
-    if (!screenings.length) return;
-    setPaused(true);
-    const i = target ? screenings.indexOf(target) : 0;
-    setRequestedId(screenings[(i + direction + screenings.length) % screenings.length].id);
-  };
-
-  return { screenings, current, previous, currentIndex, reducedMotion, paused, playing,
+  return { current, previous, reducedMotion, playing,
     pending: Boolean(target && current?.key !== target.key), failedCount: failed.size,
-    move, setPaused, fail, retryImages: () => {
+    fail, retryImages: () => {
       setRequestedId(null);
       setProjection({ key: null, previous: null });
       setFailed(new Set());
     } };
 }
+

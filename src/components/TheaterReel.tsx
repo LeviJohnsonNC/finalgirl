@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { ArrowUpRight, ChevronLeft, ChevronRight, Pause, Play, RotateCcw } from 'lucide-react';
+import { ArrowUpRight, RotateCcw } from 'lucide-react';
 import type { GameResult } from '@/hooks/useGameHistory';
 import { useTheaterReel } from '@/hooks/useTheaterReel';
 import { activeScreeningStatus, screeningDate, screeningVerdict } from '@/lib/theater';
@@ -21,18 +21,15 @@ interface TheaterReelProps {
 export const TheaterReel = ({ games, loading, historyError, onRetryHistory, onOpenCaseFile, activeGame, actions }: TheaterReelProps) => {
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
-  const [explicitPlayback, setExplicitPlayback] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const active = !showArchive ? activeGame : null;
-  const reel = useTheaterReel(games, (hovered || focused) && !explicitPlayback, active);
+  const reel = useTheaterReel(games, hovered || focused, active);
   const { current, previous } = reel;
   const selection = active?.selection ?? current;
   const title = selection ? `${selection.finalGirl} vs. ${selection.killer}` : '';
   const date = current && !active ? screeningDate(current.timestamp) : '';
   const warming = loading || (reel.pending && !current);
   const unavailable = !warming && !current && (reel.failedCount > 0 || Boolean(historyError));
-  const playbackLabel = reel.reducedMotion ? 'Automatic playback off for reduced motion'
-    : `${reel.paused ? 'Play' : 'Pause'} ${active ? 'projection' : 'slideshow'}`;
   const verdict = active ? 'In progress' : current ? screeningVerdict(current) : '';
   // The carousel now spans the scenery; only picture/marquee interaction pauses it.
   const isProjectionTarget = (target: EventTarget | null) => target instanceof Element && Boolean(target.closest('.theater-screen, .theater-program'));
@@ -52,14 +49,7 @@ export const TheaterReel = ({ games, loading, historyError, onRetryHistory, onOp
           </div>
           {active && <p className="theater-progress-line">{activeScreeningStatus(active)}</p>}
         </div>
-        <p className={`theater-verdict ${active ? 'theater-in-progress' : current?.outcome === 'won' ? 'theater-survived' : 'theater-lost'}`}>{verdict}</p>
-        {(!active || current) && <div className="theater-reel-controls"><div className="theater-transport" role="group" aria-label="Projection controls">
-          {!active && <button onClick={() => reel.move(-1)} disabled={reel.screenings.length < 2} aria-label="Previous scene"><ChevronLeft size={16} aria-hidden="true" /></button>}
-          <button onClick={() => { if (reel.paused) setExplicitPlayback(true); reel.setPaused(!reel.paused); }} disabled={reel.reducedMotion || !current} aria-label={playbackLabel}>
-            {reel.paused || reel.reducedMotion ? <Play size={14} aria-hidden="true" /> : <Pause size={14} aria-hidden="true" />}
-          </button>
-          {!active && <button onClick={() => reel.move(1)} disabled={reel.screenings.length < 2} aria-label="Next scene"><ChevronRight size={16} aria-hidden="true" /></button>}
-        </div></div>}
+        <p className={`theater-verdict ${active ? 'theater-in-progress' : current?.outcome === 'won' ? 'theater-survived' : 'theater-lost'} ${verdict.length > 8 ? 'theater-verdict-long' : ''}`}>{verdict}</p>
       </> : <div className="theater-empty-program">
         <p className="theater-program-kicker">{warming ? 'Preparing the feature' : unavailable ? 'The archive is safe' : 'Tonight at Starlight'}</p>
         <p className="theater-program-line">{warming ? 'Bringing your stories to the screen.' : unavailable ? 'Stills unavailable. Your case files are safe.' : games.length ? 'Your case files are ready. New scenes will appear here.' : 'The screen is waiting for your first story.'}</p>
@@ -71,9 +61,9 @@ export const TheaterReel = ({ games, loading, historyError, onRetryHistory, onOp
     {actions}
   </>;
   return <section className="theater-reel" aria-label="Personal screenings" aria-roledescription="carousel"
-    onPointerOver={event => { if (event.pointerType === 'mouse' && isProjectionTarget(event.target) && !isProjectionTarget(event.relatedTarget)) { setHovered(true); setExplicitPlayback(false); } }}
+    onPointerOver={event => { if (event.pointerType === 'mouse' && isProjectionTarget(event.target) && !isProjectionTarget(event.relatedTarget)) { setHovered(true); } }}
     onPointerOut={event => { if (event.pointerType === 'mouse' && !isProjectionTarget(event.relatedTarget)) setHovered(false); }}
-    onFocusCapture={event => { if (isProjectionTarget(event.target)) { setFocused(true); setExplicitPlayback(false); } }}
+    onFocusCapture={event => { if (isProjectionTarget(event.target)) { setFocused(true); } }}
     onBlurCapture={event => { if (!isProjectionTarget(event.relatedTarget)) setFocused(false); }}>
     <DriveInScreen lower={lower} busy={reel.pending || (!active && loading)} projecting={Boolean(current) && reel.playing}>
       {current ? <ProjectorSlideshow current={current} previous={previous} reducedMotion={reel.reducedMotion} onImageError={reel.fail} /> : <div className="theater-title-card">
