@@ -4,7 +4,8 @@ import { test, expect, activeGame, gameId, selection, userId } from './fixtures'
 test('the theater keeps the screen and controls inside narrow and wide layouts', async ({ page, archive }, testInfo) => {
   await archive.install(page, { signedIn: false });
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: /Some nights/ })).toBeVisible();
+  await expect(page.getByText('Tonight at Starlight', { exact: true })).toBeVisible();
+  await expect(page.locator('.theater-screen')).toHaveText('');
   for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 639, height: 900 }, { width: 640, height: 900 }, { width: 844, height: 390 }, { width: 1440, height: 900 }, { width: 2048, height: 1152 }]) {
     await page.setViewportSize(viewport);
     const portrait = viewport.width < 640;
@@ -24,6 +25,9 @@ test('the theater keeps the screen and controls inside narrow and wide layouts',
     expect(Math.abs(screen.width - aperture.width * scale)).toBeLessThan(1);
     expect(Math.abs(screen.height - aperture.height * scale)).toBeLessThan(1);
     expect((await page.locator('.theater-program').boundingBox())!.y).toBeGreaterThan(screen.y + screen.height);
+    const panel = (await page.locator('.theater-program').boundingBox())!;
+    const copy = (await page.locator('.theater-empty-program').boundingBox())!;
+    expect(Math.abs((copy.y + copy.height / 2) - (panel.y + panel.height / 2))).toBeLessThan(1);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewport.width);
     for (const selector of ['.theater-screen', '.theater-play', '.theater-footer nav', '.theater-account']) {
       const box = await page.locator(selector).boundingBox();
@@ -37,6 +41,20 @@ test('the theater keeps the screen and controls inside narrow and wide layouts',
   await page.screenshot({ path: testInfo.outputPath('theater-first-visit.png'), fullPage: true });
   expect(archive.calls).toEqual([]);
 });
+
+for (const withRecordedCase of [false, true]) {
+  test(`the signed-in theater stays text-free without generated movies (${withRecordedCase ? 'case without artwork' : 'empty archive'})`, async ({ page, archive }, testInfo) => {
+    if (withRecordedCase) archive.history = [{ id: gameId, timestamp: 1, outcome: 'won', killer: selection.killer, location: selection.location, final_girl: selection.finalGirl }];
+    await archive.install(page);
+    await page.goto('/');
+    await expect(page.getByText('Tonight at Starlight', { exact: true })).toBeVisible();
+    await expect(page.locator('.theater-screen')).toHaveText('');
+    await expect(page.locator('.theater-program-line')).toHaveText(withRecordedCase ? 'Your case files are ready. New scenes will appear here.' : 'The screen is waiting for your first story.');
+    await page.evaluate(() => document.fonts.ready);
+    await page.screenshot({ path: testInfo.outputPath('empty-starlight.png'), fullPage: true });
+    expect(archive.calls).toEqual([]);
+  });
+}
 
 test('a delayed composition download never separates the projection from its frame', async ({ page, archive }) => {
   await page.setViewportSize({ width: 1440, height: 900 });

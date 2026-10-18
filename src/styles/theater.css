@@ -1,3 +1,6 @@
+@font-face { font-family: 'Starlight Display'; src: url('../assets/fonts/im-fell-english.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Starlight Copy'; src: url('../assets/fonts/crimson-pro-italic.woff2') format('woff2'); font-weight: 200 900; font-style: italic; font-display: swap; }
+
 /* One calibrated photograph owns the rim, steel, ground and live projection.
    Overscan fills wide monitors; critical content stays in its center safe area. */
 .theater { position: relative; isolation: isolate; overflow: clip; min-height: 100svh; color: hsl(var(--foreground)); background: #03080c; }
@@ -8,8 +11,8 @@
 .theater-brand > span { display: block; margin-top: 12px; font-family: 'Courier New', monospace; font-size: 14px; letter-spacing: .19em; text-transform: uppercase; color: #a9b6c0; }
 .theater-unofficial { color: #ef252c; }
 .theater-admission { grid-column: 3; justify-self: end; pointer-events: auto; }
-.theater-account { display: inline-flex; justify-content: center; align-items: center; gap: 11px; min-height: 48px; padding: 10px 18px; border: 1px solid #a7aaa56e; background: #0306078c; font-family: 'Courier New', monospace; font-size: 16px; text-transform: uppercase; letter-spacing: .12em; white-space: nowrap; color: #e6e3db; }
-.theater-account:hover { border-color: #e9e1cfaa; background: #0c1319c9; }
+.theater-account { display: inline-flex; justify-content: center; align-items: center; gap: 11px; min-height: 48px; padding: 7px 15px; font-family: 'Courier New', monospace; font-size: 16px; text-transform: uppercase; letter-spacing: .12em; white-space: nowrap; color: #e6e3db; }
+.theater-account:hover { background-color: #172022; color: #fff0d7; }
 .theater-main { width: 100%; }
 .theater-reel { position: relative; width: 100%; }
 .theater-screen-wrap { --stage-height: max(100svh, 740px); --scene-width: max(100vw, min(calc(var(--stage-height) * 2.67), 319vw)); position: relative; width: 100%; height: var(--stage-height); min-height: var(--required-stage-height, 0px); }
@@ -35,14 +38,17 @@
 .theater-title-card { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; background: #05080b; }
 .theater-title-art { position: absolute; width: 100%; height: 100%; object-fit: cover; object-position: center 40%; opacity: .48; filter: saturate(.55) brightness(1.15); }
 .theater-title-card::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse, #05080b20, #05080bb3); }
-.theater-title-copy { position: relative; z-index: 1; padding: 3cqw; color: #e7e0cf; }
-.theater-kicker { font-family: 'Courier New', monospace; font-size: clamp(7px, 1.6cqw, 12px); letter-spacing: .13em; text-transform: uppercase; }
-.theater-title-copy h2 { font-family: var(--font-display); font-size: clamp(26px, 8.3cqw, 66px); line-height: 1.02; font-weight: 500; margin: 2cqw 0 2.4cqw; letter-spacing: -.025em; }
-.theater-title-copy h2 em { font-weight: 400; }
-.theater-title-rule { display: block; width: 4.5cqw; height: 1px; background: #b93737; margin: 0 auto 2cqw; }
-.theater-title-copy p { font-family: 'Courier New', monospace; font-size: clamp(8px, 1.8cqw, 14px); color: #e7e0cfb3; }
 .theater-lower { position: absolute; left: var(--marquee-x); top: var(--marquee-y); width: var(--marquee-width); z-index: 6; }
-.theater-program { position: relative; width: 100%; min-height: 100px; padding: 15px 22px 10px; border: 1px solid #8897978c; outline: 1px solid #010406; background: linear-gradient(155deg, #adc8d408, transparent 45%), #03090df5; box-shadow: inset 0 1px #d0d5ca14, inset 0 -2px #000a, 0 3px 0 #020407, 0 8px 16px #0007; color: #e9e3d6; }
+/* Nine-slice artwork keeps chipped edges and scratches at their physical size. */
+.theater-program, .theater-account {
+  border: 6px solid transparent;
+  border-image: url('../assets/theater-weathered-rim.svg') 16 / 6px / 1px stretch;
+  background: linear-gradient(115deg, #a6b8b80b, transparent 38%, #7e36290d 86%, transparent), #060c10ed;
+  background-clip: padding-box;
+  box-shadow: inset 0 2px 6px #000b, 0 5px 12px #0009;
+}
+.theater-program { position: relative; width: 100%; min-height: 100px; padding: 10px 17px 5px; color: #e9e3d6; }
+.theater-program-empty { display: grid; align-items: center; padding-block: 14px; }
 .theater-program-personal { display: grid; grid-template-columns: minmax(0,1fr) auto; grid-template-rows: auto; gap: 0 18px; align-items: center; }
 .theater-caption { grid-column: 1; grid-row: 1; min-width: 0; }
 .theater-caption h2 { margin: 0 0 5px; font-family: var(--font-display); font-size: clamp(18px, 1.45vw, 25px); font-weight: 500; line-height: 1.2; letter-spacing: .045em; text-transform: uppercase; overflow-wrap: anywhere; }
@@ -64,8 +70,8 @@
 .theater-mode-switch button { min-height: 44px; padding: 4px 0; font: 11px/1.4 'Courier New', monospace; text-transform: uppercase; letter-spacing: .08em; color: #b7c1c6; border-bottom: 1px solid transparent; }
 .theater-mode-switch button[aria-pressed=true] { color: #f1e7d5; border-color: #b74d43; }
 .theater-empty-program { text-align: center; }
-.theater-program-kicker { margin: 0 0 8px; font: 18px/1.2 var(--font-display); letter-spacing: .06em; text-transform: uppercase; }
-.theater-program-line { color: #b6c0c5; font: 12px/1.5 'Courier New', monospace; }
+.theater-program-kicker { margin: 0 0 6px; color: #e5d5b8; font: 400 clamp(19px, 1.65vw, 26px)/1.15 'Starlight Display', Georgia, serif; letter-spacing: .025em; text-shadow: 0 2px 3px #000; }
+.theater-program-line { margin: 0; color: #b5b8b1; font: italic 400 clamp(14px, 1.05vw, 17px)/1.35 'Starlight Copy', Georgia, serif; letter-spacing: .015em; }
 .theater-actions { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; gap: 6px; margin-top: 20px; }
 .theater-play {
   position: relative; isolation: isolate; container-type: inline-size; display: block;
@@ -132,9 +138,10 @@
   .theater-header { padding: max(24px, env(safe-area-inset-top)) 16px 0; gap: 8px; grid-template-columns: 44px minmax(0,1fr) 44px; }
   .theater-brand h1 { font-size: clamp(30px, 9.5vw, 42px); white-space: nowrap; }
   .theater-brand > span { font-size: clamp(8px, 2.5vw, 12px); letter-spacing: .1em; margin-top: 9px; white-space: nowrap; }
-  .theater-account { min-height: 44px; width: 44px; padding: 0; background: #03080b80; }
+  .theater-account { min-height: 44px; width: 44px; padding: 0; }
   .theater-account-text { display: none; }
-  .theater-program { padding: 13px 14px 8px; min-height: 116px; }
+  .theater-program { padding: 8px 9px 3px; min-height: 116px; }
+  .theater-program-empty { padding-block: 14px; }
   .theater-program-personal { grid-template-columns: minmax(0,1fr); grid-template-rows: auto auto; gap: 5px; }
   .theater-caption { grid-column: 1; grid-row: 1; }
   .theater-caption h2 { font-size: 17px; line-height: 1.18; }
@@ -145,8 +152,8 @@
   .theater-program-active .theater-caption { grid-row: 2; }
   .theater-program-active .theater-verdict { grid-row: 3; }
   .theater-mode-switch button { font-size: 10px; min-height: 44px; }
-  .theater-program-kicker { font-size: 18px; }
-  .theater-program-line { font-size: 11px; }
+  .theater-program-kicker { font-size: 21px; }
+  .theater-program-line { font-size: 15px; }
   .theater-actions { margin-top: 18px; }
   .theater-play { width: min(260px, 78vw); min-height: 48px; border-radius: 10px; }
   .theater-footer { padding-inline: 8px; }

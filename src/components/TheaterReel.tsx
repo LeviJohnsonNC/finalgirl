@@ -34,7 +34,7 @@ export const TheaterReel = ({ games, loading, historyError, onRetryHistory, onOp
   // The carousel now spans the scenery; only picture/marquee interaction pauses it.
   const isProjectionTarget = (target: EventTarget | null) => target instanceof Element && Boolean(target.closest('.theater-screen, .theater-program'));
   const lower = <>
-    <div className={`theater-program ${selection ? 'theater-program-personal' : ''} ${activeGame ? 'theater-program-active' : ''}`}>
+    <div className={`theater-program ${selection ? 'theater-program-personal' : 'theater-program-empty'} ${activeGame ? 'theater-program-active' : ''}`}>
       {activeGame && <div className="theater-mode-switch" role="group" aria-label="Screening selection">
         <button aria-pressed={!showArchive} onClick={() => setShowArchive(false)}>Now playing</button>
         <button aria-pressed={showArchive} onClick={() => setShowArchive(true)}>Past screenings</button>
@@ -68,11 +68,6 @@ export const TheaterReel = ({ games, loading, historyError, onRetryHistory, onOp
     <DriveInScreen lower={lower} busy={reel.pending || (!active && loading)} projecting={Boolean(current) && reel.playing}>
       {current ? <ProjectorSlideshow current={current} previous={previous} reducedMotion={reel.reducedMotion} onImageError={reel.fail} /> : <div className="theater-title-card">
         <img src={openingStill} alt="" className="theater-title-art" />
-        <div className="theater-title-copy">
-          <span className="theater-kicker">{active ? 'A feature in progress' : warming ? 'Projector warming up…' : 'An evening of terrible possibilities'}</span>
-          <h2>{active ? <>The night<br /><em>isn’t over.</em></> : <>Some nights<br /><em>stay with you.</em></>}</h2>
-          <span className="theater-title-rule" /><p>{active ? 'Your story is right where you left it.' : 'Your cast. Your story. Your last chance.'}</p>
-        </div>
       </div>}
     </DriveInScreen>
   </section>;
