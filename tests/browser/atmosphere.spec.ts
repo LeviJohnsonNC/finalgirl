@@ -35,7 +35,7 @@ test('Rules broadcasts readable looping news with pause and reduced motion', asy
   await page.evaluate(() => document.fonts.ready);
   const metrics = await page.evaluate(() => {
     const strip = document.querySelector('.news-broadcast')!.getBoundingClientRect();
-    const groups = [...document.querySelectorAll('.news-ticker-group')];
+    const groups = Array.from(document.querySelectorAll('.news-ticker-group'));
     return { bottom: strip.bottom, footer: document.querySelector('.app-footer')!.getBoundingClientRect().top,
       widths: groups.map(el => el.getBoundingClientRect().width),
       content: groups.map(el => el.textContent),
