@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import { ChevronDown, Dices } from 'lucide-react';
-import { getFilmIdByLocation, FEATURE_FILMS } from '@/types/gameData';
+import { Dices } from 'lucide-react';
+import { getFilmIdByLocation } from '@/types/gameData';
 import { getSetupCardsForLocation, getEventsForLocation } from '@/types/featureFilmDetails';
 import {
   FALCONWOOD_MISSIONS,
@@ -45,12 +45,8 @@ const ScenarioDropdownsForLocation = ({
     return getEventsForLocation(filmId);
   }, [filmId]);
 
-  const hasData = setupCards.length > 0 || events.length > 0;
   const showMissions = locationHasMissions(selectedLocation);
   const selectedMissionData = getMissionByName(selectedMission);
-
-  const selectedSetupData = setupCards.find(s => s.name === selectedSetup);
-  const selectedEventData = events.find(e => e.name === selectedEvent);
 
   const handleSetupChange = (value: string) => {
     setSelectedSetup(value);
@@ -180,17 +176,6 @@ const ScenarioDropdownsForLocation = ({
         )}
       </div>
 
-      {selectedLocation === 'Buddyland' && (selectedSetupData || selectedEventData) && (
-        <div aria-live="polite" className="mt-5 space-y-4 border-l-2 border-secondary/50 pl-4">
-          {[selectedSetupData, selectedEventData].map(card => card && (
-            <div key={card.name}>
-              <h3 className="font-display text-sm text-secondary uppercase tracking-wide">{card.name}</h3>
-              <p className="type-body-sm text-muted-foreground mt-1">{card.description}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
     </div>
   );
 };
@@ -199,3 +184,4 @@ const ScenarioDropdownsForLocation = ({
 export const ScenarioDropdowns = (props: ScenarioDropdownsProps) => (
   <ScenarioDropdownsForLocation key={props.selectedLocation ?? 'none'} {...props} />
 );
+

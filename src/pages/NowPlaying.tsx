@@ -36,8 +36,6 @@ interface NowPlayingProps {
   showDeathPanel?: boolean;
   syncPlayNow?: ()=>Promise<boolean>;
   onPlayEvent?: (event: PlayEvent) => boolean;
-  syncStatus?: string;
-  onRetrySync?: () => void;
   initialStory?: string;
   initialSceneImageUrl?: string;
   initialVisualBible?: string;
@@ -55,7 +53,7 @@ interface NowPlayingProps {
 }
 
 const NowPlaying = ({
-  playEvents = [], playMode = false, showDeathPanel = false, syncPlayNow, onPlayEvent, syncStatus, onRetrySync,
+  playEvents = [], playMode = false, showDeathPanel = false, syncPlayNow, onPlayEvent,
   sessionId, initialStory, initialSceneImageUrl, initialVisualBible, onCheckpoint,
   killer,
   location,
@@ -274,7 +272,6 @@ const NowPlaying = ({
     onExit={() => onCheckpoint({ playMode: false })}
     onFinish={outcome => onGameEnd(outcome, !isGenerating && !error ? story || undefined : undefined, sceneImageUrl || undefined, visualBible)}
     onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying} hasStory={Boolean(story)}
-    syncStatus={syncStatus} onRetrySync={onRetrySync}
     deathControls={<label className="type-caption text-muted-foreground flex gap-3 items-start"><input type="checkbox" className="mt-1 accent-primary" checked={showDeathPanel} onChange={e=>onCheckpoint({showDeathPanel:e.target.checked})}/><span>Open death details after a kill. Scene generation stays optional.</span></label>}
     onDeath={event=>setDeathEventId(event.id)}/>
     {deathEventId && syncPlayNow && <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl}} events={playEvents} eventId={deathEventId} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/>}
@@ -474,4 +471,5 @@ const NowPlaying = ({
 };
 
 export default NowPlaying;
+
 

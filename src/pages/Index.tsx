@@ -29,7 +29,6 @@ import { GameResult } from '@/hooks/useGameHistory';
 import { GameHistoryProvider, useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { NewsTicker } from '@/components/NewsTicker';
 import { useAuth } from '@/hooks/useAuth';
-import { SyncNotice } from '@/components/SyncNotice';
 import { toast } from 'sonner';
 
 // Warm the chunks the user reaches first (dashboard = CastingRoom, plus the
@@ -68,7 +67,7 @@ const IndexContent = () => {
   const introStory = activeGame?.introStory;
   const visualBible = activeGame?.visualBible;
   const endingFormData = activeGame?.formData ?? null;
-  const { recordGame, updateGame, pendingSaveCount, retryPendingSaves } = useGameHistoryContext();
+  const { recordGame, updateGame } = useGameHistoryContext();
   const recordedIds = useRef(new Set<string>());
   if (activeGame?.result) recordedIds.current.add(activeGame.id);
   const checkpointGame = (id: string, updates: Partial<ActiveGame>) => {
@@ -221,7 +220,7 @@ const IndexContent = () => {
           if (activeGame && !handlePlayAgain()) return false;
           setCurrentPage('dashboard'); return true;
         }}
-        recoveryNotice={<>{cloudNotice}{cloudPlay.error && !cloudPlay.conflict && <p role="status" className="theater-status">{cloudPlay.error} <button className="underline min-h-[44px] px-2" onClick={cloudPlay.refresh}>Retry cloud sync</button></p>}</>}
+        recoveryNotice={cloudNotice}
         onArchive={handleArchive} 
         onNavigateHome={handleNavigateHome}
         onScrapbooks={() => goToScrapbooks()}
@@ -252,8 +251,6 @@ const IndexContent = () => {
               showDeathPanel={activeGame.showDeathPanel}
               syncPlayNow={cloudPlay.syncNow}
               onPlayEvent={event => appendPlayEvent(activeGame.id, event)}
-              syncStatus={cloudPlay.conflict ? 'Another device has changes. Open the cloud notice to choose a version.' : !user ? 'Saved on this device · sign in for cloud recovery' : cloudPlay.error || (cloudPlay.pendingCount ? 'Saved on this device · cloud sync pending' : 'Saved on this device · cloud up to date')}
-              onRetrySync={user ? () => { void cloudPlay.retry(); } : undefined}
               initialStory={activeGame.introStory}
               initialSceneImageUrl={activeGame.sceneImageUrl}
               initialVisualBible={activeGame.visualBible}
@@ -315,9 +312,10 @@ const IndexContent = () => {
   };
 
   const isScrapbookOpen = currentPage === 'scrapbooks';
+  const isGameSession = currentPage === 'nowPlaying' || currentPage === 'outcome' || currentPage === 'ending';
 
   return (
-    <div className="min-h-screen bg-background relative overflow-x-hidden">
+    <div className={`min-h-screen bg-background relative overflow-x-hidden${isGameSession ? ' game-session' : ''}`}>
       {/* Shared App Header — hidden on mobile when scrapbook is open */}
       <div className={isScrapbookOpen ? 'hidden sm:block' : currentPage==='nowPlaying' && activeGame?.playMode ? 'play-active-header' : ''}>
         <AppHeader onNavigateHome={handleNavigateHome} />
@@ -326,7 +324,6 @@ const IndexContent = () => {
       {/* Main Content — one Suspense boundary covers every lazy page */}
       <main className="container mx-auto px-3 sm:px-4 pt-24 sm:pt-32 pb-28 relative z-10">
         <Suspense fallback={<PageLoading />}>
-          <SyncNotice count={pendingSaveCount} onRetry={retryPendingSaves} />
           {activeGame && currentPage !== activeGame.phase && resumeNotice}
           {cloudPlay.conflict && cloudNotice}{renderPage()}
         </Suspense>
@@ -428,4 +425,5 @@ const Index = () => (
 );
 
 export default Index;
+
 

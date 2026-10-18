@@ -243,13 +243,7 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
             <Play className={`w-5 h-5 ${isComplete ? 'text-primary' : ''}`} />
             <span>Press Play</span>
           </button>
-          <p
-            className={`press-play-helper ${
-              isComplete ? 'text-primary' : 'text-dim'
-            }`}
-          >
-            {isComplete ? 'Tape ready' : 'Cast your feature to begin'}
-          </p>
+          {!isComplete && <p className="press-play-helper text-dim">Cast your feature to begin</p>}
         </div>
       </div>
 

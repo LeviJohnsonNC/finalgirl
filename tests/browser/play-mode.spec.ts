@@ -1,4 +1,5 @@
 import { test, expect, activeGame } from './fixtures';
+import { resolve } from 'node:path';
 
 const tracked = {
   ...activeGame,
@@ -23,8 +24,10 @@ test('lightweight Play tracking survives reload, undo, bulk recording and quiet 
     draft: {
       ...activeGame,
       selection: { ...activeGame.selection, location: 'Buddyland' },
+      sceneImageUrl: 'http://127.0.0.1:4173/play-still.png',
     },
   });
+  await page.route('**/play-still.png', route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/buddyland.png') }));
   await page.goto('/');
   await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
   await page
@@ -32,6 +35,12 @@ test('lightweight Play tracking survives reload, undo, bulk recording and quiet 
     .click();
   await page.getByRole('button', { name: 'Track this game' }).click();
   await page.getByRole('button', { name: 'Start from round 1' }).click();
+  await expect(page.getByText(/Saved on this device/i)).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Retry cloud sync' })).toHaveCount(0);
+  for (const grain of await page.locator('.game-session .film-grain').all()) {
+    await expect(grain).toHaveCSS('animation-name', 'none');
+    await expect(grain).toHaveCSS('transform', 'none');
+  }
   for (let i = 0; i < 5; i++)
     await page
       .getByRole('button', { name: 'Save one victim', exact: true })
@@ -97,13 +106,18 @@ test('lightweight Play tracking survives reload, undo, bulk recording and quiet 
   await expect(
     page.getByText(archive.storyText, { exact: true }),
   ).toBeVisible();
+  await expect(page.locator('.story-image-loaded')).toHaveCSS('animation-name', 'none');
+  for (const grain of await page.locator('.game-session .film-grain').all()) {
+    await expect(grain).toHaveCSS('animation-name', 'none');
+    await expect(grain).toHaveCSS('transform', 'none');
+  }
   expect(archive.calls.filter((c) => c === 'generate-story')).toHaveLength(0);
   await expect
     .poll(() => archive.sessions[0]?.state.playEvents)
     .toHaveLength(11);
 });
 
-test('joining midgame preserves an unknown round and offline taps until retry', async ({
+test('joining midgame preserves an unknown round and syncs offline taps on reconnect', async ({
   page,
   archive,
 }) => {
@@ -127,12 +141,10 @@ test('joining midgame preserves an unknown round and offline taps until retry', 
     page.getByRole('button', { name: 'Save one victim', exact: true }),
   ).toContainText('5');
   await page.getByRole('button', { name: 'Details & log' }).click();
-  const retry = page
-    .getByRole('button', { name: 'Retry cloud sync', exact: true })
-    .last();
-  await expect(retry).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Retry cloud sync', exact: true })).toHaveCount(0);
+  await expect(page.getByText(/Saved on this device/i)).toHaveCount(0);
   archive.failWrites = false;
-  await retry.click();
+  await page.evaluate(() => window.dispatchEvent(new Event('online')));
   await expect
     .poll(() => archive.sessions[0]?.state.playEvents)
     .toHaveLength(2);
@@ -340,3 +352,4 @@ test('Play controls remain reachable on small phones, landscape, tablets and wid
       });
   }
 });
+

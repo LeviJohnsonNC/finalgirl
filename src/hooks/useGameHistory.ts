@@ -378,7 +378,7 @@ export const useGameHistory = () => {
       if (!setLocalGameHistory(games => games.filter(item => item.id !== id))) throw new Error('Could not delete the local record.');
       return;
     }
-    if (!await flush()) throw new Error('Your saved changes must reach the archive before deleting records. Retry the pending saves first.');
+    if (!await flush()) throw new Error('Your saved changes must reach the archive before deleting records. Reconnect and try again.');
     const { error } = await supabase.from('game_history').delete().eq('id', id).eq('user_id', userId)
       .abortSignal(AbortSignal.timeout(20000));
     if (error) throw new Error(error.message);
@@ -392,7 +392,7 @@ export const useGameHistory = () => {
       if (!setLocalGameHistory([])) throw new Error('Could not clear local records.');
       return;
     }
-    if (!await flush()) throw new Error('Retry pending saves before resetting your plays.');
+    if (!await flush()) throw new Error('Your saved changes must reach the archive before resetting your plays. Reconnect and try again.');
     const games = [...baseRef.current];
     const { error } = await supabase.from('game_history').delete().eq('user_id', userId)
       .abortSignal(AbortSignal.timeout(20000));
@@ -413,3 +413,4 @@ export const useGameHistory = () => {
     isDegraded: Boolean(userId && loadError && gameHistory.length),
   };
 };
+

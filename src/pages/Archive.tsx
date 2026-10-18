@@ -4,7 +4,6 @@ import { FilmToggle } from '@/components/FilmToggle';
 import { FEATURE_FILMS } from '@/types/gameData';
 import { useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { useOwnedFilms } from '@/hooks/useOwnedFilms';
-import { SyncNotice } from '@/components/SyncNotice';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -19,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const Archive = () => {
-  const { ownedFilms, setOwnedFilms, loadError, isDegraded, isLoading, retryLoadOwnedFilms, pendingSaveCount, retryPendingSaves } = useOwnedFilms();
+  const { ownedFilms, setOwnedFilms, loadError, isDegraded, isLoading, retryLoadOwnedFilms } = useOwnedFilms();
   const { clearHistory } = useGameHistoryContext();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -108,8 +107,6 @@ const Archive = () => {
           </button>
         </div>
       )}
-
-      <SyncNotice count={pendingSaveCount} onRetry={retryPendingSaves} />
 
       {/* Reset Plays Button - Right aligned */}
       <div className="flex justify-end px-2">

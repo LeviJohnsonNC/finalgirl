@@ -63,7 +63,7 @@ export function useDeathScenes(
     try {
       if (!(await syncNow()))
         throw new Error(
-          'Cloud sync is pending. The death is saved on this device; retry sync before generating.',
+          'Could not sync this death yet. Try generating the scene again when connected.',
         );
       const {
         data: { session },
@@ -133,3 +133,4 @@ export function useDeathScenes(
     signedIn: Boolean(user),
   };
 }
+
