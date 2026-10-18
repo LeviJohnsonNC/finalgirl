@@ -1,39 +1,41 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import {isDeathScene,type DeathScene} from '@/lib/play/death';
-export type {DeathScene} from '@/lib/play/death';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { isDeathScene, type DeathScene } from "@/lib/play/death";
+export type { DeathScene } from "@/lib/play/death";
 export function useDeathScenes(
   sessionId: string,
   syncNow?: () => Promise<boolean>,
 ) {
   const { user } = useAuth();
-  const owner = user?.id ?? 'guest';
+  const owner = user?.id ?? "guest";
   const [saved, setSaved] = useState<{
     key: string;
     rows: DeathScene[];
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const key = owner + ':' + sessionId;
+  const key = owner + ":" + sessionId;
   const current = useRef(key);
   current.current = key;
   const generation = useRef<AbortController | null>(null);
   const active = useRef(true);
+  // Token refresh may replace the auth user object without changing the owner.
+  // Keep in-flight generation alive until the account or session actually changes.
   const refresh = useCallback(async () => {
     if (!user) return;
     const requestKey = key;
     const { data, error } = await supabase
-      .from('play_death_scenes' as never)
-      .select('id,session_id,event_id,signature,take,scene_text,model,status')
-      .eq('session_id', sessionId)
-      .eq('user_id', user.id)
-      .eq('status', 'ready')
-      .order('created_at', { ascending: true })
+      .from("play_death_scenes" as never)
+      .select("id,session_id,event_id,signature,take,scene_text,model,status")
+      .eq("session_id", sessionId)
+      .eq("user_id", user.id)
+      .eq("status", "ready")
+      .order("created_at", { ascending: true })
       .abortSignal(AbortSignal.timeout(20000));
     if (!active.current || current.current !== requestKey) return;
     if (error) {
-      setError('Saved scenes could not be loaded. Your game is still safe.');
+      setError("Saved scenes could not be loaded. Your game is still safe.");
       return;
     }
     setSaved({
@@ -41,7 +43,7 @@ export function useDeathScenes(
       rows: (Array.isArray(data) ? data : []).filter(isDeathScene),
     });
     setError(null);
-  }, [user, key, sessionId]);
+  }, [owner, key, sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     active.current = true;
     setError(null);
@@ -53,7 +55,15 @@ export function useDeathScenes(
     };
   }, [refresh]);
   const generate = async (eventId: string, take: number) => {
-    if (!user || generation.current || !syncNow) return;
+    if (generation.current) return null;
+    if (!user || !syncNow) {
+      setError(
+        !user
+          ? "Sign in to generate a gruesome death. Your recorded death is safe."
+          : "Scene generation is unavailable until this game can sync. Your death is recorded.",
+      );
+      return null;
+    }
     const requestKey = key;
     const controller = new AbortController();
     generation.current = controller;
@@ -63,20 +73,20 @@ export function useDeathScenes(
     try {
       if (!(await syncNow()))
         throw new Error(
-          'Could not sync this death yet. Try generating the scene again when connected.',
+          "Could not sync this death yet. Try generating the scene again when connected.",
         );
       const {
         data: { session },
       } = await supabase.auth.getSession();
       if (!session?.access_token || session.user.id !== user.id)
-        throw new Error('Sign in to generate a death scene.');
+        throw new Error("Sign in to generate a death scene.");
       if (current.current !== requestKey || !active.current) return;
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-death-scene`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             Authorization: `Bearer ${session.access_token}`,
           },
@@ -87,9 +97,9 @@ export function useDeathScenes(
       const data = await response.json();
       if (!response.ok)
         throw new Error(
-          typeof data.error === 'string'
+          typeof data.error === "string"
             ? data.error
-            : 'The scene could not be developed.',
+            : "The scene could not be developed.",
         );
       if (
         !isDeathScene(data.scene) ||
@@ -97,7 +107,7 @@ export function useDeathScenes(
         data.scene.event_id !== eventId
       )
         throw new Error(
-          'The scene response was invalid. Close and reopen death details before trying again.',
+          "The scene response was invalid. Close and reopen death details before trying again.",
         );
       if (current.current === requestKey && active.current)
         setSaved((previous) => ({
@@ -109,15 +119,17 @@ export function useDeathScenes(
             data.scene,
           ],
         }));
+      return data.scene as DeathScene;
     } catch (reason) {
       if (current.current === requestKey && active.current)
         setError(
           controller.signal.aborted
-            ? 'The scene is taking longer than expected. Close and reopen death details before retrying. Your death is recorded.'
+            ? "The scene is taking longer than expected. Close and reopen death details before retrying. Your death is recorded."
             : reason instanceof Error
               ? reason.message
-              : 'Scene unavailable. Your death is recorded.',
+              : "Scene unavailable. Your death is recorded.",
         );
+      return null;
     } finally {
       clearTimeout(timer);
       if (generation.current === controller) generation.current = null;
@@ -133,4 +145,3 @@ export function useDeathScenes(
     signedIn: Boolean(user),
   };
 }
-

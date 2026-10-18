@@ -65,3 +65,24 @@ describe("sourced death context", () => {
     ).toEqual([]);
   });
 });
+
+describe("memorable, bounded death fiction", () => {
+  it("asks for a complete short horror story with sourced context and no new game effects", () => {
+    const kill = event({
+      kind: "killed",
+      quantity: 1,
+      cause: "killer",
+      room: "Kitchen",
+    });
+    const facts = deathFacts(
+      { killer: "Billy the Bear", location: "Buddyland", finalGirl: "Rena" },
+      [event({ kind: "start", saved: 0, killed: 0, round: 1 }), kill],
+      kill.id,
+    )!;
+    const prompt = deathPrompt(facts, []);
+    expect(prompt.system).toContain("100–150 words");
+    expect(prompt.system).toContain("one or two short paragraphs");
+    expect(prompt.system).toContain("Never use em dashes");
+    expect(JSON.parse(prompt.user).recordedFacts.room).toBe("Kitchen");
+  });
+});

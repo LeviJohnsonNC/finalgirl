@@ -1,11 +1,11 @@
-import { test } from 'node:test';
-import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
-import ts from 'typescript';
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import ts from "typescript";
 const require = createRequire(import.meta.url);
 const code = (path) =>
-  ts.transpileModule(readFileSync(new URL(path, import.meta.url), 'utf8'), {
+  ts.transpileModule(readFileSync(new URL(path, import.meta.url), "utf8"), {
     compilerOptions: {
       module: ts.ModuleKind.CommonJS,
       target: ts.ScriptTarget.ES2022,
@@ -13,38 +13,48 @@ const code = (path) =>
   }).outputText;
 function moduleAt(path, imports) {
   const ex = {};
-  new Function('require', 'exports', code(path))((name) => {
+  new Function("require", "exports", code(path))((name) => {
     if (imports[name]) return imports[name];
-    throw new Error('Unexpected import ' + name);
+    throw new Error("Unexpected import " + name);
   }, ex);
   return ex;
 }
-const buddyland = moduleAt('../supabase/functions/_shared/play/buddyland.ts', {});
-const modules = moduleAt('../supabase/functions/_shared/play/modules.ts', {'./buddyland.ts':buddyland});
-const events = moduleAt('../supabase/functions/_shared/play/events.ts', {'./modules.ts':modules});
-const death = moduleAt('../supabase/functions/_shared/play/death.ts', { './events.ts': events, './modules.ts': modules });
-const schemas = moduleAt('../supabase/functions/_shared/validation.ts', {
-  'https://deno.land/x/zod@v3.22.4/mod.ts': require('zod'),
-  './auth.ts': { corsHeaders: {} },
+const buddyland = moduleAt(
+  "../supabase/functions/_shared/play/buddyland.ts",
+  {},
+);
+const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", {
+  "./buddyland.ts": buddyland,
 });
-const sessionId = '11111111-1111-4111-8111-111111111111',
-  eventId = '22222222-2222-4222-8222-222222222222';
+const events = moduleAt("../supabase/functions/_shared/play/events.ts", {
+  "./modules.ts": modules,
+});
+const death = moduleAt("../supabase/functions/_shared/play/death.ts", {
+  "./events.ts": events,
+  "./modules.ts": modules,
+});
+const schemas = moduleAt("../supabase/functions/_shared/validation.ts", {
+  "https://deno.land/x/zod@v3.22.4/mod.ts": require("zod"),
+  "./auth.ts": { corsHeaders: {} },
+});
+const sessionId = "11111111-1111-4111-8111-111111111111",
+  eventId = "22222222-2222-4222-8222-222222222222";
 const state = {
   selection: {
-    killer: 'Billy the Bear',
-    location: 'Camp Happy Trails',
-    finalGirl: 'Rena',
+    killer: "Billy the Bear",
+    location: "Camp Happy Trails",
+    finalGirl: "Rena",
   },
   playEvents: [
     {
-      id: '33333333-3333-4333-8333-333333333333',
+      id: "33333333-3333-4333-8333-333333333333",
       at: 1,
-      kind: 'start',
+      kind: "start",
       saved: 0,
       killed: 0,
       round: 1,
     },
-    { id: eventId, at: 2, kind: 'killed', quantity: 2, cause: 'event' },
+    { id: eventId, at: 2, kind: "killed", quantity: 2, cause: "event" },
   ],
 };
 function fixture(options = {}) {
@@ -55,28 +65,28 @@ function fixture(options = {}) {
   const owned = options.foreign ? null : structuredClone(state);
   if (options.undone)
     owned.playEvents.push({
-      id: '44444444-4444-4444-8444-444444444444',
+      id: "44444444-4444-4444-8444-444444444444",
       at: 3,
-      kind: 'undo',
+      kind: "undo",
       target: eventId,
     });
   const client = {
     auth: {
       getUser: async () => ({
-        data: { user: options.unauthorized ? null : { id: 'owner-A' } },
+        data: { user: options.unauthorized ? null : { id: "owner-A" } },
       }),
     },
     rpc: async () => {
-      calls.push('claim');
+      calls.push("claim");
       return options.claimError
-        ? { error: { message: 'offline' } }
+        ? { error: { message: "offline" } }
         : {
             data: {
-              action: options.action ?? 'generate',
-              id: 'scene',
-              lease: 'lease-token',
-              text: 'A saved original death scene.',
-              model: 'cheap',
+              action: options.action ?? "generate",
+              id: "scene",
+              lease: "lease-token",
+              text: "A saved original death scene.",
+              model: "cheap",
             },
           };
     },
@@ -95,11 +105,11 @@ function fixture(options = {}) {
         },
         maybeSingle: async () => ({
           data:
-            table === 'play_sessions'
+            table === "play_sessions"
               ? owned
                 ? { state: owned }
                 : null
-              : { id: 'scene' },
+              : { id: "scene" },
           error: null,
         }),
         then: (resolve, reject) =>
@@ -109,105 +119,105 @@ function fixture(options = {}) {
     },
   };
   const imports = {
-    '../_shared/auth.ts': { getCorsHeaders: () => ({}) },
-    '../_shared/guard.ts': {
+    "../_shared/auth.ts": { getCorsHeaders: () => ({}) },
+    "../_shared/guard.ts": {
       requireUser: async () => {
-        calls.push('guard');
+        calls.push("guard");
         return options.deny
-          ? { ok: false, response: new Response('{}', { status: 503 }) }
+          ? { ok: false, response: new Response("{}", { status: 503 }) }
           : {
               ok: true,
-              user: { id: 'owner-A' },
+              user: { id: "owner-A" },
               adminClient: client,
               logUsage: async () => {
-                calls.push('log');
+                calls.push("log");
               },
             };
       },
     },
-    '../_shared/validation.ts': schemas,
-    '../_shared/aiGateway.ts': {
+    "../_shared/validation.ts": schemas,
+    "../_shared/aiGateway.ts": {
       generateText: async (opts) => {
-        calls.push('AI');
+        calls.push("AI");
         assert.equal(opts.singleAttempt, true);
         assert.ok(opts.signal instanceof AbortSignal);
-        assert.equal(opts.maxTokens, 200);
-        if (options.aiError) throw new Error('offline');
+        assert.equal(opts.maxTokens, 340);
+        if (options.aiError) throw new Error("offline");
         return {
-          text: 'An original vignette about exactly the recorded victims.',
-          model: 'cheap',
+          text: "An original vignette about exactly the recorded victims.",
+          model: "cheap",
         };
       },
       statusFor: () => 500,
-      userFacingMessage: () => 'The reel jammed.',
+      userFacingMessage: () => "The reel jammed.",
     },
-    '../_shared/models.ts': { DEATH_MODEL_CANDIDATES: ['cheap'] },
-    '../_shared/deathPrompt.ts': {
+    "../_shared/models.ts": { DEATH_MODEL_CANDIDATES: ["cheap"] },
+    "../_shared/deathPrompt.ts": {
       deathPrompt: (facts) => {
-        assert.equal(facts.location, 'Camp Happy Trails');
-        assert.equal(facts.cause, 'event');
+        assert.equal(facts.location, "Camp Happy Trails");
+        assert.equal(facts.cause, "event");
         assert.equal(facts.quantity, 2);
-        return { system: 'original', user: JSON.stringify(facts) };
+        return { system: "original", user: JSON.stringify(facts) };
       },
     },
-    '../_shared/play/death.ts': death,
-    '../_shared/play/events.ts': events,
+    "../_shared/play/death.ts": death,
+    "../_shared/play/events.ts": events,
   };
   new Function(
-    'require',
-    'exports',
-    'Deno',
-    code('../supabase/functions/generate-death-scene/index.ts'),
+    "require",
+    "exports",
+    "Deno",
+    code("../supabase/functions/generate-death-scene/index.ts"),
   )(
     (name) => {
-      if (name.includes('/http/server.ts'))
+      if (name.includes("/http/server.ts"))
         return {
           serve: (fn) => {
             handler = fn;
           },
         };
-      if (name.includes('supabase-js')) return { createClient: () => client };
+      if (name.includes("supabase-js")) return { createClient: () => client };
       if (imports[name]) return imports[name];
       throw new Error(name);
     },
     {},
-    { env: { get: () => 'configured' } },
+    { env: { get: () => "configured" } },
   );
   const request = (body) =>
-    new Request('https://example.test', {
-      method: 'POST',
-      headers: { Authorization: 'Bearer test' },
+    new Request("https://example.test", {
+      method: "POST",
+      headers: { Authorization: "Bearer test" },
       body: JSON.stringify(body ?? { sessionId, eventId }),
     });
   return { handler, calls, updates, filters, request, owned };
 }
-test('cached and in-flight scenes never reserve quota or call a model', async () => {
-  for (const action of ['cached', 'busy']) {
+test("cached and in-flight scenes never reserve quota or call a model", async () => {
+  for (const action of ["cached", "busy"]) {
     const f = fixture({ action });
     const r = await f.handler(f.request());
-    assert.equal(r.status, action === 'cached' ? 200 : 409);
-    assert.deepEqual(f.calls, ['claim']);
+    assert.equal(r.status, action === "cached" ? 200 : 409);
+    assert.deepEqual(f.calls, ["claim"]);
   }
 });
-test('generation uses canonical owned observations and a lease before any paid call', async () => {
+test("generation uses canonical owned observations and a lease before any paid call", async () => {
   const f = fixture();
   assert.equal((await f.handler(f.request())).status, 200);
-  assert.deepEqual(f.calls, ['claim', 'guard', 'AI', 'log']);
+  assert.deepEqual(f.calls, ["claim", "guard", "AI", "log"]);
   assert.deepEqual(f.owned.playEvents, state.playEvents);
   assert.ok(
     f.filters.some(
       ([table, key, value]) =>
-        table === 'play_sessions' && key === 'user_id' && value === 'owner-A',
+        table === "play_sessions" && key === "user_id" && value === "owner-A",
     ),
   );
   assert.ok(
     f.filters.some(
-      ([, key, value]) => key === 'lease' && value === 'lease-token',
+      ([, key, value]) => key === "lease" && value === "lease-token",
     ),
   );
-  assert.ok(f.updates.some((u) => u.status === 'ready'));
+  assert.ok(f.updates.some((u) => u.status === "ready"));
 });
-test('foreign, undone and unauthorized deaths do not authorize work', async () => {
+test("foreign, undone and unauthorized deaths do not authorize work", async () => {
   for (const options of [
     { foreign: true },
     { undone: true },
@@ -219,7 +229,7 @@ test('foreign, undone and unauthorized deaths do not authorize work', async () =
     assert.deepEqual(f.calls, []);
   }
 });
-test('claim and allowance failures fail closed; AI failure leaves the death intact', async () => {
+test("claim and allowance failures fail closed; AI failure leaves the death intact", async () => {
   for (const options of [
     { claimError: true },
     { deny: true },
@@ -228,16 +238,16 @@ test('claim and allowance failures fail closed; AI failure leaves the death inta
     const f = fixture(options);
     const r = await f.handler(f.request());
     assert.ok(r.status >= 500);
-    if (!options.aiError) assert.ok(!f.calls.includes('AI'));
+    if (!options.aiError) assert.ok(!f.calls.includes("AI"));
     assert.deepEqual(f.owned.playEvents, state.playEvents);
     if (!options.claimError)
-      assert.ok(f.updates.some((u) => u.status === 'failed'));
+      assert.ok(f.updates.some((u) => u.status === "failed"));
   }
 });
-test('invalid take or caller-supplied fictional actors are rejected before authentication or spending', async () => {
+test("invalid take or caller-supplied fictional actors are rejected before authentication or spending", async () => {
   for (const bad of [
     { sessionId, eventId, take: 3 },
-    { sessionId, eventId, killer: 'other' },
+    { sessionId, eventId, killer: "other" },
   ]) {
     const f = fixture();
     assert.equal((await f.handler(f.request(bad))).status, 400);

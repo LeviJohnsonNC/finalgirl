@@ -1,3 +1,6 @@
+import { playStartingValues } from "@/lib/play/defaults";
+import horrorImage from "@/assets/play/horror-eye.webp";
+import bloodlustImage from "@/assets/play/bloodlust-stain.webp";
 import { useActiveImages } from "@/hooks/useActiveImages";
 import { PlaySearch } from "./PlaySearch";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -8,11 +11,14 @@ import {
   Plus,
   Undo2,
   Volume2,
-  Eye,
-  Droplets,
   ChevronDown,
   Camera,
-  Sparkles,
+  UnlockKeyhole,
+  Zap,
+  HeartPulse,
+  RotateCcw,
+  Bookmark,
+  type LucideIcon,
   Shield,
   Swords,
   KeyRound,
@@ -72,33 +78,65 @@ const stateLimits: Record<StateField, number> = {
   finalHorrorLevel: 7,
   bloodlust: 99,
 };
-const moments: Array<{ type: MomentType; title: string; prompt: string }> = [
+const moments: Array<{
+  type: MomentType;
+  title: string;
+  prompt: string;
+  icon: LucideIcon;
+}> = [
   {
     type: "item",
+    icon: KeyRound,
     title: "Found a weapon or key item",
     prompt: "Which weapon or item?",
   },
   {
     type: "ultimate-unlocked",
+    icon: UnlockKeyhole,
     title: "Ultimate unlocked",
     prompt: "Anything to remember?",
   },
   {
     type: "ultimate-used",
+    icon: Zap,
     title: "Ultimate used",
     prompt: "What did it change?",
   },
-  { type: "escape", title: "Narrow escape", prompt: "How did you escape?" },
+  {
+    type: "escape",
+    icon: Shield,
+    title: "Narrow escape",
+    prompt: "How did you escape?",
+  },
   {
     type: "turning-point",
+    icon: Swords,
     title: "Turned the tables",
     prompt: "What changed?",
   },
-  { type: "other", title: "Other moment", prompt: "What happened?" },
+  {
+    type: "girl-revived",
+    icon: HeartPulse,
+    title: "Second wind",
+    prompt: "How did she come back?",
+  },
+  {
+    type: "killer-revived",
+    icon: RotateCcw,
+    title: "Back from the dead",
+    prompt: "What happened when the killer rose?",
+  },
+  {
+    type: "other",
+    icon: Bookmark,
+    title: "Other moment",
+    prompt: "What happened?",
+  },
 ];
 export function PlayScreen(props: PlayScreenProps) {
   const { events, onEvent, killer, location, finalGirl } = props;
   const summary = summarizePlay(events);
+  const startingValues = playStartingValues(killer, finalGirl);
   const { characterImages } = useActiveImages();
   const [message, setMessage] = useState("");
   const [finishOpen, setFinishOpen] = useState(false);
@@ -347,10 +385,18 @@ export function PlayScreen(props: PlayScreenProps) {
                     />
                   )}
                 {field === "finalHorrorLevel" && (
-                  <Eye className="play-stat-symbol" />
+                  <img
+                    className="play-stat-portrait play-stat-art"
+                    src={horrorImage}
+                    alt=""
+                  />
                 )}
                 {field === "bloodlust" && (
-                  <Droplets className="play-stat-symbol" />
+                  <img
+                    className="play-stat-portrait play-stat-art"
+                    src={bloodlustImage}
+                    alt=""
+                  />
                 )}
                 <span>{stateLabels[field]}</span>
                 {editingState === field ? (
@@ -381,8 +427,7 @@ export function PlayScreen(props: PlayScreenProps) {
                   <button
                     aria-label={`Track ${stateLabels[field]}`}
                     onClick={() => {
-                      setEditingState(field);
-                      setStateValue("");
+                      setState(field, startingValues[field]);
                     }}
                   >
                     + Track
@@ -437,15 +482,7 @@ export function PlayScreen(props: PlayScreenProps) {
         <div className="play-moment-choices">
           {moments.map((choice) => (
             <button key={choice.type} onClick={() => pickMoment(choice)}>
-              {choice.type === "item" ? (
-                <KeyRound size={15} />
-              ) : choice.type === "escape" ? (
-                <Shield size={15} />
-              ) : choice.type === "turning-point" ? (
-                <Swords size={15} />
-              ) : (
-                <Sparkles size={15} />
-              )}
+              <choice.icon size={17} aria-hidden="true" />
               {choice.title}
             </button>
           ))}
@@ -489,7 +526,7 @@ export function PlayScreen(props: PlayScreenProps) {
                 if (saveMoment()) setMomentId(null);
               }}
             >
-              Done
+              Record
             </button>
           </div>
         )}

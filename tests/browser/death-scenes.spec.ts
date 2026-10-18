@@ -56,7 +56,7 @@ test("record first, contextualize optionally, cache and replay without another g
       .getByRole("button", { name: "Killer attack", exact: true })
       .click();
   await page
-    .getByRole("button", { name: "Gruesome Death · uses AI", exact: true })
+    .getByRole("button", { name: "Gruesome Death", exact: true })
     .click();
   await expect(
     page.getByRole("region", { name: "Generated death scene" }),
@@ -89,7 +89,7 @@ test("record first, contextualize optionally, cache and replay without another g
     ),
   ).not.toContain("killer");
   await page
-    .getByRole("button", { name: "Back to the game", exact: true })
+    .getByRole("button", { name: "Save and exit", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Record one victim killed", exact: true }),
@@ -104,22 +104,22 @@ test("record first, contextualize optionally, cache and replay without another g
     archive.calls.filter((c) => c === "generate-death-scene"),
   ).toHaveLength(1);
   await page
-    .getByRole("button", { name: "Another take · uses AI", exact: true })
+    .getByRole("button", { name: "Gruesome Death", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Take 2", exact: true }),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: "Another take · uses AI", exact: true })
+    .getByRole("button", { name: "Gruesome Death", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Take 3", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Another take · uses AI", exact: true }),
-  ).toHaveCount(0);
+    page.getByRole("button", { name: "Gruesome Death", exact: true }),
+  ).toBeDisabled();
   await page
-    .getByRole("button", { name: "Back to the game", exact: true })
+    .getByRole("button", { name: "Save and exit", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Record one victim killed", exact: true }),
@@ -152,13 +152,13 @@ test("AI failure and a late death response cannot lose or revive a recorded coun
       .getByRole("button", { name: "Killer attack", exact: true })
       .click();
   await page
-    .getByRole("button", { name: "Gruesome Death · uses AI", exact: true })
+    .getByRole("button", { name: "Gruesome Death", exact: true })
     .click();
   await expect(
     page.getByRole("status").filter({ hasText: "Scene unavailable." }),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: "Back to the game", exact: true })
+    .getByRole("button", { name: "Save and exit", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Record one victim killed", exact: true }),
@@ -178,11 +178,11 @@ test("AI failure and a late death response cannot lose or revive a recorded coun
       .getByRole("button", { name: "Killer attack", exact: true })
       .click();
   await page
-    .getByRole("button", { name: "Gruesome Death · uses AI", exact: true })
+    .getByRole("button", { name: "Gruesome Death", exact: true })
     .click();
   await expect.poll(() => Boolean(archive.releaseDeath)).toBe(true);
   await page
-    .getByRole("button", { name: "Back to the game", exact: true })
+    .getByRole("button", { name: "Save and exit", exact: true })
     .click();
   await page.getByRole("button", { name: "Undo", exact: true }).click();
   archive.releaseDeath!();
@@ -223,7 +223,7 @@ test("a conflicting phone or desktop keeps both versions before explicit handoff
     .getByRole("button", { name: "Record one victim killed", exact: true })
     .click();
   await page
-    .getByRole("button", { name: "Back to the game", exact: true })
+    .getByRole("button", { name: "Save and exit", exact: true })
     .click();
   await expect(page.getByRole("alert")).toContainText(
     "Another device changed this game.",
@@ -273,7 +273,7 @@ test("manual death narration stops the intro and replays from device cache after
       .getByRole("button", { name: "Killer attack", exact: true })
       .click();
   await page
-    .getByRole("button", { name: "Gruesome Death · uses AI", exact: true })
+    .getByRole("button", { name: "Gruesome Death", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Narrate death scene", exact: true })
@@ -315,7 +315,7 @@ test("manual death narration stops the intro and replays from device cache after
     )
     .toBe(2);
   await page
-    .getByRole("button", { name: "Back to the game", exact: true })
+    .getByRole("button", { name: "Save and exit", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Narrate introduction", exact: true }),
@@ -351,7 +351,7 @@ test("manual death narration stops the intro and replays from device cache after
     .click();
   expect((await audio()).count).toBe(0);
   await page
-    .getByRole("button", { name: "Back to the game", exact: true })
+    .getByRole("button", { name: "Save and exit", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Record one victim killed", exact: true }),
@@ -414,7 +414,7 @@ test("opening a legacy death preserves its cached scene until the player changes
     page.getByRole("region", { name: "Generated death scene", exact: true }),
   ).toContainText(archive.deathText);
   await page
-    .getByRole("button", { name: "Back to the game", exact: true })
+    .getByRole("button", { name: "Save and exit", exact: true })
     .click();
   await expect
     .poll(() => archive.sessions[0]?.state.playEvents)
@@ -430,7 +430,7 @@ test("opening a legacy death preserves its cached scene until the player changes
     page.getByRole("combobox", { name: "Death event card", exact: true }),
   ).toHaveText("Sing-A-Long");
   await page
-    .getByRole("button", { name: "Back to the game", exact: true })
+    .getByRole("button", { name: "Save and exit", exact: true })
     .click();
   await expect
     .poll(() => archive.sessions[0]?.state.playEvents)
