@@ -33,7 +33,7 @@ export const SessionDetail = ({ stats, onOpenSession }: SessionDetailProps) => {
 
   return (
     <div className="session-detail">
-      <h3 className="section-title">// THE TAPE LOG</h3>
+      <h2 className="section-title">// THE TAPE LOG</h2>
 
       <div className="session-detail-grid">
         {stats.playStats && (
@@ -116,10 +116,10 @@ export const SessionDetail = ({ stats, onOpenSession }: SessionDetailProps) => {
               <h4 className="session-card-title">In her hands</h4>
               <p className="session-card-sub">Most-used weapons</p>
             </header>
-            <dl className="weapon-list">
+            <dl className="weapon-list stats-scroll-list" tabIndex={0} aria-label="All recorded weapons">
               {weapons.map((weapon) => (
                 <div key={weapon.name} className="weapon-row">
-                  <dt className="weapon-name">{weapon.name}</dt>
+                  <dt className="weapon-name" title={weapon.name}>{weapon.name}</dt>
                   <dd className="weapon-meter">
                     <span
                       className="weapon-bar"
@@ -148,7 +148,7 @@ export const SessionDetail = ({ stats, onOpenSession }: SessionDetailProps) => {
               <h4 className="session-card-title">Recent sessions</h4>
               <p className="session-card-sub">Newest first</p>
             </header>
-            <ol className="session-list">
+            <ol className="session-list stats-scroll-list" tabIndex={0} aria-label="Latest recorded sessions">
               {recentSessions.map((session) => {
                 const body = (
                   <>

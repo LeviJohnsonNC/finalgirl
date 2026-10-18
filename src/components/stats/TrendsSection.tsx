@@ -5,6 +5,7 @@ import { useActiveImages } from '@/hooks/useActiveImages';
 import { NarrativeBadgeModal } from './NarrativeBadgeModal';
 import { TrendsChart } from './TrendsChart';
 import { RecordPanel } from './RecordPanel';
+import forestPhoto from '@/assets/stats/recovered-forest.webp';
 
 interface TrendsSectionProps {
   stats: ComputedStats;
@@ -42,15 +43,18 @@ const NarrativeBadge = ({ label, value, subtext, image, type = 'killer', variant
 
   return (
     <>
-      <div
-        className={`narrative-badge ${variantClasses[variant]} cursor-pointer transition-transform hover:scale-[1.03] active:scale-[0.98]`}
+      <button
+        type="button"
+        className={`narrative-badge ${variantClasses[variant]}`}
         onClick={() => setModalOpen(true)}
       >
         {image && (
           <>
             <img 
               src={image} 
-              alt={value}
+              alt=""
+              loading="lazy"
+              onError={event => { event.currentTarget.style.display = 'none'; }}
               className={`absolute inset-0 w-full h-full object-cover ${type === 'killer' ? 'object-top' : type === 'finalGirl' ? 'object-top' : 'object-center'}`}
             />
             <div className={`absolute inset-0 ${type === 'location' ? 'bg-gradient-to-t from-black/95 via-black/60 to-black/20' : 'bg-gradient-to-t from-black/90 via-black/40 to-black/15'}`} />
@@ -63,7 +67,7 @@ const NarrativeBadge = ({ label, value, subtext, image, type = 'killer', variant
             <div className="narrative-subtext">{subtext}</div>
           </div>
         </div>
-      </div>
+      </button>
       <NarrativeBadgeModal
         open={modalOpen}
         onOpenChange={setModalOpen}
@@ -79,30 +83,25 @@ const NarrativeBadge = ({ label, value, subtext, image, type = 'killer', variant
 
 export const TrendsSection = ({ stats, games }: TrendsSectionProps) => {
   const { characterImages, locationImages } = useActiveImages();
-  const hasEnoughData = stats.gamesPlayed >= 3;
-
-  if (!hasEnoughData) {
-    return (
-      <div className="trends-section">
-        <h3 className="section-title">// RECOVERED FOOTAGE</h3>
-        <div className="trends-empty">
-          <p className="type-body-sm text-dim text-center py-8">
-            Play 3+ games to unlock your personal story
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="trends-section">
-      <h3 className="section-title">// RECOVERED FOOTAGE</h3>
-
-      <RecordPanel record={stats.record} />
-
-      {/* Chart Section — windowed, bucketed, and honest about empty periods */}
+      <div className="footage-layout">
+        <aside className="footage-case-note" aria-hidden="true">
+          <strong>{stats.gamesPlayed}</strong><span>sessions</span>
+          <hr /><span>{stats.record.wins} wins</span><span>{stats.record.losses} losses</span>
+        </aside>
+        <div className="footage-plate stats-surface">
+          <h2 className="section-title">// Recovered footage</h2>
+          <RecordPanel record={stats.record} />
+        </div>
+        <figure className="stats-evidence-photo footage-photo" aria-hidden="true">
+          <img src={forestPhoto} alt="" onError={event => { event.currentTarget.style.visibility = 'hidden'; }} />
+          <figcaption>Still here.</figcaption>
+        </figure>
+      </div>
       {games.length > 0 && <TrendsChart games={games} />}
-
+      <section className={`stats-highlights ${stats.gamesPlayed < 3 ? 'stats-highlights-sparse' : ''}`} aria-label="Highlights from the files">
+        <h2 className="section-title">Highlights from the files</h2>
       {/* Narrative Badges */}
       <div className="narrative-grid">
         <NarrativeBadge
@@ -137,10 +136,8 @@ export const TrendsSection = ({ stats, games }: TrendsSectionProps) => {
           type="location"
           variant="info"
         />
-      </div>
 
       {/* Final Girl Narrative Badges */}
-      <div className="narrative-grid">
         <NarrativeBadge
           label="Comfort Zone"
           value={stats.comfortZone?.finalGirl || null}
@@ -174,6 +171,7 @@ export const TrendsSection = ({ stats, games }: TrendsSectionProps) => {
           variant="warning"
         />
       </div>
+      </section>
     </div>
   );
 };

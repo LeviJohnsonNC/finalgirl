@@ -8,6 +8,8 @@ import { PlayerArchetypeBadge } from '@/components/stats/PlayerArchetype';
 import { SessionDetail } from '@/components/stats/SessionDetail';
 import { AlertTriangle, Film, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import forestPhoto from '@/assets/stats/recovered-forest.webp';
+import '@/styles/stats.css';
 
 interface StatsProps {
   /** Open a recorded session in its scrapbook. */
@@ -38,10 +40,10 @@ const Stats = ({ onOpenSession }: StatsProps) => {
   return (
     <div className="stats-page">
       {/* VHS Background Layers */}
-      <div className="stats-bg-plate" />
-      <div className="stats-grain-overlay" />
-      <div className="stats-scanlines" />
-      <div className="stats-vignette" />
+      <div className="stats-bg-plate" aria-hidden="true" />
+      <div className="stats-grain-overlay" aria-hidden="true" />
+      <div className="stats-scanlines" aria-hidden="true" />
+      <div className="stats-vignette" aria-hidden="true" />
 
       {/* REC Indicator */}
       <div className="rec-indicator">
@@ -49,6 +51,7 @@ const Stats = ({ onOpenSession }: StatsProps) => {
         <span>REC</span>
       </div>
 
+      <p className="stats-scene-note" aria-hidden="true">Some stories<br />don’t end.</p>
       {/* Header with Archival Framing */}
       <div className="stats-header">
         <div className="flex flex-col gap-2">
@@ -137,21 +140,29 @@ const Stats = ({ onOpenSession }: StatsProps) => {
           <TrendsSection stats={stats} games={gameHistory} />
 
           {/* Breakdowns */}
-          <BreakdownTabs stats={stats} />
+          <div className="stats-breakdown-layout">
+            <BreakdownTabs stats={stats} />
+            <figure className="stats-evidence-photo breakdown-photo" aria-hidden="true">
+              <img src={forestPhoto} alt="" loading="lazy" onError={event => { event.currentTarget.style.visibility = 'hidden'; }} />
+              <figcaption>Different girls.<br />Same nightmare.</figcaption>
+            </figure>
+          </div>
 
           {/* Horror spread, weapons, and the last few sessions */}
-          <SessionDetail stats={stats} onOpenSession={onOpenSession} />
+          <div className="stats-bottom-grid">
+            <SessionDetail stats={stats} onOpenSession={onOpenSession} />
 
-          {/* The read on how you play, last — it is the summing-up, and it
-              reads better after the evidence than before it. */}
-          <PlayerArchetypeBadge
-            archetype={stats.playerArchetype}
-            reason={stats.archetypeReason}
-            profile={stats.archetypeProfile}
-            scores={stats.archetypeScores}
-          />
+            {/* The profile follows the recorded evidence in reading order. */}
+            <PlayerArchetypeBadge
+              archetype={stats.playerArchetype}
+              reason={stats.archetypeReason}
+              profile={stats.archetypeProfile}
+              scores={stats.archetypeScores}
+            />
+          </div>
         </div>
       )}
+      <p className="stats-legal">This is an unofficial fan-made application that is not endorsed by or affiliated with Van Ryder Games, the registered trademark owner of Final Girl and all associated intellectual property rights.</p>
     </div>
   );
 };
