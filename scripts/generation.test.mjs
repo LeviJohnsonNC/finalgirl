@@ -44,3 +44,16 @@ test('reference fallback never bypasses credits, safety or authorization errors'
     assert(calls.every(call=>Array.isArray(call.messages[0].content)));
   }
 });
+
+test('all generated text rejects em dashes, including escaped and split SSE payloads', async () => {
+  const { exports } = gateway();
+  assert.equal(exports.normalizeGeneratedText('She stopped\u2014then ran.'), 'She stopped, then ran.');
+  const input = 'data: {"choices":[{"delta":{"content":"She stopped\\u2014then ran."}}]}\n\ndata: {"choices":[{"delta":{"content":"Café\u2014still."}}]}\n\ndata: {"error":"interrupted"}\n\ndata: [DONE]\n\n';
+  const bytes = new TextEncoder().encode(input);
+  const upstream = new ReadableStream({ start(controller) { for (const byte of bytes) controller.enqueue(Uint8Array.of(byte)); controller.close(); } });
+  const normalized = await new Response(exports.normalizeGeneratedStream(upstream)).text();
+  assert.doesNotMatch(normalized, /\u2014|\\u2014/);
+  assert.match(normalized, /Café, still/);
+  assert.match(normalized, /"error":"interrupted"/);
+  assert.match(normalized, /data: \[DONE\]/);
+});

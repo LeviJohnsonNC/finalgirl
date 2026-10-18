@@ -27,6 +27,7 @@ test('opening reader supports long stories, full-size photos, narration and resu
   await installTestAudio(page);
   await photos(page);
   await resume(page);
+  await expect(page.locator('.narration-tagline, .narration-cast')).toHaveCount(0);
   const reader = page.getByRole('region', { name: 'Opening narration' });
   const image = page.getByRole('img', { name: 'Scene still', exact: true });
   await image.evaluate((img: HTMLImageElement) => img.decode());
@@ -43,12 +44,16 @@ test('opening reader supports long stories, full-size photos, narration and resu
   }
   await page.getByRole('button', { name: 'View scene still full size' }).click();
   await expect(page.getByRole('dialog').locator('img')).toHaveAttribute('src', stillUrl);
+  await expect(page.getByRole('dialog').locator('.image-lightbox-edge')).toBeVisible();
+  await expect(page.getByRole('dialog').locator('p')).toHaveCount(0);
+  if (testInfo.project.name === 'desktop') expect((await page.getByRole('dialog').boundingBox())!.width).toBeGreaterThan(1000);
   await page.getByRole('button', { name: 'Close', exact: true }).click();
   await page.getByRole('button', { name: 'Narrate', exact: true }).click();
   await expect(page.getByRole('progressbar', { name: 'Narration progress' })).toBeVisible();
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await page.getByRole('button', { name: 'Special Rules', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
+  if (testInfo.project.name === 'desktop') expect((await page.getByRole('dialog').boundingBox())!.width).toBeGreaterThan(900);
   await page.getByRole('button', { name: 'Close', exact: true }).click();
   await page.getByRole('button', { name: 'WON', exact: true }).click();
   await expect(page.getByLabel('Weapon Used', { exact: true })).toBeVisible();

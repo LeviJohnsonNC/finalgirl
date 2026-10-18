@@ -1,10 +1,10 @@
 import {createPortal} from 'react-dom';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Upload, Loader2, ArrowLeft } from 'lucide-react';
+import { X, Upload, ArrowLeft } from 'lucide-react';
 import { GameResult } from '@/hooks/useGameHistory';
 import { ScrapbookGrid } from './ScrapbookGrid';
 import { ScrapbookStoryPage } from './ScrapbookStoryPage';
-import { ScrapbookPolaroid } from './ScrapbookPolaroid';
+import { ScrapbookArtwork } from './ScrapbookArtwork';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -183,8 +183,14 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
 
   const coverImage = type === 'finalGirl' ? finalGirlCover : killerCover;
   const themeClass = type === 'finalGirl' ? 'scrapbook-theme-survivor' : 'scrapbook-theme-killer';
-  const selectedPosterUrl = selectedGame?.posterImageUrl;
-  const selectedSceneUrl = selectedGame?.sceneImageUrl;
+  const handleGenerated = (id: string, updates: Partial<GameResult>) => {
+    onUpdateGame(id, updates);
+    setSelectedGame(prev => prev?.id === id ? { ...prev, ...updates } : prev);
+  };
+  const artwork = (kind: 'scene' | 'poster', className?: string) => selectedGame && (
+    <ScrapbookArtwork key={`${selectedGame.id}:${kind}`} game={selectedGame} kind={kind}
+      className={className} loading={isLoadingStory} onGenerated={handleGenerated} />
+  );
 
   return createPortal(
     <div className={`fixed inset-0 z-50 ${isMobile ? 'overflow-y-auto' : 'flex items-center justify-center'}`}>
@@ -228,9 +234,10 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
           {/* Inside Pages */}
           <div className={`scrapbook-pages ${isOpen || isMobile ? 'pages-visible' : ''}`}>
             {/* Polaroid - only on desktop */}
-            {!isMobile && selectedSceneUrl && (
-              <ScrapbookPolaroid sceneImageUrl={selectedSceneUrl} />
-            )}
+            {!isMobile && selectedGame && <div className="scrapbook-polaroid">
+              <div className="polaroid-clip" />
+              <div className="polaroid-frame">{artwork('scene', 'polaroid-image')}<span className="polaroid-caption">EVIDENCE</span></div>
+            </div>}
 
             {isMobile ? (
               /* ===== MOBILE: Single column layout ===== */
@@ -250,47 +257,15 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
                       </div>
 
                       {/* Poster above story on mobile */}
-                      {selectedPosterUrl ? (
-                        <div className="mb-4 flex justify-center">
-                          <img
-                            src={selectedPosterUrl}
-                            alt="Game Poster"
-                            className="max-h-[200px] w-auto object-contain border-4 border-[hsl(30_20%_25%)] shadow-lg"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </div>
-                      ) : (
-                        <div className="mb-4">
-                          <button
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploading}
-                            className="no-poster clickable-poster w-full h-[120px]"
-                          >
-                            {isUploading ? (
-                              <Loader2 className="w-6 h-6 text-muted-foreground/40 animate-spin" />
-                            ) : (
-                              <Upload className="w-6 h-6 text-muted-foreground/40 mb-1" />
-                            )}
-                            <span className="font-display text-xs text-dim">
-                              {isUploading ? 'Uploading...' : 'Upload Poster'}
-                            </span>
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Scene image on mobile */}
-                      {selectedSceneUrl && (
-                        <div className="mb-4 flex justify-center">
-                          <img
-                            src={selectedSceneUrl}
-                            alt="Scene"
-                            className="max-h-[180px] w-auto object-contain rounded-sm shadow-md"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </div>
-                      )}
+                      <div className="mb-4 flex justify-center max-h-[240px]">
+                        {artwork('poster', 'max-h-[240px] w-auto object-contain border-4 border-[hsl(30_20%_25%)] shadow-lg')}
+                      </div>
+                      <div className="mb-4 flex justify-center">
+                        {artwork('scene', 'max-h-[180px] w-auto object-contain rounded-sm shadow-md')}
+                      </div>
+                      <button className="back-to-grid text-xs" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+                        <Upload className="inline w-3 h-3 mr-1" />{isUploading ? 'Uploading...' : 'Upload poster'}
+                      </button>
 
                       {isLoadingStory ? (
                         <p className="type-label text-muted-foreground text-center py-6 animate-pulse">Recovering full case file...</p>
@@ -304,6 +279,8 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
                       selectedGameId={null}
                       onSelectGame={handleSelectGame}
                       type={type}
+                      onUpdateGame={onUpdateGame}
+                      onFetchGameDetails={onFetchGameDetails}
                     />
                   )}
                 </div>
@@ -316,30 +293,10 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
                   <div className="page-content">
                     {selectedGame ? (
                       <div className="poster-display">
-                        {selectedPosterUrl ? (
-                          <img
-                            src={selectedPosterUrl}
-                            alt="Game Poster"
-                            className="w-full h-full object-contain"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        ) : (
-                          <button
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploading}
-                            className="no-poster clickable-poster"
-                          >
-                            {isUploading ? (
-                              <Loader2 className="w-8 h-8 text-muted-foreground/40 animate-spin" />
-                            ) : (
-                              <Upload className="w-8 h-8 text-muted-foreground/40 mb-2" />
-                            )}
-                            <span className="font-display text-sm text-dim">
-                              {isUploading ? 'Uploading...' : 'Click to Upload Poster'}
-                            </span>
-                          </button>
-                        )}
+                        {artwork('poster', 'w-full h-full object-contain')}
+                        <button className="back-to-grid text-xs" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+                          <Upload className="inline w-3 h-3 mr-1" />{isUploading ? 'Uploading...' : 'Upload poster'}
+                        </button>
                         {/* Hidden file input */}
                         <input
                           ref={fileInputRef}
@@ -394,6 +351,8 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
                         selectedGameId={null}
                         onSelectGame={handleSelectGame}
                         type={type}
+                        onUpdateGame={onUpdateGame}
+                        onFetchGameDetails={onFetchGameDetails}
                       />
                     )}
                   </div>

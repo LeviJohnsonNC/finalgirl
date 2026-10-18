@@ -239,7 +239,6 @@ const TheEnd = ({
       heading={<>
         <NarrationTitle title="The End" ending />
         <p className={`narration-outcome ${isWin ? 'narration-outcome--won' : 'narration-outcome--lost'}`}>{isWin ? fate === 'died' ? 'Victory came at a terrible cost.' : fate === 'survived' ? 'She survived the night.' : 'The night is over. The cost remains.' : fate === 'survived' ? 'Alive. But the night was lost.' : 'Not every story ends with a survivor.'}</p>
-        <p className="narration-cast">{result.finalGirl} · {result.killer} · {result.location}</p>
       </>}
       controls={<>
         <button onClick={handleSave} className="narration-button narration-button--primary">{endingStory && !isGenerating && !error ? 'SAVE' : 'SAVE RESULT'}</button>

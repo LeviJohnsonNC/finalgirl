@@ -50,7 +50,7 @@ test('resume form edits and sync a failed save on reconnect without losing the r
   await expect(page.getByRole('button', { name: 'RESUME GAME' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Scrapbooks', exact: true }).click();
   await page.getByRole('button', { name: /Final Girl Scrapbook/ }).click();
-  await page.locator('.scrapbook-thumbnail').first().click();
+  await page.locator('.scrapbook-thumbnail .thumbnail-label').first().click();
   await expect(page.locator('.story-page-content').getByText('Axe', { exact: true })).toBeVisible();
 });
 

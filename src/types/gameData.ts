@@ -36,6 +36,19 @@ const aiBoxArtGlob = import.meta.glob<{ default: string }>(
   { eager: true },
 );
 
+// Collection covers are displayed at 82-96 CSS pixels. A 288px WebP covers
+// high-density screens without downloading the multi-megabyte source PNG.
+const thumbnailGlob = import.meta.glob<{ default: string }>(
+  '../assets/collection-thumbnails/**/*.webp', { eager: true },
+);
+const boxArtThumbnails = new Map<string, string>();
+for (const [path, image] of Object.entries({ ...officialBoxArtGlob, ...aiBoxArtGlob })) {
+  const thumb = thumbnailGlob[path.replace('/box-art/', '/collection-thumbnails/').replace(/\.png$/, '.webp')];
+  if (thumb) boxArtThumbnails.set(image.default, thumb.default);
+}
+export const getBoxArtThumbnail = (url: string | undefined): string | undefined =>
+  url ? boxArtThumbnails.get(url) ?? url : undefined;
+
 // Index each glob by basename once, so building the image maps is a hash
 // lookup per entity instead of a linear scan over every glob entry.
 const globsByBasename = new WeakMap<Record<string, { default: string }>, Map<string, string>>();

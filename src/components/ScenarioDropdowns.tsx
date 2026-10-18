@@ -1,5 +1,5 @@
 import { useState, useMemo, useId } from 'react';
-import { Dices, Flame, MapPin, Crosshair } from 'lucide-react';
+import { Dices, Clapperboard, MapPin, Crosshair } from 'lucide-react';
 import { getFilmIdByLocation } from '@/types/gameData';
 import { getSetupCardsForLocation, getEventsForLocation } from '@/types/featureFilmDetails';
 import {
@@ -75,7 +75,7 @@ const ScenarioDropdownsForLocation = ({
         <label htmlFor={`${id}-setup`} className="casting-console-label">
           Setup Scenario
         </label>
-        <span className="casting-console-icon casting-console-icon--setup" aria-hidden="true"><Flame /></span>
+        <span className="casting-console-icon casting-console-icon--setup" aria-hidden="true"><Clapperboard /></span>
         <Select 
           value={selectedSetup || undefined} 
           onValueChange={handleSetupChange}

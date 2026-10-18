@@ -40,7 +40,9 @@ test('module cards show the supplied Buddyland cover, blurb and complete cast on
   await card.scrollIntoViewIfNeeded();
   await expect(card.getByText(/The party is over/)).toBeVisible();
   for (const name of ['Billy the Bear', 'Buddyland', 'Rena & Gwynn']) await expect(card.getByText(name, { exact: true })).toBeVisible();
-  await expect.poll(() => card.getByRole('img').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(1000);
+  await expect.poll(() => card.getByRole('img').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeLessThanOrEqual(288);
+  await expect(card.getByRole('img')).toHaveAttribute('src', /\.webp$/);
+  expect(await card.getByRole('img').evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
   await expect(card.getByRole('switch')).toBeChecked();
   await page.screenshot({ path: testInfo.outputPath('collection-buddyland.png'), fullPage: false });
   for (const width of [320, 390, 768, 1440]) {

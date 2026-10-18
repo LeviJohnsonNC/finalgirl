@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Switch } from '@/components/ui/switch';
-import { FeatureFilm } from '@/types/gameData';
+import { FeatureFilm, getBoxArtThumbnail } from '@/types/gameData';
 import { Skull, MapPin, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useActiveImages } from '@/hooks/useActiveImages';
@@ -17,7 +17,7 @@ interface FilmToggleProps {
 export const FilmToggle = React.forwardRef<HTMLDivElement, FilmToggleProps>(
   ({ film, isOwned, onToggle, disabled = false }, ref) => {
     const { getBoxArt } = useActiveImages();
-    const boxArt = getBoxArt(film);
+    const boxArt = getBoxArtThumbnail(getBoxArt(film));
     const comingSoon = film.killer === 'TBD';
     return (
       <div ref={ref} className={cn('glass-card collection-film', isOwned && 'collection-film-owned')}>
@@ -31,7 +31,7 @@ export const FilmToggle = React.forwardRef<HTMLDivElement, FilmToggleProps>(
         </div>
         <div className="collection-feature">
           {boxArt && <div className="collection-cover">
-            <img src={boxArt} alt={`${film.name} box art`} loading="lazy" decoding="async"
+            <img src={boxArt} alt={`${film.name} box art`} width={288} height={432} loading="lazy" decoding="async"
               onError={event => { event.currentTarget.style.visibility = 'hidden'; }} />
           </div>}
           <div className="collection-pitch">

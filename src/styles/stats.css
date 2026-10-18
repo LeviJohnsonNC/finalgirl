@@ -4,6 +4,7 @@
 /* The archive is one environment. Texture belongs to its surfaces, never to
    the data or the chart labels. All artwork is decorative; every value is live. */
 .stats-page {
+  --archive-label: Arial, Helvetica, sans-serif;
   --archive-paper: #e7e4d8;
   --archive-muted: #a6b2b7;
   --archive-line: #81969b50;
@@ -14,7 +15,7 @@
   padding-top: 12px;
   padding-bottom: 36px;
   color: var(--archive-paper);
-  font-family: 'Courier New', monospace;
+  font-family: var(--archive-label);
 }
 .stats-page .stats-bg-plate {
   z-index: -3;
@@ -23,11 +24,11 @@
 .stats-page .stats-grain-overlay { opacity: .035; animation: none; }
 .stats-page .stats-scanlines { opacity: .12; }
 .stats-page .stats-vignette { background: linear-gradient(90deg, #0005, transparent 18% 82%, #0005); pointer-events: none; }
-.stats-page .rec-indicator { position: absolute; top: 26px; right: 0; font: 10px 'Courier New', monospace; letter-spacing: .16em; color: #dc8178; opacity: .8; }
+.stats-page .rec-indicator { position: absolute; top: 26px; right: 0; font: 12px var(--archive-label); letter-spacing: .16em; color: #dc8178; opacity: .8; }
 .stats-page .rec-dot { width: 5px; height: 5px; animation: none; }
 .stats-page .stats-header { margin-bottom: 30px; }
 .stats-page .stats-header h1 { font: 500 54px/1 'Archive Fell', Georgia, serif; color: #dc2927; letter-spacing: .13em; animation: none; text-shadow: 0 0 24px #b9121788, 0 2px 2px #000; }
-.stats-page .stats-subheader { margin-top: 2px; color: #c7cbc7; font: 10px/1.6 'Courier New', monospace; letter-spacing: .15em; }
+.stats-page .stats-subheader { margin-top: 2px; color: #c7cbc7; font: 12px/1.6 var(--archive-label); letter-spacing: .15em; }
 .stats-scene-note { position: absolute; top: -46px; right: 30%; transform: rotate(-12deg); color: #c0c9c586; font: 600 27px/1 'Archive Hand', cursive; text-align: center; pointer-events: none; }
 .stats-page .stats-content { display: flex; flex-direction: column; gap: 26px; }
 .stats-page .stats-content > * { margin-block: 0; min-width: 0; }
@@ -83,15 +84,15 @@
 .stats-page .winloss-readout { font: 700 29px/1 Georgia, serif; letter-spacing: -.025em; transition: none; }
 .stats-page .winloss-readout-inside { color: #f0ffff; text-shadow: 0 1px 3px #001116, 0 0 7px #001116; }
 .stats-page .winloss-readout-outside { color: #fff2e7; text-shadow: 0 1px 5px #160000; }
-.stats-page .winloss-labels { margin-top: 7px; font: 10px/1.3 'Courier New', monospace; letter-spacing: .1em; }
+.stats-page .winloss-labels { margin-top: 7px; font: 12px/1.3 var(--archive-label); letter-spacing: .1em; }
 .stats-page .winloss-count-value { font: 600 26px/1.2 Georgia, serif; }
-.stats-page .winloss-even-caption { font: 10px 'Courier New', monospace; color: #bac3c2; }
+.stats-page .winloss-even-caption { font: 12px var(--archive-label); color: #bac3c2; }
 .stats-page .record-lower { grid-template-columns: minmax(180px, .9fr) minmax(0, 2fr); gap: 14px; }
 .stats-page .record-lower-solo { grid-template-columns: 1fr; }
 .stats-page .record-run, .stats-page .record-form { padding: 12px 14px; min-width: 0; border: 1px solid #8ea4a33b; border-radius: 3px; background: linear-gradient(135deg, #729b9b09, transparent), #030b0e8c; box-shadow: inset 0 0 0 2px #020709; }
-.stats-page .record-run-label, .stats-page .record-form-label, .stats-page .record-form-hint, .stats-page .record-run-sub { font: 10px/1.5 'Courier New', monospace; letter-spacing: .04em; color: #aebbbf; }
+.stats-page .record-run-label, .stats-page .record-form-label, .stats-page .record-form-hint, .stats-page .record-run-sub { font: 12px/1.5 var(--archive-label); letter-spacing: .04em; color: #aebbbf; }
 .stats-page .record-run-value { font: 500 25px/1.1 'Archive Fell', Georgia, serif; text-transform: uppercase; }
-.stats-page .record-run-sub { font-size: 9px; gap: 4px 12px; margin-top: 5px; }
+.stats-page .record-run-sub { font-size: 11px; gap: 4px 12px; margin-top: 5px; }
 .stats-page .record-form-strip { height: 24px; gap: 3px; padding: 2px; }
 .stats-page .record-form-tick { border-radius: 0; }
 .stats-page .record-form-body { max-width: min(100%, calc(var(--tick-count, 20) * 2rem)); }
@@ -104,21 +105,21 @@
 .stats-page .chart-filter-row { z-index: 2; position: absolute; right: 20px; top: 16px; margin: 0; gap: 8px; }
 .stats-page .chart-header { align-items: flex-start; margin: 0 0 12px; gap: 14px; }
 .stats-page .chart-title { font: 400 18px/1.2 'Archive Fell', Georgia, serif; letter-spacing: .08em; color: #e6e5dc; text-shadow: none; }
-.stats-page .chart-subtitle, .stats-page .chart-filter-label { font: 10px/1.5 'Courier New', monospace; letter-spacing: .05em; color: #a8b6bb; }
+.stats-page .chart-subtitle, .stats-page .chart-filter-label { font: 12px/1.5 var(--archive-label); letter-spacing: .05em; color: #a8b6bb; }
 .stats-page .chart-controls { margin-top: 42px; gap: 10px; }
 .stats-page .time-filter, .stats-page .chart-toggle { padding: 0; border: 1px solid #8c9da945; border-radius: 2px; background: #02090dde; backdrop-filter: none; }
-.stats-page .filter-chip, .stats-page .chart-toggle-btn, .stats-page .chart-view-btn { padding: 4px 10px; min-height: 36px; border-radius: 1px; color: #b8c2c6; font: 10px/1.3 'Courier New', monospace; letter-spacing: .03em; box-shadow: none; }
+.stats-page .filter-chip, .stats-page .chart-toggle-btn, .stats-page .chart-view-btn { padding: 4px 10px; min-height: 36px; border-radius: 1px; color: #b8c2c6; font: 12px/1.3 var(--archive-label); letter-spacing: .03em; box-shadow: none; }
 .stats-page .filter-chip-active, .stats-page .chart-toggle-btn-active { color: #faf1dc; background: #525e5e42; box-shadow: inset 0 -1px #c4b494; }
 .stats-page .chart-view-btn { border-color: #8c9da945; }
 .stats-page .chart-legend { margin: -36px 0 20px; gap: 22px; }
-.stats-page .chart-legend-item { font: 10px 'Courier New', monospace; letter-spacing: .06em; color: #d2d9d9; }
-.stats-page .chart-container .recharts-text { font-family: 'Courier New', monospace; font-size: 10px; fill: #b6c2c4; text-shadow: none; }
+.stats-page .chart-legend-item { font: 12px var(--archive-label); letter-spacing: .06em; color: #d2d9d9; }
+.stats-page .chart-container .recharts-text { font-family: var(--archive-label); font-size: 11px; fill: #b6c2c4; text-shadow: none; }
 .stats-page .chart-container .recharts-cartesian-grid line { opacity: 1; stroke: #96a7a71c; }
 .stats-page .chart-container .recharts-bar-rectangle path { filter: none; }
 .stats-page .chart-plot { height: 190px; }
 .stats-page .chart-tooltip { border: 1px solid #8b9fa36b; background: #030b0ff7; color: #dce4e3; }
 .stats-page .chart-table-scroll { max-height: 222px; overflow: auto; background: #02090de6; }
-.stats-page .chart-table { font: 12px/1.5 'Courier New', monospace; }
+.stats-page .chart-table { font: 12px/1.5 var(--archive-label); }
 .stats-page .chart-table thead th { position: sticky; top: 0; background: #0a151a; }
 
 /* Eight case stills, in a single grid. */
@@ -130,9 +131,9 @@
 .stats-page .narrative-badge > .relative { min-height: 116px; }
 .stats-page .narrative-badge-danger { border-color: #b77f6c7d; }
 .stats-page .narrative-badge-success { border-color: #66b0b170; }
-.stats-page .narrative-label { margin: 0 0 35px; font: 10px/1.3 'Courier New', monospace; letter-spacing: .1em; color: #eef0e9; text-shadow: 0 1px 4px #000; }
+.stats-page .narrative-label { margin: 0 0 35px; font: 12px/1.3 var(--archive-label); letter-spacing: .1em; color: #eef0e9; text-shadow: 0 1px 4px #000; }
 .stats-page .narrative-value { font: 500 19px/1.1 'Archive Fell', Georgia, serif; color: #f1eee3; overflow-wrap: anywhere; }
-.stats-page .narrative-subtext, .stats-page .narrative-unlock { font: 11px/1.3 'Courier New', monospace; color: #c3cdce; margin-top: 7px; }
+.stats-page .narrative-subtext, .stats-page .narrative-unlock { font: 13px/1.3 var(--archive-label); color: #c3cdce; margin-top: 7px; }
 .stats-page .narrative-badge-locked { opacity: 1; border-color: #81969b40; background: linear-gradient(140deg, #273d434a, transparent), #040e12cf; }
 .stats-page .narrative-badge-locked .narrative-label { color: #a4b2b5; }
 
@@ -140,15 +141,15 @@
 .stats-breakdown-layout { display: grid; grid-template-columns: minmax(0, 1fr) 165px; gap: 30px; align-items: center; }
 .stats-page .breakdown-section { padding: 0; background: #02090de8; border-color: var(--archive-line); border-radius: 3px; backdrop-filter: none; box-shadow: 0 4px 12px #0005; min-width: 0; }
 .stats-page .breakdown-tabs-list { display: flex; border: 0; border-radius: 0; border-bottom: 1px solid #81969b50; padding: 0; margin: 0; height: 42px; background: linear-gradient(180deg, #1a272e, #060d12); }
-.stats-page .breakdown-tab { font: 11px 'Courier New', monospace; letter-spacing: .12em; text-transform: uppercase; min-height: 42px; border-radius: 0; color: #aebbc1; box-shadow: none; }
+.stats-page .breakdown-tab { font: 13px var(--archive-label); letter-spacing: .12em; text-transform: uppercase; min-height: 42px; border-radius: 0; color: #aebbc1; box-shadow: none; }
 .stats-page .breakdown-tab + .breakdown-tab { border-left: 1px solid #000c; }
 .stats-page .breakdown-tab[data-state=active] { background: linear-gradient(#5c0c107d, #18060a); color: #f8ece0; box-shadow: inset 0 2px #9b3435; }
 .stats-page .breakdown-content { margin: 0; }
 .breakdown-scroll { max-height: 388px; overflow: auto; scrollbar-gutter: stable; border-radius: 0 0 3px 3px; }
-.stats-page .breakdown-table-header th { position: sticky; top: 0; z-index: 1; background: #091218; padding: 12px 14px; font: 9px/1.3 'Courier New', monospace; letter-spacing: .09em; color: #b4c0c1; box-shadow: 0 1px #84999b30; }
-.stats-page .breakdown-section td { padding: 7px 14px; font: 12px/1.25 'Courier New', monospace; }
+.stats-page .breakdown-table-header th { position: sticky; top: 0; z-index: 1; background: #091218; padding: 12px 14px; font: 11px/1.3 var(--archive-label); letter-spacing: .09em; color: #b4c0c1; box-shadow: 0 1px #84999b30; }
+.stats-page .breakdown-section td { padding: 7px 14px; font: 12px/1.25 var(--archive-label); }
 .stats-page .breakdown-table-row { height: 39px; border-color: #8ea0a21f; }
-.stats-page .breakdown-name { font: 12px/1.3 'Courier New', monospace; color: #dddcd2; }
+.stats-page .breakdown-name { font: 12px/1.3 var(--archive-label); color: #dddcd2; }
 .stats-page .breakdown-avatar { width: 25px; height: 25px; }
 .stats-page .breakdown-rate-meter { width: 95px; background: #4d69694a; height: 6px; }
 .stats-page .breakdown-rate-fill-win { background: #19d4df; }
@@ -167,46 +168,46 @@
 .stats-page .session-card-wide { grid-column: auto; }
 .stats-page .session-card > * + * { margin-top: 10px; }
 .stats-page .session-card-title { font: 400 16px/1.2 'Archive Fell', Georgia, serif; letter-spacing: .02em; }
-.stats-page .session-card-sub { font: 9px/1.5 'Courier New', monospace; letter-spacing: .03em; color: #a7b3b7; }
+.stats-page .session-card-sub { font: 11px/1.5 var(--archive-label); letter-spacing: .03em; color: #a7b3b7; }
 .stats-page .session-card .text-4xl { font: 26px/1.4 'Archive Fell', Georgia, serif; color: #46c6cf; }
-.stats-page .session-card .type-caption, .stats-page .session-card .type-body-sm { font: 10px/1.55 'Courier New', monospace; color: #a7b3b7; }
+.stats-page .session-card .type-caption, .stats-page .session-card .type-body-sm { font: 12px/1.55 var(--archive-label); color: #a7b3b7; }
 .stats-page .session-card dl.type-body-sm { font-size: 11px; }
 .stats-page .horror-chart { height: 111px; gap: 5px; }
-.stats-page .horror-count, .stats-page .horror-level, .stats-page .horror-scale { font: 9px/1.3 'Courier New', monospace; color: #a9b8bc; }
+.stats-page .horror-count, .stats-page .horror-level, .stats-page .horror-scale { font: 11px/1.3 var(--archive-label); color: #a9b8bc; }
 .stats-page .horror-bar { min-height: 0; border-radius: 0; background: linear-gradient(180deg, #f24f42, #a91e20); box-shadow: none; }
 .stats-page .horror-scale { margin-top: 6px; }
-.stats-scroll-list, .stats-page .chart-table-scroll, .stats-page .breakdown-scroll { scrollbar-color: #7b939875 #02090b; scrollbar-width: thin; overscroll-behavior: auto; }
+.stats-scroll-list, .stats-page .chart-table-scroll, .stats-page .breakdown-scroll { scrollbar-color: #7b939875 #02090b; scrollbar-width: thin; overscroll-behavior: contain; }
 .stats-page .weapon-list { max-height: 190px; overflow-y: auto; scrollbar-gutter: stable; padding: 2px 3px 2px 0; grid-template-columns: minmax(0, 1.25fr) minmax(24px, .9fr) auto; row-gap: 13px; }
-.stats-page .weapon-name { font: 10px/1.3 'Courier New', monospace; white-space: normal; overflow-wrap: anywhere; }
-.stats-page .weapon-count { font: 10px/1.3 'Courier New', monospace; gap: 4px; }
-.stats-page .weapon-wins { font: 9px 'Courier New', monospace; color: #a1b0b3; }
+.stats-page .weapon-name { font: 12px/1.3 var(--archive-label); white-space: normal; overflow-wrap: anywhere; }
+.stats-page .weapon-count { font: 12px/1.3 var(--archive-label); gap: 4px; }
+.stats-page .weapon-wins { font: 11px var(--archive-label); color: #a1b0b3; }
 .stats-page .weapon-wins::before { margin-right: 3px; }
 .stats-page .weapon-bar { background: #bcc346b3; }
 .stats-page .session-list { max-height: 245px; overflow-y: auto; scrollbar-gutter: stable; padding-right: 3px; }
 .stats-page .session-row { grid-template-columns: 30px minmax(0, 1fr); align-items: start; gap: 3px 6px; min-height: 47px; padding: 8px 0; margin: 0; }
-.stats-page .session-cast { display: block; font: 10px/1.4 'Courier New', monospace; overflow-wrap: anywhere; }
+.stats-page .session-cast { display: block; font: 12px/1.4 var(--archive-label); overflow-wrap: anywhere; }
 .stats-page .session-vs { padding-inline: 5px; font: inherit; color: #8f9ea4; }
-.stats-page .session-outcome { font: 9px/1.5 'Courier New', monospace; }
-.stats-page .session-place { grid-column: 2; font: 9px/1.3 'Courier New', monospace; white-space: normal; overflow-wrap: anywhere; color: #9babb2; }
-.stats-page .session-meta { grid-column: 2; justify-content: space-between; font: 9px/1.3 'Courier New', monospace; color: #9babb2; }
+.stats-page .session-outcome { font: 11px/1.5 var(--archive-label); }
+.stats-page .session-place { grid-column: 2; font: 11px/1.3 var(--archive-label); white-space: normal; overflow-wrap: anywhere; color: #9babb2; }
+.stats-page .session-meta { grid-column: 2; justify-content: space-between; font: 11px/1.3 var(--archive-label); color: #9babb2; }
 .stats-page .archetype-badge { position: relative; padding: 18px; border-radius: 3px; border-color: #a2aa9163; background: linear-gradient(150deg, #8897650a, transparent), #030b0ee8; backdrop-filter: none; min-width: 0; box-shadow: inset 0 0 0 3px #020709; }
 .stats-page .archetype-badge::before { content: ''; position: absolute; width: 22px; height: 72px; left: -10px; top: 30px; background: #bdab7e4d; transform: rotate(4deg); border-block: 1px dotted #d1b78d66; pointer-events: none; }
 .stats-page .archetype-content { gap: 15px; }
 .stats-page .archetype-eyebrow { margin-bottom: 16px; font: 400 18px/1.2 'Archive Fell', Georgia, serif; color: #e5e5da; letter-spacing: .1em; text-transform: uppercase; }
 .stats-page .archetype-name { font: 400 29px/1.15 'Archive Fell', Georgia, serif; letter-spacing: .02em; }
-.stats-page .archetype-margin { font: 9px/1.5 'Courier New', monospace; color: #abb8b9; margin-top: 5px; }
+.stats-page .archetype-margin { font: 11px/1.5 var(--archive-label); color: #abb8b9; margin-top: 5px; }
 .stats-page .archetype-profile { gap: 10px; }
-.stats-page .archetype-reason { font: 11px/1.65 'Courier New', monospace; color: #c5ccca; letter-spacing: 0; }
-.archetype-more summary { padding-block: 6px; cursor: pointer; color: #d6cead; font: 10px/1.5 'Courier New', monospace; text-decoration: underline; text-underline-offset: 4px; }
+.stats-page .archetype-reason { font: 13px/1.65 var(--archive-label); color: #c5ccca; letter-spacing: 0; }
+.archetype-more summary { padding-block: 6px; cursor: pointer; color: #d6cead; font: 12px/1.5 var(--archive-label); text-decoration: underline; text-underline-offset: 4px; }
 .archetype-more[open] summary { margin-bottom: 10px; }
 .archetype-more p + p { margin-top: 10px; }
 .stats-page .archetype-scores { padding-top: 13px; }
-.stats-page .archetype-scores-label { font: 9px/1.5 'Courier New', monospace; color: #9eafb2; }
+.stats-page .archetype-scores-label { font: 11px/1.5 var(--archive-label); color: #9eafb2; }
 .stats-page .archetype-score-list { grid-template-columns: minmax(0, 1.15fr) minmax(25px, 1fr) auto; gap: 12px 9px; justify-content: stretch; }
-.stats-page .archetype-score-name { font: 11px/1.3 'Courier New', monospace; }
-.stats-page .archetype-score-blurb { display: block; margin-top: 4px; font: 9px/1.4 'Courier New', monospace; color: #a3afb2; }
-.stats-page .archetype-score-value { font: 11px/1.4 'Courier New', monospace; color: #c4cecc; }
-.stats-page .archetype-score-support { font: 9px 'Courier New', monospace; color: #a1afb2; }
+.stats-page .archetype-score-name { font: 13px/1.3 var(--archive-label); }
+.stats-page .archetype-score-blurb { display: block; margin-top: 4px; font: 11px/1.4 var(--archive-label); color: #a3afb2; }
+.stats-page .archetype-score-value { font: 13px/1.4 var(--archive-label); color: #c4cecc; }
+.stats-page .archetype-score-support { font: 11px var(--archive-label); color: #a1afb2; }
 .stats-page .archetype-score-meter { height: 6px; }
 
 @media (min-width: 1500px) { .stats-page .stats-bg-plate { background-size: auto, 100vw auto; } }
@@ -246,8 +247,8 @@
   .stats-page .record-lower { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .stats-page .record-run { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 10px; }
   .stats-page .record-run-value { grid-column: 2; grid-row: 1 / 3; font-size: 24px; }
-  .stats-page .record-run-sub { margin: 0; font-size: 9px; }
-  .stats-page .record-run-label { font-size: 10px; }
+  .stats-page .record-run-sub { margin: 0; font-size: 11px; }
+  .stats-page .record-run-label { font-size: 11px; }
   .stats-page .record-form { padding: 12px; }
   .stats-page .record-form-hint { display: inline; font-size: 8px; }
   .stats-page .record-form-strip { gap: 2px; height: 23px; }
@@ -267,9 +268,9 @@
   .stats-page .narrative-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .stats-page .narrative-badge { min-height: 147px; padding: 12px; }
   .stats-page .narrative-badge > .relative { min-height: 121px; }
-  .stats-page .narrative-label { font-size: 9px; }
+  .stats-page .narrative-label { font-size: 11px; }
   .stats-page .narrative-value { font-size: 18px; }
-  .stats-page .narrative-subtext { font-size: 10px; }
+  .stats-page .narrative-subtext { font-size: 11px; }
   .stats-breakdown-layout, .stats-bottom-grid { grid-template-columns: minmax(0, 1fr); gap: 22px; }
   .stats-page .breakdown-table-header th { padding: 11px 9px; }
   .stats-page .breakdown-section td { padding: 8px 9px; }
@@ -281,7 +282,7 @@
   .stats-page .session-detail-grid { grid-template-columns: 1fr; gap: 12px; }
   .stats-page .session-card { padding: 16px; }
   .stats-page .session-card-title { font-size: 19px; }
-  .stats-page .session-card-sub { font-size: 10px; }
+  .stats-page .session-card-sub { font-size: 11px; }
   .stats-page .session-card .type-caption { font-size: 11px; }
   .stats-page .session-card .type-body-sm { font-size: 12px; }
   .stats-page .horror-chart { height: 130px; }
@@ -289,13 +290,13 @@
   .stats-page .weapon-list { max-height: 220px; row-gap: 15px; }
   .stats-page .session-row { min-height: 61px; gap: 4px 10px; grid-template-columns: 35px minmax(0, 1fr); }
   .stats-page .session-cast { font-size: 12px; }
-  .stats-page .session-place, .stats-page .session-meta, .stats-page .session-outcome { font-size: 10px; }
+  .stats-page .session-place, .stats-page .session-meta, .stats-page .session-outcome { font-size: 11px; }
   .stats-page .session-list { max-height: 330px; }
   .stats-page .archetype-badge { padding: 20px; }
   .stats-page .archetype-reason { font-size: 12px; }
   .stats-page .archetype-score-list { gap: 16px 12px; }
   .stats-page .archetype-score-name { font-size: 12px; }
-  .stats-page .archetype-margin, .stats-page .archetype-scores-label { font-size: 10px; }
+  .stats-page .archetype-margin, .stats-page .archetype-scores-label { font-size: 11px; }
   .archetype-more summary { padding-block: 12px; font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -304,20 +305,20 @@
 
 /* Stats keeps the existing navigation actions, but places them above the
    evidence rather than floating a news broadcast over the charts. */
-body:has(.stats-page) main > .stats-page .stats-bg-plate { position: absolute; top: -128px; bottom: -110px; left: calc(50% - 50vw); right: auto; width: 100vw; background: linear-gradient(#02090ba6, #02090b9c), url('../assets/stats/archive-woods.webp') center / cover no-repeat, #03090b; }
+body:has(.stats-page) main > .stats-page .stats-bg-plate { position: absolute; top: -128px; bottom: 0; left: calc(50% - 50vw); right: auto; width: 100vw; background: linear-gradient(#02090ba6, #02090b9c), url('../assets/stats/archive-woods.webp') center / cover no-repeat, #03090b; }
 body:has(.stats-page) .fixed:has(.news-ticker) { display: none; }
 body:has(.stats-page) footer { position: absolute; top: 38px; bottom: auto; left: auto; right: 38px; width: auto; padding: 0; background: none; border: 0; backdrop-filter: none; }
 body:has(.stats-page) footer > .container { width: auto; max-width: none; padding: 0; gap: 14px; }
 body:has(.stats-page) footer .container > div.type-caption { display: none; }
 body:has(.stats-page) footer .container > .flex { gap: 7px; }
-body:has(.stats-page) footer button { color: #bac6c9; font: 10px/1.4 'Courier New', monospace; letter-spacing: .035em; }
+body:has(.stats-page) footer button { color: #bac6c9; font: 12px/1.4 var(--archive-label); letter-spacing: .035em; }
 body:has(.stats-page) footer button:hover { color: #f5ead9; }
 body:has(.stats-page) footer button[aria-label=STATS] { color: #f4d7cf; box-shadow: inset 0 -1px #b45a50; }
 body:has(.stats-page) footer .container > div.flex > :not(button) { display: none; }
-.stats-legal { position: relative; z-index: 1; margin: 28px auto 0; max-width: 720px; align-self: center; padding: 10px 8px 0; text-align: center; font: 9px/1.6 'Courier New', monospace; color: #859396; }
+.stats-legal { position: relative; z-index: 1; margin: 28px auto 0; max-width: 720px; align-self: center; padding: 10px 8px 0; text-align: center; font: 11px/1.6 var(--archive-label); color: #859396; }
 @media (max-width: 1099px) and (min-width: 768px) {
   body:has(.stats-page) footer { right: 20px; top: 22px; }
-  body:has(.stats-page) footer button { padding-inline: 5px; font-size: 9px; }
+  body:has(.stats-page) footer button { padding-inline: 5px; font-size: 11px; }
   body:has(.stats-page) footer > .container { gap: 4px; }
   body:has(.stats-page) footer .container > .flex { gap: 0; }
 }
@@ -329,33 +330,30 @@ body:has(.stats-page) footer .container > div.flex > :not(button) { display: non
   body:has(.stats-page) footer button svg { width: 15px; height: 15px; }
   body:has(.stats-page) footer button span { display: none; }
   body:has(.stats-page) footer .container > .flex { gap: 6px; }
-  body:has(.stats-page) main > .stats-page .stats-bg-plate { top: -154px; bottom: -40px; }
+  body:has(.stats-page) main > .stats-page .stats-bg-plate { top: -154px; bottom: 0; }
   .stats-scene-note { display: none; }
-  .stats-page .stats-subheader { font-size: 9px; }
+  .stats-page .stats-subheader { font-size: 11px; }
 }
 @media (min-width: 768px) {
   .footage-layout { padding-left: 90px; }
   .footage-case-note { width: 79px; padding-inline: 8px; }
-  .stats-page .chart-plot { width: calc(100% - 170px); }
-  .stats-page .trends-chart::after { content: 'Same lake.\A Different stories.'; white-space: pre; position: absolute; right: 24px; bottom: 33px; font: 600 27px/1.05 'Archive Hand', cursive; color: #d9e4dfab; transform: rotate(-9deg); text-align: center; pointer-events: none; }
-  .stats-page .trends-chart:has(.chart-table)::after { display: none; }
+  .stats-page .chart-plot { width: 100%; }
   .stats-page .narrative-label { font-size: 11px; }
   .stats-page .breakdown-name, .stats-page .breakdown-section td { font-size: 13px; }
-  .stats-page .breakdown-table-header th { font-size: 10px; }
+  .stats-page .breakdown-table-header th { font-size: 11px; }
   .stats-page .record-run-label, .stats-page .record-form-label, .stats-page .record-form-hint { font-size: 11px; }
-  .stats-page .record-run-sub { font-size: 10px; }
-  .stats-page .session-card-sub, .stats-page .session-card .type-caption { font-size: 10px; }
+  .stats-page .record-run-sub { font-size: 11px; }
+  .stats-page .session-card-sub, .stats-page .session-card .type-caption { font-size: 11px; }
   .stats-page .session-card .type-body-sm { font-size: 11px; }
   .stats-page .weapon-name, .stats-page .weapon-count, .stats-page .session-cast { font-size: 11px; }
-  .stats-page .session-outcome, .stats-page .session-meta, .stats-page .session-place { font-size: 10px; }
+  .stats-page .session-outcome, .stats-page .session-meta, .stats-page .session-place { font-size: 11px; }
   .stats-page .archetype-reason { font-size: 12px; }
-  .stats-page .archetype-margin, .stats-page .archetype-scores-label, .archetype-more summary { font-size: 10px; }
+  .stats-page .archetype-margin, .stats-page .archetype-scores-label, .archetype-more summary { font-size: 11px; }
 }
 @media (min-width: 768px) and (max-width: 1099px) {
   .footage-layout { padding-left: 74px; }
   .footage-case-note { width: 62px; }
-  .stats-page .chart-plot { width: calc(100% - 125px); }
-  .stats-page .trends-chart::after { font-size: 23px; right: 14px; }
+  .stats-page .chart-plot { width: 100%; }
 }
 @media (max-width: 767px) {
   .stats-page .trends-chart { background-image: linear-gradient(90deg, #020a0de8, #020a0d99), url('../assets/stats/archive-woods.webp'); }
@@ -377,9 +375,19 @@ body:has(.stats-page) .stats-bg-plate::before { content: ''; position: absolute;
 .stats-page:has(.stats-highlights-sparse) .stats-breakdown-layout { grid-template-columns: minmax(0, 1fr); }
 .stats-page:has(.stats-highlights-sparse) .breakdown-photo { display: none; }
 
-.stats-page .chart-coverage { margin: 0 0 12px; color: #b2c0c2; font: 10px/1.5 'Courier New', monospace; }
-.stats-page .chart-empty { padding: 38px 18px; color: #b2c0c2; font: 12px/1.6 'Courier New', monospace; }
+.stats-page .chart-coverage { margin: 0 0 12px; color: #b2c0c2; font: 12px/1.5 var(--archive-label); }
+.stats-page .chart-empty { padding: 38px 18px; color: #b2c0c2; font: 12px/1.6 var(--archive-label); }
 @media (min-width: 768px) and (max-width: 1099px) {
   .stats-bottom-grid { grid-template-columns: minmax(0, 1fr); }
   .stats-page .session-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* End at the content edge; decorative layers must never lengthen the page. */
+html:has(.stats-page), body:has(.stats-page) { overscroll-behavior-y: none; }
+body:has(.stats-page) main { padding-bottom: 24px; }
+.stats-page { min-height: 0; padding-bottom: 0; }
+.stats-page button, .stats-page input, .stats-page select,
+.stats-page .type-caption, .stats-page .type-label, .stats-page .type-body-sm { font-family: var(--archive-label); }
+.stats-page .stats-content { font-variant-numeric: tabular-nums; }
+
+.stats-page .stats-bg-plate { overflow: clip; }

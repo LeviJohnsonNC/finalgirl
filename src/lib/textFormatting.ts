@@ -6,7 +6,7 @@ import React from 'react';
  */
 export const renderFormattedText = (text: string): React.ReactNode[] => {
   const parts: React.ReactNode[] = [];
-  let remaining = text;
+  let remaining = text.replace(/\u2014/g, ', ');
   let key = 0;
 
   while (remaining.length > 0) {
@@ -39,7 +39,7 @@ export const renderFormattedText = (text: string): React.ReactNode[] => {
 // Used inside .story-text wrappers where CSS overrides the default colors.
 export const renderFormattedInline = (text: string): React.ReactNode[] => {
   const parts: React.ReactNode[] = [];
-  let remaining = text;
+  let remaining = text.replace(/\u2014/g, ', ');
   let key = 0;
 
   while (remaining.length > 0) {
