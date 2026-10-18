@@ -119,6 +119,86 @@ test('projection controls identify the game and open its exact case file', async
   expect(archive.calls).toEqual([]);
 });
 
+test('compact captions keep a long matchup, its case link, and touch controls readable', async ({ page, archive }, testInfo) => {
+  archive.history = [{ id: gameId, timestamp: Date.UTC(2026, 8, 18, 18), outcome: 'won', killer: 'The Tormentor',
+    location: 'Falconwood', final_girl: 'Janelle', scene_image_url: 'http://127.0.0.1:4173/theater-a.png', intro_story: 'The Falconwood case.' }];
+  await archive.install(page);
+  await page.route('**/theater-a.png', route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/camp-happy-trails.png') }));
+  await page.goto('/');
+  const title = page.getByRole('heading', { name: 'Janelle vs. The Tormentor', exact: true });
+  await expect(title).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  await expect(page.locator('.theater-program time')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Open case file for Janelle vs. The Tormentor', exact: true })).toBeVisible();
+  for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 640, height: 900 }, { width: 1440, height: 900 }]) {
+    await page.setViewportSize(viewport);
+    await expect(page.locator('.theater-screen-wrap')).toHaveAttribute('data-composition', viewport.width < 640 ? 'portrait' : 'landscape');
+    const caption = (await page.locator('.theater-caption').boundingBox())!;
+    const controls = (await page.getByRole('group', { name: 'Projection controls' }).boundingBox())!;
+    expect(caption.x).toBeGreaterThanOrEqual(0);
+    expect(caption.x + caption.width).toBeLessThanOrEqual(viewport.width);
+    expect(controls.y >= caption.y + caption.height - 1 || controls.x >= caption.x + caption.width - 1).toBe(true);
+    for (const button of await page.locator('.theater-transport button').all()) {
+      const box = (await button.boundingBox())!;
+      expect(box.width).toBeGreaterThanOrEqual(44);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
+    }
+    await expect(title).toHaveText('Janelle vs. The Tormentor');
+    await page.screenshot({ path: testInfo.outputPath(`compact-caption-${viewport.width}.png`), fullPage: true });
+  }
+  await page.getByRole('button', { name: 'Open case file for Janelle vs. The Tormentor', exact: true }).click();
+  await expect(page.locator('.story-page-content').getByText('The Falconwood case.')).toBeVisible();
+  await expect(page.locator('.story-date')).toContainText('September 18, 2026');
+  expect(archive.calls).toEqual([]);
+});
+
+test('projector flutter stays subtle and freezes for pause and reduced motion', async ({ page, archive }) => {
+  archive.history = [{ id: gameId, timestamp: 1, outcome: 'won', killer: 'Hans', location: 'Camp Happy Trails',
+    final_girl: 'Laurie', scene_image_url: 'http://127.0.0.1:4173/theater-a.png' }];
+  await archive.install(page);
+  await page.route('**/theater-a.png', route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/camp-happy-trails.png') }));
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Laurie vs. Hans' })).toBeVisible();
+  await page.mouse.move(0, 0);
+  const screen = page.locator('.theater-screen');
+  await expect(screen).toHaveAttribute('data-projecting', 'true');
+  const sample = () => screen.evaluate(async el => {
+    const values: number[] = [];
+    for (let i = 0; i < 30; i++) {
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+      values.push(Number(getComputedStyle(el, '::before').opacity));
+    }
+    return values;
+  });
+  const moving = await sample();
+  expect(Math.min(...moving)).toBeGreaterThanOrEqual(.0059);
+  expect(Math.max(...moving)).toBeLessThanOrEqual(.0181);
+  expect(Math.max(...moving) - Math.min(...moving)).toBeGreaterThan(.0005);
+  await page.getByRole('button', { name: 'Pause slideshow' }).click();
+  await expect(screen).toHaveAttribute('data-projecting', 'false');
+  const still = await sample();
+  expect(Math.max(...still) - Math.min(...still)).toBeLessThan(.00001);
+  await page.getByRole('button', { name: 'Play slideshow' }).click();
+  // Play must resume while the control still holds focus, including after a tap.
+  await expect(screen).toHaveAttribute('data-projecting', 'true');
+  await page.getByRole('button', { name: 'Account', exact: true }).focus();
+  await page.mouse.move(0, 0);
+  await expect(screen).toHaveAttribute('data-projecting', 'true');
+  await page.getByRole('button', { name: 'Open case file for Laurie vs. Hans' }).focus();
+  await expect(screen).toHaveAttribute('data-projecting', 'false');
+  await page.getByRole('button', { name: 'Account', exact: true }).focus();
+  await expect(screen).toHaveAttribute('data-projecting', 'true');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(screen).toHaveAttribute('data-projecting', 'false');
+  expect(await screen.evaluate(el => getComputedStyle(el, '::before').animationName)).toBe('none');
+  expect(await screen.evaluate(el => getComputedStyle(el, '::before').opacity)).toBe('0');
+  await expect(page.getByRole('button', { name: 'Automatic playback off for reduced motion' })).toBeDisabled();
+  await expect(page.locator('.theater-scenery')).toHaveCSS('animation-name', 'none');
+  expect(archive.calls).toEqual([]);
+});
+
 test('broken artwork falls back to the same game’s poster and an exhausted reel can retry', async ({ page, archive }) => {
   archive.history = [{ id: gameId, timestamp: 1, outcome: 'won', killer: 'Hans', location: 'Camp Happy Trails', final_girl: 'Laurie', scene_image_url: 'http://127.0.0.1:4173/broken-scene.png', poster_image_url: 'http://127.0.0.1:4173/recoverable-poster.png' }];
   await archive.install(page);
@@ -158,6 +238,9 @@ test('an unfinished game owns the main screening while past cases remain availab
   await expect(page.getByRole('heading', { name: 'Laurie vs. Hans' })).toBeVisible();
   await expect(page.getByText('Round 4 · 3 saved · 2 killed')).toBeVisible();
   await expect(page.getByRole('button', { name: 'RESUME GAME', exact: true })).toHaveCount(1);
+  await expect(page.getByText('Laurie vs. Hans', { exact: true })).toHaveCount(1);
+  await page.getByRole('button', { name: 'Pause projection' }).click();
+  await expect(page.locator('.theater-screen')).toHaveAttribute('data-projecting', 'false');
   await page.screenshot({ path: testInfo.outputPath('theater-resume.png'), fullPage: true });
   await page.getByRole('button', { name: 'Past screenings' }).click();
   await expect(page.getByRole('heading', { name: 'Rena vs. Billy the Bear' })).toBeVisible();
