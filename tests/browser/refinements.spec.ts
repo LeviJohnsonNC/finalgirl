@@ -42,6 +42,7 @@ test('scrapbook recovers missing and broken photographs, saves them, and hides r
   archive.releaseImage?.();
   await expect(page.getByRole('button', { name: 'Generate scene picture' })).toHaveCount(0);
   await expect.poll(() => row.scene_image_url).toBe('https://example.test/poster.png');
+  await expect.poll(() => page.getByRole('img', { name: 'Scene evidence', exact: true }).evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
   await page.screenshot({ path: info.outputPath('scrapbook-recovered.png') });
 });
 
