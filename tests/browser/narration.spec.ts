@@ -100,6 +100,7 @@ test('sacrificial wins carry reviewed fate and mission into story and poster wit
   await archive.install(page, { draft: { ...draft, selection: selected, phase: 'ending', result, visualBible: 'Nancy and Slayer retain their established identities.', formData: { ...formData, finalGirlHealth: 0 } } });
   await resume(page);
   await expect(page.getByText('Victory came at a terrible cost.')).toBeVisible();
+  await expect.poll(() => archive.generationRequests.some(r => r.name === 'generate-ending')).toBe(true);
   const ending = archive.generationRequests.find(r => r.name === 'generate-ending')!;
   expect(ending.body.finalGirlHealth).toBe(0);
   expect(ending.body.mission).toMatchObject({ name: 'Save Your Father' });
@@ -125,6 +126,7 @@ test('blank health is unknown, explicit zero remains zero across reload and gene
   await expect(page.getByLabel('Final Girl Health', { exact: true })).toHaveValue('0');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(page.getByText('Victory came at a terrible cost.')).toBeVisible();
+  await expect.poll(() => archive.generationRequests.some(r => r.name === 'generate-ending')).toBe(true);
   const ending = archive.generationRequests.find(r => r.name === 'generate-ending')!;
   expect(ending.body.finalGirlHealth).toBe(0);
   expect(ending.body).not.toHaveProperty('killerHealth');
