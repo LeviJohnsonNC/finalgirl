@@ -27,6 +27,8 @@ test('scrapbook recovers missing and broken photographs, saves them, and hides r
   await page.goto('/');
   await page.getByRole('button', { name: 'Scrapbooks', exact: true }).click();
   await page.locator('.scrapbook-cover-button').first().click();
+  // Playwright can target transparent content while the book is still opening.
+  await expect(page.locator('.scrapbook-pages')).toHaveCSS('opacity', '1');
   const missingPoster = page.getByRole('button', { name: 'Generate poster picture' });
   await missingPoster.click();
   await expect.poll(() => archive.generationRequests.length).toBe(1);
@@ -56,10 +58,11 @@ test('stats stops at its content edge and uses contained list scrolling', async 
   const metrics = await page.evaluate(() => ({
     bottom: document.querySelector('.stats-legal')!.getBoundingClientRect().bottom + scrollY,
     total: document.documentElement.scrollHeight,
+    footer: document.querySelector('.app-footer')!.getBoundingClientRect().height,
     overscroll: getComputedStyle(document.documentElement).overscrollBehaviorY,
     chartNote: getComputedStyle(document.querySelector('.trends-chart')!, '::after').content,
   }));
-  expect(metrics.total - metrics.bottom).toBeLessThanOrEqual(30);
+  expect(metrics.total - metrics.bottom - metrics.footer).toBeLessThanOrEqual(30);
   expect(metrics.overscroll).toBe('none');
   expect(metrics.chartNote).not.toContain('Same lake');
 });

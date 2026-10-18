@@ -49,7 +49,7 @@ export const TheaterReel = ({ games, loading, historyError, onRetryHistory, onOp
           </div>
           {active && <p className="theater-progress-line">{activeScreeningStatus(active)}</p>}
         </div>
-        <p className={`theater-verdict ${active ? 'theater-in-progress' : current?.outcome === 'won' ? 'theater-survived' : 'theater-lost'} ${verdict.length > 8 ? 'theater-verdict-long' : ''}`}>{verdict}</p>
+        <p className={`theater-verdict ${active ? 'theater-in-progress' : current?.outcome === 'won' ? 'theater-survived' : 'theater-lost'} ${verdict.length > 8 ? 'theater-verdict-long' : ''}${verdict === 'Lost to the night' ? ' theater-verdict--night' : ''}`} aria-label={verdict}>{verdict === 'Lost to the night' ? <><span>Lost to the</span>{' '}<span>night</span></> : verdict}</p>
       </> : <div className="theater-empty-program">
         <p className="theater-program-kicker">{warming ? 'Preparing the feature' : unavailable ? 'The archive is safe' : 'Tonight at Starlight'}</p>
         <p className="theater-program-line">{warming ? 'Bringing your stories to the screen.' : unavailable ? 'Stills unavailable. Your case files are safe.' : games.length ? 'Your case files are ready. New scenes will appear here.' : 'The screen is waiting for your first story.'}</p>

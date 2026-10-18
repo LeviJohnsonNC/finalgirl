@@ -227,7 +227,7 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
               <span>Press Play</span>
             </button>
           </div>
-          {!isComplete && <p id="casting-play-help" className="casting-console-help">Cast your feature to begin</p>}
+          <p id="casting-play-help" className="casting-console-help" aria-hidden={isComplete ? true : undefined}>{!isComplete && 'Cast your feature to begin'}</p>
         </section>
       </div>
 
