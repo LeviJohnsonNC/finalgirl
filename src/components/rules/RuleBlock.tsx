@@ -139,7 +139,7 @@ export const RuleBlock = ({ block, glossary, onJumpTo }: RuleBlockProps) => {
             <thead>
               <tr>
                 {block.headers.map((h, i) => (
-                  <th key={i} className="type-caption uppercase">
+                  <th key={i} scope="col" className="type-caption uppercase">
                     {h}
                   </th>
                 ))}

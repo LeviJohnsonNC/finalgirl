@@ -23,11 +23,11 @@ export const RuleSection = ({
     .filter((s): s is RuleSectionType => !!s);
 
   return (
-    <section id={section.id} className="scroll-mt-32">
+    <section id={section.id} tabIndex={-1} className="scroll-mt-32">
       {showTitle && (
-        <h3 className="font-title text-lg sm:text-xl text-foreground uppercase tracking-wide mb-3">
+        <h2 className="rule-section-heading font-title text-lg sm:text-xl text-foreground uppercase tracking-wide mb-3">
           {section.title}
-        </h3>
+        </h2>
       )}
       <div className="space-y-3">
         {section.body.map((block, i) => (

@@ -121,6 +121,12 @@
     --font-title: 'Bebas Neue', sans-serif;
     --font-horror: 'Creepster', cursive;
     --font-display: 'Roslindale Display Condensed', 'Times New Roman', serif;
+    --font-rules-title: 'Rulebook Condensed', 'Bebas Neue', sans-serif;
+    --font-rules-body: 'Rulebook Crimson', Georgia, serif;
+    --font-rules-label: 'Courier New', monospace;
+    --rules-ink: 42 20% 88%;
+    --rules-muted: 195 10% 67%;
+    --rules-surface: 195 14% 7%;
 
     --sidebar-background: 0 0% 6%;
     --sidebar-foreground: 0 0% 90%;

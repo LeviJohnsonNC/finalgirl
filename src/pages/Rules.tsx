@@ -1,26 +1,20 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
-import { Search, BookMarked, ArrowUp, X, Radio, FileText, AlertTriangle } from 'lucide-react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { Search, ArrowLeft, ArrowRight, X, BookOpen, ChevronRight } from 'lucide-react';
 import { coreRules } from '@/data/rules/coreRules';
 import { RuleModule, RuleSection as RuleSectionType, RuleBlock, RuleChapter as RuleChapterType } from '@/data/rules/types';
 import { RuleChapter } from '@/components/rules/RuleChapter';
+import { getChapterArt, rulebookArt } from '@/components/rules/chapterArt';
+import '@/styles/rules.css';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useOwnedFilms } from '@/hooks/useOwnedFilms';
 import { FEATURE_FILMS } from '@/types/gameData';
-import { ENTITY_RULE_MODULES, buildEntityChapter, EntityRuleModule } from '@/data/rules/moduleRules';
+import { ENTITY_RULE_MODULES, buildEntityChapter } from '@/data/rules/moduleRules';
 
 const MODULES: RuleModule[] = [coreRules];
 
-type RuleCategory = 'ALL' | 'CORE' | 'TURN' | 'COMBAT' | 'KILLER' | 'TOKENS' | 'VICTIMS' | 'ITEMS';
+type RuleCategory = 'ALL' | 'CORE' | 'TURN' | 'COMBAT' | 'KILLER' | 'TOKENS' | 'VICTIMS' | 'ITEMS' | 'LOCATION';
 
-const CATEGORY_FILTERS: RuleCategory[] = ['ALL', 'CORE', 'TURN', 'COMBAT', 'KILLER', 'TOKENS', 'VICTIMS', 'ITEMS'];
-
-const RULES_TICKER = [
-  'ARCHIVE NOTE: RULEBOOK FOUND WITH THREE PAGES MISSING.',
-  'WARNING: FEATURE FILMS REQUIRED — CORE BOX ALONE IS NOT ENOUGH.',
-  'SYSTEM: CROSS-REFERENCING KILLER PHASE...',
-  'REPORT: PLAYER FORGOT TO RESOLVE PANIC AGAIN.',
-  'CASE FILE: SURVIVOR MOVEMENT CONFIRMED UNDER POOR LIGHTING.',
-];
+const CATEGORY_FILTERS: RuleCategory[] = ['ALL', 'CORE', 'TURN', 'COMBAT', 'KILLER', 'TOKENS', 'VICTIMS', 'ITEMS', 'LOCATION'];
 
 function blockToText(block: RuleBlock): string {
   switch (block.type) {
@@ -58,26 +52,17 @@ function sectionMatches(section: RuleSectionType, query: string): number {
 function getChapterCategory(chapter: RuleChapterType, sections: RuleSectionType[], killerIds: Set<string>, locationIds: Set<string>): RuleCategory | 'LOCATION' {
   if (killerIds.has(chapter.id)) return 'KILLER';
   if (locationIds.has(chapter.id)) return 'LOCATION';
-  const text = [
-    chapter.title,
-    chapter.subtitle ?? '',
-    ...chapter.sectionIds.flatMap((id) => {
-      const section = sections.find((s) => s.id === id);
-      return section ? [section.title, ...(section.tags ?? [])] : [];
-    }),
-  ].join(' ').toLowerCase();
-
-  if (/victim|bystander|rescue|panic/.test(text)) return 'VICTIMS';
-  if (/item|search|craft|weapon/.test(text)) return 'ITEMS';
-  if (/attack|combat|guard|retaliate|damage|health/.test(text)) return 'COMBAT';
-  if (/killer|terror|horror|dark power|finale|bloodlust/.test(text)) return 'KILLER';
-  if (/token|marker|time|track/.test(text)) return 'TOKENS';
-  if (/turn|action|planning|upkeep|phase/.test(text)) return 'TURN';
+  const coreCategories: Record<string, RuleCategory> = {
+    'ch-overview': 'CORE', 'ch-boards': 'CORE', 'ch-game-turn': 'TURN',
+    'ch-attacking': 'COMBAT', 'ch-bloodlust': 'KILLER', 'ch-tokens-cards': 'TOKENS',
+    'ch-minions': 'KILLER', 'ch-items': 'ITEMS', 'ch-end': 'CORE', 'ch-glossary': 'CORE',
+  };
+  if (coreCategories[chapter.id]) return coreCategories[chapter.id];
+  if (sections.some(section => chapter.sectionIds.includes(section.id) && section.tags?.includes('victim'))) return 'VICTIMS';
   return 'CORE';
 }
 
 const Rules = () => {
-  const moduleId = MODULES[0].id;
   const coreModule = MODULES[0];
   const { ownedFilms } = useOwnedFilms();
 
@@ -131,7 +116,9 @@ const Rules = () => {
     null
   );
   const [initialSubBySection, setInitialSubBySection] = useState<Record<string, string>>({});
-  const [showTopButton, setShowTopButton] = useState(false);
+  const indexScroll = useRef(0);
+  const lastIndexChapter = useRef<string | null>(null);
+  const pendingHash = useRef(window.location.hash.match(/^#rules\/(.+)$/)?.[1] ?? null);
 
   // Match counts per section
   const sectionMatchCounts = useMemo(() => {
@@ -157,373 +144,212 @@ const Rules = () => {
   const chapterMatchCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const ch of module.chapters) {
+      const title = `${ch.title} ${ch.subtitle ?? ''}`.toLowerCase();
+      const titleHits = query.trim() && title.includes(query.trim().toLowerCase()) ? 3 : 0;
       if (ch.id === 'ch-glossary') {
-        if (glossaryHits > 0) counts[ch.id] = glossaryHits;
+        if (glossaryHits + titleHits > 0) counts[ch.id] = glossaryHits + titleHits;
         continue;
       }
-      let total = 0;
+      let total = titleHits;
       for (const sid of ch.sectionIds) total += sectionMatchCounts[sid] ?? 0;
       if (total > 0) counts[ch.id] = total;
     }
     return counts;
-  }, [module, sectionMatchCounts, glossaryHits]);
+  }, [module, sectionMatchCounts, glossaryHits, query]);
 
-  // Match IDs also change when owned expansions finish loading. Use the
-  // actual target IDs so unrelated renders cannot reopen a manually closed chapter.
-  const firstSearchChapter = query.trim()
-    ? module.chapters.find(c => (chapterMatchCounts[c.id] ?? 0) > 0)
-    : undefined;
-  const firstSearchChapterId = firstSearchChapter?.id;
-  const firstSearchSectionId = firstSearchChapter?.sectionIds.find(sid => (sectionMatchCounts[sid] ?? 0) > 0);
+  const killerIds = useMemo(() => new Set(killerChapters.map(c => c.id)), [killerChapters]);
+  const locationIds = useMemo(() => new Set(locationChapters.map(c => c.id)), [locationChapters]);
+  const isSearching = query.trim().length > 0;
+  const visibleChapters = module.chapters.filter(ch => {
+    const categoryMatches = activeCategory === 'ALL'
+      || getChapterCategory(ch, module.sections, killerIds, locationIds) === activeCategory
+      || (activeCategory === 'VICTIMS' && ch.sectionIds.some(id => /victim|panic/.test(id)));
+    return categoryMatches && (!isSearching || (chapterMatchCounts[ch.id] ?? 0) > 0);
+  });
+  const activeChapter = module.chapters.find(ch => ch.id === openChapterId);
+  const activeIndex = activeChapter ? visibleChapters.findIndex(ch => ch.id === activeChapter.id) : -1;
+
+  const clearHash = useCallback(() => {
+    if (window.location.hash.startsWith('#rules/')) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+  }, []);
+
+  const handleOpen = useCallback((chapterId: string) => {
+    if (!openChapterId) {
+      indexScroll.current = window.scrollY;
+      lastIndexChapter.current = chapterId;
+    }
+    clearHash();
+    const chapter = module.chapters.find(ch => ch.id === chapterId);
+    const match = chapter?.sectionIds.find(id => (sectionMatchCounts[id] ?? 0) > 0);
+    if (match) setInitialSubBySection(prev => ({ ...prev, [chapterId]: match }));
+    setOpenChapterId(chapterId);
+  }, [openChapterId, clearHash, module.chapters, sectionMatchCounts, setOpenChapterId]);
+
+  const handleClose = useCallback(() => {
+    clearHash();
+    setOpenChapterId(null);
+  }, [clearHash, setOpenChapterId]);
+
+  const handleJumpTo = useCallback((sectionId: string) => {
+    const chapter = module.chapters.find(ch => ch.sectionIds.includes(sectionId));
+    if (!chapter) return;
+    setQuery('');
+    setActiveCategory('ALL');
+    setInitialSubBySection(prev => ({ ...prev, [chapter.id]: sectionId }));
+    setOpenChapterId(chapter.id);
+    window.history.replaceState(null, '', `#rules/${sectionId}`);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const target = document.getElementById(sectionId);
+      target?.scrollIntoView({ block: 'start' });
+      target?.focus({ preventScroll: true });
+    }));
+  }, [module, setOpenChapterId]);
+
+  // Wait for collection-specific chapters before resolving an incoming deep link.
   useEffect(() => {
-    if (!query.trim() || !firstSearchChapterId) return;
-    setOpenChapterId(firstSearchChapterId);
-    if (firstSearchSectionId) {
-      setInitialSubBySection(prev => prev[firstSearchChapterId] === firstSearchSectionId
-        ? prev : { ...prev, [firstSearchChapterId]: firstSearchSectionId });
+    const sectionId = pendingHash.current;
+    if (!sectionId || !module.chapters.some(ch => ch.sectionIds.includes(sectionId))) return;
+    pendingHash.current = null;
+    handleJumpTo(sectionId);
+  }, [module.chapters, handleJumpTo]);
+
+  // Keep direct search-to-rule behavior, including chapters arriving after collection load.
+  const firstSearchChapter = isSearching ? visibleChapters[0] : undefined;
+  const firstSearchChapterId = firstSearchChapter?.id;
+  const firstSearchSectionId = firstSearchChapter?.sectionIds.find(id => (sectionMatchCounts[id] ?? 0) > 0);
+  useEffect(() => {
+    if (!query.trim()) return;
+    setOpenChapterId(firstSearchChapterId ?? null);
+    if (firstSearchChapterId && firstSearchSectionId) {
+      setInitialSubBySection(prev => ({ ...prev, [firstSearchChapterId]: firstSearchSectionId }));
     }
   }, [query, firstSearchChapterId, firstSearchSectionId, setOpenChapterId]);
 
-  const handleToggle = useCallback(
-    (chapterId: string) => {
-      setOpenChapterId((prev) => (prev === chapterId ? null : chapterId));
-      setTimeout(() => {
-        const el = document.getElementById(chapterId);
-        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 80);
-    },
-    [setOpenChapterId]
-  );
-
-  const handleClose = useCallback(() => {
-    setOpenChapterId(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [setOpenChapterId]);
-
-  // Find the chapter that owns a given sectionId
-  const chapterForSection = useCallback(
-    (sectionId: string): RuleChapterType | undefined =>
-      module.chapters.find((c) => c.sectionIds.includes(sectionId)),
-    [module]
-  );
-
-  const handleJumpTo = useCallback(
-    (sectionId: string) => {
-      const ch = chapterForSection(sectionId);
-      if (!ch) return;
-      setOpenChapterId(ch.id);
-      // Set sub-tab to that section if it's a top-level section in chapter
-      const sec = module.sections.find((s) => s.id === sectionId);
-      const subId = sec?.parentId && ch.sectionIds.includes(sec.parentId) ? sec.parentId : sectionId;
-      setInitialSubBySection((prev) => ({ ...prev, [ch.id]: subId }));
-      window.history.replaceState(null, '', `#rules/${sectionId}`);
-      setTimeout(() => {
-        const el = document.getElementById(sectionId) ?? document.getElementById(ch.id);
-        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 120);
-    },
-    [chapterForSection, module, setOpenChapterId]
-  );
-
-  // Honor incoming hash on mount
   useEffect(() => {
-    const hash = window.location.hash;
-    const m = hash.match(/^#rules\/(.+)$/);
-    if (m) {
-      setTimeout(() => handleJumpTo(m[1]), 100);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const frame = requestAnimationFrame(() => {
+      // Live search must never steal keyboard focus while someone is typing.
+      if (document.activeElement?.matches('.rulebook-search input')) return;
+      if (openChapterId) {
+        const heading = document.getElementById('rule-reader-title');
+        heading?.focus({ preventScroll: true });
+        // A deep link owns its exact section scroll position.
+        if (!window.location.hash.startsWith('#rules/')) {
+          document.getElementById('rule-reader')?.scrollIntoView({ block: 'start' });
+        }
+      } else {
+        window.scrollTo({ top: indexScroll.current });
+        if (lastIndexChapter.current) document.getElementById(`open-${lastIndexChapter.current}`)?.focus({ preventScroll: true });
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [openChapterId]);
 
-  // Show "back to top" after scrolling
-  useEffect(() => {
-    const onScroll = () => setShowTopButton(window.scrollY > 400);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  // Filter glossary for search
-  const filteredGlossary = useMemo(() => {
-    if (!query.trim()) return module.glossary;
-    const q = query.trim().toLowerCase();
-    return module.glossary.filter(
-      (t) => t.term.toLowerCase().includes(q) || t.short.toLowerCase().includes(q)
-    );
-  }, [query, module]);
-
+  const filteredGlossary = module.glossary.filter(t => !isSearching || query.trim().toLowerCase() === 'glossary'
+    || `${t.term} ${t.short}`.toLowerCase().includes(query.trim().toLowerCase()));
   const glossaryBody = (
-    <div className="space-y-2">
-      {filteredGlossary.length === 0 ? (
-        <p className="type-caption uppercase text-muted-foreground">
-          No terms match "{query}".
-        </p>
-      ) : (
-        filteredGlossary.map((t) => (
-          <div key={t.id} className="glossary-entry">
-            <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="font-title text-base uppercase tracking-wide text-secondary">
-                {t.term}
-              </span>
-              {t.sectionId && (
-                <button
-                  onClick={() => handleJumpTo(t.sectionId!)}
-                  className="type-caption uppercase text-primary/80 hover:text-primary"
-                >
-                  → see rule
-                </button>
-              )}
-            </div>
-            <p className="type-body-sm text-foreground/85 leading-relaxed mt-1">{t.short}</p>
-          </div>
-        ))
-      )}
+    <div className="rule-glossary">
+      {filteredGlossary.map(term => (
+        <div key={term.id} className="glossary-entry">
+          <h2>{term.term}</h2>
+          <p>{term.short}</p>
+          {term.sectionId && <button onClick={() => handleJumpTo(term.sectionId!)} className="rule-text-link">Read the rule <ArrowRight size={14} /></button>}
+        </div>
+      ))}
+      {filteredGlossary.length === 0 && <p>No terms match “{query}”.</p>}
     </div>
   );
 
-  const isSearching = query.trim().length > 0;
-  const killerIds = useMemo(() => new Set(killerChapters.map((c) => c.id)), [killerChapters]);
-  const locationIds = useMemo(() => new Set(locationChapters.map((c) => c.id)), [locationChapters]);
-  const chapterCategories = useMemo(
-    () => Object.fromEntries(module.chapters.map((chapter) => [chapter.id, getChapterCategory(chapter, module.sections, killerIds, locationIds)])),
-    [module, killerIds, locationIds]
+  const renderIndexGroup = (chapters: RuleChapterType[], label: string, hint: string) => chapters.length > 0 && (
+    <section className="rule-index-group" aria-label={label}>
+      <div className="rule-group-heading"><h2>{label}</h2><span>{hint}</span></div>
+      {chapters.map(chapter => (
+        <button key={chapter.id} id={`open-${chapter.id}`} className="rule-index-row" onClick={() => handleOpen(chapter.id)} aria-label={`Open ${chapter.title}`}>
+          <img src={getChapterArt(chapter)} alt="" loading="lazy" className="rule-index-art" />
+          <span className="rule-index-shade" aria-hidden="true" />
+          <span className="rule-number">{chapter.number}</span>
+          <span className="rule-index-copy"><strong>{chapter.title}</strong><span>{chapter.subtitle}</span></span>
+          {(chapterMatchCounts[chapter.id] ?? 0) > 0 && <span className="rule-hit-count">{chapterMatchCounts[chapter.id]} hits</span>}
+          <ChevronRight className="rule-index-arrow" size={22} aria-hidden="true" />
+        </button>
+      ))}
+    </section>
   );
-  const visibleChapters = module.chapters.filter((chapter) => {
-    const matchesSearch = !isSearching || (chapterMatchCounts[chapter.id] ?? 0) > 0;
-    const category = chapterCategories[chapter.id];
-    const matchesCategory = activeCategory === 'ALL' || category === activeCategory;
-    return matchesSearch && matchesCategory;
-  });
-  const activeChapter = module.chapters.find((chapter) => chapter.id === openChapterId) ?? visibleChapters[0];
-  const activeChapterSections = activeChapter
-    ? activeChapter.sectionIds.map((id) => module.sections.find((section) => section.id === id)).filter((section): section is RuleSectionType => !!section)
-    : [];
-  const relatedSections = activeChapterSections
-    .flatMap((section) => section.seeAlso ?? [])
-    .map((id) => module.sections.find((section) => section.id === id))
-    .filter((section, index, arr): section is RuleSectionType => !!section && arr.findIndex((item) => item?.id === section.id) === index)
-    .slice(0, 4);
-  const sidebarTip = activeChapterSections.flatMap((section) => section.body).find((block) => block.type === 'callout' || block.type === 'example');
-  const tickerContent = [...RULES_TICKER, ...RULES_TICKER];
 
   return (
-    <div className="rules-page relative min-h-screen px-3 sm:px-5 pb-28 pt-3 sm:pt-6">
-      {/* Page chrome overlays */}
-      <div className="film-grain pointer-events-none" aria-hidden />
-      <div className="vignette pointer-events-none" aria-hidden />
-
-      <div className="rules-binder mx-auto">
-        {/* Header */}
-        <header className="rules-header relative mb-5">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-3 type-caption uppercase text-muted-foreground">
-                <span className="rec-dot" aria-hidden />
-                <span>Final Girl / Unofficial Case Files</span>
-              </div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <BookMarked className="w-7 h-7 text-primary" />
-                <h1 className="font-title text-4xl sm:text-6xl uppercase tracking-wide text-foreground blood-glow">
-                  Rulebook
-                </h1>
-              </div>
-              <p className="mt-3 type-caption uppercase text-muted-foreground">
-                Unofficial Fan Reference · Recovered Binder Copy ·{' '}
-                <a
-                  href="https://gamers-hq.de/media/pdf/22/ba/4a/FinalGirl_Rules.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-secondary/80 hover:text-secondary underline decoration-dotted"
-                >
-                  Official Core Rulebook ↗
-                </a>
-              </p>
+    <div className={`rules-page rules-cinema ${activeChapter ? 'rules-is-reading' : ''}`}>
+      <div className="rulebook-shell">
+        <div className="rulebook-masthead"><span><span className="rule-status-dot" /> Field guide to surviving the night</span><span>VOL. 01 / FAN REFERENCE</span></div>
+        {!activeChapter && (
+          <header className="rulebook-cover">
+            <img src={rulebookArt.archive} alt="" fetchPriority="high" />
+            <div className="rulebook-cover-shade" aria-hidden="true" />
+            <div className="rulebook-cover-copy">
+              <span className="rule-eyebrow">The unofficial survival manual</span>
+              <h1>Rulebook<span className="rule-title-period">.</span></h1>
+              <p>Know the rules. Make it to morning.</p>
             </div>
-            <div className="rules-dossier-card">
-              <span className="vhs-spec-label type-caption uppercase px-2 py-0.5">CORE · VHS-001 · FAN REF</span>
-              <span className="type-caption uppercase text-muted-foreground">Recovered Tape / Evidence Box 07</span>
-              <span className="type-caption uppercase text-primary/80">Archive Ref: FG-RULES-{String(visibleChapters.length).padStart(2, '0')}</span>
-            </div>
-          </div>
-        </header>
-
-        {/* Search bar + filters */}
-        <div className="rules-search-wrap mb-6 sticky top-3 sm:top-5 z-30">
-          <div className="rules-search relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/70" />
-            <input
-              type="text"
-              inputMode="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="SEARCH RULES, TERMS, ICONS..."
-              className="rules-search-input w-full pl-9 pr-9 py-3 type-label uppercase"
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
-                aria-label="Clear search"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-          <div className="rules-filter-strip mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Rule categories">
-            {CATEGORY_FILTERS.map((category) => (
-              <button
-                key={category}
-                type="button"
-                onClick={() => setActiveCategory(category)}
-                className={`rules-filter-chip font-vhs text-[10px] sm:text-[11px] uppercase tracking-[0.18em] px-3 py-1.5 whitespace-nowrap ${activeCategory === category ? 'rules-filter-chip-active' : ''}`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="rules-layout-grid">
-          {/* Chapter list */}
-          <main className="space-y-2.5 min-w-0">
-        {visibleChapters.length === 0 ? (
-          <div className="text-center py-16 type-label uppercase text-muted-foreground">
-            No chapters match "{query}".
-          </div>
-        ) : (
-          (() => {
-            const killerIds = new Set(killerChapters.map((c) => c.id));
-            const locationIds = new Set(locationChapters.map((c) => c.id));
-            const visibleKillers = visibleChapters.filter((c) => killerIds.has(c.id));
-            const visibleLocations = visibleChapters.filter((c) => locationIds.has(c.id));
-            const visibleCore = visibleChapters.filter(
-              (c) => !killerIds.has(c.id) && !locationIds.has(c.id)
-            );
-
-            const renderChapter = (ch: RuleChapterType) => (
-              <RuleChapter
-                key={ch.id}
-                chapter={ch}
-                allSections={module.sections}
-                glossary={module.glossary}
-                isOpen={openChapterId === ch.id}
-                matchCount={chapterMatchCounts[ch.id] ?? 0}
-                isDimmed={isSearching && (chapterMatchCounts[ch.id] ?? 0) === 0}
-                initialSubId={initialSubBySection[ch.id]}
-                onToggle={() => handleToggle(ch.id)}
-                onJumpTo={handleJumpTo}
-                onClose={handleClose}
-                customBody={ch.id === 'ch-glossary' ? glossaryBody : undefined}
-              />
-            );
-
-            const GroupHeader = ({ label, hint }: { label: string; hint: string }) => (
-              <div className="pt-6 pb-1 flex items-baseline gap-3">
-                <span className="h-px flex-1 bg-secondary/30" />
-                <span className="font-title text-sm uppercase tracking-[0.3em] text-secondary">
-                  {label}
-                </span>
-                <span className="type-caption uppercase text-muted-foreground">
-                  {hint}
-                </span>
-                <span className="h-px flex-1 bg-secondary/30" />
-              </div>
-            );
-
-            return (
-              <>
-                {visibleCore.map(renderChapter)}
-                {visibleKillers.length > 0 && (
-                  <>
-                    <GroupHeader label="Killers" hint="Owned · Special Rules" />
-                    {visibleKillers.map(renderChapter)}
-                  </>
-                )}
-                {visibleLocations.length > 0 && (
-                  <>
-                    <GroupHeader label="Locations" hint="Owned · Special Rules" />
-                    {visibleLocations.map(renderChapter)}
-                  </>
-                )}
-              </>
-            );
-          })()
+            <span className="rule-cover-stamp" aria-hidden="true">RECOVERED<br />BINDER COPY</span>
+          </header>
         )}
-          </main>
-
-          <aside className="rules-case-notes hidden xl:block">
-            <div className="rules-case-note-card sticky top-28">
-              <div className="flex items-center gap-2 type-caption uppercase text-primary/80">
-                <Radio className="w-3.5 h-3.5" />
-                Rulebook Status: Indexed
-              </div>
-              <div className="mt-5">
-                <p className="type-caption uppercase text-muted-foreground">Currently Viewing</p>
-                <h2 className="mt-1 font-title text-xl uppercase tracking-wide text-foreground leading-tight">
-                  {activeChapter?.title ?? 'No File Selected'}
-                </h2>
-                <p className="mt-1 type-caption uppercase text-muted-foreground">
-                  {activeChapter ? `${chapterCategories[activeChapter.id]} · ${activeChapter.number}` : 'Archive standby'}
-                </p>
-              </div>
-              <div className="mt-5 pt-4 border-t border-dashed border-border/70">
-                <p className="type-caption uppercase text-primary/80 flex items-center gap-2">
-                  <FileText className="w-3.5 h-3.5" /> Related Rules
-                </p>
-                <div className="mt-3 space-y-2">
-                  {relatedSections.length > 0 ? relatedSections.map((section) => (
-                    <button key={section.id} onClick={() => handleJumpTo(section.id)} className="rules-related-tab w-full text-left type-caption uppercase">
-                      {section.title}
-                    </button>
-                  )) : (
-                    <p className="type-caption uppercase text-muted-foreground">No cross-reference recovered.</p>
-                  )}
-                </div>
-              </div>
-              <div className="mt-5 pt-4 border-t border-dashed border-border/70">
-                <p className="type-caption uppercase text-primary/80 flex items-center gap-2">
-                  <AlertTriangle className="w-3.5 h-3.5" /> Survivor Tip
-                </p>
-                <p className="mt-2 type-body-sm leading-relaxed text-foreground/80">
-                  {sidebarTip && 'text' in sidebarTip ? sidebarTip.text : 'Read the phase timing twice before resolving panic, attacks, or finale effects.'}
-                </p>
-              </div>
-            </div>
-          </aside>
-        </div>
-
-        <div className="mt-10 pt-5 border-t border-border/50 text-muted-foreground/70 type-caption uppercase text-center">
-          {module.source}
-        </div>
-      </div>
-
-      <div className="rules-bottom-ticker fixed bottom-11 sm:bottom-14 left-0 right-0 z-40 overflow-hidden">
-        <div className="relative h-7 sm:h-8 flex items-center">
-          <div className="absolute left-0 z-10 h-full flex items-center px-2 sm:px-3 pr-8 rules-ticker-badge">
-            <span className="type-caption text-primary uppercase blood-glow">⚠ RULES ⚠</span>
+        <div className="rulebook-tools">
+          <div className="rulebook-search">
+            <Search size={18} aria-hidden="true" />
+            <input aria-label="Search rules" inputMode="search" value={query}
+              onChange={event => { setQuery(event.target.value); setActiveCategory('ALL'); clearHash(); }}
+              placeholder="SEARCH RULES, TERMS, ICONS..." />
+            {query && <button aria-label="Clear search" onClick={() => setQuery('')}><X size={18} /></button>}
           </div>
-          <div className="news-ticker flex items-center whitespace-nowrap pl-24 sm:pl-28">
-            {tickerContent.map((headline, idx) => (
-              <span key={idx} className="inline-flex items-center">
-                <span className="type-caption text-muted-foreground uppercase">{headline}</span>
-                <span className="mx-32 sm:mx-48 text-primary/60">◆</span>
-              </span>
+          <div className="rulebook-filters" role="group" aria-label="Rule categories">
+            {CATEGORY_FILTERS.filter(category => category !== 'LOCATION' || locationChapters.length > 0).map(category => (
+              <button key={category} aria-pressed={activeCategory === category} onClick={() => { setActiveCategory(category); handleClose(); }}>
+                {category === 'LOCATION' ? 'LOCATIONS' : category}
+              </button>
             ))}
           </div>
-          <div className="absolute right-0 z-10 h-full w-8 sm:w-12 rules-ticker-fade" />
         </div>
-      </div>
 
-      {/* Floating back-to-top */}
-      {showTopButton && (
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-20 right-4 z-40 p-3 rounded-full bg-primary/15 border border-primary/40 text-primary hover:bg-primary/25 transition-colors backdrop-blur"
-          aria-label="Back to top"
-        >
-          <ArrowUp className="w-5 h-5" />
-        </button>
-      )}
+        {activeChapter ? (
+          <div className="rule-reader-layout" id="rule-reader">
+            <aside className="rule-reader-nav">
+              <button className="rule-back" onClick={handleClose}><ArrowLeft size={15} /> Back to Chapters</button>
+              <label className="rule-mobile-chapters">Chapter
+                <select aria-label="Choose chapter" value={activeChapter.id} onChange={event => handleOpen(event.target.value)}>
+                  {visibleChapters.map(ch => <option key={ch.id} value={ch.id}>{ch.number} — {ch.title}</option>)}
+                </select>
+              </label>
+              <nav aria-label="Chapter navigation" className="rule-desktop-chapters">
+                <span className="rule-eyebrow">{isSearching ? 'Search results' : 'Chapter index'}</span>
+                {visibleChapters.map(ch => <button key={ch.id} aria-current={ch.id === activeChapter.id ? 'page' : undefined} onClick={() => handleOpen(ch.id)}>
+                  <span>{ch.number}</span><span>{ch.title}</span>{ch.id === activeChapter.id && <ChevronRight size={14} />}
+                </button>)}
+              </nav>
+              <a className="rule-official-link" href="https://gamers-hq.de/media/pdf/22/ba/4a/FinalGirl_Rules.pdf" target="_blank" rel="noopener noreferrer">Official Core Rulebook ↗</a>
+            </aside>
+            <div className="rule-reader-main">
+              <RuleChapter key={`${activeChapter.id}:${query.trim().toLowerCase()}`} chapter={activeChapter} allSections={module.sections} glossary={module.glossary}
+                initialSubId={initialSubBySection[activeChapter.id]} onJumpTo={handleJumpTo}
+                customBody={activeChapter.id === 'ch-glossary' ? glossaryBody : undefined} />
+              <nav className="rule-reader-footer" aria-label="Reading navigation">
+                <button className="rule-back" onClick={handleClose}><ArrowLeft size={15} /> Back to Chapters</button>
+                {activeIndex >= 0 && activeIndex < visibleChapters.length - 1 && <button className="rule-next" onClick={() => handleOpen(visibleChapters[activeIndex + 1].id)}>
+                  <span><small>Next chapter</small>{visibleChapters[activeIndex + 1].title}</span><ArrowRight size={20} />
+                </button>}
+              </nav>
+            </div>
+          </div>
+        ) : visibleChapters.length > 0 ? (
+          <div className="rulebook-index">
+            {renderIndexGroup(visibleChapters.filter(ch => !killerIds.has(ch.id) && !locationIds.has(ch.id)), 'Core rules', 'READ. REMEMBER. SURVIVE.')}
+            {renderIndexGroup(visibleChapters.filter(ch => killerIds.has(ch.id)), 'Killer files', 'FROM YOUR COLLECTION')}
+            {renderIndexGroup(visibleChapters.filter(ch => locationIds.has(ch.id)), 'Location files', 'FROM YOUR COLLECTION')}
+          </div>
+        ) : <div className="rulebook-empty" role="status"><BookOpen size={32} /><h2>No chapters match{query ? ` “${query}”` : ' this category'}.</h2><p>Try another term or return to the full index.</p><button className="rule-text-link" onClick={() => { setQuery(''); setActiveCategory('ALL'); }}>Show all chapters <ArrowRight size={16} /></button></div>}
+
+        <footer className="rulebook-colophon"><span>{visibleChapters.length} chapters / Unofficial fan reference</span><a href="https://gamers-hq.de/media/pdf/22/ba/4a/FinalGirl_Rules.pdf" target="_blank" rel="noopener noreferrer">Official Core Rulebook ↗</a></footer>
+        <p className="rulebook-source">{module.source}. Not endorsed by or affiliated with Van Ryder Games.</p>
+      </div>
     </div>
   );
 };

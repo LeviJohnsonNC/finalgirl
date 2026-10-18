@@ -332,7 +332,7 @@ const IndexContent = () => {
       </main>
 
       {/* News Ticker - above footer */}
-      {!isNarrationPage && !(currentPage === 'nowPlaying' && activeGame?.playMode) && <NewsTicker />}
+      {!isNarrationPage && currentPage !== 'rules' && !(currentPage === 'nowPlaying' && activeGame?.playMode) && <NewsTicker />}
 
       {/* VHS Footer */}
       <footer
