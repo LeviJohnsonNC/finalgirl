@@ -12,18 +12,18 @@ test('the theater keeps the screen and controls inside narrow and wide layouts',
     const scenery = page.locator('.theater-scenery');
     await scenery.evaluate((image: HTMLImageElement) => image.decode());
     const naturalWidth = await scenery.evaluate((image: HTMLImageElement) => image.naturalWidth);
-    expect(naturalWidth).toBe(portrait ? 1024 : 1536);
+    expect(naturalWidth).toBe(portrait ? 910 : 1915);
     const photo = (await scenery.boundingBox())!;
     const screen = (await page.locator('.theater-screen').boundingBox())!;
     // Pixel bounds measured from the physical aperture in each photograph.
-    const aperture = portrait ? { x: 70, y: 359, width: 888, height: 383, ground: 940 }
-      : { x: 280, y: 125, width: 977, height: 410, ground: 700 };
+    const aperture = portrait ? { x: 222, y: 477, width: 526, height: 526 * 9 / 16 }
+      : { x: 690, y: 159, width: 532, height: 532 * 9 / 16 };
     const scale = photo.width / naturalWidth;
     expect(Math.abs(screen.x - (photo.x + aperture.x * scale))).toBeLessThan(1);
     expect(Math.abs(screen.y - (photo.y + aperture.y * scale))).toBeLessThan(1);
     expect(Math.abs(screen.width - aperture.width * scale)).toBeLessThan(1);
     expect(Math.abs(screen.height - aperture.height * scale)).toBeLessThan(1);
-    expect((await page.locator('.theater-program').boundingBox())!.y).toBeGreaterThan(photo.y + aperture.ground * scale);
+    expect((await page.locator('.theater-program').boundingBox())!.y).toBeGreaterThan(screen.y + screen.height);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewport.width);
     for (const selector of ['.theater-screen', '.theater-play', '.theater-footer nav', '.theater-account']) {
       const box = await page.locator(selector).boundingBox();
@@ -44,7 +44,7 @@ test('a delayed composition download never separates the projection from its fra
   let release!: () => void;
   let requested = false;
   const gate = new Promise<void>(resolve => { release = resolve; });
-  await page.route('**/theater-drive-in-portrait*.webp', async route => {
+  await page.route('**/theater-starlight-portrait*.webp', async route => {
     requested = true;
     await gate;
     await route.continue();
@@ -54,32 +54,32 @@ test('a delayed composition download never separates the projection from its fra
   await page.setViewportSize({ width: 390, height: 844 });
   await expect.poll(() => requested).toBe(true);
   await expect(page.locator('.theater-screen-wrap')).toHaveAttribute('data-composition', 'landscape');
-  expect(await page.locator('.theater-scenery').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(1536);
+  expect(await page.locator('.theater-scenery').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(1915);
   // Return to desktop before the pending portrait arrives: it must not win.
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
-  const delivered = page.waitForResponse('**/theater-drive-in-portrait*.webp');
+  const delivered = page.waitForResponse('**/theater-starlight-portrait*.webp');
   release();
   await (await delivered).finished();
   await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   await expect(page.locator('.theater-screen-wrap')).toHaveAttribute('data-composition', 'landscape');
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator('.theater-screen-wrap')).toHaveAttribute('data-composition', 'portrait');
-  expect(await page.locator('.theater-scenery').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(1024);
+  expect(await page.locator('.theater-scenery').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(910);
   expect(archive.calls).toEqual([]);
 });
 
 test('an unavailable alternate composition keeps the existing scene and controls', async ({ page, archive }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await archive.install(page);
-  await page.route('**/theater-drive-in-portrait*.webp', route => route.abort());
+  await page.route('**/theater-starlight-portrait*.webp', route => route.abort());
   await page.goto('/');
   await page.locator('.theater-scenery').evaluate((image: HTMLImageElement) => image.decode());
-  const failed = page.waitForEvent('requestfailed', request => request.url().includes('theater-drive-in-portrait'));
+  const failed = page.waitForEvent('requestfailed', request => request.url().includes('theater-starlight-portrait'));
   await page.setViewportSize({ width: 390, height: 844 });
   await failed;
   await expect(page.locator('.theater-screen-wrap')).toHaveAttribute('data-composition', 'landscape');
-  expect(await page.locator('.theater-scenery').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(1536);
+  expect(await page.locator('.theater-scenery').evaluate((image: HTMLImageElement) => image.naturalWidth)).toBe(1915);
   await page.getByRole('button', { name: 'START THE TAPE' }).click();
   await expect(page.getByRole('button', { name: /Choose KILLER/i })).toBeVisible();
   expect(archive.calls).toEqual([]);
@@ -93,6 +93,9 @@ test('projected scenes preserve the full artwork and the theater opens casting',
   const art = page.locator('.theater-projection-art').last();
   await expect(art).toBeVisible();
   await expect(art).toHaveCSS('object-fit', 'contain');
+  await expect(page.locator('.theater-projection-fill')).toHaveCount(0);
+  const aperture = (await page.locator('.theater-screen').boundingBox())!;
+  expect(aperture.width / aperture.height).toBeCloseTo(16 / 9, 2);
   await expect.poll(() => art.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(0);
   await page.screenshot({ path: testInfo.outputPath('theater-projection.png'), fullPage: true });
   await page.getByRole('button', { name: 'START THE TAPE' }).click();
@@ -114,7 +117,7 @@ test('projection controls identify the game and open its exact case file', async
   await expect(page.getByRole('heading', { name: 'Rena vs. Billy the Bear' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Play slideshow' })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('personal-screening.png'), fullPage: true });
-  await page.getByRole('button', { name: 'Open case file' }).click();
+  await page.getByRole('button', { name: 'Open case file for Rena vs. Billy the Bear', exact: true }).click();
   await expect(page.locator('.story-page-content').getByText('This is the older Buddyland case file.')).toBeVisible();
   expect(archive.calls).toEqual([]);
 });
@@ -128,7 +131,7 @@ test('compact captions keep a long matchup, its case link, and touch controls re
   const title = page.getByRole('heading', { name: 'Janelle vs. The Tormentor', exact: true });
   await expect(title).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
-  await expect(page.locator('.theater-program time')).toHaveCount(0);
+  await expect(page.locator('.theater-program time')).toContainText('Sep 18, 2026');
   await expect(page.getByRole('button', { name: 'Open case file for Janelle vs. The Tormentor', exact: true })).toBeVisible();
   for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 640, height: 900 }, { width: 1440, height: 900 }]) {
     await page.setViewportSize(viewport);
@@ -297,4 +300,32 @@ test('signing out removes personal projections and resume details', async ({ pag
   await expect(page.getByRole('heading', { name: 'Laurie vs. Hans' })).toHaveCount(0);
   await expect(page.locator('.theater-projection-art')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /RESUME/ })).toHaveCount(0);
+});
+
+test('a long matchup and sacrificial victory remain readable above the footer', async ({ page, archive }) => {
+  archive.history = [{ id: gameId, timestamp: Date.UTC(2026, 8, 18, 18), outcome: 'won', final_girl_health: 0,
+    killer: 'The Intruders — Zeke, Baghead and the Twins', location: 'Wingard Cottage', final_girl: 'Adelaide',
+    scene_image_url: 'http://127.0.0.1:4173/theater-long.png' }];
+  await archive.install(page);
+  await page.route('**/theater-long.png', route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/camp-happy-trails.png') }));
+  await page.goto('/');
+  await expect(page.locator('.theater-verdict')).toHaveText('Sacrificial victory');
+  for (const viewport of [{ width: 320, height: 568 }, { width: 640, height: 900 }, { width: 1674, height: 940 }]) {
+    await page.setViewportSize(viewport);
+    await expect(page.locator('.theater-screen-wrap')).toHaveAttribute('data-composition', viewport.width < 640 ? 'portrait' : 'landscape');
+    await expect.poll(async () => {
+      const button = (await page.locator('.theater-play').boundingBox())!;
+      const footer = (await page.locator('.theater-footer').boundingBox())!;
+      return footer.y - button.y - button.height;
+    }).toBeGreaterThan(20);
+    const program = (await page.locator('.theater-program').boundingBox())!;
+    for (const selector of ['.theater-caption h2', '.theater-caption-details', '.theater-verdict', '.theater-transport']) {
+      const box = (await page.locator(selector).boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(program.x);
+      expect(box.x + box.width).toBeLessThanOrEqual(program.x + program.width);
+      expect(box.y + box.height).toBeLessThanOrEqual(program.y + program.height);
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewport.width);
+  }
+  expect(archive.calls).toEqual([]);
 });
