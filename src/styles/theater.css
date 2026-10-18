@@ -43,8 +43,8 @@
 .theater-title-copy p { font-family: 'Courier New', monospace; font-size: clamp(8px, 1.8cqw, 14px); color: #e7e0cfb3; }
 .theater-lower { position: absolute; left: var(--marquee-x); top: var(--marquee-y); width: var(--marquee-width); z-index: 6; }
 .theater-program { position: relative; width: 100%; min-height: 100px; padding: 15px 22px 10px; border: 1px solid #8897978c; outline: 1px solid #010406; background: linear-gradient(155deg, #adc8d408, transparent 45%), #03090df5; box-shadow: inset 0 1px #d0d5ca14, inset 0 -2px #000a, 0 3px 0 #020407, 0 8px 16px #0007; color: #e9e3d6; }
-.theater-program-personal { display: grid; grid-template-columns: minmax(0,1fr) auto; grid-template-rows: auto auto; gap: 0 14px; align-items: center; }
-.theater-caption { grid-column: 1; grid-row: 1 / 3; min-width: 0; }
+.theater-program-personal { display: grid; grid-template-columns: minmax(0,1fr) auto; grid-template-rows: auto; gap: 0 18px; align-items: center; }
+.theater-caption { grid-column: 1; grid-row: 1; min-width: 0; }
 .theater-caption h2 { margin: 0 0 5px; font-family: var(--font-display); font-size: clamp(18px, 1.45vw, 25px); font-weight: 500; line-height: 1.2; letter-spacing: .045em; text-transform: uppercase; overflow-wrap: anywhere; }
 .theater-caption-details { display: flex; align-items: center; flex-wrap: wrap; gap: 0 8px; min-width: 0; font: 12px/1.6 'Courier New', monospace; letter-spacing: .055em; text-transform: uppercase; color: #b2bac1; }
 .theater-caption-details > span:first-child { overflow-wrap: anywhere; }
@@ -52,21 +52,15 @@
 .theater-caption-link { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; margin-block: -8px; font: inherit; color: #c9d0d3; text-align: left; }
 .theater-caption-link:hover { color: #fff5df; text-decoration: underline; text-underline-offset: 4px; }
 .theater-caption-link svg { flex-shrink: 0; opacity: .7; }
-.theater-verdict { grid-column: 2; grid-row: 1; margin: 0; max-width: 145px; padding-left: 16px; border-left: 1px solid #a8b6b74d; font: 17px/1.3 'Courier New', monospace; letter-spacing: .055em; text-transform: uppercase; text-align: right; }
+.theater-verdict { grid-column: 2; grid-row: 1; display: flex; align-items: center; justify-content: flex-end; align-self: stretch; margin: 0; max-width: 190px; padding-left: 20px; border-left: 1px solid #a8b6b74d; font: 500 clamp(24px, 1.75vw, 30px)/1.2 'Courier New', monospace; letter-spacing: .055em; text-transform: uppercase; text-align: right; }
+.theater-verdict-long { font-size: clamp(18px, 1.25vw, 22px); }
 .theater-survived { color: #20d6da; }
 .theater-lost { color: #e48679; }
 .theater-in-progress { color: #d0bd8d; }
 .theater-progress-line { margin-top: 6px; font: 11px/1.5 'Courier New', monospace; color: #acb8bc; }
-.theater-reel-controls { grid-column: 2; grid-row: 2; justify-self: end; }
-.theater-transport { display: flex; align-items: center; }
-.theater-transport button { display: grid; place-items: center; width: 44px; height: 44px; color: #dddcd3; }
-.theater-transport svg { pointer-events: none; filter: drop-shadow(0 1px 2px #000); }
-.theater-transport button:disabled { opacity: .3; cursor: default; }
-.theater-transport button:hover:not(:disabled) { background: #7d9da11c; color: #38d3d7; }
 .theater-mode-switch { grid-column: 1 / -1; grid-row: 1; display: flex; justify-content: center; gap: 22px; border-bottom: 1px solid #a8b6b733; margin: -8px 0 12px; }
-.theater-program-active .theater-caption { grid-row: 2 / 4; }
+.theater-program-active .theater-caption { grid-row: 2; }
 .theater-program-active .theater-verdict { grid-row: 2; }
-.theater-program-active .theater-reel-controls { grid-row: 3; }
 .theater-mode-switch button { min-height: 44px; padding: 4px 0; font: 11px/1.4 'Courier New', monospace; text-transform: uppercase; letter-spacing: .08em; color: #b7c1c6; border-bottom: 1px solid transparent; }
 .theater-mode-switch button[aria-pressed=true] { color: #f1e7d5; border-color: #b74d43; }
 .theater-empty-program { text-align: center; }
@@ -128,7 +122,8 @@
   .theater-header { padding-inline: 24px; }
   .theater-caption h2 { font-size: 18px; }
   .theater-program { padding-inline: 16px; }
-  .theater-verdict { font-size: 14px; max-width: 120px; padding-left: 10px; }
+  .theater-verdict { font-size: 24px; max-width: 165px; padding-left: 14px; }
+  .theater-verdict-long { font-size: 18px; }
   .theater-footer nav { gap: 8px 20px; }
 }
 @media (min-width: 640px) and (max-width: 799px) { .theater-scene-plane { top: calc(var(--stage-height) * -.035); } }
@@ -140,17 +135,15 @@
   .theater-account { min-height: 44px; width: 44px; padding: 0; background: #03080b80; }
   .theater-account-text { display: none; }
   .theater-program { padding: 13px 14px 8px; min-height: 116px; }
-  .theater-program-personal { grid-template-columns: minmax(0,1fr); grid-template-rows: auto auto auto; gap: 5px; }
+  .theater-program-personal { grid-template-columns: minmax(0,1fr); grid-template-rows: auto auto; gap: 5px; }
   .theater-caption { grid-column: 1; grid-row: 1; }
   .theater-caption h2 { font-size: 17px; line-height: 1.18; }
   .theater-caption-details { font-size: 10px; gap: 0 6px; }
-  .theater-verdict { grid-column: 1; grid-row: 2; max-width: none; padding: 4px 0 0; border-left: 0; border-top: 1px solid #9ea9aa33; font-size: 12px; text-align: left; }
-  .theater-reel-controls { grid-column: 1; grid-row: 3; justify-self: center; }
-  .theater-transport button { height: 44px; width: 44px; }
+  .theater-verdict { grid-column: 1; grid-row: 2; justify-content: flex-start; max-width: none; padding: 10px 0 2px; border-left: 0; border-top: 1px solid #9ea9aa33; font-size: 24px; text-align: left; }
+  .theater-verdict-long { font-size: 18px; }
   .theater-mode-switch { gap: 18px; margin-bottom: 7px; }
   .theater-program-active .theater-caption { grid-row: 2; }
   .theater-program-active .theater-verdict { grid-row: 3; }
-  .theater-program-active .theater-reel-controls { grid-row: 4; }
   .theater-mode-switch button { font-size: 10px; min-height: 44px; }
   .theater-program-kicker { font-size: 18px; }
   .theater-program-line { font-size: 11px; }

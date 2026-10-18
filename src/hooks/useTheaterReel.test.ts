@@ -18,16 +18,16 @@ beforeEach(() => { vi.useFakeTimers(); TestImage.instances = []; vi.stubGlobal('
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe('projection lifecycle', () => {
-  it('holds the visible picture until the next loads and manual changes pause the reel', () => {
+  it('holds the visible picture until the automatic next scene loads', () => {
     const { result } = renderHook(() => useTheaterReel(games, false));
     loaded('a');
-    act(() => result.current.move(1));
+    act(() => vi.advanceTimersByTime(16000));
     expect(result.current.current?.id).toBe('a');
     expect(result.current.pending).toBe(true);
     loaded('b');
     expect(result.current.current?.id).toBe('b');
     expect(result.current.previous?.id).toBe('a');
-    expect(result.current.paused).toBe(true);
+    expect(result.current.playing).toBe(true);
     act(() => vi.advanceTimersByTime(3000));
     expect(result.current.previous).toBeUndefined();
   });
@@ -41,10 +41,10 @@ describe('projection lifecycle', () => {
     loaded('b');
     expect(result.current.current?.id).toBe('b');
   });
-  it('ignores late image completions after a different scene is requested', () => {
-    const { result } = renderHook(() => useTheaterReel(games, false));
+  it('ignores late image completions after its case is removed', () => {
+    const { result, rerender } = renderHook(({ rows }) => useTheaterReel(rows, false), { initialProps: { rows: games } });
     const lateLoad = lastImage('a').onload!;
-    act(() => result.current.move(1));
+    rerender({ rows: games.slice(1) });
     loaded('b');
     act(() => lateLoad());
     expect(result.current.current?.id).toBe('b');
@@ -81,14 +81,13 @@ describe('projection lifecycle', () => {
     expect(result.current.current?.id).toBe('a');
     expect(result.current.playing).toBe(false);
   });
-  it('respects reduced motion and retains manual navigation', () => {
+  it('respects reduced motion without advancing the scene', () => {
     vi.spyOn(window, 'matchMedia').mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() } as unknown as MediaQueryList);
     const { result } = renderHook(() => useTheaterReel(games, false));
     loaded('a');
     act(() => vi.advanceTimersByTime(20000));
     expect(result.current.pending).toBe(false);
-    act(() => result.current.move(1)); loaded('b');
-    expect(result.current.current?.id).toBe('b');
+    expect(result.current.current?.id).toBe('a');
     expect(result.current.playing).toBe(false);
   });
   it('removes deleted pictures immediately and cancels callbacks on unmount', () => {
@@ -102,3 +101,4 @@ describe('projection lifecycle', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 });
+
