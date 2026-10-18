@@ -190,7 +190,7 @@ const TheEnd = ({
         ...(formData.victimsSaved != null && { victimsSaved: formData.victimsSaved }),
         ...(formData.victimsKilled != null && { victimsKilled: formData.victimsKilled }),
         ...(formData.roundsPlayed != null && {roundsPlayed:formData.roundsPlayed}),
-        ...(result.playEvents?.length && {playSummary:playStoryBeats(result.playEvents)}),
+        ...(result.playEvents?.length && {playSummary:playStoryBeats(result.playEvents, result)}),
         ...(formData.endingSubLocation && { endingSubLocation: formData.endingSubLocation }),
         ...(formData.gameHighlights && { gameHighlights: formData.gameHighlights }),
       };

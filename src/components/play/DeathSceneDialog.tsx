@@ -22,6 +22,7 @@ import {
   playMechanisms,
 } from "@/lib/play/catalog";
 import { useDeathScenes } from "@/hooks/play/useDeathScenes";
+import { BUDDIES, SPECIAL_VICTIMS } from "@/lib/play/modules";
 interface Props {
   sessionId: string;
   selection: DeathSelection;
@@ -55,6 +56,7 @@ export function DeathSceneDialog({
     mechanism: facts?.mechanism ?? "",
     terrorCard: facts?.terrorCard ?? "",
     eventCard: facts?.eventCard ?? "",
+    attacker: facts?.attacker ?? "",
   };
   const [values, setValues] = useState<PlayDetails>(() => ({
     ...initial,
@@ -125,13 +127,16 @@ export function DeathSceneDialog({
     return (
       <span className="play-card-note">
         {card?.effect ?? "Effect not verified. Add what happened below."}
-        {card && (
+        {card && /^https?:\/\//.test(card.source) && (
           <>
             {" "}
             <a href={card.source} target="_blank" rel="noopener noreferrer">
               Source
             </a>
           </>
+        )}
+        {card && !/^https?:\/\//.test(card.source) && (
+          <> Source: {card.source}.</>
         )}
       </span>
     );
@@ -167,6 +172,22 @@ export function DeathSceneDialog({
       </p>
       <div className="play-death-fields">
         <label>
+          Who or what attacked?
+          <input
+            aria-label="Death attacker"
+            maxLength={120}
+            list="play-attacker-options"
+            value={values.attacker ?? ""}
+            onChange={(e) => update("attacker", e.target.value)}
+            placeholder="Optional, leave blank for a hazard"
+          />
+          <datalist id="play-attacker-options">
+            <option value={selection.killer} />
+            {selection.killer === "Billy the Bear" &&
+              BUDDIES.map((b) => <option key={b.id} value={b.name} />)}
+          </datalist>
+        </label>
+        <label>
           Where?
           <input
             aria-label="Death location"
@@ -197,7 +218,7 @@ export function DeathSceneDialog({
           </select>
         </label>
         <label>
-          How / attacker
+          How?
           <input
             aria-label="Death mechanism"
             value={values.mechanism ?? ""}
@@ -219,8 +240,20 @@ export function DeathSceneDialog({
             value={values.victim ?? ""}
             onChange={(e) => update("victim", e.target.value)}
             maxLength={120}
+            list={
+              selection.location === "Buddyland"
+                ? "play-victim-options"
+                : undefined
+            }
             placeholder="Anonymous victim"
           />
+          {selection.location === "Buddyland" && (
+            <datalist id="play-victim-options">
+              {SPECIAL_VICTIMS.map((v) => (
+                <option key={v.id} value={v.name} />
+              ))}
+            </datalist>
+          )}
         </label>
         <label>
           Terror card

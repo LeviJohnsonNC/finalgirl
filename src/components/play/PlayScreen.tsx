@@ -19,6 +19,7 @@ import {
 } from "@/lib/play/events";
 import { PlayTimeline } from "./PlayTimeline";
 import "@/styles/play.css";
+import { BUDDYLAND_ITEMS } from "@/lib/play/modules";
 
 export interface PlayScreenProps {
   killer: string;
@@ -387,11 +388,6 @@ export function PlayScreen(props: PlayScreenProps) {
           })}
         </div>
       </section>
-      {props.moduleControls && (
-        <section className="play-panel" aria-label="Module tracking">
-          {props.moduleControls}
-        </section>
-      )}
       {props.deathPanel}
       <section className="play-panel play-moments" aria-label="Remember this">
         <h2>
@@ -411,6 +407,11 @@ export function PlayScreen(props: PlayScreenProps) {
                 "Add detail"}
               <input
                 aria-label="Moment detail"
+                list={
+                  moment.momentType === "item" && location === "Buddyland"
+                    ? "play-item-options"
+                    : undefined
+                }
                 maxLength={240}
                 value={momentDetail}
                 onChange={(e) =>
@@ -418,6 +419,13 @@ export function PlayScreen(props: PlayScreenProps) {
                 }
                 onBlur={saveMoment}
               />
+              {moment.momentType === "item" && location === "Buddyland" && (
+                <datalist id="play-item-options">
+                  {BUDDYLAND_ITEMS.map((item) => (
+                    <option key={item.id} value={item.name} />
+                  ))}
+                </datalist>
+              )}
             </label>
             <button
               onClick={() => {
@@ -429,6 +437,11 @@ export function PlayScreen(props: PlayScreenProps) {
           </div>
         )}
       </section>
+      {props.moduleControls && (
+        <section className="play-panel" aria-label="Module tracking">
+          {props.moduleControls}
+        </section>
+      )}
       <p role="status" className="play-feedback">
         {message}
       </p>

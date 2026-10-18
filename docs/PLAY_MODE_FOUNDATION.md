@@ -22,9 +22,12 @@ The existing AI scene generator and narration cache remain in use. New mechanism
 | The Organism Terror | 1 | 0 | Full inventory and effects |
 | Maple Lane Events | 1 | 1 | Remaining deck |
 | Sunnydaze Mall Events | 1 | 1 | Remaining deck |
-| **Total researched records** | **50** | **10** | Other decks remain incomplete |
+| Billy Terror | 11 | 11 | Photographed deck covered |
+| Buddyland Terror | 8 | 8 | Photographed deck covered |
+| Buddyland Events | 10 | 10 | Photographed deck covered |
+| **Total researched records** | **79** | **39** | Other decks remain incomplete |
 
-Existing location catalogs provide additional Event-name suggestions, including Buddyland's previously owner-supplied names. Their older, unverified descriptions are not promoted to researched effects. Free-text card names, mechanisms and board spaces work everywhere.
+Existing location catalogs provide additional Event-name suggestions. Their older, unverified descriptions are not promoted to researched effects. Buddyland's October 18 owner photographs now supply verified effects in the shared catalog; see [BUDDYLAND_PLAY.md](BUDDYLAND_PLAY.md). Free-text card names, mechanisms and board spaces work everywhere.
 
 ### Sources
 
@@ -47,7 +50,7 @@ Several Fandom pages were blocked or had incomplete indexed text. A card title, 
 
 The functional foundation is ready for the UI pass once checks pass. The dedicated mobile pass can refine density, sticky counter placement and one-handed use; the functional tests already exercise small portrait phones, landscape, tablets and desktop.
 
-Future module tracking enters through `PlayScreen.moduleControls`, displayed only when populated. Multiple killer health systems, Exposed Victim/testing state, helicopter progress, and other module mechanics remain outside this pass. No empty placeholder is displayed.
+Module tracking enters through `PlayScreen.moduleControls`, displayed only when populated. Billy and Buddyland now use that extension point. Multiple killer health systems, Exposed Victim/testing state, helicopter progress, and other modules remain follow-up work. No empty placeholder is displayed.
 
 The AI-death pass still needs complete verified card effects, a broader board-space catalog, module-specific cause coverage, and prose/narration evaluation. For the first complete module, Station 2891 plus The Organism needs the missing effects listed above and the remaining Organism Terror cards. Card photos or scans are the most direct way to close gaps.
 

@@ -1,4 +1,11 @@
 /** Immutable observations, shared by the app and edge runtime. */
+import {
+  validModuleObservation,
+  describeModule,
+  moduleStoryBeats,
+  type ModuleObservation,
+  type ModuleSelection,
+} from "./modules.ts";
 export const DEATH_CAUSES = [
   "unspecified",
   "killer",
@@ -30,6 +37,7 @@ export type PlayKind =
   | "adjust"
   | "state"
   | "moment"
+  | "module"
   | "details"
   | "reduce"
   | "undo"
@@ -42,6 +50,7 @@ export interface PlayDetails {
   mechanism?: string;
   terrorCard?: string;
   eventCard?: string;
+  attacker?: string;
   detail?: string;
 }
 export interface PlayEvent extends PlayDetails {
@@ -56,6 +65,7 @@ export interface PlayEvent extends PlayDetails {
   value?: number | null;
   target?: string;
   momentType?: MomentType;
+  moduleData?: ModuleObservation;
 }
 export interface PlaySummary {
   tracked: boolean;
@@ -81,6 +91,7 @@ export const DETAIL_FIELDS = [
   "mechanism",
   "terrorCard",
   "eventCard",
+  "attacker",
   "detail",
 ] as const;
 export function validPlayDetails(input: unknown): input is PlayDetails {
@@ -133,6 +144,8 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
       );
     case "moment":
       return typeof e.text === "string" && e.text.trim().length > 0;
+    case "module":
+      return validModuleObservation(e.moduleData);
     case "details":
     case "reduce":
     case "undo":
@@ -261,7 +274,7 @@ export function describeEvent(e: PlayEvent): string {
     case "saved":
       return `Saved ${e.quantity} victim${e.quantity === 1 ? "" : "s"}`;
     case "killed":
-      return `${e.quantity} victim${e.quantity === 1 ? "" : "s"} killed${e.room ? ` at ${e.room}` : ""}${e.cause && e.cause !== "unspecified" ? ` (${e.cause})` : ""}${e.mechanism ? `, ${e.mechanism}` : ""}${e.victim ? `, ${e.victim}` : ""}${e.terrorCard ? `, Terror: ${e.terrorCard}` : ""}${e.eventCard ? `, Event: ${e.eventCard}` : ""}${e.text ? `: ${e.text}` : ""}`;
+      return `${e.quantity} victim${e.quantity === 1 ? "" : "s"} killed${e.room ? ` at ${e.room}` : ""}${e.attacker ? ` by ${e.attacker}` : ""}${e.cause && e.cause !== "unspecified" ? ` (${e.cause})` : ""}${e.mechanism ? `, ${e.mechanism}` : ""}${e.victim ? `, ${e.victim}` : ""}${e.terrorCard ? `, Terror: ${e.terrorCard}` : ""}${e.eventCard ? `, Event: ${e.eventCard}` : ""}${e.text ? `: ${e.text}` : ""}`;
     case "round":
       return "Next round";
     case "adjust":
@@ -272,15 +285,29 @@ export function describeEvent(e: PlayEvent): string {
       return `${{ finalGirlHealth: "Final Girl Health", killerHealth: "Killer Health", finalHorrorLevel: "Horror", bloodlust: "Bloodlust" }[e.field!]}: ${e.value === null ? "no longer tracked" : e.value}`;
     case "moment":
       return `${e.text}${e.detail ? `: ${e.detail}` : ""}`;
+    case "module":
+      return e.moduleData ? describeModule(e.moduleData) : "";
     default:
       return "";
   }
 }
-export function playStoryBeats(log: readonly PlayEvent[]): string {
+export function playStoryBeats(
+  log: readonly PlayEvent[],
+  selection?: ModuleSelection,
+): string {
   const s = summarizePlay(log);
   if (!s.tracked) return "";
   // Reserve most context for explicit moments; routine taps cannot crowd them out.
-  const moments = s.entries.filter((e) => e.kind === "moment");
+  const moments = s.entries.filter(
+    (e) =>
+      e.kind === "moment" ||
+      (e.kind === "module" &&
+        e.moduleData?.module === "buddyland" &&
+        Object.entries(e.moduleData.changes).some(
+          ([key, value]) =>
+            /^item\..+\.status$/.test(key) && value === "carried",
+        )),
+  );
   const chosen = new Set(
     [
       ...moments.slice(0, 1),
@@ -294,7 +321,14 @@ export function playStoryBeats(log: readonly PlayEvent[]): string {
       (e) =>
         `${e.currentRound ? `Round ${e.currentRound}: ` : ""}${describeEvent(e).replace(/[—–]/g, ",").slice(0, 145)}`,
     );
-  return lines.join("\n").slice(0, 1800);
+  const moduleBeats = selection
+    ? moduleStoryBeats(selection, s.entries).replace(/[—–]/g, ",").slice(0, 900)
+    : "";
+  if (!moduleBeats) return lines.join("\n").slice(0, 1800);
+  return `${lines.join("\n").slice(0, 875)}\nModule observations:\n${moduleBeats}`.slice(
+    0,
+    1800,
+  );
 }
 export function newPlayEvent(fields: Omit<PlayEvent, "id" | "at">): PlayEvent {
   const event = { ...fields, id: crypto.randomUUID(), at: Date.now() };

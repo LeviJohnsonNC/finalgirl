@@ -1,5 +1,7 @@
 import {DeathSceneDialog} from '@/components/play/DeathSceneDialog';
 import { PlayScreen } from '@/components/play/PlayScreen';
+import { BuddylandControls } from '@/components/play/BuddylandControls';
+import { validModuleObservation, moduleState } from '@/lib/play/modules';
 import { newPlayEvent, summarizePlay, type PlayDetails, type PlayEvent } from '@/lib/play/events';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Volume2, VolumeX, Loader2, ScrollText } from 'lucide-react';
@@ -272,6 +274,14 @@ const NowPlaying = ({
   const finishPlay = (outcome: 'won' | 'lost') => {
     const entries = summarizePlay(playEvents).entries;
     for (const [id, draft] of Object.entries(playDrafts)) {
+      if (id.startsWith('module:') && draft.detail !== undefined) {
+        const [,module,key] = id.split(':');
+        const observation = {module, changes:{[key]:draft.detail.trim() || null}};
+        if (validModuleObservation(observation) && moduleState(entries, observation.module)[key] !== observation.changes[key]) {
+          if (!onPlayEvent?.(newPlayEvent({kind:'module', moduleData:observation}))) return;
+        }
+        continue;
+      }
       const entry = entries.find(e => e.id === id);
       if (!entry) continue;
       const changed = entry.kind === 'moment' ? draft.detail !== undefined && draft.detail !== entry.detail
@@ -287,6 +297,7 @@ const NowPlaying = ({
     onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying} hasStory={Boolean(story)}
     showDeathDetails={showDeathPanel} onShowDeathDetails={enabled => onCheckpoint({showDeathPanel: enabled})}
     drafts={playDrafts} onDraft={saveDraft}
+    moduleControls={(killer === 'Billy the Bear' || location === 'Buddyland' || ['Rena','Gwynn'].includes(finalGirl)) ? <BuddylandControls killer={killer} location={location} finalGirl={finalGirl} events={playEvents} onEvent={recordPlayEvent} drafts={playDrafts} onDraft={saveDraft}/> : undefined}
     deathPanel={deathEventId && syncPlayNow ? <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl}} events={playEvents} eventId={deathEventId} draft={playDrafts[deathEventId]} onDraft={saveDraft} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/> : undefined}
     onDeath={event=>setDeathEventId(event.id)}/>;
 

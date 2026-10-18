@@ -24,7 +24,7 @@ describe('Bad Times at Buddyland', () => {
     expect(events.map(e => e.name)).toEqual(expect.arrayContaining(['Nick the Janitor', 'Birthday Girl', 'Pizza Delivery', 'Sing-A-Long']));
     expect(events.find(e => e.name === 'Birthday Girl')?.description).toContain('4 Time');
     expect(events.find(e => e.name === 'Buddy Up')?.description).toContain('at least 2');
-    expect(events.find(e => e.name === 'Sing-A-Long')?.description).toContain('Increase Horror by 1 during each Upkeep');
+    expect(events.find(e => e.name === 'Sing-A-Long')?.description).toContain('Draw a Terror card during each Upkeep');
   });
 
   it('has real, distinct artwork in both casting preferences and a cover', () => {
