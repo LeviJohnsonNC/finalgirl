@@ -1,6 +1,6 @@
 import {DeathSceneDialog} from '@/components/play/DeathSceneDialog';
 import { PlayScreen } from '@/components/play/PlayScreen';
-import type { PlayEvent } from '@/lib/play/events';
+import { newPlayEvent, summarizePlay, type PlayDetails, type PlayEvent } from '@/lib/play/events';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Volume2, VolumeX, Loader2, ScrollText } from 'lucide-react';
 import { SpecialRulesModal, getApplicableSpecialRules } from '@/components/SpecialRulesModal';
@@ -30,13 +30,14 @@ interface NowPlayingProps {
   sessionId: string;
   playEvents?: PlayEvent[];
   playMode?: boolean;
+  playDrafts?: Record<string, PlayDetails>;
   showDeathPanel?: boolean;
   syncPlayNow?: ()=>Promise<boolean>;
   onPlayEvent?: (event: PlayEvent) => boolean;
   initialStory?: string;
   initialSceneImageUrl?: string;
   initialVisualBible?: string;
-  onCheckpoint: (updates: Partial<ActiveGame>) => void;
+  onCheckpoint: (updates: Partial<ActiveGame>) => boolean | void;
   killer: string;
   location: string;
   finalGirl: string;
@@ -50,7 +51,7 @@ interface NowPlayingProps {
 }
 
 const NowPlaying = ({
-  playEvents = [], playMode = false, showDeathPanel = false, syncPlayNow, onPlayEvent,
+  playEvents = [], playDrafts = {}, playMode = false, showDeathPanel = true, syncPlayNow, onPlayEvent,
   sessionId, initialStory, initialSceneImageUrl, initialVisualBible, onCheckpoint,
   killer,
   location,
@@ -264,15 +265,30 @@ const NowPlaying = ({
     if (event.kind==='killed' && showDeathPanel) setDeathEventId(event.id);
     return true;
   };
-  if (playMode && onPlayEvent) return <><PlayScreen killer={killer} location={location} finalGirl={finalGirl}
+  const saveDraft = (id: string, draft: PlayDetails) => {
+    if (JSON.stringify(playDrafts[id]) === JSON.stringify(draft)) return true;
+    return onCheckpoint({playDrafts: {[id]: draft}}) !== false;
+  };
+  const finishPlay = (outcome: 'won' | 'lost') => {
+    const entries = summarizePlay(playEvents).entries;
+    for (const [id, draft] of Object.entries(playDrafts)) {
+      const entry = entries.find(e => e.id === id);
+      if (!entry) continue;
+      const changed = entry.kind === 'moment' ? draft.detail !== undefined && draft.detail !== entry.detail
+        : entry.kind === 'killed' && Object.entries(draft).some(([key, value]) => value !== (entry[key as keyof PlayEvent] ?? (key === 'cause' ? 'unspecified' : '')));
+      if (changed && !onPlayEvent?.(newPlayEvent({kind: 'details', target: id, ...draft}))) return;
+    }
+    onGameEnd(outcome, !isGenerating && !error ? story || undefined : undefined, sceneImageUrl || undefined, visualBible);
+  };
+  if (playMode && onPlayEvent) return <PlayScreen killer={killer} location={location} finalGirl={finalGirl}
     imageUrl={sceneImageUrl || bgImage} events={playEvents} onEvent={recordPlayEvent}
     onExit={() => onCheckpoint({ playMode: false })}
-    onFinish={outcome => onGameEnd(outcome, !isGenerating && !error ? story || undefined : undefined, sceneImageUrl || undefined, visualBible)}
+    onFinish={finishPlay}
     onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying} hasStory={Boolean(story)}
-    deathControls={<label className="type-caption text-muted-foreground flex gap-3 items-start"><input type="checkbox" className="mt-1 accent-primary" checked={showDeathPanel} onChange={e=>onCheckpoint({showDeathPanel:e.target.checked})}/><span>Open death details after a kill. Scene generation stays optional.</span></label>}
-    onDeath={event=>setDeathEventId(event.id)}/>
-    {deathEventId && syncPlayNow && <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl}} events={playEvents} eventId={deathEventId} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/>}
-    </>;
+    showDeathDetails={showDeathPanel} onShowDeathDetails={enabled => onCheckpoint({showDeathPanel: enabled})}
+    drafts={playDrafts} onDraft={saveDraft}
+    deathPanel={deathEventId && syncPlayNow ? <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl}} events={playEvents} eventId={deathEventId} draft={playDrafts[deathEventId]} onDraft={saveDraft} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/> : undefined}
+    onDeath={event=>setDeathEventId(event.id)}/>;
 
   return (
     <NarrationLayout

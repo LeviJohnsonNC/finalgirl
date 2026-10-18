@@ -7,12 +7,14 @@ interface Props {
   events: PlayEvent[];
   onToggle?: (event: PlayEvent, undone: boolean) => void;
   onDeath?: (event: PlayEvent) => void;
+  onMoment?: (event: PlayEvent) => void;
+  limit?: number;
 }
-export function PlayTimeline({ events, onToggle, onDeath }: Props) {
+export function PlayTimeline({ events, onToggle, onDeath, onMoment, limit = 100 }: Props) {
   const summary = summarizePlay(events);
   const originals = events
     .filter((e) => !['undo', 'restore', 'details'].includes(e.kind))
-    .slice(-100)
+    .slice(-limit)
     .reverse();
   return (
     <section aria-label="Game timeline" className="space-y-3">
@@ -56,6 +58,7 @@ export function PlayTimeline({ events, onToggle, onDeath }: Props) {
                     <span className="sr-only"> {describeEvent(entry)}</span>
                   </button>
                 )}
+                {onMoment && entry.kind === 'moment' && !undone && <button type="button" className="type-caption underline min-h-[44px]" onClick={() => onMoment(entry)}>Edit detail</button>}
                 {onDeath && entry.kind === 'killed' && !undone && (
                   <button
                     type="button"
@@ -70,7 +73,7 @@ export function PlayTimeline({ events, onToggle, onDeath }: Props) {
           );
         })}
       </ol>
-      {events.length > 100 && (
+      {events.length > 100 && limit === 100 && (
         <p className="type-caption text-muted-foreground">
           Showing the latest 100 observations. The complete log remains saved.
         </p>

@@ -1,7 +1,7 @@
 import { GameResult } from '@/hooks/useGameHistory';
 
-/** Final Girl's horror track runs 1–7. */
-export const HORROR_LEVELS = [1, 2, 3, 4, 5, 6, 7] as const;
+/** Final Girl's horror track runs 0–7. */
+export const HORROR_LEVELS = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 
 export interface HorrorBin {
   level: number;
@@ -39,7 +39,7 @@ export const buildHorrorDistribution = (games: GameResult[]): { bins: HorrorBin[
     const level = game.finalHorrorLevel;
     if (level == null) return;
     const bin = bins.find((b) => b.level === level);
-    // A level outside 1–7 is bad data, not a new bin.
+    // A level outside 0–7 is bad data, not a new bin.
     if (!bin) return;
     bin.games += 1;
     recorded += 1;

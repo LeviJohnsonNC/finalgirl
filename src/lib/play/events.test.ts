@@ -37,3 +37,43 @@ describe('play observations', () => {
     expect(summarizePlay(log).finalGirlHealth).toBe(1);
   });
 });
+
+describe('corrections and meaningful moments', () => {
+  it('decrements the matching counter without touching intervening moments', async () => {
+    const {decrementPlay} = await import('./events');
+    const death = event({kind: 'killed', quantity: 1});
+    const moment = event({kind: 'moment', text: 'Narrow escape', momentType: 'escape'});
+    const log = [event({kind: 'start', saved: 0, killed: 0, round: 1}), death, moment];
+    const correction = event(decrementPlay(log, 'killed')!);
+    expect(summarizePlay([...log, correction])).toMatchObject({killed: 0});
+    expect(playStoryBeats([...log, correction])).toContain('Narrow escape');
+    expect(decrementPlay([...log, correction], 'killed')).toBeNull();
+    expect(decrementPlay(log, 'round')).toBeNull();
+  });
+  it('partially corrects legacy groups and allows undoing the correction', async () => {
+    const {decrementPlay} = await import('./events');
+    const group = event({kind:'killed',quantity:3,room:'Kitchen'});
+    const log = [event({kind:'start',saved:0,killed:0,round:1}),group];
+    const correction = event(decrementPlay(log,'killed')!);
+    const summary = summarizePlay([...log,correction]);
+    expect(summary.killed).toBe(2);
+    expect(summary.entries.find(e=>e.id===group.id)).toMatchObject({quantity:2,room:'Kitchen'});
+    expect(summarizePlay([...log,correction,event({kind:'undo',target:correction.id})]).killed).toBe(3);
+  });
+  it('corrects legacy baselines and leaves unknown rounds unknown', async () => {
+    const {decrementPlay} = await import('./events');
+    const log = [event({kind:'start',saved:4,killed:2,round:null})];
+    expect(summarizePlay([...log,event(decrementPlay(log,'saved')!)])).toMatchObject({saved:3,killed:2,round:null});
+  });
+  it('keeps a weapon and its edited detail despite many routine observations', () => {
+    const item = event({kind:'moment',text:'Found a weapon or key item',momentType:'item'});
+    const log = [event({kind:'start',saved:0,killed:0,round:1}),item,event({kind:'details',target:item.id,detail:'Flamethrower'}),...Array.from({length:40},()=>event({kind:'state',field:'bloodlust',value:5}))];
+    expect(playStoryBeats(log)).toContain('Flamethrower');
+    expect(playStoryBeats([...log,event({kind:'undo',target:item.id})])).not.toContain('Flamethrower');
+  });
+  it('records zero Horror and clears optional tracking without fabricating a value', () => {
+    const log = [event({kind:'start',saved:0,killed:0,round:1}),event({kind:'state',field:'finalHorrorLevel',value:0})];
+    expect(summarizePlay(log).finalHorrorLevel).toBe(0);
+    expect(summarizePlay([...log,event({kind:'state',field:'finalHorrorLevel',value:null})]).finalHorrorLevel).toBeUndefined();
+  });
+});

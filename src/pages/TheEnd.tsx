@@ -183,7 +183,7 @@ const TheEnd = ({
         // Character-specific max health so the AI can contextualise HP fractions
         finalGirlMaxHealth,
         // Game stats from form
-        ...(formData.finalHorrorLevel && { finalHorrorLevel: formData.finalHorrorLevel }),
+        ...(formData.finalHorrorLevel !== undefined && { finalHorrorLevel: formData.finalHorrorLevel }),
         ...(formData.weaponUsed && { weaponUsed: formData.weaponUsed }),
         ...(formData.finalGirlHealth !== undefined && { finalGirlHealth: formData.finalGirlHealth }),
         ...(endingKillerHealth !== undefined && { killerHealth: endingKillerHealth }),

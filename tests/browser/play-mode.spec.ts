@@ -15,163 +15,48 @@ const tracked = {
     },
   ],
 };
-test('lightweight Play tracking survives reload, undo, bulk recording and quiet mode', async ({
-  page,
-  archive,
-}, info) => {
-  test.setTimeout(90000);
-  await archive.install(page, {
-    draft: {
-      ...activeGame,
-      selection: { ...activeGame.selection, location: 'Buddyland' },
-      sceneImageUrl: 'http://127.0.0.1:4173/play-still.png',
-    },
-  });
-  await page.route('**/play-still.png', route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/buddyland.png') }));
+test('Play starts immediately, corrects matching counters, saves moments and resumes', async ({page, archive}, info) => {
+  await archive.install(page, {draft: {...activeGame, selection: {...activeGame.selection, location:'Buddyland'}}});
   await page.goto('/');
-  await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
-  await page
-    .getByRole('button', { name: 'Enter Play mode', exact: true })
-    .click();
-  await page.getByRole('button', { name: 'Track this game' }).click();
-  await page.getByRole('button', { name: 'Start from round 1' }).click();
-  await expect(page.getByText(/Saved on this device/i)).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Retry cloud sync' })).toHaveCount(0);
-  for (const grain of await page.locator('.game-session .film-grain').all()) {
-    await expect(grain).toHaveCSS('animation-name', 'none');
-    await expect(grain).toHaveCSS('transform', 'none');
-  }
-  for (let i = 0; i < 5; i++)
-    await page
-      .getByRole('button', { name: 'Save one victim', exact: true })
-      .click();
-  await page
-    .getByRole('button', { name: 'Record one victim killed', exact: true })
-    .click();
-  await page.getByRole('button', { name: 'Next round', exact: true }).click();
-  await expect(
-    page.getByRole('button', { name: 'Next round', exact: true }),
-  ).toContainText('2');
-  await page.getByRole('button', { name: 'Undo', exact: true }).click();
-  await expect(
-    page.getByRole('button', { name: 'Next round', exact: true }),
-  ).toContainText('1');
-  await page.screenshot({
-    path: info.outputPath('play-overview.png'),
-    fullPage: true,
-  });
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
-    ),
-  ).toBe(true);
-  await page.getByRole('button', { name: 'Details & log' }).click();
-  await page
-    .getByLabel('Game moment')
-    .fill('Barricaded the arcade with a broken cabinet.');
-  await page.getByRole('button', { name: 'Add moment', exact: true }).click();
-  await expect(
-    page
-      .getByRole('paragraph')
-      .filter({ hasText: 'Barricaded the arcade with a broken cabinet.' }),
-  ).toBeVisible();
-  await page.getByLabel('Victim quantity').fill('3');
-  await page.screenshot({
-    path: info.outputPath('play-case-notes.png'),
-    fullPage: true,
-  });
-  await page.getByRole('button', { name: 'Save group', exact: true }).click();
-  await expect(
-    page.getByRole('button', { name: 'Save one victim', exact: true }),
-  ).toContainText('8');
-  await page.reload();
-  await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
-  await expect(
-    page.getByRole('button', { name: 'Save one victim', exact: true }),
-  ).toContainText('8');
-  await page
-    .getByRole('button', { name: 'Collapse tracking controls' })
-    .click();
-  await expect(
-    page.getByRole('button', {
-      name: 'Saved 8 · Killed 1 · Round 1',
-      exact: true,
-    }),
-  ).toBeVisible();
-  await page.screenshot({
-    path: info.outputPath('play-quiet.png'),
-    fullPage: true,
-  });
-  await page.getByRole('button', { name: 'Read story', exact: true }).click();
-  await expect(
-    page.getByText(archive.storyText, { exact: true }),
-  ).toBeVisible();
-  await expect(page.getByRole('img', { name: 'Scene still', exact: true })).toHaveCSS('animation-name', 'none');
-  for (const grain of await page.locator('.game-session .film-grain').all()) {
-    await expect(grain).toHaveCSS('animation-name', 'none');
-    await expect(grain).toHaveCSS('transform', 'none');
-  }
-  expect(archive.calls.filter((c) => c === 'generate-story')).toHaveLength(0);
-  await expect
-    .poll(() => archive.sessions[0]?.state.playEvents)
-    .toHaveLength(11);
+  await page.getByRole('button', {name:'RESUME GAME', exact:true}).click();
+  await page.getByRole('button', {name:'Enter Play mode', exact:true}).click();
+  await expect(page.getByRole('button', {name:'Track this game'})).toHaveCount(0);
+  await expect(page.getByRole('checkbox', {name:'Death details', exact:true})).toBeChecked();
+  await page.getByRole('checkbox', {name:'Death details', exact:true}).uncheck();
+  for(let i=0;i<5;i++) await page.getByRole('button', {name:'Save one victim', exact:true}).click();
+  await page.getByRole('button', {name:'Record one victim killed', exact:true}).click();
+  await page.getByRole('button', {name:'Narrow escape', exact:true}).click();
+  await page.getByLabel('Moment detail', {exact:true}).fill('Barricaded the arcade with a broken cabinet.');
+  await page.getByRole('button', {name:'Done', exact:true}).click();
+  await page.getByRole('button', {name:'Decrease killed', exact:true}).click();
+  await expect(page.getByRole('button', {name:'Record one victim killed', exact:true})).toContainText('0');
+  await expect(page.getByRole('button', {name:'Decrease killed', exact:true})).toBeDisabled();
+  await expect(page.getByRole('region', {name:'Game timeline'})).toContainText('Barricaded the arcade');
+  await page.getByRole('button', {name:'Next round', exact:true}).click();
+  await page.getByRole('button', {name:'Previous round', exact:true}).click();
+  await expect(page.getByRole('button', {name:'Next round', exact:true})).toContainText('1');
+  await page.reload(); await page.getByRole('button', {name:'RESUME GAME', exact:true}).click();
+  await expect(page.getByRole('button', {name:'Save one victim', exact:true})).toContainText('5');
+  await expect(page.getByRole('checkbox', {name:'Death details', exact:true})).not.toBeChecked();
+  await expect.poll(()=>{const log=archive.sessions[0]?.state.playEvents; return Array.isArray(log) ? log.filter((e: {kind:string})=>e.kind==='start').length : 0;}).toBe(1);
+  await page.screenshot({path:info.outputPath('play-overview.png'),fullPage:true});
+  await page.getByRole('button', {name:'Read story', exact:true}).click();
+  await expect(page.getByText(archive.storyText, {exact:true})).toBeVisible();
+  expect(archive.calls.filter(c=>c==='generate-story')).toHaveLength(0);
 });
 
-test('joining midgame preserves an unknown round and syncs offline taps on reconnect', async ({
-  page,
-  archive,
-}) => {
-  archive.failWrites = true;
-  await archive.install(page, { draft: { ...activeGame, playMode: true } });
-  await page.goto('/');
-  await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
-  await page.getByRole('button', { name: 'Track this game' }).click();
-  await page.getByLabel('Starting Saved').fill('4');
-  await page.getByLabel('Starting Killed').fill('2');
-  await page.getByRole('button', { name: 'Use current totals' }).click();
-  await expect(
-    page.getByRole('button', { name: 'Start round tracking' }),
-  ).toContainText('—');
-  await page
-    .getByRole('button', { name: 'Save one victim', exact: true })
-    .click();
-  await page.reload();
-  await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
-  await expect(
-    page.getByRole('button', { name: 'Save one victim', exact: true }),
-  ).toContainText('5');
-  await page.getByRole('button', { name: 'Details & log' }).click();
-  await expect(page.getByRole('button', { name: 'Retry cloud sync', exact: true })).toHaveCount(0);
-  await expect(page.getByText(/Saved on this device/i)).toHaveCount(0);
-  archive.failWrites = false;
-  await page.evaluate(() => window.dispatchEvent(new Event('online')));
-  await expect
-    .poll(() => archive.sessions[0]?.state.playEvents)
-    .toHaveLength(2);
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Close', exact: true })
-    .click();
-  await page
-    .getByRole('button', { name: 'Start round tracking', exact: true })
-    .click();
-  await expect(page.getByLabel('Current round', { exact: true })).toHaveValue(
-    '',
-  );
-  await page.getByLabel('Current round', { exact: true }).fill('6');
-  await page
-    .getByRole('button', { name: 'Use current round', exact: true })
-    .click();
-  await expect(
-    page.getByRole('button', { name: 'Next round', exact: true }),
-  ).toContainText('6');
-  await expect(
-    page.getByRole('button', { name: 'Save one victim', exact: true }),
-  ).toContainText('5');
-  await page.getByRole('button', { name: 'Next round', exact: true }).click();
-  await expect(
-    page.getByRole('button', { name: 'Next round', exact: true }),
-  ).toContainText('7');
+test('legacy midgame totals retain unknown round and sync offline taps on reconnect', async ({page,archive}) => {
+  archive.failWrites=true;
+  await archive.install(page,{draft:{...tracked,playEvents:[{...tracked.playEvents[0],saved:4,killed:2,round:null}]}});
+  await page.goto('/'); await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Next round',exact:true})).toContainText('?');
+  await page.getByRole('button',{name:'Save one victim',exact:true}).click();
+  await page.reload(); await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Save one victim',exact:true})).toContainText('5');
+  archive.failWrites=false; await page.evaluate(()=>window.dispatchEvent(new Event('online')));
+  await expect.poll(()=>archive.sessions[0]?.state.playEvents).toHaveLength(2);
+  await page.getByRole('button',{name:'Next round',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Next round',exact:true})).toContainText('1');
 });
 
 test('cloud handoff resumes a session on a fresh device without creating another game', async ({

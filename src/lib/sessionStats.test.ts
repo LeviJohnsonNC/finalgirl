@@ -21,8 +21,8 @@ describe('buildHorrorDistribution', () => {
       game({ finalHorrorLevel: 4 }),
     ]);
 
-    expect(bins).toHaveLength(7);
-    expect(bins.map((b) => b.games)).toEqual([1, 0, 0, 2, 0, 0, 0]);
+    expect(bins).toHaveLength(8);
+    expect(bins.map((b) => b.games)).toEqual([0, 1, 0, 0, 2, 0, 0, 0]);
     expect(recorded).toBe(3);
   });
 
@@ -32,13 +32,19 @@ describe('buildHorrorDistribution', () => {
     expect(bins.reduce((sum, b) => sum + b.games, 0)).toBe(1);
   });
 
+  it('counts recorded zero separately from an unrecorded level', () => {
+    const { bins, recorded } = buildHorrorDistribution([game({ finalHorrorLevel: 0 }), game()]);
+    expect(recorded).toBe(1);
+    expect(bins[0]).toMatchObject({ level: 0, games: 1 });
+  });
+
   it('drops out-of-range levels rather than inventing a bin for them', () => {
     const { bins, recorded } = buildHorrorDistribution([
-      game({ finalHorrorLevel: 0 }),
+      game({ finalHorrorLevel: -1 }),
       game({ finalHorrorLevel: 9 }),
       game({ finalHorrorLevel: 7 }),
     ]);
-    expect(bins).toHaveLength(7);
+    expect(bins).toHaveLength(8);
     expect(recorded).toBe(1);
   });
 });
