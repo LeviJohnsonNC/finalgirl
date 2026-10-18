@@ -2,7 +2,7 @@ import {DeathSceneDialog} from '@/components/play/DeathSceneDialog';
 import { PlayScreen } from '@/components/play/PlayScreen';
 import type { PlayEvent } from '@/lib/play/events';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ImageIcon, Volume2, VolumeX, Loader2, ScrollText } from 'lucide-react';
+import { Volume2, VolumeX, Loader2, ScrollText } from 'lucide-react';
 import { SpecialRulesModal, getApplicableSpecialRules } from '@/components/SpecialRulesModal';
 import { getModulePromptContext } from '@/data/rules/moduleRules';
 import { getMissionByName } from '@/data/falconwoodMissions';
@@ -20,11 +20,9 @@ import { FILM_THEMES } from '@/data/filmThemes';
 import { toast } from 'sonner';
 import nowPlayingBg from '@/assets/now-playing-bg.png';
 import projectorSound from '@/assets/sounds/projector-start.mp3';
-import { SceneImageFrame } from '@/components/SceneImageFrame';
+import { NarrationPhoto } from '@/components/NarrationPhoto';
 import { NarrationTransport } from '@/components/NarrationTransport';
-import { StickyOutcomeBar } from '@/components/StickyOutcomeBar';
-import { ProjectorLeader } from '@/components/ProjectorLeader';
-import { renderStoryText } from '@/lib/textFormatting';
+import { NarrationLayout, NarrationReader, NarrationTitle } from '@/components/NarrationLayout';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 
 import type { ActiveGame } from '@/lib/activeGame';
@@ -278,198 +276,42 @@ const NowPlaying = ({
     </>;
 
   return (
-    <div
-      className="relative min-h-[80vh]"
-      style={theme ? {
-        '--primary': theme.primary,
-        '--secondary': theme.secondary,
-      } as React.CSSProperties : undefined}
-    >
-      {/* Background Image — location-specific when available */}
-      <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"
-        style={{
-          backgroundImage: `url(${bgImage})`,
-          opacity: 0.4,
-        }}
-      />
-      
-      {/* Film Grain Overlay */}
-      <div className="film-grain fixed inset-0 pointer-events-none opacity-[0.07]" />
-      
-      {/* Vignette */}
-      <div className="vignette fixed inset-0 pointer-events-none" />
-      
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center py-6 sm:py-8 pt-16 sm:pt-24 px-3 sm:px-6">
-
-        {/* Title */}
-        <p className="type-caption text-primary/70 uppercase mb-1 text-center">
-          Now Playing
-        </p>
-        <h1 className="font-display text-2xl sm:text-3xl md:text-4xl text-foreground tracking-[0.1em] sm:tracking-[0.15em] uppercase mb-1 sm:mb-1 text-center">
-          {film?.name ?? 'Now Playing'}
-        </h1>
-        {theme?.tagline && (
-          <p className="type-caption text-muted-foreground/70 italic mb-2 text-center px-4">
-            {theme.tagline}
-          </p>
-        )}
-        <p className={`type-label text-muted-foreground text-center px-2 ${missionData ? 'mb-2' : 'mb-6 sm:mb-8'}`}>
-          {killer} vs {finalGirl} at {location}
-        </p>
-
-        {/* Mission — Falconwood's mandatory objective */}
-        {missionData && (
-          <div className="mb-6 sm:mb-8 max-w-xl text-center px-3">
-            <p className="type-caption uppercase text-primary tracking-[0.2em]">
-              Mission · {missionData.name}
-            </p>
-            <p className="type-caption text-muted-foreground/80 italic mt-1">
-              {missionData.description}
-            </p>
-          </div>
-        )}
-
-        {onPlayEvent && <button onClick={() => onCheckpoint({ playMode: true })} className="vcr-tape-button min-h-[48px] px-6 py-3 mb-6 font-display text-secondary tracking-widest uppercase">Enter Play mode</button>}
-
-        {/* Story Container */}
-        <div className="w-full max-w-7xl flex flex-col gap-4 sm:gap-6">
-          {/* Action Buttons — Reshoot now lives on the film frame itself */}
-          {story && (
-            <div className="flex flex-col items-center gap-3">
-            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-2 sm:gap-3 px-2 w-full sm:w-auto">
-              {/* Row 1: Narrate — full width on mobile */}
-              <button
-                onClick={handleNarrate}
-                disabled={isNarrating || isGenerating}
-                className="vcr-tape-button flex items-center justify-center gap-2 px-4 sm:px-6 py-3 font-display text-xs sm:text-sm tracking-[0.1em] sm:tracking-[0.15em] uppercase transition-all duration-300 disabled:opacity-50 min-h-[44px] w-full sm:w-auto"
-              >
-                {isNarrating ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : isPlaying ? (
-                  <VolumeX className="w-4 h-4" />
-                ) : (
-                  <Volume2 className="w-4 h-4" />
-                )}
-                {isNarrating ? 'Generating...' : isPlaying ? 'Stop' : 'Narrate'}
-              </button>
-
-              {/* Special Rules — only when killer/location has dedicated rules */}
-              {applicableSpecialRules.length > 0 && (
-                <SpecialRulesModal killer={killer} location={location}>
-                  <button className="vcr-tape-button flex items-center justify-center gap-2 px-4 sm:px-6 py-3 font-display text-xs sm:text-sm tracking-[0.1em] sm:tracking-[0.15em] uppercase transition-all duration-300 min-h-[44px] w-full sm:w-auto">
-                    <ScrollText className="w-4 h-4 shrink-0" />
-                    <span>Special Rules</span>
-                  </button>
-                </SpecialRulesModal>
-              )}
-            </div>
-
-            {isPlaying && (
-              <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} />
-            )}
-            </div>
-          )}
-          
-          {/* Story + Still.
-              Two columns only from xl up: below that the pair is stacked with
-              the still leading, because splitting 960px between a 500px picture
-              and a column of prose leaves neither enough room.
-              The story panel fills its track rather than being capped at 68ch.
-              That cap was measured in ch of the *page* font — VT323, whose
-              advance is 0.40em — so it resolved to roughly 435px instead of the
-              ~660px of 19px serif it was meant to describe, and the difference
-              showed up as dead space in the middle of the page. */}
-          <div
-            className={`w-full px-1 sm:px-0 ${
-              showImageSlot
-                ? 'grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(420px,520px)] gap-6 xl:gap-10'
-                : 'flex justify-center'
-            }`}
-          >
-            {showImageSlot && (
-              <div className="order-first xl:order-last w-full max-w-[520px] mx-auto xl:mx-0">
-                <div className="xl:sticky xl:top-24">
-                  <SceneImageFrame
-                    variant="scene"
-                    imageUrl={sceneImageUrl}
-                    isGenerating={isGeneratingImage}
-                    error={imageError}
-                    onRetry={() => developScene(sceneImageUrl || undefined)}
-                    caption={`Reel 01 · ${location}`}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Capped at a readable measure everywhere except the two-column
-                layout, where the track itself is already the right width. */}
-            <div
-              className={`scenario-description p-4 sm:p-8 rounded-sm w-full max-w-[46rem] mx-auto ${
-                showImageSlot ? 'xl:max-w-none xl:mx-0' : ''
-              }`}
-            >
-              {isGenerating ? (
-                <div className="flex flex-col items-center justify-center py-10 sm:py-16">
-                  <ProjectorLeader label="The projector is warming up" />
-                </div>
-              ) : error ? (
-                <div className="flex flex-col items-center justify-center py-8 sm:py-12 gap-4">
-                  <p className="type-label text-destructive text-center px-2">
-                    {error}
-                  </p>
-                  <button
-                    onClick={generateStory}
-                    className="font-display text-xs sm:text-sm tracking-wider uppercase px-4 py-2 vcr-tape-button min-h-[44px]"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              ) : story ? (
-                <div className="story-text story-intro story-text-dark">
-                  {renderStoryText(story)}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <p className="type-label text-muted-foreground">
-                    Waiting for the story...
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Outcome — also docks to the viewport once scrolled past, so the
-              end of a two-hour game is never a scroll hunt. */}
-          {(
-            <StickyOutcomeBar enabled>
-              <button
-                onClick={() => onGameEnd('won', !isGenerating && !error ? story || undefined : undefined, sceneImageUrl || undefined, visualBible)}
-                className="outcome-btn outcome-btn-won group relative w-full sm:w-auto min-w-[200px] sm:min-w-[240px] h-14 sm:h-16 overflow-hidden rounded-sm transition-all duration-200"
-              >
-                <span className="relative z-10 font-display text-xl sm:text-2xl tracking-[0.2em] uppercase text-secondary drop-shadow-lg">
-                  WON
-                </span>
-              </button>
-
-              <button
-                onClick={() => onGameEnd('lost', !isGenerating && !error ? story || undefined : undefined, sceneImageUrl || undefined, visualBible)}
-                className="outcome-btn outcome-btn-lost group relative w-full sm:w-auto min-w-[200px] sm:min-w-[240px] h-14 sm:h-16 overflow-hidden rounded-sm transition-all duration-200"
-              >
-                <span className="relative z-10 font-display text-xl sm:text-2xl tracking-[0.2em] uppercase text-primary drop-shadow-lg">
-                  LOST
-                </span>
-              </button>
-            </StickyOutcomeBar>
-          )}
-
+    <NarrationLayout
+      background={bgImage}
+      kind="opening"
+      heading={<>
+        <NarrationTitle title={film?.name ?? 'Now Playing'} />
+        {theme?.tagline && <p className="narration-tagline">{theme.tagline}</p>}
+        <p className="narration-cast">{killer} vs {finalGirl} at {location}</p>
+        {missionData && <details className="narration-mission">
+          <summary>Mission · {missionData.name}</summary>
+          <p>{missionData.description}</p>
+        </details>}
+      </>}
+      controls={<>
+        {onPlayEvent && <button onClick={() => onCheckpoint({ playMode: true })} className="narration-button narration-button--primary">Enter Play mode</button>}
+        <div className="narration-control-row">
+          {story && <button onClick={handleNarrate} disabled={isNarrating || isGenerating} className="narration-button narration-button--narrate">
+            {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" /> : isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            {isNarrating ? 'Generating...' : isPlaying ? 'Stop' : 'Narrate'}
+          </button>}
+          {applicableSpecialRules.length > 0 && <SpecialRulesModal killer={killer} location={location}>
+            <button className="narration-button narration-button--quiet"><ScrollText className="w-4 h-4 shrink-0" /><span>Special Rules</span></button>
+          </SpecialRulesModal>}
         </div>
-      </div>
-    </div>
+        {isPlaying && <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} />}
+      </>}
+      image={showImageSlot ? <NarrationPhoto variant="scene" imageUrl={sceneImageUrl} isGenerating={isGeneratingImage} error={imageError} onRetry={() => developScene(sceneImageUrl || undefined)} caption={`Reel 01 · ${location}`} /> : undefined}
+    >
+      <NarrationReader kind="opening" story={story} isGenerating={isGenerating} error={error} onRetry={generateStory} actions={<>
+        <span className="narration-result-label">Record result</span>
+        <div className="narration-result-buttons">
+          <button className="narration-result narration-result--won" onClick={() => onGameEnd('won', !isGenerating && !error ? story || undefined : undefined, sceneImageUrl || undefined, visualBible)}>WON</button>
+          <button className="narration-result narration-result--lost" onClick={() => onGameEnd('lost', !isGenerating && !error ? story || undefined : undefined, sceneImageUrl || undefined, visualBible)}>LOST</button>
+        </div>
+      </>} />
+    </NarrationLayout>
   );
 };
 
 export default NowPlaying;
-
-

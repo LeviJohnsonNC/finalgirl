@@ -312,17 +312,18 @@ const IndexContent = () => {
   };
 
   const isScrapbookOpen = currentPage === 'scrapbooks';
+  const isNarrationPage = (currentPage === 'nowPlaying' && !activeGame?.playMode) || currentPage === 'ending';
   const isGameSession = currentPage === 'nowPlaying' || currentPage === 'outcome' || currentPage === 'ending';
 
   return (
-    <div className={`min-h-screen bg-background relative overflow-x-hidden${isGameSession ? ' game-session' : ''}`}>
+    <div className={`min-h-screen bg-background relative overflow-x-hidden${isGameSession ? ' game-session' : ''}${isNarrationPage ? ' narration-session' : ''}`}>
       {/* Shared App Header — hidden on mobile when scrapbook is open */}
-      <div className={isScrapbookOpen ? 'hidden sm:block' : currentPage==='nowPlaying' && activeGame?.playMode ? 'play-active-header' : ''}>
+      {!isNarrationPage && <div className={isScrapbookOpen ? 'hidden sm:block' : currentPage==='nowPlaying' && activeGame?.playMode ? 'play-active-header' : ''}>
         <AppHeader onNavigateHome={handleNavigateHome} />
-      </div>
+      </div>}
       
       {/* Main Content — one Suspense boundary covers every lazy page */}
-      <main className="container mx-auto px-3 sm:px-4 pt-24 sm:pt-32 pb-28 relative z-10">
+      <main className={isNarrationPage ? "narration-main relative z-10" : "container mx-auto px-3 sm:px-4 pt-24 sm:pt-32 pb-28 relative z-10"}>
         <Suspense fallback={<PageLoading />}>
           {activeGame && currentPage !== activeGame.phase && resumeNotice}
           {cloudPlay.conflict && cloudNotice}{renderPage()}
@@ -330,7 +331,7 @@ const IndexContent = () => {
       </main>
 
       {/* News Ticker - above footer */}
-      {!(currentPage === 'nowPlaying' && activeGame?.playMode) && <NewsTicker />}
+      {!isNarrationPage && !(currentPage === 'nowPlaying' && activeGame?.playMode) && <NewsTicker />}
 
       {/* VHS Footer */}
       <footer
@@ -409,8 +410,10 @@ const IndexContent = () => {
                 <span className="hidden sm:inline">{user ? 'ACCOUNT' : 'SIGN IN'}</span>
               </button>
             )}
-            <VCRTime />
-            <span className="hidden sm:inline type-caption text-primary">SP</span>
+            {!isNarrationPage && <>
+              <VCRTime />
+              <span className="hidden sm:inline type-caption text-primary">SP</span>
+            </>}
           </div>
         </div>
       </footer>

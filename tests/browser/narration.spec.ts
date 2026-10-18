@@ -1,0 +1,93 @@
+import { resolve } from 'node:path';
+import { test, expect, gameId, installTestAudio } from './fixtures';
+
+const selection = { killer: 'Billy the Bear', location: 'Buddyland', finalGirl: 'Rena', setupScenario: 'Birthday Bash', startingEvent: 'Birthday Girl', mission: null, filmId: 's4-buddyland' };
+const paragraph = 'The chain on the side door of Buddyland had been cut years ago, though nobody in Rena’s group admitted knowing that before tonight. Her classmates entered in nervous pairs, flashlights skating over the Dining Area and the Prize Counter. From somewhere near the Party Room, a recorded child’s voice whispered, *“Nobody goes alone.”*';
+const story = Array.from({ length: 12 }, () => paragraph).join('\n\n');
+const stillUrl = 'http://127.0.0.1:4173/narration-still.png';
+const posterUrl = 'http://127.0.0.1:4173/narration-poster.png';
+const draft = { version: 1, id: gameId, phase: 'nowPlaying', selection, introStory: story, sceneImageUrl: stillUrl };
+const formData = { finalHorrorLevel: 4, finalGirlHealth: 2, killerHealth: 0, weaponUsed: 'Flashlight', victimsSaved: 3, victimsKilled: 6, endingSubLocation: 'Arcade', gameHighlights: '' };
+
+async function photos(page: import('@playwright/test').Page) {
+  await page.route('**/narration-still.png', route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/buddyland.png') }));
+  await page.route('**/narration-poster.png', route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/scrapbooks/final-girl-cover.png') }));
+}
+
+async function resume(page: import('@playwright/test').Page) {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'RESUME GAME' }).click();
+  await page.locator('.narration-title').waitFor();
+  await page.evaluate(() => document.fonts.ready);
+}
+
+test('opening reader supports long stories, full-size photos, narration and results', async ({ page, archive }, testInfo) => {
+  if (testInfo.project.name === 'desktop') await page.setViewportSize({ width: 1672, height: 941 });
+  await archive.install(page, { draft });
+  await installTestAudio(page);
+  await photos(page);
+  await resume(page);
+  const reader = page.getByRole('region', { name: 'Opening narration' });
+  const image = page.getByRole('img', { name: 'Scene still', exact: true });
+  await image.evaluate((img: HTMLImageElement) => img.decode());
+  await page.screenshot({ path: testInfo.outputPath('opening.png'), fullPage: true });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  if (testInfo.project.name === 'desktop') {
+    expect(await reader.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true);
+    await reader.focus();
+    await reader.press('End');
+    await expect.poll(() => reader.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
+    await expect(page.getByRole('button', { name: 'WON', exact: true })).toBeInViewport();
+  } else {
+    expect(await reader.evaluate(el => getComputedStyle(el).maxHeight)).toBe('none');
+  }
+  await page.getByRole('button', { name: 'View scene still full size' }).click();
+  await expect(page.getByRole('dialog').locator('img')).toHaveAttribute('src', stillUrl);
+  await page.getByRole('button', { name: 'Close', exact: true }).click();
+  await page.getByRole('button', { name: 'Narrate', exact: true }).click();
+  await expect(page.getByRole('progressbar', { name: 'Narration progress' })).toBeVisible();
+  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await page.getByRole('button', { name: 'Special Rules', exact: true }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByRole('button', { name: 'Close', exact: true }).click();
+  await page.getByRole('button', { name: 'WON', exact: true }).click();
+  await expect(page.getByLabel('Weapon Used', { exact: true })).toBeVisible();
+});
+
+for (const outcome of ['won', 'lost'] as const) {
+  test(`ending ${outcome} preserves the full portrait poster, narration and saved result`, async ({ page, archive }, testInfo) => {
+    if (testInfo.project.name === 'desktop') await page.setViewportSize({ width: 1672, height: 941 });
+    archive.history.push({ id: gameId, timestamp: 1, outcome, killer: selection.killer, location: selection.location, final_girl: selection.finalGirl, intro_story: story });
+    await archive.install(page, { draft: { ...draft, phase: 'ending', result: { ...selection, id: gameId, timestamp: 1, outcome }, endingStory: story, posterImageUrl: posterUrl, formData } });
+    await installTestAudio(page);
+    await photos(page);
+    await resume(page);
+    const poster = page.getByRole('img', { name: 'Movie poster', exact: true });
+    await poster.evaluate((img: HTMLImageElement) => img.decode());
+    const ratio = await poster.evaluate((img: HTMLImageElement) => img.clientWidth / img.clientHeight);
+    expect(Math.abs(ratio - 341 / 512)).toBeLessThan(.01);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await page.screenshot({ path: testInfo.outputPath(`ending-${outcome}.png`), fullPage: true });
+    await expect(page.getByRole('button', { name: 'SAVE', exact: true })).toBeInViewport();
+    await page.getByRole('button', { name: 'Narrate', exact: true }).click();
+    await expect(page.getByRole('progressbar', { name: 'Narration progress' })).toBeVisible();
+    await page.getByRole('button', { name: 'Stop', exact: true }).click();
+    await page.getByRole('button', { name: 'SAVE', exact: true }).click();
+    await expect.poll(() => archive.history[0]?.outcome).toBe(outcome);
+    await expect.poll(() => archive.history[0]?.ending_narration).toBe(story);
+  });
+}
+
+test('a broken opening photograph can be developed again without losing the story', async ({ page, archive }) => {
+  await archive.install(page, { draft });
+  await page.route('**/narration-still.png', route => route.fulfill({ status: 404 }));
+  await page.route('https://example.test/poster.png', route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/buddyland.png') }));
+  await resume(page);
+  await expect(page.getByText('This photograph could not be loaded.')).toBeVisible();
+  await page.getByRole('button', { name: 'Try Again', exact: true }).click();
+  await expect.poll(() => Boolean(archive.releaseImage)).toBe(true);
+  archive.releaseImage!();
+  await expect(page.getByRole('img', { name: 'Scene still', exact: true })).toHaveAttribute('src', 'https://example.test/poster.png');
+  await expect(page.getByRole('region', { name: 'Opening narration' })).toContainText('The chain on the side door');
+  await expect(page.getByRole('button', { name: 'WON', exact: true })).toBeEnabled();
+});

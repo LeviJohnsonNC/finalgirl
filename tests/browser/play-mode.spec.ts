@@ -106,7 +106,7 @@ test('lightweight Play tracking survives reload, undo, bulk recording and quiet 
   await expect(
     page.getByText(archive.storyText, { exact: true }),
   ).toBeVisible();
-  await expect(page.locator('.story-image-loaded')).toHaveCSS('animation-name', 'none');
+  await expect(page.getByRole('img', { name: 'Scene still', exact: true })).toHaveCSS('animation-name', 'none');
   for (const grain of await page.locator('.game-session .film-grain').all()) {
     await expect(grain).toHaveCSS('animation-name', 'none');
     await expect(grain).toHaveCSS('transform', 'none');
