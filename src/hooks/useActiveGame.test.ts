@@ -65,3 +65,17 @@ describe('recoverable active game', () => {
     expect(renderHook(useActiveGame).result.current.activeGame).toBeNull();
   });
 });
+
+it('initializes once for early rapid taps and merges independent durable drafts', () => {
+  const {result} = renderHook(useActiveGame);
+  act(()=> { result.current.save(game); });
+  act(()=> {
+    result.current.appendPlayEvent(game.id,newPlayEvent({kind:'saved',quantity:1}));
+    result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));
+    result.current.checkpoint(game.id,{playDrafts:{one:{detail:'Axe'}}});
+    result.current.checkpoint(game.id,{playDrafts:{two:{room:'Kitchen'}}});
+    expect(summarizePlay(result.current.getCurrentGame()!.playEvents).saved).toBe(1);
+  });
+  expect(result.current.activeGame!.playEvents!.filter(e=>e.kind==='start')).toHaveLength(1);
+  expect(result.current.activeGame!.playDrafts).toEqual({one:{detail:'Axe'},two:{room:'Kitchen'}});
+});

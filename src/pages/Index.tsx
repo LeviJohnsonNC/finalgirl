@@ -60,7 +60,7 @@ const IndexContent = () => {
     setScrapbookFocusId(focusGameId);
     setCurrentPage('scrapbooks');
   };
-  const { activeGame, save: saveActiveGame, checkpoint, updateFormDraft, appendPlayEvent } = useActiveGame();
+  const { activeGame, save: saveActiveGame, checkpoint, updateFormDraft, appendPlayEvent, getCurrentGame } = useActiveGame();
   const cloudPlay = usePlaySessionSync(activeGame);
   const gameSelection = activeGame?.selection ?? null;
   const lastGameResult = activeGame?.result ?? null;
@@ -71,7 +71,7 @@ const IndexContent = () => {
   const recordedIds = useRef(new Set<string>());
   if (activeGame?.result) recordedIds.current.add(activeGame.id);
   const checkpointGame = (id: string, updates: Partial<ActiveGame>) => {
-    checkpoint(id, updates);
+    const saved = checkpoint(id, updates);
     // A late image can land after SAVE unmounts its screen. Queue the attachment
     // against the stable record ID, even after the active draft was cleared.
     if (recordedIds.current.has(id)) {
@@ -80,6 +80,7 @@ const IndexContent = () => {
         if (updates.posterImageUrl) updateGame(id, { posterImageUrl: updates.posterImageUrl });
       } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save the image.'); }
     }
+    return saved;
   };
 
   // Scroll to top when page changes
@@ -117,12 +118,13 @@ const IndexContent = () => {
   const handleBackFromNowPlaying = goBack;
 
   const handleGameEnd = (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, bible?: string) => {
-    if (!activeGame) return;
+    const game = getCurrentGame();
+    if (!game || game.id !== activeGame?.id) return;
     try {
-      const result = activeGame.result ?? recordGame({ outcome, ...activeGame.selection, ...trackedOutcome(activeGame.playEvents),
-        introStory: story, sceneImageUrl, visualBible: bible }, activeGame.id);
-      recordedIds.current.add(activeGame.id);
-      if (checkpoint(activeGame.id, { phase: 'outcome', result, introStory: story, sceneImageUrl, visualBible: bible })) {
+      const result = game.result ?? recordGame({ outcome, ...game.selection, ...trackedOutcome(game.playEvents),
+        introStory: story, sceneImageUrl, visualBible: bible }, game.id);
+      recordedIds.current.add(game.id);
+      if (checkpoint(game.id, { phase: 'outcome', result, introStory: story, sceneImageUrl, visualBible: bible })) {
         setCurrentPage('outcome');
       }
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save your game.'); }
@@ -247,6 +249,7 @@ const IndexContent = () => {
               key={activeGame.id}
               sessionId={activeGame.id}
               playEvents={activeGame.playEvents}
+              playDrafts={activeGame.playDrafts}
               playMode={activeGame.playMode}
               showDeathPanel={activeGame.showDeathPanel}
               syncPlayNow={cloudPlay.syncNow}

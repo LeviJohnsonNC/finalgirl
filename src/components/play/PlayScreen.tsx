@@ -1,36 +1,24 @@
-import { useState } from 'react';
-import {
-  ChevronDown,
-  ChevronUp,
-  Clapperboard,
-  Heart,
-  Skull,
-  Undo2,
-  Settings2,
-  Volume2,
-  Monitor,
-  ArrowLeft,
-  Radio,
-  Flag,
-} from 'lucide-react';
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ArrowLeft, Flag, Minus, Plus, Undo2, Volume2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useKeepAwake } from '@/hooks/play/useKeepAwake';
-import { newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
-import { PlayTimeline } from './PlayTimeline';
+  decrementPlay,
+  newPlayEvent,
+  summarizePlay,
+  STATE_FIELDS,
+  type PlayEvent,
+  type PlayDetails,
+  type StateField,
+  type MomentType,
+} from "@/lib/play/events";
+import { PlayTimeline } from "./PlayTimeline";
+import "@/styles/play.css";
 
 export interface PlayScreenProps {
   killer: string;
@@ -40,667 +28,447 @@ export interface PlayScreenProps {
   events: PlayEvent[];
   onEvent: (event: PlayEvent) => boolean;
   onExit: () => void;
-  onFinish: (outcome: 'won' | 'lost') => void;
+  onFinish: (outcome: "won" | "lost") => void;
   onNarrate: () => void;
   narrationBusy: boolean;
   narrationPlaying: boolean;
   hasStory: boolean;
-  deathControls?: React.ReactNode;
+  showDeathDetails: boolean;
+  onShowDeathDetails: (enabled: boolean) => void;
+  deathPanel?: ReactNode;
   onDeath?: (event: PlayEvent) => void;
+  drafts: Record<string, PlayDetails>;
+  onDraft: (id: string, draft: PlayDetails) => boolean;
+  /** Module controls can be added here without changing the core tracker. */
+  moduleControls?: ReactNode;
 }
-const inputClass =
-  'w-full h-12 px-3 bg-muted border border-border text-base text-foreground rounded-sm focus-visible:outline-secondary';
-const buttonClass =
-  'vcr-tape-button px-4 py-3 min-h-[48px] font-display uppercase text-sm tracking-wider';
-const parseCount = (text: string, max = 999) =>
-  /^\d+$/.test(text) && Number(text) <= max ? Number(text) : null;
+const stateLabels: Record<StateField, string> = {
+  finalGirlHealth: "Final Girl health",
+  killerHealth: "Killer health",
+  finalHorrorLevel: "Horror",
+  bloodlust: "Bloodlust",
+};
+const stateLimits: Record<StateField, number> = {
+  finalGirlHealth: 10,
+  killerHealth: 20,
+  finalHorrorLevel: 7,
+  bloodlust: 99,
+};
+const moments: Array<{ type: MomentType; title: string; prompt: string }> = [
+  {
+    type: "item",
+    title: "Found a weapon or key item",
+    prompt: "Which weapon or item?",
+  },
+  {
+    type: "ultimate-unlocked",
+    title: "Ultimate unlocked",
+    prompt: "Anything to remember?",
+  },
+  {
+    type: "ultimate-used",
+    title: "Ultimate used",
+    prompt: "What did it change?",
+  },
+  { type: "escape", title: "Narrow escape", prompt: "How did you escape?" },
+  {
+    type: "turning-point",
+    title: "Turned the tables",
+    prompt: "What changed?",
+  },
+  { type: "other", title: "Other moment", prompt: "What happened?" },
+];
 export function PlayScreen(props: PlayScreenProps) {
-  const {
-    killer,
-    location,
-    finalGirl,
-    imageUrl,
-    events,
-    onEvent,
-    onExit,
-    onFinish,
-  } = props;
+  const { events, onEvent, killer, location, finalGirl } = props;
   const summary = summarizePlay(events);
-  const [startOpen, setStartOpen] = useState(false);
-  const [roundStartOpen, setRoundStartOpen] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [message, setMessage] = useState("");
   const [finishOpen, setFinishOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
-  const [saved, setSaved] = useState('0');
-  const [killed, setKilled] = useState('0');
-  const [round, setRound] = useState('');
-  const [quantity, setQuantity] = useState('2');
-  const [note, setNote] = useState('');
-  const [stateField, setStateField] =
-    useState<NonNullable<PlayEvent['field']>>('finalGirlHealth');
-  const [stateValue, setStateValue] = useState('');
-  const [message, setMessage] = useState('');
-  const mobile = useIsMobile();
-  const awake = useKeepAwake();
-  const commit = (fields: Omit<PlayEvent, 'id' | 'at'>) => {
-    try {
-      if (!onEvent(newPlayEvent(fields))) {
-        setMessage('This change could not be saved. Please try again.');
-        return false;
-      }
-      setMessage('');
-      return true;
-    } catch (reason) {
-      setMessage(
-        reason instanceof Error ? reason.message : 'Check your values.',
-      );
-      return false;
-    }
-  };
-  const baseline = (kind: 'start' | 'adjust') => {
-    const s = parseCount(saved),
-      k = parseCount(killed),
-      r = round.trim() === '' ? null : parseCount(round);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [momentId, setMomentId] = useState<string | null>(null);
+  const [editingState, setEditingState] = useState<StateField | null>(null);
+  const [stateValue, setStateValue] = useState("");
+  const started = useRef(false);
+  useEffect(() => {
+    if (summary.tracked || started.current) return;
+    started.current = true;
     if (
-      s === null ||
-      k === null ||
-      (round.trim() !== '' && (r === null || r < 1))
+      !onEvent(newPlayEvent({ kind: "start", saved: 0, killed: 0, round: 1 }))
     ) {
-      setMessage('Enter whole numbers; the round can be left unrecorded.');
-      return;
+      started.current = false;
+      setMessage(
+        "Tracking could not be saved. Try a counter again after freeing device storage.",
+      );
     }
-    if (commit({ kind, saved: s, killed: k, round: r })) {
-      setStartOpen(false);
-      setDetailsOpen(false);
+  }, [summary.tracked, onEvent]);
+  const commit = (fields: Omit<PlayEvent, "id" | "at">) => {
+    const e = newPlayEvent(fields);
+    if (!onEvent(e)) {
+      setMessage("This change could not be saved. Please try again.");
+      return null;
     }
+    setMessage("");
+    return e;
   };
-  const last = [...summary.entries].reverse().find((e) => e.kind !== 'start');
+  const last = [...summary.entries].reverse().find((e) => e.kind !== "start");
   const lastDeath = [...summary.entries]
     .reverse()
-    .find((e) => e.kind === 'killed');
-  const start = () => {
-    setSaved('0');
-    setKilled('0');
-    setRound('');
-    setStartOpen(true);
+    .find((e) => e.kind === "killed");
+  const moment = summary.entries.find(
+    (e) => e.id === momentId && e.kind === "moment",
+  );
+  const momentDetail = moment
+    ? (props.drafts[moment.id]?.detail ?? moment.detail ?? "")
+    : "";
+  const saveMoment = () => {
+    if (
+      moment &&
+      momentDetail.trim() !== (moment.detail ?? "") &&
+      !commit({
+        kind: "details",
+        target: moment.id,
+        detail: momentDetail.trim(),
+      })
+    )
+      return false;
+    return true;
   };
-  const showDetails = () => {
-    setSaved(String(summary.saved ?? 0));
-    setKilled(String(summary.killed ?? 0));
-    setRound(summary.round === null ? '' : String(summary.round));
-    setDetailsOpen(true);
+  const pickMoment = (choice: (typeof moments)[number]) => {
+    if (!saveMoment()) return;
+    const e = commit({
+      kind: "moment",
+      momentType: choice.type,
+      text: choice.title,
+    });
+    if (e) {
+      setMomentId(e.id);
+      setMessage(`${choice.title} recorded. Details are optional.`);
+    }
+  };
+  const setState = (field: StateField, value: number | null) => {
+    if (
+      value !== null &&
+      (!Number.isInteger(value) || value < 0 || value > stateLimits[field])
+    ) {
+      setMessage(`Use a whole number from 0 to ${stateLimits[field]}.`);
+      return;
+    }
+    if (commit({ kind: "state", field, value })) setEditingState(null);
   };
   return (
-    <div className="play-screen fixed lg:relative inset-x-0 top-24 lg:top-auto bottom-[var(--app-footer-h,60px)] lg:bottom-auto overflow-y-auto lg:overflow-visible px-3 lg:px-2 pb-52 lg:pb-10 max-w-7xl mx-auto">
-      <header className="flex flex-wrap justify-between items-center gap-3 mb-5">
+    <div className="play-screen play-workspace">
+      <header className="play-heading">
         <div>
-          <p className="font-vhs text-secondary tracking-[0.18em] text-sm flex items-center gap-2">
-            <Radio className="w-4 h-4" aria-hidden="true" />
-            PLAY MODE // REEL 01
-          </p>
-          <h1 className="font-display text-2xl sm:text-3xl uppercase tracking-wide mt-1">
-            {location}
-          </h1>
-          <p className="type-caption text-muted-foreground">
+          <p className="play-eyebrow">PLAY MODE</p>
+          <h1>{location}</h1>
+          <p>
             {finalGirl} vs {killer}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            className="type-caption text-muted-foreground min-h-[44px] px-2 flex items-center gap-2"
-            onClick={onExit}
-            aria-label="Read story"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Story
+        <nav aria-label="Session actions">
+          <button onClick={props.onExit} aria-label="Read story">
+            <ArrowLeft size={16} /> Story
           </button>
           {props.hasStory && (
             <button
+              onClick={props.onNarrate}
+              disabled={props.narrationBusy}
               aria-label={
                 props.narrationPlaying
-                  ? 'Stop introduction'
-                  : 'Narrate introduction'
+                  ? "Stop introduction"
+                  : "Narrate introduction"
               }
-              disabled={props.narrationBusy}
-              onClick={props.onNarrate}
-              className="min-h-[44px] min-w-[44px] border border-border p-2 text-secondary disabled:opacity-50"
             >
-              <Volume2 className="w-4 h-4 mx-auto" />
+              <Volume2 size={16} />
             </button>
           )}
           <button
-            onClick={() => setFinishOpen(true)}
+            onClick={() => {
+              if (saveMoment()) setFinishOpen(true);
+            }}
             aria-label="Finish game"
-            className="min-h-[44px] px-3 border border-primary/40 type-caption text-primary flex gap-2 items-center"
           >
-            <Flag className="w-4 h-4" />
-            Finish
+            <Flag size={16} /> Finish
           </button>
-        </div>
+        </nav>
       </header>
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_280px] gap-6 items-start">
-        <figure className="relative border border-border/70 bg-background shadow-2xl overflow-hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-20 blur-2xl"
-            style={{ backgroundImage: `url(${imageUrl})` }}
-          />
-          <img
-            src={imageUrl}
-            alt={`${finalGirl}'s night at ${location}`}
-            style={{
-              height: mobile
-                ? `max(180px,calc(100dvh - ${!summary.tracked ? 440 : collapsed ? 420 : 510}px))`
-                : undefined,
-            }}
-            className="relative w-full object-contain h-[max(180px,calc(100dvh-510px))] lg:h-[max(260px,calc(100dvh-330px))]"
-          />
-          <div className="film-grain pointer-events-none absolute inset-0 opacity-[0.06]" />
-          <figcaption className="relative flex justify-between px-4 py-2 border-t border-border/40 type-caption text-muted-foreground">
-            <span>CASE FILE // {location.toUpperCase()}</span>
-            <span>REEL 01</span>
-          </figcaption>
-        </figure>
-        <aside
-          aria-label="Play controls"
-          className="fixed lg:static inset-x-0 z-50 lg:z-auto border-t lg:border border-secondary/30 bg-background/95 backdrop-blur-md lg:backdrop-blur-none p-3 sm:p-4 shadow-2xl"
-          style={{ bottom: 'var(--app-footer-h,56px)' }}
-        >
-          <div className="flex justify-between items-center gap-2 mb-2">
-            <p className="font-vhs text-secondary tracking-widest text-sm">
-              {summary.tracked ? 'THE NIGHT SO FAR' : 'YOUR NIGHT. YOUR PACE.'}
-            </p>
-            {summary.tracked && (
-              <button
-                onClick={() => setCollapsed((v) => !v)}
-                className="min-w-[44px] min-h-[44px] flex items-center justify-center text-muted-foreground"
-                aria-label={
-                  collapsed
-                    ? 'Expand tracking controls'
-                    : 'Collapse tracking controls'
-                }
+      <figure className="play-scene">
+        <img src={props.imageUrl} alt={`${finalGirl}'s night at ${location}`} />
+        <figcaption>
+          {finalGirl} / {killer}
+        </figcaption>
+      </figure>
+      <section className="play-tracking" aria-label="Play controls">
+        <div className="play-counters">
+          {(["saved", "killed", "round"] as const).map((counter) => {
+            const value =
+              summary[counter] ??
+              (counter === "round" && !summary.tracked ? 1 : 0);
+            const increment =
+              counter === "round"
+                ? "Next round"
+                : counter === "saved"
+                  ? "Save one victim"
+                  : "Record one victim killed";
+            const decrement =
+              counter === "round" ? "Previous round" : `Decrease ${counter}`;
+            return (
+              <div
+                key={counter}
+                className={`play-count play-count--${counter}`}
               >
-                {collapsed ? (
-                  <ChevronUp className="w-4 h-4" />
-                ) : (
-                  <ChevronDown className="w-4 h-4" />
-                )}
-              </button>
-            )}
-          </div>
-          <span className="sr-only" aria-live="polite" aria-atomic="true">
-            {summary.tracked
-              ? `Victims saved: ${summary.saved}. Victims killed: ${summary.killed}. Current round: ${summary.round ?? 'unrecorded'}.`
-              : ''}
-          </span>
-          {!summary.tracked ? (
-            <>
-              <p className="hidden lg:block type-body-sm text-muted-foreground mb-5">
-                Keep the picture up. Record a rescue, a death, a turning point.
-                Every tap becomes part of the night.
-              </p>
-              <button
-                onClick={start}
-                className={`${buttonClass} w-full text-secondary flex justify-center gap-2 items-center`}
-              >
-                <Clapperboard className="w-4 h-4" />
-                Track this game
-              </button>
-            </>
-          ) : (
-            <>
-              {collapsed ? (
                 <button
-                  onClick={() => setCollapsed(false)}
-                  className="w-full min-h-[48px] font-vhs text-lg text-foreground"
-                >
-                  Saved {summary.saved} · Killed {summary.killed} · Round{' '}
-                  {summary.round ?? '—'}
-                </button>
-              ) : (
-                <div className="grid grid-cols-3 lg:grid-cols-1 gap-2">
-                  <button
-                    aria-label="Save one victim"
-                    onClick={() => commit({ kind: 'saved', quantity: 1 })}
-                    className="play-counter play-counter-save"
-                  >
-                    <Heart className="w-4 h-4" />
-                    <span>SAVED</span>
-                    <strong>{summary.saved}</strong>
-                    <span className="text-xl">+</span>
-                  </button>
-                  <button
-                    aria-label="Record one victim killed"
-                    onClick={() =>
-                      commit({
-                        kind: 'killed',
-                        quantity: 1,
-                        cause: 'unspecified',
-                      })
-                    }
-                    className="play-counter play-counter-killed"
-                  >
-                    <Skull className="w-4 h-4" />
-                    <span>KILLED</span>
-                    <strong>{summary.killed}</strong>
-                    <span className="text-xl">+</span>
-                  </button>
-                  <button
-                    aria-label={
-                      summary.round === null
-                        ? 'Start round tracking'
-                        : 'Next round'
-                    }
-                    onClick={() => {
-                      if (summary.round === null) {
-                        setRound('');
-                        setRoundStartOpen(true);
-                      } else commit({ kind: 'round' });
-                    }}
-                    className="play-counter play-counter-round"
-                  >
-                    <Clapperboard className="w-4 h-4" />
-                    <span>ROUND</span>
-                    <strong>{summary.round ?? '—'}</strong>
-                    <span className="text-xl">+</span>
-                  </button>
-                </div>
-              )}
-              <div className="flex items-center justify-between gap-2 mt-2">
-                <button
-                  disabled={!last}
+                  className="play-count-add"
+                  aria-label={increment}
+                  disabled={value >= 999}
                   onClick={() =>
-                    last && commit({ kind: 'undo', target: last.id })
+                    commit(
+                      counter === "round"
+                        ? { kind: "round" }
+                        : {
+                            kind: counter,
+                            quantity: 1,
+                            ...(counter === "killed" && {
+                              cause: "unspecified" as const,
+                            }),
+                          },
+                    )
                   }
-                  className="type-caption flex items-center gap-2 min-h-[44px] px-2 text-muted-foreground disabled:opacity-30"
                 >
-                  <Undo2 className="w-4 h-4" />
-                  Undo
+                  <span>
+                    {counter === "round"
+                      ? "Round"
+                      : counter === "saved"
+                        ? "Victims saved"
+                        : "Victims killed"}
+                  </span>
+                  <strong>
+                    {counter === "round" &&
+                    summary.tracked &&
+                    summary.round === null
+                      ? "?"
+                      : value}
+                  </strong>
+                  <Plus size={20} aria-hidden="true" />
                 </button>
-                {props.onDeath && lastDeath && (
-                  <button
-                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-primary"
-                    aria-label="Latest death scene"
-                    onClick={() => props.onDeath?.(lastDeath)}
-                  >
-                    <Skull className="w-4 h-4" />
-                  </button>
-                )}
                 <button
-                  onClick={showDetails}
-                  className="type-caption text-secondary min-h-[44px] px-2 flex gap-2 items-center"
+                  className="play-count-minus"
+                  aria-label={decrement}
+                  disabled={
+                    summary[counter] === null ||
+                    value <= (counter === "round" ? 1 : 0)
+                  }
+                  onClick={() => {
+                    const correction = decrementPlay(events, counter);
+                    if (correction) commit(correction);
+                  }}
                 >
-                  <Settings2 className="w-4 h-4" />
-                  Details & log
+                  <Minus size={17} aria-hidden="true" />
                 </button>
+                {counter === "killed" && (
+                  <label className="play-death-toggle">
+                    <input
+                      type="checkbox"
+                      checked={props.showDeathDetails}
+                      onChange={(e) =>
+                        props.onShowDeathDetails(e.target.checked)
+                      }
+                    />{" "}
+                    Death details
+                  </label>
+                )}
               </div>
-            </>
-          )}
-          {awake.supported && (
-            <div className="hidden lg:block border-t border-border/50 mt-3 pt-3">
-              <button
-                onClick={awake.toggle}
-                aria-pressed={awake.enabled}
-                className="type-caption flex gap-2 items-center min-h-[44px] text-muted-foreground"
-              >
-                <Monitor className="w-4 h-4" />
-                {awake.active
-                  ? 'Screen awake'
-                  : awake.enabled
-                    ? 'Keep awake requested'
-                    : 'Keep screen awake'}
-              </button>
-            </div>
-          )}
-        </aside>
-      </div>
-      {message && (
-        <p role="status" aria-live="polite" className="type-caption text-muted-foreground mt-3">
-          {message}
-        </p>
-      )}
-      <Dialog open={roundStartOpen} onOpenChange={setRoundStartOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="font-display uppercase">
-              Start round tracking
-            </DialogTitle>
-            <DialogDescription>
-              Enter the round you are on now. Earlier rounds stay unrecorded.
-            </DialogDescription>
-          </DialogHeader>
-          <input
-            aria-label="Current round"
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            value={round}
-            onChange={(e) => setRound(e.target.value)}
-            placeholder="Current round (1–999)"
-            className={inputClass}
-          />
+            );
+          })}
+        </div>
+        <div className="play-tracking-tools">
           <button
-            className={`${buttonClass} text-secondary`}
-            onClick={() => {
-              const n = parseCount(round);
-              if (
-                n !== null &&
-                n >= 1 &&
-                commit({
-                  kind: 'adjust',
-                  saved: summary.saved!,
-                  killed: summary.killed!,
-                  round: n,
-                })
-              )
-                setRoundStartOpen(false);
-              else setMessage('Enter the current round from 1 to 999.');
-            }}
+            aria-label="Undo"
+            disabled={!last}
+            onClick={() => last && commit({ kind: "undo", target: last.id })}
           >
-            Use current round
+            <Undo2 size={15} /> Undo last action
           </button>
-          <p role="status" className="type-caption text-primary">
-            {message}
-          </p>
-        </DialogContent>
-      </Dialog>
-      <Dialog open={startOpen} onOpenChange={setStartOpen}>
-        <DialogContent className="bg-background max-h-[85dvh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle className="font-display text-secondary uppercase">
-              Start tracking
-            </DialogTitle>
-            <DialogDescription>
-              Start from the beginning, or enter the totals you already have.
-              Your physical game stays in charge.
-            </DialogDescription>
-          </DialogHeader>
-          <button
-            className={`${buttonClass} text-secondary`}
-            onClick={() => {
-              if (commit({ kind: 'start', saved: 0, killed: 0, round: 1 }))
-                setStartOpen(false);
-            }}
-          >
-            Start from round 1
-          </button>
-          <div className="border-t border-border pt-4 space-y-3">
-            <p className="font-display uppercase text-sm">Already playing?</p>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                ['Saved', saved, setSaved],
-                ['Killed', killed, setKilled],
-                ['Round', round, setRound],
-              ].map(([label, value, setter]) => (
-                <label
-                  key={String(label)}
-                  className="type-caption text-muted-foreground"
-                >
-                  {String(label)}
-                  <input
-                    aria-label={`Starting ${label}`}
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={String(value)}
-                    onChange={(e) =>
-                      (setter as (v: string) => void)(e.target.value)
-                    }
-                    placeholder={label === 'Round' ? 'Unknown' : '0'}
-                    className={inputClass}
-                  />
-                </label>
-              ))}
-            </div>
+          {lastDeath && (
             <button
-              onClick={() => baseline('start')}
-              className={`${buttonClass} w-full`}
+              aria-label="Latest death scene"
+              onClick={() => props.onDeath?.(lastDeath)}
             >
-              Use current totals
+              Latest death details
+            </button>
+          )}
+        </div>
+        <p className="sr-only" aria-live="polite">
+          Victims saved: {summary.saved ?? 0}. Victims killed:{" "}
+          {summary.killed ?? 0}. Round: {summary.round ?? "unrecorded"}.
+        </p>
+      </section>
+      <section className="play-panel" aria-label="Optional trackers">
+        <h2>
+          Track more <span>Optional</span>
+        </h2>
+        <div className="play-state-grid">
+          {STATE_FIELDS.map((field) => {
+            const value = summary[field];
+            return (
+              <div key={field} className="play-state">
+                <span>{stateLabels[field]}</span>
+                {editingState === field ? (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!/^\d+$/.test(stateValue)) {
+                        setMessage("Enter a whole number.");
+                        return;
+                      }
+                      setState(field, Number(stateValue));
+                    }}
+                  >
+                    <input
+                      aria-label={`${stateLabels[field]} value`}
+                      inputMode="numeric"
+                      type="text"
+                      value={stateValue}
+                      onChange={(e) => setStateValue(e.target.value)}
+                      autoFocus
+                    />
+                    <button type="submit">Set</button>
+                    <button type="button" onClick={() => setEditingState(null)}>
+                      Cancel
+                    </button>
+                  </form>
+                ) : value === undefined ? (
+                  <button
+                    aria-label={`Track ${stateLabels[field]}`}
+                    onClick={() => {
+                      setEditingState(field);
+                      setStateValue("");
+                    }}
+                  >
+                    + Track
+                  </button>
+                ) : (
+                  <>
+                    <div className="play-state-stepper">
+                      <button
+                        aria-label={`Decrease ${stateLabels[field]}`}
+                        disabled={value <= 0}
+                        onClick={() => setState(field, value - 1)}
+                      >
+                        <Minus size={16} />
+                      </button>
+                      <button
+                        aria-label={`Set ${stateLabels[field]}`}
+                        onClick={() => {
+                          setEditingState(field);
+                          setStateValue(String(value));
+                        }}
+                      >
+                        {value}
+                      </button>
+                      <button
+                        aria-label={`Increase ${stateLabels[field]}`}
+                        disabled={value >= stateLimits[field]}
+                        onClick={() => setState(field, value + 1)}
+                      >
+                        <Plus size={16} />
+                      </button>
+                    </div>
+                    <button
+                      className="play-text-button"
+                      aria-label={`Stop tracking ${stateLabels[field]}`}
+                      onClick={() => setState(field, null)}
+                    >
+                      Stop tracking
+                    </button>
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+      {props.moduleControls && (
+        <section className="play-panel" aria-label="Module tracking">
+          {props.moduleControls}
+        </section>
+      )}
+      {props.deathPanel}
+      <section className="play-panel play-moments" aria-label="Remember this">
+        <h2>
+          Remember this <span>The moments that made your night</span>
+        </h2>
+        <div className="play-moment-choices">
+          {moments.map((choice) => (
+            <button key={choice.type} onClick={() => pickMoment(choice)}>
+              {choice.title}
+            </button>
+          ))}
+        </div>
+        {moment && (
+          <div className="play-moment-editor">
+            <label>
+              {moments.find((c) => c.type === moment.momentType)?.prompt ??
+                "Add detail"}
+              <input
+                aria-label="Moment detail"
+                maxLength={240}
+                value={momentDetail}
+                onChange={(e) =>
+                  props.onDraft(moment.id, { detail: e.target.value })
+                }
+                onBlur={saveMoment}
+              />
+            </label>
+            <button
+              onClick={() => {
+                if (saveMoment()) setMomentId(null);
+              }}
+            >
+              Done
             </button>
           </div>
-          <p role="status" className="type-caption text-primary">
-            {message}
-          </p>
-        </DialogContent>
-      </Dialog>
-      <Sheet open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <SheetContent
-          side={mobile ? 'bottom' : 'right'}
-          className="overflow-y-auto max-h-[88dvh] sm:max-h-none"
-        >
-          <SheetHeader>
-            <SheetTitle className="font-display text-secondary uppercase">
-              Case notes
-            </SheetTitle>
-            <SheetDescription>
-              Record only what you want to remember.
-            </SheetDescription>
-          </SheetHeader>
-          <div className="space-y-6 pt-5">
-            <section className="space-y-3">
-              <h3 className="font-display uppercase text-sm">
-                Multiple victims
-              </h3>
-              <label className="type-caption text-muted-foreground">
-                Quantity (1–50)
-                <input
-                  aria-label="Victim quantity"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  className={inputClass}
-                />
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  className={`${buttonClass} text-secondary`}
-                  onClick={() => {
-                    const n = parseCount(quantity, 50);
-                    if (n && commit({ kind: 'saved', quantity: n }))
-                      setDetailsOpen(false);
-                    else setMessage('Enter a quantity from 1 to 50.');
-                  }}
-                >
-                  Save group
-                </button>
-                <button
-                  className={`${buttonClass} text-primary`}
-                  onClick={() => {
-                    const n = parseCount(quantity, 50);
-                    if (
-                      n &&
-                      commit({
-                        kind: 'killed',
-                        quantity: n,
-                        cause: 'unspecified',
-                      })
-                    )
-                      setDetailsOpen(false);
-                    else setMessage('Enter a quantity from 1 to 50.');
-                  }}
-                >
-                  Record group killed
-                </button>
-              </div>
-            </section>
-            <section className="space-y-3">
-              <h3 className="font-display uppercase text-sm">Remember this</h3>
-              <div className="flex gap-2 flex-wrap">
-                {[
-                  'Found a weapon',
-                  'Dark Power revealed',
-                  'Finale began',
-                  'Narrow escape',
-                ].map((text) => (
-                  <button
-                    key={text}
-                    onClick={() => commit({ kind: 'moment', text })}
-                    className="type-caption border border-border px-3 min-h-[44px] text-muted-foreground hover:text-secondary"
-                  >
-                    {text}
-                  </button>
-                ))}
-              </div>
-              <label className="type-caption text-muted-foreground">
-                A moment from the game
-                <textarea
-                  aria-label="Game moment"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  maxLength={240}
-                  className={`${inputClass} h-24 py-3`}
-                />
-              </label>
-              <button
-                disabled={!note.trim()}
-                onClick={() => {
-                  if (commit({ kind: 'moment', text: note.trim() }))
-                    setNote('');
-                }}
-                className={`${buttonClass} w-full disabled:opacity-40`}
-              >
-                Add moment
-              </button>
-            </section>
-            <section className="space-y-3">
-              <h3 className="font-display uppercase text-sm">Recorded state</h3>
-              <label className="type-caption text-muted-foreground">
-                What changed?
-                <select
-                  aria-label="State to record"
-                  value={stateField}
-                  onChange={(e) =>
-                    setStateField(e.target.value as typeof stateField)
-                  }
-                  className={inputClass}
-                >
-                  <option value="finalGirlHealth">Final Girl Health</option>
-                  <option value="killerHealth">Killer Health</option>
-                  <option value="finalHorrorLevel">Horror Level</option>
-                  <option value="bloodlust">Bloodlust</option>
-                </select>
-              </label>
-              <input
-                aria-label="Recorded state value"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={stateValue}
-                onChange={(e) => setStateValue(e.target.value)}
-                placeholder="Current value"
-                className={inputClass}
-              />
-              <button
-                className={`${buttonClass} w-full`}
-                onClick={() => {
-                  const n = parseCount(stateValue, 99);
-                  if (
-                    n !== null &&
-                    commit({ kind: 'state', field: stateField, value: n })
-                  )
-                    setStateValue('');
-                  else
-                    setMessage('Enter a valid current value. Horror uses 1–7.');
-                }}
-              >
-                Record state
-              </button>
-            </section>
-            <details className="border-t border-border pt-4">
-              <summary className="font-display uppercase text-sm min-h-[44px] cursor-pointer">
-                Correct totals
-              </summary>
-              <div className="space-y-3">
-                {[
-                  ['Saved', saved, setSaved],
-                  ['Killed', killed, setKilled],
-                  ['Round', round, setRound],
-                ].map(([label, value, setter]) => (
-                  <label
-                    key={String(label)}
-                    className="block type-caption text-muted-foreground"
-                  >
-                    {String(label)}
-                    <input
-                      aria-label={`Corrected ${label}`}
-                      value={String(value)}
-                      onChange={(e) =>
-                        (setter as (v: string) => void)(e.target.value)
-                      }
-                      type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      className={inputClass}
-                    />
-                  </label>
-                ))}
-                <button
-                  onClick={() => baseline('adjust')}
-                  className={`${buttonClass} w-full`}
-                >
-                  Apply correction
-                </button>
-              </div>
-            </details>
-            {props.deathControls}
-            <PlayTimeline
-              events={events}
-              onToggle={(event, undone) =>
-                commit({ kind: undone ? 'restore' : 'undo', target: event.id })
-              }
-              onDeath={(event) => {
-                setDetailsOpen(false);
-                props.onDeath?.(event);
-              }}
-            />
-            {awake.supported && (
-              <button
-                aria-pressed={awake.enabled}
-                onClick={awake.toggle}
-                className={`${buttonClass} w-full`}
-              >
-                {awake.active
-                  ? 'Screen awake'
-                  : awake.enabled
-                    ? 'Keep awake requested'
-                    : 'Keep screen awake'}
-              </button>
-            )}
-            <p role="status" className="type-caption text-secondary">
-              {message}
-            </p>
-          </div>
-        </SheetContent>
-      </Sheet>
+        )}
+      </section>
+      <p role="status" className="play-feedback">
+        {message}
+      </p>
+      <section className="play-panel">
+        <PlayTimeline
+          events={events}
+          limit={historyOpen ? 100 : 5}
+          onToggle={(e, undone) =>
+            commit({ kind: undone ? "restore" : "undo", target: e.id })
+          }
+          onDeath={props.onDeath}
+          onMoment={(e) => {
+            if (saveMoment()) setMomentId(e.id);
+          }}
+        />
+        {events.filter((e) => !["details", "undo", "restore"].includes(e.kind))
+          .length > 5 && (
+          <button
+            className="play-text-button"
+            aria-expanded={historyOpen}
+            onClick={() => setHistoryOpen((v) => !v)}
+          >
+            {historyOpen ? "Show recent activity" : "Show more activity"}
+          </button>
+        )}
+      </section>
       <Dialog open={finishOpen} onOpenChange={setFinishOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-display uppercase">
-              How did the night end?
-            </DialogTitle>
+            <DialogTitle>How did the night end?</DialogTitle>
             <DialogDescription>
               Review your recorded details before saving the result.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => onFinish('won')}
-              className={`${buttonClass} text-secondary`}
-            >
-              Won
-            </button>
-            <button
-              onClick={() => onFinish('lost')}
-              className={`${buttonClass} text-primary`}
-            >
-              Lost
-            </button>
+          <div className="play-finish">
+            <button onClick={() => props.onFinish("won")}>Won</button>
+            <button onClick={() => props.onFinish("lost")}>Lost</button>
           </div>
         </DialogContent>
       </Dialog>
     </div>
   );
 }
-

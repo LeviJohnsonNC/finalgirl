@@ -55,7 +55,7 @@ test('record first, contextualize optionally, cache and replay without another g
   expect(
     archive.calls.filter((c) => c === 'generate-death-scene'),
   ).toHaveLength(1);
-  expect(archive.sessions[0].state.playEvents).toHaveLength(3);
+  expect(archive.sessions[0].state.playEvents).toEqual(expect.arrayContaining([expect.objectContaining({kind: 'details', room: 'Kitchen', cause: 'event', text: 'Tragic Collapse'})]));
   expect(
     archive.generationRequests.find((r) => r.name === 'generate-death-scene')
       ?.body,
@@ -116,7 +116,7 @@ test('AI failure and a late death response cannot lose or revive a recorded coun
     .getByRole('button', { name: 'Record one victim killed', exact: true })
     .click();
   await expect(
-    page.getByRole('dialog', { name: 'The last thing they saw' }),
+    page.getByRole('region', { name: 'Death details', exact: true }),
   ).toBeVisible();
   await page
     .getByRole('button', { name: 'Develop death scene · uses AI', exact: true })

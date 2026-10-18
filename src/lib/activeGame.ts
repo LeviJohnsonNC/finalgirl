@@ -1,4 +1,4 @@
-import { validPlayLog, type PlayEvent } from './play/events';
+import { validPlayLog, validPlayDetails, type PlayEvent, type PlayDetails } from './play/events';
 import type { GameResult } from '@/hooks/useGameHistory';
 
 export interface GameSelection {
@@ -7,7 +7,7 @@ export interface GameSelection {
   filmId: string | null;
 }
 export interface EndingFormData {
-  finalHorrorLevel: number; finalGirlHealth?: number; killerHealth?: number;
+  finalHorrorLevel?: number; finalGirlHealth?: number; killerHealth?: number;
   weaponUsed: string; victimsSaved: number | null; victimsKilled: number | null;
   roundsPlayed?: number | null;
   endingSubLocation: string; gameHighlights: string;
@@ -17,6 +17,7 @@ export interface ActiveGame {
   playEvents?: PlayEvent[];
   playMode?: boolean;
   showDeathPanel?: boolean;
+  playDrafts?: Record<string, PlayDetails>;
   id: string;
   selection: GameSelection;
   phase: 'nowPlaying' | 'outcome' | 'ending';
@@ -30,6 +31,7 @@ export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
   if (game.playEvents !== undefined && !validPlayLog(game.playEvents)) return false;
+  if (game.playDrafts !== undefined && (!game.playDrafts || typeof game.playDrafts !== 'object' || Array.isArray(game.playDrafts) || Object.keys(game.playDrafts).length > 1000 || !Object.values(game.playDrafts).every(validPlayDetails))) return false;
   if (game.showDeathPanel !== undefined && typeof game.showDeathPanel !== 'boolean') return false;
   if (game.playMode !== undefined && typeof game.playMode !== 'boolean') return false;
   const textFields = [game.introStory, game.sceneImageUrl, game.visualBible, game.endingStory, game.posterImageUrl];

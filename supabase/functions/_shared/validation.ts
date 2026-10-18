@@ -97,7 +97,7 @@ export const EndingRequestSchema = z.object({
     backstory: z.string().max(3000).optional()
   }),
   // Optional game stats
-  finalHorrorLevel: z.number().int().min(1).max(7).optional(),
+  finalHorrorLevel: z.number().int().min(0).max(7).optional(),
   weaponUsed: z.string().max(100).optional(),
   finalGirlHealth: z.number().int().min(0).max(10).optional(),  // Max 6 in official game, buffer for custom
   killerHealth: z.number().int().min(0).max(20).optional(),

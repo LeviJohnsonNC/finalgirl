@@ -73,10 +73,10 @@ export const GameOutcomeForm = ({
   const isFalconwood = result.location === 'Falconwood';
   const isSlayer = result.killer === 'Slayer';
 
-  // Unrecorded health remains unknown; a win alone cannot establish survival.
-  const [finalHorrorLevel, setFinalHorrorLevel] = useDraftField(
+  // Optional observations stay unknown until the player records them.
+  const [finalHorrorLevel, setFinalHorrorLevel] = useDraftField<number | null>(
     'finalHorrorLevel',
-    result.finalHorrorLevel ?? 4,
+    result.finalHorrorLevel ?? null,
     initialDraft,
     onDraftChange,
   );
@@ -353,7 +353,7 @@ export const GameOutcomeForm = ({
     }
 
     const formData: EndingFormData = {
-      finalHorrorLevel,
+      finalHorrorLevel: finalHorrorLevel ?? undefined,
       finalGirlHealth: finalGirlHealth ?? undefined,
       killerHealth: killerIsUnkillable ? undefined : killerHealth ?? undefined,
       weaponUsed: weaponUsed || '',
@@ -372,13 +372,13 @@ export const GameOutcomeForm = ({
       {result.playEvents?.length ? (
         <p className="border border-secondary/30 bg-card p-3 type-body-sm text-muted-foreground">
           Your recorded totals are ready. Review them below; these final values
-          take precedence in your ending and statistics. Health and Horror
-          defaults should also be checked.
+          take precedence in your ending and statistics. Blank Health and Horror
+          values stay unrecorded.
         </p>
       ) : (
         <p className="type-body-sm text-muted-foreground">
           Record as much as you like. Blank victim totals and rounds stay
-          unrecorded. Review the suggested Health and Horror values.
+          unrecorded, along with blank Health and Horror values.
         </p>
       )}
       {/* Section: Combat Stats */}
@@ -391,23 +391,21 @@ export const GameOutcomeForm = ({
           {/* Final Horror Level */}
           <div className="space-y-1">
             <label className="type-caption text-muted-foreground">
-              Final Horror Level (1-7)
+              Final Horror Level (0-7)
             </label>
-            <div className="flex items-center gap-3">
-              <input
-                type="range"
-                min="1"
-                max="7"
-                value={finalHorrorLevel}
-                onChange={(e) =>
-                  setFinalHorrorLevel(Math.trunc(Number(e.target.value)))
-                }
-                className="flex-1 h-2 bg-muted rounded-sm appearance-none cursor-pointer accent-primary"
-              />
-              <span className="font-display text-lg text-primary w-6 text-center">
-                {finalHorrorLevel}
-              </span>
-            </div>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              aria-label="Final Horror Level"
+              value={finalHorrorLevel == null ? '' : String(finalHorrorLevel)}
+              onChange={(e) => {
+                const val = e.target.value === '' ? null : Math.min(7, Math.max(0, Math.trunc(Number(e.target.value))));
+                setFinalHorrorLevel(val === null || !Number.isFinite(val) ? null : val);
+              }}
+              placeholder="Unrecorded"
+              className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
+            />
           </div>
 
           {/* Weapon Used */}

@@ -27,7 +27,7 @@ describe('SessionDetail', () => {
     ]);
     const { container } = render(<SessionDetail stats={stats({ horrorBins: bins, horrorRecorded: recorded })} />);
 
-    expect(container.querySelectorAll('.horror-col')).toHaveLength(7);
+    expect(container.querySelectorAll('.horror-col')).toHaveLength(8);
     expect(screen.getByText('2 of 4 sessions recorded')).toBeInTheDocument();
     expect(screen.getByText('2 games ended at horror level 3')).toBeInTheDocument();
   });

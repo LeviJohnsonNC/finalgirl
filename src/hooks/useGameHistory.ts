@@ -85,7 +85,7 @@ export interface GameResult {
   introStory?: string;
   endingNarration?: string;
   gameHighlights?: string;
-  finalHorrorLevel?: number; // 1-7
+  finalHorrorLevel?: number; // 0-7
   finalGirlHealth?: number;
   killerHealth?: number;
   weaponUsed?: string;

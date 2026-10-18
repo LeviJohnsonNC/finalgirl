@@ -25,6 +25,10 @@ export function deathFacts(
     victim: e.victim ?? '',
     note: e.text ?? '',
     round: e.currentRound,
+    // Omit absent additions to preserve signatures for legacy saved scenes.
+    ...(e.mechanism && { mechanism: e.mechanism }),
+    ...(e.terrorCard && { terrorCard: e.terrorCard }),
+    ...(e.eventCard && { eventCard: e.eventCard }),
   };
 }
 export type DeathFacts = NonNullable<ReturnType<typeof deathFacts>>;
