@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="120" viewBox="0 0 600 120">
+  <defs>
+    <linearGradient id="steel" x2="0.1" y2="1">
+      <stop stop-color="#716257"/><stop offset=".15" stop-color="#403c36"/>
+      <stop offset=".5" stop-color="#392d2b"/><stop offset=".88" stop-color="#68372f"/>
+      <stop offset="1" stop-color="#251d1b"/>
+    </linearGradient>
+    <pattern id="wear" width="71" height="29" patternUnits="userSpaceOnUse">
+      <path d="M3 4h9m11 1 7-1m18 2h15M9 26h12m15 0 14-1m7-12 9-1" stroke="#c0ab88" stroke-opacity=".28"/>
+      <path d="m15 2 11 2m15-1h13M2 25h7m14 2h12m19-1h13" stroke="#060b0d" stroke-width="2" stroke-opacity=".8"/>
+    </pattern>
+    <path id="rim" fill-rule="evenodd" d="M5 2 73 3 76 1 166 2 168 4 293 2 296 1 421 3 424 2 592 2 598 7 597 39 599 42 597 83 599 86 598 113 593 118 504 117 501 119 377 117 373 118 257 117 253 119 122 117 118 118 6 117 2 112 3 79 1 76 3 42 2 38 2 7ZM16 16 16 103 583 104 584 16Z"/>
+  </defs>
+  <use href="#rim" fill="url(#steel)"/>
+  <use href="#rim" fill="url(#wear)"/>
+  <path d="M17 9h64m37 0 85 1m25-1h122m28 1h49m35-1h102M8 20v24m0 18v34m584-75v19m0 39v24" stroke="#b8ad92" stroke-opacity=".3"/>
+  <path d="M18 110h101m29 1h78m30-1h132m29 1h89m19-1h46" stroke="#9b5140" stroke-opacity=".5"/>
+  <path d="M16 17h568M17 103h565" stroke="#020608" stroke-width="3" stroke-opacity=".85"/>
+</svg>
