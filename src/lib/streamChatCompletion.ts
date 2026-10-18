@@ -82,8 +82,9 @@ export const streamChatCompletion = async ({
           }
           const delta: string | undefined = json?.choices?.[0]?.delta?.content;
           if (delta) {
-            accumulated += delta;
-            onToken(delta, accumulated);
+            const cleanDelta = delta.replace(/\u2014/g, ', ');
+            accumulated += cleanDelta;
+            onToken(cleanDelta, accumulated);
           }
         } catch (err) {
           // Rethrow our own error frame; ignore genuinely malformed JSON.

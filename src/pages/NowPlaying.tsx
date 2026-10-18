@@ -16,7 +16,6 @@ import { getKillerNarrativeRules } from '@/data/killerSpecialRules';
 import { getKillerDescription } from '@/data/killerDescriptions';
 import { getFinalGirlDescription } from '@/data/finalGirlDescriptions';
 import { getLocationDescription } from '@/data/locationDescriptions';
-import { FILM_THEMES } from '@/data/filmThemes';
 import { toast } from 'sonner';
 import nowPlayingBg from '@/assets/now-playing-bg.png';
 import projectorSound from '@/assets/sounds/projector-start.mp3';
@@ -64,7 +63,6 @@ const NowPlaying = ({
   onGameEnd,
 }: NowPlayingProps) => {
   const film = FEATURE_FILMS.find(f => f.id === filmId);
-  const theme = filmId ? FILM_THEMES[filmId] ?? null : null;
   const { locationImages } = useActiveImages();
   const bgImage = locationImages[location] ?? nowPlayingBg;
 
@@ -282,8 +280,6 @@ const NowPlaying = ({
       kind="opening"
       heading={<>
         <NarrationTitle title={film?.name ?? 'Now Playing'} />
-        {theme?.tagline && <p className="narration-tagline">{theme.tagline}</p>}
-        <p className="narration-cast">{killer} vs {finalGirl} at {location}</p>
         {missionData && <details className="narration-mission">
           <summary>Mission · {missionData.name}</summary>
           <p>{missionData.description}</p>

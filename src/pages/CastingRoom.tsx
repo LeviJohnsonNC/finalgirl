@@ -154,7 +154,7 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
   }
 
   return (
-    <div className="relative min-h-[80vh]">
+    <div className="casting-page relative">
       {/* Background Image - subtle, atmospheric */}
       <div 
         className="fixed inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"

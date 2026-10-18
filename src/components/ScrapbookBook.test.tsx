@@ -3,6 +3,7 @@ import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { ScrapbookBook } from './ScrapbookBook';
 import { GameResult } from '@/hooks/useGameHistory';
 
+vi.mock('@/hooks/useImageGeneration', () => ({ useImageGeneration: () => ({ isAuthenticated: true, generateImage: vi.fn(), isGeneratingImage: false, imageError: null }) }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { storage: { from: () => ({}) } } }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'u1' } }) }));
 
@@ -89,7 +90,7 @@ it('ignores an older detail response after a newer selection', async () => {
     onFetchGameDetails={id => id === 'a' ? new Promise(resolve => { finish = resolve; }) : Promise.resolve(game('b'))} />);
   await waitFor(() => expect(finish).toBeDefined());
   fireEvent.click(screen.getByRole('button', { name: /Back to Grid/ }));
-  fireEvent.click(document.querySelectorAll('.scrapbook-thumbnail')[1]);
+  fireEvent.click(document.querySelectorAll('.scrapbook-thumbnail .thumbnail-label')[1]);
   expect(await screen.findByText('The ending of b.')).toBeInTheDocument();
   await act(async () => { finish!(game('a', { endingNarration: 'Late response should stay closed.' })); });
   expect(screen.queryByText('Late response should stay closed.')).toBeNull();

@@ -10,6 +10,11 @@ import {
   usesResponsesApi,
 } from "./models.ts";
 
+// Apply the same punctuation contract to every text route, including utility
+// prompts and death scenes. Keep the fallback deterministic if a model ignores it.
+const PUNCTUATION_RULE = '\nNever use em dashes (U+2014) in your output. Use commas, colons, semicolons or full stops instead.';
+export const normalizeGeneratedText = (text: string): string => text.replace(/\u2014/g, ', ');
+
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const RESPONSES_URL = "https://ai.gateway.lovable.dev/v1/responses";
 
@@ -331,7 +336,7 @@ export const generateText = async (opts: {
     if (usesResponsesApi(model)) {
       const text = await collectResponsesText(
         model,
-        opts.system + lengthHint(opts.maxTokens),
+        opts.system + PUNCTUATION_RULE + lengthHint(opts.maxTokens),
         opts.user,
         opts.signal,
       );
@@ -342,7 +347,7 @@ export const generateText = async (opts: {
     const data = await post({
       model,
       messages: [
-        { role: "system", content: opts.system },
+        { role: "system", content: opts.system + PUNCTUATION_RULE },
         { role: "user", content: opts.user },
       ],
       max_tokens: opts.maxTokens ?? 400,
@@ -355,7 +360,7 @@ export const generateText = async (opts: {
     return text;
   });
 
-  return { text: result, model };
+  return { text: normalizeGeneratedText(result), model };
 };
 
 /**
@@ -433,7 +438,7 @@ export const streamChat = async (opts: {
 }): Promise<{ body: ReadableStream<Uint8Array>; model: string }> => {
   const { result, model } = await withModelFallback(TEXT_MODEL_CANDIDATES, async (model) => {
     if (usesResponsesApi(model)) {
-      return responsesToChatFrames(await postResponsesStream(model, opts.system, opts.user), model);
+      return responsesToChatFrames(await postResponsesStream(model, opts.system + PUNCTUATION_RULE, opts.user), model);
     }
 
     const response = await fetch(GATEWAY_URL, {
@@ -442,7 +447,7 @@ export const streamChat = async (opts: {
       body: JSON.stringify({
         model,
         messages: [
-          { role: "system", content: opts.system },
+          { role: "system", content: opts.system + PUNCTUATION_RULE },
           { role: "user", content: opts.user },
         ],
         stream: true,
@@ -457,5 +462,26 @@ export const streamChat = async (opts: {
     return response.body;
   });
 
-  return { body: result, model };
+  return { body: normalizeGeneratedStream(result), model };
+};
+
+/** Parse complete SSE payloads so escaped punctuation and split UTF-8 bytes
+ * are normalized without touching event metadata, errors, or JSON syntax. */
+export const normalizeGeneratedStream = (upstream: ReadableStream<Uint8Array>): ReadableStream<Uint8Array> => {
+  const decoder = new TextDecoder(), encoder = new TextEncoder();
+  let buffer = '';
+  const handle = (controller: TransformStreamDefaultController<Uint8Array>) => (event: Record<string, unknown>) => {
+    const choices = event.choices as Array<{ delta?: { content?: string } }> | undefined;
+    for (const choice of choices ?? []) {
+      if (typeof choice.delta?.content === 'string') choice.delta.content = normalizeGeneratedText(choice.delta.content);
+    }
+    controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+  };
+  return upstream.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
+    transform(chunk, controller) { buffer = eachSseEvent(decoder.decode(chunk, { stream: true }), buffer, handle(controller)); },
+    flush(controller) {
+      eachSseEvent(decoder.decode() + '\n\n', buffer, handle(controller));
+      controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+    },
+  }));
 };

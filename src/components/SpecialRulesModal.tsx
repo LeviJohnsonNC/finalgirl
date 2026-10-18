@@ -33,7 +33,7 @@ export const SpecialRulesModal = ({ killer, location, children }: SpecialRulesMo
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="special-rules-dialog w-[calc(100vw-1.5rem)] max-w-none sm:max-w-[min(90vw,64rem)] max-h-[88dvh] overflow-y-auto overscroll-contain">
         <DialogHeader>
           <DialogTitle className="font-display text-lg sm:text-xl tracking-[0.15em] uppercase text-secondary">
             Special Rules

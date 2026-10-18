@@ -14,20 +14,17 @@ interface ImageLightboxProps {
 export const ImageLightbox = ({ imageUrl, caption, children }: ImageLightboxProps) => (
   <Dialog>
     <DialogTrigger asChild>{children}</DialogTrigger>
-    <DialogContent className="max-w-[92vw] sm:max-w-4xl p-0 bg-card border-border overflow-hidden">
+    <DialogContent className="image-lightbox w-fit max-w-[96vw] sm:max-w-[96vw] p-0 sm:p-0 bg-transparent border-0 rounded-none overflow-visible" aria-describedby={undefined}>
       <DialogTitle className="sr-only">{caption}</DialogTitle>
-      <div className="relative">
+      <div className="image-lightbox-mount relative">
         <img
           src={imageUrl}
           alt={caption}
-          className="w-full h-auto max-h-[80vh] object-contain bg-black"
+          className="block w-auto h-auto max-w-[96vw] max-h-[92dvh] object-contain bg-black"
         />
-        <div className="film-grain absolute inset-0 pointer-events-none opacity-[0.12]" />
+        <div className="image-lightbox-edge" aria-hidden="true" />
         <div className="vignette absolute inset-0 pointer-events-none" />
       </div>
-      <p className="film-frame-caption type-caption uppercase text-muted-foreground px-4 py-3">
-        {caption}
-      </p>
     </DialogContent>
   </Dialog>
 );
