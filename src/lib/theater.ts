@@ -11,6 +11,7 @@ export interface Screening {
   killer: string;
   location: string;
   outcome?: 'won' | 'lost';
+  finalGirlHealth?: number;
   timestamp: number;
 }
 
@@ -29,7 +30,7 @@ export function buildScreenings(games: GameResult[], failed: ReadonlySet<string>
     if (!imageUrl || seenIds.has(game.id) || seenImages.has(imageUrl)) continue;
     seenIds.add(game.id); seenImages.add(imageUrl);
     pool.push({ id: game.id, key: `${game.id}:${imageUrl}`, imageUrl, kind: scene ? 'scene' : 'poster',
-      finalGirl: game.finalGirl, killer: game.killer, location: game.location, outcome: game.outcome, timestamp: game.timestamp });
+      finalGirl: game.finalGirl, killer: game.killer, location: game.location, outcome: game.outcome, finalGirlHealth: game.finalGirlHealth, timestamp: game.timestamp });
   }
   const reel: Screening[] = [];
   while (pool.length && reel.length < 24) {
@@ -60,4 +61,10 @@ export function activeScreenings(game: ActiveGame, failed: ReadonlySet<string>):
   const poster = game.posterImageUrl && !failed.has(game.posterImageUrl) ? game.posterImageUrl : null;
   const imageUrl = scene || poster;
   return imageUrl ? [{ ...game.selection, id: game.id, key: `${game.id}:${imageUrl}`, imageUrl, kind: scene ? 'scene' : 'poster', timestamp: 0 }] : [];
+}
+
+/** A result alone cannot establish survival (simultaneous deaths can win). */
+export function screeningVerdict(game: Pick<Screening, 'outcome' | 'finalGirlHealth'>): string {
+  if (game.outcome === 'won') return game.finalGirlHealth === 0 ? 'Sacrificial victory' : game.finalGirlHealth !== undefined && game.finalGirlHealth > 0 ? 'Survived' : 'Victory';
+  return game.finalGirlHealth !== undefined && game.finalGirlHealth > 0 ? 'Alive · Defeat' : 'Lost to the night';
 }

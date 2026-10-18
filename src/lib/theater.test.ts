@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { GameResult } from '@/hooks/useGameHistory';
-import { activeScreenings, activeScreeningStatus, buildScreenings, screeningDate } from './theater';
+import { activeScreenings, activeScreeningStatus, buildScreenings, screeningDate, screeningVerdict } from './theater';
 import type { ActiveGame } from './activeGame';
 
 const game = (id: string, timestamp: number, overrides: Partial<GameResult> = {}): GameResult => ({ id, timestamp, outcome: 'won', killer: 'Hans', location: 'Camp Happy Trails', finalGirl: 'Laurie', sceneImageUrl: `https://test.invalid/${id}.png`, ...overrides });
@@ -49,5 +49,20 @@ describe('unfinished screening', () => {
     expect(activeScreenings(withArt, new Set())[0]).toMatchObject({ kind: 'scene', timestamp: 0 });
     expect(activeScreenings(withArt, new Set())[0].outcome).toBeUndefined();
     expect(activeScreenings(withArt, new Set([withArt.sceneImageUrl]))[0].kind).toBe('poster');
+  });
+});
+
+
+describe('marquee result accuracy', () => {
+  it.each([
+    ['won', 2, 'Survived'], ['won', 0, 'Sacrificial victory'], ['won', undefined, 'Victory'],
+    ['lost', 2, 'Alive · Defeat'], ['lost', 0, 'Lost to the night'], ['lost', undefined, 'Lost to the night'],
+  ] as const)('labels %s with health %s as %s', (outcome, finalGirlHealth, label) => {
+    expect(screeningVerdict({ outcome, finalGirlHealth })).toBe(label);
+  });
+  it('preserves recorded health when a scene falls back to its poster', () => {
+    const [screening] = buildScreenings([game('a', 1, { finalGirlHealth: 0, posterImageUrl: 'https://test.invalid/poster.png' })], new Set(['https://test.invalid/a.png']));
+    expect(screening.kind).toBe('poster');
+    expect(screeningVerdict(screening)).toBe('Sacrificial victory');
   });
 });

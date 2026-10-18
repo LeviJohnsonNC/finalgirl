@@ -37,18 +37,20 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
             <span><span className="theater-unofficial">Unofficial</span> Case Files</span>
           </button>
           <div className="theater-admission">
-            {!authLoading && <button className="theater-account" onClick={() => navigate('/auth')}>
-              <Ticket size={16} aria-hidden="true" />{user ? 'Account' : 'Sign in'}
+            {!authLoading && <button className="theater-account" aria-label={user ? 'Account' : 'Sign in'} onClick={() => navigate('/auth')}>
+              <Ticket size={18} aria-hidden="true" /><span className="theater-account-text">{user ? 'Account' : 'Sign in'}</span>
             </button>}
           </div>
         </header>
 
         <main className="theater-main" aria-label="The drive-in theater">
           <TheaterReel key={user?.id ?? 'guest'} games={authLoading ? [] : gameHistory} loading={authLoading || isLoading}
-            historyError={loadError} onRetryHistory={retryLoadHistory} onOpenCaseFile={user ? onOpenCaseFile : undefined} activeGame={resumeGame} />
-          <div className="theater-recovery">{recoveryNotice}</div>
-          <TheaterActions game={resumeGame} cloud={resumeFromCloud} onStart={onStart} onStartAnother={onStartAnother} />
-          {authError && <p role="status" className="theater-status">Sign-in services reconnecting</p>}
+            historyError={loadError} onRetryHistory={retryLoadHistory} onOpenCaseFile={user ? onOpenCaseFile : undefined} activeGame={resumeGame}
+            actions={<>
+              <div className="theater-recovery">{recoveryNotice}</div>
+              <TheaterActions game={resumeGame} cloud={resumeFromCloud} onStart={onStart} onStartAnother={onStartAnother} />
+              {authError && <p role="status" className="theater-status">Sign-in services reconnecting</p>}
+            </>} />
         </main>
 
         <footer className="theater-footer">
