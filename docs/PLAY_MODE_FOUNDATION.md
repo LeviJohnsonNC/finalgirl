@@ -83,3 +83,13 @@ The scene prompt asks for a specific 100–150-word miniature horror story with 
 Starting-stat evidence: owner photo IMG_9308.jpg for Rena/Gwynn; [photographed Billy board](https://dudetakeyourturn.ca/2026/03/25/cuddle-bears-of-death-final-girl-bad-times-at-buddyland-review/) for 8 Health and 4 Horror; [core rulebook](https://cdn.svc.asmodee.net/production-asmodeeca/uploads/2025/10/Final-Girl-Rules.pdf) for Hans/Laurie and the starting Bloodlust position.
 
 Deploy `generate-death-scene` and `narrate-story` with the frontend so their shared log validator accepts both new moment types. The former also contains the new story prompt and token budget. No database migration is needed.
+
+## Saved-story visibility fix and final Play refinements
+
+Death facts normalize each module observation's field order before reducing it into context. PostgreSQL JSONB stores object keys in length-then-byte order, while a browser preserves insertion order. The previous fingerprint could differ even when the facts were identical, hiding a successful generation behind “Details saved.” Normalizing per observation preserves existing server fingerprints and cached scenes, including repeated edits and null clears. It also works with the already deployed edge functions. A stale initial scene lookup can no longer replace a newer generation result. Unexpected response fingerprints produce an explicit recovery message instead of a silent saved-details fallback.
+
+The browser archive mock now reproduces the JSONB storage boundary. Regression coverage exercises Killer attack and Terror card with tracked Buddyland context, a delayed empty scene lookup, saved-story reopening without another call, and a mismatched successful response. All generation and narration services remain mocked during verification.
+
+Each Remember this tile has its own compressed film still, with no overall background image or heading camera icon. The matchup subtitle and Optional labels have been removed. Counter corrections align horizontally with the plus controls. The collapsed history expands into compact entries within a keyboard-accessible, internally scrolling ledger. Cause tiles retain their images without icons; loading text no longer repeats that the death is saved.
+
+No migration or new edge-function deployment is required for this visibility fix. Earlier deployment requirements for the `terror` cause and revival moments still apply if those previous edge updates have not been deployed.

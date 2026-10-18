@@ -150,9 +150,7 @@ export function BuddylandControls(props: Props) {
     <div className="play-modules">
       {props.killer === "Billy the Bear" && (
         <section aria-label="Billy tracking">
-          <h2>
-            Billy &amp; his Buddies <span>Optional</span>
-          </h2>
+          <h2>Billy &amp; his Buddies</h2>
           <p className="play-card-note">
             Record the state on your table. Resolve card effects and rewards on
             the board.
@@ -472,9 +470,7 @@ export function BuddylandControls(props: Props) {
       )}
       {props.location === "Buddyland" && (
         <section aria-label="Buddyland tracking">
-          <h2>
-            Inside Buddyland <span>Optional</span>
-          </h2>
+          <h2>Inside Buddyland</h2>
           <details>
             <summary>Events &amp; Special Victims</summary>
             <p className="play-card-note">

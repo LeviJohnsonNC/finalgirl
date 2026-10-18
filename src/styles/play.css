@@ -1876,3 +1876,132 @@ body:has(.play-workspace) .app-shell {
     font-size: 21px;
   }
 }
+
+/* Align each correction with the inset plus control above it. */
+.play-count {
+  --counter-inset: 20px;
+  --counter-plus-size: 40px;
+}
+.play-count-minus {
+  justify-self: end;
+  margin-right: calc(
+    var(--counter-inset) + 1px + (var(--counter-plus-size) - 44px) / 2
+  );
+}
+
+/* Each memory has its own film still; the surrounding board stays quiet. */
+.play-panel.play-moments {
+  background: none;
+  box-shadow: none;
+}
+.play-moment-choices button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 88px;
+  align-items: flex-end;
+  padding: 14px 12px;
+  background: #0a100d;
+  border-color: #aaa38577;
+}
+.play-moment-choices button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(0deg, #030807ed, #03080714 95%),
+    linear-gradient(90deg, #050c0b66, transparent);
+  pointer-events: none;
+}
+.play-moment-choices button > img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 44%;
+  opacity: 0.88;
+  transition: transform 0.2s;
+}
+.play-moment-choices button > span {
+  color: #f4ecda;
+  text-shadow: 0 2px 5px #000;
+}
+.play-moment-choices button > svg {
+  margin-bottom: 1px;
+  filter: drop-shadow(0 2px 3px #000);
+}
+.play-moment-choices button:hover > img {
+  transform: scale(1.04);
+}
+
+/* Keep a long night in a small, keyboard-scrollable ledger. */
+.play-history .play-timeline-list {
+  max-height: min(320px, 48dvh);
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #8b8764 #101713;
+  padding-right: 8px;
+}
+.play-history [aria-label="Game timeline"] li {
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 10px;
+  padding: 2px 0 2px 9px;
+  border-bottom: 1px solid #74786e22;
+}
+.play-history [aria-label="Game timeline"] li > p {
+  font-size: 12px;
+  line-height: 1.4;
+}
+.play-history [aria-label="Game timeline"] li > div {
+  grid-column: 3;
+  grid-row: 1;
+  gap: 0 10px;
+}
+.play-history [aria-label="Game timeline"] li > div button {
+  font-size: 11px;
+  min-height: 36px;
+}
+@media (max-width: 639px) {
+  .play-count {
+    --counter-inset: 10px;
+    --counter-plus-size: 32px;
+  }
+  .play-moment-choices button {
+    min-height: 94px;
+    padding: 12px 10px;
+  }
+  .play-history [aria-label="Game timeline"] li {
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 10px;
+    padding-block: 3px;
+  }
+  .play-history [aria-label="Game timeline"] li > p:first-child {
+    grid-column: 1;
+    font-size: 9px;
+    line-height: 1.1;
+  }
+  .play-history [aria-label="Game timeline"] li > p:nth-child(2) {
+    grid-column: 1;
+  }
+  .play-history [aria-label="Game timeline"] li > div {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    gap: 0 8px;
+  }
+  .play-history [aria-label="Game timeline"] li > div button {
+    min-height: 44px;
+  }
+}
+.play-timeline-list:focus-visible {
+  outline: 1px solid #c9d2cc;
+  outline-offset: 3px;
+}
+.play-workspace .play-history .play-timeline-list > li {
+  margin-top: 0;
+}

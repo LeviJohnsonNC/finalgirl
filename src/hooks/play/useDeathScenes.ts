@@ -20,11 +20,13 @@ export function useDeathScenes(
   current.current = key;
   const generation = useRef<AbortController | null>(null);
   const active = useRef(true);
+  const generationVersion = useRef(0);
   // Token refresh may replace the auth user object without changing the owner.
   // Keep in-flight generation alive until the account or session actually changes.
   const refresh = useCallback(async () => {
     if (!user) return;
     const requestKey = key;
+    const version = generationVersion.current;
     const { data, error } = await supabase
       .from("play_death_scenes" as never)
       .select("id,session_id,event_id,signature,take,scene_text,model,status")
@@ -33,7 +35,12 @@ export function useDeathScenes(
       .eq("status", "ready")
       .order("created_at", { ascending: true })
       .abortSignal(AbortSignal.timeout(20000));
-    if (!active.current || current.current !== requestKey) return;
+    if (
+      !active.current ||
+      current.current !== requestKey ||
+      version !== generationVersion.current
+    )
+      return;
     if (error) {
       setError("Saved scenes could not be loaded. Your game is still safe.");
       return;
@@ -65,6 +72,7 @@ export function useDeathScenes(
       return null;
     }
     const requestKey = key;
+    generationVersion.current++;
     const controller = new AbortController();
     generation.current = controller;
     setBusy(true);
@@ -109,7 +117,8 @@ export function useDeathScenes(
         throw new Error(
           "The scene response was invalid. Close and reopen death details before trying again.",
         );
-      if (current.current === requestKey && active.current)
+      if (current.current === requestKey && active.current) {
+        generationVersion.current++;
         setSaved((previous) => ({
           key: requestKey,
           rows: [
@@ -119,6 +128,7 @@ export function useDeathScenes(
             data.scene,
           ],
         }));
+      }
       return data.scene as DeathScene;
     } catch (reason) {
       if (current.current === requestKey && active.current)

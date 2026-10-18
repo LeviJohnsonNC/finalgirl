@@ -11,16 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { PlaySearch } from "./PlaySearch";
-import {
-  Skull,
-  Ghost,
-  Flame,
-  Clapperboard,
-  MapPin,
-  HelpCircle,
-  LoaderCircle,
-  BookOpen,
-} from "lucide-react";
+import { LoaderCircle, BookOpen } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { DeathNarration } from "./DeathNarration";
 import { getFilmIdByLocation } from "@/types/gameData";
@@ -107,6 +98,7 @@ export function DeathSceneDialog({
     );
   };
   const [message, setMessage] = useState("");
+  const [resultError, setResultError] = useState("");
   const scenes = useDeathScenes(sessionId, syncNow);
   const serialized = JSON.stringify(facts);
   const saved = useRef(JSON.stringify(initial));
@@ -160,10 +152,34 @@ export function DeathSceneDialog({
   };
   const generate = async (next: number) => {
     setRequested(true);
+    setResultError("");
     if (save()) {
       setTake(next);
       revealPayoff();
-      await scenes.generate(eventId, next);
+      const clean = Object.fromEntries(
+        Object.entries(values).map(([key, value]) => [
+          key,
+          typeof value === "string" ? value.trim() : value,
+        ]),
+      ) as PlayDetails;
+      const expected = deathFacts(
+        selection,
+        [
+          ...events,
+          newPlayEvent({ kind: "details", target: eventId, ...clean }),
+        ],
+        eventId,
+      );
+      const response = await scenes.generate(eventId, next);
+      if (
+        response &&
+        expected &&
+        response.signature !== (await deathSignature(expected))
+      ) {
+        setResultError(
+          "A story was returned for different saved details. Close and reopen this death to load its saved story before trying again.",
+        );
+      }
       revealPayoff();
     } else revealPayoff();
   };
@@ -224,14 +240,14 @@ export function DeathSceneDialog({
           >
             {(
               [
-                ["killer", Skull, causeKiller],
-                ["minion", Ghost, causeMinion],
-                ["terror", Clapperboard, causeTerror],
-                ["event", Flame, causeEvent],
-                ["hazard", MapPin, causeHazard],
-                ["other", HelpCircle, causeOther],
+                ["killer", causeKiller],
+                ["minion", causeMinion],
+                ["terror", causeTerror],
+                ["event", causeEvent],
+                ["hazard", causeHazard],
+                ["other", causeOther],
               ] as const
-            ).map(([cause, Icon, art]) => (
+            ).map(([cause, art]) => (
               <button
                 key={cause}
                 className={`play-cause-tile play-cause-tile--${cause}`}
@@ -243,7 +259,6 @@ export function DeathSceneDialog({
                 }
               >
                 <img src={art} alt="" />
-                <Icon size={22} aria-hidden="true" />
                 <span>{deathCauseLabels[cause]}</span>
               </button>
             ))}
@@ -306,7 +321,7 @@ export function DeathSceneDialog({
               </label>
             )}
             <label>
-              Where? <span>Optional</span>
+              Where?
               <PlaySearch
                 label="Death location"
                 value={values.room ?? ""}
@@ -316,7 +331,7 @@ export function DeathSceneDialog({
               />
             </label>
             <label>
-              Victim <span>Optional</span>
+              Victim
               <PlaySearch
                 label="Victim name or role"
                 value={values.victim || "Regular victim"}
@@ -333,7 +348,7 @@ export function DeathSceneDialog({
               />
             </label>
             <label className="play-death-note">
-              Anything else? <span>Optional</span>
+              Anything else?
               <textarea
                 aria-label="Death context"
                 value={values.text ?? ""}
@@ -357,9 +372,7 @@ export function DeathSceneDialog({
                 <LoaderCircle size={25} className="animate-spin" />
                 <div>
                   <h3>The last thing they saw…</h3>
-                  <p>
-                    Developing this moment into a story. Your death is saved.
-                  </p>
+                  <p>Developing this moment into a story.</p>
                 </div>
               </div>
             ) : selected && !dirty ? (
@@ -401,12 +414,16 @@ export function DeathSceneDialog({
             ) : (
               <p role="status">
                 {scenes.error ||
+                  resultError ||
                   message ||
                   "Your details are saved. Create a gruesome death when you’re ready."}
               </p>
             )}
             {!scenes.busy && scenes.error && selected && !dirty && (
               <p role="alert">{scenes.error}</p>
+            )}
+            {!scenes.busy && resultError && selected && !dirty && (
+              <p role="alert">{resultError}</p>
             )}
             {!scenes.busy && selected && !dirty && takes.length >= 3 && (
               <p className="play-card-note">

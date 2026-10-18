@@ -7,6 +7,57 @@ const selection = {
   finalGirl: "Rena",
 };
 describe("death identity and factual context", () => {
+  it("matches cloud JSONB key order without losing existing server scene signatures", async () => {
+    const start = newPlayEvent({
+      kind: "start",
+      saved: 0,
+      killed: 0,
+      round: 4,
+    });
+    const moduleEvent = newPlayEvent({
+      kind: "module",
+      moduleData: {
+        module: "billy",
+        changes: {
+          "buddy.toby.status": "active",
+          "buddy.toby.health": 3,
+          "source.1.status": "active",
+        },
+      },
+    });
+    const death = newPlayEvent({
+      kind: "killed",
+      quantity: 1,
+      cause: "killer",
+    });
+    const cloudModule = {
+      ...moduleEvent,
+      moduleData: {
+        module: "billy" as const,
+        changes: {
+          "source.1.status": "active",
+          "buddy.toby.health": 3,
+          "buddy.toby.status": "active",
+        },
+      },
+    };
+    const cloud = deathFacts(selection, [start, cloudModule, death], death.id)!;
+    const local = deathFacts(selection, [start, moduleEvent, death], death.id)!;
+    expect(local).toEqual(cloud);
+    expect(await deathSignature(local)).toBe(await deathSignature(cloud));
+    // Captured from the previous edge implementation with JSONB-ordered input.
+    expect(await deathSignature(local)).toBe(
+      "5ba8f677ca50fe10547b6a08062d0d914d078e21cef18a82e5558ea561dc1411",
+    );
+    // Legacy/non-module events may carry irrelevant extra properties.
+    const stray = {
+      ...death,
+      moduleData: { module: "billy", changes: null },
+    } as unknown as typeof death;
+    expect(deathFacts(selection, [start, stray], death.id)).not.toHaveProperty(
+      "moduleContext",
+    );
+  });
   it("uses the selected location and cause, ignores later unrelated taps, and excludes undone deaths", async () => {
     const start = newPlayEvent({
       kind: "start",

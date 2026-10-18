@@ -1,6 +1,14 @@
 import { playStartingValues } from "@/lib/play/defaults";
 import horrorImage from "@/assets/play/horror-eye.webp";
 import bloodlustImage from "@/assets/play/bloodlust-stain.webp";
+import momentItem from "@/assets/play/moment-item.webp";
+import momentUnlocked from "@/assets/play/moment-ultimate-unlocked.webp";
+import momentUsed from "@/assets/play/moment-ultimate-used.webp";
+import momentEscape from "@/assets/play/moment-escape.webp";
+import momentTurningPoint from "@/assets/play/moment-turning-point.webp";
+import momentGirlRevived from "@/assets/play/moment-girl-revived.webp";
+import momentKillerRevived from "@/assets/play/moment-killer-revived.webp";
+import momentOther from "@/assets/play/moment-other.webp";
 import { useActiveImages } from "@/hooks/useActiveImages";
 import { PlaySearch } from "./PlaySearch";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -12,7 +20,6 @@ import {
   Undo2,
   Volume2,
   ChevronDown,
-  Camera,
   UnlockKeyhole,
   Zap,
   HeartPulse,
@@ -83,52 +90,61 @@ const moments: Array<{
   title: string;
   prompt: string;
   icon: LucideIcon;
+  image: string;
 }> = [
   {
     type: "item",
     icon: KeyRound,
+    image: momentItem,
     title: "Found a weapon or key item",
     prompt: "Which weapon or item?",
   },
   {
     type: "ultimate-unlocked",
     icon: UnlockKeyhole,
+    image: momentUnlocked,
     title: "Ultimate unlocked",
     prompt: "Anything to remember?",
   },
   {
     type: "ultimate-used",
     icon: Zap,
+    image: momentUsed,
     title: "Ultimate used",
     prompt: "What did it change?",
   },
   {
     type: "escape",
     icon: Shield,
+    image: momentEscape,
     title: "Narrow escape",
     prompt: "How did you escape?",
   },
   {
     type: "turning-point",
     icon: Swords,
+    image: momentTurningPoint,
     title: "Turned the tables",
     prompt: "What changed?",
   },
   {
     type: "girl-revived",
     icon: HeartPulse,
+    image: momentGirlRevived,
     title: "Second wind",
     prompt: "How did she come back?",
   },
   {
     type: "killer-revived",
     icon: RotateCcw,
+    image: momentKillerRevived,
     title: "Back from the dead",
     prompt: "What happened when the killer rose?",
   },
   {
     type: "other",
     icon: Bookmark,
+    image: momentOther,
     title: "Other moment",
     prompt: "What happened?",
   },
@@ -222,9 +238,6 @@ export function PlayScreen(props: PlayScreenProps) {
         <div>
           <p className="play-eyebrow">PLAY MODE</p>
           <h1>{location}</h1>
-          <p>
-            {finalGirl} vs {killer}
-          </p>
         </div>
         <nav aria-label="Session actions">
           <button onClick={props.onExit} aria-label="Read story">
@@ -362,9 +375,7 @@ export function PlayScreen(props: PlayScreenProps) {
         className="play-panel play-track-more"
         aria-label="Optional trackers"
       >
-        <h2>
-          Track more <span>OPTIONAL</span>
-        </h2>
+        <h2>Track more</h2>
         <div className="play-state-grid">
           {STATE_FIELDS.map((field) => {
             const value = summary[field];
@@ -476,14 +487,14 @@ export function PlayScreen(props: PlayScreenProps) {
       {props.deathPanel}
       <section className="play-panel play-moments" aria-label="Remember this">
         <h2>
-          <Camera size={21} /> Remember this{" "}
-          <span>The moments that made your night</span>
+          Remember this <span>The moments that made your night</span>
         </h2>
         <div className="play-moment-choices">
           {moments.map((choice) => (
             <button key={choice.type} onClick={() => pickMoment(choice)}>
+              <img src={choice.image} alt="" loading="lazy" />
               <choice.icon size={17} aria-hidden="true" />
-              {choice.title}
+              <span>{choice.title}</span>
             </button>
           ))}
         </div>

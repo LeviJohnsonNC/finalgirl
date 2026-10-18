@@ -11,12 +11,26 @@ export const gameId = '11111111-1111-4111-8111-111111111111';
 export const opening = 'The lights went out at Camp Happy Trails. Laurie heard a branch snap behind the cabins. Hans was waiting in the dark.';
 export const activeGame = { version: 1, id: gameId, phase: 'nowPlaying', selection, introStory: opening };
 
+// PostgreSQL JSONB does not preserve the browser's object insertion order.
+// Mirror the real storage boundary so death fingerprints are tested honestly.
+function jsonbRoundTrip(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(jsonbRoundTrip);
+  if (value && typeof value === 'object') return Object.fromEntries(
+    Object.entries(value).sort(([a], [b]) => Buffer.byteLength(a) - Buffer.byteLength(b) || Buffer.compare(Buffer.from(a), Buffer.from(b)))
+      .map(([key, entry]) => [key, jsonbRoundTrip(entry)]),
+  );
+  return value;
+}
+
 export class ArchiveMock {
   sessions: Array<{id:string;revision:number;state:Record<string,unknown>;closed:boolean}> = [];
   deathScenes: DeathScene[] = [];
   failDeaths=false;
   holdDeath=false;
   releaseDeath:(()=>void)|null=null;
+  holdDeathRead=false;
+  releaseDeathRead:(()=>void)|null=null;
+  deathSignatureOverride:string|null=null;
   deathText='The ceiling gave a soft, dusty sigh. Nobody looked up until the light fitting dropped, trailing a bright knot of wires. A scream vanished beneath the crash. When the dust cleared, the broken fixture still swung against the wall, tapping out the last few seconds of someone’s night.';
   holdCollection=false;
   collectionWaiters:Array<()=>void>=[];
@@ -61,7 +75,7 @@ export class ArchiveMock {
           const b=request.postDataJSON();const session=this.sessions.find(r=>r.id===b.sessionId);
           const f=session?deathFacts(session.state.selection as typeof selection,session.state.playEvents as PlayEvent[],b.eventId):null;
           if(!f)return json({error:'Sync the recorded death first.'},409);
-          const signature=await deathSignature(f);
+          const signature=this.deathSignatureOverride ?? await deathSignature(f);
           let scene=this.deathScenes.find(r=>r.session_id===b.sessionId&&r.event_id===b.eventId&&r.signature===signature&&r.take===b.take);
           const cached=!!scene;
           if(!scene){scene={id:String(this.deathScenes.length+1).padStart(8,'0')+'-dddd-4ddd-8ddd-dddddddddddd',session_id:b.sessionId,event_id:b.eventId,signature,take:b.take,scene_text:this.deathText,model:'test-cheap',status:'ready'};this.deathScenes.push(scene);}
@@ -84,11 +98,16 @@ export class ArchiveMock {
         }
         return json({ error: 'Unmocked generation' }, 500);
       }
-      if(path.endsWith('/play_death_scenes'))return json(this.deathScenes.filter(r=>r.session_id===url.searchParams.get('session_id')?.replace(/^eq\./,'')));
+      if(path.endsWith('/play_death_scenes')) {
+        const snapshot=this.deathScenes.filter(r=>r.session_id===url.searchParams.get('session_id')?.replace(/^eq\./,''));
+        if(this.holdDeathRead)await new Promise<void>(done=>{this.releaseDeathRead=done;});
+        return json(snapshot);
+      }
       if (path.endsWith('/play_sessions')) return json(this.sessions.filter(row=>!row.closed));
       if (path.endsWith('/rpc/save_play_session')) {
         if(this.failWrites) return json({message:'offline'},503);
         const b=request.postDataJSON();let row=this.sessions.find(r=>r.id===b.p_id);
+        b.p_state=jsonbRoundTrip(b.p_state);
         if(!row){row={id:b.p_id,revision:1,state:b.p_state,closed:b.p_closed};this.sessions.push(row);return json({ok:true,revision:1});}
         if(JSON.stringify(row.state)===JSON.stringify(b.p_state)&&row.closed===b.p_closed)return json({ok:true,revision:row.revision});
         if(b.p_revision!==row.revision)return json({ok:false,...row});
