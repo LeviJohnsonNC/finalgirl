@@ -56,7 +56,9 @@ test('unlock Buddyland, cast both girls, choose cards and save a complete game',
   expect(JSON.stringify(request.body)).toContain('Six Victims');
   expect(JSON.stringify(request.body)).toContain('4 Time');
   await page.getByRole('button', { name: 'WON', exact: true }).first().click();
-  await expect(page.getByLabel('Final Girl Health', { exact: true })).toHaveValue('5');
+  await expect(page.getByLabel('Final Girl Health', { exact: true })).toHaveValue('');
+  await page.getByLabel('Final Girl Health', { exact: true }).fill('5');
+  await page.getByLabel('Killer Health', { exact: true }).fill('0');
   await page.getByLabel('Buddies in Play at End (0–7)').fill('2');
   await page.getByLabel('All Power Sources Inactive').check();
   await page.getByLabel('Billy Finale (optional)').selectOption('Power Surge');
@@ -99,7 +101,7 @@ test('Billy brings Buddies to another Location', async ({ page, archive }) => {
   await page.getByRole('button', { name: 'LOST', exact: true }).first().click();
   await expect(page.getByLabel('All Power Sources Inactive')).toBeVisible();
   await expect(page.getByLabel('Final Girl Health', { exact: true })).toHaveValue('');
-  await expect(page.getByLabel('Killer Health', { exact: true })).toHaveValue('4');
+  await expect(page.getByLabel('Killer Health', { exact: true })).toHaveValue('');
 });
 
 test('a different killer at Buddyland has no Billy-only outcome fields', async ({ page, archive }) => {
@@ -107,7 +109,7 @@ test('a different killer at Buddyland has no Billy-only outcome fields', async (
   await page.goto('/'); await page.getByRole('button', { name: 'RESUME GAME' }).click();
   await page.getByRole('button', { name: 'WON', exact: true }).first().click();
   await expect(page.getByLabel('All Power Sources Inactive')).toHaveCount(0);
-  await expect(page.getByLabel('Final Girl Health', { exact: true })).toHaveValue('5');
+  await expect(page.getByLabel('Final Girl Health', { exact: true })).toHaveValue('');
 });
 
 

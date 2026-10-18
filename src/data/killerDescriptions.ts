@@ -10,7 +10,7 @@ export const KILLER_DESCRIPTIONS: Record<string, string> = {
   // Season 3 - Don't Make a Sound
   'The Eyeless': `A humanoid creature with a pale, greyish-beige complexion and a powerful, lean muscularity. The skin is highly textured with visible veins, mottled discoloration, and a matte, leathery quality that suggests practical prosthetic makeup rather than digital effects. The most striking feature is a large, fan-like crest extending from the forehead and temples, ribbed with bony ridges and parchment-like membranes that appear both ancient and organic.
 
-The face is gaunt and monstrous, with deeply sunken, dark eyes and a wide-open, snarling mouth that reveals rows of long, needle-sharp fangs. Viscous saliva drips from the lower jaw, emphasizing a primal, predatory state. The creature's expression is one of pure, mindless aggression. It is captured in a dark, subterranean environment with warm, out-of-focus background lights, creating a gritty, high-contrast aesthetic typical of a vintage 1980s creature feature.`,
+The face is gaunt and monstrous, with deeply sunken, dark eyes and a wide-open, snarling mouth that reveals rows of long, needle-sharp fangs. Viscous saliva drips from the lower jaw, emphasizing a primal, predatory state. The creature's expression is one of pure, mindless aggression. Its location, pose and lighting are determined by the selected scene; it is blind and hunts by sound.`,
 
   // Season 3 - The Marrek Murders
   'The Tormentor': `A woman with a lean, athletic build and a menacing, predatory presence. Her face is obscured by a stark white, smooth mask reminiscent of a porcelain doll, featuring a single, jagged vertical bloodstain running down the left eye. Through the narrow eyeholes, her dark eyes are fixed in an intense, unwavering stare that feels cold and calculated. She wears a deep red hooded vest pulled over her head, framing the mask in shadow.
@@ -47,19 +47,7 @@ He holds wooden marionette control bars with long strings dangling down, implyin
 
 This character radiates playful cruelty. He enjoys being watched. Violence is a performance, not a necessity. He taunts rather than rushes, smiles rather than scowls, and always appears one step ahead. He is not frantic. He is entertained.`,
 
-  "Dr. Fright": `A middle-aged man in his late 40s to early 50s with a stocky, work-hardened build and a hunched, aggressive posture. His body language is tense and animalistic—shoulders forward, arms slightly bent, as if perpetually mid-lunge. He looks like someone who has snapped rather than transformed.
-
-His face is weathered and rough, with deep lines, broken skin, and fresh cuts smeared with blood. His expression is furious and unhinged—eyes wide, jaw clenched, lips pulled tight in a snarl. There's no irony or playfulness here; his violence is raw and emotional.
-
-His eyes are dark and intense, fixed on his target with obsessive focus.
-
-He has medium-length, thinning brown hair, greasy and disheveled, clinging to his head and forehead. Hair looks neglected rather than styled.
-
-He reads as a man driven past reason—rage-fueled, territorial, and deeply personal. He wears rural work clothing: A yellow or mustard sweater vest over a long-sleeve button-up shirt. Work trousers, dirty and worn. Clothing is soaked and smeared with blood, especially across the chest and sleeves.
-
-He carries a rusted metal pitchfork, held tightly and angled forward like a spear. The pitchfork is not ceremonial—it's a familiar farm tool turned weapon.
-
-The look should always feel domestic and agricultural, never stylized or theatrical.`,
+  "Dr. Fright": `A grotesque, stocky middle-aged man with pockmarked, scarred skin, milky-white eyes and thinning disheveled brown hair. Mustard sweater vest over a worn long-sleeve shirt and work trousers; a rusted pitchfork. His unsettling physical identity stays consistent in dreams and waking imagery. He is the supernatural Dream Doctor, not a non-supernatural farmer. A dark cloudlike presence may appear only when the story establishes it. The selected location and scene determine his pose, lighting and surroundings.`,
 
   "Ratchet Lady": `A woman in her early 30s with a lean, frantic build and a terrifying, visceral presence. Her skin is pale and sallow, heavily smudged with soot and grime. Her face is almost entirely encased in thick, dingy medical bandages that wrap tightly around her head and eyes, leaving only her mouth exposed. Her expression is one of primal, unhinged ferocity, with her jaw dropped in a wide, silent scream.
 

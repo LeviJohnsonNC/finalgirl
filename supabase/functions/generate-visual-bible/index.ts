@@ -1,9 +1,5 @@
-// Produces a short "look book" paragraph for one game — film stock, palette,
-// light quality, lens character — generated once when the game starts.
-//
-// Both the opening still and the closing poster are given this same text, which
-// is what makes a session's two images read as frames from one film rather than
-// two unrelated pictures. Cheap: one short text call per game.
+// Establish stable cast identity, location architecture and palette once per game.
+// Preserve the existing string checkpoint format so older sessions still resume.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getCorsHeaders } from "../_shared/auth.ts";
 import { requireUser } from "../_shared/guard.ts";
@@ -31,12 +27,12 @@ serve(async (req) => {
     const { text, model } = await generateText({
       system: VISUAL_BIBLE_SYSTEM,
       user: buildVisualBiblePrompt(validation.data),
-      maxTokens: 200,
-      temperature: 1,
+      maxTokens: 400,
+      temperature: 0.5,
     });
 
     await guard.logUsage({ model, kind: "visual-bible" });
-    return json({ visualBible: text, model });
+    return json({ visualBible: text.trim().slice(0, 1000), model });
   } catch (error) {
     console.error("Error in generate-visual-bible:", error);
     return json({ error: userFacingMessage(error) }, statusFor(error));

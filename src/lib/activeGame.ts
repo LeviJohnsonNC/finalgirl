@@ -7,7 +7,7 @@ export interface GameSelection {
   filmId: string | null;
 }
 export interface EndingFormData {
-  finalHorrorLevel: number; finalGirlHealth: number; killerHealth: number;
+  finalHorrorLevel: number; finalGirlHealth?: number; killerHealth?: number;
   weaponUsed: string; victimsSaved: number | null; victimsKilled: number | null;
   roundsPlayed?: number | null;
   endingSubLocation: string; gameHighlights: string;

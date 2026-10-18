@@ -12,7 +12,7 @@ import { useNarration } from '@/hooks/useNarration';
 import { getFilmDetails } from '@/types/featureFilmDetails';
 import { getFilmIdByKiller, getFilmIdByLocation, getFilmIdByFinalGirl, FEATURE_FILMS } from '@/types/gameData';
 import { useActiveImages } from '@/hooks/useActiveImages';
-import { getKillerSpecialRules } from '@/data/killerSpecialRules';
+import { getKillerNarrativeRules } from '@/data/killerSpecialRules';
 import { getKillerDescription } from '@/data/killerDescriptions';
 import { getFinalGirlDescription } from '@/data/finalGirlDescriptions';
 import { getLocationDescription } from '@/data/locationDescriptions';
@@ -120,8 +120,11 @@ const NowPlaying = ({
     (async () => {
       const bible = await generateVisualBible({
         killer,
+        killerDescription: getKillerDescription(killer),
         finalGirl,
+        finalGirlDescription: getFinalGirlDescription(finalGirl),
         location,
+        moduleVisualGuidance: getModulePromptContext(killer, location)?.visualGuidance,
         locationDescription: getLocationDescription(location),
       });
       if (cancelled) return;
@@ -147,11 +150,13 @@ const NowPlaying = ({
       moduleVisualGuidance: moduleContext?.visualGuidance,
       visualBible,
       sceneType: 'beginning',
+      mission: getMissionByName(mission),
+      scenarioRules: [getKillerNarrativeRules(killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
       gameId: sessionImageId.current,
       previousImageUrl,
     });
     if (url) { setSceneImageUrl(url); checkpointRef.current({ sceneImageUrl: url }); }
-  }, [story, killer, finalGirl, location, moduleContext?.visualGuidance, visualBible, generateImage]);
+  }, [story, killer, finalGirl, location, moduleContext?.visualGuidance, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, mission, visualBible, generateImage]);
 
   // Images generate on their own now — no API key, no button to find.
   //
@@ -193,24 +198,20 @@ const NowPlaying = ({
       const locationDetails = locationFilmDetails?.location;
       const finalGirlDetails = finalGirlFilmDetails?.finalGirls?.find(fg => fg.name === finalGirl);
 
-      const killerRules = getKillerSpecialRules(killer);
+      const killerRules = getKillerNarrativeRules(killer);
       const moduleSpecialRules = moduleContext
         ? [moduleContext.rulesSummary, moduleContext.narrativeGuidance].filter(Boolean).join('\n')
         : undefined;
-      // Falconwood's Mission is the spine of the story, so it rides along with
-      // the location's special rules rather than needing a new payload field.
-      const missionNote = missionData
-        ? `MISSION (the Final Girl's mandatory objective this game — build the story around it): ${missionData.name} — ${missionData.description} She cannot finish the killer until this is done.`
-        : undefined;
-      const locationSpecialRules = [moduleSpecialRules, missionNote].filter(Boolean).join('\n');
+      const locationSpecialRules = moduleSpecialRules;
 
       // Build payload with complete objects matching the edge function's StoryRequest interface
       const payload = {
+        mission: missionData,
         killer: {
           name: killer,
           description: killerDetails?.description || `A terrifying killer known as ${killer}.`,
-          ...((killerRules?.narrativeNote || moduleSpecialRules) && {
-            specialRules: [killerRules?.narrativeNote, moduleSpecialRules].filter(Boolean).join('\n'),
+          ...((killerRules || moduleSpecialRules) && {
+            specialRules: [killerRules, moduleSpecialRules].filter(Boolean).join('\n'),
           }),
         },
         location: {

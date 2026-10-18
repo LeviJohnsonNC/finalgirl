@@ -1,8 +1,11 @@
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { corsHeaders } from './auth.ts';
 
+const MissionSchema = z.object({ name: z.string().min(1).max(100), description: z.string().max(1500) });
+
 // Schema for generate-story endpoint
 export const StoryRequestSchema = z.object({
+  mission: MissionSchema.optional(),
   killer: z.object({
     name: z.string().min(1).max(100),
     description: z.string().max(5000).optional(),
@@ -40,13 +43,22 @@ export const SceneImageRequestSchema = z.object({
   moduleVisualGuidance: z.string().max(3000).optional(),
   visualBible: z.string().max(1000).optional(),
   outcome: z.enum(['won', 'lost']).optional(),
+  introStory: z.string().max(10000).optional(),
+  finalGirlHealth: z.number().int().min(0).max(10).optional(),
+  killerHealth: z.number().int().min(0).max(20).optional(),
+  mission: MissionSchema.optional(),
+  scenarioRules: z.string().max(6000).optional(),
   // Used to name the stored file, and to clean up the image being replaced.
   gameId: z.string().uuid().optional(),
+  referenceImageUrl: z.string().url().max(2000).optional(),
   previousImageUrl: z.string().url().max(2000).optional()
 });
 
 // Schema for generate-visual-bible endpoint
 export const VisualBibleRequestSchema = z.object({
+  killerDescription: z.string().max(3000).optional(),
+  finalGirlDescription: z.string().max(3000).optional(),
+  moduleVisualGuidance: z.string().max(3000).optional(),
   killer: z.string().min(1).max(100),
   finalGirl: z.string().min(1).max(100),
   location: z.string().min(1).max(100),
@@ -66,6 +78,7 @@ export const NarrationRequestSchema = z.object({
 
 // Schema for generate-ending endpoint
 export const EndingRequestSchema = z.object({
+  mission: MissionSchema.optional(),
   // Required fields
   introStory: z.string().min(50).max(10000),
   outcome: z.enum(['won', 'lost']),

@@ -8,6 +8,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { ownedOpeningReference } from "../_shared/imageReference.ts";
 import { getCorsHeaders } from "../_shared/auth.ts";
 import { requireUser } from "../_shared/guard.ts";
 import { SceneImageRequestSchema, validateRequest } from "../_shared/validation.ts";
@@ -18,6 +19,8 @@ import {
   buildShotBriefPrompt,
   SceneContext,
   SHOT_BRIEF_SYSTEM,
+  parseArtPlan,
+  fallbackPosterCopy,
 } from "../_shared/prompts.ts";
 
 const EXTENSION: Record<string, string> = {
@@ -51,40 +54,51 @@ serve(async (req) => {
     const isPoster = body.sceneType === "ending";
     const context: SceneContext = { ...body };
 
-    // Cinematographer pass: distil the story to one shot before the image model
-    // sees it. Cheap, and it stops the image model from averaging the whole
-    // story into mush. A failure here is not fatal — the image prompt falls
-    // back to carrying the full story itself.
+    // Compare three story-specific compositions in one utility call, then generate
+    // only the selected image. Invalid planning falls back to the full story.
     let briefModel: string | undefined;
+    let posterCopy = fallbackPosterCopy(context);
     try {
       const brief = await generateText({
         system: SHOT_BRIEF_SYSTEM,
         user: buildShotBriefPrompt(context),
-        maxTokens: 200,
+        maxTokens: 1200,
       });
-      context.shotBrief = brief.text;
+      const plan = parseArtPlan(brief.text);
+      if (plan) {
+        context.shotBrief = plan.concepts[plan.selected];
+        posterCopy = { title: plan.title, tagline: plan.tagline };
+      } else {
+        console.warn('Invalid art plan; using fact-constrained story fallback.');
+      }
       briefModel = brief.model;
     } catch (err) {
       console.warn("Shot brief failed, falling back to full-story prompt:", err);
     }
 
     const prompt = isPoster ? buildPosterPrompt(context) : buildBeginningPrompt(context);
-    const image = await generateImage(prompt);
+    const reference = isPoster ? ownedOpeningReference(body.referenceImageUrl, Deno.env.get("SUPABASE_URL") ?? '', user.id, body.gameId) : undefined;
+    const image = await generateImage(prompt, reference);
 
     // --- Persist to storage; never hand back a data: URI ---
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    const extension = EXTENSION[image.mimeType] ?? "png";
+    const mimeType = isPoster ? "image/png" : image.mimeType;
+    const extension = EXTENSION[mimeType] ?? "png";
     const kind = isPoster ? "poster" : "scene";
     const id = body.gameId ?? crypto.randomUUID();
     const path = `game-posters/${user.id}/${id}-${kind}-${Date.now()}.${extension}`;
 
-    const bytes = Uint8Array.from(atob(image.base64), (c) => c.charCodeAt(0));
+    let bytes: Uint8Array = Uint8Array.from(atob(image.base64), (c) => c.charCodeAt(0));
+    if (isPoster) {
+      const { composePoster } = await import('../_shared/poster.ts');
+      bytes = await composePoster(bytes, posterCopy);
+    }
     const { error: uploadError } = await adminClient.storage
       .from("posters")
-      .upload(path, bytes, { contentType: image.mimeType, upsert: true });
+      .upload(path, bytes, { contentType: mimeType, upsert: true });
 
     if (uploadError) {
       console.error("Poster upload failed:", uploadError);
