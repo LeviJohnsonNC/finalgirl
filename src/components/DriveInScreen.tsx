@@ -10,7 +10,7 @@ const compositions = {
   portrait: { src: portrait, surface: portraitSurface, width: 1024, height: 1536 },
 };
 
-export function DriveInScreen({ children, busy }: { children: ReactNode; busy: boolean }) {
+export function DriveInScreen({ children, busy, projecting }: { children: ReactNode; busy: boolean; projecting: boolean }) {
   const [composition, setComposition] = useState<keyof typeof compositions>(() =>
     window.matchMedia(phoneQuery).matches ? 'portrait' : 'landscape');
 
@@ -46,7 +46,7 @@ export function DriveInScreen({ children, busy }: { children: ReactNode; busy: b
       <div className="theater-scene-plane">
         <img src={art.src} className="theater-scenery" alt="" aria-hidden="true"
           width={art.width} height={art.height} fetchPriority="high" />
-        <div className="theater-screen" aria-busy={busy}>
+        <div className="theater-screen" aria-busy={busy} data-projecting={projecting}>
           {children}
           <div className="theater-screen-texture" aria-hidden="true" />
         </div>

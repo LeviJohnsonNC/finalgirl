@@ -19,7 +19,6 @@ export const TheaterActions = ({ game, cloud, onStart, onStartAnother }: Theater
       {game && <span className="theater-play-label" aria-hidden="true">{cloud ? 'RESUME CLOUD GAME' : 'RESUME GAME'}</span>}
     </button>
     {game ? <>
-      <p className="theater-action-hint">{game.selection.finalGirl} vs. {game.selection.killer}</p>
       {onStartAnother && (cloud ? <button className="theater-new-tape" onClick={onStartAnother}>Start another tape</button> : (
         <AlertDialog>
           <AlertDialogTrigger asChild><button className="theater-new-tape">Start another tape</button></AlertDialogTrigger>
