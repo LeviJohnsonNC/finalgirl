@@ -10,6 +10,7 @@ export const DEATH_CAUSES = [
   "unspecified",
   "killer",
   "minion",
+  "terror",
   "event",
   "hazard",
   "other",

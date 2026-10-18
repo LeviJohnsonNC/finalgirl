@@ -43,7 +43,8 @@ test('Rules broadcasts readable looping news with pause and reduced motion', asy
       overflow: document.documentElement.scrollWidth > innerWidth };
   });
   expect(Math.abs(metrics.bottom - metrics.footer)).toBeLessThanOrEqual(1);
-  expect(metrics.widths[0]).toBe(metrics.widths[1]);
+  // Transformed ticker copies may differ by a fraction of a rendered pixel.
+  expect(Math.abs(metrics.widths[0] - metrics.widths[1])).toBeLessThan(0.1);
   expect(metrics.content[0]).toBe(metrics.content[1]);
   expect(metrics.duration).toBeCloseTo(metrics.widths[0] / 48, 1);
   expect(metrics.overflow).toBe(false);

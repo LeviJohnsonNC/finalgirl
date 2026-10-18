@@ -1,5 +1,10 @@
-import { summarizePlay, validPlayLog, type PlayEvent } from './events.ts';
-import { moduleContext } from './modules.ts';
+import {
+  summarizePlay,
+  validPlayLog,
+  type PlayDetails,
+  type PlayEvent,
+} from "./events.ts";
+import { moduleContext } from "./modules.ts";
 export interface DeathSelection {
   killer: string;
   location: string;
@@ -12,21 +17,22 @@ export function deathFacts(
 ) {
   if (!validPlayLog(events)) return null;
   const entries = summarizePlay(events).entries;
-  const e = entries.find(
-    (e) => e.id === eventId && e.kind === 'killed',
-  );
+  const e = entries.find((e) => e.id === eventId && e.kind === "killed");
   if (!e) return null;
-  const context = moduleContext(selection, entries.slice(0, entries.indexOf(e) + 1));
+  const context = moduleContext(
+    selection,
+    entries.slice(0, entries.indexOf(e) + 1),
+  );
   return {
     version: 1,
     killer: selection.killer,
     location: selection.location,
     finalGirl: selection.finalGirl,
     quantity: e.quantity!,
-    cause: e.cause ?? 'unspecified',
-    room: e.room ?? '',
-    victim: e.victim ?? '',
-    note: e.text ?? '',
+    cause: e.cause ?? "unspecified",
+    room: e.room ?? "",
+    victim: e.victim ?? "",
+    note: e.text ?? "",
     round: e.currentRound,
     // Omit absent additions to preserve signatures for legacy saved scenes.
     ...(e.mechanism && { mechanism: e.mechanism }),
@@ -39,33 +45,34 @@ export function deathFacts(
 export type DeathFacts = NonNullable<ReturnType<typeof deathFacts>>;
 export async function deathSignature(facts: DeathFacts) {
   const bytes = await crypto.subtle.digest(
-    'SHA-256',
+    "SHA-256",
     new TextEncoder().encode(JSON.stringify(facts)),
   );
   return Array.from(new Uint8Array(bytes), (b) =>
-    b.toString(16).padStart(2, '0'),
-  ).join('');
+    b.toString(16).padStart(2, "0"),
+  ).join("");
 }
 /** Only names already verified in the owner's Buddyland board/cards. Other boards accept free text. */
 export const deathRooms: Record<string, readonly string[]> = {
   Buddyland: [
-    'Arcade',
-    'Party Room',
-    'Kitchen',
-    'Prize Counter',
-    'Janitor’s Closet',
-    'Bathroom',
-    'Jungle Gym',
-    'Ball Pit',
+    "Arcade",
+    "Party Room",
+    "Kitchen",
+    "Prize Counter",
+    "Janitor’s Closet",
+    "Bathroom",
+    "Jungle Gym",
+    "Ball Pit",
   ],
 };
 export const deathCauseLabels = {
-  unspecified: 'Unspecified / general',
-  killer: 'Killer',
-  minion: 'Minion',
-  event: 'Event',
-  hazard: 'Location hazard',
-  other: 'Other',
+  unspecified: "Unspecified / general",
+  killer: "Killer attack",
+  minion: "Buddy / minion",
+  terror: "Terror card",
+  event: "Event",
+  hazard: "Location hazard",
+  other: "Other / not sure",
 } as const;
 
 export interface DeathScene {
@@ -76,22 +83,44 @@ export interface DeathScene {
   take: number;
   scene_text: string;
   model?: string;
-  status: 'ready';
+  status: "ready";
 }
 export function isDeathScene(input: unknown): input is DeathScene {
   const r = input as DeathScene;
   return Boolean(
     r &&
-      typeof r.id === 'string' &&
-      typeof r.session_id === 'string' &&
-      typeof r.event_id === 'string' &&
+      typeof r.id === "string" &&
+      typeof r.session_id === "string" &&
+      typeof r.event_id === "string" &&
       /^[0-9a-f]{64}$/.test(r.signature) &&
       Number.isInteger(r.take) &&
       r.take >= 0 &&
       r.take <= 2 &&
-      r.status === 'ready' &&
-      typeof r.scene_text === 'string' &&
+      r.status === "ready" &&
+      typeof r.scene_text === "string" &&
       r.scene_text.length >= 10 &&
       r.scene_text.length <= 1600,
   );
+}
+
+/** Clear fields from a previous cause before checkpointing or generating a scene.
+ * Empty strings are intentional: detail events merge into the original death. */
+export function detailsForCause(
+  details: PlayDetails,
+  killer: string,
+): PlayDetails {
+  const cause = details.cause ?? "unspecified";
+  return {
+    ...details,
+    attacker:
+      cause === "killer"
+        ? killer
+        : cause === "minion"
+          ? (details.attacker ?? "")
+          : "",
+    terrorCard: cause === "terror" ? (details.terrorCard ?? "") : "",
+    eventCard: cause === "event" ? (details.eventCard ?? "") : "",
+    mechanism:
+      cause === "hazard" || cause === "other" ? (details.mechanism ?? "") : "",
+  };
 }

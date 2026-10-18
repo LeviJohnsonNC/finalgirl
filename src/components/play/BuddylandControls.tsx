@@ -1,3 +1,5 @@
+import { PlaySelect } from "./PlaySelect";
+import { PlaySearch } from "./PlaySearch";
 import { useState } from "react";
 import {
   BUDDIES,
@@ -5,7 +7,6 @@ import {
   BILLY_POWERS,
   BUDDYLAND_EVENTS,
   BUDDYLAND_ITEMS,
-  BUDDYLAND_TERRORS,
   BUDDYLAND_ROOMS,
   SPECIAL_VICTIMS,
   FINAL_GIRL_REWARDS,
@@ -73,34 +74,21 @@ function Picker({
   cards: readonly { id: string; name: string }[];
   onPick: (id: string) => boolean;
 }) {
-  const [open, setOpen] = useState(false);
-  return open ? (
-    <div>
-      <label>
-        {label}
-        <select
-          aria-label={label}
-          value=""
-          onChange={(e) => {
-            if (e.target.value && onPick(e.target.value)) setOpen(false);
-          }}
-        >
-          <option value="">Choose the card you revealed</option>
-          {cards.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </label>
-      <button type="button" onClick={() => setOpen(false)}>
-        Cancel
-      </button>
-    </div>
-  ) : (
-    <button onClick={() => setOpen(true)}>{label}</button>
+  return (
+    <PlaySearch
+      allowCustom={false}
+      label={label}
+      value=""
+      options={cards.map((c) => c.name)}
+      placeholder={label}
+      onChange={(name) => {
+        const card = cards.find((c) => c.name === name);
+        return card ? onPick(card.id) : false;
+      }}
+    />
   );
 }
+
 export function BuddylandControls(props: Props) {
   const entries = summarizePlay(props.events).entries;
   const billy = moduleState(entries, "billy"),
@@ -131,19 +119,18 @@ export function BuddylandControls(props: Props) {
     return (
       <label>
         {label}
-        <input
-          aria-label={label}
+        <PlaySearch
+          label={label}
           value={value}
-          maxLength={240}
-          list={key.endsWith(".room") ? "buddyland-board-spaces" : undefined}
-          onChange={(e) => props.onDraft(id, { detail: e.target.value })}
-          onBlur={() => {
-            if (
-              value.trim() !== String(state[key] ?? "") &&
-              !record(module, { [key]: value.trim() || null })
-            )
-              return;
+          onSearch={(next) => props.onDraft(id, { detail: next })}
+          options={key.endsWith(".room") ? BUDDYLAND_ROOMS : []}
+          onChange={(next) => {
+            if (!record(module, { [key]: next.trim() || null })) {
+              props.onDraft(id, { detail: next });
+              return false;
+            }
             props.onDraft(id, {});
+            return true;
           }}
           placeholder="Unrecorded"
         />
@@ -161,45 +148,6 @@ export function BuddylandControls(props: Props) {
   );
   return (
     <div className="play-modules">
-      <datalist id="buddyland-board-spaces">
-        {BUDDYLAND_ROOMS.map((room) => (
-          <option key={room} value={room} />
-        ))}
-      </datalist>
-      {(props.killer === "Billy the Bear" ||
-        props.location === "Buddyland") && (
-        <details>
-          <summary>Terror card reference</summary>
-          <Picker
-            label="Record drawn Terror"
-            cards={BUDDYLAND_TERRORS.filter(
-              (c) =>
-                ("killer" in c && props.killer === c.killer) ||
-                ("location" in c && props.location === c.location),
-            ).map((c) => ({ id: c.name, name: c.name }))}
-            onPick={(name) => {
-              const card = BUDDYLAND_TERRORS.find((c) => c.name === name)!;
-              return record("killer" in card ? "billy" : "buddyland", {
-                lastTerror: name,
-              });
-            }}
-          />
-          {BUDDYLAND_TERRORS.filter(
-            (c) =>
-              (c.name === billy.lastTerror &&
-                props.killer === "Billy the Bear") ||
-              (c.name === venue.lastTerror && props.location === "Buddyland"),
-          ).map((c) => (
-            <p key={c.name} className="play-card-note">
-              <strong>{c.name}</strong>: {c.effect}
-            </p>
-          ))}
-          <p className="play-card-note">
-            Drawing a card records its name. Confirm any resulting deaths with
-            the Killed counter.
-          </p>
-        </details>
-      )}
       {props.killer === "Billy the Bear" && (
         <section aria-label="Billy tracking">
           <h2>
@@ -260,7 +208,7 @@ export function BuddylandControls(props: Props) {
                     />
                     <label>
                       Status
-                      <select
+                      <PlaySelect
                         aria-label={`${b.name} status`}
                         value={String(billy[`${prefix}.status`] ?? "")}
                         onChange={(e) =>
@@ -272,7 +220,7 @@ export function BuddylandControls(props: Props) {
                         <option value="active">In play</option>
                         <option value="defeated">Defeated</option>
                         <option value="removed">Removed</option>
-                      </select>
+                      </PlaySelect>
                     </label>
                     {b.id === "billy-jr" ? (
                       <p className="play-card-note">
@@ -281,7 +229,7 @@ export function BuddylandControls(props: Props) {
                     ) : (
                       <label>
                         Sharing Billy’s space?
-                        <select
+                        <PlaySelect
                           aria-label={`${b.name} shares Billy’s space`}
                           value={
                             billy[`${prefix}.withBilly`] === undefined
@@ -300,12 +248,12 @@ export function BuddylandControls(props: Props) {
                           <option value="">Unrecorded</option>
                           <option value="true">Yes</option>
                           <option value="false">No</option>
-                        </select>
+                        </PlaySelect>
                       </label>
                     )}
                     <label>
                       Activation
-                      <select
+                      <PlaySelect
                         aria-label={`${b.name} activation`}
                         value={
                           billy[`${prefix}.waiting`] === undefined
@@ -326,15 +274,10 @@ export function BuddylandControls(props: Props) {
                           Wait until next Killer phase
                         </option>
                         <option value="false">Ready</option>
-                      </select>
+                      </PlaySelect>
                     </label>
                     {textField("billy", `${prefix}.room`, `${b.name} location`)}
-                    {b.ability && <p className="play-card-note">{b.ability}</p>}
-                    <p className="play-card-note">
-                      Kill reward: {b.reward} If defeated outside the Action
-                      phase, take the reward at the start of the next Action
-                      phase.
-                    </p>
+
                     <button
                       onClick={() => {
                         const changes = {
@@ -413,7 +356,7 @@ export function BuddylandControls(props: Props) {
                 <div key={i} className="play-module-card">
                   <label>
                     Power Source {i}
-                    <select
+                    <PlaySelect
                       aria-label={`Power Source ${i} status`}
                       value={String(billy[`source.${i}.status`] ?? "")}
                       onChange={(e) =>
@@ -426,7 +369,7 @@ export function BuddylandControls(props: Props) {
                       <option value="active">Active</option>
                       <option value="inactive">Inactive</option>
                       <option value="set-aside">Set aside</option>
-                    </select>
+                    </PlaySelect>
                   </label>
                   {textField(
                     "billy",
@@ -441,7 +384,7 @@ export function BuddylandControls(props: Props) {
             <summary>Revealed powers &amp; Finale</summary>
             <label>
               Revealed Finale
-              <select
+              <PlaySelect
                 aria-label="Revealed Finale"
                 value={String(billy.finale ?? "")}
                 onChange={(e) =>
@@ -454,16 +397,12 @@ export function BuddylandControls(props: Props) {
                     {f.name}
                   </option>
                 ))}
-              </select>
+              </PlaySelect>
             </label>
-            {BILLY_FINALES.filter((f) => f.id === billy.finale).map((f) => (
-              <p key={f.id} className="play-module-reminder">
-                {f.effect}
-              </p>
-            ))}
+
             <label>
               Billy’s status
-              <select
+              <PlaySelect
                 aria-label="Billy status"
                 value={String(billy.billyStatus ?? "")}
                 onChange={(e) =>
@@ -473,14 +412,9 @@ export function BuddylandControls(props: Props) {
                 <option value="">Unrecorded</option>
                 <option value="active">In play</option>
                 <option value="defeated">Defeated</option>
-              </select>
+              </PlaySelect>
             </label>
-            {billy.finale === "power-surge" && (
-              <p className="play-card-note">
-                Record Boris separately when he appears. Defeating Billy alone
-                does not win Power Surge.
-              </p>
-            )}
+
             <div className="play-module-grid">
               {BILLY_POWERS.filter(
                 (p) => billy[`power.${p.id}.active`] !== undefined,
@@ -491,7 +425,6 @@ export function BuddylandControls(props: Props) {
                   aria-label={`${p.name} tracker`}
                 >
                   <h3>{p.name}</h3>
-                  <p className="play-card-note">{p.effect}</p>
                   {"health" in p && (
                     <Stepper
                       label={`${p.name} health`}
@@ -535,23 +468,6 @@ export function BuddylandControls(props: Props) {
               }}
             />
           </details>
-          <details>
-            <summary>Revealed Bloodlust tokens</summary>
-            <p className="play-card-note">
-              Record only revealed token effects. Keep facedown tokens hidden.
-            </p>
-            <div className="play-module-grid">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i}>
-                  {textField(
-                    "billy",
-                    `bloodlust.${i}`,
-                    `Revealed Bloodlust token ${i}`,
-                  )}
-                </div>
-              ))}
-            </div>
-          </details>
         </section>
       )}
       {props.location === "Buddyland" && (
@@ -570,10 +486,9 @@ export function BuddylandControls(props: Props) {
             ).map((c) => (
               <article className="play-module-card" key={c.id}>
                 <h3>{c.name}</h3>
-                <p className="play-card-note">{c.effect}</p>
                 <label>
                   {c.name} status
-                  <select
+                  <PlaySelect
                     aria-label={`${c.name} Event status`}
                     value={String(venue[`event.${c.id}`])}
                     onChange={(e) =>
@@ -585,7 +500,7 @@ export function BuddylandControls(props: Props) {
                     <option value="active">Active / resolving</option>
                     <option value="resolved">Discarded / resolved</option>
                     <option value="">Stop tracking</option>
-                  </select>
+                  </PlaySelect>
                 </label>
               </article>
             ))}
@@ -602,7 +517,7 @@ export function BuddylandControls(props: Props) {
               {SPECIAL_VICTIMS.map((v) => (
                 <label key={v.id}>
                   {v.name}
-                  <select
+                  <PlaySelect
                     aria-label={`${v.name} status`}
                     value={String(venue[`victim.${v.id}`] ?? "")}
                     onChange={(e) =>
@@ -618,13 +533,13 @@ export function BuddylandControls(props: Props) {
                     {v.id === "nick" && (
                       <option value="away">Away until Upkeep</option>
                     )}
-                  </select>
+                  </PlaySelect>
                 </label>
               ))}
             </div>
             <label>
               Tragic Collapse token
-              <select
+              <PlaySelect
                 aria-label="Tragic Collapse location"
                 value={String(venue.collapseRoom ?? "")}
                 onChange={(e) =>
@@ -635,7 +550,7 @@ export function BuddylandControls(props: Props) {
                 {["Jungle Gym", "Kitchen", "Bathroom"].map((room) => (
                   <option key={room}>{room}</option>
                 ))}
-              </select>
+              </PlaySelect>
             </label>
           </details>
           <details>
@@ -648,10 +563,9 @@ export function BuddylandControls(props: Props) {
                   aria-label={`${item.name} tracker`}
                 >
                   <h3>{item.name}</h3>
-                  <p className="play-card-note">{item.effect}</p>
                   <label>
                     Item status
-                    <select
+                    <PlaySelect
                       aria-label={`${item.name} status`}
                       value={String(venue[`item.${item.id}.status`])}
                       onChange={(e) =>
@@ -663,7 +577,7 @@ export function BuddylandControls(props: Props) {
                       <option value="carried">Carried</option>
                       <option value="discarded">Discarded / spent</option>
                       <option value="">Stop tracking</option>
-                    </select>
+                    </PlaySelect>
                   </label>
                   {"uses" in item && (
                     <>
