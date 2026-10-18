@@ -356,6 +356,16 @@
     animation: grain-shift 0.5s steps(10) infinite;
   }
 
+  /* Game screens keep their texture still: no shifting grain or VHS flutter. */
+  .game-session .film-grain,
+  .game-session .story-image-loaded {
+    animation: none;
+  }
+
+  .game-session .film-grain {
+    transform: none;
+  }
+
   @keyframes grain-shift {
     0%, 100% { transform: translate(0, 0); }
     10% { transform: translate(-2%, -2%); }
@@ -4634,3 +4644,4 @@
   .play-screen figure img { height: max(140px,calc(100dvh - 160px)) !important; }
   .play-screen figure figcaption { font-size: .75rem; }
 }
+

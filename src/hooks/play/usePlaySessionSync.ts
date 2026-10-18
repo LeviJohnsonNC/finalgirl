@@ -26,7 +26,6 @@ export function usePlaySessionSync(game: ActiveGame | null) {
   const [loadError, setLoadError] = useState<string | null>(null);
   const latest = useRef({ owner, game, signedIn: Boolean(user), revisions });
   latest.current = { owner, game, signedIn: Boolean(user), revisions };
-  const [refreshIndex, setRefreshIndex] = useState(0);
 
   const send = useCallback(async (snapshot: Snapshot) => {
     if (latest.current.owner !== owner || !latest.current.signedIn) throw new Error('Sign in to sync this game.');
@@ -75,7 +74,7 @@ export function usePlaySessionSync(game: ActiveGame | null) {
       } catch (reason) { if (!cancelled) setLoadError(reason instanceof Error ? reason.message : 'Cloud games unavailable.'); }
     })();
     return () => { cancelled = true; };
-  }, [user, isAuthReady, owner, refreshIndex]);
+  }, [user, isAuthReady, owner]);
 
   const close = useCallback(() => {
     const state = latest.current.game;
@@ -121,6 +120,7 @@ export function usePlaySessionSync(game: ActiveGame | null) {
     // Hide a prior account's rows on the very first render, before effects reset.
     remoteGames: remoteOwner.current === owner ? remoteGames.filter(row => !pending.some(p => p.id === row.id && p.closed)) : [],
     pendingCount: pending.length, error: error || loadError, conflict: conflictOwner.current === owner ? conflict : null,
-    refresh: () => { setRefreshIndex(n => n + 1); void flush(); }, retry: flush, close, adopt, keepLocal,
+    close, adopt, keepLocal,
   };
 }
+

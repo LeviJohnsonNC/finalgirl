@@ -44,7 +44,9 @@ test('unlock Buddyland, cast both girls, choose cards and save a complete game',
   await page.getByRole('combobox', { name: 'Starting Event' }).click();
   await expect(page.getByRole('option')).toHaveCount(10);
   await page.getByRole('option', { name: 'Birthday Girl', exact: true }).click();
-  await expect(page.getByText(/If she is alone during the Panic phase/)).toBeVisible();
+  await expect(page.getByText(/If she is alone during the Panic phase/)).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Birthday Bash', exact: true })).toHaveCount(0);
+  await expect(page.getByText('Tape ready', { exact: true })).toHaveCount(0);
   await page.screenshot({ path: info.outputPath('buddyland-casting.png'), fullPage: true });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole('button', { name: 'Press Play', exact: true }).click();

@@ -100,7 +100,7 @@ export function DeathSceneDialog({
     }
     setMessage(
       ok
-        ? 'Details saved on this device.'
+        ? ''
         : 'Details could not be saved. Please try again.',
     );
     return ok;
@@ -287,3 +287,4 @@ export function DeathSceneDialog({
     </Dialog>
   );
 }
+

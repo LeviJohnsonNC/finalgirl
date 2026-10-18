@@ -26,7 +26,7 @@ test('sign in, edit collection, reload, and sign out', async ({ page, archive })
   await expect(page.getByRole('button', { name: 'SIGN IN', exact: true })).toBeVisible();
 });
 
-test('resume form edits and retry a failed save without losing the result', async ({ page, archive }, testInfo) => {
+test('resume form edits and sync a failed save on reconnect without losing the result', async ({ page, archive }, testInfo) => {
   archive.failWrites = true;
   await archive.install(page, { draft: activeGame }); await resume(page);
   await page.getByRole('button', { name: 'WON', exact: true }).first().click();
@@ -38,9 +38,10 @@ test('resume form edits and retry a failed save without losing the result', asyn
   await expect(page.getByLabel('Final Girl Health', { exact: true })).toHaveValue('1');
   await page.screenshot({ path: testInfo.outputPath('recovered-outcome.png'), fullPage: true });
   await page.getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION' }).click();
-  await expect(page.getByText(/saved on this device and waiting/)).toBeVisible();
+  await expect(page.getByText(/saved on this device and waiting/)).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'RETRY SAVE', exact: true })).toHaveCount(0);
   archive.failWrites = false;
-  await page.getByRole('button', { name: 'RETRY SAVE' }).click();
+  await page.evaluate(() => window.dispatchEvent(new Event('online')));
   await expect.poll(() => archive.history.length).toBe(1);
   await expect.poll(() => archive.history[0].weapon_used).toBe('Axe');
   expect(archive.history[0].victims_saved).toBeNull();
@@ -79,3 +80,4 @@ test('attach a poster that finishes after Save', async ({ page, archive }) => {
   await expect.poll(() => archive.history[0].poster_image_url).toBe('https://example.test/poster.png');
   await expect.poll(() => page.evaluate(id => JSON.parse(localStorage.getItem('final-girl-history-v3:' + id) ?? '[]')[0]?.posterImageUrl, userId)).toBe('https://example.test/poster.png');
 });
+

@@ -45,8 +45,6 @@ export interface PlayScreenProps {
   narrationBusy: boolean;
   narrationPlaying: boolean;
   hasStory: boolean;
-  syncStatus?: string;
-  onRetrySync?: () => void;
   deathControls?: React.ReactNode;
   onDeath?: (event: PlayEvent) => void;
 }
@@ -90,7 +88,7 @@ export function PlayScreen(props: PlayScreenProps) {
         setMessage('This change could not be saved. Please try again.');
         return false;
       }
-      setMessage('Saved on this device.');
+      setMessage('');
       return true;
     } catch (reason) {
       setMessage(
@@ -337,19 +335,8 @@ export function PlayScreen(props: PlayScreenProps) {
               </div>
             </>
           )}
-          <div className="hidden lg:block border-t border-border/50 mt-3 pt-3 space-y-2">
-            <p className="type-caption text-muted-foreground">
-              {props.syncStatus || 'Saved on this device'}
-            </p>
-            {props.onRetrySync && (
-              <button
-                onClick={props.onRetrySync}
-                className="type-caption text-secondary underline min-h-[44px]"
-              >
-                Retry cloud sync
-              </button>
-            )}
-            {awake.supported && (
+          {awake.supported && (
+            <div className="hidden lg:block border-t border-border/50 mt-3 pt-3">
               <button
                 onClick={awake.toggle}
                 aria-pressed={awake.enabled}
@@ -362,17 +349,15 @@ export function PlayScreen(props: PlayScreenProps) {
                     ? 'Keep awake requested'
                     : 'Keep screen awake'}
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </aside>
       </div>
-      <p
-        role="status"
-        aria-live="polite"
-        className="type-caption text-muted-foreground mt-3 min-h-5"
-      >
-        {message}
-      </p>
+      {message && (
+        <p role="status" aria-live="polite" className="type-caption text-muted-foreground mt-3">
+          {message}
+        </p>
+      )}
       <Dialog open={roundStartOpen} onOpenChange={setRoundStartOpen}>
         <DialogContent>
           <DialogHeader>
@@ -683,17 +668,6 @@ export function PlayScreen(props: PlayScreenProps) {
                     : 'Keep screen awake'}
               </button>
             )}
-            <p className="type-caption text-muted-foreground">
-              {props.syncStatus || 'Saved on this device'}
-            </p>
-            {props.onRetrySync && (
-              <button
-                onClick={props.onRetrySync}
-                className="type-caption underline text-secondary min-h-[44px]"
-              >
-                Retry cloud sync
-              </button>
-            )}
             <p role="status" className="type-caption text-secondary">
               {message}
             </p>
@@ -729,3 +703,4 @@ export function PlayScreen(props: PlayScreenProps) {
     </div>
   );
 }
+
