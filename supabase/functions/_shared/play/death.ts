@@ -21,7 +21,25 @@ export function deathFacts(
   if (!e) return null;
   const context = moduleContext(
     selection,
-    entries.slice(0, entries.indexOf(e) + 1),
+    entries.slice(0, entries.indexOf(e) + 1).map((entry) =>
+      entry.kind === "module" && entry.moduleData
+        ? {
+            ...entry,
+            moduleData: {
+              ...entry.moduleData,
+              // Match PostgreSQL JSONB's length-then-byte key order per observation.
+              // Module field names are validated ASCII. Normalizing before reduction
+              // preserves existing server fingerprints, including repeated edits.
+              changes: Object.fromEntries(
+                Object.entries(entry.moduleData.changes).sort(
+                  ([a], [b]) =>
+                    a.length - b.length || (a < b ? -1 : a > b ? 1 : 0),
+                ),
+              ),
+            },
+          }
+        : entry,
+    ),
   );
   return {
     version: 1,
