@@ -17,16 +17,6 @@
   }
 }
 
-.news-ticker {
-  animation: ticker-scroll 1200s linear infinite;
-  will-change: transform;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
-.news-ticker:hover {
-  animation-play-state: paused;
-}
 /* Roslindale font imported via index.html for main titles */
 
 @layer base {

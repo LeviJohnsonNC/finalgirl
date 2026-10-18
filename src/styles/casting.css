@@ -136,6 +136,7 @@
 .casting-console-label {
   grid-column: 2; color: hsl(var(--foreground) / .65); font-family: var(--font-vhs);
   font-size: 15px; line-height: 1; letter-spacing: .2em; text-transform: uppercase;
+  transform: translateY(4px);
 }
 .casting-console-icon { grid-column: 1; grid-row: 2; display: grid; place-items: center; height: 46px; color: hsl(var(--foreground) / .85); }
 .casting-console-icon svg { width: 34px; height: 34px; stroke-width: 2.5; }

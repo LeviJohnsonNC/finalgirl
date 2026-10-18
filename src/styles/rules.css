@@ -22,6 +22,7 @@
 
 /* A photographic index opens into one quiet article. The type always sits on
    solid ink or a controlled scrim; grain and distress stay on the frame. */
+body:has(.rules-cinema) main { padding-bottom: calc(var(--app-footer-h, 64px) + 72px); }
 .rules-cinema {
   isolation: isolate;
   padding: 8px 0 24px;

@@ -317,7 +317,7 @@ const IndexContent = () => {
   const isGameSession = currentPage === 'nowPlaying' || currentPage === 'outcome' || currentPage === 'ending';
 
   return (
-    <div className={`min-h-screen bg-background relative overflow-x-hidden${isGameSession ? ' game-session' : ''}${isNarrationPage ? ' narration-session' : ''}`}>
+    <div className={`app-shell min-h-screen bg-background relative overflow-x-hidden${isGameSession ? ' game-session' : ''}${isNarrationPage ? ' narration-session' : ''}`}>
       {/* Shared App Header — hidden on mobile when scrapbook is open */}
       {!isNarrationPage && <div className={isScrapbookOpen ? 'hidden sm:block' : currentPage==='nowPlaying' && activeGame?.playMode ? 'play-active-header' : ''}>
         <AppHeader onNavigateHome={handleNavigateHome} />
@@ -332,7 +332,7 @@ const IndexContent = () => {
       </main>
 
       {/* News Ticker - above footer */}
-      {!isNarrationPage && currentPage !== 'rules' && !(currentPage === 'nowPlaying' && activeGame?.playMode) && <NewsTicker />}
+      {!isNarrationPage && !(currentPage === 'nowPlaying' && activeGame?.playMode) && <NewsTicker />}
 
       {/* VHS Footer */}
       <footer

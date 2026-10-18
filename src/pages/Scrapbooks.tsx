@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import finalGirlCover from '@/assets/scrapbooks/final-girl-cover.png';
 import killerCover from '@/assets/scrapbooks/killer-cover.png';
+import '@/styles/scrapbooks.css';
 
 interface ScrapbooksProps {
   /** A game to open straight onto, handed over by the stats page. */
@@ -99,7 +100,8 @@ const Scrapbooks = ({ focusGameId, onFocusHandled }: ScrapbooksProps) => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-12rem)] flex flex-col">
+    <div className="scrapbooks-page min-h-[calc(100vh-12rem)] flex flex-col">
+      <div className="scrapbooks-backdrop" aria-hidden="true" />
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center px-4">
           <p className="text-muted-foreground type-label animate-pulse text-center">

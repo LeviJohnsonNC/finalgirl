@@ -176,7 +176,7 @@
 .stats-page .horror-count, .stats-page .horror-level, .stats-page .horror-scale { font: 11px/1.3 var(--archive-label); color: #a9b8bc; }
 .stats-page .horror-bar { min-height: 0; border-radius: 0; background: linear-gradient(180deg, #f24f42, #a91e20); box-shadow: none; }
 .stats-page .horror-scale { margin-top: 6px; }
-.stats-scroll-list, .stats-page .chart-table-scroll, .stats-page .breakdown-scroll { scrollbar-color: #7b939875 #02090b; scrollbar-width: thin; overscroll-behavior: contain; }
+.stats-scroll-list, .stats-page .chart-table-scroll, .stats-page .breakdown-scroll { scrollbar-color: #7b939875 #02090b; scrollbar-width: thin; overscroll-behavior: auto; }
 .stats-page .weapon-list { max-height: 190px; overflow-y: auto; scrollbar-gutter: stable; padding: 2px 3px 2px 0; grid-template-columns: minmax(0, 1.25fr) minmax(24px, .9fr) auto; row-gap: 13px; }
 .stats-page .weapon-name { font: 12px/1.3 var(--archive-label); white-space: normal; overflow-wrap: anywhere; }
 .stats-page .weapon-count { font: 12px/1.3 var(--archive-label); gap: 4px; }
@@ -305,7 +305,7 @@
 
 /* Keep the archive artwork behind the page and the news ticker quiet. */
 body:has(.stats-page) main > .stats-page .stats-bg-plate { position: absolute; top: -128px; bottom: 0; left: calc(50% - 50vw); right: auto; width: 100vw; background: linear-gradient(#02090ba6, #02090b9c), url('../assets/stats/archive-woods.webp') center / cover no-repeat, #03090b; }
-body:has(.stats-page) .fixed:has(.news-ticker) { display: none; }
+body:has(.stats-page) .news-broadcast { display: none; }
 .stats-legal { position: relative; z-index: 1; margin: 28px auto 0; max-width: 720px; align-self: center; padding: 10px 8px 0; text-align: center; font: 11px/1.6 var(--archive-label); color: #859396; }
 
 @media (max-width: 767px) {
@@ -363,6 +363,10 @@ body:has(.stats-page) .stats-bg-plate::before { content: ''; position: absolute;
 
 /* End at the content edge; decorative layers must never lengthen the page. */
 html:has(.stats-page), body:has(.stats-page) { overscroll-behavior-y: none; }
+/* Hidden on just the x axis implicitly makes y auto. Clip decoration without
+   creating extra body/shell scroll containers; the document owns page scroll. */
+html:has(.stats-page) { overflow-x: clip; }
+body:has(.stats-page), body:has(.stats-page) .app-shell { overflow-x: clip; overflow-y: visible; }
 body:has(.stats-page) main { padding-bottom: calc(var(--app-footer-h, 64px) + 24px); }
 .stats-page { min-height: 0; padding-bottom: 0; }
 .stats-page button, .stats-page input, .stats-page select,
