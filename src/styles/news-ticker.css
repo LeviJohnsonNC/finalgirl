@@ -1,0 +1,65 @@
+/* A worn late-night radio strip. Interference lives on the frame, not the copy. */
+@font-face { font-family: 'Night Watch Mono'; src: url('../assets/fonts/vt323.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+.news-broadcast {
+  --font-vhs: 'Night Watch Mono', monospace;
+  position: fixed; bottom: var(--app-footer-h, 56px); left: 0; right: 0; z-index: 40;
+  display: flex; align-items: center; height: 48px; isolation: isolate;
+  background: linear-gradient(#181b1d, #07090b 22% 78%, #101317);
+  border-block: 1px solid #58636580;
+  box-shadow: 0 -5px 18px #0008, inset 0 2px #000, inset 0 -2px #000;
+  color: #e7e8dc;
+}
+.news-broadcast::before, .news-broadcast::after {
+  content: ''; position: absolute; pointer-events: none; left: 0; right: 0; z-index: 2;
+}
+.news-broadcast::before {
+  top: 2px; bottom: 2px;
+  background: repeating-linear-gradient(0deg, #91c4c608 0 1px, transparent 1px 3px);
+  border-block: 1px solid #9ca6a32b;
+}
+.news-broadcast::after {
+  top: -1px; height: 2px; opacity: .65;
+  background: repeating-linear-gradient(90deg, #9d2329 0 25px, #07090b 25px 35px, #33484a 35px 70px, #07090b 70px 102px, #315960 102px 121px, transparent 121px 179px);
+  box-shadow: 0 46px #65282a80;
+}
+.news-station {
+  flex: 0 0 172px; align-self: stretch; display: flex; flex-direction: column;
+  justify-content: center; padding-inline: 20px 14px; position: relative;
+  background: linear-gradient(105deg, #191d20, #080b0e);
+  border-right: 1px solid #6c333a; box-shadow: 3px 0 10px #0009;
+}
+.news-station::before { content: ''; position: absolute; inset: 6px 7px 6px 10px; border: 1px solid #858d8c40; border-left-color: #66848680; transform: skewX(-3deg); pointer-events: none; }
+.news-station-name { font: 22px/1 var(--font-vhs); letter-spacing: .06em; white-space: nowrap; color: #edf2e8; text-shadow: -1px 0 #4ab7bf, 1px 0 #d84653; }
+.news-station-frequency { display: flex; align-items: center; gap: 5px; margin-top: 4px; font: 8px/1.1 'Courier New', monospace; letter-spacing: .13em; color: #9faeb0; }
+.news-station-frequency i { width: 4px; height: 4px; background: #ca4c4c; box-shadow: 0 0 5px #ca4c4c80; }
+.news-cue { flex: 0 0 43px; text-align: center; font: 25px/1 var(--font-vhs); letter-spacing: .08em; color: #e8e1d5; text-shadow: -1px 0 #25818b, 1px 0 #c2494f; }
+.news-viewport { min-width: 0; flex: 1; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 20px), transparent); }
+.news-viewport:focus-visible { outline: 1px solid #a6c4c7; outline-offset: -2px; }
+.news-ticker { display: flex; width: max-content; animation: ticker-scroll 1200s linear infinite; will-change: transform; }
+.news-ticker-group { display: flex; flex: 0 0 auto; align-items: center; width: max-content; }
+.news-headline { display: flex; flex: 0 0 auto; align-items: center; white-space: nowrap; font: 20px/1.2 var(--font-vhs); text-transform: uppercase; letter-spacing: .025em; }
+.news-headline-text { text-shadow: 0 1px 2px #000; }
+.news-headline-source { color: #e77979; }
+.news-separator { margin-inline: 32px; color: #cbb99b; font-size: 9px; text-shadow: -1px 0 #39646a, 1px 0 #762b32; }
+.news-pause { display: grid; place-items: center; flex: 0 0 44px; min-height: 44px; color: #a6b5b8; border-left: 1px solid #74808230; }
+.news-pause:hover { background: #89959b12; color: #f2eee4; }
+.news-pause:focus-visible { outline: 2px solid #a6c4c7; outline-offset: -4px; }
+.news-broadcast[data-paused='true'] .news-ticker,
+.news-viewport:hover .news-ticker, .news-viewport:focus-within .news-ticker { animation-play-state: paused; }
+@media (max-width: 639px) {
+  .news-broadcast { height: 44px; }
+  .news-broadcast::after { box-shadow: 0 42px #65282a80; }
+  .news-station { flex-basis: 106px; padding-inline: 12px 8px; }
+  .news-station::before { inset-inline: 5px; }
+  .news-station-name { font-size: 16px; letter-spacing: .015em; }
+  .news-station-frequency { font-size: 6px; letter-spacing: .02em; }
+  .news-cue { flex-basis: 28px; font-size: 20px; }
+  .news-headline { font-size: 18px; }
+  .news-separator { margin-inline: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .news-ticker { animation: none; transform: none; will-change: auto; }
+  .news-viewport { overflow-x: auto; scrollbar-width: thin; }
+  .news-ticker-group[aria-hidden='true'] { display: none; }
+  .news-pause { display: none; }
+}
