@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Dices } from 'lucide-react';
+import { useState, useMemo, useId } from 'react';
+import { Dices, Flame, MapPin, Crosshair } from 'lucide-react';
 import { getFilmIdByLocation } from '@/types/gameData';
 import { getSetupCardsForLocation, getEventsForLocation } from '@/types/featureFilmDetails';
 import {
@@ -32,6 +32,7 @@ const ScenarioDropdownsForLocation = ({
   const [selectedSetup, setSelectedSetup] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [selectedMission, setSelectedMission] = useState<string | null>(null);
+  const id = useId();
 
   const filmId = selectedLocation ? getFilmIdByLocation(selectedLocation) : null;
   
@@ -67,116 +68,112 @@ const ScenarioDropdownsForLocation = ({
     handleMissionChange(getRandomMission().name);
   };
 
-  if (!selectedLocation) {
-    return null;
-  }
-
-
   return (
-    <div className="w-full max-w-2xl mx-auto px-2 sm:px-4 mb-6 sm:mb-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-        {/* Setup Scenario Dropdown */}
-        <div className="flex flex-col gap-2">
-          <label className="font-display text-xs text-muted-foreground tracking-[0.2em] uppercase">
-            Setup Scenario
-          </label>
-          <Select 
-            value={selectedSetup || undefined} 
-            onValueChange={handleSetupChange}
-            disabled={setupCards.length === 0}
-          >
-            <SelectTrigger aria-label="Setup Scenario" className="scenario-dropdown font-display text-xs sm:text-sm tracking-wider uppercase min-h-[44px]">
-              <SelectValue placeholder={setupCards.length > 0 ? "Select Setup..." : "Coming Soon"} />
-            </SelectTrigger>
-            <SelectContent className="scenario-dropdown-content" side="top">
-              {setupCards.map((card) => (
-                <SelectItem 
-                  key={card.name} 
-                  value={card.name}
-                  className="font-display text-xs sm:text-sm tracking-wide uppercase cursor-pointer focus:bg-primary/20 focus:text-primary-foreground data-[highlighted]:bg-primary/20 data-[highlighted]:text-foreground min-h-[44px]"
-                >
-                  {card.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Event Dropdown */}
-        <div className="flex flex-col gap-2">
-          <label className="font-display text-xs text-muted-foreground tracking-[0.2em] uppercase">
-            Event
-          </label>
-          <Select 
-            value={selectedEvent || undefined} 
-            onValueChange={handleEventChange}
-            disabled={events.length === 0}
-          >
-            <SelectTrigger aria-label="Starting Event" className="scenario-dropdown font-display text-xs sm:text-sm tracking-wider uppercase min-h-[44px]">
-              <SelectValue placeholder={events.length > 0 ? "Select Event..." : "Coming Soon"} />
-            </SelectTrigger>
-            <SelectContent className="scenario-dropdown-content" side="top">
-              {events.map((event) => (
-                <SelectItem 
-                  key={event.name} 
-                  value={event.name}
-                  className="font-display text-xs sm:text-sm tracking-wide uppercase cursor-pointer focus:bg-primary/20 focus:text-primary-foreground data-[highlighted]:bg-primary/20 data-[highlighted]:text-foreground min-h-[44px]"
-                >
-                  {event.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Mission — Falconwood only. Drawn at random by the official rules,
-            so the dice button sits beside the list. */}
-        {showMissions && (
-          <div className="flex flex-col gap-2 md:col-span-2">
-            <label className="font-display text-xs text-muted-foreground tracking-[0.2em] uppercase">
-              Mission
-            </label>
-            <div className="flex items-stretch gap-2">
-              <Select
-                value={selectedMission || undefined}
-                onValueChange={handleMissionChange}
+    <div className="casting-console-fields">
+      {/* Setup Scenario Dropdown */}
+      <div className="casting-console-field">
+        <label htmlFor={`${id}-setup`} className="casting-console-label">
+          Setup Scenario
+        </label>
+        <span className="casting-console-icon casting-console-icon--setup" aria-hidden="true"><Flame /></span>
+        <Select 
+          value={selectedSetup || undefined} 
+          onValueChange={handleSetupChange}
+          disabled={setupCards.length === 0}
+        >
+          <SelectTrigger id={`${id}-setup`} aria-label="Setup Scenario" className="casting-console-select">
+            <SelectValue placeholder={!selectedLocation ? "Choose location first" : setupCards.length > 0 ? "Select Setup..." : "Coming Soon"} />
+          </SelectTrigger>
+          <SelectContent className="scenario-dropdown-content casting-console-menu" side="top">
+            {setupCards.map((card) => (
+              <SelectItem 
+                key={card.name} 
+                value={card.name}
+                className="font-display text-xs sm:text-sm tracking-wide uppercase cursor-pointer focus:bg-primary/20 focus:text-primary-foreground data-[highlighted]:bg-primary/20 data-[highlighted]:text-foreground min-h-[44px]"
               >
-                <SelectTrigger className="scenario-dropdown font-display text-xs sm:text-sm tracking-wider uppercase min-h-[44px] flex-1">
-                  <SelectValue placeholder="Select Mission..." />
-                </SelectTrigger>
-                <SelectContent className="scenario-dropdown-content" side="top">
-                  {FALCONWOOD_MISSIONS.map((mission) => (
-                    <SelectItem
-                      key={mission.name}
-                      value={mission.name}
-                      className="font-display text-xs sm:text-sm tracking-wide uppercase cursor-pointer focus:bg-primary/20 focus:text-primary-foreground data-[highlighted]:bg-primary/20 data-[highlighted]:text-foreground min-h-[44px]"
-                    >
-                      {mission.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <button
-                type="button"
-                onClick={handleRandomMission}
-                aria-label="Draw a random mission"
-                title="Draw a random mission"
-                className="vcr-tape-button flex items-center justify-center gap-2 px-4 min-h-[44px] font-display text-xs tracking-[0.15em] uppercase"
-              >
-                <Dices className="w-4 h-4 text-primary" />
-                <span className="hidden sm:inline">Draw</span>
-              </button>
-            </div>
-            {selectedMissionData && (
-              <p className="type-caption text-muted-foreground/80 italic">
-                {selectedMissionData.description}
-              </p>
-            )}
-          </div>
-        )}
+                {card.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
+      {/* Event Dropdown */}
+      <div className="casting-console-field casting-console-field--event">
+        <label htmlFor={`${id}-event`} className="casting-console-label">
+          Event
+        </label>
+        <span className="casting-console-icon" aria-hidden="true"><MapPin /></span>
+        <Select 
+          value={selectedEvent || undefined} 
+          onValueChange={handleEventChange}
+          disabled={events.length === 0}
+        >
+          <SelectTrigger id={`${id}-event`} aria-label="Starting Event" className="casting-console-select">
+            <SelectValue placeholder={!selectedLocation ? "Choose location first" : events.length > 0 ? "Select Event..." : "Coming Soon"} />
+          </SelectTrigger>
+          <SelectContent className="scenario-dropdown-content casting-console-menu" side="top">
+            {events.map((event) => (
+              <SelectItem 
+                key={event.name} 
+                value={event.name}
+                className="font-display text-xs sm:text-sm tracking-wide uppercase cursor-pointer focus:bg-primary/20 focus:text-primary-foreground data-[highlighted]:bg-primary/20 data-[highlighted]:text-foreground min-h-[44px]"
+              >
+                {event.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Mission — Falconwood only. Drawn at random by the official rules,
+          so the dice button sits beside the list. */}
+      {showMissions && (
+        <div className="casting-console-field casting-console-field--mission">
+          <label htmlFor={`${id}-mission`} className="casting-console-label">
+            Mission
+          </label>
+          <span className="casting-console-icon" aria-hidden="true"><Crosshair /></span>
+          <div className="casting-console-mission-controls">
+            <Select
+              value={selectedMission || undefined}
+              onValueChange={handleMissionChange}
+            >
+              <SelectTrigger id={`${id}-mission`} aria-label="Mission" className="casting-console-select">
+                <SelectValue placeholder="Select Mission..." />
+              </SelectTrigger>
+              <SelectContent className="scenario-dropdown-content casting-console-menu" side="top">
+                {FALCONWOOD_MISSIONS.map((mission) => (
+                  <SelectItem
+                    key={mission.name}
+                    value={mission.name}
+                    className="font-display text-xs sm:text-sm tracking-wide uppercase cursor-pointer focus:bg-primary/20 focus:text-primary-foreground data-[highlighted]:bg-primary/20 data-[highlighted]:text-foreground min-h-[44px]"
+                  >
+                    {mission.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <button
+              type="button"
+              onClick={handleRandomMission}
+              aria-label="Draw a random mission"
+              title="Draw a random mission"
+              className="casting-console-draw"
+            >
+              <Dices className="w-4 h-4 text-primary" />
+              <span className="hidden sm:inline">Draw</span>
+            </button>
+          </div>
+          {selectedMissionData && (
+            <p className="casting-console-mission-description type-caption text-muted-foreground/80 italic">
+              {selectedMissionData.description}
+            </p>
+          )}
+        </div>
+      )}
     </div>
+
   );
 };
 

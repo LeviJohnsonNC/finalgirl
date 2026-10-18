@@ -208,43 +208,27 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
           />
         </div>
 
-        {/* Case Options strip */}
-        <div className="w-full max-w-3xl px-4 mb-10">
-          <div className="border-t border-border/40 pt-4">
-            <div className="type-caption text-muted-foreground/70 mb-3">
-              CASE OPTIONS //
-            </div>
-            <ScenarioDropdowns
-              selectedLocation={selection.location}
-              onSetupChange={setSelectedSetup}
-              onEventChange={setSelectedEvent}
-              onMissionChange={setSelectedMission}
-            />
+        <section className="casting-console" aria-label="Scenario and playback">
+          <ScenarioDropdowns
+            selectedLocation={selection.location}
+            onSetupChange={setSelectedSetup}
+            onEventChange={setSelectedEvent}
+            onMissionChange={setSelectedMission}
+          />
+          <div className="casting-console-playback">
+            <button
+              type="button"
+              onClick={handlePressPlay}
+              disabled={!isComplete}
+              aria-describedby={!isComplete ? 'casting-play-help' : undefined}
+              className="casting-console-play"
+            >
+              <Play aria-hidden="true" />
+              <span>Press Play</span>
+            </button>
           </div>
-        </div>
-
-        {/* Press Play */}
-        <div className="flex flex-col items-center gap-3">
-          <button
-            onClick={handlePressPlay}
-            disabled={!isComplete}
-            className={`
-              press-play-btn
-              px-8 py-4 md:px-10 md:py-5
-              flex items-center gap-3
-              font-display text-lg md:text-xl tracking-[0.15em] uppercase
-              transition-all duration-500
-              ${isComplete
-                ? 'cta-unlocked vcr-tape-button text-foreground'
-                : 'cta-locked text-muted-foreground/50 cursor-not-allowed'
-              }
-            `}
-          >
-            <Play className={`w-5 h-5 ${isComplete ? 'text-primary' : ''}`} />
-            <span>Press Play</span>
-          </button>
-          {!isComplete && <p className="press-play-helper text-dim">Cast your feature to begin</p>}
-        </div>
+          {!isComplete && <p id="casting-play-help" className="casting-console-help">Cast your feature to begin</p>}
+        </section>
       </div>
 
       {/* Picker Modal */}
