@@ -97,7 +97,7 @@ export function useDeathScenes(
         data.scene.event_id !== eventId
       )
         throw new Error(
-          'The scene response was invalid. Check saved scenes before trying again.',
+          'The scene response was invalid. Close and reopen death details before trying again.',
         );
       if (current.current === requestKey && active.current)
         setSaved((previous) => ({
@@ -113,7 +113,7 @@ export function useDeathScenes(
       if (current.current === requestKey && active.current)
         setError(
           controller.signal.aborted
-            ? 'The scene is taking longer than expected. Check saved scenes before retrying. Your death is recorded.'
+            ? 'The scene is taking longer than expected. Close and reopen death details before retrying. Your death is recorded.'
             : reason instanceof Error
               ? reason.message
               : 'Scene unavailable. Your death is recorded.',

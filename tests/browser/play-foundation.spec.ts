@@ -1,3 +1,4 @@
+import { searchPick, openHistory } from "./play-helpers";
 import { test, expect, activeGame, userId } from "./fixtures";
 const storageKey = `final-girl-active-game-v1:${userId}`;
 async function resume(page: import("@playwright/test").Page) {
@@ -37,9 +38,7 @@ test("optional observations preserve zero, survive reload, and reach the ending"
   await page
     .getByRole("button", { name: "Found a weapon or key item", exact: true })
     .click();
-  await page
-    .getByLabel("Moment detail", { exact: true })
-    .fill("Axe from the cabins");
+  await searchPick(page, "Moment detail", "Axe from the cabins");
   await page.getByRole("button", { name: "Done", exact: true }).click();
   await page.reload();
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
@@ -52,6 +51,7 @@ test("optional observations preserve zero, survive reload, and reach the ending"
   await expect(
     page.getByRole("button", { name: "Track Bloodlust", exact: true }),
   ).toBeVisible();
+  await openHistory(page);
   await expect(
     page.getByRole("region", { name: "Game timeline" }),
   ).toContainText("Axe from the cabins");
@@ -115,7 +115,7 @@ test("stopping Horror tracking keeps it unrecorded through the ending", async ({
   ).not.toHaveProperty("finalHorrorLevel");
 });
 
-test("inline death drafts stay with their victims, filter cards, and reopen without spending AI", async ({
+test("cause-first modal preserves separate death drafts and discards hidden facts", async ({
   page,
   archive,
 }, info) => {
@@ -131,84 +131,95 @@ test("inline death drafts stay with their victims, filter cards, and reopen with
     },
   });
   await resume(page);
+  await expect(page.getByRole("region", { name: "Game timeline" })).toHaveCount(
+    0,
+  );
   await page
     .getByRole("button", { name: "Record one victim killed", exact: true })
     .click();
-  const editor = page.getByRole("region", {
-    name: "Death details",
+  const modal = page.getByRole("dialog", {
+    name: "Gruesome Death",
     exact: true,
   });
-  await expect(editor).toBeVisible();
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  await page.getByLabel("Death location", { exact: true }).fill("Kitchen");
-  await page.getByLabel("Death mechanism", { exact: true }).fill("Frostbite");
-  await page
-    .getByLabel("Terror card", { exact: true })
-    .fill("The generator is out.");
-  await expect(editor).toContainText(
+  await expect(modal).toBeVisible();
+  await expect(
+    page.getByRole("combobox", { name: "Death location", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Terror card", exact: true }).click();
+  await searchPick(page, "Terror card", "The generator is out.");
+  await expect(modal).not.toContainText(
     "Frostbite remains through the next Upkeep",
   );
-  await page.getByLabel("Death event card", { exact: true }).fill("Pair up!");
-  await expect(editor).toContainText("Redistribute lone Victims");
-  expect(
-    await page
-      .locator("#play-terror-options option")
-      .evaluateAll((options) =>
-        options.map((o) => (o as HTMLOptionElement).value),
-      ),
-  ).not.toContain("Taking Souvenirs");
+  await expect(modal).not.toContainText("Source:");
+  await page
+    .getByRole("button", { name: "Killer attack", exact: true })
+    .click();
+  await expect(
+    page.getByRole("combobox", { name: "Terror card", exact: true }),
+  ).toHaveCount(0);
+  await searchPick(page, "Death location", "Kitchen");
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(modal).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Record one victim killed", exact: true }),
+  ).toContainText("1");
   await page
     .getByRole("button", { name: "Record one victim killed", exact: true })
     .click();
-  await expect(page.getByLabel("Death location", { exact: true })).toHaveValue(
-    "",
-  );
-  await page.getByLabel("Death location", { exact: true }).fill("Lab");
-  await expect
-    .poll(() =>
-      page.evaluate(
-        (key) =>
-          Object.values(JSON.parse(localStorage.getItem(key)!).playDrafts).some(
-            (d) => (d as { room?: string }).room === "Lab",
-          ),
-        storageKey,
-      ),
-    )
-    .toBe(true);
+  await page
+    .getByRole("button", { name: "Location hazard", exact: true })
+    .click();
+  await searchPick(page, "Death mechanism", "Frostbite");
+  await searchPick(page, "Death location", "Lab");
   await page.reload();
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
   await page
     .getByRole("button", { name: "Latest death scene", exact: true })
     .click();
-  await expect(page.getByLabel("Death location", { exact: true })).toHaveValue(
-    "Lab",
-  );
-  await page
-    .getByRole("button", { name: "Back to the game", exact: true })
-    .click();
+  await expect(
+    page.getByRole("combobox", { name: "Death location", exact: true }),
+  ).toHaveText("Lab");
+  await expect(
+    page.getByRole("combobox", { name: "Death mechanism", exact: true }),
+  ).toHaveText("Frostbite");
+  await page.keyboard.press("Escape");
+  await openHistory(page);
   await page
     .getByRole("region", { name: "Game timeline" })
     .locator("li")
     .filter({ hasText: "at Kitchen" })
     .getByRole("button", { name: "Death details", exact: true })
     .click();
-  await expect(page.getByLabel("Terror card", { exact: true })).toHaveValue(
-    "The generator is out.",
-  );
-  await expect(page.getByLabel("Death mechanism", { exact: true })).toHaveValue(
-    "Frostbite",
-  );
+  await expect(
+    page.getByRole("button", { name: "Killer attack", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page.getByRole("combobox", { name: "Death location", exact: true }),
+  ).toHaveText("Kitchen");
+  await expect(
+    page.getByRole("combobox", { name: "Terror card", exact: true }),
+  ).toHaveCount(0);
   expect(
     archive.calls.filter((c) => c === "generate-death-scene"),
   ).toHaveLength(0);
   await page.screenshot({
-    path: info.outputPath("inline-death.png"),
+    path: info.outputPath("gruesome-death.png"),
     fullPage: true,
   });
+  await page.keyboard.press("Escape");
   await page
     .getByRole("button", { name: "Decrease killed", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Record one victim killed", exact: true }),
   ).toContainText("1");
+  const log = await page.evaluate(
+    (key) => JSON.parse(localStorage.getItem(key)!).playEvents,
+    storageKey,
+  );
+  expect(
+    log
+      .filter((e: { cause?: string }) => e.cause === "killer")
+      .every((e: { terrorCard?: string }) => !e.terrorCard),
+  ).toBe(true);
 });

@@ -1,5 +1,22 @@
+import { useActiveImages } from "@/hooks/useActiveImages";
+import { PlaySearch } from "./PlaySearch";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ArrowLeft, Flag, Minus, Plus, Undo2, Volume2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Flag,
+  Minus,
+  Plus,
+  Undo2,
+  Volume2,
+  Eye,
+  Droplets,
+  ChevronDown,
+  Camera,
+  Sparkles,
+  Shield,
+  Swords,
+  KeyRound,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -82,6 +99,7 @@ const moments: Array<{ type: MomentType; title: string; prompt: string }> = [
 export function PlayScreen(props: PlayScreenProps) {
   const { events, onEvent, killer, location, finalGirl } = props;
   const summary = summarizePlay(events);
+  const { characterImages } = useActiveImages();
   const [message, setMessage] = useState("");
   const [finishOpen, setFinishOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -158,6 +176,11 @@ export function PlayScreen(props: PlayScreenProps) {
   return (
     <div className="play-screen play-workspace">
       <header className="play-heading">
+        <img
+          className="play-hero-image"
+          src={props.imageUrl}
+          alt={`${finalGirl}'s night at ${location}`}
+        />
         <div>
           <p className="play-eyebrow">PLAY MODE</p>
           <h1>{location}</h1>
@@ -179,7 +202,7 @@ export function PlayScreen(props: PlayScreenProps) {
                   : "Narrate introduction"
               }
             >
-              <Volume2 size={16} />
+              <Volume2 size={16} /> Narrate
             </button>
           )}
           <button
@@ -192,12 +215,6 @@ export function PlayScreen(props: PlayScreenProps) {
           </button>
         </nav>
       </header>
-      <figure className="play-scene">
-        <img src={props.imageUrl} alt={`${finalGirl}'s night at ${location}`} />
-        <figcaption>
-          {finalGirl} / {killer}
-        </figcaption>
-      </figure>
       <section className="play-tracking" aria-label="Play controls">
         <div className="play-counters">
           {(["saved", "killed", "round"] as const).map((counter) => {
@@ -303,15 +320,38 @@ export function PlayScreen(props: PlayScreenProps) {
           {summary.killed ?? 0}. Round: {summary.round ?? "unrecorded"}.
         </p>
       </section>
-      <section className="play-panel" aria-label="Optional trackers">
+      <section
+        className="play-panel play-track-more"
+        aria-label="Optional trackers"
+      >
         <h2>
-          Track more <span>Optional</span>
+          Track more <span>OPTIONAL</span>
         </h2>
         <div className="play-state-grid">
           {STATE_FIELDS.map((field) => {
             const value = summary[field];
             return (
-              <div key={field} className="play-state">
+              <div key={field} className={`play-state play-state--${field}`}>
+                {(field === "finalGirlHealth" || field === "killerHealth") &&
+                  characterImages[
+                    field === "finalGirlHealth" ? finalGirl : killer
+                  ] && (
+                    <img
+                      className="play-stat-portrait"
+                      alt=""
+                      src={
+                        characterImages[
+                          field === "finalGirlHealth" ? finalGirl : killer
+                        ]
+                      }
+                    />
+                  )}
+                {field === "finalHorrorLevel" && (
+                  <Eye className="play-stat-symbol" />
+                )}
+                {field === "bloodlust" && (
+                  <Droplets className="play-stat-symbol" />
+                )}
                 <span>{stateLabels[field]}</span>
                 {editingState === field ? (
                   <form
@@ -391,11 +431,21 @@ export function PlayScreen(props: PlayScreenProps) {
       {props.deathPanel}
       <section className="play-panel play-moments" aria-label="Remember this">
         <h2>
-          Remember this <span>The moments that made your night</span>
+          <Camera size={21} /> Remember this{" "}
+          <span>The moments that made your night</span>
         </h2>
         <div className="play-moment-choices">
           {moments.map((choice) => (
             <button key={choice.type} onClick={() => pickMoment(choice)}>
+              {choice.type === "item" ? (
+                <KeyRound size={15} />
+              ) : choice.type === "escape" ? (
+                <Shield size={15} />
+              ) : choice.type === "turning-point" ? (
+                <Swords size={15} />
+              ) : (
+                <Sparkles size={15} />
+              )}
               {choice.title}
             </button>
           ))}
@@ -405,26 +455,33 @@ export function PlayScreen(props: PlayScreenProps) {
             <label>
               {moments.find((c) => c.type === moment.momentType)?.prompt ??
                 "Add detail"}
-              <input
-                aria-label="Moment detail"
-                list={
-                  moment.momentType === "item" && location === "Buddyland"
-                    ? "play-item-options"
-                    : undefined
-                }
-                maxLength={240}
-                value={momentDetail}
-                onChange={(e) =>
-                  props.onDraft(moment.id, { detail: e.target.value })
-                }
-                onBlur={saveMoment}
-              />
-              {moment.momentType === "item" && location === "Buddyland" && (
-                <datalist id="play-item-options">
-                  {BUDDYLAND_ITEMS.map((item) => (
-                    <option key={item.id} value={item.name} />
-                  ))}
-                </datalist>
+              {moment.momentType === "item" ? (
+                <PlaySearch
+                  label="Moment detail"
+                  value={momentDetail}
+                  options={
+                    location === "Buddyland"
+                      ? BUDDYLAND_ITEMS.map((item) => item.name)
+                      : []
+                  }
+                  onSearch={(value) =>
+                    props.onDraft(moment.id, { detail: value })
+                  }
+                  onChange={(value) =>
+                    props.onDraft(moment.id, { detail: value })
+                  }
+                  placeholder="Add an optional detail"
+                />
+              ) : (
+                <input
+                  aria-label="Moment detail"
+                  value={momentDetail}
+                  onChange={(e) =>
+                    props.onDraft(moment.id, { detail: e.target.value })
+                  }
+                  onBlur={saveMoment}
+                  maxLength={240}
+                />
               )}
             </label>
             <button
@@ -438,38 +495,44 @@ export function PlayScreen(props: PlayScreenProps) {
         )}
       </section>
       {props.moduleControls && (
-        <section className="play-panel" aria-label="Module tracking">
+        <section className="play-module-surface" aria-label="Module tracking">
           {props.moduleControls}
         </section>
       )}
       <p role="status" className="play-feedback">
         {message}
       </p>
-      <section className="play-panel">
-        <PlayTimeline
-          events={events}
-          limit={historyOpen ? 100 : 5}
-          onToggle={(e, undone) =>
-            commit({ kind: undone ? "restore" : "undo", target: e.id })
-          }
-          onDeath={props.onDeath}
-          onMoment={(e) => {
-            if (saveMoment()) setMomentId(e.id);
-          }}
-        />
-        {events.filter((e) => !["details", "undo", "restore"].includes(e.kind))
-          .length > 5 && (
-          <button
-            className="play-text-button"
-            aria-expanded={historyOpen}
-            onClick={() => setHistoryOpen((v) => !v)}
-          >
-            {historyOpen ? "Show recent activity" : "Show more activity"}
-          </button>
+      <section className="play-panel play-history">
+        <button
+          className="play-history-toggle"
+          aria-expanded={historyOpen}
+          onClick={() => setHistoryOpen((v) => !v)}
+        >
+          <span>
+            The night so far{" "}
+            <small>
+              {summary.entries.filter((e) => e.kind !== "start").length}{" "}
+              observations
+            </small>
+          </span>
+          <ChevronDown size={20} />
+        </button>
+        {historyOpen && (
+          <PlayTimeline
+            events={events}
+            limit={100}
+            onToggle={(e, undone) =>
+              commit({ kind: undone ? "restore" : "undo", target: e.id })
+            }
+            onDeath={props.onDeath}
+            onMoment={(e) => {
+              if (saveMoment()) setMomentId(e.id);
+            }}
+          />
         )}
       </section>
       <Dialog open={finishOpen} onOpenChange={setFinishOpen}>
-        <DialogContent>
+        <DialogContent className="play-finish-modal">
           <DialogHeader>
             <DialogTitle>How did the night end?</DialogTitle>
             <DialogDescription>

@@ -1,3 +1,18 @@
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { PlaySearch } from "./PlaySearch";
+import {
+  Skull,
+  Ghost,
+  Flame,
+  Clapperboard,
+  MapPin,
+  HelpCircle,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { DeathNarration } from "./DeathNarration";
 import { getFilmIdByLocation } from "@/types/gameData";
@@ -6,13 +21,13 @@ import {
   newPlayEvent,
   type PlayEvent,
   type PlayDetails,
-  type DeathCause,
 } from "@/lib/play/events";
-import { DEATH_CAUSES } from "@/lib/play/events";
+
 import {
   deathFacts,
   deathSignature,
   deathCauseLabels,
+  detailsForCause,
   type DeathSelection,
 } from "@/lib/play/death";
 import {
@@ -34,8 +49,7 @@ interface Props {
   draft?: PlayDetails;
   onDraft: (id: string, draft: PlayDetails) => boolean;
 }
-/** Kept under the existing export name so saved-scene callers remain stable.
- * The editor now lives inline; recording another victim never blocks on it. */
+/** The kill is already recorded; dismissing only closes its optional editor. */
 export function DeathSceneDialog({
   sessionId,
   selection,
@@ -58,6 +72,8 @@ export function DeathSceneDialog({
     eventCard: facts?.eventCard ?? "",
     attacker: facts?.attacker ?? "",
   };
+  // Opening an older record must not rewrite its facts or invalidate cached takes.
+  // Cause changes below explicitly clear fields that no longer apply.
   const [values, setValues] = useState<PlayDetails>(() => ({
     ...initial,
     ...draft,
@@ -121,26 +137,6 @@ export function DeathSceneDialog({
   if (!facts) return null;
   const update = (field: keyof PlayDetails, value: string) =>
     setValues((previous) => ({ ...previous, [field]: value }));
-  const cardNote = (kind: "terror" | "event", name?: string) => {
-    if (!name) return null;
-    const card = findPlayCard(selection, kind, name);
-    return (
-      <span className="play-card-note">
-        {card?.effect ?? "Effect not verified. Add what happened below."}
-        {card && /^https?:\/\//.test(card.source) && (
-          <>
-            {" "}
-            <a href={card.source} target="_blank" rel="noopener noreferrer">
-              Source
-            </a>
-          </>
-        )}
-        {card && !/^https?:\/\//.test(card.source) && (
-          <> Source: {card.source}.</>
-        )}
-      </span>
-    );
-  };
   const catalogEvents = applicablePlayCards(selection, "event");
   // Legacy location data supplies names only. Unverified descriptions never become rules.
   const legacyEvents =
@@ -155,216 +151,225 @@ export function DeathSceneDialog({
     ]),
   );
   return (
-    <section
-      className="play-panel play-death-editor"
-      aria-label="Death details"
-      onBlurCapture={save}
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) {
+          save();
+          onClose();
+        }
+      }}
     >
-      <h2>
-        The last thing they saw{" "}
-        <span>
-          Round {facts.round ?? "?"} / {facts.quantity} recorded
-        </span>
-      </h2>
-      <p className="play-card-note">
-        The death is recorded. Every detail is optional; keep playing whenever
-        you like.
-      </p>
-      <div className="play-death-fields">
-        <label>
-          Who or what attacked?
-          <input
-            aria-label="Death attacker"
-            maxLength={120}
-            list="play-attacker-options"
-            value={values.attacker ?? ""}
-            onChange={(e) => update("attacker", e.target.value)}
-            placeholder="Optional, leave blank for a hazard"
-          />
-          <datalist id="play-attacker-options">
-            <option value={selection.killer} />
-            {selection.killer === "Billy the Bear" &&
-              BUDDIES.map((b) => <option key={b.id} value={b.name} />)}
-          </datalist>
-        </label>
-        <label>
-          Where?
-          <input
-            aria-label="Death location"
-            value={values.room ?? ""}
-            onChange={(e) => update("room", e.target.value)}
-            maxLength={120}
-            list="play-room-options"
-            placeholder="Room or board space"
-          />
-          <datalist id="play-room-options">
-            {(PLAY_ROOMS[selection.location] ?? []).map((name) => (
-              <option key={name} value={name} />
-            ))}
-          </datalist>
-        </label>
-        <label>
-          Cause
-          <select
+      <DialogContent
+        className="play-death-modal"
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          document
+            .getElementById("play-cause-first")
+            ?.focus({ preventScroll: true });
+        }}
+      >
+        <div className="play-death-heading">
+          <p className="play-eyebrow">
+            ONE LESS SOUL / ROUND {facts.round ?? "?"}
+          </p>
+          <DialogTitle>Gruesome Death</DialogTitle>
+          <DialogDescription>
+            The death is recorded. Add what you know, or return to the game.
+          </DialogDescription>
+        </div>
+        <div className="play-cause-section" id="play-cause-first" tabIndex={-1}>
+          <h3>What caused it?</h3>
+          <div
+            className="play-cause-choices"
+            role="group"
             aria-label="Cause of death"
-            value={values.cause ?? "unspecified"}
-            onChange={(e) => update("cause", e.target.value as DeathCause)}
           >
-            {DEATH_CAUSES.map((cause) => (
-              <option key={cause} value={cause}>
-                {deathCauseLabels[cause]}
-              </option>
+            {(
+              [
+                ["killer", Skull],
+                ["minion", Ghost],
+                ["terror", Clapperboard],
+                ["event", Flame],
+                ["hazard", MapPin],
+                ["other", HelpCircle],
+              ] as const
+            ).map(([cause, Icon]) => (
+              <button
+                key={cause}
+                aria-pressed={values.cause === cause}
+                onClick={() =>
+                  setValues((previous) =>
+                    detailsForCause({ ...previous, cause }, selection.killer),
+                  )
+                }
+              >
+                <Icon size={20} />
+                <span>{deathCauseLabels[cause]}</span>
+              </button>
             ))}
-          </select>
-        </label>
-        <label>
-          How?
-          <input
-            aria-label="Death mechanism"
-            value={values.mechanism ?? ""}
-            onChange={(e) => update("mechanism", e.target.value)}
-            maxLength={120}
-            list="play-mechanism-options"
-            placeholder="Attack, form or hazard"
-          />
-          <datalist id="play-mechanism-options">
-            {playMechanisms(selection).map((name) => (
-              <option key={name} value={name} />
-            ))}
-          </datalist>
-        </label>
-        <label>
-          Victim name or role
-          <input
-            aria-label="Victim name or role"
-            value={values.victim ?? ""}
-            onChange={(e) => update("victim", e.target.value)}
-            maxLength={120}
-            list={
-              selection.location === "Buddyland"
-                ? "play-victim-options"
-                : undefined
-            }
-            placeholder="Anonymous victim"
-          />
-          {selection.location === "Buddyland" && (
-            <datalist id="play-victim-options">
-              {SPECIAL_VICTIMS.map((v) => (
-                <option key={v.id} value={v.name} />
-              ))}
-            </datalist>
-          )}
-        </label>
-        <label>
-          Terror card
-          <input
-            aria-label="Terror card"
-            value={values.terrorCard ?? ""}
-            onChange={(e) => update("terrorCard", e.target.value)}
-            maxLength={160}
-            list="play-terror-options"
-            placeholder="Search or enter a card"
-          />
-          <datalist id="play-terror-options">
-            {applicablePlayCards(selection, "terror").map((card) => (
-              <option key={card.name} value={card.name} />
-            ))}
-          </datalist>
-          {cardNote("terror", values.terrorCard)}
-        </label>
-        <label>
-          Event
-          <input
-            aria-label="Death event card"
-            value={values.eventCard ?? ""}
-            onChange={(e) => update("eventCard", e.target.value)}
-            maxLength={160}
-            list="play-event-options"
-            placeholder="Event affecting this death"
-          />
-          <datalist id="play-event-options">
-            {eventNames.map((name) => (
-              <option key={name} value={name} />
-            ))}
-          </datalist>
-          {cardNote("event", values.eventCard)}
-        </label>
-        <label>
-          What happened?
-          <textarea
-            aria-label="Death context"
-            value={values.text ?? ""}
-            onChange={(e) => update("text", e.target.value)}
-            maxLength={240}
-            placeholder="Optional observation or card effect"
-          />
-        </label>
-      </div>
-      {selected && !dirty && (
-        <section aria-label="Generated death scene" className="mt-4 space-y-3">
-          <p className="type-caption">TAKE {selected.take + 1}</p>
-          <p className="type-body leading-relaxed">{selected.scene_text}</p>
-          <DeathNarration
-            key={selected.id}
-            scene={selected}
-            filmId={getFilmIdByLocation(selection.location)}
-          />
-        </section>
-      )}
-      <div className="play-death-actions">
-        <button
-          onClick={() => {
-            if (save()) onClose();
-          }}
-        >
-          Back to the game
-        </button>
-        {!selected || dirty ? (
-          <button
-            disabled={scenes.busy || !scenes.signedIn}
-            onClick={() => void generate(0)}
-          >
-            {scenes.busy
-              ? "Developing scene…"
-              : "Develop death scene · uses AI"}
-          </button>
-        ) : (
-          Math.max(...takes.map((r) => r.take)) < 2 && (
-            <button
-              disabled={scenes.busy}
-              onClick={() =>
-                void generate(
-                  Math.min(2, Math.max(...takes.map((r) => r.take)) + 1),
-                )
-              }
-            >
-              {scenes.busy ? "Developing scene…" : "Another take · uses AI"}
-            </button>
-          )
+          </div>
+        </div>
+        {values.cause !== "unspecified" && (
+          <div className="play-death-fields">
+            {values.cause === "minion" && (
+              <label>
+                Who attacked?
+                <PlaySearch
+                  label="Death attacker"
+                  value={values.attacker ?? ""}
+                  onChange={(v) => update("attacker", v)}
+                  options={
+                    selection.killer === "Billy the Bear"
+                      ? BUDDIES.map((b) => b.name)
+                      : []
+                  }
+                  placeholder="Choose a Buddy or enter a minion"
+                />
+              </label>
+            )}
+            {values.cause === "terror" && (
+              <label>
+                Terror card
+                <PlaySearch
+                  label="Terror card"
+                  value={values.terrorCard ?? ""}
+                  onChange={(v) => update("terrorCard", v)}
+                  options={applicablePlayCards(selection, "terror").map(
+                    (c) => c.name,
+                  )}
+                  placeholder="Choose or enter a Terror card"
+                />
+              </label>
+            )}
+            {values.cause === "event" && (
+              <label>
+                Event
+                <PlaySearch
+                  label="Death event card"
+                  value={values.eventCard ?? ""}
+                  onChange={(v) => update("eventCard", v)}
+                  options={eventNames}
+                  placeholder="Choose or enter an Event"
+                />
+              </label>
+            )}
+            {(values.cause === "hazard" || values.cause === "other") && (
+              <label>
+                How did it happen?
+                <PlaySearch
+                  label="Death mechanism"
+                  value={values.mechanism ?? ""}
+                  onChange={(v) => update("mechanism", v)}
+                  options={playMechanisms(selection)}
+                  placeholder="Choose or describe the cause"
+                />
+              </label>
+            )}
+            <label>
+              Where? <span>Optional</span>
+              <PlaySearch
+                label="Death location"
+                value={values.room ?? ""}
+                onChange={(v) => update("room", v)}
+                options={PLAY_ROOMS[selection.location] ?? []}
+                placeholder="Room or board space"
+              />
+            </label>
+            <label>
+              Victim <span>Optional</span>
+              <PlaySearch
+                label="Victim name or role"
+                value={values.victim ?? ""}
+                onChange={(v) => update("victim", v)}
+                options={
+                  selection.location === "Buddyland"
+                    ? SPECIAL_VICTIMS.map((v) => v.name)
+                    : []
+                }
+                placeholder="Anonymous victim"
+              />
+            </label>
+            <label className="play-death-note">
+              Anything else? <span>Optional</span>
+              <textarea
+                aria-label="Death context"
+                value={values.text ?? ""}
+                onChange={(e) => update("text", e.target.value)}
+                maxLength={240}
+                placeholder="A detail worth remembering…"
+              />
+            </label>
+          </div>
         )}
-        {takes.length > 1 &&
-          !dirty &&
-          takes.map((scene) => (
+        {selected && !dirty && (
+          <section
+            aria-label="Generated death scene"
+            className="mt-4 space-y-3"
+          >
+            <p className="type-caption">TAKE {selected.take + 1}</p>
+            <p className="type-body leading-relaxed">{selected.scene_text}</p>
+            <DeathNarration
+              key={selected.id}
+              scene={selected}
+              filmId={getFilmIdByLocation(selection.location)}
+            />
+          </section>
+        )}
+        <div className="play-death-actions">
+          <button
+            onClick={() => {
+              if (save()) onClose();
+            }}
+          >
+            Back to the game
+          </button>
+          {!selected || dirty ? (
             <button
-              key={scene.id}
-              aria-pressed={selected?.id === scene.id}
-              onClick={() => setTake(scene.take)}
+              disabled={
+                scenes.busy ||
+                !scenes.signedIn ||
+                values.cause === "unspecified"
+              }
+              onClick={() => void generate(0)}
             >
-              Take {scene.take + 1}
+              {scenes.busy ? "Creating scene…" : "Gruesome Death · uses AI"}
             </button>
-          ))}
-        <button onClick={() => void scenes.refresh()}>
-          Check saved scenes
-        </button>
-      </div>
-      {!scenes.signedIn && (
-        <p className="play-card-note">
-          Sign in to develop scenes. Recording and saving details still work.
+          ) : (
+            Math.max(...takes.map((r) => r.take)) < 2 && (
+              <button
+                disabled={scenes.busy}
+                onClick={() =>
+                  void generate(
+                    Math.min(2, Math.max(...takes.map((r) => r.take)) + 1),
+                  )
+                }
+              >
+                {scenes.busy ? "Creating scene…" : "Another take · uses AI"}
+              </button>
+            )
+          )}
+          {takes.length > 1 &&
+            !dirty &&
+            takes.map((scene) => (
+              <button
+                key={scene.id}
+                aria-pressed={selected?.id === scene.id}
+                onClick={() => setTake(scene.take)}
+              >
+                Take {scene.take + 1}
+              </button>
+            ))}
+        </div>
+        {!scenes.signedIn && (
+          <p className="play-card-note">
+            Sign in to develop scenes. Recording and saving details still work.
+          </p>
+        )}
+        <p role="status" className="play-card-note">
+          {scenes.error || message}
         </p>
-      )}
-      <p role="status" className="play-card-note">
-        {scenes.error || message}
-      </p>
-    </section>
+      </DialogContent>
+    </Dialog>
   );
 }
