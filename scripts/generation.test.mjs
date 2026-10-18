@@ -57,3 +57,63 @@ test('all generated text rejects em dashes, including escaped and split SSE payl
   assert.match(normalized, /"error":"interrupted"/);
   assert.match(normalized, /data: \[DONE\]/);
 });
+
+test("a death request rejects the observed two-word fragment when the provider hits its token limit", async () => {
+  const exports = {};
+  new Function(
+    "require",
+    "exports",
+    "Deno",
+    "fetch",
+    compile("../supabase/functions/_shared/aiGateway.ts"),
+  )(
+    () => ({ usesResponsesApi: () => false }),
+    exports,
+    { env: { get: () => "fake-key" } },
+    async () =>
+      new Response(
+        JSON.stringify({
+          choices: [
+            {
+              finish_reason: "length",
+              message: { content: "The grease-stained" },
+            },
+          ],
+          usage: {
+            completion_tokens: 340,
+            completion_tokens_details: { reasoning_tokens: 334 },
+          },
+        }),
+      ),
+  );
+  await assert.rejects(
+    exports.generateText({
+      system: "Write a complete story.",
+      user: "Recorded facts",
+      candidates: ["google/gemini-3.8-flash"],
+      maxTokens: 340,
+      requireComplete: true,
+      singleAttempt: true,
+    }),
+    /complete|finish|limit/i,
+  );
+});
+
+test('death overrides using Responses require a completed stream and pass low reasoning explicitly', async () => {
+  for (const ending of ['response.completed','response.incomplete','missing']) {
+    const exports = {};
+    new Function('require','exports','Deno','fetch',compile('../supabase/functions/_shared/aiGateway.ts'))(
+      () => ({usesResponsesApi:()=>true}), exports, {env:{get:()=> 'fake-key'}},
+      async (_url, init) => {
+        const body=JSON.parse(init.body);
+        assert.deepEqual(body.reasoning,{effort:'low'});
+        const events=[{type:'response.output_text.delta',delta:'The grease-stained counter was empty.'}];
+        if(ending!=='missing')events.push({type:ending});
+        return new Response(events.map(e=>'data: '+JSON.stringify(e)+'\n\n').join('')+'data: [DONE]\n\n');
+      },
+    );
+    const request=exports.generateText({system:'Complete story.',user:'Facts',candidates:['openai/test'],requireComplete:true,reasoningEffort:'low'});
+    if(ending==='response.completed')assert.equal((await request).text,'The grease-stained counter was empty.');
+    else await assert.rejects(request,/stream|completion/i);
+  }
+});

@@ -103,6 +103,15 @@ export interface DeathScene {
   model?: string;
   status: "ready";
 }
+/** A readable paragraph, not an upstream fragment. Keep older complete short scenes. */
+export function isCompleteDeathText(text: unknown): text is string {
+  return (
+    typeof text === "string" &&
+    text.length <= 1600 &&
+    text.trim().split(/\s+/u).length >= 40 &&
+    /[.!?…]["'”’)\]]*\s*$/u.test(text)
+  );
+}
 export function isDeathScene(input: unknown): input is DeathScene {
   const r = input as DeathScene;
   return Boolean(

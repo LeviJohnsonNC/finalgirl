@@ -107,13 +107,13 @@ test("record first, contextualize optionally, cache and replay without another g
     .getByRole("button", { name: "Gruesome Death", exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "Take 2", exact: true }),
+    page.getByRole("button", { name: "Version 2", exact: true }),
   ).toBeVisible();
   await page
     .getByRole("button", { name: "Gruesome Death", exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "Take 3", exact: true }),
+    page.getByRole("button", { name: "Version 3", exact: true }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Gruesome Death", exact: true }),

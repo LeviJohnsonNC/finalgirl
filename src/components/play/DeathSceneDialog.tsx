@@ -11,7 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { PlaySearch } from "./PlaySearch";
-import { LoaderCircle, BookOpen } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { DeathNarration } from "./DeathNarration";
 import { getFilmIdByLocation } from "@/types/gameData";
@@ -27,6 +27,7 @@ import {
   deathSignature,
   deathCauseLabels,
   detailsForCause,
+  isCompleteDeathText,
   type DeathSelection,
 } from "@/lib/play/death";
 import {
@@ -122,9 +123,11 @@ export function DeathSceneDialog({
       live = false;
     };
   }, [serialized]); // eslint-disable-line react-hooks/exhaustive-deps
-  const takes = scenes.rows
+  const matchingScenes = scenes.rows
     .filter((r) => r.event_id === eventId && r.signature === signature)
     .sort((a, b) => a.take - b.take);
+  const takes = matchingScenes.filter((r) => isCompleteDeathText(r.scene_text));
+  const unfinished = matchingScenes.length > takes.length;
   const selected = takes.find((r) => r.take === take) ?? takes[0];
   const dirty = Object.keys(initial).some(
     (key) =>
@@ -359,7 +362,7 @@ export function DeathSceneDialog({
             </label>
           </div>
         )}
-        {(requested || selected || scenes.error || message) && (
+        {(requested || selected || unfinished || scenes.error || message) && (
           <section
             ref={payoff}
             className="play-death-payoff"
@@ -378,9 +381,7 @@ export function DeathSceneDialog({
             ) : selected && !dirty ? (
               <section aria-label="Generated death scene">
                 <div className="play-death-story-heading">
-                  <BookOpen size={18} />
                   <h3>The last thing they saw</h3>
-                  <span>TAKE {selected.take + 1}</span>
                 </div>
                 {selected.scene_text
                   .split(/\n\s*\n/)
@@ -404,7 +405,7 @@ export function DeathSceneDialog({
                           aria-pressed={selected.id === scene.id}
                           onClick={() => setTake(scene.take)}
                         >
-                          Take {scene.take + 1}
+                          Version {scene.take + 1}
                         </button>
                       ))}
                     </div>
@@ -415,6 +416,9 @@ export function DeathSceneDialog({
               <p role="status">
                 {scenes.error ||
                   resultError ||
+                  (unfinished
+                    ? "This saved scene was cut short. Use Gruesome Death to write it again."
+                    : "") ||
                   message ||
                   "Your details are saved. Create a gruesome death when you’re ready."}
               </p>
@@ -427,7 +431,7 @@ export function DeathSceneDialog({
             )}
             {!scenes.busy && selected && !dirty && takes.length >= 3 && (
               <p className="play-card-note">
-                All three takes are saved for this death.
+                Three versions are saved for this death.
               </p>
             )}
           </section>
@@ -446,8 +450,10 @@ export function DeathSceneDialog({
             disabled={scenes.busy || (!dirty && takes.length >= 3)}
             onClick={() =>
               void generate(
-                selected && !dirty
-                  ? Math.min(2, Math.max(...takes.map((r) => r.take)) + 1)
+                !dirty
+                  ? ([0, 1, 2].find(
+                      (next) => !takes.some((r) => r.take === next),
+                    ) ?? 2)
                   : 0,
               )
             }

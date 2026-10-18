@@ -57,6 +57,8 @@ const state = {
     { id: eventId, at: 2, kind: "killed", quantity: 2, cause: "event" },
   ],
 };
+const completeText =
+  "The kitchen clock stopped while the plates were still shaking. Two adults crouched beneath the steel counter and watched the doorway, certain the shelves had taken the worst of it. Then the bolts above them began to unwind, one at a time. When the ceiling finally settled, the counter had become a narrow lid. The clock started again, ticking beneath the silence.";
 function fixture(options = {}) {
   const calls = [],
     updates = [],
@@ -82,10 +84,13 @@ function fixture(options = {}) {
         ? { error: { message: "offline" } }
         : {
             data: {
-              action: options.action ?? "generate",
+              action:
+                calls.filter((c) => c === "claim").length > 1
+                  ? (options.repairAction ?? "generate")
+                  : (options.action ?? "generate"),
               id: "scene",
               lease: "lease-token",
-              text: "A saved original death scene.",
+              text: options.cachedText ?? completeText,
               model: "cheap",
             },
           };
@@ -113,7 +118,10 @@ function fixture(options = {}) {
           error: null,
         }),
         then: (resolve, reject) =>
-          Promise.resolve({ data: [] }).then(resolve, reject),
+          Promise.resolve({
+            data: [],
+            error: options.repairError ? { message: "repair offline" } : null,
+          }).then(resolve, reject),
       };
       return query;
     },
@@ -141,15 +149,18 @@ function fixture(options = {}) {
         calls.push("AI");
         assert.equal(opts.singleAttempt, true);
         assert.ok(opts.signal instanceof AbortSignal);
-        assert.equal(opts.maxTokens, 340);
+        assert.equal(opts.maxTokens, 4096);
+        assert.equal(opts.reasoningEffort, "low");
+        assert.equal(opts.requireComplete, true);
         if (options.aiError) throw new Error("offline");
         return {
-          text: "An original vignette about exactly the recorded victims.",
+          text: options.text ?? completeText,
           model: "cheap",
         };
       },
       statusFor: () => 500,
       userFacingMessage: () => "The reel jammed.",
+      GatewayError: class extends Error {},
     },
     "../_shared/models.ts": { DEATH_MODEL_CANDIDATES: ["cheap"] },
     "../_shared/deathPrompt.ts": {
@@ -163,6 +174,37 @@ function fixture(options = {}) {
     "../_shared/play/death.ts": death,
     "../_shared/play/events.ts": events,
   };
+  if (options.realGateway) {
+    const real = {};
+    new Function(
+      "require",
+      "exports",
+      "Deno",
+      "fetch",
+      code("../supabase/functions/_shared/aiGateway.ts"),
+    )(
+      () => ({ usesResponsesApi: () => false }),
+      real,
+      { env: { get: () => "fake-key" } },
+      async (_url, init) => {
+        calls.push("AI");
+        const body = JSON.parse(init.body);
+        assert.equal(body.max_tokens, 4096);
+        assert.equal(body.reasoning_effort, "low");
+        return new Response(
+          JSON.stringify({
+            choices: [
+              {
+                finish_reason: options.finishReason,
+                message: { content: options.text ?? completeText },
+              },
+            ],
+          }),
+        );
+      },
+    );
+    imports["../_shared/aiGateway.ts"] = real;
+  }
   new Function(
     "require",
     "exports",
@@ -252,5 +294,66 @@ test("invalid take or caller-supplied fictional actors are rejected before authe
     const f = fixture();
     assert.equal((await f.handler(f.request(bad))).status, 400);
     assert.deepEqual(f.calls, []);
+  }
+});
+
+test("the observed fragment is never persisted as a ready death scene", async () => {
+  const f = fixture({ text: "The grease-stained" });
+  const response = await f.handler(f.request());
+  assert.equal(response.status, 500);
+  assert.ok(!f.updates.some((u) => u.status === "ready"));
+  assert.ok(f.updates.some((u) => u.status === "failed"));
+});
+
+test("real gateway and death handler reject clipped, missing-finish and short responses before publishing, and accept a complete story", async () => {
+  for (const options of [
+    { finishReason: "length", text: "The grease-stained" },
+    { finishReason: "length", text: completeText },
+    { finishReason: undefined, text: completeText },
+    { finishReason: "stop", text: "The grease-stained" },
+    { finishReason: "stop", text: completeText },
+  ]) {
+    const f = fixture({ ...options, realGateway: true });
+    const response = await f.handler(f.request());
+    const success =
+      options.finishReason === "stop" && options.text === completeText;
+    assert.equal(response.status, success ? 200 : 500);
+    assert.equal(
+      f.updates.some((u) => u.status === "ready"),
+      success,
+    );
+    assert.equal(f.calls.filter((c) => c === "AI").length, 1);
+    if (success)
+      assert.equal((await response.json()).scene.scene_text, completeText);
+  }
+});
+
+test("cached fragments are repaired in the same slot through a fresh lease, and contention/failures spend no allowance", async () => {
+  const f = fixture({ action: "cached", cachedText: "The grease-stained" });
+  const response = await f.handler(f.request());
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).scene.scene_text, completeText);
+  assert.deepEqual(f.calls, ["claim", "claim", "guard", "AI", "log"]);
+  assert.ok(
+    f.filters.some(
+      ([, key, value]) =>
+        key === "scene_text" && value === "The grease-stained",
+    ),
+  );
+  assert.ok(
+    f.filters.some(
+      ([, key, value]) => key === "user_id" && value === "owner-A",
+    ),
+  );
+  assert.equal(f.updates.filter((u) => u.status === "ready").length, 1);
+  for (const options of [{ repairAction: "busy" }, { repairError: true }]) {
+    const failed = fixture({
+      action: "cached",
+      cachedText: "The grease-stained",
+      ...options,
+    });
+    assert.ok((await failed.handler(failed.request())).status >= 400);
+    assert.ok(!failed.calls.includes("AI"));
+    assert.ok(!failed.calls.includes("guard"));
   }
 });

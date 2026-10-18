@@ -7,10 +7,15 @@ import {
   generateText,
   statusFor,
   userFacingMessage,
+  GatewayError,
 } from "../_shared/aiGateway.ts";
 import { DEATH_MODEL_CANDIDATES } from "../_shared/models.ts";
 import { deathPrompt } from "../_shared/deathPrompt.ts";
-import { deathFacts, deathSignature } from "../_shared/play/death.ts";
+import {
+  deathFacts,
+  deathSignature,
+  isCompleteDeathText,
+} from "../_shared/play/death.ts";
 import { validPlayLog } from "../_shared/play/events.ts";
 
 type ClaimSlot =
@@ -98,22 +103,55 @@ serve(async (req) => {
       return json({ error: "That death is not active in this game." }, 409);
     const signature = await deathSignature(facts);
     admin = createClient(url, serviceKey);
-    const { data: rawSlot, error: claimError } = await admin.rpc(
-      "claim_death_scene",
-      {
+    const claimScene = () =>
+      admin!.rpc("claim_death_scene", {
         p_user_id: user.id,
         p_session_id: sessionId,
         p_event_id: eventId,
         p_signature: signature,
         p_take: take,
-      },
-    );
+      });
+    const { data: rawSlot, error: claimError } = await claimScene();
     if (claimError || !isClaimSlot(rawSlot))
       return json(
         { error: "Could not reserve this scene. Your recorded death is safe." },
         503,
       );
-    const slot = rawSlot;
+    let slot = rawSlot;
+    if (slot.action === "cached" && !isCompleteDeathText(slot.text)) {
+      // Only invalidate the exact fragment we read. A concurrent completed repair
+      // must never be overwritten. The existing RPC then grants one repair lease.
+      const { error: repairError } = await admin
+        .from("play_death_scenes")
+        .update({ status: "failed" })
+        .eq("id", slot.id)
+        .eq("user_id", user.id)
+        .eq("status", "ready")
+        .eq("scene_text", slot.text);
+      if (repairError)
+        return json(
+          {
+            error:
+              "The unfinished scene could not be reopened. Please try again.",
+          },
+          503,
+        );
+      const repaired = await claimScene();
+      if (repaired.error || !isClaimSlot(repaired.data))
+        return json(
+          {
+            error:
+              "The unfinished scene could not be reserved. Please try again.",
+          },
+          503,
+        );
+      slot = repaired.data;
+      if (slot.action === "cached" && !isCompleteDeathText(slot.text))
+        return json(
+          { error: "The saved scene is unfinished. Please try again." },
+          503,
+        );
+    }
     const scene = (id: string, text: string, model?: string) => ({
       id,
       session_id: sessionId,
@@ -169,19 +207,26 @@ serve(async (req) => {
       .limit(3);
     const prompt = deathPrompt(
       facts,
-      (earlier ?? []).map((r) => r.scene_text),
+      (earlier ?? []).map((r) => r.scene_text).filter(isCompleteDeathText),
     );
     const { text, model } = await generateText({
       ...prompt,
       candidates: DEATH_MODEL_CANDIDATES,
-      maxTokens: 340,
+      // Gemini shares this allowance between reasoning and visible prose.
+      // Keep prose at 100–150 words through the prompt, not a tiny combined cap.
+      maxTokens: 4096,
+      reasoningEffort: "low",
+      requireComplete: true,
       temperature: 0.95,
       signal: AbortSignal.timeout(20000),
       singleAttempt: true,
     });
-    if (text.length < 10 || text.length > 1600)
-      throw new Error("Scene length invalid");
     await guard.logUsage({ model, kind: "death" });
+    if (!isCompleteDeathText(text))
+      throw new GatewayError(
+        "incomplete_response",
+        "Death scene was not a complete paragraph",
+      );
     const { data: saved, error: saveError } = await admin
       .from("play_death_scenes")
       .update({ status: "ready", scene_text: text, model })

@@ -25,6 +25,7 @@ export type GatewayErrorKind =
   | "model_unavailable"
   | "content_policy"
   | "empty_response"
+  | "incomplete_response"
   | "upstream";
 
 export class GatewayError extends Error {
@@ -44,6 +45,8 @@ export const userFacingMessage = (err: unknown): string => {
         return "AI credits depleted. Please add credits to continue.";
       case "content_policy":
         return "That scene was too dark even for the censors. Try regenerating.";
+      case "incomplete_response":
+        return "The scene stopped before it was finished. Please try again.";
       default:
         return "The reel jammed. Try again.";
     }
@@ -81,6 +84,7 @@ interface GatewayCall {
   modalities?: string[];
   max_tokens?: number;
   temperature?: number;
+  reasoning_effort?: "low";
 }
 
 /**
@@ -147,9 +151,10 @@ const withModelFallback = async <T>(
 // Responses API (/v1/responses) — used for `openai/*` text models.
 //
 // Every call here streams, because reasoning-capable models can run for minutes
-// and a buffered request would be severed by a platform timeout. No reasoning
-// options are requested: these are one-shot generations and the app never shows
-// a thinking trace. No abort/deadline is ever wrapped around these fetches.
+// and a buffered request would be severed by a platform timeout. Main story
+// callers retain default reasoning and no helper-owned deadline. The short
+// death route can supply low reasoning and its bounded caller signal. Thinking
+// traces are never returned to the player.
 // ---------------------------------------------------------------------------
 
 /** Opens a streaming /v1/responses request and hands back the raw SSE body. */
@@ -158,6 +163,7 @@ const postResponsesStream = async (
   system: string,
   user: string,
   signal?: AbortSignal,
+  reasoningEffort?: "low",
 ): Promise<ReadableStream<Uint8Array>> => {
   const key = apiKey();
   const response = await fetch(RESPONSES_URL, {
@@ -179,12 +185,17 @@ const postResponsesStream = async (
       ],
       stream: true,
       store: false,
+      ...(reasoningEffort && { reasoning: { effort: reasoningEffort } }),
     }),
   });
 
   if (!response.ok || !response.body) {
     const text = await response.text().catch(() => "");
-    console.error(`Responses ${model} failed:`, response.status, text.slice(0, 300));
+    console.error(
+      `Responses ${model} failed:`,
+      response.status,
+      text.slice(0, 300),
+    );
     throw classify(response.status, text);
   }
   return response.body;
@@ -281,16 +292,33 @@ const responsesToChatFrames = (
 };
 
 /** Consumes a streaming /v1/responses call and returns the joined text. */
-const collectResponsesText = async (model: string, system: string, user: string, signal?: AbortSignal): Promise<string> => {
-  const upstream = await postResponsesStream(model, system, user, signal);
+const collectResponsesText = async (
+  model: string,
+  system: string,
+  user: string,
+  signal?: AbortSignal,
+  options?: { requireComplete?: boolean; reasoningEffort?: "low" },
+): Promise<string> => {
+  const upstream = await postResponsesStream(
+    model,
+    system,
+    user,
+    signal,
+    options?.reasoningEffort,
+  );
   const reader = upstream.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
   let text = "";
   let failure: string | null = null;
+  let completed = false;
 
   const handle = (event: Record<string, unknown>) => {
-    if (event.type === "response.output_text.delta" && typeof event.delta === "string") {
+    if (event.type === "response.completed") completed = true;
+    if (
+      event.type === "response.output_text.delta" &&
+      typeof event.delta === "string"
+    ) {
       text += event.delta;
       return;
     }
@@ -300,12 +328,22 @@ const collectResponsesText = async (model: string, system: string, user: string,
   while (true) {
     const { value, done } = await reader.read();
     if (done) break;
-    buffer = eachSseEvent(decoder.decode(value, { stream: true }), buffer, handle);
+    buffer = eachSseEvent(
+      decoder.decode(value, { stream: true }),
+      buffer,
+      handle,
+    );
   }
   // Drain any frame left without its blank-line terminator.
   eachSseEvent("\n\n", buffer, handle);
 
-  if (failure) throw new GatewayError("upstream", `Responses stream failed: ${failure}`);
+  if (failure)
+    throw new GatewayError("upstream", `Responses stream failed: ${failure}`);
+  if (options?.requireComplete && !completed)
+    throw new GatewayError(
+      "incomplete_response",
+      "Responses stream ended without completion",
+    );
   return text.trim();
 };
 
@@ -330,6 +368,9 @@ export const generateText = async (opts: {
   candidates?: string[];
   signal?: AbortSignal;
   singleAttempt?: boolean;
+  /** Death prose must have an explicit successful provider finish signal. */
+  requireComplete?: boolean;
+  reasoningEffort?: "low";
 }): Promise<{ text: string; model: string }> => {
   const chain = opts.candidates ?? UTILITY_MODEL_CANDIDATES;
   const { result, model } = await withModelFallback(chain, async (model) => {
@@ -339,24 +380,67 @@ export const generateText = async (opts: {
         opts.system + PUNCTUATION_RULE + lengthHint(opts.maxTokens),
         opts.user,
         opts.signal,
+        {
+          requireComplete: opts.requireComplete,
+          reasoningEffort: opts.reasoningEffort,
+        },
       );
-      if (!text) throw new GatewayError("empty_response", "Gateway returned no text");
+      if (!text)
+        throw new GatewayError("empty_response", "Gateway returned no text");
       return text;
     }
 
-    const data = await post({
-      model,
-      messages: [
-        { role: "system", content: opts.system + PUNCTUATION_RULE },
-        { role: "user", content: opts.user },
-      ],
-      max_tokens: opts.maxTokens ?? 400,
-      temperature: opts.temperature ?? 0.9,
-    }, {signal:opts.signal,singleAttempt:opts.singleAttempt});
+    const data = await post(
+      {
+        model,
+        messages: [
+          { role: "system", content: opts.system + PUNCTUATION_RULE },
+          { role: "user", content: opts.user },
+        ],
+        max_tokens: opts.maxTokens ?? 400,
+        temperature: opts.temperature ?? 0.9,
+        ...(opts.reasoningEffort && { reasoning_effort: opts.reasoningEffort }),
+      },
+      { signal: opts.signal, singleAttempt: opts.singleAttempt },
+    );
 
-    const choices = data.choices as Array<{ message?: { content?: string } }> | undefined;
+    const choices = data.choices as
+      | Array<{
+          finish_reason?: string;
+          native_finish_reason?: string;
+          message?: { content?: string; refusal?: string };
+        }>
+      | undefined;
+    if (opts.requireComplete) {
+      const finish = choices?.[0]?.finish_reason?.toLowerCase();
+      const nativeFinish = choices?.[0]?.native_finish_reason?.toLowerCase();
+      const usage = data.usage as
+        | {
+            completion_tokens?: number;
+            completion_tokens_details?: { reasoning_tokens?: number };
+          }
+        | undefined;
+      console.info("Death text completion", {
+        model,
+        finishReason: finish ?? "missing",
+        nativeFinishReason: nativeFinish,
+        completionTokens: usage?.completion_tokens,
+        reasoningTokens: usage?.completion_tokens_details?.reasoning_tokens,
+      });
+      if (finish === "content_filter" || choices?.[0]?.message?.refusal)
+        throw new GatewayError("content_policy", "Provider declined the scene");
+      if (
+        !["stop", "end_turn"].includes(finish ?? "") ||
+        (nativeFinish && !["stop", "end_turn"].includes(nativeFinish))
+      )
+        throw new GatewayError(
+          "incomplete_response",
+          `Generation did not finish: ${finish ?? "missing"}`,
+        );
+    }
     const text = choices?.[0]?.message?.content?.trim();
-    if (!text) throw new GatewayError("empty_response", "Gateway returned no text");
+    if (!text)
+      throw new GatewayError("empty_response", "Gateway returned no text");
     return text;
   });
 

@@ -1,4 +1,4 @@
-import {deathFacts,deathSignature} from '../../src/lib/play/death';
+import {deathFacts,deathSignature,isCompleteDeathText} from '../../src/lib/play/death';
 import type {PlayEvent} from '../../src/lib/play/events';
 import type {DeathScene} from '../../src/lib/play/death';
 import { test as base, expect, Page } from '@playwright/test';
@@ -77,7 +77,8 @@ export class ArchiveMock {
           if(!f)return json({error:'Sync the recorded death first.'},409);
           const signature=this.deathSignatureOverride ?? await deathSignature(f);
           let scene=this.deathScenes.find(r=>r.session_id===b.sessionId&&r.event_id===b.eventId&&r.signature===signature&&r.take===b.take);
-          const cached=!!scene;
+          const cached=!!scene && isCompleteDeathText(scene.scene_text);
+          if(scene && !cached)scene.scene_text=this.deathText;
           if(!scene){scene={id:String(this.deathScenes.length+1).padStart(8,'0')+'-dddd-4ddd-8ddd-dddddddddddd',session_id:b.sessionId,event_id:b.eventId,signature,take:b.take,scene_text:this.deathText,model:'test-cheap',status:'ready'};this.deathScenes.push(scene);}
           if(this.holdDeath)await new Promise<void>(r=>{this.releaseDeath=r;});
           return json({scene,cached});

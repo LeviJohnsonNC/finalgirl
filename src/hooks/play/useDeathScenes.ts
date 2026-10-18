@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { isDeathScene, type DeathScene } from "@/lib/play/death";
+import {
+  isDeathScene,
+  isCompleteDeathText,
+  type DeathScene,
+} from "@/lib/play/death";
 export type { DeathScene } from "@/lib/play/death";
 export function useDeathScenes(
   sessionId: string,
@@ -118,6 +122,10 @@ export function useDeathScenes(
           "The scene response was invalid. Close and reopen death details before trying again.",
         );
       if (current.current === requestKey && active.current) {
+        if (!isCompleteDeathText(data.scene.scene_text))
+          throw new Error(
+            "The scene stopped before it was finished. Try Gruesome Death again.",
+          );
         generationVersion.current++;
         setSaved((previous) => ({
           key: requestKey,

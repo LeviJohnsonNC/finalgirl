@@ -123,7 +123,7 @@ test("a mismatched successful scene response gives a visible recovery message", 
     page.getByRole("region", { name: "Generated death scene", exact: true }),
   ).toHaveCount(0);
 });
-test("aligned corrections, individual moment art and a compact scrollable timeline", async ({
+test("small right-aligned corrections, individual moment art and a compact scrollable timeline", async ({
   page,
   archive,
 }, info) => {
@@ -146,7 +146,7 @@ test("aligned corrections, individual moment art and a compact scrollable timeli
     expect(heading).not.toMatch(/optional/i);
   }
   for (const counter of ["saved", "killed", "round"]) {
-    const centers = await page
+    const controls = await page
       .locator(`.play-count--${counter}`)
       .evaluate((el) => {
         const plus = el
@@ -155,9 +155,26 @@ test("aligned corrections, individual moment art and a compact scrollable timeli
         const minus = el
           .querySelector(".play-count-minus")!
           .getBoundingClientRect();
-        return [plus.x + plus.width / 2, minus.x + minus.width / 2];
+        return {
+          right: el.getBoundingClientRect().right - minus.right,
+          minusWidth: minus.width,
+          plusWidth: plus.width,
+          height: minus.height,
+          hitWidth: parseFloat(
+            getComputedStyle(el.querySelector(".play-count-minus")!, "::after")
+              .width,
+          ),
+          hitHeight: parseFloat(
+            getComputedStyle(el.querySelector(".play-count-minus")!, "::after")
+              .height,
+          ),
+        };
       });
-    expect(Math.abs(centers[0] - centers[1])).toBeLessThan(1);
+    expect(Math.abs(controls.right)).toBeLessThan(1);
+    expect(controls.minusWidth).toBeLessThan(controls.plusWidth);
+    expect(controls.height).toBeLessThanOrEqual(30);
+    expect(controls.hitWidth).toBeGreaterThanOrEqual(44);
+    expect(controls.hitHeight).toBeGreaterThanOrEqual(44);
   }
   const moments = page.getByRole("region", {
     name: "Remember this",
