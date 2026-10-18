@@ -131,7 +131,15 @@ test('an empty archive retains Back and navigation without leaking the stats lay
   await page.getByRole('button', { name: 'Stats', exact: true }).click();
   await page.getByRole('button', { name: 'RULES', exact: true }).click();
   await expect(page.locator('.stats-page')).toHaveCount(0);
-  await expect(page.locator('footer')).toHaveCSS('position', 'fixed');
+  await expect(page.locator('.rules-cinema')).toBeVisible();
+  // The rulebook has its own colophon and intentionally quiets the ticker.
+  // The global contentinfo footer must still retain the app navigation.
+  await expect(page.getByRole('contentinfo')).toHaveCSS('position', 'fixed');
+  await expect(page.locator('.news-ticker')).toHaveCount(0);
+  await page.getByRole('button', { name: 'COLLECTION', exact: true }).click();
+  await expect(page.locator('.rules-cinema')).toHaveCount(0);
+  await expect(page.locator('.stats-page')).toHaveCount(0);
+  await expect(page.getByRole('contentinfo')).toHaveCSS('position', 'fixed');
   await expect(page.locator('.news-ticker').last()).toBeVisible();
   expect(archive.calls).toEqual([]);
 });
