@@ -1,16 +1,16 @@
 import {playStoryBeats} from '@/lib/play/events';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ImageIcon, Volume2, VolumeX, Loader2 } from 'lucide-react';
+import { Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { streamChatCompletion } from '@/lib/streamChatCompletion';
 
 import { toast } from 'sonner';
 import { useNarration } from '@/hooks/useNarration';
 import nowPlayingBg from '@/assets/now-playing-bg.png';
 import projectorSound from '@/assets/sounds/projector-start.mp3';
-import { SceneImageFrame } from '@/components/SceneImageFrame';
+import { NarrationPhoto } from '@/components/NarrationPhoto';
 import { NarrationTransport } from '@/components/NarrationTransport';
-import { StickyOutcomeBar } from '@/components/StickyOutcomeBar';
-import { ProjectorLeader } from '@/components/ProjectorLeader';
+import { NarrationLayout, NarrationReader, NarrationTitle } from '@/components/NarrationLayout';
+import { useActiveImages } from '@/hooks/useActiveImages';
 import { GameResult } from '@/hooks/useGameHistory';
 import { getFilmIdByLocation, getFilmIdByFinalGirl } from '@/types/gameData';
 import { getFilmDetails } from '@/types/featureFilmDetails';
@@ -20,7 +20,6 @@ import { getLocationDescription } from '@/data/locationDescriptions';
 import { getFinalGirlMaxHealth } from '@/data/finalGirlHealth';
 import { getKillerSpecialRules } from '@/data/killerSpecialRules';
 import { getModulePromptContext } from '@/data/rules/moduleRules';
-import { renderStoryText } from '@/lib/textFormatting';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 
 import type { EndingFormData, ActiveGame } from '@/lib/activeGame';
@@ -69,6 +68,8 @@ const TheEnd = ({
   const moduleContext = getModulePromptContext(result.killer, result.location);
 
   const isWin = result.outcome === 'won';
+  const { locationImages } = useActiveImages();
+  const background = locationImages[result.location] ?? nowPlayingBg;
   // Reserve the poster column while it develops, not just once it exists.
   const showPosterSlot = Boolean(posterImageUrl) || isGeneratingImage || Boolean(imageError);
 
@@ -218,149 +219,29 @@ const TheEnd = ({
   };
 
   return (
-    <div className="relative min-h-[80vh]">
-      {/* Background Image */}
-      <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"
-        style={{ 
-          backgroundImage: `url(${nowPlayingBg})`,
-          opacity: 0.4,
-        }}
-      />
-      
-      {/* Film Grain Overlay */}
-      <div className="film-grain fixed inset-0 pointer-events-none opacity-[0.07]" />
-      
-      {/* Vignette */}
-      <div className="vignette fixed inset-0 pointer-events-none" />
-      
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center py-6 sm:py-8 pt-16 sm:pt-24 px-3 sm:px-6">
-
-        {/* Title */}
-        <h1 
-          className={`font-display text-2xl sm:text-3xl md:text-4xl tracking-[0.1em] sm:tracking-[0.15em] uppercase mb-1 sm:mb-2 text-center ${
-            isWin ? 'text-secondary neon-text' : 'text-primary blood-glow'
-          }`}
-        >
-          The End
-        </h1>
-        <p className="type-label text-muted-foreground mb-6 sm:mb-8 text-center px-2">
-          {result.finalGirl} {isWin ? 'survived' : 'fell to'} {result.killer} at {result.location}
-        </p>
-
-        {/* Story Container */}
-        <div className="w-full max-w-7xl flex flex-col gap-4 sm:gap-6">
-          {/* Action Buttons - Above text */}
-          {endingStory && (
-            <div className="flex flex-col items-center gap-3">
-            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-2 sm:gap-3 px-2 w-full sm:w-auto">
-              {/* Row 1: Narrate — full width on mobile */}
-              <button
-                onClick={handleNarrate}
-                disabled={isNarrating || isGenerating}
-                className="vcr-tape-button flex items-center justify-center gap-2 px-4 sm:px-6 py-3 font-display text-xs sm:text-sm tracking-[0.1em] sm:tracking-[0.15em] uppercase transition-all duration-300 disabled:opacity-50 min-h-[44px] w-full sm:w-auto"
-              >
-                {isNarrating ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : isPlaying ? (
-                  <VolumeX className="w-4 h-4" />
-                ) : (
-                  <Volume2 className="w-4 h-4" />
-                )}
-                {isNarrating ? 'Generating...' : isPlaying ? 'Stop' : 'Narrate'}
-              </button>
-            </div>
-
-            {isPlaying && (
-              <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} />
-            )}
-            </div>
-          )}
-          
-          {/* Ending + Poster — same layout rules as Now Playing: side by side
-              only from xl up, stacked below that, and the text fills its track
-              instead of being capped in ch of a font it is not set in. The
-              poster is 2:3, so it is held slightly narrower than the 3:4 still
-              to keep it from running past the fold on its own. */}
-          <div
-            className={`w-full px-1 sm:px-0 ${
-              showPosterSlot
-                ? 'grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(380px,460px)] gap-6 xl:gap-10'
-                : 'flex justify-center'
-            }`}
-          >
-            {showPosterSlot && (
-              <div className="order-first xl:order-last w-full max-w-[460px] mx-auto xl:mx-0">
-                <div className="xl:sticky xl:top-24">
-                  <SceneImageFrame
-                    variant="poster"
-                    imageUrl={posterImageUrl}
-                    isGenerating={isGeneratingImage}
-                    error={imageError}
-                    onRetry={() => developPoster(posterImageUrl || undefined)}
-                    caption={`${result.finalGirl} vs ${result.killer}`}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Capped at a readable measure everywhere except the two-column
-                layout, where the track itself is already the right width. */}
-            <div
-              className={`scenario-description p-4 sm:p-8 rounded-sm w-full max-w-[46rem] mx-auto ${
-                showPosterSlot ? 'xl:max-w-none xl:mx-0' : ''
-              }`}
-            >
-              {isGenerating ? (
-                <div className="flex flex-col items-center justify-center py-10 sm:py-16">
-                  <ProjectorLeader label="The projector is warming up" />
-                </div>
-              ) : error ? (
-                <div className="flex flex-col items-center justify-center py-8 sm:py-12 gap-4">
-                  <p className="type-label text-destructive text-center px-2">
-                    {error}
-                  </p>
-                  <button
-                    onClick={generateEnding}
-                    className="font-display text-xs sm:text-sm tracking-wider uppercase px-4 py-2 vcr-tape-button min-h-[44px]"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              ) : endingStory ? (
-                <div className="story-text story-ending story-text-dark">
-                  {renderStoryText(endingStory)}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <p className="type-label text-muted-foreground">
-                    Waiting for the ending...
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Save — docks once scrolled past, same as the outcome buttons. */}
-          {(
-            <StickyOutcomeBar enabled>
-              <button
-                onClick={handleSave}
-                className={`outcome-btn ${isWin ? 'outcome-btn-won' : 'outcome-btn-lost'} group relative w-full sm:w-auto min-w-[200px] sm:min-w-[240px] h-14 sm:h-16 overflow-hidden rounded-sm transition-all duration-200`}
-              >
-                <span className={`relative z-10 font-display text-xl sm:text-2xl tracking-[0.2em] uppercase ${isWin ? 'text-secondary' : 'text-primary'} drop-shadow-lg`}>
-                  {endingStory && !isGenerating && !error ? 'SAVE' : 'SAVE RESULT'}
-                </span>
-              </button>
-            </StickyOutcomeBar>
-          )}
-
-        </div>
-      </div>
-    </div>
+    <NarrationLayout
+      background={background}
+      kind="ending"
+      heading={<>
+        <NarrationTitle title="The End" ending />
+        <p className={`narration-outcome ${isWin ? 'narration-outcome--won' : 'narration-outcome--lost'}`}>{isWin ? 'She survived the night.' : 'Not every story ends with a survivor.'}</p>
+        <p className="narration-cast">{result.finalGirl} {isWin ? 'survived' : 'fell to'} {result.killer} at {result.location}</p>
+      </>}
+      controls={<>
+        <button onClick={handleSave} className="narration-button narration-button--primary">{endingStory && !isGenerating && !error ? 'SAVE' : 'SAVE RESULT'}</button>
+        {endingStory && <div className="narration-control-row">
+          <button onClick={handleNarrate} disabled={isNarrating || isGenerating} className="narration-button narration-button--narrate">
+            {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" /> : isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            {isNarrating ? 'Generating...' : isPlaying ? 'Stop' : 'Narrate'}
+          </button>
+        </div>}
+        {isPlaying && <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} />}
+      </>}
+      image={showPosterSlot ? <NarrationPhoto variant="poster" imageUrl={posterImageUrl} isGenerating={isGeneratingImage} error={imageError} onRetry={() => developPoster(posterImageUrl || undefined)} caption={`${result.finalGirl} vs ${result.killer}`} /> : undefined}
+    >
+      <NarrationReader kind="ending" story={endingStory} isGenerating={isGenerating} error={error} onRetry={generateEnding} />
+    </NarrationLayout>
   );
 };
 
 export default TheEnd;
-
