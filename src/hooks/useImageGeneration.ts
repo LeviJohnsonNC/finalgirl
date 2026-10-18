@@ -26,8 +26,14 @@ export interface GenerateImageContext {
   visualBible?: string;
   sceneType: 'beginning' | 'ending';
   outcome?: 'won' | 'lost';
+  introStory?: string;
+  finalGirlHealth?: number;
+  killerHealth?: number;
+  mission?: { name: string; description: string };
+  scenarioRules?: string;
   gameId?: string;
   previousImageUrl?: string;
+  referenceImageUrl?: string;
 }
 
 /** POSTs to an edge function with the caller's session token. */
@@ -161,6 +167,9 @@ export const useImageGeneration = () => {
       finalGirl: string;
       location: string;
       locationDescription?: string;
+      killerDescription?: string;
+      finalGirlDescription?: string;
+      moduleVisualGuidance?: string;
     }): Promise<string | undefined> => {
       if (!userId) return undefined;
       try {

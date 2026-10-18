@@ -365,13 +365,23 @@ export const generateText = async (opts: {
  */
 export const generateImage = async (
   prompt: string,
+  referenceImageUrl?: string,
 ): Promise<{ base64: string; mimeType: string; model: string }> => {
   const { result, model } = await withModelFallback(IMAGE_MODEL_CANDIDATES, async (model) => {
-    const data = await post({
-      model,
-      messages: [{ role: "user", content: prompt }],
-      modalities: ["image", "text"],
-    });
+    const content = referenceImageUrl ? [
+      { type: "text", text: `${prompt}\nThe attached opening photograph is an IDENTITY reference only: match cast appearance, clothing, architecture and palette. Make a new composition from the ending; translate into the requested painted medium. Do not copy the opening's pose, action or fate.` },
+      { type: "image_url", image_url: { url: referenceImageUrl } },
+    ] : prompt;
+    let data: Record<string, unknown>;
+    try {
+      data = await post({ model, messages: [{ role: "user", content }], modalities: ["image", "text"] });
+    } catch (error) {
+      // Some gateway routes reject reference input. Keep the text continuity
+      // path; never bypass credit, rate-limit, authorization or safety errors.
+      if (!referenceImageUrl || !(error instanceof GatewayError) || error.kind !== "upstream" || ![400, 422].includes(error.status)) throw error;
+      console.warn("Image route rejected reference input; retaining text continuity.");
+      data = await post({ model, messages: [{ role: "user", content: prompt }], modalities: ["image", "text"] });
+    }
 
     const image = extractImage(data);
     if (!image) {

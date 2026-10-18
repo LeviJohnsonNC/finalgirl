@@ -91,3 +91,57 @@ test('a broken opening photograph can be developed again without losing the stor
   await expect(page.getByRole('region', { name: 'Opening narration' })).toContainText('The chain on the side door');
   await expect(page.getByRole('button', { name: 'WON', exact: true })).toBeEnabled();
 });
+
+test('sacrificial wins carry reviewed fate and mission into story and poster without claiming survival', async ({ page, archive }) => {
+  archive.autoImages = true;
+  const selected = { ...selection, killer: 'Slayer', location: 'Falconwood', finalGirl: 'Nancy', mission: 'Save Your Father', filmId: 's3-falconwood' };
+  const result = { id: gameId, timestamp: 1, outcome: 'won', ...selected, introStory: story };
+  archive.history.push({ id: gameId, timestamp: 1, outcome: 'won', killer: selected.killer, location: selected.location, final_girl: selected.finalGirl });
+  await archive.install(page, { draft: { ...draft, selection: selected, phase: 'ending', result, visualBible: 'Nancy and Slayer retain their established identities.', formData: { ...formData, finalGirlHealth: 0 } } });
+  await resume(page);
+  await expect(page.getByText('Victory came at a terrible cost.')).toBeVisible();
+  const ending = archive.generationRequests.find(r => r.name === 'generate-ending')!;
+  expect(ending.body.finalGirlHealth).toBe(0);
+  expect(ending.body.mission).toMatchObject({ name: 'Save Your Father' });
+  await expect.poll(() => archive.generationRequests.some(r => r.name === 'generate-scene-image')).toBe(true);
+  const poster = archive.generationRequests.find(r => r.name === 'generate-scene-image')!;
+  expect(poster.body.finalGirlHealth).toBe(0);
+  expect(poster.body.introStory).toBe(story);
+  expect(poster.body.mission).toMatchObject({ name: 'Save Your Father' });
+  expect(poster.body.scenarioRules).toContain('Mirror Dimension');
+  archive.releaseImage?.();
+});
+
+test('blank health is unknown, explicit zero remains zero across reload and generation', async ({ page, archive }) => {
+  await archive.install(page, { draft: { ...draft, sceneImageUrl: undefined } });
+  await resume(page);
+  await page.getByRole('button', { name: 'WON', exact: true }).first().click();
+  const health = page.getByLabel('Final Girl Health', { exact: true });
+  await expect(health).toHaveValue('');
+  await health.fill('0');
+  await expect(health).toHaveValue('0');
+  await page.reload();
+  await page.getByRole('button', { name: 'RESUME GAME' }).click();
+  await expect(page.getByLabel('Final Girl Health', { exact: true })).toHaveValue('0');
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await expect(page.getByText('Victory came at a terrible cost.')).toBeVisible();
+  const ending = archive.generationRequests.find(r => r.name === 'generate-ending')!;
+  expect(ending.body.finalGirlHealth).toBe(0);
+  expect(ending.body).not.toHaveProperty('killerHealth');
+});
+
+test('legacy unkillable zero health is omitted from both ending generation requests', async ({ page, archive }) => {
+  archive.autoImages = true;
+  const selected = { ...selection, killer: 'Poltergeist', location: 'Creech Manor', finalGirl: 'Alice' };
+  const result = { id: gameId, timestamp: 1, outcome: 'won', ...selected, introStory: story };
+  archive.history.push({ id: gameId, timestamp: 1, outcome: 'won', killer: selected.killer, location: selected.location, final_girl: selected.finalGirl });
+  await archive.install(page, { draft: { ...draft, selection: selected, phase: 'ending', result, formData: { ...formData, finalGirlHealth: 2, killerHealth: 0 } } });
+  await resume(page);
+  await expect.poll(() => archive.generationRequests.some(r => r.name === 'generate-scene-image')).toBe(true);
+  for (const name of ['generate-ending', 'generate-scene-image']) {
+    const request = archive.generationRequests.find(r => r.name === name)!;
+    expect(request.body).not.toHaveProperty('killerHealth');
+    expect(JSON.stringify(request.body)).toContain('escape with her');
+  }
+  archive.releaseImage?.();
+});

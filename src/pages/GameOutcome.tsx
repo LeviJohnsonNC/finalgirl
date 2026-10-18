@@ -29,7 +29,7 @@ const GameOutcome = ({ result, introStory, onContinue, onDiscard, initialDraft, 
         
         <div className="space-y-1">
           <p className="type-label text-muted-foreground">
-            {result.finalGirl} {isWin ? 'survived' : 'fell to'} {result.killer}
+            {result.finalGirl} vs {result.killer}
           </p>
           <p className="type-caption text-muted-foreground/70">
             at {result.location}

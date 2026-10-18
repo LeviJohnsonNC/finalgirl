@@ -17,8 +17,11 @@ import { getFilmDetails } from '@/types/featureFilmDetails';
 import { getKillerDescription } from '@/data/killerDescriptions';
 import { getFinalGirlDescription } from '@/data/finalGirlDescriptions';
 import { getLocationDescription } from '@/data/locationDescriptions';
+import { characterFate } from '../../supabase/functions/_shared/storyFacts';
+import { getMissionByName } from '@/data/falconwoodMissions';
+import { isKillerUnkillable } from '@/data/killerHealth';
 import { getFinalGirlMaxHealth } from '@/data/finalGirlHealth';
-import { getKillerSpecialRules } from '@/data/killerSpecialRules';
+import { getKillerNarrativeRules } from '@/data/killerSpecialRules';
 import { getModulePromptContext } from '@/data/rules/moduleRules';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 
@@ -31,6 +34,7 @@ interface TheEndProps {
   onCheckpoint: (updates: Partial<ActiveGame>) => void;
   result: GameResult;
   introStory?: string;
+  sceneImageUrl?: string;
   /** This game's look description, established on Now Playing. */
   visualBible?: string;
   formData: EndingFormData;
@@ -42,6 +46,7 @@ const TheEnd = ({
   initialEndingStory, initialPosterImageUrl, onCheckpoint,
   result,
   introStory,
+  sceneImageUrl,
   visualBible,
   formData,
   onSave,
@@ -68,6 +73,8 @@ const TheEnd = ({
   const moduleContext = getModulePromptContext(result.killer, result.location);
 
   const isWin = result.outcome === 'won';
+  const fate = characterFate(formData.finalGirlHealth);
+  const endingKillerHealth = isKillerUnkillable(result.killer) ? undefined : formData.killerHealth;
   const { locationImages } = useActiveImages();
   const background = locationImages[result.location] ?? nowPlayingBg;
   // Reserve the poster column while it develops, not just once it exists.
@@ -95,12 +102,18 @@ const TheEnd = ({
       // Carried over from Now Playing so the poster matches the opening still.
       visualBible,
       sceneType: 'ending',
+      referenceImageUrl: sceneImageUrl ?? result.sceneImageUrl,
       outcome: result.outcome,
+      introStory,
+      finalGirlHealth: formData.finalGirlHealth,
+      killerHealth: endingKillerHealth,
+      mission: getMissionByName(result.mission),
+      scenarioRules: [getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
       gameId: result.id,
       previousImageUrl,
     });
     if (url) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
-  }, [endingStory, result.killer, result.finalGirl, result.location, result.outcome, result.id, moduleContext?.visualGuidance, visualBible, generateImage]);
+  }, [endingStory, result.killer, result.finalGirl, result.location, result.outcome, result.id, moduleContext?.visualGuidance, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, result.sceneImageUrl, result.mission, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage]);
 
   // The poster develops on its own once the ending narration lands.
   //
@@ -141,20 +154,21 @@ const TheEnd = ({
         ? getFilmDetails(finalGirlFilmId)?.finalGirls.find(girl => girl.name === result.finalGirl)?.backstory
         : undefined) ?? getFinalGirlDescription(result.finalGirl);
       const locationDescription = getLocationDescription(result.location);
-      const killerRules = getKillerSpecialRules(result.killer);
+      const killerRules = getKillerNarrativeRules(result.killer);
       const moduleSpecialRules = moduleContext
         ? [moduleContext.rulesSummary, moduleContext.narrativeGuidance].filter(Boolean).join('\n')
         : undefined;
       const finalGirlMaxHealth = getFinalGirlMaxHealth(result.finalGirl);
 
       const payload = {
+        mission: getMissionByName(result.mission),
         introStory,
         outcome: result.outcome,
         killer: {
           name: result.killer,
           description: killerDescription,
-          ...((killerRules?.narrativeNote || moduleSpecialRules) && {
-            specialRules: [killerRules?.narrativeNote, moduleSpecialRules].filter(Boolean).join('\n'),
+          ...((killerRules || moduleSpecialRules) && {
+            specialRules: [killerRules, moduleSpecialRules].filter(Boolean).join('\n'),
           }),
         },
         location: {
@@ -172,7 +186,7 @@ const TheEnd = ({
         ...(formData.finalHorrorLevel && { finalHorrorLevel: formData.finalHorrorLevel }),
         ...(formData.weaponUsed && { weaponUsed: formData.weaponUsed }),
         ...(formData.finalGirlHealth !== undefined && { finalGirlHealth: formData.finalGirlHealth }),
-        ...(formData.killerHealth !== undefined && { killerHealth: formData.killerHealth }),
+        ...(endingKillerHealth !== undefined && { killerHealth: endingKillerHealth }),
         ...(formData.victimsSaved != null && { victimsSaved: formData.victimsSaved }),
         ...(formData.victimsKilled != null && { victimsKilled: formData.victimsKilled }),
         ...(formData.roundsPlayed != null && {roundsPlayed:formData.roundsPlayed}),
@@ -224,8 +238,8 @@ const TheEnd = ({
       kind="ending"
       heading={<>
         <NarrationTitle title="The End" ending />
-        <p className={`narration-outcome ${isWin ? 'narration-outcome--won' : 'narration-outcome--lost'}`}>{isWin ? 'She survived the night.' : 'Not every story ends with a survivor.'}</p>
-        <p className="narration-cast">{result.finalGirl} {isWin ? 'survived' : 'fell to'} {result.killer} at {result.location}</p>
+        <p className={`narration-outcome ${isWin ? 'narration-outcome--won' : 'narration-outcome--lost'}`}>{isWin ? fate === 'died' ? 'Victory came at a terrible cost.' : fate === 'survived' ? 'She survived the night.' : 'The night is over. The cost remains.' : fate === 'survived' ? 'Alive. But the night was lost.' : 'Not every story ends with a survivor.'}</p>
+        <p className="narration-cast">{result.finalGirl} · {result.killer} · {result.location}</p>
       </>}
       controls={<>
         <button onClick={handleSave} className="narration-button narration-button--primary">{endingStory && !isGenerating && !error ? 'SAVE' : 'SAVE RESULT'}</button>

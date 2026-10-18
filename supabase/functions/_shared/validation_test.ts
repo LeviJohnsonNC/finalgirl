@@ -246,3 +246,13 @@ Deno.test('NarrationRequestSchema - death narration requires a saved scene UUID'
  assertEquals(validateRequest(NarrationRequestSchema,{...base,deathSceneId:'not-an-id'}).success,false);
  assertEquals(validateRequest(NarrationRequestSchema,{...base,deathSceneId:'11111111-1111-4111-8111-111111111111'}).success,true);
 });
+
+
+Deno.test('generation context preserves explicit fate and mission while allowing old requests', () => {
+  const scene = { sceneType: 'ending', story: 'A completed ending long enough to pass validation, with a costly victory.', killer: 'Slayer', location: 'Falconwood', finalGirl: 'Nancy', outcome: 'won', finalGirlHealth: 0, killerHealth: 0, mission: { name: 'Save Your Father', description: 'Get him out before transport.' }, scenarioRules: 'The mission gates victory.', introStory: 'The opening concern becomes the closing image.' };
+  const parsed = SceneImageRequestSchema.parse(scene);
+  assertEquals(parsed.finalGirlHealth, 0);
+  assertEquals(parsed.mission?.name, 'Save Your Father');
+  assertEquals(SceneImageRequestSchema.safeParse({ ...scene, finalGirlHealth: -1 }).success, false);
+  assertEquals(SceneImageRequestSchema.safeParse({ ...scene, mission: { name: 'x', description: 'x'.repeat(1501) } }).success, false);
+});

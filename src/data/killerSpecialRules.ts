@@ -25,9 +25,9 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   'Poltergeist': {
     narrativeNote:
-      'A malevolent spirit that cannot be wounded, driven off, or killed by the Final Girl. The only path to safety is locating the ghost\'s anchor: finding Carolyn (and optionally recovering Mr. Floppy, her teddy bear) to put the haunting to rest. Do NOT write scenes where the Final Girl defeats or destroys the Poltergeist through combat.',
+      'A malevolent spirit that cannot be wounded, driven off, or killed by the Final Girl. The only path to safety is finding Carolyn and escaping with her (and optionally recovering Mr. Floppy, her teddy bear). Do NOT write scenes where the Final Girl defeats or destroys the Poltergeist through combat.',
     unkillable: true,
-    winCondition: 'Find Carolyn (and optionally Mr. Floppy the teddy bear) to end the haunting. Defeating the Poltergeist in combat is not possible.',
+    winCondition: 'Find Carolyn and escape with her; optionally recover Mr. Floppy the teddy bear. Do not claim this destroys the spirit or ends the haunting. Defeating the Poltergeist in combat is not possible.',
   },
 
   'Inkanyamba': {
@@ -41,7 +41,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
   },
 
   'Dr. Fright': {
-    narrativeNote: 'A rage-fueled rural killer with no supernatural abilities. Personal and territorial — this is his domain.',
+    narrativeNote: 'A supernatural Dream Doctor who stalks people in their sleep; injuries in his nightmares can carry into waking life. Respect the reported awake/asleep state and Boiler Room rules. Never portray him as a mundane farm killer.',
   },
 
   // ── Season 1 Vignettes ────────────────────────────────────────────────────
@@ -154,4 +154,11 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
  */
 export function getKillerSpecialRules(name: string): KillerSpecialRules | undefined {
   return KILLER_SPECIAL_RULES[name];
+}
+
+
+/** Carry unique objectives into every story and image, not just the biography. */
+export function getKillerNarrativeRules(name: string): string | undefined {
+  const rules = getKillerSpecialRules(name);
+  return rules ? [rules.narrativeNote, rules.winCondition && `Victory objective: ${rules.winCondition}`, rules.lossCondition && `Loss condition: ${rules.lossCondition}`].filter(Boolean).join('\n') : undefined;
 }

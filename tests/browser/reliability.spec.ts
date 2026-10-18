@@ -64,7 +64,7 @@ test('record and save a result through an AI outage', async ({ page, archive }, 
   await page.screenshot({ path: testInfo.outputPath('no-ai-save.png'), fullPage: true });
   await page.getByRole('button', { name: 'SAVE RESULT', exact: true }).first().click();
   await expect.poll(() => archive.history[0]?.outcome).toBe('lost');
-  await expect.poll(() => archive.history[0]?.final_girl_health).toBe(0);
+  await expect.poll(() => archive.history[0]?.final_girl_health).toBeNull();
   expect(archive.calls.filter(name => name === 'generate-ending')).toHaveLength(0);
 });
 

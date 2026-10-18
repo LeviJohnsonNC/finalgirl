@@ -73,22 +73,22 @@ export const GameOutcomeForm = ({
   const isFalconwood = result.location === 'Falconwood';
   const isSlayer = result.killer === 'Slayer';
 
-  // Local form state - use character-specific max health for defaults
+  // Unrecorded health remains unknown; a win alone cannot establish survival.
   const [finalHorrorLevel, setFinalHorrorLevel] = useDraftField(
     'finalHorrorLevel',
     result.finalHorrorLevel ?? 4,
     initialDraft,
     onDraftChange,
   );
-  const [finalGirlHealth, setFinalGirlHealth] = useDraftField(
+  const [finalGirlHealth, setFinalGirlHealth] = useDraftField<number | null>(
     'finalGirlHealth',
-    result.finalGirlHealth ?? (isWin ? maxFinalGirlHealth : 0),
+    result.finalGirlHealth ?? null,
     initialDraft,
     onDraftChange,
   );
-  const [killerHealth, setKillerHealth] = useDraftField(
+  const [killerHealth, setKillerHealth] = useDraftField<number | null>(
     'killerHealth',
-    result.killerHealth ?? (isWin ? 0 : Math.ceil(maxKillerHealth / 2)),
+    result.killerHealth ?? null,
     initialDraft,
     onDraftChange,
   );
@@ -354,8 +354,8 @@ export const GameOutcomeForm = ({
 
     const formData: EndingFormData = {
       finalHorrorLevel,
-      finalGirlHealth,
-      killerHealth: killerIsUnkillable ? 0 : killerHealth,
+      finalGirlHealth: finalGirlHealth ?? undefined,
+      killerHealth: killerIsUnkillable ? undefined : killerHealth ?? undefined,
       weaponUsed: weaponUsed || '',
       victimsSaved,
       victimsKilled,
@@ -435,18 +435,18 @@ export const GameOutcomeForm = ({
               inputMode="numeric"
               pattern="[0-9]*"
               aria-label="Final Girl Health"
-              value={finalGirlHealth === 0 ? '' : String(finalGirlHealth)}
+              value={finalGirlHealth == null ? '' : String(finalGirlHealth)}
               onChange={(e) => {
                 const val =
                   e.target.value === ''
-                    ? 0
+                    ? null
                     : Math.min(
                         maxFinalGirlHealth,
                         Math.max(0, Math.trunc(Number(e.target.value))),
                       );
-                setFinalGirlHealth(isNaN(val) ? 0 : val);
+                setFinalGirlHealth(val === null || !Number.isFinite(val) ? null : val);
               }}
-              placeholder="0"
+              placeholder="Unrecorded"
               className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
             />
           </div>
@@ -462,18 +462,18 @@ export const GameOutcomeForm = ({
                 inputMode="numeric"
                 pattern="[0-9]*"
                 aria-label="Killer Health"
-                value={killerHealth === 0 ? '' : String(killerHealth)}
+                value={killerHealth == null ? '' : String(killerHealth)}
                 onChange={(e) => {
                   const val =
                     e.target.value === ''
-                      ? 0
+                      ? null
                       : Math.min(
                           maxKillerHealth,
                           Math.max(0, Math.trunc(Number(e.target.value))),
                         );
-                  setKillerHealth(isNaN(val) ? 0 : val);
+                  setKillerHealth(val === null || !Number.isFinite(val) ? null : val);
                 }}
-                placeholder="0"
+                placeholder="Unrecorded"
                 className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
               />
             </div>

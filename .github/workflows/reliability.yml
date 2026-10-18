@@ -52,6 +52,7 @@ jobs:
         with:
           deno-version: '2.9.7'
       - run: deno test --no-config --no-lock --node-modules-dir=auto supabase/functions/_shared/validation_test.ts
+      - run: deno test --no-config --no-lock --allow-net=deno.land,cdn.jsdelivr.net supabase/functions/_shared/poster_test.ts
       - run: deno check --no-config --no-lock --node-modules-dir=auto supabase/functions/*/index.ts
   browser:
     runs-on: ubuntu-latest

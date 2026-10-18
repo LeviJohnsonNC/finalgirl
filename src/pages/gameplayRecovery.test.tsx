@@ -28,7 +28,7 @@ describe('gameplay without AI dependencies', () => {
     fireEvent.change(screen.getByLabelText('Buddies in Play at End (0–7)'), { target: { value: '1' } });
     expect(draft).toHaveBeenCalledWith({ buddiesInPlay: 1 });
     fireEvent.click(screen.getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION' }));
-    expect(save.mock.calls[0][0]).toMatchObject({ finalGirlHealth: 6 });
+    expect(save.mock.calls[0][0]).toMatchObject({ finalGirlHealth: undefined });
     expect(save.mock.calls[0][0].gameHighlights).toContain('Buddies in play at end: 1');
     expect(save.mock.calls[0][0].gameHighlights).toContain('All Power Sources Inactive');
   });
@@ -37,7 +37,7 @@ describe('gameplay without AI dependencies', () => {
     render(<GameOutcomeForm result={{ ...result, location: 'Buddyland', finalGirl: 'Gwynn' }} onSaveResult={save} onContinue={vi.fn()} onDiscard={vi.fn()} />);
     expect(screen.queryByLabelText('All Power Sources Inactive')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION' }));
-    expect(save.mock.calls[0][0]).toMatchObject({ finalGirlHealth: 5, gameHighlights: '' });
+    expect(save.mock.calls[0][0]).toMatchObject({ finalGirlHealth: undefined, gameHighlights: '' });
   });
   it('keeps an unreported Buddy count unknown and records the Power Surge ending explicitly', () => {
     const save = vi.fn();

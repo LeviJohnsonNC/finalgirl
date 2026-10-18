@@ -282,6 +282,7 @@ const IndexContent = () => {
             <TheEnd
               result={lastGameResult}
               introStory={introStory}
+              sceneImageUrl={activeGame.sceneImageUrl}
               visualBible={visualBible}
               initialEndingStory={activeGame.endingStory}
               initialPosterImageUrl={activeGame.posterImageUrl}
