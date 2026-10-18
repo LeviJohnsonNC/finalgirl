@@ -4,7 +4,7 @@ Adds Billy the Bear, Buddyland, Rena and Gwynn to the existing collection, casti
 
 ## Release
 
-This is a frontend release. **No SQL migration, new secret, data backfill or edge-function deployment is required.** Merge the PR into `main`, let Lovable sync it, then publish the updated frontend. Existing generation functions already accept the expansion's descriptions and module rules through their current request schemas.
+Collection and casting use the existing tables and settings. The new [Buddyland Play module](BUDDYLAND_PLAY.md) also requires deploying `generate-death-scene` and `narrate-story` with the frontend, because they validate the shared module observations and death signatures. **No SQL migration, new secret or data backfill is required.** Merge the PR into `main`, let Lovable sync it, and publish with those function updates.
 
 Existing collection settings and saved games remain compatible. Billy's existing outcome fields keep their draft keys. Optional Power Surge and Boris fields also survive reload; an unreported Buddy count stays unknown rather than becoming zero. All writes still go through the account-scoped active draft and durable history queue.
 
@@ -36,7 +36,7 @@ Billy's power and Buddy mechanics follow **Billy**, including mixed games at ano
 
 The five added images are **original AI-generated fan artwork**, made for this app using the supplied/publisher character and setting references. They are not official Van Ryder Games illustrations. They live under `src/assets/*/ai/` and use the existing missing-official-art fallback, so Buddyland remains illustrated with either casting-art preference. Existing official art is preserved. Dropping official images into the corresponding top-level asset folders will take precedence under the standard preference.
 
-The app remains a play aid: it does not simulate the board, resolve die rolls, track individual Buddy cards, or replace printed Item/Terror/Finale cards. Its existing footer disclaimer remains in place.
+The app remains a play aid: it does not simulate the board, resolve die rolls or replace printed cards. Play mode now optionally tracks individual Buddies, sources, powers, Finales, Events, Special Victims and Items; see [the Play module coverage and remaining evidence gaps](BUDDYLAND_PLAY.md). Its existing footer disclaimer remains in place.
 
 ## Review and validation
 

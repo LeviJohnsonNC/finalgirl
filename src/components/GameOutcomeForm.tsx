@@ -4,6 +4,8 @@ import { GameResult } from '@/hooks/useGameHistory';
 import { EndingFormData } from '@/pages/TheEnd';
 import { getFinalGirlMaxHealth } from '@/data/finalGirlHealth';
 import { getKillerMaxHealth, isKillerUnkillable } from '@/data/killerHealth';
+import { BUDDIES, BILLY_FINALES, moduleState } from '@/lib/play/modules';
+import { summarizePlay } from '@/lib/play/events';
 
 interface GameOutcomeFormProps {
   result: GameResult;
@@ -42,6 +44,7 @@ export const GameOutcomeForm = ({
   onDiscard,
 }: GameOutcomeFormProps) => {
   const isWin = result.outcome === 'won';
+  const billyState = moduleState(summarizePlay(result.playEvents).entries, 'billy');
 
   // Get the Final Girl's max health based on character data
   const maxFinalGirlHealth = useMemo(
@@ -167,25 +170,25 @@ export const GameOutcomeForm = ({
   // Buddyland - Buddies + power supplies
   const [buddiesInPlay, setBuddiesInPlay] = useDraftField<number | null>(
     'buddiesInPlay',
-    null,
+    billyState.rosterComplete === true ? BUDDIES.filter(b => billyState[`buddy.${b.id}.status`] === 'active').length : null,
     initialDraft,
     onDraftChange,
   );
   const [powerSuppliesShutDown, setPowerSuppliesShutDown] = useDraftField(
     'powerSuppliesShutDown',
-    false,
+    [1,2,3,4,5].every(i => ['inactive','set-aside'].includes(String(billyState[`source.${i}.status`]))) && [1,2,3,4,5].some(i => billyState[`source.${i}.status`] === 'inactive'),
     initialDraft,
     onDraftChange,
   );
   const [billyFinale, setBillyFinale] = useDraftField(
     'billyFinale',
-    '',
+    BILLY_FINALES.find(f => f.id === billyState.finale)?.name ?? '',
     initialDraft,
     onDraftChange,
   );
   const [borisStatus, setBorisStatus] = useDraftField(
     'borisStatus',
-    '',
+    billyState['buddy.boris.status'] === 'defeated' ? 'defeated' : billyState['buddy.boris.status'] === 'active' ? 'still in play' : '',
     initialDraft,
     onDraftChange,
   );
@@ -813,6 +816,7 @@ export const GameOutcomeForm = ({
             >
               <option value="">Not recorded</option>
               <option value="Power Surge">Power Surge</option>
+              {BILLY_FINALES.filter(f => f.name !== 'Power Surge').map(f => <option key={f.id} value={f.name}>{f.name}</option>)}
               <option value="Other Finale">Other Finale</option>
             </select>
           </div>

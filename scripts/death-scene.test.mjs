@@ -19,8 +19,10 @@ function moduleAt(path, imports) {
   }, ex);
   return ex;
 }
-const events = moduleAt('../supabase/functions/_shared/play/events.ts', {});
-const death = moduleAt('../supabase/functions/_shared/play/death.ts', { './events.ts': events });
+const buddyland = moduleAt('../supabase/functions/_shared/play/buddyland.ts', {});
+const modules = moduleAt('../supabase/functions/_shared/play/modules.ts', {'./buddyland.ts':buddyland});
+const events = moduleAt('../supabase/functions/_shared/play/events.ts', {'./modules.ts':modules});
+const death = moduleAt('../supabase/functions/_shared/play/death.ts', { './events.ts': events, './modules.ts': modules });
 const schemas = moduleAt('../supabase/functions/_shared/validation.ts', {
   'https://deno.land/x/zod@v3.22.4/mod.ts': require('zod'),
   './auth.ts': { corsHeaders: {} },

@@ -1,3 +1,4 @@
+import { BUDDYLAND_EVENTS, BUDDYLAND_TERRORS, BUDDYLAND_ROOMS } from './buddyland.ts';
 /** Researched 2026-10-18. Facts only, summaries paraphrased; provenance per record.
  * A name-only record never supplies an invented effect to the model.
  * This is a narrative companion catalog, not an executable rules engine. */
@@ -16,6 +17,8 @@ const camp = wiki("Camp_Happy_Trails");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+  ...BUDDYLAND_TERRORS.map(card => ({...card, kind: 'terror' as const, source: 'Owner photo IMG_9309.jpg'})),
+  ...BUDDYLAND_EVENTS.map(card => ({...card, kind: 'event' as const, location: 'Buddyland', source: 'Owner photo IMG_9311.jpg'})),
   ...[
     "It's happy hour!",
     "It's not safe in here!",
@@ -243,16 +246,7 @@ export const PLAY_ROOMS: Record<string, readonly string[]> = {
     "Lake",
     "Makeout Point",
   ],
-  Buddyland: [
-    "Arcade",
-    "Party Room",
-    "Kitchen",
-    "Prize Counter",
-    "Janitor’s Closet",
-    "Bathroom",
-    "Jungle Gym",
-    "Ball Pit",
-  ],
+  Buddyland: [...BUDDYLAND_ROOMS],
 };
 // These labels record a player's observation, never infer which form is active.
 export function playMechanisms(selection: {
@@ -262,6 +256,8 @@ export function playMechanisms(selection: {
   return [
     "Killer attack",
     "Minion attack",
+    ...(selection.killer === 'Billy the Bear' ? ['Animatronic attack', 'Short circuit'] : []),
+    ...(selection.location === 'Buddyland' ? ['Tragic Collapse'] : []),
     ...(selection.location === "Station 2891" ? ["Frostbite"] : []),
     ...(selection.killer === "The Organism"
       ? ["Fast Organism", "Tough Organism", "Strong Organism"]

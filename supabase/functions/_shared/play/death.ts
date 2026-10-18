@@ -1,4 +1,5 @@
 import { summarizePlay, validPlayLog, type PlayEvent } from './events.ts';
+import { moduleContext } from './modules.ts';
 export interface DeathSelection {
   killer: string;
   location: string;
@@ -10,10 +11,12 @@ export function deathFacts(
   eventId: string,
 ) {
   if (!validPlayLog(events)) return null;
-  const e = summarizePlay(events).entries.find(
+  const entries = summarizePlay(events).entries;
+  const e = entries.find(
     (e) => e.id === eventId && e.kind === 'killed',
   );
   if (!e) return null;
+  const context = moduleContext(selection, entries.slice(0, entries.indexOf(e) + 1));
   return {
     version: 1,
     killer: selection.killer,
@@ -29,6 +32,8 @@ export function deathFacts(
     ...(e.mechanism && { mechanism: e.mechanism }),
     ...(e.terrorCard && { terrorCard: e.terrorCard }),
     ...(e.eventCard && { eventCard: e.eventCard }),
+    ...(e.attacker && { attacker: e.attacker }),
+    ...(context && { moduleContext: context }),
   };
 }
 export type DeathFacts = NonNullable<ReturnType<typeof deathFacts>>;
