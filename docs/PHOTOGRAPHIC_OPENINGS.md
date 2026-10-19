@@ -39,6 +39,18 @@ A separate short JSON utility test with low reasoning/4,000 tokens completed in 
 
 `scripts/check-opening-live.mjs` runs the exact branch builders, parsers, gateway and embedded reference bytes for both Buddyland Final Girls. It is opt-in and paid, requiring a securely supplied `LOVABLE_API_KEY`. It caps requests at four utility calls and two images, rejects fallback models, saves only temporary diagnostic files and never accesses game/session/statistics tables. It must not be added to normal CI.
 
+The unchanged script at commit `597a8bb` was then run in a separate temporary directory against the actual gateway. All six calls completed with HTTP 200, `stop` / native `STOP`, with no retries or model fallback. Both four-field continuity records and both three-concept shot plans passed the real parsers. Later commits change documentation/tests only.
+
+| Exact pipeline | Continuity | Three-shot plan | Image | Total gateway time |
+| --- | --- | --- | --- | --- |
+| Rena / Billy | 2.820 s | 4.345 s | 21.106 s | 28.271 s |
+| Gwynn / Billy | 3.990 s | 5.183 s | 19.461 s | 28.634 s |
+
+- [Verified Rena opening](https://cdyvccecrovyjkabfcnx.supabase.co/storage/v1/object/public/posters/diagnostics%2F597a8bb-20261019-rena-82d41.png)
+- [Verified Gwynn opening](https://cdyvccecrovyjkabfcnx.supabase.co/storage/v1/object/public/posters/diagnostics%2F597a8bb-20261019-gwynn-82d41.png)
+
+Both exact-pipeline outputs were visually reviewed: photographed skin, individual hair, real fabric and physical animatronic materials, with distinct heroine identities and no black bars. They are 1376 x 768. Gwynn's composition is more side-profile than the planner's proposed over-shoulder view. This verifies these two generated cases, not the deployed application or every future random sample. Diagnostic images were isolated from all real game data; no code was deployed and no sessions/statistics were changed.
+
 ## Release
 
 After merging, deploy the frontend and both functions, including their bundled shared files:
