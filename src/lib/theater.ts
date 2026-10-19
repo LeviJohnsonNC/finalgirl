@@ -6,7 +6,7 @@ export interface Screening {
   id: string;
   key: string;
   imageUrl: string;
-  kind: 'scene' | 'poster';
+  kind: 'scene';
   finalGirl: string;
   killer: string;
   location: string;
@@ -17,7 +17,7 @@ export interface Screening {
 
 /** A small, stable reel: newest first, then a different matchup when possible.
  * Re-evaluating after a history refresh never randomly reshuffles the screen.
- * Failed scenes can fall back to their own poster, without losing the case ID. */
+ * Posters belong in the lobby; unavailable stills are skipped. */
 export function buildScreenings(games: GameResult[], failed: ReadonlySet<string> = new Set()): Screening[] {
   const seenIds = new Set<string>();
   const seenImages = new Set<string>();
@@ -25,11 +25,10 @@ export function buildScreenings(games: GameResult[], failed: ReadonlySet<string>
   const ordered = [...games].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0) || a.id.localeCompare(b.id));
   for (const game of ordered) {
     const scene = game.sceneImageUrl && !failed.has(game.sceneImageUrl) ? game.sceneImageUrl : null;
-    const poster = game.posterImageUrl && !failed.has(game.posterImageUrl) ? game.posterImageUrl : null;
-    const imageUrl = scene || poster;
+    const imageUrl = scene;
     if (!imageUrl || seenIds.has(game.id) || seenImages.has(imageUrl)) continue;
     seenIds.add(game.id); seenImages.add(imageUrl);
-    pool.push({ id: game.id, key: `${game.id}:${imageUrl}`, imageUrl, kind: scene ? 'scene' : 'poster',
+    pool.push({ id: game.id, key: `${game.id}:${imageUrl}`, imageUrl, kind: 'scene',
       finalGirl: game.finalGirl, killer: game.killer, location: game.location, outcome: game.outcome, finalGirlHealth: game.finalGirlHealth, timestamp: game.timestamp });
   }
   const reel: Screening[] = [];
@@ -58,9 +57,7 @@ export function activeScreeningStatus(game: ActiveGame): string {
 
 export function activeScreenings(game: ActiveGame, failed: ReadonlySet<string>): Screening[] {
   const scene = game.sceneImageUrl && !failed.has(game.sceneImageUrl) ? game.sceneImageUrl : null;
-  const poster = game.posterImageUrl && !failed.has(game.posterImageUrl) ? game.posterImageUrl : null;
-  const imageUrl = scene || poster;
-  return imageUrl ? [{ ...game.selection, id: game.id, key: `${game.id}:${imageUrl}`, imageUrl, kind: scene ? 'scene' : 'poster', timestamp: 0 }] : [];
+  return scene ? [{ ...game.selection, id: game.id, key: `${game.id}:${scene}`, imageUrl: scene, kind: 'scene', timestamp: 0 }] : [];
 }
 
 /** A result alone cannot establish survival (simultaneous deaths can win). */

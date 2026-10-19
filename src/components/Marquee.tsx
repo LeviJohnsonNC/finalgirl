@@ -15,6 +15,7 @@ interface MarqueeProps {
   onScrapbooks?: () => void;
   onStats?: () => void;
   onRules?: () => void;
+  onLobby?: () => void;
   onOpenCaseFile?: (id: string) => void;
   resumeGame?: ActiveGame | null;
   resumeFromCloud?: boolean;
@@ -22,7 +23,7 @@ interface MarqueeProps {
   recoveryNotice?: ReactNode;
 }
 
-export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onStats, onRules, onOpenCaseFile,
+export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onStats, onRules, onLobby, onOpenCaseFile,
   resumeGame, resumeFromCloud, onStartAnother, recoveryNotice }: MarqueeProps) => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading, authError } = useAuth();
@@ -55,6 +56,7 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
 
         <footer className="theater-footer">
           <nav aria-label="Theater navigation">
+            {onLobby && <button onClick={onLobby}>Lobby</button>}
             {onScrapbooks && <button onClick={onScrapbooks}>Scrapbooks</button>}
             {onStats && <button onClick={onStats}>Stats</button>}
             {onRules && <button onClick={onRules}>Rules</button>}

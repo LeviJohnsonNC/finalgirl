@@ -213,18 +213,20 @@ test('projector flutter stays subtle and freezes for interaction and reduced mot
   expect(archive.calls).toEqual([]);
 });
 
-test('broken artwork falls back to the same game’s poster and an exhausted reel can retry', async ({ page, archive }) => {
+test('broken scenes never fall back to posters and the projection can retry the still', async ({ page, archive }) => {
   archive.history = [{ id: gameId, timestamp: 1, outcome: 'won', killer: 'Hans', location: 'Camp Happy Trails', final_girl: 'Laurie', scene_image_url: 'http://127.0.0.1:4173/broken-scene.png', poster_image_url: 'http://127.0.0.1:4173/recoverable-poster.png' }];
   await archive.install(page);
-  await page.route('**/broken-scene.png', route => route.abort());
   let working = false;
-  await page.route('**/recoverable-poster.png', route => working ? route.fulfill({ contentType: 'image/png', path: resolve('src/assets/characters/ai/laurie.png') }) : route.abort());
+  let posterRequests = 0;
+  await page.route('**/broken-scene.png', route => working ? route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/camp-happy-trails.png') }) : route.abort());
+  await page.route('**/recoverable-poster.png', route => { posterRequests++; return route.abort(); });
   await page.goto('/');
   await expect(page.getByText('Stills unavailable. Your case files are safe.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'START THE TAPE' })).toBeEnabled();
   working = true;
   await page.getByRole('button', { name: 'Retry projection' }).click();
-  await expect(page.getByRole('img', { name: /Poster from Laurie/ })).toBeVisible();
+  await expect(page.getByRole('img', { name: /Scene from Laurie/ })).toBeVisible();
+  expect(posterRequests).toBe(0);
   await expect(page.locator('.theater-transport')).toHaveCount(0);
   expect(archive.calls).toEqual([]);
 });
