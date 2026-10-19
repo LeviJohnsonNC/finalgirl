@@ -4,14 +4,14 @@ import assert from 'node:assert/strict';
 import ts from 'typescript';
 
 function imageHandler({ rowExists = true, attachError = null, composeError = false, invalidPlan = false } = {}) {
-  const filters = []; const removed = []; const phases = []; let handler;
+  const filters = []; const removed = []; const phases = []; const imageCalls = []; let handler;
   const client = {
     from: () => ({ update: () => {
       const query = { eq: (key, value) => { filters.push([key, value]); return query; }, select: async () => ({ data: rowExists ? [{ id: 'record' }] : [], error: attachError }) };
       return query;
     } }),
     storage: { from: () => ({
-      upload: async (_path, bytes, options) => { phases.push('upload'); assert.equal(Buffer.from(bytes).toString(), 'complete-poster'); assert.equal(options.contentType, 'image/png'); return { error: null }; },
+      upload: async (_path, bytes, options) => { phases.push('upload'); assert.equal(Buffer.from(bytes).toString(), _path.includes('-scene-') ? 'test' : 'complete-poster'); assert.equal(options.contentType, 'image/png'); return { error: null }; },
       getPublicUrl: () => ({ data: { publicUrl: 'https://example.test/new.png' } }),
       remove: async paths => { removed.push(...paths); return { error: null }; },
     }) },
@@ -23,7 +23,7 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
     '../_shared/auth.ts': { getCorsHeaders: () => ({ 'Access-Control-Allow-Origin': 'https://example.test' }) },
     '../_shared/guard.ts': { requireUser: async () => ({ ok: true, user: { id: 'owner-A' }, logUsage: async () => {} }) },
     '../_shared/validation.ts': { validateRequest: (_schema, data) => ({ success: true, data }) },
-    '../_shared/aiGateway.ts': { generateText: async () => ({ text: invalidPlan ? '{' : 'valid', model: 'text' }), generateImage: async () => ({ base64: 'dGVzdA==', mimeType: 'image/png', model: 'image' }), statusFor: () => 500, userFacingMessage: () => 'failed' },
+    '../_shared/aiGateway.ts': { generateText: async () => ({ text: invalidPlan ? '{' : 'valid', model: 'text' }), generateImage: async (...args) => { imageCalls.push(args); return { base64: 'dGVzdA==', mimeType: 'image/png', model: 'image' }; }, statusFor: () => 500, userFacingMessage: () => 'failed' },
     '../_shared/poster.ts': { composePoster: async (_bytes, copy) => { phases.push('compose'); assert.equal(copy.title, invalidPlan ? 'FALLBACK' : 'TITLE'); if(composeError) throw new Error('composition failed'); return Buffer.from('complete-poster'); } },
     '../_shared/prompts.ts': { buildBeginningPrompt: () => 'scene', buildPosterPrompt: () => 'poster', buildShotBriefPrompt: () => 'brief', parseArtPlan: text => text === 'valid' ? {concepts:['one','two','three'],selected:1,title:'TITLE',tagline:'TAGLINE'} : null, fallbackPosterCopy: () => ({title:'FALLBACK',tagline:'TAGLINE'}) },
   };
@@ -34,9 +34,17 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
     if (modules[name]) return modules[name];
     throw new Error('Unexpected image handler import: ' + name);
   }, {}, { env: { get: () => 'configured' } });
-  return { handler, filters, removed, phases };
+  return { handler, filters, removed, phases, imageCalls };
 }
-const request = () => new Request('https://example.test', { method: 'POST', body: JSON.stringify({ sceneType: 'ending', gameId: 'record', previousImageUrl: 'https://example.test/storage/v1/object/public/posters/game-posters/owner-A/old.png' }) });
+const request = (sceneType = 'ending') => new Request('https://example.test', { method: 'POST', body: JSON.stringify({ sceneType, gameId: 'record', previousImageUrl: 'https://example.test/storage/v1/object/public/posters/game-posters/owner-A/old.png' }) });
+test('new opening stills use the screen ratio while closing posters retain their generation settings',async()=>{
+  for(const sceneType of ['beginning','ending']) {
+    const f=imageHandler();
+    assert.equal((await f.handler(request(sceneType))).status,200);
+    assert.deepEqual(f.imageCalls[0][2],sceneType==='beginning'?{aspectRatio:'16:9'}:undefined);
+    assert.deepEqual(f.phases,sceneType==='beginning'?['upload']:['compose','upload']);
+  }
+});
 test('late images attach only to the supplied record and authenticated owner', async () => {
   const { handler, filters, removed } = imageHandler();
   const response = await handler(request());

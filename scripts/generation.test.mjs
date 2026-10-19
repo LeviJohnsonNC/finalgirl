@@ -30,6 +30,19 @@ test('the image gateway passes a real identity reference alongside the prompt',a
   assert.equal(calls[0].messages[0].content[1].image_url.url,own);
   assert.match(calls[0].messages[0].content[0].text,/IDENTITY reference only/);
 });
+test('opening stills explicitly request widescreen dimensions without changing default poster requests',async()=>{
+  const {calls,exports}=gateway();
+  await exports.generateImage('opening photo',undefined,{aspectRatio:'16:9'});
+  assert.deepEqual(calls[0].image_config,{aspect_ratio:'16:9'});
+  await exports.generateImage('paint the ending',own);
+  assert.equal(calls[1].image_config,undefined);
+});
+test('image dimensions survive the existing reference-input fallback',async()=>{
+  const {calls,exports}=gateway(422,'Unsupported image input');
+  await exports.generateImage('opening photo',own,{aspectRatio:'16:9'});
+  assert.equal(calls.length,3);
+  assert(calls.every(call=>call.image_config.aspect_ratio==='16:9'));
+});
 test('a route rejecting image input falls back to text continuity once',async()=>{
   const {calls,exports}=gateway(422,'Unsupported image input');
   await exports.generateImage('paint the ending',own);

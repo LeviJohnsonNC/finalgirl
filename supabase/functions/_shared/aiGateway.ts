@@ -82,6 +82,7 @@ interface GatewayCall {
   model: string;
   messages: Array<{ role: string; content: unknown }>;
   modalities?: string[];
+  image_config?: { aspect_ratio: "16:9" };
   max_tokens?: number;
   temperature?: number;
   reasoning_effort?: "low";
@@ -455,7 +456,10 @@ export const generateText = async (opts: {
 export const generateImage = async (
   prompt: string,
   referenceImageUrl?: string,
+  options?: { aspectRatio: "16:9" },
 ): Promise<{ base64: string; mimeType: string; model: string }> => {
+  // Match the theater at generation time rather than cropping saved artwork.
+  const dimensions = options ? { image_config: { aspect_ratio: options.aspectRatio } } : {};
   const { result, model } = await withModelFallback(IMAGE_MODEL_CANDIDATES, async (model) => {
     const content = referenceImageUrl ? [
       { type: "text", text: `${prompt}\nThe attached opening photograph is an IDENTITY reference only: match cast appearance, clothing, architecture and palette. Make a new composition from the ending; translate into the requested painted medium. Do not copy the opening's pose, action or fate.` },
@@ -463,13 +467,13 @@ export const generateImage = async (
     ] : prompt;
     let data: Record<string, unknown>;
     try {
-      data = await post({ model, messages: [{ role: "user", content }], modalities: ["image", "text"] });
+      data = await post({ model, messages: [{ role: "user", content }], modalities: ["image", "text"], ...dimensions });
     } catch (error) {
       // Some gateway routes reject reference input. Keep the text continuity
       // path; never bypass credit, rate-limit, authorization or safety errors.
       if (!referenceImageUrl || !(error instanceof GatewayError) || error.kind !== "upstream" || ![400, 422].includes(error.status)) throw error;
       console.warn("Image route rejected reference input; retaining text continuity.");
-      data = await post({ model, messages: [{ role: "user", content: prompt }], modalities: ["image", "text"] });
+      data = await post({ model, messages: [{ role: "user", content: prompt }], modalities: ["image", "text"], ...dimensions });
     }
 
     const image = extractImage(data);
