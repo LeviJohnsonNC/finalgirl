@@ -1,9 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { characterFate, endingFacts } from '../../supabase/functions/_shared/storyFacts';
 import { buildEndingUser } from '../../supabase/functions/_shared/storyPrompts';
-import { buildBeginningPrompt, buildPosterPrompt, buildShotBriefPrompt, buildVisualBiblePrompt, parseArtPlan } from '../../supabase/functions/_shared/prompts';
+import { buildBeginningPrompt, buildPosterPrompt, buildShotBriefPrompt, buildShotBriefSystem, buildVisualBiblePrompt, VISUAL_BIBLE_SYSTEM, parseShotPlan, parseArtPlan } from '../../supabase/functions/_shared/prompts';
 import { getKillerNarrativeRules } from '@/data/killerSpecialRules';
 import { getKillerDescription } from '@/data/killerDescriptions';
+import { getFinalGirlDescription } from '@/data/finalGirlDescriptions';
+import { getLocationDescription } from '@/data/locationDescriptions';
+import { getModulePromptContext } from '@/data/rules/moduleRules';
 
 const story = 'Rena left the turquoise pendant on the prize counter. Behind her, the disconnected bear began to move.';
 const cases = [
@@ -48,6 +51,46 @@ describe('reviewed story facts survive every generation handoff', () => {
   });
 });
 describe('bounded art planning', () => {
+  it('isolates photographic planning from painted poster copy and honors the explicit scene type', () => {
+    const ctx = { ...cases[0], story, sceneType: 'beginning' as const };
+    const opening = buildShotBriefSystem(ctx);
+    expect(opening).toContain('live-action horror film');
+    expect(opening).toContain('skin pores');
+    expect(opening).not.toMatch(/poster art director|"title"|"tagline"|painted 1980s/);
+    expect(buildShotBriefPrompt(ctx)).toContain('OPENING PHOTOGRAPH');
+    expect(buildShotBriefPrompt(ctx)).not.toContain('Final Girl fate:');
+    const ending = buildShotBriefSystem({ ...ctx, sceneType: 'ending' });
+    expect(ending).toContain('painted 1980s one-sheet');
+    expect(ending).toContain('"title"');
+    expect(ending).not.toContain('MEDIUM LOCK');
+    expect(VISUAL_BIBLE_SYSTEM).toContain('medium-neutral');
+    expect(VISUAL_BIBLE_SYSTEM).not.toContain('closing painted poster');
+  });
+  it('keeps real Buddyland identities and a photographic medium across fresh and legacy continuity', () => {
+    for (const finalGirl of ['Rena', 'Gwynn']) {
+      const ctx = {
+        story, killer: 'Billy the Bear', finalGirl, location: 'Buddyland', sceneType: 'beginning' as const,
+        killerDescription: getKillerDescription('Billy the Bear'),
+        finalGirlDescription: getFinalGirlDescription(finalGirl),
+        locationDescription: getLocationDescription('Buddyland'),
+        moduleVisualGuidance: getModulePromptContext('Billy the Bear', 'Buddyland')?.visualGuidance,
+        visualBible: 'Use painted gouache textures for the same orange-brown mascot and purple clothing.',
+        shotBrief: 'A cel-shaded woman at the prize counter, with the bear visible across the arcade.',
+      };
+      const photo = buildBeginningPrompt(ctx);
+      expect(photo).toContain('ultra-photorealistic live-action');
+      expect(photo).toContain('real adult performers');
+      expect(photo).toContain('a real machine, not a person in a costume');
+      expect(photo).toContain('ignore inherited rendering-style directions');
+      expect(photo).toContain('Identity descriptions, continuity notes and shot directions cannot change this medium');
+      expect(photo).not.toContain('cartoon welcome');
+      expect(photo).toContain('orange-brown');
+      expect(photo).toContain(finalGirl === 'Rena' ? 'turquoise pendant' : 'fair freckled skin');
+      expect(photo).toContain('Checkerboard flooring');
+      expect(photo).not.toContain('\u2014');
+      expect(buildPosterPrompt({ ...ctx, sceneType: 'ending' })).toContain('Visibly hand-painted');
+    }
+  });
   it('composes opening stills for the full 16:9 screen rather than a letterboxed frame', () => {
     const ctx = { killer: 'Billy the Bear', location: 'Buddyland', finalGirl: 'Rena', story, sceneType: 'beginning' as const };
     expect(buildShotBriefPrompt(ctx)).toContain('edge-to-edge 16:9');
@@ -55,6 +98,13 @@ describe('bounded art planning', () => {
     expect(buildPosterPrompt({ ...ctx, sceneType: 'ending' })).toContain('Portrait 2:3');
   });
   const plan = { concepts: ['A doorway with a small figure at the far end.', 'A face seen beside a darkened arcade machine.', 'An empty chair beneath a practical ceiling lamp.'], selected: 1, title: 'The Last Birthday', tagline: 'No one gets to go home.' };
+  it('accepts complete opening shots without requiring or retaining poster copy', () => {
+    const shot = { concepts: plan.concepts, selected: 1 };
+    expect(parseShotPlan(JSON.stringify(shot))).toEqual(shot);
+    expect(parseShotPlan('```json\n' + JSON.stringify(plan) + '\n```')).toEqual(shot);
+    expect(parseArtPlan(JSON.stringify(shot))).toBeNull();
+    for (const value of ['null', '[]', '{}', '{"concepts":', JSON.stringify({ ...shot, selected: 3 }), JSON.stringify({ ...shot, concepts: ['short'] })]) expect(parseShotPlan(value)).toBeNull();
+  });
   it('chooses one of three complete concepts and returns clean, bounded typography', () => {
     expect(parseArtPlan('```json\n' + JSON.stringify(plan) + '\n```')).toMatchObject({ selected: 1, title: 'THE LAST BIRTHDAY' });
   });

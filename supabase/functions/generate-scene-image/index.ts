@@ -19,7 +19,8 @@ import {
   buildPosterPrompt,
   buildShotBriefPrompt,
   SceneContext,
-  SHOT_BRIEF_SYSTEM,
+  buildShotBriefSystem,
+  parseShotPlan,
   parseArtPlan,
   fallbackPosterCopy,
 } from "../_shared/prompts.ts";
@@ -63,14 +64,15 @@ serve(async (req) => {
     let posterCopy = fallbackPosterCopy(context);
     try {
       const brief = await generateText({
-        system: SHOT_BRIEF_SYSTEM,
+        system: buildShotBriefSystem(context),
         user: buildShotBriefPrompt(context),
         maxTokens: 1200,
       });
-      const plan = parseArtPlan(brief.text);
+      const posterPlan = isPoster ? parseArtPlan(brief.text) : null;
+      const plan = isPoster ? posterPlan : parseShotPlan(brief.text);
       if (plan) {
         context.shotBrief = plan.concepts[plan.selected];
-        posterCopy = { title: plan.title, tagline: plan.tagline };
+        if (posterPlan) posterCopy = { title: posterPlan.title, tagline: posterPlan.tagline };
       } else {
         console.warn('Invalid art plan; using fact-constrained story fallback.');
       }

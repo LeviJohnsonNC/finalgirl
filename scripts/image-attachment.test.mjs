@@ -2,9 +2,15 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import ts from 'typescript';
+const compile = path => ts.transpileModule(readFileSync(new URL(path, import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+const storyFacts = {}, prompts = {};
+new Function('exports', compile('../supabase/functions/_shared/storyFacts.ts'))(storyFacts);
+new Function('require', 'exports', compile('../supabase/functions/_shared/prompts.ts'))(name => {
+  assert.equal(name, './storyFacts.ts'); return storyFacts;
+}, prompts);
 
 function imageHandler({ rowExists = true, attachError = null, composeError = false, invalidPlan = false, discardedBefore = false, discardedDuring = false } = {}) {
-  const filters = []; const removed = []; const phases = []; const imageCalls = []; let handler;
+  const filters = []; const removed = []; const phases = []; const imageCalls = []; const textCalls = []; let handler;
   let uploaded=false;
   const discardedHelpers={};new Function('require','exports',ts.transpileModule(readFileSync(new URL('../supabase/functions/_shared/discardedGame.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(()=>{},discardedHelpers);
   const client = {
@@ -27,9 +33,13 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
     '../_shared/auth.ts': { getCorsHeaders: () => ({ 'Access-Control-Allow-Origin': 'https://example.test' }) },
     '../_shared/guard.ts': { requireUser: async () => ({ ok: true, adminClient:client, user: { id: 'owner-A' }, logUsage: async () => {} }) },
     '../_shared/validation.ts': { validateRequest: (_schema, data) => ({ success: true, data }) },
-    '../_shared/aiGateway.ts': { generateText: async () => ({ text: invalidPlan ? '{' : 'valid', model: 'text' }), generateImage: async (...args) => { imageCalls.push(args); return { base64: 'dGVzdA==', mimeType: 'image/png', model: 'image' }; }, statusFor: () => 500, userFacingMessage: () => 'failed' },
-    '../_shared/poster.ts': { composePoster: async (_bytes, copy) => { phases.push('compose'); assert.equal(copy.title, invalidPlan ? 'FALLBACK' : 'TITLE'); if(composeError) throw new Error('composition failed'); return Buffer.from('complete-poster'); } },
-    '../_shared/prompts.ts': { buildBeginningPrompt: () => 'scene', buildPosterPrompt: () => 'poster', buildShotBriefPrompt: () => 'brief', parseArtPlan: text => text === 'valid' ? {concepts:['one','two','three'],selected:1,title:'TITLE',tagline:'TAGLINE'} : null, fallbackPosterCopy: () => ({title:'FALLBACK',tagline:'TAGLINE'}) },
+    '../_shared/aiGateway.ts': { generateText: async opts => {
+      textCalls.push(opts);
+      const copy = opts.system.includes('"title"') ? { title: 'TITLE', tagline: 'TAGLINE' } : {};
+      return { text: invalidPlan ? '{' : JSON.stringify({ concepts: ['A doorway with a small figure at the far end.', 'A face seen beside a darkened arcade machine.', 'An empty chair beneath a practical ceiling lamp.'], selected: 1, ...copy }), model: 'text' };
+    }, generateImage: async (...args) => { imageCalls.push(args); return { base64: 'dGVzdA==', mimeType: 'image/png', model: 'image' }; }, statusFor: () => 500, userFacingMessage: () => 'failed' },
+    '../_shared/poster.ts': { composePoster: async (_bytes, copy) => { phases.push('compose'); assert.equal(copy.title, invalidPlan ? 'BUDDYLAND' : 'TITLE'); if(composeError) throw new Error('composition failed'); return Buffer.from('complete-poster'); } },
+    '../_shared/prompts.ts': prompts,
   };
   new Function('require', 'exports', 'Deno', code)(name => {
     if (name.includes('/http/server.ts')) return { serve: fn => { handler = fn; } };
@@ -38,9 +48,26 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
     if (modules[name]) return modules[name];
     throw new Error('Unexpected image handler import: ' + name);
   }, {}, { env: { get: () => 'configured' } });
-  return { handler, filters, removed, phases, imageCalls };
+  return { handler, filters, removed, phases, imageCalls, textCalls };
 }
-const request = (sceneType = 'ending') => new Request('https://example.test', { method: 'POST', body: JSON.stringify({ sceneType, gameId: 'record', previousImageUrl: 'https://example.test/storage/v1/object/public/posters/game-posters/owner-A/old.png' }) });
+const request = (sceneType = 'ending') => new Request('https://example.test', { method: 'POST', body: JSON.stringify({ sceneType, killer: 'Billy the Bear', finalGirl: 'Rena', location: 'Buddyland', story: 'Rena held her flashlight toward the empty prize counter. Across the arcade, the bear began to move.', gameId: 'record', previousImageUrl: 'https://example.test/storage/v1/object/public/posters/game-posters/owner-A/old.png' }) });
+test('opening generation uses a photographic planner without poster copy, with a safe full-story fallback', async () => {
+  for (const invalidPlan of [false, true]) {
+    const f = imageHandler({ invalidPlan });
+    assert.equal((await f.handler(request('beginning'))).status, 200);
+    assert.match(f.textCalls[0].system, /real camera shot/);
+    assert.doesNotMatch(f.textCalls[0].system, /poster art director|"title"|"tagline"/);
+    assert.match(f.imageCalls[0][0], /ultra-photorealistic live-action/);
+    assert.match(f.imageCalls[0][0], invalidPlan ? /Rena held her flashlight/ : /A face seen beside a darkened arcade machine/);
+    assert.equal(f.imageCalls[0][1], undefined);
+    assert.deepEqual(f.phases, ['upload']);
+  }
+  const poster = imageHandler();
+  assert.equal((await poster.handler(request('ending'))).status, 200);
+  assert.match(poster.textCalls[0].system, /painted 1980s one-sheet/);
+  assert.match(poster.imageCalls[0][0], /Visibly hand-painted/);
+  assert.deepEqual(poster.phases, ['compose', 'upload']);
+});
 test('new opening stills use the screen ratio while closing posters retain their generation settings',async()=>{
   for(const sceneType of ['beginning','ending']) {
     const f=imageHandler();
