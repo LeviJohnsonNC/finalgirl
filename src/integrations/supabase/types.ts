@@ -41,6 +41,30 @@ export type Database = {
         }
         Relationships: []
       }
+      discarded_games: {
+        Row: {
+          cleanup_pending: boolean
+          cleanup_revision: number
+          discarded_at: string
+          game_id: string
+          user_id: string
+        }
+        Insert: {
+          cleanup_pending?: boolean
+          cleanup_revision?: number
+          discarded_at?: string
+          game_id: string
+          user_id: string
+        }
+        Update: {
+          cleanup_pending?: boolean
+          cleanup_revision?: number
+          discarded_at?: string
+          game_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       game_history: {
         Row: {
           created_at: string
@@ -293,7 +317,12 @@ export type Database = {
         }
         Returns: Json
       }
+      discard_game_session: { Args: { p_game_id: string }; Returns: Json }
       get_game_history_summary: { Args: never; Returns: Json[] }
+      queue_discarded_image_cleanup: {
+        Args: { p_game_id: string; p_user_id: string }
+        Returns: undefined
+      }
       reserve_ai_usage: {
         Args: {
           p_daily_limit?: number
