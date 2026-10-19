@@ -69,17 +69,21 @@ describe('gameplay without AI dependencies', () => {
     expect(JSON.stringify(body)).toContain('Six Victims');
     expect(JSON.stringify(body)).toContain('1 Time');
   });
-  it('replaces fragmentary saved continuity before generating an opening, without rerolling its story', async () => {
+  it('repairs fragmentary saved continuity for Reshoot without rerolling the saved story', async () => {
     let complete: (value: string) => void;
     mock.bible.mockReturnValue(new Promise<string>(resolve => { complete = resolve; }));
     const checkpoint = vi.fn();
-    render(<NowPlaying {...result} sessionId={result.id} initialStory={opening} initialVisualBible="Drafting Core Visual Elements:**" filmId="s1-camp-happy-trails" setupScenario={null} startingEvent={null} onBack={vi.fn()} onCheckpoint={checkpoint} onGameEnd={vi.fn()} />);
+    const previousImageUrl = 'https://example.test/cartoon.png';
+    render(<NowPlaying {...result} sessionId={result.id} initialStory={opening} initialSceneImageUrl={previousImageUrl} initialVisualBible="Drafting Core Visual Elements:**" filmId="s1-camp-happy-trails" setupScenario={null} startingEvent={null} onBack={vi.fn()} onCheckpoint={checkpoint} onGameEnd={vi.fn()} />);
     await waitFor(() => expect(mock.bible).toHaveBeenCalledTimes(1));
     expect(mock.image).not.toHaveBeenCalled();
     expect(mock.stream).not.toHaveBeenCalled();
     await act(async () => complete!(bible));
+    await waitFor(() => expect(checkpoint).toHaveBeenCalledWith({ visualBible: bible }));
+    expect(mock.image).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Reshoot' }));
     await waitFor(() => expect(mock.image).toHaveBeenCalledTimes(1));
-    expect(mock.image.mock.calls[0][0]).toMatchObject({ story: opening, visualBible: bible, gameId: result.id });
+    expect(mock.image.mock.calls[0][0]).toMatchObject({ story: opening, visualBible: bible, gameId: result.id, previousImageUrl });
     expect(checkpoint).toHaveBeenCalledWith({ visualBible: bible });
   });
   it('reuses complete saved continuity without another utility request', async () => {
