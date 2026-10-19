@@ -1,0 +1,157 @@
+/* A damaged film still, with live text and accessible result controls. */
+@font-face {
+  font-family: "Night End Serif";
+  src: url("../assets/fonts/im-fell-english.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+.play-finish-modal {
+  grid-template-columns: minmax(0, 1fr);
+  width: calc(100vw - 32px);
+  max-width: 620px !important;
+  min-height: 342px;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 67px 64px 68px !important;
+  gap: 42px;
+  align-content: center;
+  isolation: isolate;
+  transition-property: opacity;
+  border: 1px solid #b1afa08f !important;
+  border-radius: 9px !important;
+  background: #0a1416 url("../assets/play/night-end-frame.webp") center / 100%
+    100% no-repeat !important;
+  box-shadow:
+    0 26px 90px #000,
+    0 0 0 1px #080a09,
+    inset 0 0 0 2px #dbd6bb28,
+    inset 0 0 28px #0006;
+}
+.play-finish-modal h2 {
+  text-align: center;
+  width: 120%;
+  margin-left: -10%;
+  transform: scaleX(0.83);
+  white-space: nowrap;
+  font:
+    400 clamp(20px, 6.3vw, 38px) / 1.1 "Night End Serif",
+    serif;
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
+  color: #ece6d7;
+  text-shadow:
+    0 2px 3px #000,
+    1px 0 #b6c6c126;
+}
+.play-finish-modal .play-finish {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.play-finish-modal .play-finish button {
+  position: relative;
+  min-height: 88px;
+  padding: 12px;
+  overflow: hidden;
+  border: 2px solid var(--result-edge);
+  border-radius: 7px;
+  background:
+    linear-gradient(var(--result-wash), var(--result-wash)),
+    url("../assets/play/night-end-frame.webp") center 70% / 620px auto;
+  color: #f2ecd9;
+  font:
+    400 36px/1 "Night End Serif",
+    serif;
+  text-shadow: 0 2px 4px #000;
+  box-shadow:
+    0 4px 18px #0008,
+    inset 0 0 0 1px #d5e7d526,
+    inset 0 0 22px var(--result-glow);
+  transition:
+    filter 0.15s,
+    box-shadow 0.15s;
+}
+.play-finish-won {
+  --result-edge: #6bbcc2;
+  --result-wash: #004952a3;
+  --result-glow: #6ad8e45e;
+}
+.play-finish-lost {
+  --result-edge: #b3362e;
+  --result-wash: #630803c7;
+  --result-glow: #bd211b70;
+}
+.play-finish-modal .play-finish button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background:
+    linear-gradient(
+      125deg,
+      transparent 12%,
+      #e9e4cc35 12.2%,
+      transparent 12.7% 78%,
+      #e9e4cc20 78.3%,
+      transparent 78.7%
+    ),
+    linear-gradient(
+      25deg,
+      transparent 6%,
+      #c7cfb633 6.2%,
+      transparent 6.8% 88%,
+      #d5d2bb30 88.2%,
+      transparent 88.8%
+    );
+}
+.play-finish-modal .play-finish button:hover {
+  filter: brightness(1.2);
+}
+.play-finish-modal .play-finish button:focus-visible {
+  outline: 2px solid #f4ebd7;
+  outline-offset: 5px;
+}
+.play-finish-modal > button:last-child {
+  top: 10px;
+  right: 10px;
+  opacity: 0.9;
+  color: #e8e8dd;
+  background: transparent;
+}
+.play-finish-modal > button:last-child svg {
+  width: 25px;
+  height: 25px;
+  stroke-width: 1.5;
+}
+.play-finish-modal > button:last-child:focus-visible {
+  outline: 2px solid #e8e8dd;
+  outline-offset: -3px;
+}
+@media (max-width: 639px) {
+  .play-finish-modal {
+    min-height: 290px;
+    padding: 64px 25px 52px !important;
+    gap: 30px;
+  }
+  .play-finish-modal .play-finish {
+    gap: 14px;
+  }
+  .play-finish-modal .play-finish button {
+    min-height: 76px;
+    font-size: 32px;
+  }
+}
+@media (max-height: 380px) {
+  .play-finish-modal {
+    min-height: 0;
+    padding-block: 44px !important;
+    gap: 22px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play-finish-modal .play-finish button {
+    transition: none;
+  }
+}

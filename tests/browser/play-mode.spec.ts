@@ -186,6 +186,59 @@ test("reviewed tracked totals drive the ending, statistics and saved case notes"
   await page.goto("/");
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
   await page.getByRole("button", { name: "Finish game", exact: true }).click();
+  const finish = page.getByRole("dialog", { name: "How did the night end?" });
+  await expect(finish).toBeVisible();
+  await expect(finish).not.toContainText("Review your recorded details");
+  await page.evaluate(() => document.fonts.ready);
+  const assertContained = async () =>
+    expect(
+      await finish.evaluate((el) => {
+        const box = el.getBoundingClientRect();
+        const title = document.createRange();
+        title.selectNodeContents(el.querySelector("h2")!);
+        return (
+          box.left >= 0 &&
+          box.right <= innerWidth &&
+          box.top >= 0 &&
+          box.bottom <= innerHeight &&
+          [
+            title.getBoundingClientRect(),
+            ...Array.from(
+              el.querySelectorAll(".play-finish button"),
+              (button) => button.getBoundingClientRect(),
+            ),
+          ].every(
+            (child) =>
+              child.left >= box.left + 12 && child.right <= box.right - 12,
+          )
+        );
+      }),
+    ).toBe(true);
+  await assertContained();
+  if (info.project.name === "mobile") {
+    const original = page.viewportSize()!;
+    for (const size of [
+      { width: 320, height: 568 },
+      { width: 844, height: 390 },
+    ]) {
+      await page.setViewportSize(size);
+      await expect
+        .poll(async () => {
+          const box = await finish.boundingBox();
+          return box && box.x >= 0 && box.x + box.width <= size.width;
+        })
+        .toBe(true);
+      await assertContained();
+    }
+    await page.setViewportSize(original);
+  }
+  await page.screenshot({
+    path: info.outputPath("night-end-frame.png"),
+    animations: "disabled",
+  });
+  await page.keyboard.press("Escape");
+  await expect(finish).toBeHidden();
+  await page.getByRole("button", { name: "Finish game", exact: true }).click();
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Won", exact: true })
