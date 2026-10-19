@@ -31,6 +31,8 @@ export type MomentType =
   | "turning-point"
   | "girl-revived"
   | "killer-revived"
+  | "dark-power"
+  | "finale"
   | "other";
 export type PlayKind =
   | "start"
@@ -55,6 +57,7 @@ export interface PlayDetails {
   eventCard?: string;
   attacker?: string;
   detail?: string;
+  killerCard?: string;
 }
 export interface PlayEvent extends PlayDetails {
   id: string;
@@ -96,6 +99,7 @@ export const DETAIL_FIELDS = [
   "eventCard",
   "attacker",
   "detail",
+  "killerCard",
 ] as const;
 export function validPlayDetails(input: unknown): input is PlayDetails {
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
@@ -122,6 +126,8 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
       "turning-point",
       "girl-revived",
       "killer-revived",
+      "dark-power",
+      "finale",
       "other",
     ].includes(e.momentType)
   )
@@ -214,7 +220,10 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
               )
                 Object.assign(e, { [field]: edit[field] });
             }
-          else if (edit.detail !== undefined) e.detail = edit.detail;
+          else {
+            if (edit.detail !== undefined) e.detail = edit.detail;
+            if (edit.killerCard !== undefined) e.killerCard = edit.killerCard;
+          }
         }
       }
     if (e.kind === "start") {
@@ -289,7 +298,7 @@ export function describeEvent(e: PlayEvent): string {
     case "state":
       return `${{ finalGirlHealth: "Final Girl Health", killerHealth: "Killer Health", finalHorrorLevel: "Horror", bloodlust: "Bloodlust" }[e.field!]}: ${e.value === null ? "no longer tracked" : e.value}`;
     case "moment":
-      return `${e.text}${e.detail ? `: ${e.detail}` : ""}`;
+      return `${e.text}${e.killerCard ? `: ${e.killerCard}` : ""}${e.detail ? `${e.killerCard ? ". " : ": "}${e.detail}` : ""}`;
     case "module":
       return e.moduleData ? describeModule(e.moduleData) : "";
     default:
@@ -307,10 +316,12 @@ export function playStoryBeats(
     (e) =>
       e.kind === "moment" ||
       (e.kind === "module" &&
-        e.moduleData?.module === "buddyland" &&
+        e.moduleData &&
         Object.entries(e.moduleData.changes).some(
           ([key, value]) =>
-            /^item\..+\.status$/.test(key) && value === "carried",
+            (/^item\..+\.status$/.test(key) && value === "carried") ||
+            (/^buddy\..+\.status$/.test(key) && value === "defeated") ||
+            (/^victim\./.test(key) && value === "killed"),
         )),
   );
   const chosen = new Set(

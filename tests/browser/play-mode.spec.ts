@@ -49,7 +49,7 @@ test("Play starts immediately, corrects matching counters, saves moments and res
     .getByRole("button", { name: "Record one victim killed", exact: true })
     .click();
   await page
-    .getByRole("button", { name: "Narrow escape", exact: true })
+    .getByRole("button", { name: "Other moment", exact: true })
     .click();
   await page
     .getByLabel("Moment detail", { exact: true })

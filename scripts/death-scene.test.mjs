@@ -259,6 +259,18 @@ test("generation uses canonical owned observations and a lease before any paid c
   );
   assert.ok(f.updates.some((u) => u.status === "ready"));
 });
+test("new reveal moments are accepted by the real death handler using the owned session", async () => {
+  const f = fixture();
+  f.owned.playEvents.splice(1, 0,
+    events.newPlayEvent({ kind: "moment", momentType: "dark-power", text: "Dark Power", killerCard: "Backup Generator" }),
+    events.newPlayEvent({ kind: "moment", momentType: "finale", text: "Finale", killerCard: "Power Surge" }),
+  );
+  const facts = death.deathFacts(f.owned.selection, f.owned.playEvents, eventId);
+  assert.equal(facts.moduleContext.billy.finale, "power-surge");
+  assert.equal(facts.moduleContext.billy["power.backup-generator.revealed"], true);
+  assert.equal((await f.handler(f.request())).status, 200);
+  assert.deepEqual(f.calls, ["claim", "guard", "AI", "log"]);
+});
 test("foreign, undone and unauthorized deaths do not authorize work", async () => {
   for (const options of [
     { foreign: true },

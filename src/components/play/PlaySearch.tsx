@@ -72,15 +72,17 @@ export function PlaySearch({
                   Clear selection
                 </CommandItem>
               )}
-              {options.map((option) => (
-                <CommandItem
-                  key={option}
-                  value={option}
-                  onSelect={() => pick(option)}
-                >
-                  {option}
-                </CommandItem>
-              ))}
+              {[...new Set(options)]
+                .sort((a, b) => a.localeCompare(b))
+                .map((option) => (
+                  <CommandItem
+                    key={option}
+                    value={option}
+                    onSelect={() => pick(option)}
+                  >
+                    {option}
+                  </CommandItem>
+                ))}
               {allowCustom &&
                 search.trim() &&
                 !options.some(
