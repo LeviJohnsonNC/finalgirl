@@ -9,6 +9,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { ownedOpeningReference } from "../_shared/imageReference.ts";
+import { openingReferences } from "../_shared/openingReferences.ts";
 import { getCorsHeaders } from "../_shared/auth.ts";
 import { isDiscardedGame } from "../_shared/discardedGame.ts";
 import { requireUser } from "../_shared/guard.ts";
@@ -59,14 +60,16 @@ serve(async (req) => {
     const context: SceneContext = { ...body };
 
     // Compare three story-specific compositions in one utility call, then generate
-    // only the selected image. Invalid planning falls back to the full story.
+    // only the selected image. Never spend an opening image call on a broken plan.
     let briefModel: string | undefined;
     let posterCopy = fallbackPosterCopy(context);
     try {
       const brief = await generateText({
         system: buildShotBriefSystem(context),
         user: buildShotBriefPrompt(context),
-        maxTokens: 1200,
+        maxTokens: 4000,
+        reasoningEffort: "low",
+        requireComplete: true,
       });
       const posterPlan = isPoster ? parseArtPlan(brief.text) : null;
       const plan = isPoster ? posterPlan : parseShotPlan(brief.text);
@@ -74,16 +77,20 @@ serve(async (req) => {
         context.shotBrief = plan.concepts[plan.selected];
         if (posterPlan) posterCopy = { title: posterPlan.title, tagline: posterPlan.tagline };
       } else {
+        if (!isPoster) throw new Error("The opening shot plan was incomplete. Please try again.");
         console.warn('Invalid art plan; using fact-constrained story fallback.');
       }
       briefModel = brief.model;
     } catch (err) {
+      if (!isPoster) throw err;
       console.warn("Shot brief failed, falling back to full-story prompt:", err);
     }
 
     const prompt = isPoster ? buildPosterPrompt(context) : buildBeginningPrompt(context);
     const reference = isPoster ? ownedOpeningReference(body.referenceImageUrl, Deno.env.get("SUPABASE_URL") ?? '', user.id, body.gameId) : undefined;
-    const image = await generateImage(prompt, reference, isPoster ? undefined : { aspectRatio: "16:9" });
+    const image = await generateImage(prompt, reference, isPoster ? undefined : {
+      aspectRatio: "16:9", references: openingReferences(body.finalGirl, body.killer),
+    });
 
     // --- Persist to storage; never hand back a data: URI ---
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;

@@ -369,7 +369,7 @@ export const generateText = async (opts: {
   candidates?: string[];
   signal?: AbortSignal;
   singleAttempt?: boolean;
-  /** Death prose must have an explicit successful provider finish signal. */
+  /** Reject partial output even when the provider returns HTTP 200. */
   requireComplete?: boolean;
   reasoningEffort?: "low";
 }): Promise<{ text: string; model: string }> => {
@@ -421,7 +421,7 @@ export const generateText = async (opts: {
             completion_tokens_details?: { reasoning_tokens?: number };
           }
         | undefined;
-      console.info("Death text completion", {
+      console.info("Text completion", {
         model,
         finishReason: finish ?? "missing",
         nativeFinishReason: nativeFinish,
@@ -456,7 +456,7 @@ export const generateText = async (opts: {
 export const generateImage = async (
   prompt: string,
   referenceImageUrl?: string,
-  options?: { aspectRatio: "16:9" },
+  options?: { aspectRatio: "16:9"; references?: Array<{ name: string; url: string }> },
 ): Promise<{ base64: string; mimeType: string; model: string }> => {
   // Match the theater at generation time rather than cropping saved artwork.
   const dimensions = options ? { image_config: { aspect_ratio: options.aspectRatio } } : {};
@@ -464,6 +464,12 @@ export const generateImage = async (
     const content = referenceImageUrl ? [
       { type: "text", text: `${prompt}\nThe attached opening photograph is an IDENTITY reference only: match cast appearance, clothing, architecture and palette. Make a new composition from the ending; translate into the requested painted medium. Do not copy the opening's pose, action or fate.` },
       { type: "image_url", image_url: { url: referenceImageUrl } },
+    ] : options?.references?.length ? [
+      { type: "text", text: `${prompt}\nThe attached photographs are cast IDENTITY references: preserve the named person's face, hair and clothing and the named creature's physical construction. Photograph them in the new shot. Do not copy the portraits' poses, backgrounds or framing, or introduce another cast member.` },
+      ...options.references.flatMap(reference => [
+        { type: "text", text: `Identity photograph: ${reference.name}` },
+        { type: "image_url", image_url: { url: reference.url } },
+      ]),
     ] : prompt;
     let data: Record<string, unknown>;
     try {

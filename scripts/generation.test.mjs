@@ -37,6 +37,17 @@ test('opening stills explicitly request widescreen dimensions without changing d
   await exports.generateImage('paint the ending',own);
   assert.equal(calls[1].image_config,undefined);
 });
+test('opening identity photos carry named subjects and never inherit painted poster instructions', async () => {
+  const { calls, exports } = gateway();
+  const references = [{ name: 'Rena', url: 'data:image/jpeg;base64,portrait-A' }, { name: 'Billy the Bear', url: 'data:image/jpeg;base64,portrait-B' }];
+  await exports.generateImage('Photograph the new opening.', undefined, { aspectRatio: '16:9', references });
+  const content = calls[0].messages[0].content;
+  assert.match(content[0].text, /cast IDENTITY references/);
+  assert.doesNotMatch(content[0].text, /painted medium|ending|opening photograph is/);
+  assert.deepEqual(content.filter(part => part.type === 'image_url').map(part => part.image_url.url), references.map(ref => ref.url));
+  assert(content.some(part => part.text === 'Identity photograph: Rena'));
+  assert(content.some(part => part.text === 'Identity photograph: Billy the Bear'));
+});
 test('image dimensions survive the existing reference-input fallback',async()=>{
   const {calls,exports}=gateway(422,'Unsupported image input');
   await exports.generateImage('opening photo',own,{aspectRatio:'16:9'});
