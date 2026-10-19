@@ -79,9 +79,9 @@ const ScenarioDropdownsForLocation = ({
       {/* Setup Scenario Dropdown */}
       <div className="casting-console-field">
         <label htmlFor={`${id}-setup`} className="casting-console-label">
+          <span className="casting-console-icon" aria-hidden="true"><Clapperboard /></span>
           Setup Scenario
         </label>
-        <span className="casting-console-icon casting-console-icon--setup" aria-hidden="true"><Clapperboard /></span>
         <Select 
           value={selectedSetup || undefined} 
           onValueChange={handleSetupChange}
@@ -95,7 +95,7 @@ const ScenarioDropdownsForLocation = ({
               <SelectItem 
                 key={card.name} 
                 value={card.name}
-                className="font-display text-xs sm:text-sm tracking-wide uppercase cursor-pointer focus:bg-primary/20 focus:text-primary-foreground data-[highlighted]:bg-primary/20 data-[highlighted]:text-foreground min-h-[44px]"
+                className="casting-console-option"
               >
                 {card.name}
               </SelectItem>
@@ -107,9 +107,9 @@ const ScenarioDropdownsForLocation = ({
       {/* Event Dropdown */}
       <div className="casting-console-field casting-console-field--event">
         <label htmlFor={`${id}-event`} className="casting-console-label">
+          <span className="casting-console-icon" aria-hidden="true"><MapPin /></span>
           Event
         </label>
-        <span className="casting-console-icon" aria-hidden="true"><MapPin /></span>
         <Select 
           value={selectedEvent || undefined} 
           onValueChange={handleEventChange}
@@ -123,7 +123,7 @@ const ScenarioDropdownsForLocation = ({
               <SelectItem 
                 key={event.name} 
                 value={event.name}
-                className="font-display text-xs sm:text-sm tracking-wide uppercase cursor-pointer focus:bg-primary/20 focus:text-primary-foreground data-[highlighted]:bg-primary/20 data-[highlighted]:text-foreground min-h-[44px]"
+                className="casting-console-option"
               >
                 {event.name}
               </SelectItem>
@@ -137,9 +137,9 @@ const ScenarioDropdownsForLocation = ({
       {showMissions && (
         <div className="casting-console-field casting-console-field--mission">
           <label htmlFor={`${id}-mission`} className="casting-console-label">
+            <span className="casting-console-icon" aria-hidden="true"><Crosshair /></span>
             Mission
           </label>
-          <span className="casting-console-icon" aria-hidden="true"><Crosshair /></span>
           <div className="casting-console-mission-controls">
             <Select
               value={selectedMission || undefined}
@@ -153,7 +153,7 @@ const ScenarioDropdownsForLocation = ({
                   <SelectItem
                     key={mission.name}
                     value={mission.name}
-                    className="font-display text-xs sm:text-sm tracking-wide uppercase cursor-pointer focus:bg-primary/20 focus:text-primary-foreground data-[highlighted]:bg-primary/20 data-[highlighted]:text-foreground min-h-[44px]"
+                    className="casting-console-option"
                   >
                     {mission.name}
                   </SelectItem>
