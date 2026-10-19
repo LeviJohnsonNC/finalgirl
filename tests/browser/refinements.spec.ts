@@ -1,26 +1,37 @@
 import { test, expect } from './fixtures';
 
-test('desktop setup fits without scrolling and keeps its faceplate clear of navigation', async ({ page, archive }, info) => {
+test('desktop setup preserves the photos and keeps its readable faceplate clear of navigation', async ({ page, archive }, info) => {
   if (info.project.name !== 'desktop') return;
   await archive.install(page);
   await page.goto('/');
   await page.getByRole('button', { name: 'START THE TAPE', exact: true }).click();
   await expect(page.locator('.casting-console')).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
-  for (const size of [{ width: 2048, height: 1152 }, { width: 1672, height: 941 }, { width: 1440, height: 900 }, { width: 1280, height: 800 }, { width: 1280, height: 720 }, { width: 1024, height: 768 }]) {
+  const measurements = [];
+  for (const size of [{ width: 2048, height: 1152 }, { width: 1672, height: 941 }, { width: 1440, height: 900 }, { width: 1280, height: 800 }, { width: 1366, height: 768 }, { width: 1280, height: 720 }, { width: 1024, height: 768 }]) {
     await page.setViewportSize(size);
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     const bounds = await page.evaluate(() => ({ height: document.documentElement.scrollHeight, viewport: innerHeight,
       panel: document.querySelector('.casting-console')!.getBoundingClientRect().bottom,
-      proportion: document.querySelector('.casting-tableau')!.getBoundingClientRect().width / document.querySelector('.casting-console')!.getBoundingClientRect().width,
+      photosWidth: document.querySelector('.casting-tableau')!.getBoundingClientRect().width,
+      consoleWidth: document.querySelector('.casting-console')!.getBoundingClientRect().width,
       ticker: document.querySelector('.news-broadcast')!.getBoundingClientRect().top,
       footer: document.querySelector('footer')!.getBoundingClientRect().top }));
-    expect(bounds.height, JSON.stringify({ size, bounds })).toBeLessThanOrEqual(size.height + 1);
+    measurements.push({ ...size, ...bounds });
+    // A short 720px window may scroll slightly; normal laptop sizes still fit.
+    // Readability never depends on shrinking the photographs or control text.
+    expect(bounds.height, JSON.stringify({ size, bounds })).toBeLessThanOrEqual(size.height + (size.height <= 720 ? 56 : 1));
     expect(bounds.panel).toBeLessThan(bounds.footer);
     expect(bounds.panel).toBeLessThan(bounds.ticker);
-    expect(bounds.proportion).toBeCloseTo(1160 / 800, 2);
+    // The photographs retain their original sizing formula. Only the console
+    // gains a minimum width so laptop controls no longer shrink with the art.
+    const photosWidth = Math.min(1160, size.width - 96, Math.max(640, (size.height - 510) / .43));
+    expect(bounds.photosWidth).toBeCloseTo(photosWidth, 1);
+    expect(bounds.consoleWidth).toBeCloseTo(Math.max(640, photosWidth * 800 / 1160), 1);
     if (size.width === 2048 || size.width === 1280) await page.screenshot({ path: info.outputPath(`setup-proportions-${size.width}-${size.height}.png`) });
   }
+  await info.attach('setup-layout-metrics', { body: JSON.stringify(measurements, null, 2), contentType: 'application/json' });
   await page.screenshot({ path: info.outputPath('setup-fit.png') });
 });
 

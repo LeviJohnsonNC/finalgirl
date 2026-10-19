@@ -137,6 +137,8 @@ test('the narrow lobby supports swiping, keyboard dismissal, and resizing withou
   const viewer = page.getByRole('dialog');
   await expect(viewer).toBeVisible();
   expect(await viewer.evaluate(el => { const r = el.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight; })).toBe(true);
+  // Wait for the dialog's focus scope to mount before sending its first key.
+  await expect(viewer.getByRole('button', { name: 'Open case file' })).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(viewer).toBeHidden();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
