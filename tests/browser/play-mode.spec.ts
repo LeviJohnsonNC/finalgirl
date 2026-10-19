@@ -1,3 +1,4 @@
+import { saveResultOnly } from "./play-helpers";
 import { openHistory } from "./play-helpers";
 import { test, expect, activeGame } from "./fixtures";
 import { resolve } from "node:path";
@@ -316,9 +317,7 @@ test("unrecorded totals remain blank after reload while an explicit zero is save
     "0",
   );
   await expect(page.getByLabel("Final round", { exact: true })).toHaveValue("");
-  await page
-    .getByRole("button", { name: "SAVE RESULT WITHOUT NARRATION", exact: true })
-    .click();
+  await saveResultOnly(page);
   await expect.poll(() => archive.history[0]?.victims_saved).toBe(0);
   await expect.poll(() => archive.history[0]?.victims_killed).toBeNull();
   await expect.poll(() => archive.history[0]?.rounds_played).toBeNull();

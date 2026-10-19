@@ -1,3 +1,4 @@
+import { saveResultOnly } from "./play-helpers";
 import { test, expect, activeGame, gameId, opening, selection, userId } from './fixtures';
 
 async function resume(page: import('@playwright/test').Page) {
@@ -37,7 +38,7 @@ test('resume form edits and sync a failed save on reconnect without losing the r
   await expect(page.getByLabel('Weapon Used', { exact: true })).toHaveValue('Axe');
   await expect(page.getByLabel('Final Girl Health', { exact: true })).toHaveValue('1');
   await page.screenshot({ path: testInfo.outputPath('recovered-outcome.png'), fullPage: true });
-  await page.getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION' }).click();
+  await saveResultOnly(page);
   await expect(page.getByText(/saved on this device and waiting/)).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'RETRY SAVE', exact: true })).toHaveCount(0);
   archive.failWrites = false;

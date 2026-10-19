@@ -2,7 +2,10 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import NowPlaying from './NowPlaying';
 import TheEnd from './TheEnd';
+import type { ReactNode } from 'react';
 import { GameOutcomeForm } from '@/components/GameOutcomeForm';
+// Data-flow tests use a native adapter; browser tests exercise the real themed menus.
+vi.mock('@/components/outcome/OutcomeSelect', () => ({ OutcomeSelect: ({ label, id, value, onValueChange, children }: { label: string; id?: string; value: string; onValueChange: (value: string) => void; children: ReactNode }) => <select aria-label={label} id={id} value={value} onChange={event => onValueChange(event.target.value)}>{children}</select> }));
 const mock = vi.hoisted(() => ({ stream: vi.fn(), image: vi.fn(), settingsReady: true, autoGenerate: true }));
 vi.mock('@/lib/streamChatCompletion', () => ({ streamChatCompletion: mock.stream }));
 vi.mock('@/hooks/useNarration', () => ({ useNarration: () => ({ isNarrating: false, isPlaying: false, progress: {}, toggleNarration: vi.fn() }) }));
@@ -19,6 +22,11 @@ const result = { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', timestamp: 1, outco
 const formData = { finalHorrorLevel: 4, finalGirlHealth: 1, killerHealth: 0, weaponUsed: '', victimsSaved: 0, victimsKilled: 0, endingSubLocation: '', gameHighlights: '' };
 const opening = 'The lights went out at camp. Laurie stepped into the darkness and heard a branch snap.';
 
+function saveOnly() {
+  fireEvent.click(screen.getByRole('button', { name: 'More options' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Save result without narration' }));
+}
+
 describe('gameplay without AI dependencies', () => {
   it('keeps Billy outcome details with Billy at another Location and checkpoints them', () => {
     const save = vi.fn(); const draft = vi.fn().mockReturnValue(true);
@@ -27,7 +35,7 @@ describe('gameplay without AI dependencies', () => {
     expect(screen.getByLabelText('All Power Sources Inactive')).toBeChecked();
     fireEvent.change(screen.getByLabelText('Buddies in Play at End (0–7)'), { target: { value: '1' } });
     expect(draft).toHaveBeenCalledWith({ buddiesInPlay: 1 });
-    fireEvent.click(screen.getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION' }));
+    saveOnly();
     expect(save.mock.calls[0][0]).toMatchObject({ finalGirlHealth: undefined });
     expect(save.mock.calls[0][0].gameHighlights).toContain('Buddies in play at end: 1');
     expect(save.mock.calls[0][0].gameHighlights).toContain('All Power Sources Inactive');
@@ -36,17 +44,17 @@ describe('gameplay without AI dependencies', () => {
     const save = vi.fn();
     render(<GameOutcomeForm result={{ ...result, location: 'Buddyland', finalGirl: 'Gwynn' }} onSaveResult={save} onContinue={vi.fn()} onDiscard={vi.fn()} />);
     expect(screen.queryByLabelText('All Power Sources Inactive')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION' }));
+    saveOnly();
     expect(save.mock.calls[0][0]).toMatchObject({ finalGirlHealth: undefined, gameHighlights: '' });
   });
   it('keeps an unreported Buddy count unknown and records the Power Surge ending explicitly', () => {
     const save = vi.fn();
     render(<GameOutcomeForm result={{ ...result, killer: 'Billy the Bear' }} onSaveResult={save} onContinue={vi.fn()} onDiscard={vi.fn()} />);
-    fireEvent.click(screen.getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION' }));
+    saveOnly();
     expect(save.mock.calls[0][0].gameHighlights).toBe('');
     fireEvent.change(screen.getByLabelText('Billy Finale (optional)'), { target: { value: 'Power Surge' } });
     fireEvent.change(screen.getByLabelText('Boris at Game End'), { target: { value: 'defeated' } });
-    fireEvent.click(screen.getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION' }));
+    saveOnly();
     expect(save.mock.calls[1][0].gameHighlights).toContain('Billy Finale: Power Surge. Boris: defeated');
   });
   it('sends Buddyland cards and the selected biography to opening generation', async () => {
@@ -109,9 +117,9 @@ describe('gameplay without AI dependencies', () => {
     render(<GameOutcomeForm result={{ ...result, killer: 'Poltergeist' }} initialDraft={{ weaponUsed: 'Axe', foundCarolyn: true, victimsSaved: 0 }} onDraftChange={draft} onSaveResult={save} onContinue={vi.fn()} onDiscard={vi.fn()} />);
     expect(screen.getByDisplayValue('Axe')).toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: 'Found Carolyn' })).toBeChecked();
-    fireEvent.change(screen.getByPlaceholderText('Machete, Axe, Fire...'), { target: { value: 'Knife' } });
+    fireEvent.change(screen.getByLabelText('Weapon Used'), { target: { value: 'Knife' } });
     expect(draft).toHaveBeenCalledWith({ weaponUsed: 'Knife' });
-    fireEvent.click(screen.getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION' }));
+    saveOnly();
     expect(save.mock.calls[0][0]).toMatchObject({ weaponUsed: 'Knife', victimsSaved: 0 });
     expect(save.mock.calls[0][0].gameHighlights).toContain('Found Carolyn');
   });

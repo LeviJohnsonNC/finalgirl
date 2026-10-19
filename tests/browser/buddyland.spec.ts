@@ -1,3 +1,4 @@
+import { saveResultOnly } from "./play-helpers";
 import { test, expect, activeGame } from './fixtures';
 import type { Page } from '@playwright/test';
 
@@ -61,16 +62,18 @@ test('unlock Buddyland, cast both girls, choose cards and save a complete game',
   await page.getByLabel('Killer Health', { exact: true }).fill('0');
   await page.getByLabel('Buddies in Play at End (0–7)').fill('2');
   await page.getByLabel('All Power Sources Inactive').check();
-  await page.getByLabel('Billy Finale (optional)').selectOption('Power Surge');
-  await page.getByLabel('Boris at Game End').selectOption('defeated');
+  await page.getByLabel('Billy Finale (optional)').click();
+  await page.getByRole('option', { name: 'Power Surge', exact: true }).click();
+  await page.getByLabel('Boris at Game End').click();
+  await page.getByRole('option', { name: 'Defeated', exact: true }).click();
   await page.getByLabel('Victims Saved', { exact: true }).fill('4');
   await page.reload();
   await page.getByRole('button', { name: 'RESUME GAME' }).click();
   await expect(page.getByLabel('Buddies in Play at End (0–7)')).toHaveValue('2');
   await expect(page.getByLabel('All Power Sources Inactive')).toBeChecked();
-  await expect(page.getByLabel('Boris at Game End')).toHaveValue('defeated');
+  await expect(page.getByLabel('Boris at Game End')).toHaveText('Defeated');
   await page.screenshot({ path: info.outputPath('buddyland-outcome.png'), fullPage: true });
-  await page.getByRole('button', { name: 'SAVE RESULT WITHOUT NARRATION' }).click();
+  await saveResultOnly(page);
   await expect.poll(() => archive.history.length).toBe(1);
   await expect.poll(() => archive.history[0]).toMatchObject({ killer: 'Billy the Bear', location: 'Buddyland', final_girl: 'Gwynn', victims_saved: 4, final_girl_health: 5, killer_health: 0 });
   expect(archive.history[0].game_highlights).toContain('Buddies in play at end: 2');

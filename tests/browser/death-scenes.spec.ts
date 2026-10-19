@@ -1,3 +1,4 @@
+import { saveResultOnly } from "./play-helpers";
 import { deathFacts, deathSignature } from "../../src/lib/play/death";
 import type { PlayEvent } from "../../src/lib/play/events";
 import { searchPick } from "./play-helpers";
@@ -361,9 +362,7 @@ test("manual death narration stops the intro and replays from device cache after
     .getByRole("dialog")
     .getByRole("button", { name: "Won", exact: true })
     .click();
-  await page
-    .getByRole("button", { name: "SAVE RESULT WITHOUT NARRATION", exact: true })
-    .click();
+  await saveResultOnly(page);
   await page.locator(".session-row-link").first().click();
   const savedScenes = page
     .locator("summary")
