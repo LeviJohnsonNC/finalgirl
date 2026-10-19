@@ -35,7 +35,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   decrementPlay,
@@ -49,6 +48,7 @@ import {
 } from "@/lib/play/events";
 import { PlayTimeline } from "./PlayTimeline";
 import "@/styles/play.css";
+import "@/styles/play-finish.css";
 import { BUDDYLAND_ITEMS } from "@/lib/play/modules";
 
 export interface PlayScreenProps {
@@ -580,16 +580,26 @@ export function PlayScreen(props: PlayScreenProps) {
         )}
       </section>
       <Dialog open={finishOpen} onOpenChange={setFinishOpen}>
-        <DialogContent className="play-finish-modal">
+        <DialogContent
+          className="play-finish-modal"
+          aria-describedby={undefined}
+        >
           <DialogHeader>
             <DialogTitle>How did the night end?</DialogTitle>
-            <DialogDescription>
-              Review your recorded details before saving the result.
-            </DialogDescription>
           </DialogHeader>
           <div className="play-finish">
-            <button onClick={() => props.onFinish("won")}>Won</button>
-            <button onClick={() => props.onFinish("lost")}>Lost</button>
+            <button
+              className="play-finish-won"
+              onClick={() => props.onFinish("won")}
+            >
+              Won
+            </button>
+            <button
+              className="play-finish-lost"
+              onClick={() => props.onFinish("lost")}
+            >
+              Lost
+            </button>
           </div>
         </DialogContent>
       </Dialog>
