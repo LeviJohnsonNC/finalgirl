@@ -1,12 +1,14 @@
 import { createContext, useContext, ReactNode } from 'react';
 import { useGameHistory, GameResult } from '@/hooks/useGameHistory';
 import type { GameStats } from '@/hooks/useGameHistory';
+import type { ActiveGame } from '@/lib/activeGame';
 
 interface GameHistoryContextValue {
   gameHistory: GameResult[];
   recordGame: (result: Omit<GameResult, 'id' | 'timestamp'>, gameId?: string) => GameResult;
   updateGame: (id: string, updates: Partial<GameResult>) => void;
   deleteGame: (id: string) => Promise<void>;
+  discardGame: (id: string, snapshot?: ActiveGame) => Promise<{cleanupPending:boolean}>;
   getStats: () => GameStats;
   fetchGameDetails: (id: string) => Promise<GameResult | null>;
   clearHistory: () => Promise<void>;

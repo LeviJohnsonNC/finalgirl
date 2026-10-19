@@ -1,4 +1,5 @@
 import {playStoryBeats} from '@/lib/play/events';
+import { SessionOptions } from '@/components/SessionOptions';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { streamChatCompletion } from '@/lib/streamChatCompletion';
@@ -224,6 +225,7 @@ const TheEnd = ({
   const handleNarrate = () =>
     toggleNarration(endingStory, {
       kind: 'ending',
+      gameId: result.id,
       outcome: result.outcome,
       filmId: getFilmIdByLocation(result.location),
     });
@@ -242,6 +244,7 @@ const TheEnd = ({
       </>}
       controls={<>
         <button onClick={handleSave} className="narration-button narration-button--primary">{endingStory && !isGenerating && !error ? 'SAVE' : 'SAVE RESULT'}</button>
+        <SessionOptions onDiscard={onDiscard} />
         {endingStory && <div className="narration-control-row">
           <button onClick={handleNarrate} disabled={isNarrating || isGenerating} className="narration-button narration-button--narrate">
             {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" /> : isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}

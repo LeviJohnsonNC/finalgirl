@@ -16,6 +16,7 @@ interface CastingSelection {
 }
 
 interface CastingRoomProps {
+  initialSelection?: {killer:string;location:string;finalGirl:string;setupScenario:string|null;startingEvent:string|null;mission:string|null};
   onStartGame: (selection: {
     killer: string;
     location: string;
@@ -27,24 +28,27 @@ interface CastingRoomProps {
   onGoToArchive?: () => void;
 }
 
-const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
+const CastingRoom = ({ onStartGame, onGoToArchive, initialSelection }: CastingRoomProps) => {
   const { ownedFilms, isLoading, loadError, isDegraded, retryLoadOwnedFilms } = useOwnedFilms();
   
   const [selection, setSelection] = useState<CastingSelection>({
-    killer: null,
-    location: null,
-    finalGirl: null,
+    killer: initialSelection?.killer ?? null,
+    location: initialSelection?.location ?? null,
+    finalGirl: initialSelection?.finalGirl ?? null,
   });
   
   // Track scenario selections
-  const [selectedSetup, setSelectedSetup] = useState<string | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
-  const [selectedMission, setSelectedMission] = useState<string | null>(null);
+  const [selectedSetup, setSelectedSetup] = useState<string | null>(initialSelection?.setupScenario ?? null);
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(initialSelection?.startingEvent ?? null);
+  const [selectedMission, setSelectedMission] = useState<string | null>(initialSelection?.mission ?? null);
+  const [previousLocation,setPreviousLocation] = useState(selection.location);
   useEffect(() => {
+    if (selection.location === previousLocation) return;
+    setPreviousLocation(selection.location);
     setSelectedSetup(null);
     setSelectedEvent(null);
     setSelectedMission(null);
-  }, [selection.location]);
+  }, [selection.location, previousLocation]);
   
   
   const [isShufflingAll, setIsShufflingAll] = useState(false);
@@ -211,6 +215,9 @@ const CastingRoom = ({ onStartGame, onGoToArchive }: CastingRoomProps) => {
         <section className="casting-console" aria-label="Scenario and playback">
           <ScenarioDropdowns
             selectedLocation={selection.location}
+            setupValue={selectedSetup}
+            eventValue={selectedEvent}
+            missionValue={selectedMission}
             onSetupChange={setSelectedSetup}
             onEventChange={setSelectedEvent}
             onMissionChange={setSelectedMission}

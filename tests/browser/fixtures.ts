@@ -23,6 +23,9 @@ function jsonbRoundTrip(value: unknown): unknown {
 }
 
 export class ArchiveMock {
+  discarded = new Set<string>();
+  failDiscard = false;
+  cleanupPending = false;
   sessions: Array<{id:string;revision:number;state:Record<string,unknown>;closed:boolean}> = [];
   deathScenes: DeathScene[] = [];
   failDeaths=false;
@@ -69,6 +72,15 @@ export class ArchiveMock {
       if (path.includes('/functions/v1/')) {
         const name = path.split('/').pop()!; this.calls.push(name);
         this.generationRequests.push({ name, body: request.postDataJSON() });
+        if(name==='discard-game') {
+          if(this.failDiscard)return json({error:'Discard unavailable'},503);
+          const id=request.postDataJSON().gameId;
+          const current=this.sessions.find(row=>row.id===id)?.state;
+          const history=this.history.find(row=>row.id===id);
+          const scenes=this.deathScenes.filter(row=>row.session_id===id).map(row=>({id:row.id,text:row.scene_text}));
+          this.discarded.add(id);this.sessions=this.sessions.filter(row=>row.id!==id);this.history=this.history.filter(row=>row.id!==id);this.deathScenes=this.deathScenes.filter(row=>row.session_id!==id);
+          return json({discarded:true,session:current,history,scenes,cleanupPending:this.cleanupPending});
+        }
         if(name==='narrate-story')return json({audioContent:'UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=',voiceId:'Test',persona:'cold'});
         if(name==='generate-death-scene') {
           if(this.failDeaths)return json({error:'Scene unavailable. The death is still recorded.'},503);
@@ -92,6 +104,7 @@ export class ArchiveMock {
         if (name === 'generate-scene-image') {
           await new Promise<void>(resolve => { this.releaseImage = resolve; });
           const body = request.postDataJSON();
+          if(this.discarded.has(body.gameId))return json({error:'This game was discarded.',discarded:true},410);
           const imageUrl = 'https://example.test/poster.png';
           const record = this.history.find(game => game.id === body.gameId);
           if (record) record[body.sceneType === 'ending' ? 'poster_image_url' : 'scene_image_url'] = imageUrl;
@@ -105,9 +118,15 @@ export class ArchiveMock {
         return json(snapshot);
       }
       if (path.endsWith('/play_sessions')) return json(this.sessions.filter(row=>!row.closed));
+      if (path.endsWith('/discarded_games')) {
+        const id=url.searchParams.get('game_id')?.replace(/^eq\./,'');
+        const rows=[...this.discarded].filter(value=>!id||value===id).map(game_id=>({game_id,cleanup_pending:this.cleanupPending}));
+        return json(request.headers().accept?.includes('vnd.pgrst.object') ? rows[0] ?? null : rows);
+      }
       if (path.endsWith('/rpc/save_play_session')) {
         if(this.failWrites) return json({message:'offline'},503);
         const b=request.postDataJSON();let row=this.sessions.find(r=>r.id===b.p_id);
+        if(this.discarded.has(b.p_id))return json({ok:true,discarded:true});
         b.p_state=jsonbRoundTrip(b.p_state);
         if(!row){row={id:b.p_id,revision:1,state:b.p_state,closed:b.p_closed};this.sessions.push(row);return json({ok:true,revision:1});}
         if(JSON.stringify(row.state)===JSON.stringify(b.p_state)&&row.closed===b.p_closed)return json({ok:true,revision:row.revision});
@@ -128,6 +147,7 @@ export class ArchiveMock {
         if (request.method() === 'POST') {
           if (this.failWrites) return json({ message: 'offline', code: 'TEST' }, 503);
           const record = request.postDataJSON();
+          if(this.discarded.has(record.id))return json({message:'This game was discarded.',code:'PT410'},410);
           if (!this.history.some(game => game.id === record.id)) this.history.push(record);
           return route.fulfill({ status: 201, headers: cors });
         }

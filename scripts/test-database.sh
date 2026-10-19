@@ -8,6 +8,7 @@ done
 psql "$TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f tests/database/assertions.sql
 psql "$TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f tests/database/play-sessions.sql
 psql "$TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f tests/database/death-scenes.sql
+psql "$TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f tests/database/discard-games.sql
 result_dir=$(mktemp -d)
 trap 'rm -rf "$result_dir"' EXIT
 pids=()
@@ -39,3 +40,18 @@ for pid in "${pids[@]}"; do wait "$pid"; done
 generations=$(cat "$result_dir"/death-* | awk '$0 == "generate" { count++ } END { print count+0 }')
 if [[ "$generations" != 1 ]]; then echo "Expected one death generation lease; got $generations" >&2; exit 1; fi
 echo 'Migration replay, ownership, allowance/collection concurrency and death-scene leases passed.'
+# A discard must beat stale session/history writes regardless of arrival order.
+race_id=cccccccc-cccc-4ccc-8ccc-cccccccccccc
+pids=()
+for index in {1..8}; do
+  if (( index % 2 == 0 )); then
+    query="SELECT public.discard_game_session('$race_id');"
+  else
+    query="SELECT public.save_play_session('$race_id',0,'{\"version\":1,\"id\":\"$race_id\",\"phase\":\"nowPlaying\",\"selection\":{}}',false); DO \$\$ BEGIN INSERT INTO public.game_history(id,user_id,timestamp,outcome,killer,location,final_girl) VALUES('$race_id',auth.uid(),1,'won','Hans','Camp Happy Trails','Laurie'); EXCEPTION WHEN SQLSTATE 'PT410' OR unique_violation THEN NULL; END \$\$;"
+  fi
+  psql "$TEST_DATABASE_URL" -X -qAt -v ON_ERROR_STOP=1 -c "SET ROLE authenticated; SELECT set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',false); $query" > "$result_dir/discard-$index" &
+  pids+=("$!")
+done
+for pid in "${pids[@]}"; do wait "$pid"; done
+psql "$TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -c "DO \$\$ BEGIN ASSERT NOT EXISTS(SELECT 1 FROM public.play_sessions WHERE id='$race_id'); ASSERT NOT EXISTS(SELECT 1 FROM public.game_history WHERE id='$race_id'); ASSERT (SELECT count(*) FROM public.discarded_games WHERE game_id='$race_id')=1; END \$\$;"
+echo 'Concurrent discard and stale-save protection passed.'

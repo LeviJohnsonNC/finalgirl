@@ -29,6 +29,13 @@
       "when": 1792265400000,
       "tag": "0003_image_preferences_defaults",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792425600000,
+      "tag": "0004_discard_game_session",
+      "breakpoints": true
     }
   ]
 }

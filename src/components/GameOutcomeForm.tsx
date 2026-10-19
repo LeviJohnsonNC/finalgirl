@@ -1078,6 +1078,7 @@ export const GameOutcomeForm = ({
             </button>
             {optionsOpen && (
               <div id="outcome-options-menu">
+                <button type="button" className="outcome-discard-action" onClick={() => {setOptionsOpen(false); onDiscard();}}>Discard game…</button>
                 <button
                   type="button"
                   onClick={() => {

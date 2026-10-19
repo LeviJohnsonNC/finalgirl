@@ -17,6 +17,9 @@ import {
 } from '@/components/ui/select';
 
 interface ScenarioDropdownsProps {
+  setupValue?: string | null;
+  eventValue?: string | null;
+  missionValue?: string | null;
   selectedLocation: string | null;
   onSetupChange?: (setup: string | null) => void;
   onEventChange?: (event: string | null) => void;
@@ -27,11 +30,14 @@ const ScenarioDropdownsForLocation = ({
   selectedLocation, 
   onSetupChange, 
   onEventChange,
-  onMissionChange
+  onMissionChange, setupValue, eventValue, missionValue
 }: ScenarioDropdownsProps) => {
-  const [selectedSetup, setSelectedSetup] = useState<string | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
-  const [selectedMission, setSelectedMission] = useState<string | null>(null);
+  const [localSetup, setSelectedSetup] = useState<string | null>(null);
+  const [localEvent, setSelectedEvent] = useState<string | null>(null);
+  const [localMission, setSelectedMission] = useState<string | null>(null);
+  const selectedSetup = setupValue === undefined ? localSetup : setupValue;
+  const selectedEvent = eventValue === undefined ? localEvent : eventValue;
+  const selectedMission = missionValue === undefined ? localMission : missionValue;
   const id = useId();
 
   const filmId = selectedLocation ? getFilmIdByLocation(selectedLocation) : null;

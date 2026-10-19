@@ -1,5 +1,8 @@
 project_id = "cdyvccecrovyjkabfcnx"
 
+[functions.discard-game]
+verify_jwt = false
+
 [functions.generate-story]
 verify_jwt = false
 

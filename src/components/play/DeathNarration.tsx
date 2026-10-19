@@ -27,6 +27,7 @@ export function DeathNarration({
               kind: "death",
               filmId,
               deathSceneId: scene.id,
+              gameId: scene.session_id,
             });
         }}
         className="play-death-audio-button vcr-tape-button w-11 h-11 p-3 text-secondary inline-flex items-center justify-center"

@@ -1,0 +1,134 @@
+@font-face {
+  font-family: "Session Fell";
+  src: url("../assets/fonts/im-fell-english.woff2") format("woff2");
+  font-display: swap;
+}
+.session-options-trigger {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 9px;
+  border: 1px solid #c3b89a35;
+  border-radius: 4px;
+  background: #101715aa;
+  color: #b7b9ac;
+}
+.session-options-trigger:hover {
+  color: #eee4cf;
+  border-color: #d6c6a17a;
+}
+.session-options-menu {
+  animation: none !important;
+  z-index: 90;
+  padding: 5px;
+  border: 1px solid #a48f695e;
+  background: #111b17;
+  color: #e2b39f;
+  min-width: 170px;
+}
+.session-options-menu [role="menuitem"] {
+  min-height: 44px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.session-options-menu [role="menuitem"]:focus {
+  background: #43251f;
+  color: #ffdfcb;
+}
+.discard-game-modal {
+  z-index: 100;
+  max-width: min(480px, calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  overflow-y: auto;
+  padding: 28px;
+  border: 1px solid #9d89636b;
+  border-radius: 7px;
+  color: #e8e0cf;
+  background:
+    linear-gradient(#131a17e8, #080f0ef5),
+    url("../assets/outcome/case-surface.webp") center/cover;
+  box-shadow:
+    inset 0 0 0 3px #171d18,
+    0 20px 100px #000d;
+  font-family: Arial, sans-serif;
+}
+.discard-game-modal h2 {
+  font:
+    400 31px/1.15 "Session Fell",
+    Georgia,
+    serif;
+  padding-right: 20px;
+  text-align: left;
+}
+.discard-game-cast {
+  padding: 9px 0 14px;
+  color: #d8c9ac;
+  text-align: left;
+  font-size: 14px;
+}
+.discard-game-cast span {
+  display: block;
+  font-size: 12px;
+  color: #a5afa3;
+  padding-top: 4px;
+}
+.discard-game-modal .discard-game-description {
+  color: #c6c9bc;
+  font-size: 14px;
+  line-height: 1.65;
+  text-align: left;
+}
+.discard-game-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 9px;
+}
+.discard-game-actions button {
+  min-height: 46px;
+  padding: 10px 15px;
+  border: 1px solid #b2af9166;
+  border-radius: 5px;
+  color: #efe7d4;
+  background: #293329;
+  font-size: 14px;
+}
+.discard-game-actions .discard-game-confirm {
+  background: #622c25;
+  border-color: #d88d724d;
+  color: #ffd8c6;
+}
+.discard-game-actions button:focus-visible {
+  outline: 2px solid #efe2bd;
+  outline-offset: 3px;
+}
+.discard-game-actions button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.discard-game-modal[data-busy="true"] > button {
+  pointer-events: none;
+  opacity: 0.3;
+}
+.discard-game-error {
+  color: #f6b399;
+  font-size: 13px;
+  line-height: 1.5;
+}
+#outcome-options-menu .outcome-discard-action {
+  color: #e2b39f;
+  border-top: 1px solid #a48f6933;
+}
+@media (max-width: 380px) {
+  .discard-game-modal {
+    padding: 22px 18px;
+  }
+  .discard-game-actions {
+    flex-direction: column;
+  }
+  .discard-game-actions button {
+    width: 100%;
+  }
+}

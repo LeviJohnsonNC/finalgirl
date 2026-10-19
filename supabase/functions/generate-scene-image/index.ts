@@ -10,6 +10,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { ownedOpeningReference } from "../_shared/imageReference.ts";
 import { getCorsHeaders } from "../_shared/auth.ts";
+import { isDiscardedGame } from "../_shared/discardedGame.ts";
 import { requireUser } from "../_shared/guard.ts";
 import { SceneImageRequestSchema, validateRequest } from "../_shared/validation.ts";
 import { generateImage, generateText, statusFor, userFacingMessage } from "../_shared/aiGateway.ts";
@@ -50,6 +51,8 @@ serve(async (req) => {
     const validation = validateRequest(SceneImageRequestSchema, await req.json(), cors);
     if (!validation.success) return validation.error;
     const body = validation.data;
+    if (await isDiscardedGame(guard.adminClient, user.id, body.gameId))
+      return json({ error: "This game was discarded.", discarded: true }, 410);
 
     const isPoster = body.sceneType === "ending";
     const context: SceneContext = { ...body };
@@ -103,6 +106,14 @@ serve(async (req) => {
     if (uploadError) {
       console.error("Poster upload failed:", uploadError);
       return json({ error: "The image developed but could not be filed. Try again." }, 500);
+    }
+
+    // A discard can complete while the provider is working. Never attach or return
+    // its late image, and invalidate any earlier storage-cleanup acknowledgement.
+    if (body.gameId && await isDiscardedGame(adminClient, user.id, body.gameId)) {
+      await adminClient.rpc('queue_discarded_image_cleanup', { p_user_id: user.id, p_game_id: body.gameId });
+      await adminClient.storage.from('posters').remove([path]);
+      return json({ error: "This game was discarded.", discarded: true }, 410);
     }
 
     const { data: urlData } = adminClient.storage.from("posters").getPublicUrl(path);

@@ -534,7 +534,7 @@ body:has(.play-workspace) .app-shell {
   font-size: 12px;
   color: #eee8dc;
 }
-.play-heading button:last-child {
+.play-heading button[aria-label="Finish game"] {
   background: #582020d9;
   border-color: #ad64535e;
 }

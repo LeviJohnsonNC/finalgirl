@@ -47,6 +47,7 @@ import {
   type MomentType,
 } from "@/lib/play/events";
 import { PlayTimeline } from "./PlayTimeline";
+import { SessionOptions } from "@/components/SessionOptions";
 import "@/styles/play.css";
 import "@/styles/play-finish.css";
 import { BUDDYLAND_ITEMS, killerMomentCards } from "@/lib/play/modules";
@@ -61,6 +62,7 @@ export interface PlayScreenProps {
   onEvent: (event: PlayEvent) => boolean;
   onExit: () => void;
   onFinish: (outcome: "won" | "lost") => void;
+  onDiscard?: () => void;
   onNarrate: () => void;
   narrationBusy: boolean;
   narrationPlaying: boolean;
@@ -276,6 +278,7 @@ export function PlayScreen(props: PlayScreenProps) {
           >
             <Flag size={16} /> Finish
           </button>
+          {props.onDiscard && <SessionOptions onDiscard={props.onDiscard} />}
         </nav>
       </header>
       <section className="play-tracking" aria-label="Play controls">
