@@ -7,14 +7,19 @@ test('desktop setup fits without scrolling and keeps its faceplate clear of navi
   await page.getByRole('button', { name: 'START THE TAPE', exact: true }).click();
   await expect(page.locator('.casting-console')).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
-  for (const size of [{ width: 1672, height: 941 }, { width: 1440, height: 900 }, { width: 1280, height: 800 }, { width: 1280, height: 720 }]) {
+  for (const size of [{ width: 2048, height: 1152 }, { width: 1672, height: 941 }, { width: 1440, height: 900 }, { width: 1280, height: 800 }, { width: 1280, height: 720 }, { width: 1024, height: 768 }]) {
     await page.setViewportSize(size);
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     const bounds = await page.evaluate(() => ({ height: document.documentElement.scrollHeight, viewport: innerHeight,
       panel: document.querySelector('.casting-console')!.getBoundingClientRect().bottom,
+      proportion: document.querySelector('.casting-tableau')!.getBoundingClientRect().width / document.querySelector('.casting-console')!.getBoundingClientRect().width,
+      ticker: document.querySelector('.news-broadcast')!.getBoundingClientRect().top,
       footer: document.querySelector('footer')!.getBoundingClientRect().top }));
     expect(bounds.height, JSON.stringify({ size, bounds })).toBeLessThanOrEqual(size.height + 1);
     expect(bounds.panel).toBeLessThan(bounds.footer);
+    expect(bounds.panel).toBeLessThan(bounds.ticker);
+    expect(bounds.proportion).toBeCloseTo(1160 / 800, 2);
+    if (size.width === 2048 || size.width === 1280) await page.screenshot({ path: info.outputPath(`setup-proportions-${size.width}-${size.height}.png`) });
   }
   await page.screenshot({ path: info.outputPath('setup-fit.png') });
 });

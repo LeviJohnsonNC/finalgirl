@@ -211,26 +211,41 @@
 }
 @media (prefers-reduced-motion: reduce) { .casting-console-select, .casting-console-play { transition: none; } }
 
-/* Retain the tableau and faceplate, reclaim only redundant desktop spacing. */
+/* Scale the photos and faceplate as one desktop composition. The photo area
+   stays dominant at laptop heights instead of shrinking independently. */
 @media (min-width: 1024px) {
+  .casting-page { --casting-height-reserve: 510px; --casting-stage-width: min(1160px, calc(100vw - 96px), max(640px, calc((100dvh - var(--casting-height-reserve)) / .43))); }
   body:has(.casting-page) main { padding-top: 104px; padding-bottom: calc(var(--app-footer-h, 64px) + 12px); }
   .casting-content { padding-block: 0; }
-  .casting-tableau { max-width: min(1160px, max(555px, calc((100dvh - 600px) / .36))); margin-block: 8px 16px; }
+  .casting-tableau { width: var(--casting-stage-width); margin-block: 8px 16px; }
   .casting-slot-top { gap: 14px; }
   .casting-slot { gap: 14px; }
   .casting-slot-controls { position: relative; left: 50%; transform: translateX(-50%); min-width: 180px; margin-inline: 0; }
   .casting-slot-buttons .plate-btn { font-size: 12px; letter-spacing: .1em; }
   .casting-slot--location .casting-slot-controls { max-width: 220px; }
-  .casting-console { margin-bottom: 0; padding-block: 27px 25px; }
+  .casting-console { width: calc(var(--casting-stage-width) * 800 / 1160); margin-bottom: 0; padding-block: 27px 25px; }
   .casting-console-playback { margin-top: 18px; }
-  .casting-page:has(.casting-console-field--mission) .casting-tableau { max-width: min(1160px, max(555px, calc((100dvh - 715px) / .36))); }
+  .casting-page:has(.casting-console-field--mission) { --casting-height-reserve: 625px; }
+}
+
+@media (min-width: 1024px) and (max-height: 850px) {
+  .casting-console { padding: 20px 24px 18px; }
+  .casting-console-fields { column-gap: 18px; }
+  .casting-console-field { grid-template-columns: 30px minmax(0, 1fr); column-gap: 10px; row-gap: 6px; }
+  .casting-console-field--event { padding-left: 14px; }
+  .casting-console-label { font-size: 12px; letter-spacing: .13em; white-space: nowrap; }
+  .casting-console-icon, .casting-console-icon--setup { height: 44px; margin: 0; }
+  .casting-console-icon svg { width: 26px; height: 26px; }
+  .casting-console-select { height: 44px; font-size: 15px; padding-inline: 8px; }
+  .casting-console-play { min-height: 44px; padding-block: 8px; font-size: 20px; }
+  .casting-console-playback { margin-top: 12px; }
+  .casting-console-help { margin-top: 6px; }
 }
 
 @media (min-width: 1024px) and (max-height: 799px) {
   .casting-tableau { margin-block: 4px 10px; }
   .casting-slot-top, .casting-slot { gap: 8px; }
   .casting-slot-buttons .plate-btn { height: 44px; }
-  .casting-console { padding-top: 25px; }
   .casting-console-playback { margin-top: 12px; }
   .casting-console-help { margin-top: 6px; }
 }
