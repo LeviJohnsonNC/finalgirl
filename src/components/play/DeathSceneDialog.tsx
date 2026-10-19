@@ -243,12 +243,12 @@ export function DeathSceneDialog({
           >
             {(
               [
-                ["killer", causeKiller],
                 ["minion", causeMinion],
-                ["terror", causeTerror],
                 ["event", causeEvent],
+                ["killer", causeKiller],
                 ["hazard", causeHazard],
                 ["other", causeOther],
+                ["terror", causeTerror],
               ] as const
             ).map(([cause, art]) => (
               <button

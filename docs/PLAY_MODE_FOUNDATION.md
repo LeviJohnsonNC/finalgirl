@@ -1,5 +1,7 @@
 # Play mode functional foundation
 
+The current streamlined Buddyland controls and reveal moments are documented in [BUDDYLAND_PLAY.md](BUDDYLAND_PLAY.md), including artwork previews and release requirements.
+
 Play begins tracking once on entry (zero saved/killed, round one), resumes saved sessions, and records locally before acknowledging an observation. Existing unknown rounds and legacy group records remain readable. Saved/Killed/Round have independent correction buttons. Corrections target the latest matching record, preserve unrelated moments, and invalidate death scenes whose factual identity changes.
 
 The main trackers and expandable activity history live in one document scroll. Optional death details open in a dismissible modal. Optional health, Horror and Bloodlust values remain unset until the player opts in. Track starts immediately with an editable starting suggestion: Rena 6, Gwynn 5, Billy 8, Hans 12, Laurie 5, Horror 4, Bloodlust 0. Other casts fall back to 5 Final Girl health and 10 Killer health; these are suggestions rather than researched rules. Existing observations, including zero, are never reset. Stopping a tracker makes it unrecorded again. No automatic game-rule effects or win/loss decisions are inferred. Horror zero now survives tracking, result review, generation and statistics.

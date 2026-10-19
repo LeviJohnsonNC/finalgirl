@@ -475,7 +475,7 @@ export const GameOutcomeForm = ({
             <datalist id="outcome-weapon-suggestions">
               {BUDDYLAND_ITEMS.filter((item) =>
                 /damage|attacking/i.test(item.effect),
-              ).map((item) => (
+              ).sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
                 <option key={item.id} value={item.name} />
               ))}
             </datalist>
@@ -732,15 +732,13 @@ export const GameOutcomeForm = ({
                     onValueChange={setBillyFinale}
                   >
                     <option value="">Not recorded</option>
-                    <option value="Power Surge">Power Surge</option>
-                    {BILLY_FINALES.filter((f) => f.name !== "Power Surge").map(
+                    {[...BILLY_FINALES, { id: 'other', name: 'Other Finale' }].sort((a,b) => a.name.localeCompare(b.name)).map(
                       (f) => (
                         <option key={f.id} value={f.name}>
                           {f.name}
                         </option>
                       ),
                     )}
-                    <option value="Other Finale">Other Finale</option>
                   </OutcomeSelect>
                 </div>
                 {billyFinale === "Power Surge" && (
@@ -1054,7 +1052,7 @@ export const GameOutcomeForm = ({
         </div>
         {result.location === "Buddyland" && (
           <datalist id="outcome-room-suggestions">
-            {BUDDYLAND_ROOMS.map((room) => (
+            {[...BUDDYLAND_ROOMS].sort((a,b) => a.localeCompare(b)).map((room) => (
               <option key={room} value={room} />
             ))}
           </datalist>

@@ -13,7 +13,25 @@ export interface ModuleObservation {
   module: "billy" | "buddyland";
   changes: Record<string, ModuleValue>;
 }
-type ObservedEvent = { kind: string; moduleData?: ModuleObservation };
+type ObservedEvent = {
+  kind: string;
+  moduleData?: ModuleObservation;
+  momentType?: string;
+  killerCard?: string;
+};
+
+/** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
+export function killerMomentCards(killer: string, type: string) {
+  const cards =
+    killer !== "Billy the Bear"
+      ? []
+      : type === "dark-power"
+        ? [...BILLY_POWERS]
+        : type === "finale"
+          ? [...BILLY_FINALES]
+          : [];
+  return cards.sort((a, b) => a.name.localeCompare(b.name));
+}
 export interface ModuleSelection {
   killer: string;
   location: string;
@@ -76,7 +94,8 @@ function validField(
       member(BILLY_POWERS, id) &&
       key.split(".").length === 3
     ) {
-      if (field === "active") return oneOf(value, [true, false]);
+      if (field === "active" || field === "revealed")
+        return oneOf(value, [true, false]);
       const power = BILLY_POWERS.find((p) => p.id === id);
       if (field === "health" && power && "health" in power)
         return count(value, power.health);
@@ -135,6 +154,17 @@ export function moduleState(
 ): ModuleState {
   const state: ModuleState = {};
   for (const e of entries) {
+    // Moment details have already been reduced with undo/restore and corrections.
+    // A remembered reveal is evidence of a reveal, not proof the power is still active.
+    if (module === "billy" && e.kind === "moment" && e.killerCard) {
+      if (e.momentType === "finale") {
+        const finale = BILLY_FINALES.find((c) => c.name === e.killerCard);
+        if (finale) state.finale = finale.id;
+      } else if (e.momentType === "dark-power") {
+        const power = BILLY_POWERS.find((c) => c.name === e.killerCard);
+        if (power) state[`power.${power.id}.revealed`] = true;
+      }
+    }
     if (
       e.kind !== "module" ||
       e.moduleData?.module !== module ||
@@ -227,7 +257,7 @@ export function moduleStoryBeats(
       const prefix = `buddy.${b.id}`;
       if (billy[`${prefix}.status`] !== undefined)
         lines.push(
-          `${b.name}: ${billy[`${prefix}.status`]}, Health ${billy[`${prefix}.health`] ?? "?"}`,
+          `${b.name}: ${billy[`${prefix}.status`]}${billy[`${prefix}.health`] !== undefined ? `, Health ${billy[`${prefix}.health`]}` : ""}`,
         );
     }
     const sources = [1, 2, 3, 4, 5].filter(
@@ -241,6 +271,10 @@ export function moduleStoryBeats(
       if (billy[`power.${p.id}.active`] !== undefined)
         lines.push(
           `${p.name}: ${billy[`power.${p.id}.active`] ? "active" : "removed"}`,
+        );
+      else if (billy[`power.${p.id}.revealed`] === true)
+        lines.push(
+          `${p.name}: revealed earlier; current active status untracked`,
         );
     for (const i of [1, 2, 3, 4, 5, 6])
       if (billy[`bloodlust.${i}`])
@@ -278,6 +312,11 @@ export function buddylandReferences(
     for (const p of BILLY_POWERS)
       if (state[`power.${p.id}.active`] === true)
         refs.push({ name: p.name, effect: p.effect });
+      else if (state[`power.${p.id}.revealed`] === true)
+        refs.push({
+          name: p.name,
+          effect: `${p.effect} The player recorded its reveal, not whether it remains active. Do not assume it caused this death.`,
+        });
     const finale = BILLY_FINALES.find((f) => f.id === state.finale);
     if (finale) refs.push({ name: finale.name, effect: finale.effect });
     const buddy = BUDDIES.find(

@@ -1,4 +1,4 @@
-import { searchPick, statusPick } from "./play-helpers";
+import { searchPick, statusPick, openHistory } from "./play-helpers";
 import { test, expect, activeGame, userId } from "./fixtures";
 const selection = {
   ...activeGame.selection,
@@ -11,22 +11,38 @@ async function open(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
 }
-async function pick(
+const buddies = ["Allie", "Billy Jr.", "Boris", "Cam", "Ramey", "Roxy", "Toby"];
+const victims = ["Birthday Girl", "Nick the Janitor", "Pizza Guy"];
+function portrait(page: import("@playwright/test").Page, name: string) {
+  return page.locator(".play-character").filter({
+    has: page.locator("strong", {
+      hasText: new RegExp(
+        "^" + name.replace(/[.*+?^$()|[\]\\]/g, "\\$&") + "$",
+      ),
+    }),
+  });
+}
+async function reveal(
   page: import("@playwright/test").Page,
-  label: string,
-  value: string,
+  kind: "Dark Power" | "Finale",
+  name: string,
 ) {
-  const names: Record<string, string> = {
-    toby: "Toby",
-    "backup-generator": "Backup Generator",
-    "sing-a-long": "Sing-A-Long",
-    "flash-camera": "Flash Camera",
-    "skee-ball-token": "Skee-Ball Token",
-  };
-  await searchPick(page, label, names[value] ?? value);
+  await page.getByRole("button", { name: kind, exact: true }).click();
+  const trigger = page.getByRole("combobox", {
+    name: kind + " card",
+    exact: true,
+  });
+  await expect(trigger).toHaveText("Not specified");
+  await trigger.click();
+  const options = (await page.getByRole("option").allTextContents()).filter(
+    (x) => x !== "Not specified",
+  );
+  expect(options).toEqual([...options].sort((a, b) => a.localeCompare(b)));
+  expect(options).toHaveLength(kind === "Dark Power" ? 6 : 4);
+  await page.getByRole("option", { name, exact: true }).click();
 }
 
-test("Buddyland observations survive reload and reach deaths and ending review", async ({
+test("streamlined portraits and reveals survive reload and reach deaths and ending review", async ({
   page,
   archive,
 }, info) => {
@@ -34,185 +50,131 @@ test("Buddyland observations survive reload and reach deaths and ending review",
     draft: { ...activeGame, selection, playMode: true },
   });
   await open(page);
-  const billy = page.getByRole("region", {
-    name: "Billy tracking",
-    exact: true,
-  });
-  await billy
-    .locator("summary")
-    .filter({ hasText: /^Buddies/ })
-    .click();
-  await expect(page.getByRole("article", { name: "Toby tracker" })).toHaveCount(
-    0,
-  );
-  await pick(page, "Add revealed Buddy", "toby");
-  const toby = page.getByRole("article", { name: "Toby tracker", exact: true });
-  await expect(toby.getByLabel("Toby health", { exact: true })).toHaveText("3");
-  await toby
-    .getByRole("button", { name: "Decrease Toby health", exact: true })
-    .click();
-  await statusPick(
-    page,
-    toby.getByLabel("Toby shares Billy’s space", { exact: true }),
-    "Yes",
-  );
-  await statusPick(
-    page,
-    toby.getByLabel("Toby activation", { exact: true }),
-    "Wait until next Killer phase",
-  );
-  await expect(billy).toContainText("A recorded Buddy is protecting Billy.");
-  await billy
-    .getByLabel("All Buddies currently in play are listed", { exact: true })
-    .check();
-  await billy
-    .locator("summary")
-    .filter({ hasText: /^Power Sources$/ })
-    .click();
-  await page
-    .getByRole("button", { name: "Record starting Power Sources", exact: true })
-    .click();
-  await statusPick(
-    page,
-    page.getByLabel("Power Source 1 status", { exact: true }),
-    "Inactive",
-  );
-  await searchPick(page, "Power Source 1 location", "Dining Area");
-  await billy
-    .locator("summary")
-    .filter({ hasText: /^Revealed powers/ })
-    .click();
-  await statusPick(
-    page,
-    page.getByLabel("Revealed Finale", { exact: true }),
-    "Power Surge",
-  );
+  await expect(page.locator(".play-count-add > span")).toHaveText([
+    "Round",
+    "Victims saved",
+    "Victims killed",
+  ]);
+  await expect(page.locator(".play-state > span")).toHaveText([
+    "Bloodlust",
+    "Final Girl health",
+    "Horror",
+    "Killer health",
+  ]);
+  await expect(page.locator(".play-moment-choices button")).toHaveText([
+    "Back from the dead",
+    "Dark Power",
+    "Finale",
+    "Found a weapon or key item",
+    "Other moment",
+    "Second wind",
+    "Ultimate unlocked",
+    "Ultimate used",
+  ]);
+  await expect(page.locator(".play-character strong")).toHaveText([
+    ...buddies,
+    ...victims,
+  ]);
+  for (const removed of [
+    "Narrow escape",
+    "Turned the tables",
+    "Add revealed Buddy",
+    "Record starting Power Sources",
+    "Record revealed power",
+    "Record drawn Event",
+    "Track found Item",
+  ])
+    await expect(
+      page.getByRole("button", { name: removed, exact: true }),
+    ).toHaveCount(0);
   await expect(
-    page.getByRole("article", { name: "Boris tracker" }),
-  ).toHaveCount(0);
-  await pick(page, "Record revealed power", "backup-generator");
-  await page
-    .getByRole("button", {
-      name: "Decrease Backup Generator health",
-      exact: true,
-    })
-    .click();
-  await expect(
-    page.getByLabel("Power Source 1 status", { exact: true }),
-  ).toHaveText("Inactive");
-  await expect(
-    page.getByText("Terror card reference", { exact: true }),
-  ).toHaveCount(0);
-  await expect(
-    page.getByText("Revealed Bloodlust tokens", { exact: true }),
-  ).toHaveCount(0);
-  const venue = page.getByRole("region", {
-    name: "Buddyland tracking",
-    exact: true,
-  });
-  await venue
-    .locator("summary")
-    .filter({ hasText: /^Events/ })
-    .click();
-  await pick(page, "Record drawn Event", "sing-a-long");
-  await expect(venue).not.toContainText(
-    "During each Upkeep, draw a Terror card.",
-  );
-  await statusPick(
-    page,
-    page.getByLabel("Birthday Girl status", { exact: true }),
-    "On board",
-  );
-  await statusPick(
-    page,
     page.getByLabel("Tragic Collapse location", { exact: true }),
-    "Kitchen",
-  );
-  await venue
-    .locator("summary")
-    .filter({ hasText: /^Items/ })
-    .click();
-  await pick(page, "Track found Item", "flash-camera");
-  await page
-    .getByRole("button", { name: "Decrease Flash Camera uses", exact: true })
-    .click();
+  ).toHaveCount(0);
+  const toby = portrait(page, "Toby"),
+    boris = portrait(page, "Boris"),
+    birthday = portrait(page, "Birthday Girl");
+  await toby.click();
+  await boris.click();
+  await boris.click();
+  await birthday.click();
+  await birthday.click();
+  await expect(toby).toHaveAttribute("data-state", "active");
+  await expect(boris).toHaveAttribute("data-state", "killed");
+  await expect(birthday).toHaveAttribute("data-state", "killed");
   await expect(
     page.getByRole("button", { name: "Record one victim killed", exact: true }),
   ).toContainText("0");
+  await reveal(page, "Dark Power", "Backup Generator");
+  await page.getByRole("button", { name: "Record", exact: true }).click();
+  await reveal(page, "Finale", "Power Surge");
+  await page
+    .getByLabel("Moment detail", { exact: true })
+    .fill("Boris emerged from behind the Prize Counter.");
+  await page
+    .getByRole("combobox", { name: "Finale card", exact: true })
+    .click();
+  await page.screenshot({
+    path: info.outputPath("play-reveal.png"),
+    animations: "disabled",
+  });
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Record", exact: true }).click();
   await page.reload();
-  await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
-  await expect(toby.getByLabel("Toby health", { exact: true })).toHaveText("2");
-  await expect(toby.getByLabel("Toby activation", { exact: true })).toHaveText(
-    "Wait until next Killer phase",
-  );
-  await billy
-    .locator("summary")
-    .filter({ hasText: /^Power Sources$/ })
-    .click();
+  await open(page);
+  await expect(toby).toHaveAttribute("data-state", "active");
+  await expect(boris).toHaveAttribute("data-state", "killed");
+  await expect(birthday).toHaveAttribute("data-state", "killed");
+  await openHistory(page);
   await expect(
-    page.getByLabel("Power Source 1 location", { exact: true }),
-  ).toHaveText("Dining Area");
-  await billy
-    .locator("summary")
-    .filter({ hasText: /^Revealed powers/ })
-    .click();
-  await expect(page.getByLabel("Revealed Finale", { exact: true })).toHaveText(
-    "Power Surge",
-  );
-  await expect(
-    page.getByLabel("Backup Generator health", { exact: true }),
-  ).toHaveText("1");
-  await venue
-    .locator("summary")
-    .filter({ hasText: /^Items/ })
-    .click();
-  await expect(
-    page.getByLabel("Flash Camera uses", { exact: true }),
-  ).toHaveText("1");
+    page.getByRole("region", { name: "Game timeline" }),
+  ).toContainText("Finale: Power Surge. Boris emerged");
+  await page.getByRole("button", { name: /^The night so far/ }).click();
   await page
     .getByRole("button", { name: "Record one victim killed", exact: true })
     .click();
+  const causes = await page.locator(".play-cause-choices button").allTextContents();
+  expect(causes).toEqual([...causes].sort((a, b) => a.localeCompare(b)));
   await page
     .getByRole("button", { name: "Buddy / minion", exact: true })
     .click();
   await searchPick(page, "Death attacker", "Toby");
-  await expect(
-    page.getByRole("combobox", { name: "Terror card", exact: true }),
-  ).toHaveCount(0);
   await page
     .getByRole("button", { name: "Gruesome Death", exact: true })
     .click();
   await expect(
     page.getByRole("region", { name: "Generated death scene", exact: true }),
   ).toContainText(archive.deathText);
-  expect(
-    archive.calls.filter((c) => c === "generate-death-scene"),
-  ).toHaveLength(1);
   await page
     .getByRole("button", { name: "Save and exit", exact: true })
     .click();
-  await expect
-    .poll(() =>
-      page.evaluate(
-        (key) =>
-          JSON.parse(localStorage.getItem(key)!).playEvents.some(
-            (e: { attacker?: string }) => e.attacker === "Toby",
-          ),
-        `final-girl-active-game-v1:${userId}`,
+  for (const viewport of [
+    { width: 320, height: 640 },
+    { width: 768, height: 1024 },
+    info.project.name === "mobile"
+      ? { width: 390, height: 844 }
+      : { width: 1440, height: 1000 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await expect(toby).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
       ),
-    )
-    .toBe(true);
-  await expect(
-    page.getByRole("button", { name: "Record one victim killed", exact: true }),
-  ).toContainText("1");
+    ).toBe(true);
+    const box = await toby.boundingBox();
+    expect(box!.width).toBeGreaterThanOrEqual(90);
+  }
   await page.screenshot({
-    path: info.outputPath("buddyland-play.png"),
+    path: info.outputPath("streamlined-play.png"),
     fullPage: true,
+    animations: "disabled",
+    style: ".app-footer,.news-broadcast { visibility:hidden !important }",
   });
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth > window.innerWidth,
-  );
-  expect(overflow).toBe(false);
+  await page.locator(".play-portrait-modules").screenshot({
+    path: info.outputPath("play-roster.png"),
+    animations: "disabled",
+    style: ".app-footer,.news-broadcast { visibility:hidden !important }",
+  });
   await page.getByRole("button", { name: "Finish game", exact: true }).click();
   await page
     .getByRole("dialog")
@@ -222,8 +184,12 @@ test("Buddyland observations survive reload and reach deaths and ending review",
     page.getByLabel("Billy Finale (optional)", { exact: true }),
   ).toHaveText("Power Surge");
   await expect(
+    page.getByLabel("Boris at Game End", { exact: true }),
+  ).toHaveText("Defeated");
+  // Off portraits mean untracked, not a confirmed complete roster or zero.
+  await expect(
     page.getByLabel("Buddies in Play at End (0–7)", { exact: true }),
-  ).toHaveValue("1");
+  ).toHaveValue("");
   await page.getByRole("button", { name: "Continue", exact: true }).click();
   await expect
     .poll(
@@ -231,14 +197,69 @@ test("Buddyland observations survive reload and reach deaths and ending review",
         archive.generationRequests.find((r) => r.name === "generate-ending")
           ?.body.playSummary,
     )
-    .toContain("Toby: active, Health 2");
-  expect(
-    archive.generationRequests.find((r) => r.name === "generate-ending")!.body
-      .playSummary,
-  ).toContain("Power Surge");
+    .toContain("Toby: active");
+  const ending = archive.generationRequests.find(
+    (r) => r.name === "generate-ending",
+  )!.body.playSummary;
+  expect(ending).toContain("Power Surge");
+  expect(ending).toContain("Backup Generator");
+  expect(ending).not.toContain("Health ?");
 });
 
-test("Skee-Balls remain unloaded until recorded and unfinished room drafts survive reload", async ({
+test("every portrait cycles distinct artwork, supports keyboard and Undo, and leaves totals alone", async ({
+  page,
+  archive,
+}) => {
+  test.setTimeout(90000);
+  await archive.install(page, {
+    draft: { ...activeGame, selection, playMode: true },
+  });
+  await open(page);
+  for (const name of [...buddies, ...victims]) {
+    const tile = portrait(page, name);
+    const sources = new Set<string>();
+    for (const state of ["off", "active", "killed"] as const) {
+      await expect(tile).toHaveAttribute("data-state", state);
+      await tile.scrollIntoViewIfNeeded();
+      await expect
+        .poll(() =>
+          tile
+            .locator("img")
+            .evaluate(
+              (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
+            ),
+        )
+        .toBe(true);
+      sources.add((await tile.locator("img").getAttribute("src"))!);
+      await tile.focus();
+      await page.keyboard.press("Enter");
+    }
+    expect(sources.size).toBe(3);
+    await expect(tile).toHaveAttribute("data-state", "off");
+  }
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect(portrait(page, "Pizza Guy")).toHaveAttribute(
+    "data-state",
+    "killed",
+  );
+  await page.reload();
+  await open(page);
+  await expect(portrait(page, "Pizza Guy")).toHaveAttribute(
+    "data-state",
+    "killed",
+  );
+  await expect(
+    page.getByRole("button", { name: "Record one victim killed", exact: true }),
+  ).toContainText("0");
+  await expect(
+    page.getByRole("button", { name: "Save one victim", exact: true }),
+  ).toContainText("0");
+  expect(
+    archive.calls.filter((c) => c === "generate-death-scene"),
+  ).toHaveLength(0);
+});
+
+test("reveal selection can be cleared, corrected and left unnamed; unfinished notes survive reload and finish", async ({
   page,
   archive,
 }) => {
@@ -246,78 +267,134 @@ test("Skee-Balls remain unloaded until recorded and unfinished room drafts survi
     draft: { ...activeGame, selection, playMode: true },
   });
   await open(page);
-  const venue = page.getByRole("region", {
-    name: "Buddyland tracking",
-    exact: true,
-  });
-  await venue
-    .locator("summary")
-    .filter({ hasText: /^Items/ })
-    .click();
-  await pick(page, "Track found Item", "skee-ball-token");
-  await expect(
-    page.getByLabel("Skee-Ball Token uses", { exact: true }),
-  ).toHaveText("?");
+  await reveal(page, "Finale", "Encore");
+  await statusPick(
+    page,
+    page.getByRole("combobox", { name: "Finale card", exact: true }),
+    "Not specified",
+  );
+  await page.getByRole("button", { name: "Record", exact: true }).click();
+  await page.getByRole("button", { name: "Dark Power", exact: true }).click();
+  await page.getByRole("button", { name: "Record", exact: true }).click();
+  await reveal(page, "Finale", "Power Surge");
   await page
-    .getByRole("button", { name: "Record four loaded Skee-Balls", exact: true })
-    .click();
-  await expect(
-    page.getByLabel("Skee-Ball Token uses", { exact: true }),
-  ).toHaveText("4");
-  const billy = page.getByRole("region", {
-    name: "Billy tracking",
-    exact: true,
-  });
-  await billy
-    .locator("summary")
-    .filter({ hasText: /^Power Sources$/ })
-    .click();
-  await page
-    .getByRole("combobox", { name: "Power Source 2 location", exact: true })
-    .click();
-  await page
-    .getByRole("combobox", {
-      name: "Search Power Source 2 location",
-      exact: true,
-    })
-    .fill("Party Room");
+    .getByLabel("Moment detail", { exact: true })
+    .fill("The exit shutter slammed shut.");
   await expect
     .poll(() =>
       page.evaluate(
         (key) =>
-          JSON.parse(localStorage.getItem(key)!).playDrafts[
-            "module:billy:source.2.room"
-          ]?.detail,
-        `final-girl-active-game-v1:${userId}`,
+          (
+            Object.values(
+              JSON.parse(localStorage.getItem(key)!).playDrafts,
+            ) as { detail?: string }[]
+          ).some((v) => v.detail === "The exit shutter slammed shut."),
+        "final-girl-active-game-v1:" + userId,
       ),
     )
-    .toBe("Party Room");
+    .toBe(true);
   await page.reload();
-  await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
-  await billy
-    .locator("summary")
-    .filter({ hasText: /^Power Sources$/ })
-    .click();
-  await expect(
-    page.getByLabel("Power Source 2 location", { exact: true }),
-  ).toHaveText("Party Room");
+  await open(page);
   await page.getByRole("button", { name: "Finish game", exact: true }).click();
   await page
     .getByRole("dialog")
     .getByRole("button", { name: "Lost", exact: true })
     .click();
+  await expect(
+    page.getByLabel("Billy Finale (optional)", { exact: true }),
+  ).toHaveText("Power Surge");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
   await expect
-    .poll(() =>
-      page.evaluate(
-        (key) =>
-          JSON.parse(localStorage.getItem(key)!).result.playEvents.some(
-            (e: { moduleData?: { changes: Record<string, unknown> } }) =>
-              e.moduleData?.changes["source.2.room"] === "Party Room",
-          ),
-        `final-girl-active-game-v1:${userId}`,
-      ),
+    .poll(
+      () =>
+        archive.generationRequests.find((r) => r.name === "generate-ending")
+          ?.body.playSummary,
     )
-    .toBe(true);
+    .toContain("The exit shutter slammed shut.");
+  expect(
+    archive.generationRequests.find((r) => r.name === "generate-ending")!.body
+      .playSummary,
+  ).not.toContain("Encore");
+});
+
+test("older detailed trackers and retired moments remain recoverable without recreating removed controls", async ({
+  page,
+  archive,
+}) => {
+  const event = (n: number, fields: Record<string, unknown>) => ({
+    id: String(n).padStart(8, "0") + "-3333-4333-8333-333333333333",
+    at: n,
+    ...fields,
+  });
+  const legacy = [
+    event(1, { kind: "start", saved: 1, killed: 2, round: 4 }),
+    event(2, {
+      kind: "module",
+      moduleData: {
+        module: "billy",
+        changes: {
+          "buddy.toby.status": "active",
+          "buddy.toby.health": 2,
+          "buddy.toby.room": "Kitchen",
+          "source.1.status": "inactive",
+          finale: "power-surge",
+          rosterComplete: true,
+        },
+      },
+    }),
+    event(3, {
+      kind: "module",
+      moduleData: {
+        module: "buddyland",
+        changes: {
+          "victim.nick": "saved",
+          "victim.pizza-guy": "killed",
+          "item.flash-camera.status": "carried",
+          "item.flash-camera.uses": 1,
+        },
+      },
+    }),
+    event(4, {
+      kind: "moment",
+      momentType: "escape",
+      text: "Narrow escape",
+      detail: "Escaped through the kitchen hatch.",
+    }),
+  ];
+  await archive.install(page, {
+    draft: { ...activeGame, selection, playMode: true, playEvents: legacy },
+  });
+  await open(page);
+  await expect(portrait(page, "Toby")).toHaveAttribute("data-state", "active");
+  await expect(portrait(page, "Nick the Janitor")).toHaveAttribute(
+    "data-state",
+    "off",
+  );
+  await expect(portrait(page, "Pizza Guy")).toHaveAttribute(
+    "data-state",
+    "killed",
+  );
+  await openHistory(page);
+  await expect(
+    page.getByRole("region", { name: "Game timeline" }),
+  ).toContainText("Escaped through the kitchen hatch.");
+  await portrait(page, "Toby").click();
+  await expect
+    .poll(() => archive.sessions[0]?.state.playEvents)
+    .toHaveLength(5);
+  const log = archive.sessions[0].state.playEvents as {
+    moduleData?: { changes: Record<string, unknown> };
+  }[];
+  expect(log[1].moduleData!.changes["buddy.toby.health"]).toBe(2);
+  expect(log[4].moduleData!.changes).toMatchObject({
+    "buddy.toby.status": "defeated",
+    "buddy.toby.health": null,
+    "buddy.toby.room": null,
+    rosterComplete: null,
+  });
+  await expect(
+    page.getByRole("button", { name: "Record one victim killed", exact: true }),
+  ).toContainText("2");
 });
 
 for (const [killer, location] of [
@@ -345,6 +422,11 @@ for (const [killer, location] of [
     await expect(
       page.getByText("Terror card reference", { exact: true }),
     ).toHaveCount(0);
+    await page.getByRole("button", { name: "Dark Power", exact: true }).click();
+    await expect(
+      page.getByRole("combobox", { name: "Dark Power card", exact: true }),
+    ).toHaveCount(killer === "Billy the Bear" ? 1 : 0);
+    await page.getByRole("button", { name: "Record", exact: true }).click();
     await page
       .getByRole("button", { name: "Record one victim killed", exact: true })
       .click();
@@ -355,6 +437,7 @@ for (const [killer, location] of [
       .getByRole("combobox", { name: "Terror card", exact: true })
       .click();
     const options = await page.getByRole("option").allTextContents();
+    expect(options).toEqual([...options].sort((a, b) => a.localeCompare(b)));
     expect(options.includes("Regroup")).toBe(killer === "Billy the Bear");
     expect(options.includes("Earthquake!")).toBe(location === "Buddyland");
   });

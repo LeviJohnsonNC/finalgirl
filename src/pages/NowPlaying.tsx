@@ -284,7 +284,7 @@ const NowPlaying = ({
       }
       const entry = entries.find(e => e.id === id);
       if (!entry) continue;
-      const changed = entry.kind === 'moment' ? draft.detail !== undefined && draft.detail !== entry.detail
+      const changed = entry.kind === 'moment' ? (draft.detail !== undefined && draft.detail !== entry.detail) || (draft.killerCard !== undefined && draft.killerCard !== entry.killerCard)
         : entry.kind === 'killed' && Object.entries(draft).some(([key, value]) => value !== (entry[key as keyof PlayEvent] ?? (key === 'cause' ? 'unspecified' : '')));
       if (changed && !onPlayEvent?.(newPlayEvent({kind: 'details', target: id, ...draft}))) return;
     }
@@ -297,7 +297,7 @@ const NowPlaying = ({
     onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying} hasStory={Boolean(story)}
     showDeathDetails={showDeathPanel} onShowDeathDetails={enabled => onCheckpoint({showDeathPanel: enabled})}
     drafts={playDrafts} onDraft={saveDraft}
-    moduleControls={(killer === 'Billy the Bear' || location === 'Buddyland' || ['Rena','Gwynn'].includes(finalGirl)) ? <BuddylandControls killer={killer} location={location} finalGirl={finalGirl} events={playEvents} onEvent={recordPlayEvent} drafts={playDrafts} onDraft={saveDraft}/> : undefined}
+    moduleControls={(killer === 'Billy the Bear' || location === 'Buddyland' || ['Rena','Gwynn'].includes(finalGirl)) ? <BuddylandControls killer={killer} location={location} finalGirl={finalGirl} events={playEvents} onEvent={recordPlayEvent}/> : undefined}
     deathPanel={deathEventId && syncPlayNow ? <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl}} events={playEvents} eventId={deathEventId} draft={playDrafts[deathEventId]} onDraft={saveDraft} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/> : undefined}
     onDeath={event=>setDeathEventId(event.id)}/>;
 

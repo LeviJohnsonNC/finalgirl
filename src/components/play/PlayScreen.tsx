@@ -4,8 +4,8 @@ import bloodlustImage from "@/assets/play/bloodlust-stain.webp";
 import momentItem from "@/assets/play/moment-item.webp";
 import momentUnlocked from "@/assets/play/moment-ultimate-unlocked.webp";
 import momentUsed from "@/assets/play/moment-ultimate-used.webp";
-import momentEscape from "@/assets/play/moment-escape.webp";
-import momentTurningPoint from "@/assets/play/moment-turning-point.webp";
+import momentDarkPower from "@/assets/play/roster/moment-dark-power.webp";
+import momentFinale from "@/assets/play/roster/moment-finale.webp";
 import momentGirlRevived from "@/assets/play/moment-girl-revived.webp";
 import momentKillerRevived from "@/assets/play/moment-killer-revived.webp";
 import momentOther from "@/assets/play/moment-other.webp";
@@ -26,8 +26,8 @@ import {
   RotateCcw,
   Bookmark,
   type LucideIcon,
-  Shield,
-  Swords,
+  Eclipse,
+  Clapperboard,
   KeyRound,
 } from "lucide-react";
 import {
@@ -49,7 +49,8 @@ import {
 import { PlayTimeline } from "./PlayTimeline";
 import "@/styles/play.css";
 import "@/styles/play-finish.css";
-import { BUDDYLAND_ITEMS } from "@/lib/play/modules";
+import { BUDDYLAND_ITEMS, killerMomentCards } from "@/lib/play/modules";
+import { PlaySelect } from "./PlaySelect";
 
 export interface PlayScreenProps {
   killer: string;
@@ -79,6 +80,9 @@ const stateLabels: Record<StateField, string> = {
   finalHorrorLevel: "Horror",
   bloodlust: "Bloodlust",
 };
+const sortedStateFields = [...STATE_FIELDS].sort((a, b) =>
+  stateLabels[a].localeCompare(stateLabels[b]),
+);
 const stateLimits: Record<StateField, number> = {
   finalGirlHealth: 10,
   killerHealth: 20,
@@ -114,18 +118,18 @@ const moments: Array<{
     prompt: "What did it change?",
   },
   {
-    type: "escape",
-    icon: Shield,
-    image: momentEscape,
-    title: "Narrow escape",
-    prompt: "How did you escape?",
+    type: "dark-power",
+    icon: Eclipse,
+    image: momentDarkPower,
+    title: "Dark Power",
+    prompt: "Which Dark Power?",
   },
   {
-    type: "turning-point",
-    icon: Swords,
-    image: momentTurningPoint,
-    title: "Turned the tables",
-    prompt: "What changed?",
+    type: "finale",
+    icon: Clapperboard,
+    image: momentFinale,
+    title: "Finale",
+    prompt: "Which Finale?",
   },
   {
     type: "girl-revived",
@@ -149,6 +153,9 @@ const moments: Array<{
     prompt: "What happened?",
   },
 ];
+const sortedMoments = [...moments].sort((a, b) =>
+  a.title.localeCompare(b.title),
+);
 export function PlayScreen(props: PlayScreenProps) {
   const { events, onEvent, killer, location, finalGirl } = props;
   const summary = summarizePlay(events);
@@ -192,6 +199,10 @@ export function PlayScreen(props: PlayScreenProps) {
   const momentDetail = moment
     ? (props.drafts[moment.id]?.detail ?? moment.detail ?? "")
     : "";
+  const momentCard = moment?.killerCard ?? "";
+  const momentCards = killerMomentCards(killer, moment?.momentType ?? "");
+  const isReveal =
+    moment?.momentType === "dark-power" || moment?.momentType === "finale";
   const saveMoment = () => {
     if (
       moment &&
@@ -200,6 +211,7 @@ export function PlayScreen(props: PlayScreenProps) {
         kind: "details",
         target: moment.id,
         detail: momentDetail.trim(),
+        ...(isReveal && { killerCard: momentCard }),
       })
     )
       return false;
@@ -268,7 +280,7 @@ export function PlayScreen(props: PlayScreenProps) {
       </header>
       <section className="play-tracking" aria-label="Play controls">
         <div className="play-counters">
-          {(["saved", "killed", "round"] as const).map((counter) => {
+          {(["round", "saved", "killed"] as const).map((counter) => {
             const value =
               summary[counter] ??
               (counter === "round" && !summary.tracked ? 1 : 0);
@@ -377,7 +389,7 @@ export function PlayScreen(props: PlayScreenProps) {
       >
         <h2>Track more</h2>
         <div className="play-state-grid">
-          {STATE_FIELDS.map((field) => {
+          {sortedStateFields.map((field) => {
             const value = summary[field];
             return (
               <div key={field} className={`play-state play-state--${field}`}>
@@ -490,7 +502,7 @@ export function PlayScreen(props: PlayScreenProps) {
           Remember this <span>The moments that made your night</span>
         </h2>
         <div className="play-moment-choices">
-          {moments.map((choice) => (
+          {sortedMoments.map((choice) => (
             <button key={choice.type} onClick={() => pickMoment(choice)}>
               <img src={choice.image} alt="" loading="lazy" />
               <choice.icon size={17} aria-hidden="true" />
@@ -500,9 +512,43 @@ export function PlayScreen(props: PlayScreenProps) {
         </div>
         {moment && (
           <div className="play-moment-editor">
+            {isReveal && momentCards.length > 0 && (
+              <label>
+                {moment.momentType === "dark-power"
+                  ? "Which Dark Power?"
+                  : "Which Finale?"}
+                <PlaySelect
+                  aria-label={
+                    moment.momentType === "dark-power"
+                      ? "Dark Power card"
+                      : "Finale card"
+                  }
+                  value={momentCard}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    // One immutable detail edit keeps reveal context, Undo and recovery together.
+                    commit({
+                      kind: "details",
+                      target: moment.id,
+                      killerCard: next,
+                      detail: momentDetail.trim(),
+                    });
+                  }}
+                >
+                  <option value="">Not specified</option>
+                  {momentCards.map((card) => (
+                    <option key={card.id} value={card.name}>
+                      {card.name}
+                    </option>
+                  ))}
+                </PlaySelect>
+              </label>
+            )}
             <label>
-              {moments.find((c) => c.type === moment.momentType)?.prompt ??
-                "Add detail"}
+              {isReveal
+                ? "Anything to remember?"
+                : (moments.find((c) => c.type === moment.momentType)?.prompt ??
+                  "Add detail")}
               {moment.momentType === "item" ? (
                 <PlaySearch
                   label="Moment detail"
@@ -513,10 +559,16 @@ export function PlayScreen(props: PlayScreenProps) {
                       : []
                   }
                   onSearch={(value) =>
-                    props.onDraft(moment.id, { detail: value })
+                    props.onDraft(moment.id, {
+                      ...props.drafts[moment.id],
+                      detail: value,
+                    })
                   }
                   onChange={(value) =>
-                    props.onDraft(moment.id, { detail: value })
+                    props.onDraft(moment.id, {
+                      ...props.drafts[moment.id],
+                      detail: value,
+                    })
                   }
                   placeholder="Add an optional detail"
                 />
@@ -525,7 +577,10 @@ export function PlayScreen(props: PlayScreenProps) {
                   aria-label="Moment detail"
                   value={momentDetail}
                   onChange={(e) =>
-                    props.onDraft(moment.id, { detail: e.target.value })
+                    props.onDraft(moment.id, {
+                      ...props.drafts[moment.id],
+                      detail: e.target.value,
+                    })
                   }
                   onBlur={saveMoment}
                   maxLength={240}
