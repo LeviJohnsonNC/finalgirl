@@ -28,6 +28,7 @@ import { NarrationLayout, NarrationReader, NarrationTitle } from '@/components/N
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 
 import type { ActiveGame } from '@/lib/activeGame';
+import { parseVisualBible } from '../../supabase/functions/_shared/prompts';
 
 interface NowPlayingProps {
   onDiscard?: () => void;
@@ -76,7 +77,7 @@ const NowPlaying = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sceneImageUrl, setSceneImageUrl] = useState<string>(initialSceneImageUrl ?? '');
-  const [visualBible, setVisualBible] = useState<string | undefined>(initialVisualBible);
+  const [visualBible, setVisualBible] = useState<string | undefined>(() => parseVisualBible(initialVisualBible));
   // Whether the look-book call has finished (successfully or not). The first
   // image waits for this so it is composed with the same look the poster will use.
   const [visualBibleSettled, setVisualBibleSettled] = useState(false);
@@ -118,7 +119,7 @@ const NowPlaying = ({
   // can already reference it. Cheap enough to be fire-and-forget.
   useEffect(() => {
     if (!settingsReady) return;
-    if (!isAuthenticated || !autoGenerate || initialVisualBible) { setVisualBibleSettled(true); return; }
+    if (!isAuthenticated || !autoGenerate || parseVisualBible(initialVisualBible)) { setVisualBibleSettled(true); return; }
     let cancelled = false;
     (async () => {
       const bible = await generateVisualBible({
@@ -131,8 +132,9 @@ const NowPlaying = ({
         locationDescription: getLocationDescription(location),
       });
       if (cancelled) return;
-      setVisualBible(bible);
-      checkpointRef.current({ visualBible: bible });
+      const completeBible = parseVisualBible(bible);
+      setVisualBible(completeBible);
+      checkpointRef.current({ visualBible: completeBible });
       setVisualBibleSettled(true);
     })();
     return () => {

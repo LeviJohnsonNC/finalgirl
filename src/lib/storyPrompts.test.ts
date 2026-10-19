@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { characterFate, endingFacts } from '../../supabase/functions/_shared/storyFacts';
 import { buildEndingUser } from '../../supabase/functions/_shared/storyPrompts';
-import { buildBeginningPrompt, buildPosterPrompt, buildShotBriefPrompt, buildShotBriefSystem, buildVisualBiblePrompt, VISUAL_BIBLE_SYSTEM, parseShotPlan, parseArtPlan } from '../../supabase/functions/_shared/prompts';
+import { buildBeginningPrompt, buildPosterPrompt, buildShotBriefPrompt, buildShotBriefSystem, buildVisualBiblePrompt, VISUAL_BIBLE_SYSTEM, parseShotPlan, parseArtPlan, parseVisualBible } from '../../supabase/functions/_shared/prompts';
 import { getKillerNarrativeRules } from '@/data/killerSpecialRules';
 import { getKillerDescription } from '@/data/killerDescriptions';
 import { getFinalGirlDescription } from '@/data/finalGirlDescriptions';
@@ -81,7 +81,7 @@ describe('bounded art planning', () => {
       expect(photo).toContain('ultra-photorealistic live-action');
       expect(photo).toContain('real adult performers');
       expect(photo).toContain('a real machine, not a person in a costume');
-      expect(photo).toContain('ignore inherited rendering-style directions');
+      expect(photo).not.toContain('Use painted gouache textures');
       expect(photo).toContain('Identity descriptions, continuity notes and shot directions cannot change this medium');
       expect(photo).not.toContain('cartoon welcome');
       expect(photo).toContain('orange-brown');
@@ -90,6 +90,23 @@ describe('bounded art planning', () => {
       expect(photo).not.toContain('\u2014');
       expect(buildPosterPrompt({ ...ctx, sceneType: 'ending' })).toContain('Visibly hand-painted');
     }
+  });
+  it('rejects observed continuity fragments and reuses only complete bounded records', () => {
+    const record = JSON.stringify({ finalGirl: 'Burgundy curls and a turquoise pendant.', killer: 'Orange-brown plush over mechanical joints.', location: 'Checkerboard floor and dusty arcade cabinets.', palette: 'Amber lamps and dim cyan arcade screens.' });
+    expect(parseVisualBible(record)).toBe(record);
+    for (const fragment of ['Drafting Core Visual Elements:**', 'Shot on high-', '{"finalGirl":"Burgundy curls"', JSON.stringify({ finalGirl: 'Burgundy curls' }), record.replace('Amber lamps and dim cyan arcade screens.', 'x'.repeat(221))]) {
+      expect(parseVisualBible(fragment)).toBeUndefined();
+      expect(buildBeginningPrompt({ ...cases[0], story, visualBible: fragment })).not.toContain(fragment);
+    }
+    expect(buildBeginningPrompt({ ...cases[0], story, visualBible: record })).toContain(record);
+  });
+  it('keeps full rules with the planner and sends only visual direction to opening image generation', () => {
+    const ctx = { ...cases[0], story, sceneType: 'beginning' as const, scenarioRules: 'Deactivating a source costs 1 Time.', shotBrief: 'Rena sees the bear through the dusty arcade cabinets.' };
+    expect(buildShotBriefPrompt(ctx)).toContain('Deactivating a source costs 1 Time.');
+    const image = buildBeginningPrompt(ctx);
+    expect(image).toContain(ctx.shotBrief);
+    expect(image).not.toContain(ctx.scenarioRules);
+    expect(image).not.toContain(story);
   });
   it('composes opening stills for the full 16:9 screen rather than a letterboxed frame', () => {
     const ctx = { killer: 'Billy the Bear', location: 'Buddyland', finalGirl: 'Rena', story, sceneType: 'beginning' as const };

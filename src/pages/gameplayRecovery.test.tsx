@@ -6,15 +6,17 @@ import type { ReactNode } from 'react';
 import { GameOutcomeForm } from '@/components/GameOutcomeForm';
 // Data-flow tests use a native adapter; browser tests exercise the real themed menus.
 vi.mock('@/components/outcome/OutcomeSelect', () => ({ OutcomeSelect: ({ label, id, value, onValueChange, children }: { label: string; id?: string; value: string; onValueChange: (value: string) => void; children: ReactNode }) => <select aria-label={label} id={id} value={value} onChange={event => onValueChange(event.target.value)}>{children}</select> }));
-const mock = vi.hoisted(() => ({ stream: vi.fn(), image: vi.fn(), settingsReady: true, autoGenerate: true }));
+const bible = JSON.stringify({ finalGirl: 'Burgundy curls and a turquoise pendant.', killer: 'Orange-brown plush over mechanical joints.', location: 'Checkerboard floor and dusty arcade cabinets.', palette: 'Amber lamps and dim cyan arcade screens.' });
+const mock = vi.hoisted(() => ({ stream: vi.fn(), image: vi.fn(), bible: vi.fn(), settingsReady: true, autoGenerate: true }));
 vi.mock('@/lib/streamChatCompletion', () => ({ streamChatCompletion: mock.stream }));
 vi.mock('@/hooks/useNarration', () => ({ useNarration: () => ({ isNarrating: false, isPlaying: false, progress: {}, toggleNarration: vi.fn() }) }));
-vi.mock('@/hooks/useImageGeneration', () => ({ useImageGeneration: () => ({ isAuthenticated: true, settingsReady: mock.settingsReady, autoGenerate: mock.autoGenerate, generateImage: mock.image, generateVisualBible: vi.fn().mockResolvedValue('A look'), isGeneratingImage: false, imageError: null }) }));
+vi.mock('@/hooks/useImageGeneration', () => ({ useImageGeneration: () => ({ isAuthenticated: true, settingsReady: mock.settingsReady, autoGenerate: mock.autoGenerate, generateImage: mock.image, generateVisualBible: mock.bible, isGeneratingImage: false, imageError: null }) }));
 vi.mock('@/components/StickyOutcomeBar', () => ({ StickyOutcomeBar: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
 vi.mock('@/components/ProjectorLeader', () => ({ ProjectorLeader: () => <div>Generating</div> }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
 beforeEach(() => {
   mock.stream.mockReset(); mock.image.mockReset(); mock.settingsReady = true; mock.autoGenerate = true;
+  mock.bible.mockReset().mockResolvedValue(bible);
   vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue();
 });
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
@@ -67,6 +69,25 @@ describe('gameplay without AI dependencies', () => {
     expect(JSON.stringify(body)).toContain('Six Victims');
     expect(JSON.stringify(body)).toContain('1 Time');
   });
+  it('replaces fragmentary saved continuity before generating an opening, without rerolling its story', async () => {
+    let complete: (value: string) => void;
+    mock.bible.mockReturnValue(new Promise<string>(resolve => { complete = resolve; }));
+    const checkpoint = vi.fn();
+    render(<NowPlaying {...result} sessionId={result.id} initialStory={opening} initialVisualBible="Drafting Core Visual Elements:**" filmId="s1-camp-happy-trails" setupScenario={null} startingEvent={null} onBack={vi.fn()} onCheckpoint={checkpoint} onGameEnd={vi.fn()} />);
+    await waitFor(() => expect(mock.bible).toHaveBeenCalledTimes(1));
+    expect(mock.image).not.toHaveBeenCalled();
+    expect(mock.stream).not.toHaveBeenCalled();
+    await act(async () => complete!(bible));
+    await waitFor(() => expect(mock.image).toHaveBeenCalledTimes(1));
+    expect(mock.image.mock.calls[0][0]).toMatchObject({ story: opening, visualBible: bible, gameId: result.id });
+    expect(checkpoint).toHaveBeenCalledWith({ visualBible: bible });
+  });
+  it('reuses complete saved continuity without another utility request', async () => {
+    render(<NowPlaying {...result} sessionId={result.id} initialStory={opening} initialVisualBible={bible} filmId="s1-camp-happy-trails" setupScenario={null} startingEvent={null} onBack={vi.fn()} onCheckpoint={vi.fn()} onGameEnd={vi.fn()} />);
+    await waitFor(() => expect(mock.image).toHaveBeenCalledTimes(1));
+    expect(mock.bible).not.toHaveBeenCalled();
+    expect(mock.image.mock.calls[0][0].visualBible).toBe(bible);
+  });
   it('gives the ending the selected biography and reported Power Surge state', async () => {
     mock.autoGenerate = false;
     mock.stream.mockResolvedValue('Gwynn put down her tools. The machines were finally silent.');
@@ -85,7 +106,7 @@ describe('gameplay without AI dependencies', () => {
     render(<NowPlaying {...result} sessionId={result.id} filmId="s1-camp-happy-trails" setupScenario={null} startingEvent={null} onBack={vi.fn()} onCheckpoint={vi.fn()} onGameEnd={end} />);
     await screen.findByText('Credits unavailable');
     fireEvent.click(screen.getByRole('button', { name: 'WON' }));
-    expect(end).toHaveBeenCalledWith('won', undefined, undefined, 'A look');
+    expect(end).toHaveBeenCalledWith('won', undefined, undefined, bible);
   });
   it('saves the result even when no intro exists for an ending', async () => {
     const save = vi.fn();

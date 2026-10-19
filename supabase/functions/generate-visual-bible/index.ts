@@ -5,7 +5,7 @@ import { getCorsHeaders } from "../_shared/auth.ts";
 import { requireUser } from "../_shared/guard.ts";
 import { VisualBibleRequestSchema, validateRequest } from "../_shared/validation.ts";
 import { generateText, statusFor, userFacingMessage } from "../_shared/aiGateway.ts";
-import { buildVisualBiblePrompt, VISUAL_BIBLE_SYSTEM } from "../_shared/prompts.ts";
+import { buildVisualBiblePrompt, VISUAL_BIBLE_SYSTEM, parseVisualBible } from "../_shared/prompts.ts";
 
 serve(async (req) => {
   const cors = getCorsHeaders(req.headers.get("origin"));
@@ -27,12 +27,16 @@ serve(async (req) => {
     const { text, model } = await generateText({
       system: VISUAL_BIBLE_SYSTEM,
       user: buildVisualBiblePrompt(validation.data),
-      maxTokens: 400,
+      maxTokens: 4000,
       temperature: 0.5,
+      reasoningEffort: "low",
+      requireComplete: true,
     });
 
     await guard.logUsage({ model, kind: "visual-bible" });
-    return json({ visualBible: text.trim().slice(0, 1000), model });
+    const visualBible = parseVisualBible(text);
+    if (!visualBible) throw new Error("The continuity record was incomplete.");
+    return json({ visualBible, model });
   } catch (error) {
     console.error("Error in generate-visual-bible:", error);
     return json({ error: userFacingMessage(error) }, statusFor(error));
