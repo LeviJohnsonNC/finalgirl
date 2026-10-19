@@ -220,7 +220,7 @@ test("Buddyland observations survive reload and reach deaths and ending review",
     .click();
   await expect(
     page.getByLabel("Billy Finale (optional)", { exact: true }),
-  ).toHaveValue("Power Surge");
+  ).toHaveText("Power Surge");
   await expect(
     page.getByLabel("Buddies in Play at End (0–7)", { exact: true }),
   ).toHaveValue("1");

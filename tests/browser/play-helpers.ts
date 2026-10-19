@@ -20,3 +20,10 @@ export async function openHistory(page: Page) {
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   await toggle.click();
 }
+
+export async function saveResultOnly(page: Page) {
+  await page.getByRole("button", { name: "More options", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Save result without narration", exact: true })
+    .click();
+}
