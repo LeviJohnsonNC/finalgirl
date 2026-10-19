@@ -7,6 +7,8 @@ const games: GameResult[] = ['a', 'b', 'c'].map((id, i) => ({ id, timestamp: 3 -
 class TestImage {
   static instances: TestImage[] = [];
   src = '';
+  naturalWidth = 1600;
+  naturalHeight = 900;
   onload: (() => void) | null = null;
   onerror: (() => void) | null = null;
   constructor() { TestImage.instances.push(this); }
@@ -18,6 +20,22 @@ beforeEach(() => { vi.useFakeTimers(); TestImage.instances = []; vi.stubGlobal('
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe('projection lifecycle', () => {
+  it('rejects a portrait stored as a scene and continues without loading posters', () => {
+    const { result } = renderHook(() => useTheaterReel([{ ...games[0], posterImageUrl: 'https://test.invalid/poster.png' }, games[1]], false));
+    lastImage('a').naturalWidth = 1000;
+    lastImage('a').naturalHeight = 1500;
+    loaded('a');
+    expect(result.current.current).toBeUndefined();
+    loaded('b');
+    expect(result.current.current?.id).toBe('b');
+    expect(TestImage.instances.some(image => image.src.includes('poster.png'))).toBe(false);
+  });
+  it('retains legacy square opening stills', () => {
+    const { result } = renderHook(() => useTheaterReel(games, false));
+    lastImage('a').naturalWidth = lastImage('a').naturalHeight = 1024;
+    loaded('a');
+    expect(result.current.current?.id).toBe('a');
+  });
   it('holds the visible picture until the automatic next scene loads', () => {
     const { result } = renderHook(() => useTheaterReel(games, false));
     loaded('a');

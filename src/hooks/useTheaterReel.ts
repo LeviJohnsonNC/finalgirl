@@ -43,6 +43,9 @@ export function useTheaterReel(games: GameResult[], interacting: boolean, active
     image.onload = () => {
       window.clearTimeout(timeout);
       if (active) {
+        // Older records may put portrait artwork in the scene field. Never
+        // commit it to the projector or fall back to that game's poster.
+        if (!image.naturalWidth || image.naturalWidth < image.naturalHeight) { fail(targetUrl); return; }
         setProjection(old => old.key === targetKey ? old : { key: targetKey, previous: old.key });
         setRequestedId(id => id ?? targetId);
       }
@@ -63,9 +66,10 @@ export function useTheaterReel(games: GameResult[], interacting: boolean, active
   useEffect(() => {
     if (!nextUrl || !visible) return;
     const image = new Image();
+    image.onload = () => { if (image.naturalWidth < image.naturalHeight) fail(nextUrl); };
     image.onerror = () => fail(nextUrl);
     image.src = nextUrl;
-    return () => { image.onerror = null; };
+    return () => { image.onload = null; image.onerror = null; };
   }, [nextUrl, visible, fail]);
 
   const playing = !reducedMotion && visible && !interacting;

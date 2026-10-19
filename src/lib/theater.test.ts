@@ -12,11 +12,9 @@ describe('personal screening selection', () => {
     expect(buildScreenings([...games].reverse())).toEqual(buildScreenings(games));
     expect(games[0].id).toBe('old');
   });
-  it('falls back to the same game’s poster after a scene failure and skips exhausted games', () => {
+  it('skips unavailable scenes even when the same game has a poster', () => {
     const games = [game('a', 2, { posterImageUrl: 'https://test.invalid/poster.png' }), game('b', 1)];
     const failed = new Set(['https://test.invalid/a.png']);
-    expect(buildScreenings(games, failed)[0]).toMatchObject({ id: 'a', kind: 'poster', imageUrl: 'https://test.invalid/poster.png' });
-    failed.add('https://test.invalid/poster.png');
     expect(buildScreenings(games, failed).map(g => g.id)).toEqual(['b']);
   });
   it('deduplicates pictures and IDs, caps the reel, and leaves the archive untouched', () => {
@@ -30,7 +28,7 @@ describe('personal screening selection', () => {
   it('handles empty archives, poster-only games, and missing or invalid dates', () => {
     expect(buildScreenings([])).toEqual([]);
     expect(buildScreenings([game('a', 1, { sceneImageUrl: undefined })])).toEqual([]);
-    expect(buildScreenings([game('a', 1, { sceneImageUrl: undefined, posterImageUrl: 'https://test.invalid/p.png' })])[0].kind).toBe('poster');
+    expect(buildScreenings([game('a', 1, { sceneImageUrl: undefined, posterImageUrl: 'https://test.invalid/p.png' })])).toEqual([]);
     for (const value of [0, NaN, Infinity, 1e30]) expect(screeningDate(value)).toBe('');
   });
 });
@@ -48,7 +46,8 @@ describe('unfinished screening', () => {
     const withArt = { ...draft, sceneImageUrl: 'https://test.invalid/scene.png', posterImageUrl: 'https://test.invalid/poster.png' };
     expect(activeScreenings(withArt, new Set())[0]).toMatchObject({ kind: 'scene', timestamp: 0 });
     expect(activeScreenings(withArt, new Set())[0].outcome).toBeUndefined();
-    expect(activeScreenings(withArt, new Set([withArt.sceneImageUrl]))[0].kind).toBe('poster');
+    expect(activeScreenings(withArt, new Set([withArt.sceneImageUrl]))).toEqual([]);
+    expect(activeScreenings({ ...draft, posterImageUrl: withArt.posterImageUrl }, new Set())).toEqual([]);
   });
 });
 
@@ -60,9 +59,9 @@ describe('marquee result accuracy', () => {
   ] as const)('labels %s with health %s as %s', (outcome, finalGirlHealth, label) => {
     expect(screeningVerdict({ outcome, finalGirlHealth })).toBe(label);
   });
-  it('preserves recorded health when a scene falls back to its poster', () => {
-    const [screening] = buildScreenings([game('a', 1, { finalGirlHealth: 0, posterImageUrl: 'https://test.invalid/poster.png' })], new Set(['https://test.invalid/a.png']));
-    expect(screening.kind).toBe('poster');
+  it('preserves recorded health on the selected scene', () => {
+    const [screening] = buildScreenings([game('a', 1, { finalGirlHealth: 0, posterImageUrl: 'https://test.invalid/poster.png' })]);
+    expect(screening.kind).toBe('scene');
     expect(screeningVerdict(screening)).toBe('Sacrificial victory');
   });
 });

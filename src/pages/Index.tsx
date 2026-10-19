@@ -20,10 +20,11 @@ const TheEnd = lazy(() => import('./TheEnd'));
 const Scrapbooks = lazy(() => import('./Scrapbooks'));
 const Stats = lazy(() => import('./Stats'));
 const Rules = lazy(() => import('./Rules'));
+const Lobby = lazy(() => import('./Lobby'));
 import type { EndingFormData, ActiveGame } from '@/lib/activeGame';
 import { useActiveGame } from '@/hooks/useActiveGame';
 import { usePageNavigation } from '@/hooks/usePageNavigation';
-import { Library, BookOpen, BarChart3, ArrowLeft, User, BookMarked } from 'lucide-react';
+import { Library, BookOpen, BarChart3, ArrowLeft, User, BookMarked, Film } from 'lucide-react';
 import { getFilmIdByLocation } from '@/types/gameData';
 import { GameResult } from '@/hooks/useGameHistory';
 import { GameHistoryProvider, useGameHistoryContext } from '@/contexts/GameHistoryContext';
@@ -56,8 +57,9 @@ const IndexContent = () => {
   const sessionOwner = useRef(owner); sessionOwner.current = owner;
   const [discardTarget,setDiscardTarget] = useState<{owner:string;game:ActiveGame}|null>(null);
   const [setupReturn,setSetupReturn] = useState<{owner:string;selection:ActiveGame['selection']}|null>(null);
-  const { page: currentPage, navigate: setCurrentPage, back: goBack, canGoBack } = usePageNavigation<'home' | 'dashboard' | 'archive' | 'nowPlaying' | 'outcome' | 'ending' | 'scrapbooks' | 'stats' | 'rules'>('home');
+  const { page: currentPage, navigate: setCurrentPage, back: goBack, canGoBack } = usePageNavigation<'home' | 'dashboard' | 'archive' | 'nowPlaying' | 'outcome' | 'ending' | 'scrapbooks' | 'stats' | 'rules' | 'lobby'>('home');
   const hasStarted = currentPage !== 'home';
+  const isLobby = currentPage === 'lobby';
   // A session the stats page asked to open. Set only by that hand-off; every
   // other route into the scrapbooks clears it, so they start on the covers.
   const [scrapbookFocusId, setScrapbookFocusId] = useState<string | null>(null);
@@ -225,7 +227,11 @@ const IndexContent = () => {
     const observer = new ResizeObserver(publish);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [hasStarted]);
+  }, [hasStarted, isLobby]);
+
+  if (isLobby) return <Suspense fallback={<PageLoading />}><Lobby key={owner}
+    onTheater={handleNavigateHome} onScrapbooks={() => goToScrapbooks()} onStats={() => setCurrentPage('stats')}
+    onRules={() => setCurrentPage('rules')} onCollection={handleArchive} onOpenCase={goToScrapbooks} /></Suspense>;
 
   // Show Marquee until user starts
   if (!hasStarted) {
@@ -250,6 +256,7 @@ const IndexContent = () => {
         onOpenCaseFile={goToScrapbooks}
         onStats={() => { setCurrentPage('stats'); }}
         onRules={() => { setCurrentPage('rules'); }}
+        onLobby={() => setCurrentPage('lobby')}
       />
     );
   }
@@ -394,6 +401,14 @@ const IndexContent = () => {
           
           {/* Right: Collection + Stats + Scrapbooks + Time */}
           <div className="flex items-center gap-1 sm:gap-3">
+            {!isGameSession && <button
+              onClick={() => setCurrentPage('lobby')}
+              aria-label="LOBBY"
+              className="type-caption text-muted-foreground hover:text-amber-400 transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
+            >
+              <Film className="w-3 h-3" />
+              <span className="hidden sm:inline">LOBBY</span>
+            </button>}
             <button
               onClick={handleArchive}
               aria-label="COLLECTION"
