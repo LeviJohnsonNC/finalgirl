@@ -1,3 +1,4 @@
+import { isGameDiscarded } from "@/lib/discardedGames";
 /** Owner-scoped, bounded device audio cache. Storage failure never prevents playback. */
 const MAX_BYTES = 12 * 1024 * 1024,
   MAX_ENTRIES = 24;
@@ -6,6 +7,7 @@ interface Entry {
   owner: string;
   used: number;
   blob: Blob;
+  gameIds?: string[];
 }
 const memory = new Map<string, Entry>();
 const id = (owner: string, key: string) => owner + ':' + key;
@@ -75,10 +77,13 @@ function remember(entry: Entry) {
 export async function getNarrationClip(
   owner: string,
   key: string,
+  gameId?: string,
 ): Promise<Blob | null> {
+  if (gameId && isGameDiscarded(owner,gameId)) return null;
   const entry = memory.get(id(owner, key));
   if (entry) {
     remember({ ...entry, used: Date.now() });
+    if (gameId) void putNarrationClip(owner,key,entry.blob,gameId);
     return entry.blob;
   }
   const db = await database();
@@ -96,6 +101,7 @@ export async function getNarrationClip(
     )
       return null;
     remember({ ...stored, used: Date.now() });
+    if (gameId) void putNarrationClip(owner,key,stored.blob,gameId);
     return stored.blob;
   } catch {
     return null;
@@ -107,13 +113,16 @@ export async function putNarrationClip(
   owner: string,
   key: string,
   blob: Blob,
+  gameId?: string,
 ): Promise<void> {
-  if (!blob.size || blob.size > MAX_BYTES) return;
-  const entry = { id: id(owner, key), owner, used: Date.now(), blob };
+  if (!blob.size || blob.size > MAX_BYTES || gameId && isGameDiscarded(owner,gameId)) return;
+  const gameIds = [...new Set([...(memory.get(id(owner,key))?.gameIds ?? []), ...(gameId ? [gameId] : [])])];
+  const entry = { id: id(owner, key), owner, used: Date.now(), blob, ...(gameIds.length && {gameIds}) };
   remember(entry);
   const db = await database();
   if (!db) return;
   try {
+    if (gameId && isGameDiscarded(owner,gameId)) return;
     // One transaction serializes simultaneous cache writes and their eviction.
     const tx = db.transaction('clips', 'readwrite');
     const completion = done(tx).catch(() => {});
@@ -134,4 +143,27 @@ export async function putNarrationClip(
   } finally {
     db.close();
   }
+}
+
+/** Remove this game's clips, including known legacy keys which predate game association. */
+export async function removeGameNarration(owner: string, gameId: string, keys: string[] = []) {
+  const ids = new Set(keys.map(key => id(owner,key)));
+  const belongs = (entry: Entry) => entry.owner === owner && (entry.gameIds?.includes(gameId) || ids.has(entry.id));
+  for (const [key, entry] of memory) if (belongs(entry)) {
+    const retained = entry.gameIds?.filter(id => id !== gameId) ?? [];
+    if (retained.length) memory.set(key,{...entry,gameIds:retained}); else memory.delete(key);
+  }
+  const db = await database();
+  if (!db) return;
+  try {
+    const tx = db.transaction('clips','readwrite');
+    const completion = done(tx);
+    const store = tx.objectStore('clips');
+    const entries = await requestResult<Entry[]>(store.getAll());
+    for (const entry of entries) if (belongs(entry)) {
+      const retained = entry.gameIds?.filter(id => id !== gameId) ?? [];
+      if (retained.length) store.put({...entry,gameIds:retained}); else store.delete(entry.id);
+    }
+    await completion;
+  } finally { db.close(); }
 }

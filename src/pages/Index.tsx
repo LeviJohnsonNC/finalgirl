@@ -28,6 +28,8 @@ import { getFilmIdByLocation } from '@/types/gameData';
 import { GameResult } from '@/hooks/useGameHistory';
 import { GameHistoryProvider, useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { NewsTicker } from '@/components/NewsTicker';
+import { DiscardGameDialog } from '@/components/DiscardGameDialog';
+import { isGameDiscarded } from '@/lib/discardedGames';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
@@ -50,6 +52,10 @@ const prefetchLikelyPages = () => {
 const IndexContent = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
+  const owner = user?.id ?? 'guest';
+  const sessionOwner = useRef(owner); sessionOwner.current = owner;
+  const [discardTarget,setDiscardTarget] = useState<{owner:string;game:ActiveGame}|null>(null);
+  const [setupReturn,setSetupReturn] = useState<{owner:string;selection:ActiveGame['selection']}|null>(null);
   const { page: currentPage, navigate: setCurrentPage, back: goBack, canGoBack } = usePageNavigation<'home' | 'dashboard' | 'archive' | 'nowPlaying' | 'outcome' | 'ending' | 'scrapbooks' | 'stats' | 'rules'>('home');
   const hasStarted = currentPage !== 'home';
   // A session the stats page asked to open. Set only by that hand-off; every
@@ -67,10 +73,11 @@ const IndexContent = () => {
   const introStory = activeGame?.introStory;
   const visualBible = activeGame?.visualBible;
   const endingFormData = activeGame?.formData ?? null;
-  const { recordGame, updateGame } = useGameHistoryContext();
+  const { recordGame, updateGame, discardGame } = useGameHistoryContext();
   const recordedIds = useRef(new Set<string>());
   if (activeGame?.result) recordedIds.current.add(activeGame.id);
   const checkpointGame = (id: string, updates: Partial<ActiveGame>) => {
+    if (isGameDiscarded(owner,id)) return false;
     const saved = checkpoint(id, updates);
     // A late image can land after SAVE unmounts its screen. Queue the attachment
     // against the stable record ID, even after the active draft was cleared.
@@ -81,6 +88,26 @@ const IndexContent = () => {
       } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save the image.'); }
     }
     return saved;
+  };
+  const previousActive = useRef<{owner:string;game:ActiveGame|null}>({owner,game:activeGame});
+  useEffect(() => {
+    const previous = previousActive.current;
+    if (previous.owner === owner && previous.game && !activeGame && isGameDiscarded(owner,previous.game.id)) {
+      setSetupReturn({owner,selection:previous.game.selection});
+      setCurrentPage('dashboard');
+    }
+    previousActive.current = {owner,game:activeGame};
+  },[activeGame,owner,setCurrentPage]);
+  const requestDiscard = (game:ActiveGame) => setDiscardTarget({owner,game});
+  const confirmDiscard = async (game:ActiveGame) => {
+    const requestOwner = owner;
+    const result = await discardGame(game.id,game);
+    recordedIds.current.delete(game.id);
+    setDiscardTarget(null);
+    if (sessionOwner.current !== requestOwner) return;
+    if (!getCurrentGame()) { setSetupReturn({owner,selection:game.selection}); setCurrentPage('dashboard'); }
+    if (result.cleanupPending) toast.info('Game discarded. Image cleanup will retry when connected.');
+    else toast.success('Game discarded.');
   };
 
   // Scroll to top when page changes
@@ -166,10 +193,6 @@ const IndexContent = () => {
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save your result.'); }
   };
 
-  const handleDiscardEnding = () => {
-    if (activeGame && checkpoint(activeGame.id, { phase: 'outcome' })) setCurrentPage('outcome');
-  };
-
   const cloudNotice = <>
     {cloudPlay.conflict && <div role="alert" className={`${hasStarted ? 'fixed top-24 inset-x-3 z-[70]' : ''} border border-accent/40 bg-background p-4 shadow-2xl type-body-sm max-w-2xl mx-auto`}>
       <p>Another device changed this game. Both versions will be preserved before you choose.</p>
@@ -184,9 +207,7 @@ const IndexContent = () => {
     <div role="status" className="mb-4 border border-primary/30 bg-card px-4 py-3 type-caption text-foreground">
       A GAME IS IN PROGRESS · {activeGame.selection.finalGirl} vs {activeGame.selection.killer}
       <button className="ml-3 text-primary underline min-h-[44px]" onClick={() => { setCurrentPage(activeGame.phase); }}>RESUME GAME</button>
-      <button className="ml-3 text-muted-foreground underline min-h-[44px]" onClick={() => {
-        if (window.confirm('Discard this unfinished game? Any result already recorded stays in your archive.')) handlePlayAgain();
-      }}>DISCARD DRAFT</button>
+      <button className="ml-3 text-muted-foreground underline min-h-[44px]" onClick={() => requestDiscard(activeGame)}>DISCARD GAME</button>
     </div>
   ) : null;
 
@@ -260,10 +281,11 @@ const IndexContent = () => {
               onCheckpoint={(updates) => checkpointGame(activeGame.id, updates)}
               onBack={handleBackFromNowPlaying}
               onGameEnd={handleGameEnd}
+              onDiscard={() => requestDiscard(activeGame)}
             />
           );
         }
-        return <CastingRoom onStartGame={handleStartGame} onGoToArchive={handleArchive} />;
+        return <CastingRoom key={setupReturn?.owner === owner ? JSON.stringify(setupReturn.selection) : owner} initialSelection={setupReturn?.owner === owner ? setupReturn.selection : undefined} onStartGame={handleStartGame} onGoToArchive={handleArchive} />;
       case 'outcome':
         if (lastGameResult) {
           return (
@@ -274,11 +296,11 @@ const IndexContent = () => {
               onDraftChange={(fields) => updateFormDraft(activeGame.id, fields)}
               onSaveResult={handleSaveResult}
               onContinue={handleContinueToEnding}
-              onDiscard={handlePlayAgain}
+              onDiscard={() => requestDiscard(activeGame)}
             />
           );
         }
-        return <CastingRoom onStartGame={handleStartGame} onGoToArchive={handleArchive} />;
+        return <CastingRoom key={setupReturn?.owner === owner ? JSON.stringify(setupReturn.selection) : owner} initialSelection={setupReturn?.owner === owner ? setupReturn.selection : undefined} onStartGame={handleStartGame} onGoToArchive={handleArchive} />;
       case 'ending':
         if (lastGameResult && endingFormData) {
           return (
@@ -292,11 +314,11 @@ const IndexContent = () => {
               onCheckpoint={(updates) => checkpointGame(activeGame.id, updates)}
               formData={endingFormData}
               onSave={handleSaveEnding}
-              onDiscard={handleDiscardEnding}
+              onDiscard={() => requestDiscard(activeGame)}
             />
           );
         }
-        return <CastingRoom onStartGame={handleStartGame} onGoToArchive={handleArchive} />;
+        return <CastingRoom key={setupReturn?.owner === owner ? JSON.stringify(setupReturn.selection) : owner} initialSelection={setupReturn?.owner === owner ? setupReturn.selection : undefined} onStartGame={handleStartGame} onGoToArchive={handleArchive} />;
       case 'archive':
         return <Archive />;
       case 'scrapbooks':
@@ -311,7 +333,7 @@ const IndexContent = () => {
       case 'rules':
         return <Rules />;
       default:
-        return <CastingRoom onStartGame={handleStartGame} onGoToArchive={handleArchive} />;
+        return <CastingRoom key={setupReturn?.owner === owner ? JSON.stringify(setupReturn.selection) : owner} initialSelection={setupReturn?.owner === owner ? setupReturn.selection : undefined} onStartGame={handleStartGame} onGoToArchive={handleArchive} />;
     }
   };
 
@@ -321,6 +343,7 @@ const IndexContent = () => {
 
   return (
     <div className={`app-shell min-h-screen bg-background relative overflow-x-hidden${isGameSession ? ' game-session' : ''}${isNarrationPage ? ' narration-session' : ''}`}>
+      <DiscardGameDialog game={discardTarget?.owner === owner ? discardTarget.game : null} onClose={() => setDiscardTarget(null)} onConfirm={confirmDiscard} />
       {/* Shared App Header — hidden on mobile when scrapbook is open */}
       {!isNarrationPage && <div className={isScrapbookOpen ? 'hidden sm:block' : currentPage==='nowPlaying' && activeGame?.playMode ? 'play-active-header' : ''}>
         <AppHeader onNavigateHome={handleNavigateHome} />

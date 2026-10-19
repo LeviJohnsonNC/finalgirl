@@ -4,10 +4,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { useDurableQueue } from '@/hooks/useDurableQueue';
 import { readStoredValue, useLocalStorage } from '@/hooks/useLocalStorage';
 import { isActiveGame, type ActiveGame } from '@/lib/activeGame';
+import { isGameDiscarded, purgeLocalGame } from '@/lib/discardedGames';
 
 interface Snapshot { id: string; state: ActiveGame; closed: boolean }
 export interface RemotePlaySession { id: string; revision: number; state: ActiveGame; closed: boolean; updated_at?: string }
-interface Reply { ok: boolean; revision: number; state?: ActiveGame; closed?: boolean }
+interface Reply { ok: boolean; revision: number; state?: ActiveGame; closed?: boolean; discarded?: boolean }
 const validRow = (value: unknown): value is RemotePlaySession => {
   const row = value as RemotePlaySession;
   return Boolean(row && typeof row.id === 'string' && Number.isSafeInteger(row.revision) && row.revision > 0 && isActiveGame(row.state) && row.state.id === row.id && typeof row.closed === 'boolean');
@@ -28,6 +29,7 @@ export function usePlaySessionSync(game: ActiveGame | null) {
   latest.current = { owner, game, signedIn: Boolean(user), revisions };
 
   const send = useCallback(async (snapshot: Snapshot) => {
+    if (isGameDiscarded(owner, snapshot.id)) return;
     if (latest.current.owner !== owner || !latest.current.signedIn) throw new Error('Sign in to sync this game.');
     // Newer local snapshots contain the complete event log. Never send an older open snapshot over them.
     if (!snapshot.closed && (!latest.current.game || latest.current.game.id !== snapshot.id || JSON.stringify(snapshot.state) !== JSON.stringify(latest.current.game))) return;
@@ -39,6 +41,8 @@ export function usePlaySessionSync(game: ActiveGame | null) {
     if (latest.current.owner !== owner) throw new Error('Session changed. This game stays saved on its device.');
     if (error) throw new Error('Cloud sync unavailable. Your game is saved on this device.');
     const reply = data as unknown as Reply;
+    if (reply?.discarded === true) { purgeLocalGame(owner, snapshot.id); setConflict(null); return; }
+    if (isGameDiscarded(owner, snapshot.id)) return;
     if (!reply || !Number.isSafeInteger(reply.revision) || reply.revision < 1 || typeof reply.ok !== 'boolean') throw new Error('The archive returned an invalid session. Your local game is safe.');
     if (!reply.ok) {
       const row = { id: snapshot.id, revision: reply.revision, state: reply.state, closed: reply.closed };
@@ -51,13 +55,13 @@ export function usePlaySessionSync(game: ActiveGame | null) {
   const { pending, enqueue, flush, error } = useDurableQueue<Snapshot>(`final-girl-play-outbox-v1:${owner}`, Boolean(user && isAuthReady), send);
 
   useEffect(() => {
-    if (!user || !isAuthReady || !game) return;
+    if (!user || !isAuthReady || !game || isGameDiscarded(owner, game.id)) return;
     const timer = setTimeout(() => {
       try { enqueue({ id: game.id, state: game, closed: false }); }
       catch (reason) { setLoadError(reason instanceof Error ? reason.message : 'Cloud sync paused.'); }
     }, 400);
     return () => clearTimeout(timer);
-  }, [game, user, isAuthReady, enqueue]);
+  }, [game, user, isAuthReady, enqueue, owner]);
 
   useEffect(() => {
     setRemoteGames([]); setConflict(null); setLoadError(null);
@@ -85,7 +89,7 @@ export function usePlaySessionSync(game: ActiveGame | null) {
   }, [user, enqueue, conflict, owner]);
 
   const adopt = useCallback((row: RemotePlaySession, persist: (state: ActiveGame) => boolean) => {
-    if (!validRow(row) || latest.current.owner !== owner) return false;
+    if (!validRow(row) || latest.current.owner !== owner || isGameDiscarded(owner, row.id)) return false;
     const local = latest.current.game;
     // Both versions remain recoverable even after choosing a cloud copy.
     try {
@@ -118,7 +122,7 @@ export function usePlaySessionSync(game: ActiveGame | null) {
   return {
     syncNow,
     // Hide a prior account's rows on the very first render, before effects reset.
-    remoteGames: remoteOwner.current === owner ? remoteGames.filter(row => !pending.some(p => p.id === row.id && p.closed)) : [],
+    remoteGames: remoteOwner.current === owner ? remoteGames.filter(row => !isGameDiscarded(owner,row.id) && !pending.some(p => p.id === row.id && p.closed)) : [],
     pendingCount: pending.length, error: error || loadError, conflict: conflictOwner.current === owner ? conflict : null,
     close, adopt, keepLocal,
   };

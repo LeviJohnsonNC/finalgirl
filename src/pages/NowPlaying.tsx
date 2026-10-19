@@ -1,5 +1,6 @@
 import {DeathSceneDialog} from '@/components/play/DeathSceneDialog';
 import { PlayScreen } from '@/components/play/PlayScreen';
+import { SessionOptions } from '@/components/SessionOptions';
 import { BuddylandControls } from '@/components/play/BuddylandControls';
 import { validModuleObservation, moduleState } from '@/lib/play/modules';
 import { newPlayEvent, summarizePlay, type PlayDetails, type PlayEvent } from '@/lib/play/events';
@@ -29,6 +30,7 @@ import { useImageGeneration } from '@/hooks/useImageGeneration';
 import type { ActiveGame } from '@/lib/activeGame';
 
 interface NowPlayingProps {
+  onDiscard?: () => void;
   sessionId: string;
   playEvents?: PlayEvent[];
   playMode?: boolean;
@@ -54,7 +56,7 @@ interface NowPlayingProps {
 
 const NowPlaying = ({
   playEvents = [], playDrafts = {}, playMode = false, showDeathPanel = true, syncPlayNow, onPlayEvent,
-  sessionId, initialStory, initialSceneImageUrl, initialVisualBible, onCheckpoint,
+  sessionId, initialStory, initialSceneImageUrl, initialVisualBible, onCheckpoint, onDiscard,
   killer,
   location,
   finalGirl,
@@ -260,7 +262,7 @@ const NowPlaying = ({
     }
   };
 
-  const handleNarrate = () => toggleNarration(story, { kind: 'intro', filmId });
+  const handleNarrate = () => toggleNarration(story, { kind: 'intro', filmId, gameId: sessionId });
 
   const recordPlayEvent = (event:PlayEvent) => {
     if (!onPlayEvent?.(event)) return false;
@@ -294,6 +296,7 @@ const NowPlaying = ({
     imageUrl={sceneImageUrl || bgImage} events={playEvents} onEvent={recordPlayEvent}
     onExit={() => onCheckpoint({ playMode: false })}
     onFinish={finishPlay}
+    onDiscard={onDiscard}
     onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying} hasStory={Boolean(story)}
     showDeathDetails={showDeathPanel} onShowDeathDetails={enabled => onCheckpoint({showDeathPanel: enabled})}
     drafts={playDrafts} onDraft={saveDraft}
@@ -322,6 +325,7 @@ const NowPlaying = ({
           {applicableSpecialRules.length > 0 && <SpecialRulesModal killer={killer} location={location}>
             <button className="narration-button narration-button--quiet"><ScrollText className="w-4 h-4 shrink-0" /><span>Special Rules</span></button>
           </SpecialRulesModal>}
+          {onDiscard && <SessionOptions onDiscard={onDiscard} />}
         </div>
         {isPlaying && <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} />}
       </>}

@@ -9,11 +9,13 @@ import {
   narrationKey,
 } from '@/lib/play/narrationCache';
 import { claimNarrator } from '@/lib/play/narrationCoordinator';
+import { isGameDiscarded } from '@/lib/discardedGames';
 export interface NarrationCasting {
   kind: 'intro' | 'ending' | 'death';
   outcome?: 'won' | 'lost';
   filmId?: string | null;
   deathSceneId?: string;
+  gameId?: string;
 }
 
 /** Manual playback, synchronous iOS priming, owned replay caching and one narrator at a time. */
@@ -84,6 +86,7 @@ export const useNarration = () => {
         alive.current &&
         serial.current === request &&
         ownerRef.current === requestOwner &&
+        (!casting?.gameId || !isGameDiscarded(requestOwner, casting.gameId)) &&
         !controller.signal.aborted;
       // This call must precede every await for iOS user-gesture activation.
       const audio = createPrimedAudio();
@@ -97,9 +100,11 @@ export const useNarration = () => {
       try {
         if (requestOwner === 'guest')
           throw new Error('You must be signed in to narrate.');
-        const key = await narrationKey(text, casting ?? { kind: 'intro' });
+        // Game association is metadata, not a different voice/cache identity.
+        const { gameId, ...voiceCasting } = casting ?? { kind: 'intro' };
+        const key = await narrationKey(text, voiceCasting);
         if (!current()) return;
-        let blob = await getNarrationClip(requestOwner, key);
+        let blob = await getNarrationClip(requestOwner, key, gameId);
         if (!current()) return;
         if (!blob) {
           const {
@@ -143,7 +148,7 @@ export const useNarration = () => {
             throw new Error('The narration response was invalid.');
           blob = base64ToBlob(data.audioContent, 'audio/mpeg');
           // Playback does not wait on device storage, and memory is populated synchronously.
-          void putNarrationClip(requestOwner, key, blob);
+          void putNarrationClip(requestOwner, key, blob, gameId);
         }
         if (!current()) return;
         const url = URL.createObjectURL(blob);

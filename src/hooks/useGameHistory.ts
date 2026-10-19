@@ -2,10 +2,13 @@ import type { Json } from '@/integrations/supabase/types';
 import {validPlayLog, type PlayEvent} from '@/lib/play/events';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
-import { useLocalStorage } from './useLocalStorage';
+import { readStoredValue, useLocalStorage } from './useLocalStorage';
 import { useAuth } from './useAuth';
 import { useDurableQueue } from './useDurableQueue';
 import { supabase } from '@/integrations/supabase/client';
+import { discardedGamesKey, isGameDiscarded, purgeLocalGame } from '@/lib/discardedGames';
+import type { ActiveGame } from '@/lib/activeGame';
+import type { DiscardReply } from '@/lib/discardNarration';
 
 // Extract storage path from public URL for cleanup
 const extractStoragePath = (publicUrl: string | undefined): string | null => {
@@ -192,6 +195,9 @@ function applyWrite(games: GameResult[], write: GameWrite): GameResult[] {
 export const useGameHistory = () => {
   const { user, isLoading: authLoading, isAuthReady, authError } = useAuth();
   const userId = user?.id ?? null;
+  const owner = userId ?? 'guest';
+  useLocalStorage(discardedGamesKey(owner), {});
+  const cleanupRetry = useRef<ReturnType<typeof setTimeout>>();
   const ownerRef = useRef(userId);
   ownerRef.current = userId;
   const [localGameHistory, setLocalGameHistory] = useLocalStorage<GameResult[]>('final-girl-game-history', []);
@@ -208,6 +214,7 @@ export const useGameHistory = () => {
 
   const replaceBase = useCallback((games: GameResult[]) => {
     if (!userId || ownerRef.current !== userId) return;
+    games = games.filter(game => !isGameDiscarded(userId,game.id));
     baseRef.current = games;
     const cached = slimGamesForCache(games);
     if (setCachedGames(cached)) setRemote(null);
@@ -215,11 +222,14 @@ export const useGameHistory = () => {
   }, [userId, setCachedGames]);
 
   const send = useCallback(async (write: GameWrite) => {
+    const id = write.kind === 'record' ? write.game.id : write.id;
+    if (isGameDiscarded(userId ?? 'guest', id)) return;
     if (!userId || ownerRef.current !== userId) throw new Error('Please sign in to finish saving your records.');
     if (write.kind === 'record') {
       const { error } = await supabase.from('game_history')
         .upsert(toDbRow(write.game, userId), { onConflict: 'id', ignoreDuplicates: true })
         .abortSignal(AbortSignal.timeout(20000));
+      if (error?.code === 'PT410') { purgeLocalGame(userId,id); return; }
       if (error) throw new Error(error.message);
     } else {
       const updates: Record<string, unknown> = {};
@@ -232,24 +242,41 @@ export const useGameHistory = () => {
       if (Object.keys(updates).length) {
         const { data, error } = await supabase.from('game_history').update(updates)
           .eq('id', write.id).eq('user_id', userId).select('id').abortSignal(AbortSignal.timeout(20000)).maybeSingle();
+        if (error?.code === 'PT410') { purgeLocalGame(userId,id); return; }
+        if (!error && !data) {
+          const {data: marker} = await supabase.from('discarded_games' as never).select('game_id').eq('user_id',userId).eq('game_id',id).maybeSingle();
+          if (marker) { purgeLocalGame(userId,id); return; }
+        }
         if (error || !data) throw new Error(error?.message || 'The record was not found. Your changes remain on this device.');
       }
     }
-    if (ownerRef.current === userId) replaceBase(applyWrite(baseRef.current, write));
+    if (ownerRef.current === userId && !isGameDiscarded(userId,id)) replaceBase(applyWrite(baseRef.current, write));
   }, [userId, replaceBase]);
 
   const { pending, enqueue, flush, error: saveError } = useDurableQueue<GameWrite>(`final-girl-history-outbox-v1:${userId ?? 'guest'}`, Boolean(userId && isAuthReady && (loadedOwner === userId || loadError)), send);
-  const gameHistory = userId ? pending.reduce(applyWrite, base) : localGameHistory;
+  const gameHistory = (userId ? pending.reduce(applyWrite, base) : localGameHistory).filter(game => !isGameDiscarded(owner,game.id));
 
-  const fetchFromDb = useCallback(async () => {
+  const fetchFromDb = useCallback(async (quiet = false): Promise<void> => {
     if (!userId) return;
     const requestId = ++fetchId.current;
-    setIsDbLoading(true);
+    if (!quiet) setIsDbLoading(true);
     setLoadError(null);
     try {
-      const { data, error } = await supabase.rpc('get_game_history_summary').abortSignal(AbortSignal.timeout(20000));
+      const [{data,error}, deleted] = await Promise.all([
+        supabase.rpc('get_game_history_summary').abortSignal(AbortSignal.timeout(20000)),
+        supabase.from('discarded_games' as never).select('game_id,cleanup_pending').order('discarded_at',{ascending:false}).abortSignal(AbortSignal.timeout(20000)),
+      ]);
       if (error) throw new Error(error.message || 'Failed to retrieve session data.');
+      if (deleted.error) throw new Error('Could not verify discarded games. Reconnect and retry.');
       if (requestId !== fetchId.current || ownerRef.current !== userId) return;
+      const markers = (deleted.data ?? []) as unknown as {game_id:string;cleanup_pending:boolean}[];
+      for (const marker of markers) {
+        if (!isGameDiscarded(userId,marker.game_id)) {
+          const local = readStoredValue<ActiveGame|null>(`final-girl-active-game-v1:${userId}`,null);
+          purgeLocalGame(userId,marker.game_id);
+          void import('@/lib/discardNarration').then(m => m.clearDiscardedNarration(userId,marker.game_id,{discarded:true},local?.id === marker.game_id ? local : undefined)).catch(()=>{});
+        }
+      }
       const games = (data ?? []).map(row => {
         const summary = fromDbRow(row as unknown as Record<string, unknown>);
         const existing = baseRef.current.find(game => game.id === summary.id);
@@ -262,6 +289,16 @@ export const useGameHistory = () => {
       });
       replaceBase(games);
       setLoadedOwner(userId);
+      clearTimeout(cleanupRetry.current);
+      const cleanup = markers.filter(marker => marker.cleanup_pending).slice(0,10);
+      if (cleanup.length) {
+        void (async () => {
+          const {data:{session}} = await supabase.auth.getSession();
+          if (ownerRef.current!==userId || session?.user.id!==userId) return;
+          await Promise.allSettled(cleanup.map(marker => supabase.functions.invoke('discard-game',{body:{gameId:marker.game_id},headers:{Authorization:`Bearer ${session.access_token}`}})));
+        })();
+        cleanupRetry.current = setTimeout(()=> { if(ownerRef.current===userId) void fetchFromDb(true); },30000);
+      }
     } catch (error) {
       if (requestId === fetchId.current && ownerRef.current === userId) {
         setLoadError(error instanceof Error ? error.message : 'Failed to retrieve session data.');
@@ -273,7 +310,9 @@ export const useGameHistory = () => {
 
   useEffect(() => {
     if (isAuthReady && userId) void fetchFromDb();
-    return () => { fetchId.current += 1; };
+    const refresh = () => { if(isAuthReady && userId) void fetchFromDb(true); };
+    window.addEventListener('focus',refresh); window.addEventListener('online',refresh);
+    return () => { fetchId.current += 1; clearTimeout(cleanupRetry.current); window.removeEventListener('focus',refresh);window.removeEventListener('online',refresh); };
   }, [isAuthReady, userId, fetchFromDb]);
 
   useEffect(() => {
@@ -293,6 +332,7 @@ export const useGameHistory = () => {
   }, [userId, loadedOwner, loadError, localGameHistory, enqueue, pending, setLocalGameHistory]);
 
   const recordGame = useCallback((result: Omit<GameResult, 'id' | 'timestamp'>, gameId?: string): GameResult => {
+    if (gameId && isGameDiscarded(userId ?? 'guest',gameId)) throw new Error('This game was discarded.');
     const game = { ...result, id: gameId ?? crypto.randomUUID(), timestamp: Date.now() };
     if (userId) enqueue({ kind: 'record', game });
     else if (!setLocalGameHistory(games => [game, ...games])) throw new Error('This device could not save the game. Free some browser storage and try again.');
@@ -300,6 +340,7 @@ export const useGameHistory = () => {
   }, [userId, enqueue, setLocalGameHistory]);
 
   const updateGame = useCallback((id: string, updates: Partial<GameResult>) => {
+    if (isGameDiscarded(userId ?? 'guest',id)) return;
     if (userId) enqueue({ kind: 'update', id, updates });
     else if (!setLocalGameHistory(games => games.map(game => game.id === id ? { ...game, ...updates } : game))) {
       throw new Error('This device could not save the changes. Please try again.');
@@ -360,11 +401,12 @@ export const useGameHistory = () => {
   }, [gameHistory]);
 
   const fetchGameDetails = useCallback(async (id: string): Promise<GameResult | null> => {
+    if (isGameDiscarded(userId ?? 'guest',id)) return null;
     const existing = gameHistory.find(game => game.id === id);
     if (!userId) return existing ?? null;
     const { data, error } = await supabase.from('game_history').select('*')
       .eq('id', id).eq('user_id', userId).abortSignal(AbortSignal.timeout(20000)).maybeSingle();
-    if (ownerRef.current !== userId) return null;
+    if (ownerRef.current !== userId || isGameDiscarded(userId,id)) return null;
     if (error || !data) return existing ?? null;
     const full = fromDbRow(data as unknown as Record<string, unknown>);
     replaceBase(baseRef.current.map(game => game.id === id ? full : game));
@@ -372,20 +414,28 @@ export const useGameHistory = () => {
     return pending.reduce(applyWrite, [full]).find(game => game.id === id) ?? full;
   }, [gameHistory, userId, replaceBase, pending]);
 
-  const deleteGame = useCallback(async (id: string) => {
+  const discardGame = useCallback(async (id: string, snapshot?: ActiveGame) => {
     const game = gameHistory.find(item => item.id === id);
     if (!userId) {
-      if (!setLocalGameHistory(games => games.filter(item => item.id !== id))) throw new Error('Could not delete the local record.');
-      return;
+      purgeLocalGame('guest',id);
+      const {clearDiscardedNarration} = await import('@/lib/discardNarration');
+      await clearDiscardedNarration('guest',id,{discarded:true},snapshot ?? game).catch(()=>{});
+      return {cleanupPending:false};
     }
-    if (!await flush()) throw new Error('Your saved changes must reach the archive before deleting records. Reconnect and try again.');
-    const { error } = await supabase.from('game_history').delete().eq('id', id).eq('user_id', userId)
-      .abortSignal(AbortSignal.timeout(20000));
-    if (error) throw new Error(error.message);
-    if (ownerRef.current !== userId) return;
-    replaceBase(baseRef.current.filter(item => item.id !== id));
-    if (game) await deleteStorageFiles(game);
-  }, [gameHistory, userId, flush, replaceBase, setLocalGameHistory]);
+    // Reserve local space before sending an irreversible request. Retried IDs are idempotent.
+    localStorage.setItem(`final-girl-discard-intent-v1:${userId}:${id}`,JSON.stringify({requested:true}));
+    const {data:{session}} = await supabase.auth.getSession();
+    if (!session?.access_token || session.user.id !== userId || ownerRef.current !== userId) throw new Error('Sign in to discard this game.');
+    const { data, error } = await supabase.functions.invoke<DiscardReply>('discard-game',{body:{gameId:id},headers:{Authorization:`Bearer ${session.access_token}`}});
+    if (error || data?.discarded !== true) throw new Error('Discard could not be confirmed. Reconnect and try again.');
+    purgeLocalGame(userId,id);
+    if (ownerRef.current === userId) replaceBase(baseRef.current.filter(item => item.id !== id));
+    const {clearDiscardedNarration} = await import('@/lib/discardNarration');
+    await clearDiscardedNarration(userId,id,data,snapshot ?? game).catch(()=>{});
+    if (data.cleanupPending) cleanupRetry.current = setTimeout(()=> { if(ownerRef.current===userId) void fetchFromDb(true); },30000);
+    return {cleanupPending:Boolean(data.cleanupPending)};
+  }, [gameHistory, userId, replaceBase, fetchFromDb]);
+  const deleteGame = useCallback(async (id:string) => { await discardGame(id); },[discardGame]);
 
   const clearHistory = useCallback(async () => {
     if (!userId) {
@@ -403,7 +453,7 @@ export const useGameHistory = () => {
   }, [userId, flush, replaceBase, setLocalGameHistory]);
 
   return {
-    gameHistory, recordGame, updateGame, deleteGame, getStats, fetchGameDetails, clearHistory,
+    gameHistory, recordGame, updateGame, deleteGame, discardGame, getStats, fetchGameDetails, clearHistory,
     retryLoadHistory: fetchFromDb,
     retryPendingSaves: flush,
     pendingSaveCount: userId ? pending.length : 0,

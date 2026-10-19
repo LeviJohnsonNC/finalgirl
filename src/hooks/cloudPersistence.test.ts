@@ -8,6 +8,7 @@ const mock = vi.hoisted(() => ({
   history: new Map<string, Record<string, unknown>>(), films: ['cloud-film'],
   failSave: false, failRead: false, writes: [] as Array<Record<string, unknown>>,
   summary: null as null | (() => Promise<unknown>),
+  discarded: new Set<string>(),
 }));
 vi.mock('./useAuth', () => ({ useAuth: () => mock.auth }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
@@ -25,6 +26,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: {
   from: (table: string) => {
     let mode = 'select'; let payload: Record<string, unknown>; let id: string;
     const execute = () => {
+      if (mode === 'select' && table === 'discarded_games') return { data:[...mock.discarded].map(game_id=>({game_id,cleanup_pending:false})),error:null};
       if (mode === 'select') return { data: table === 'user_settings' ? { owned_films: mock.films } : mock.history.get(id), error: mock.failRead ? { message: 'offline' } : null };
       if (mock.failSave) return { data: null, error: { message: 'offline' } };
       mock.writes.push(payload);
@@ -35,6 +37,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: {
       return { data: mode === 'update' && !mock.history.has(id) ? null : { id }, error: null };
     };
     const builder = {
+      order: () => builder,
       select: () => builder, eq: (key: string, value: string) => { if (key === 'id') id = value; return builder; },
       maybeSingle: () => builder,
       upsert: (value: Record<string, unknown>) => { mode = 'upsert'; payload = value; return builder; },
@@ -49,7 +52,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: {
 } }));
 
 beforeEach(() => {
-  localStorage.clear(); mock.auth.user = { id: 'A' }; mock.failSave = false; mock.failRead = false;
+  localStorage.clear(); mock.discarded.clear(); mock.auth.user = { id: 'A' }; mock.failSave = false; mock.failRead = false;
   mock.summary = null; mock.history.clear(); mock.films = ['cloud-film']; mock.writes = [];
 });
 afterEach(cleanup);

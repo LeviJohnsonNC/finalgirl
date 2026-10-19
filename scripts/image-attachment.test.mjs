@@ -3,15 +3,18 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import ts from 'typescript';
 
-function imageHandler({ rowExists = true, attachError = null, composeError = false, invalidPlan = false } = {}) {
+function imageHandler({ rowExists = true, attachError = null, composeError = false, invalidPlan = false, discardedBefore = false, discardedDuring = false } = {}) {
   const filters = []; const removed = []; const phases = []; const imageCalls = []; let handler;
+  let uploaded=false;
+  const discardedHelpers={};new Function('require','exports',ts.transpileModule(readFileSync(new URL('../supabase/functions/_shared/discardedGame.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(()=>{},discardedHelpers);
   const client = {
-    from: () => ({ update: () => {
+    rpc:async()=>({error:null}),
+    from: table => table === 'discarded_games' ? {select:()=>{const q={eq:()=>q,maybeSingle:async()=>({data:discardedBefore || discardedDuring && uploaded ? {game_id:'record'} : null,error:null})};return q;}} : ({ update: () => {
       const query = { eq: (key, value) => { filters.push([key, value]); return query; }, select: async () => ({ data: rowExists ? [{ id: 'record' }] : [], error: attachError }) };
       return query;
     } }),
     storage: { from: () => ({
-      upload: async (_path, bytes, options) => { phases.push('upload'); assert.equal(Buffer.from(bytes).toString(), _path.includes('-scene-') ? 'test' : 'complete-poster'); assert.equal(options.contentType, 'image/png'); return { error: null }; },
+      upload: async (_path, bytes, options) => { uploaded=true;phases.push('upload'); assert.equal(Buffer.from(bytes).toString(), _path.includes('-scene-') ? 'test' : 'complete-poster'); assert.equal(options.contentType, 'image/png'); return { error: null }; },
       getPublicUrl: () => ({ data: { publicUrl: 'https://example.test/new.png' } }),
       remove: async paths => { removed.push(...paths); return { error: null }; },
     }) },
@@ -19,9 +22,10 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
   const source = readFileSync(new URL('../supabase/functions/generate-scene-image/index.ts', import.meta.url), 'utf8');
   const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   const modules = {
+    '../_shared/discardedGame.ts':discardedHelpers,
     '../_shared/imageReference.ts': { ownedOpeningReference: () => undefined },
     '../_shared/auth.ts': { getCorsHeaders: () => ({ 'Access-Control-Allow-Origin': 'https://example.test' }) },
-    '../_shared/guard.ts': { requireUser: async () => ({ ok: true, user: { id: 'owner-A' }, logUsage: async () => {} }) },
+    '../_shared/guard.ts': { requireUser: async () => ({ ok: true, adminClient:client, user: { id: 'owner-A' }, logUsage: async () => {} }) },
     '../_shared/validation.ts': { validateRequest: (_schema, data) => ({ success: true, data }) },
     '../_shared/aiGateway.ts': { generateText: async () => ({ text: invalidPlan ? '{' : 'valid', model: 'text' }), generateImage: async (...args) => { imageCalls.push(args); return { base64: 'dGVzdA==', mimeType: 'image/png', model: 'image' }; }, statusFor: () => 500, userFacingMessage: () => 'failed' },
     '../_shared/poster.ts': { composePoster: async (_bytes, copy) => { phases.push('compose'); assert.equal(copy.title, invalidPlan ? 'FALLBACK' : 'TITLE'); if(composeError) throw new Error('composition failed'); return Buffer.from('complete-poster'); } },
@@ -77,4 +81,9 @@ test('composition failure cannot attach incomplete art or delete the previous po
   assert.deepEqual(f.phases,['compose']);
   assert.deepEqual(f.filters,[]);
   assert.deepEqual(f.removed,[]);
+});
+
+test('discarded games authorize no new image generation and late uploads are removed without attachment',async()=>{
+ const before=imageHandler({discardedBefore:true});assert.equal((await before.handler(request())).status,410);assert.equal(before.imageCalls.length,0);
+ const during=imageHandler({discardedDuring:true});assert.equal((await during.handler(request())).status,410);assert.equal(during.imageCalls.length,1);assert.equal(during.filters.length,0);assert.equal(during.removed.length,1);assert.match(during.removed[0],/^game-posters\/owner-A\/record-poster-/);
 });
