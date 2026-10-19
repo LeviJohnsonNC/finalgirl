@@ -51,3 +51,9 @@ After preview deployment, check an image finishing after Save/reload and verify 
 - [Hosted edge runtime limits](https://supabase.com/docs/guides/functions/limits)
 
 This is a correction of the identified lore conflicts, not a claim that every existing catalog description has been independently verified.
+
+## Opening still screen format
+
+New opening stills request `image_config.aspect_ratio: "16:9"` through the existing chat image gateway, matching the theater aperture. Previously the ratio appeared only in prompt text. Both opening shot planning and the final photograph prompt now ask for edge-to-edge artwork without letterboxing, pillarboxing, or black bars. The dimension option survives model retries and the existing reference-input fallback. Closing poster settings, saved image bytes, and the theater's full-image display remain unchanged.
+
+Regression checks verify the handler-to-gateway option, serialized request dimensions, fallback preservation, and separate poster behavior. These are mocked provider checks, not a live Lovable image-generation result. Providers can round dimensions or ignore requested framing; review the next real opening still after deploying `generate-scene-image`. No database migration is required.

@@ -48,6 +48,12 @@ describe('reviewed story facts survive every generation handoff', () => {
   });
 });
 describe('bounded art planning', () => {
+  it('composes opening stills for the full 16:9 screen rather than a letterboxed frame', () => {
+    const ctx = { killer: 'Billy the Bear', location: 'Buddyland', finalGirl: 'Rena', story, sceneType: 'beginning' as const };
+    expect(buildShotBriefPrompt(ctx)).toContain('edge-to-edge 16:9');
+    expect(buildBeginningPrompt(ctx)).toContain('no letterboxing, pillarboxing or black bars');
+    expect(buildPosterPrompt({ ...ctx, sceneType: 'ending' })).toContain('Portrait 2:3');
+  });
   const plan = { concepts: ['A doorway with a small figure at the far end.', 'A face seen beside a darkened arcade machine.', 'An empty chair beneath a practical ceiling lamp.'], selected: 1, title: 'The Last Birthday', tagline: 'No one gets to go home.' };
   it('chooses one of three complete concepts and returns clean, bounded typography', () => {
     expect(parseArtPlan('```json\n' + JSON.stringify(plan) + '\n```')).toMatchObject({ selected: 1, title: 'THE LAST BIRTHDAY' });

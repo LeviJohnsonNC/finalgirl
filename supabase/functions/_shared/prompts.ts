@@ -56,7 +56,7 @@ Each concept specifies the decisive visible detail, camera position/lens, subjec
 Only selected cast, setting, facts and moment may appear. Never invent a kill, monster form, weapon or injury for impact. Permanent identity comes from cast descriptions; discard incidental posing, expression, lighting, camera and background directions. Do not transplant the killer's home setting. Read module constraints first.
 Opening: a photographable instant before play, not an ending or montage. Ending: an image earned by the actual result, even if the Final Girl died in a win or escaped alive in a loss.
 Poster title maximum 32 printable Latin characters; tagline maximum 70. Both specific to this story; no famous titles, real credits, stock taglines or unsupported sequel promises.`;
-export const buildShotBriefPrompt = (ctx: SceneContext): string => `${ctx.sceneType === 'ending' || ctx.outcome ? 'CLOSING PAINTED POSTER, portrait 2:3. Keep top 12% and bottom 25% quiet for later typography.' : 'OPENING PHOTOGRAPH, landscape 16:9.'}
+export const buildShotBriefPrompt = (ctx: SceneContext): string => `${ctx.sceneType === 'ending' || ctx.outcome ? 'CLOSING PAINTED POSTER, portrait 2:3. Keep top 12% and bottom 25% quiet for later typography.' : 'OPENING PHOTOGRAPH, edge-to-edge 16:9 landscape. Compose for the full canvas, without letterboxing or black bars.'}
 ${facts(ctx)}
 ${block('CONTINUITY (identity and palette, not mandatory framing)', ctx.visualBible)}
 ${block('OPENING CALLBACK MATERIAL', ctx.introStory)}
@@ -74,6 +74,7 @@ export const buildVisualBiblePrompt = (ctx: {
 const integrity = `FACT AND IDENTITY PRIORITY: scene facts and module rules, then stable cast identity, then composition, then style. Character descriptions define identity, not mandatory pose, props, background or light. Show a described weapon only if this scene establishes it. No extra limbs, floating props, inconsistent scale, disconnected shadows or impossible reflections. No franchise actor likenesses.
 Create an emotionally arresting, specific image. Threat may be off-frame; a visible consequence or spatial discovery must earn the tension. PG-13, no explicit gore or sexual content.`;
 export const buildBeginningPrompt = (ctx: SceneContext): string => `Create one convincing photograph from an original horror film. Landscape 16:9; output PNG.
+Fill the entire edge-to-edge 16:9 canvas with the photographed scene: no letterboxing, pillarboxing or black bars. Compose for this frame, not a wider cinema image placed inside it.
 ${facts(ctx)}
 ${block('SHARED CONTINUITY', ctx.visualBible)}
 ${ctx.shotBrief ? block('CHOSEN SHOT', ctx.shotBrief) : block('STORY — choose its strongest physically photographable opening instant', ctx.story)}

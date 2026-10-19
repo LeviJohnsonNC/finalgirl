@@ -78,7 +78,7 @@ serve(async (req) => {
 
     const prompt = isPoster ? buildPosterPrompt(context) : buildBeginningPrompt(context);
     const reference = isPoster ? ownedOpeningReference(body.referenceImageUrl, Deno.env.get("SUPABASE_URL") ?? '', user.id, body.gameId) : undefined;
-    const image = await generateImage(prompt, reference);
+    const image = await generateImage(prompt, reference, isPoster ? undefined : { aspectRatio: "16:9" });
 
     // --- Persist to storage; never hand back a data: URI ---
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
