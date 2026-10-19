@@ -189,3 +189,16 @@ describe("cause-specific death details", () => {
     expect(facts.attacker).toBe("Billy the Bear");
   });
 });
+
+describe("death prose completeness", () => {
+  it("rejects the exact observed fragment and other clipped text while preserving complete older short scenes", async () => {
+    const { isCompleteDeathText } = await import("./death");
+    const paragraph =
+      "The ceiling gave a soft, dusty sigh. Nobody looked up until the light fitting dropped, trailing a bright knot of wires. A scream vanished beneath the crash. When the dust cleared, the broken fixture still swung against the wall, tapping out the last few seconds of someone’s night.";
+    expect(isCompleteDeathText("The grease-stained")).toBe(false);
+    expect(isCompleteDeathText(paragraph)).toBe(true);
+    expect(isCompleteDeathText(paragraph + " Someone reached for")).toBe(false);
+    expect(isCompleteDeathText(paragraph + "”")).toBe(true);
+    expect(isCompleteDeathText(paragraph.repeat(10))).toBe(false);
+  });
+});

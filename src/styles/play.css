@@ -2005,3 +2005,35 @@ body:has(.play-workspace) .app-shell {
 .play-workspace .play-history .play-timeline-list > li {
   margin-top: 0;
 }
+
+/* Share the opening narration's title face and keep corrections discreet. */
+.play-heading h1 {
+  font-family: "Narration Fell", Georgia, serif;
+  font-weight: 400;
+}
+.play-count-minus {
+  width: 30px;
+  height: 28px;
+  min-height: 28px !important;
+  margin: 4px 0 0;
+  justify-self: end;
+  position: relative;
+}
+.play-count-minus::after {
+  content: "";
+  position: absolute;
+  left: -15px;
+  right: -1px;
+  top: -5px;
+  bottom: -13px;
+}
+.play-count-minus svg {
+  width: 14px;
+  height: 14px;
+}
+.play-death-story-tools .play-death-audio-button {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 12px;
+}
