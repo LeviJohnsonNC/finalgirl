@@ -26,6 +26,7 @@ export type GatewayErrorKind =
   | "content_policy"
   | "empty_response"
   | "incomplete_response"
+  | "image_unavailable"
   | "upstream";
 
 export class GatewayError extends Error {
@@ -47,6 +48,8 @@ export const userFacingMessage = (err: unknown): string => {
         return "That scene was too dark even for the censors. Try regenerating.";
       case "incomplete_response":
         return "The scene stopped before it was finished. Please try again.";
+      case "image_unavailable":
+        return "The image service is temporarily unavailable. Your story and game result are safe. Try developing the picture again in a moment.";
       default:
         return "The reel jammed. Try again.";
     }
@@ -56,7 +59,7 @@ export const userFacingMessage = (err: unknown): string => {
 
 /** HTTP status to hand back to the client for a given failure. */
 export const statusFor = (err: unknown): number =>
-  err instanceof GatewayError && (err.status === 429 || err.status === 402) ? err.status : 500;
+  err instanceof GatewayError && (err.status === 429 || err.status === 402 || err.kind === "image_unavailable") ? err.status : 500;
 
 const apiKey = () => {
   const key = Deno.env.get("LOVABLE_API_KEY");
@@ -123,12 +126,14 @@ const post = async (body: GatewayCall, options?: {signal?: AbortSignal; singleAt
 
 /**
  * Runs `call` against each candidate model in turn, moving on only when a model
- * is rejected as unknown/unavailable. Returns the result plus the model that
+ * is rejected as unknown/unavailable, or when the caller permits failover.
+ * Returns the result plus the model that
  * answered, so usage logging records what was really billed.
  */
 const withModelFallback = async <T>(
   candidates: string[],
   call: (model: string) => Promise<T>,
+  shouldFallback: (error: unknown) => boolean = error => error instanceof GatewayError && error.kind === "model_unavailable",
 ): Promise<{ result: T; model: string }> => {
   let lastError: unknown;
 
@@ -137,7 +142,7 @@ const withModelFallback = async <T>(
       return { result: await call(model), model };
     } catch (err) {
       lastError = err;
-      if (err instanceof GatewayError && err.kind === "model_unavailable") {
+      if (shouldFallback(err)) {
         console.warn(`Model ${model} unavailable, trying next candidate`);
         continue;
       }
@@ -453,6 +458,13 @@ export const generateText = async (opts: {
  * `modalities`, but the exact response shape varies by provider, so every known
  * carrier is checked before giving up.
  */
+const IMAGE_TOTAL_TIMEOUT_MS = 105_000;
+const IMAGE_MODEL_TIMEOUT_MS = 65_000;
+const imageCanFallback = (error: unknown): boolean => error instanceof GatewayError && (
+  error.kind === "model_unavailable" || error.kind === "image_unavailable" ||
+  error.kind === "upstream" && [500, 502, 503, 504].includes(error.status)
+);
+
 export const generateImage = async (
   prompt: string,
   referenceImageUrl?: string,
@@ -460,37 +472,58 @@ export const generateImage = async (
 ): Promise<{ base64: string; mimeType: string; model: string }> => {
   // Match the theater at generation time rather than cropping saved artwork.
   const dimensions = options ? { image_config: { aspect_ratio: options.aspectRatio } } : {};
-  const { result, model } = await withModelFallback(IMAGE_MODEL_CANDIDATES, async (model) => {
-    const content = referenceImageUrl ? [
-      { type: "text", text: `${prompt}\nThe attached opening photograph is an IDENTITY reference only: match cast appearance, clothing, architecture and palette. Make a new composition from the ending; translate into the requested painted medium. Do not copy the opening's pose, action or fate.` },
-      { type: "image_url", image_url: { url: referenceImageUrl } },
-    ] : options?.references?.length ? [
-      { type: "text", text: `${prompt}\nThe attached photographs are cast IDENTITY references: preserve the named person's face, hair and clothing and the named creature's physical construction. Photograph them in the new shot. Do not copy the portraits' poses, backgrounds or framing, or introduce another cast member.` },
-      ...options.references.flatMap(reference => [
-        { type: "text", text: `Identity photograph: ${reference.name}` },
-        { type: "image_url", image_url: { url: reference.url } },
-      ]),
-    ] : prompt;
-    let data: Record<string, unknown>;
-    try {
-      data = await post({ model, messages: [{ role: "user", content }], modalities: ["image", "text"], ...dimensions });
-    } catch (error) {
-      // Some gateway routes reject reference input. Keep the text continuity
-      // path; never bypass credit, rate-limit, authorization or safety errors.
-      if (!referenceImageUrl || !(error instanceof GatewayError) || error.kind !== "upstream" || ![400, 422].includes(error.status)) throw error;
-      console.warn("Image route rejected reference input; retaining text continuity.");
-      data = await post({ model, messages: [{ role: "user", content: prompt }], modalities: ["image", "text"], ...dimensions });
-    }
+  // A slow 503 used to spend nearly two minutes retrying the same provider.
+  // Leave room for the next image model and for poster composition/upload inside
+  // the edge request's 150-second idle limit. Never retry a successful image.
+  const deadline = Date.now() + IMAGE_TOTAL_TIMEOUT_MS;
+  try {
+    const { result, model } = await withModelFallback([...new Set(IMAGE_MODEL_CANDIDATES)], async (model) => {
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) throw new GatewayError("image_unavailable", "Image generation deadline exceeded", 504);
+      const signal = AbortSignal.timeout(Math.min(IMAGE_MODEL_TIMEOUT_MS, remaining));
+      const request = async (content: unknown) => {
+        try {
+          return await post({ model, messages: [{ role: "user", content }], modalities: ["image", "text"], ...dimensions }, { signal, singleAttempt: true });
+        } catch (error) {
+          if (signal.aborted) throw new GatewayError("image_unavailable", "Image model timed out", 504);
+          if (error instanceof TypeError) throw new GatewayError("image_unavailable", "Image provider connection failed", 503);
+          throw error;
+        }
+      };
+      const content = referenceImageUrl ? [
+        { type: "text", text: `${prompt}\nThe attached opening photograph is an IDENTITY reference only: match cast appearance, clothing, architecture and palette. Make a new composition from the ending; translate into the requested painted medium. Do not copy the opening's pose, action or fate.` },
+        { type: "image_url", image_url: { url: referenceImageUrl } },
+      ] : options?.references?.length ? [
+        { type: "text", text: `${prompt}\nThe attached photographs are cast IDENTITY references: preserve the named person's face, hair and clothing and the named creature's physical construction. Photograph them in the new shot. Do not copy the portraits' poses, backgrounds or framing, or introduce another cast member.` },
+        ...options.references.flatMap(reference => [
+          { type: "text", text: `Identity photograph: ${reference.name}` },
+          { type: "image_url", image_url: { url: reference.url } },
+        ]),
+      ] : prompt;
+      let data: Record<string, unknown>;
+      try {
+        data = await request(content);
+      } catch (error) {
+        // Some gateway routes reject reference input. Keep the text continuity
+        // path; never bypass credit, rate-limit, authorization or safety errors.
+        if (!referenceImageUrl || !(error instanceof GatewayError) || error.kind !== "upstream" || ![400, 422].includes(error.status)) throw error;
+        console.warn("Image route rejected reference input; retaining text continuity.");
+        data = await request(prompt);
+      }
 
-    const image = extractImage(data);
-    if (!image) {
-      console.error("No image in gateway response:", JSON.stringify(data).slice(0, 500));
-      throw new GatewayError("empty_response", "Gateway returned no image");
-    }
-    return image;
-  });
+      const image = extractImage(data);
+      if (!image) {
+        console.error("No image in gateway response:", JSON.stringify(data).slice(0, 500));
+        throw new GatewayError("empty_response", "Gateway returned no image");
+      }
+      return image;
+    }, imageCanFallback);
 
-  return { ...result, model };
+    return { ...result, model };
+  } catch (error) {
+    if (imageCanFallback(error)) throw new GatewayError("image_unavailable", "Image providers unavailable within the request budget", error instanceof GatewayError && error.status === 504 ? 504 : 503);
+    throw error;
+  }
 };
 
 /** Pulls a base64 image out of any of the response shapes the gateway may use. */

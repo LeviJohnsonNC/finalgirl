@@ -37,7 +37,7 @@ export interface GenerateImageContext {
 }
 
 /** POSTs to an edge function with the caller's session token. */
-const callFunction = async <T>(name: string, body: unknown): Promise<T> => {
+const callFunction = async <T>(name: string, body: unknown, signal?: AbortSignal): Promise<T> => {
   const { data: sessionData } = await supabase.auth.getSession();
   const token = sessionData?.session?.access_token;
   if (!token) throw new Error('Please sign in first.');
@@ -50,11 +50,15 @@ const callFunction = async <T>(name: string, body: unknown): Promise<T> => {
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
     },
     body: JSON.stringify(body),
+    signal,
   });
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok || data.error) {
-    throw new Error(data.error || `Request failed (${response.status})`);
+    const unavailable = name === 'generate-scene-image' && [502, 503, 504].includes(response.status);
+    throw new Error(data.error || (unavailable
+      ? 'The picture service could not finish. Your story and game result are safe. Please try again.'
+      : `Request failed (${response.status})`));
   }
   return data as T;
 };
@@ -146,10 +150,13 @@ export const useImageGeneration = () => {
       setIsGeneratingImage(true);
       setImageError(null);
       try {
-        const data = await callFunction<{ imageUrl?: string }>('generate-scene-image', context);
-        return data.imageUrl ?? null;
+        const data = await callFunction<{ imageUrl?: string }>('generate-scene-image', context, AbortSignal.timeout(155_000));
+        if (!data.imageUrl) throw new Error('The image service returned no picture. Please try again.');
+        return data.imageUrl;
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Image generation failed';
+        const message = err instanceof Error && err.name === 'TimeoutError'
+          ? 'The picture took too long to develop. Your story and game result are safe. Please try again.'
+          : err instanceof Error ? err.message : 'Image generation failed';
         console.error('Image generation error:', err);
         setImageError(message);
         return null;
