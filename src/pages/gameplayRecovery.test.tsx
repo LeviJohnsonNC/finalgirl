@@ -95,7 +95,7 @@ describe('gameplay without AI dependencies', () => {
   it('gives the ending the selected biography and reported Power Surge state', async () => {
     mock.autoGenerate = false;
     mock.stream.mockResolvedValue('Gwynn put down her tools. The machines were finally silent.');
-    render(<TheEnd result={{ ...result, killer: 'Billy the Bear', location: 'Buddyland', finalGirl: 'Gwynn' }} introStory="Gwynn heard a motor turning behind the Prize Counter." formData={{ ...formData, gameHighlights: 'Billy Finale: Power Surge. Boris: defeated', victimsSaved: 4 }} onCheckpoint={vi.fn()} onSave={vi.fn()} onDiscard={vi.fn()} />);
+    render(<TheEnd result={{ ...result, killer: 'Billy the Bear', location: 'Buddyland', finalGirl: 'Gwynn' }} introStory="Gwynn heard a motor turning behind the Prize Counter." formData={{ ...formData, gameHighlights: 'Billy Finale: Power Surge. Boris: defeated', victimsSaved: 4 }} onCheckpoint={vi.fn()} onSave={vi.fn()} />);
     await waitFor(() => expect(mock.stream).toHaveBeenCalled());
     const { body } = mock.stream.mock.calls[0][0];
     expect(body.finalGirl.backstory).toContain('mechanic');
@@ -114,7 +114,7 @@ describe('gameplay without AI dependencies', () => {
   });
   it('saves the result even when no intro exists for an ending', async () => {
     const save = vi.fn();
-    render(<TheEnd result={result} formData={formData} onCheckpoint={vi.fn()} onSave={save} onDiscard={vi.fn()} />);
+    render(<TheEnd result={result} formData={formData} onCheckpoint={vi.fn()} onSave={save} />);
     fireEvent.click(await screen.findByRole('button', { name: 'SAVE RESULT' }));
     expect(save).toHaveBeenCalledWith('', undefined);
     expect(mock.stream).not.toHaveBeenCalled();
@@ -123,7 +123,7 @@ describe('gameplay without AI dependencies', () => {
     let complete: (url: string) => void;
     mock.image.mockReturnValue(new Promise(resolve => { complete = resolve; }));
     const checkpoint = vi.fn(); const save = vi.fn();
-    const view = render(<TheEnd result={result} introStory={opening} initialEndingStory="Laurie made it home." formData={formData} onCheckpoint={checkpoint} onSave={save} onDiscard={vi.fn()} />);
+    const view = render(<TheEnd result={result} introStory={opening} initialEndingStory="Laurie made it home." formData={formData} onCheckpoint={checkpoint} onSave={save} />);
     await waitFor(() => expect(mock.image).toHaveBeenCalledTimes(1));
     fireEvent.click(screen.getByRole('button', { name: 'SAVE' }));
     expect(save).toHaveBeenCalledWith('Laurie made it home.', undefined);
@@ -133,7 +133,7 @@ describe('gameplay without AI dependencies', () => {
   });
   it('does not generate artwork before saved preferences are known', async () => {
     mock.settingsReady = false;
-    render(<TheEnd result={result} introStory={opening} initialEndingStory="Laurie made it home." formData={formData} onCheckpoint={vi.fn()} onSave={vi.fn()} onDiscard={vi.fn()} />);
+    render(<TheEnd result={result} introStory={opening} initialEndingStory="Laurie made it home." formData={formData} onCheckpoint={vi.fn()} onSave={vi.fn()} />);
     await act(async () => {});
     expect(mock.image).not.toHaveBeenCalled();
   });

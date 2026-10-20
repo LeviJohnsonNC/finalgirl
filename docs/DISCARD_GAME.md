@@ -1,6 +1,6 @@
 # Discard a game
 
-Open **Session options** (`⋯`) beside Finish in Play mode, in the opening story, or on the ending screen. The result form exposes the same action under **More options**. Choose **Discard game…** to open a confirmation naming the Final Girl, killer, and location.
+Open **Session options** (`⋯`) beside Finish in Play mode, or in the opening story. The ending reader keeps only Save and Narrate. The result form exposes the same action under **More options**. Choose **Discard game…** to open a confirmation naming the Final Girl, killer, and location.
 
 **Keep playing** receives focus. Escape, the close control, and the backdrop cancel before submission. **Discard game** requires explicit confirmation; while the request is pending the dialog stays open. A failed server acknowledgement preserves the local game and offers **Retry discard**.
 

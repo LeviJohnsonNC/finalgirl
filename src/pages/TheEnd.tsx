@@ -1,5 +1,4 @@
 import {playStoryBeats} from '@/lib/play/events';
-import { SessionOptions } from '@/components/SessionOptions';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { streamChatCompletion } from '@/lib/streamChatCompletion';
@@ -40,7 +39,6 @@ interface TheEndProps {
   visualBible?: string;
   formData: EndingFormData;
   onSave: (endingNarration: string, posterImageUrl?: string) => void;
-  onDiscard: () => void;
 }
 
 const TheEnd = ({
@@ -51,7 +49,6 @@ const TheEnd = ({
   visualBible,
   formData,
   onSave,
-  onDiscard,
 }: TheEndProps) => {
   const [endingStory, setEndingStory] = useState<string | null>(initialEndingStory ?? null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -244,7 +241,6 @@ const TheEnd = ({
       </>}
       controls={<>
         <button onClick={handleSave} className="narration-button narration-button--primary">{endingStory && !isGenerating && !error ? 'SAVE' : 'SAVE RESULT'}</button>
-        <SessionOptions onDiscard={onDiscard} />
         {endingStory && <div className="narration-control-row">
           <button onClick={handleNarrate} disabled={isNarrating || isGenerating} className="narration-button narration-button--narrate">
             {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" /> : isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}

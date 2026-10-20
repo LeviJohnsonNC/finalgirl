@@ -3,12 +3,14 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import ts from 'typescript';
 const compile = path => ts.transpileModule(readFileSync(new URL(path, import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-const storyFacts = {}, prompts = {};
+const storyFacts = {}, prompts = {}, narrativeStyle = {};
 const referenceData = {}, opening = {};
 new Function('exports', compile('../supabase/functions/_shared/openingReferenceData.ts'))(referenceData);
 new Function('require', 'exports', compile('../supabase/functions/_shared/openingReferences.ts'))(() => referenceData, opening);
 new Function('exports', compile('../supabase/functions/_shared/storyFacts.ts'))(storyFacts);
+new Function('exports', compile('../supabase/functions/_shared/narrativeStyle.ts'))(narrativeStyle);
 new Function('require', 'exports', compile('../supabase/functions/_shared/prompts.ts'))(name => {
+  if (name === './narrativeStyle.ts') return narrativeStyle;
   assert.equal(name, './storyFacts.ts'); return storyFacts;
 }, prompts);
 

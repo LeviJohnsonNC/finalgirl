@@ -1,5 +1,6 @@
 // Sole home of image direction. Preserve facts and identity within the requested medium.
 import { endingFacts } from './storyFacts.ts';
+import { NARRATIVE_QUANTITIES } from './narrativeStyle.ts';
 
 export interface SceneContext {
   story: string;
@@ -93,7 +94,8 @@ export const buildShotBriefSystem = (ctx: SceneContext): string => isPoster(ctx)
 Return only JSON: {"concepts":["composition A","composition B","composition C"],"selected":0,"title":"1-4 word original title","tagline":"up to 10 words"}.
 ${shotPlanning}
 Plan a painted image earned by the actual result, even if the Final Girl died in a win or escaped alive in a loss. Prioritize thumbnail readability as well as detail at full size.
-Poster title maximum 32 printable Latin characters; tagline maximum 70. Both specific to this story; no famous titles, real credits, stock taglines or unsupported sequel promises.`
+Poster title maximum 32 printable Latin characters; tagline maximum 70. Both specific to this story; no famous titles, real credits, stock taglines or unsupported sequel promises.
+For the title and tagline: ${NARRATIVE_QUANTITIES}`
 :
 `You are the director of photography on a live-action horror film, planning a real camera shot before play begins.
 Return only JSON: {"concepts":["shot A","shot B","shot C"],"selected":0}.
