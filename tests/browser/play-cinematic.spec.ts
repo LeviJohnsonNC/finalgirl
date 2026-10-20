@@ -95,7 +95,10 @@ test("cinematic dashboard and modal retain usable touch targets and keyboard dis
   await page
     .getByRole("combobox", { name: "Terror card", exact: true })
     .click();
+  await expect(search).toBeVisible();
+  await expect(search).toBeFocused();
   await page.keyboard.press("Escape");
+  await expect(search).toHaveCount(0);
   await expect(dialog).toBeVisible();
   await page.getByRole("button", { name: "Event", exact: true }).click();
   await expect(
