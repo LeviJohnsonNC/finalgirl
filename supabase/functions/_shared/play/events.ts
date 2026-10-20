@@ -34,7 +34,7 @@ export type MomentType =
   | "dark-power"
   | "finale"
   | "other";
-export const PERMANENT_MOMENTS: readonly MomentType[] = ["dark-power", "finale", "girl-revived", "killer-revived"];
+export const PERMANENT_MOMENTS: readonly MomentType[] = ["dark-power", "finale", "ultimate-unlocked", "girl-revived", "killer-revived"];
 export const isPermanentMoment = (e: Pick<PlayEvent, "kind" | "momentType">): boolean =>
   e.kind === "moment" && PERMANENT_MOMENTS.includes(e.momentType!);
 /** New milestones carry an explicit lock. Legacy undone observations stay undone. */
