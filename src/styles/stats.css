@@ -177,6 +177,9 @@
 .stats-page .horror-bar { min-height: 0; border-radius: 0; background: linear-gradient(180deg, #f24f42, #a91e20); box-shadow: none; }
 .stats-page .horror-scale { margin-top: 6px; }
 .stats-scroll-list, .stats-page .chart-table-scroll, .stats-page .breakdown-scroll { scrollbar-color: #7b939875 #02090b; scrollbar-width: thin; overscroll-behavior: auto; }
+/* Absolute screen-reader labels must belong to the clipped list, otherwise
+   off-screen rows can add hundreds of blank pixels to the document. */
+.stats-scroll-list, .stats-page .chart-table-scroll, .stats-page .breakdown-scroll { position: relative; }
 .stats-page .weapon-list { max-height: 190px; overflow-y: auto; scrollbar-gutter: stable; padding: 2px 3px 2px 0; grid-template-columns: minmax(0, 1.25fr) minmax(24px, .9fr) auto; row-gap: 13px; }
 .stats-page .weapon-name { font: 12px/1.3 var(--archive-label); white-space: normal; overflow-wrap: anywhere; }
 .stats-page .weapon-count { font: 12px/1.3 var(--archive-label); gap: 4px; }

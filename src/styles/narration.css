@@ -253,6 +253,20 @@ body:has(.narration-session) [role='dialog'] .film-grain { animation: none; tran
   .narration-photo-caption { flex-wrap: wrap; gap: 0; }
 }
 
+/* Give the ending's unused poster-column space back to the story. The poster
+   keeps its full portrait and the controls stay compact under the title. */
+@media (min-width: 900px) {
+  .narration-layout--ending:not(.narration-layout--text-only) {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, min(34vw, 500px, calc((100dvh - 190px) * .6667 + 44px)));
+    margin-inline: clamp(24px, 4vw, 72px);
+    gap: clamp(28px, 3vw, 56px);
+    --narration-heading-inset: clamp(20px, 2vw, 40px);
+  }
+  .narration-layout--ending .narration-copy { max-width: 960px; }
+  .narration-layout--ending .narration-controls { max-width: 440px; }
+  .narration-layout--ending.narration-layout--text-only { grid-template-columns: minmax(0, 960px); }
+}
+
 /* Once the two-column composition would compromise either the prose or the
    photograph, let the page scroll. Phones never have a nested story scroller. */
 @media (max-width: 899px) {

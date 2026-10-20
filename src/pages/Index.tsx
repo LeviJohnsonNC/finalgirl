@@ -321,7 +321,6 @@ const IndexContent = () => {
               onCheckpoint={(updates) => checkpointGame(activeGame.id, updates)}
               formData={endingFormData}
               onSave={handleSaveEnding}
-              onDiscard={() => requestDiscard(activeGame)}
             />
           );
         }

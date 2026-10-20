@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { characterFate, endingFacts } from '../../supabase/functions/_shared/storyFacts';
-import { buildEndingUser } from '../../supabase/functions/_shared/storyPrompts';
+import { buildEndingUser, OPENING_SYSTEM, ENDING_SYSTEM } from '../../supabase/functions/_shared/storyPrompts';
+import { NARRATIVE_QUANTITIES } from '../../supabase/functions/_shared/narrativeStyle';
+import { deathPrompt } from '../../supabase/functions/_shared/deathPrompt';
+import { deathFacts } from './play/death';
+import { newPlayEvent } from './play/events';
 import { buildBeginningPrompt, buildPosterPrompt, buildShotBriefPrompt, buildShotBriefSystem, buildVisualBiblePrompt, VISUAL_BIBLE_SYSTEM, parseShotPlan, parseArtPlan, parseVisualBible } from '../../supabase/functions/_shared/prompts';
 import { getKillerNarrativeRules } from '@/data/killerSpecialRules';
 import { getKillerDescription } from '@/data/killerDescriptions';
@@ -19,6 +23,24 @@ const cases = [
 ] as const;
 
 describe('reviewed story facts survive every generation handoff', () => {
+  it('lets every narrative omit statistical recaps while retaining exact reviewed quantities and death scope', () => {
+    const context = { ...cases[0], story };
+    const start = newPlayEvent({ kind: 'start', saved: 7, killed: 6, round: 11 });
+    const event = newPlayEvent({ kind: 'killed', quantity: 2, cause: 'event' });
+    const death = deathPrompt(deathFacts(context, [start, event], event.id)!, []);
+    for (const system of [OPENING_SYSTEM, ENDING_SYSTEM, death.system, buildShotBriefSystem(context)]) {
+      expect(system).toContain(NARRATIVE_QUANTITIES);
+      expect(system).toContain('Use an exact number only when');
+      expect(system).toContain('Never invent, round or contradict a recorded quantity');
+    }
+    expect(JSON.parse(death.user).recordedFacts.quantity).toBe(2);
+    expect(death.system).toContain('Exactly the recorded quantity dies');
+    const user = buildEndingUser({ ...context, introStory: story, victimsSaved: 7, victimsKilled: 6, roundsPlayed: 11 });
+    expect(user).toContain('"victimsSaved": 7');
+    expect(user).toContain('"victimsKilled": 6');
+    expect(user).toContain('"roundsPlayed": 11');
+    expect(user).toContain('Final Girl fate: survived');
+  });
   for (const scenario of cases) it(scenario.name, () => {
     const context = { ...scenario, story, scenarioRules: getKillerNarrativeRules(scenario.killer) };
     const narrative = buildEndingUser({ ...scenario, introStory: story, killer: { name: scenario.killer }, location: { name: scenario.location }, finalGirl: { name: scenario.finalGirl } });

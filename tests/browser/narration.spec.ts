@@ -83,6 +83,41 @@ for (const outcome of ['won', 'lost'] as const) {
   });
 }
 
+test('ending gives its story the spare screen width and keeps only Save and Narrate', async ({ page, archive }, info) => {
+  await archive.install(page, { draft: { ...draft, phase: 'ending', result: { ...selection, id: gameId, timestamp: 1, outcome: 'lost' }, endingStory: story, posterImageUrl: posterUrl, formData } });
+  await photos(page);
+  await resume(page);
+  await expect(page.getByRole('button', { name: 'Session options', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'SAVE', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Narrate', exact: true })).toBeVisible();
+  const sizes = info.project.name === 'desktop'
+    ? [{ width: 1024, height: 768 }, { width: 1280, height: 800 }, { width: 1382, height: 766 }, { width: 1672, height: 941 }, { width: 1920, height: 1080 }]
+    : [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 768, height: 1024 }];
+  for (const size of sizes) {
+    await page.setViewportSize(size);
+    const reader = page.getByRole('region', { name: 'Ending narration' });
+    await expect(reader).toContainText('The chain on the side door');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const box = (await reader.boundingBox())!;
+    expect(await reader.locator('.narration-prose').evaluate(el => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(19);
+    if (info.project.name === 'desktop') {
+      expect(box.width).toBeGreaterThan(size.width * .48);
+      // The reader's ResizeObserver recalculates available height after a resize.
+      await expect.poll(async () => {
+        const bounds = (await reader.boundingBox())!;
+        const footer = (await page.locator('.app-footer').boundingBox())!;
+        return bounds.y + bounds.height - footer.y;
+      }).toBeLessThan(0);
+      expect((await page.getByRole('button', { name: 'SAVE', exact: true }).boundingBox())!.width).toBeLessThanOrEqual(440);
+    } else {
+      await expect(reader).toHaveCSS('max-height', 'none');
+      await expect(reader).toHaveCSS('overflow-y', 'visible');
+      expect(box.width).toBeGreaterThanOrEqual(Math.min(size.width, 700) - 60);
+    }
+    if (size.width === 1382 || size.width === 390) await page.screenshot({ path: info.outputPath(`ending-refined-${size.width}.png`), fullPage: true });
+  }
+});
+
 test('a broken opening photograph can be developed again without losing the story', async ({ page, archive }) => {
   await archive.install(page, { draft });
   await page.route('**/narration-still.png', route => route.fulfill({ status: 404 }));
