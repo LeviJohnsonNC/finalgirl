@@ -50,7 +50,8 @@ test("opt-in defaults, compact adjustments and the two comeback moments survive 
   const shapes = await moments
     .locator(".play-moment-choices button svg")
     .evaluateAll((nodes) => nodes.map((n) => n.innerHTML));
-  expect(new Set(shapes).size).toBe(8);
+  expect(shapes).toHaveLength(0);
+  await expect(moments.locator('.play-moment-choices button > img')).toHaveCount(8);
   for (const [name, detail] of [
     ["Second wind", "Her black token restored two health"],
     ["Back from the dead", "Billy rose behind the counter"],

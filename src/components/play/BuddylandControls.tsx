@@ -1,19 +1,19 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   BUDDIES,
   SPECIAL_VICTIMS,
-  FINAL_GIRL_REWARDS,
   moduleState,
 } from "@/lib/play/modules";
 import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
-import { BUDDYLAND_DETAILS } from "@/data/buddyland";
 import "@/styles/play-roster.css";
+import "@/styles/play-state-art.css";
 
 const artwork = import.meta.glob<string>("../../assets/play/roster/*.webp", {
   eager: true,
   query: "?url",
   import: "default",
 });
+const powerArt = import.meta.glob<string>("../../assets/play/states/power-*.webp", { eager: true, query: "?url", import: "default" });
 type PortraitState = "off" | "active" | "killed";
 const labels = { off: "Off", active: "In play", killed: "Killed" };
 const nextState: Record<PortraitState, PortraitState> = {
@@ -82,23 +82,54 @@ interface Props {
 export function BuddylandControls({
   killer,
   location,
-  finalGirl: name,
   events,
   onEvent,
 }: Props) {
-  const entries = summarizePlay(events).entries;
+  const summary = summarizePlay(events);
+  const entries = summary.entries;
   const billy = moduleState(entries, "billy"),
     venue = moduleState(entries, "buddyland");
   const [message, setMessage] = useState("");
-  const finalGirl = BUDDYLAND_DETAILS.finalGirls.find((f) => f.name === name);
+  const initialized = useRef(false);
+  const defaultSources = () => ({
+    ...Object.fromEntries([1, 2, 3, 4, 5].filter(i => billy[`source.${i}.status`] === undefined).map(i => [`source.${i}.status`, i === 5 ? "set-aside" : "active"])),
+    powerSourcesReady: true,
+  });
+  useEffect(() => {
+    if (killer !== "Billy the Bear" || !summary.tracked || billy.powerSourcesReady || initialized.current) return;
+    initialized.current = true;
+    if (!onEvent(newPlayEvent({ kind: "module", moduleData: { module: "billy", changes: defaultSources() } }))) {
+      initialized.current = false;
+      setMessage("Power sources could not be saved. Try a token again.");
+    }
+    // An initialization is one atomic observation; never overwrite saved source states.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [killer, summary.tracked, events, onEvent]);
+  const sourceChange = (id: number, status: "active" | "inactive" | "set-aside") => {
+    const ok = onEvent(newPlayEvent({ kind: "module", moduleData: { module: "billy", changes: {
+      ...(!billy.powerSourcesReady ? defaultSources() : {}), [`source.${id}.status`]: status,
+    } } }));
+    setMessage(ok ? `Power source ${id}: ${status === "active" ? "On" : status === "inactive" ? "Off" : "removed"}.` : "This change could not be saved. Please try again.");
+  };
+  const fifthIncluded = billy["source.5.status"] === "active" || billy["source.5.status"] === "inactive";
   return (
     <div className="play-modules play-portrait-modules">
       {killer === "Billy the Bear" && (
         <section aria-label="Billy tracking">
           <h2>Billy &amp; his Buddies</h2>
-          <p className="play-roster-help">
-            Tap to cycle: Off → In play → Killed → Off
-          </p>
+          <div className="play-power-sources" role="group" aria-label="Power sources">
+            <div className="play-power-heading"><h3>Power sources</h3>{fifthIncluded && <button className="play-power-remove" onClick={() => sourceChange(5, "set-aside")}>Remove fifth</button>}</div>
+            <div className="play-power-grid">
+              {[1, 2, 3, 4, ...(fifthIncluded ? [5] : [])].map(id => {
+                const on = (billy[`source.${id}.status`] ?? "active") === "active";
+                return <button key={id} className="play-power-token" data-state={on ? "on" : "off"} aria-pressed={on} aria-label={`Power source ${id}, ${on ? "On" : "Off"}. Turn ${on ? "off" : "on"}`} onClick={() => sourceChange(id, on ? "inactive" : "active")}>
+                  <img src={powerArt[`../../assets/play/states/power-${id}.webp`]} alt="" decoding="async" />
+                  <span><strong>Source {id}</strong><small>{on ? "On" : "Off"}</small></span>
+                </button>;
+              })}
+              {!fifthIncluded && <button className="play-power-add" onClick={() => sourceChange(5, "active")} aria-label="Add fifth power source"><span>+</span>Fifth source</button>}
+            </div>
+          </div>
           <div className="play-character-grid">
             {[...BUDDIES]
               .sort((a, b) => a.name.localeCompare(b.name))
@@ -159,9 +190,6 @@ export function BuddylandControls({
       {location === "Buddyland" && (
         <section aria-label="Buddyland tracking">
           <h2>Inside Buddyland</h2>
-          <p className="play-roster-help">
-            Tap to cycle: Off → In play → Dead → Off
-          </p>
           <div className="play-character-grid">
             {[...SPECIAL_VICTIMS]
               .sort((a, b) => a.name.localeCompare(b.name))
@@ -210,34 +238,7 @@ export function BuddylandControls({
                 );
               })}
           </div>
-          <p className="play-roster-help play-roster-help--foot">
-            Use the main counters for saved and killed totals.
-          </p>
         </section>
-      )}
-      {finalGirl && (
-        <details>
-          <summary>{finalGirl.name} reference</summary>
-          <p>
-            Available save rewards:{" "}
-            {[
-              ...new Set(
-                FINAL_GIRL_REWARDS[
-                  finalGirl.name as keyof typeof FINAL_GIRL_REWARDS
-                ],
-              ),
-            ]
-              .sort((a, b) => a.localeCompare(b))
-              .join(" · ")}
-            .
-          </p>
-          <p>Ultimate: {finalGirl.ultimateAbility}</p>
-          <p>After unlocking: {finalGirl.additionalSaveReward}</p>
-          <p className="play-card-note">
-            Use Remember this to record unlocking or using your ultimate. Choose
-            and apply save rewards on your character card.
-          </p>
-        </details>
       )}
       <p role="status" className="play-feedback">
         {message}

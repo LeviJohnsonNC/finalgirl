@@ -223,7 +223,8 @@ test("small right-aligned corrections, individual moment art and a compact scrol
   expect(layout.height).toBeLessThanOrEqual(320);
   expect(layout.row).toBeLessThan(62);
   expect(layout.gap).toBe(0);
-  const first = timeline.locator("li").first();
+  // The newest entry may be protected source initialization. Correct a saved victim.
+  const first = timeline.locator("li").filter({has:page.getByText("Saved 1 victim",{exact:true})}).first();
   await first.getByRole("button", { name: /^Undo/ }).click();
   await expect(first).toContainText("UNDONE");
   expect(

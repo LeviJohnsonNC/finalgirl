@@ -1,0 +1,284 @@
+/* The Play console: live, readable controls over tactile photographic artwork. */
+@font-face {
+  font-family: 'IM Fell English';
+  src: url('../assets/fonts/im-fell-english.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+.play-workspace .play-heading {
+  flex-wrap: wrap;
+  gap: 18px 24px;
+}
+.play-workspace .play-heading > div { flex: 1 1 210px; }
+.play-workspace .play-heading nav {
+  flex: 1 1 520px;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
+.play-workspace .play-heading nav > button,
+.play-workspace .play-state > button:not(.play-text-button) {
+  border: 10px solid transparent;
+  border-image: url('../assets/play/states/frame-neutral.webp') 40 fill / 12px stretch;
+  background: none;
+  border-radius: 0;
+  backdrop-filter: none;
+  color: #f0e6ce;
+  text-shadow: 0 2px 2px #000, 0 1px #332817;
+  box-shadow: 0 4px 9px #0008;
+}
+.play-workspace .play-heading nav > button {
+  min-height: 56px;
+  flex: 1 1 0;
+  padding: 5px 14px;
+  justify-content: center;
+  font: 400 22px/1.1 'IM Fell English', Georgia, serif;
+  gap: 9px;
+  white-space: nowrap;
+}
+.play-workspace .play-heading nav > button svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.7;
+  filter: drop-shadow(0 2px 1px #000);
+}
+.play-workspace .play-heading nav > button[aria-label='Finish game'] {
+  border-image-source: url('../assets/play/states/frame-red.webp');
+}
+.play-workspace .play-heading nav > .session-options-trigger {
+  flex: 0 0 54px;
+  width: 54px;
+  padding: 4px;
+}
+.play-workspace .play-heading button:hover:not(:disabled),
+.play-workspace .play-state > button:hover:not(:disabled) { filter: brightness(1.16); }
+.play-workspace button:focus-visible {
+  outline: 2px solid #e4cca0;
+  outline-offset: 3px;
+}
+.play-workspace .play-heading::after {
+  background: linear-gradient(0deg, #060b0be8, transparent 72%), linear-gradient(90deg, #040b0b87, transparent 75%);
+}
+.play-workspace .play-count-add {
+  background-image: linear-gradient(90deg, #091610d9, #0b1a1320), url('../assets/play/forest-survivors.webp');
+}
+.play-workspace .play-count--round .play-count-add {
+  background-image: linear-gradient(90deg, #161819ce, #10121418), url('../assets/play/stopwatch.webp');
+}
+.play-workspace .play-count--killed .play-count-add {
+  background-image: linear-gradient(90deg, #200b0ad4, #230b0a18), url('../assets/play/crimson-corridor.webp');
+}
+
+.play-workspace .play-state-grid { align-items: stretch; }
+.play-workspace .play-state {
+  min-height: 188px;
+  padding: 16px 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  isolation: isolate;
+  border-radius: 5px;
+  border-color: #ada17b65;
+  box-shadow: 0 5px 14px #0005;
+}
+.play-workspace .play-state::after {
+  position: absolute;
+  content: '';
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(0deg, #060c0bed, #060c0b08 80%), linear-gradient(90deg, #070d0c8c, transparent 85%);
+  pointer-events: none;
+}
+.play-workspace .play-state .play-stat-portrait {
+  width: 100%;
+  opacity: 1;
+  z-index: -2;
+  mask-image: none;
+  object-position: center 28%;
+}
+.play-workspace .play-state .play-stat-art { object-position: center 45%; }
+.play-workspace .play-state > span {
+  margin: 0;
+  color: #fff0d9;
+  font: 400 18px/1.15 'IM Fell English', Georgia, serif;
+  text-shadow: 0 2px 6px #000;
+}
+.play-workspace .play-state > button:not(.play-text-button) {
+  margin: auto 0 28px;
+  min-height: 44px;
+  padding: 2px 10px;
+  font: 400 18px/1.1 'IM Fell English', Georgia, serif;
+}
+.play-workspace .play-state .play-state-stepper {
+  margin-top: auto;
+  width: 100%;
+  flex-shrink: 0;
+}
+.play-workspace .play-state .play-text-button {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  color: #d0c7b6;
+  min-height: 28px;
+  padding: 5px 0;
+  margin: 0;
+}
+.play-workspace .play-state form { margin-top: auto; }
+.play-workspace .play-critical-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  mix-blend-mode: screen;
+  opacity: .68;
+  pointer-events: none;
+}
+.play-workspace .play-state--finalGirlHealth[data-critical] .play-stat-portrait {
+  filter: contrast(1.16) saturate(.62);
+  object-position: 53% 20%;
+  transform: scale(1.08);
+}
+.play-workspace .play-state--killerHealth[data-critical] .play-stat-portrait {
+  filter: contrast(1.3) saturate(.68) sepia(.2);
+  object-position: 47% 20%;
+  transform: scale(1.12);
+}
+.play-workspace .play-state[data-critical],
+.play-workspace .play-state[data-horror='high'] {
+  border-color: #cf7557;
+  box-shadow: inset 0 0 18px #a6311833, 0 0 12px #be392318;
+}
+.play-workspace .play-critical-label {
+  position: relative;
+  color: #ffccac;
+  font: 700 10px/1.2 Arial, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-top: 6px;
+  text-shadow: 0 1px 4px #000;
+}
+
+.play-workspace .play-moment-choices { gap: 12px; }
+.play-workspace .play-moment-choices button {
+  display: flex;
+  align-items: flex-end;
+  min-height: 126px;
+  padding: 15px 13px;
+  border-color: #9e96776e;
+  box-shadow: 0 5px 13px #0006, inset 0 0 0 2px #0005;
+}
+.play-workspace .play-moment-choices button > img {
+  opacity: 1;
+  object-position: center 38%;
+}
+.play-workspace .play-moment-choices button::before {
+  background: linear-gradient(0deg, #030807ed, #03080721 60%, transparent);
+}
+.play-workspace .play-moment-choices button > span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 1.1;
+}
+.play-workspace .play-moment-choices strong {
+  font: 400 18px/1.13 'IM Fell English', Georgia, serif;
+  text-wrap: balance;
+}
+.play-workspace .play-moment-choices span > small {
+  color: #eee1c6;
+  font: 600 10px/1.2 Arial, sans-serif;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.play-workspace .play-moment-choices button[data-recorded] {
+  border-color: #dbc38c;
+  box-shadow: inset 0 0 0 1px #d0b87966, 0 0 18px #bba55b23, 0 5px 13px #0007;
+}
+.play-workspace .play-moment-seal {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  padding: 4px 7px;
+  color: #fff0bf;
+  border: 1px solid #d0b87988;
+  background: #12150dd9;
+  font: 700 9px/1 Arial, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+}
+.play-workspace .play-character::after {
+  background: linear-gradient(0deg, #050909ed, #0509090d 50%, transparent);
+  box-shadow: inset 0 0 0 2px #0005;
+}
+
+.play-power-sources { margin: 0 0 20px; }
+.play-power-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.play-power-heading h3 {
+  font: 400 17px/1.3 'IM Fell English', Georgia, serif;
+  margin: 0 0 8px;
+  color: #d6c8a6;
+}
+.play-power-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.play-portrait-modules .play-power-token,
+.play-portrait-modules .play-power-add {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 1;
+  border: 1px solid #bbaa7480;
+  border-radius: 5px;
+  padding: 8px;
+  display: flex;
+  align-items: flex-end;
+  background: #0e1511;
+}
+.play-power-token img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+.play-power-token::before { position: absolute; content: ''; inset: 0; z-index: -1; background: linear-gradient(0deg, #050a06ef, transparent 80%); }
+.play-power-token > span { display: flex; flex-direction: column; gap: 3px; text-shadow: 0 2px 4px #000; }
+.play-power-token strong { color: #f4e8c9; font: 400 15px/1 'IM Fell English', Georgia, serif; }
+.play-power-token small { color: #d6ec99; font: 700 9px/1 Arial, sans-serif; text-transform: uppercase; letter-spacing: .08em; }
+.play-portrait-modules .play-power-token[data-state='on'] { border-color: #bdc88699; box-shadow: 0 0 12px #b4c94d20; }
+.play-power-token[data-state='off'] img { filter: grayscale(1) brightness(.36); }
+.play-power-token[data-state='off'] small { color: #c0c4bd; }
+.play-portrait-modules .play-power-add {
+  border: 1px dashed #92957b80;
+  color: #c8c5ae;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  font: 400 13px/1.2 'IM Fell English', Georgia, serif;
+}
+.play-power-add > span { font: 26px/1 Georgia, serif; }
+.play-power-heading .play-power-remove { color: #beb9a5; font-size: 11px; min-height: 44px; padding: 0 4px; border: 0; background: none; }
+.play-power-token:hover, .play-power-add:hover { filter: brightness(1.16); }
+@media (max-width: 639px) {
+  .play-workspace .play-heading nav { width: 100%; margin-top: 16px; gap: 5px; }
+  .play-workspace .play-heading nav > button { font-size: 17px; min-height: 50px; padding: 3px 4px; gap: 5px; border-width: 8px; border-image-width: 10px; }
+  .play-workspace .play-heading nav > button svg { width: 18px; height: 18px; }
+  .play-workspace .play-heading nav > .session-options-trigger { width: 44px; flex-basis: 44px; }
+  .play-workspace .play-state-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .play-workspace .play-state { min-height: 174px; padding: 13px 10px 8px; }
+  .play-workspace .play-state > span { font-size: 17px; }
+  .play-workspace .play-moment-choices { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .play-workspace .play-moment-choices button { min-height: 116px; padding: 12px 10px; }
+  .play-workspace .play-moment-choices strong { font-size: 17px; }
+  .play-workspace .play-moment-choices span > small { font-size: 9px; letter-spacing: .01em; }
+  .play-power-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+  .play-power-token strong { font-size: 16px; }
+}
+@media (max-width: 359px) {
+  .play-workspace .play-heading nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .play-workspace .play-heading nav > button { font-size: 17px; padding: 3px; }
+  .play-workspace .play-heading nav > .session-options-trigger { width: 100%; }
+  .play-workspace .play-state .play-state-stepper { margin-left: -6px; width: calc(100% + 12px); }
+  .play-workspace .play-state .play-state-stepper button:nth-child(2) { font-size: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play-workspace .play-moment-choices button > img { transition: none; }
+}
