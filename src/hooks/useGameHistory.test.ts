@@ -115,7 +115,7 @@ describe("useGameHistory", () => {
   });
 
   describe("deleteGame", () => {
-    it("removes a game by id", () => {
+    it("removes a game by id", async () => {
       const { result } = renderHook(() => useGameHistory());
 
       let gameId: string;
@@ -126,14 +126,14 @@ describe("useGameHistory", () => {
 
       expect(result.current.gameHistory).toHaveLength(1);
 
-      act(() => {
-        result.current.deleteGame(gameId!);
+      await act(async () => {
+        await result.current.deleteGame(gameId!);
       });
 
       expect(result.current.gameHistory).toHaveLength(0);
     });
 
-    it("only removes the specified game", () => {
+    it("only removes the specified game", async () => {
       const { result } = renderHook(() => useGameHistory());
 
       let targetId: string;
@@ -144,8 +144,8 @@ describe("useGameHistory", () => {
         result.current.recordGame(createMockGame({ killer: "Keep2" }));
       });
 
-      act(() => {
-        result.current.deleteGame(targetId!);
+      await act(async () => {
+        await result.current.deleteGame(targetId!);
       });
 
       expect(result.current.gameHistory).toHaveLength(2);

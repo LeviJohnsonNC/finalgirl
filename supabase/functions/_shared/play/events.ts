@@ -34,6 +34,13 @@ export type MomentType =
   | "dark-power"
   | "finale"
   | "other";
+export const PERMANENT_MOMENTS: readonly MomentType[] = ["dark-power", "finale", "girl-revived", "killer-revived"];
+export const isPermanentMoment = (e: Pick<PlayEvent, "kind" | "momentType">): boolean =>
+  e.kind === "moment" && PERMANENT_MOMENTS.includes(e.momentType!);
+/** New milestones carry an explicit lock. Legacy undone observations stay undone. */
+export const isLockedPlayEvent = (e: PlayEvent): boolean =>
+  (isPermanentMoment(e) && e.permanent === true) ||
+  (e.kind === "module" && e.moduleData?.module === "billy" && e.moduleData.changes.powerSourcesReady === true);
 export type PlayKind =
   | "start"
   | "saved"
@@ -60,6 +67,7 @@ export interface PlayDetails {
   killerCard?: string;
 }
 export interface PlayEvent extends PlayDetails {
+  permanent?: true;
   id: string;
   at: number;
   kind: PlayKind;
@@ -115,6 +123,7 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if (e.permanent !== undefined && (e.permanent !== true || !isPermanentMoment(e))) return false;
   if (!uuid.test(e.id) || !integer(e.at, Number.MAX_SAFE_INTEGER)) return false;
   if (
     e.momentType !== undefined &&
@@ -178,7 +187,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
   const inactive = new Set<string>();
   const targets = new Set(
     log
-      .filter((e) => !["undo", "restore", "details"].includes(e.kind))
+      .filter((e) => !["undo", "restore", "details"].includes(e.kind) && !isLockedPlayEvent(e))
       .map((e) => e.id),
   );
   for (const e of log) {
@@ -186,6 +195,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     if (e.kind === "restore") inactive.delete(e.target!);
   }
   const reductions = new Map<string, number>();
+  const milestones = new Set<MomentType>();
   for (const e of log)
     if (e.kind === "reduce" && !inactive.has(e.id))
       reductions.set(e.target!, (reductions.get(e.target!) ?? 0) + 1);
@@ -233,6 +243,10 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       summary.round = e.round ?? null;
     }
     if (!summary.tracked) continue;
+    if (isPermanentMoment(e)) {
+      if (e.permanent && milestones.has(e.momentType!)) continue;
+      milestones.add(e.momentType!);
+    }
     if (e.kind === "adjust") {
       summary.saved = e.saved!;
       summary.killed = e.killed!;

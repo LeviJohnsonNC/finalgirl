@@ -77,6 +77,14 @@ describe("owner-supplied Buddyland content", () => {
   });
 });
 describe("persistent module observations", () => {
+  it("keeps source initialization metadata out of narrative and death context", () => {
+    const initialized = observe('billy', {powerSourcesReady:true,'source.1.status':'active'});
+    const log = [start(),initialized,event({kind:'killed',quantity:1,cause:'killer'})];
+    const context = moduleContext(selection,summarizePlay(log).entries)!;
+    expect(context.billy['source.1.status']).toBe('active');
+    expect(context.billy).not.toHaveProperty('powerSourcesReady');
+    expect(summarizePlay([...log,event({kind:'undo',target:initialized.id})]).entries.some(e=>e.id===initialized.id)).toBe(true);
+  });
   it("rejects invalid keys, values, decks and oversized payloads", () => {
     for (const moduleData of [
       { module: "billy", changes: { "buddy.invented.health": 2 } },

@@ -56,20 +56,20 @@ test("streamlined portraits and reveals survive reload and reach deaths and endi
     "Victims killed",
   ]);
   await expect(page.locator(".play-state > span")).toHaveText([
-    "Bloodlust",
     "Final Girl health",
-    "Horror",
     "Killer health",
+    "Bloodlust",
+    "Horror",
   ]);
-  await expect(page.locator(".play-moment-choices button")).toHaveText([
-    "Back from the dead",
+  expect(await page.locator(".play-moment-choices button").evaluateAll(nodes => nodes.map(node => node.getAttribute('aria-label')))).toEqual([
+    "Found a weapon/item",
     "Dark Power",
     "Finale",
-    "Found a weapon or key item",
-    "Other moment",
-    "Second wind",
     "Ultimate unlocked",
     "Ultimate used",
+    "Second wind",
+    "Back from the dead",
+    "Other moment",
   ]);
   await expect(page.locator(".play-character strong")).toHaveText([
     ...buddies,
@@ -381,12 +381,12 @@ test("older detailed trackers and retired moments remain recoverable without rec
   await portrait(page, "Toby").click();
   await expect
     .poll(() => archive.sessions[0]?.state.playEvents)
-    .toHaveLength(5);
+    .toHaveLength(6);
   const log = archive.sessions[0].state.playEvents as {
     moduleData?: { changes: Record<string, unknown> };
   }[];
   expect(log[1].moduleData!.changes["buddy.toby.health"]).toBe(2);
-  expect(log[4].moduleData!.changes).toMatchObject({
+  expect(log[5].moduleData!.changes).toMatchObject({
     "buddy.toby.status": "defeated",
     "buddy.toby.health": null,
     "buddy.toby.room": null,

@@ -1,13 +1,20 @@
 import { playStartingValues } from "@/lib/play/defaults";
-import horrorImage from "@/assets/play/horror-eye.webp";
+import horrorLow from "@/assets/play/states/horror-low.webp";
+import horrorMid from "@/assets/play/states/horror-mid.webp";
+import horrorHigh from "@/assets/play/states/horror-high.webp";
+import criticalHealth from "@/assets/play/states/critical-health.webp";
 import bloodlustImage from "@/assets/play/bloodlust-stain.webp";
 import momentItem from "@/assets/play/moment-item.webp";
 import momentUnlocked from "@/assets/play/moment-ultimate-unlocked.webp";
 import momentUsed from "@/assets/play/moment-ultimate-used.webp";
 import momentDarkPower from "@/assets/play/roster/moment-dark-power.webp";
 import momentFinale from "@/assets/play/roster/moment-finale.webp";
-import momentGirlRevived from "@/assets/play/moment-girl-revived.webp";
-import momentKillerRevived from "@/assets/play/moment-killer-revived.webp";
+import momentGirlRevived from "@/assets/play/states/girl-return-before.webp";
+import momentGirlReturned from "@/assets/play/states/girl-return-after.webp";
+import momentKillerRevived from "@/assets/play/states/killer-return-before.webp";
+import momentKillerReturned from "@/assets/play/states/killer-return-after.webp";
+import momentDarkPowerActive from "@/assets/play/states/dark-power-active.webp";
+import momentFinaleActive from "@/assets/play/states/finale-active.webp";
 import momentOther from "@/assets/play/moment-other.webp";
 import { useActiveImages } from "@/hooks/useActiveImages";
 import { PlaySearch } from "./PlaySearch";
@@ -20,15 +27,6 @@ import {
   Undo2,
   Volume2,
   ChevronDown,
-  UnlockKeyhole,
-  Zap,
-  HeartPulse,
-  RotateCcw,
-  Bookmark,
-  type LucideIcon,
-  Eclipse,
-  Clapperboard,
-  KeyRound,
 } from "lucide-react";
 import {
   Dialog,
@@ -40,7 +38,9 @@ import {
   decrementPlay,
   newPlayEvent,
   summarizePlay,
-  STATE_FIELDS,
+  PERMANENT_MOMENTS,
+  isPermanentMoment,
+  isLockedPlayEvent,
   type PlayEvent,
   type PlayDetails,
   type StateField,
@@ -52,6 +52,7 @@ import "@/styles/play.css";
 import "@/styles/play-finish.css";
 import { BUDDYLAND_ITEMS, killerMomentCards } from "@/lib/play/modules";
 import { PlaySelect } from "./PlaySelect";
+import "@/styles/play-state-art.css";
 
 export interface PlayScreenProps {
   killer: string;
@@ -82,9 +83,7 @@ const stateLabels: Record<StateField, string> = {
   finalHorrorLevel: "Horror",
   bloodlust: "Bloodlust",
 };
-const sortedStateFields = [...STATE_FIELDS].sort((a, b) =>
-  stateLabels[a].localeCompare(stateLabels[b]),
-);
+const orderedStateFields: StateField[] = ["finalGirlHealth", "killerHealth", "bloodlust", "finalHorrorLevel"];
 const stateLimits: Record<StateField, number> = {
   finalGirlHealth: 10,
   killerHealth: 20,
@@ -95,69 +94,67 @@ const moments: Array<{
   type: MomentType;
   title: string;
   prompt: string;
-  icon: LucideIcon;
   image: string;
+  activeImage?: string;
+  subtitle?: string;
 }> = [
   {
     type: "item",
-    icon: KeyRound,
     image: momentItem,
-    title: "Found a weapon or key item",
+    title: "Found a weapon/item",
     prompt: "Which weapon or item?",
   },
   {
     type: "ultimate-unlocked",
-    icon: UnlockKeyhole,
     image: momentUnlocked,
     title: "Ultimate unlocked",
     prompt: "Anything to remember?",
   },
   {
     type: "ultimate-used",
-    icon: Zap,
     image: momentUsed,
     title: "Ultimate used",
     prompt: "What did it change?",
   },
   {
     type: "dark-power",
-    icon: Eclipse,
     image: momentDarkPower,
+    activeImage: momentDarkPowerActive,
     title: "Dark Power",
     prompt: "Which Dark Power?",
   },
   {
     type: "finale",
-    icon: Clapperboard,
     image: momentFinale,
+    activeImage: momentFinaleActive,
     title: "Finale",
     prompt: "Which Finale?",
   },
   {
     type: "girl-revived",
-    icon: HeartPulse,
     image: momentGirlRevived,
+    activeImage: momentGirlReturned,
     title: "Second wind",
+    subtitle: "Final Girl returns",
     prompt: "How did she come back?",
   },
   {
     type: "killer-revived",
-    icon: RotateCcw,
     image: momentKillerRevived,
+    activeImage: momentKillerReturned,
     title: "Back from the dead",
+    subtitle: "Killer returns",
     prompt: "What happened when the killer rose?",
   },
   {
     type: "other",
-    icon: Bookmark,
     image: momentOther,
     title: "Other moment",
     prompt: "What happened?",
   },
 ];
-const sortedMoments = [...moments].sort((a, b) =>
-  a.title.localeCompare(b.title),
-);
+const momentOrder: MomentType[] = ["item", "dark-power", "finale", "ultimate-unlocked", "ultimate-used", "girl-revived", "killer-revived", "other"];
+const orderedMoments = momentOrder.map(type => moments.find(choice => choice.type === type)!);
 export function PlayScreen(props: PlayScreenProps) {
   const { events, onEvent, killer, location, finalGirl } = props;
   const summary = summarizePlay(events);
@@ -170,6 +167,7 @@ export function PlayScreen(props: PlayScreenProps) {
   const [editingState, setEditingState] = useState<StateField | null>(null);
   const [stateValue, setStateValue] = useState("");
   const started = useRef(false);
+  const pendingMoments = useRef(new Set<MomentType>());
   useEffect(() => {
     if (summary.tracked || started.current) return;
     started.current = true;
@@ -191,7 +189,7 @@ export function PlayScreen(props: PlayScreenProps) {
     setMessage("");
     return e;
   };
-  const last = [...summary.entries].reverse().find((e) => e.kind !== "start");
+  const last = [...summary.entries].reverse().find((e) => e.kind !== "start" && !isPermanentMoment(e) && !isLockedPlayEvent(e));
   const lastDeath = [...summary.entries]
     .reverse()
     .find((e) => e.kind === "killed");
@@ -221,11 +219,18 @@ export function PlayScreen(props: PlayScreenProps) {
   };
   const pickMoment = (choice: (typeof moments)[number]) => {
     if (!saveMoment()) return;
+    const permanent = PERMANENT_MOMENTS.includes(choice.type);
+    const existing = permanent && summary.entries.find(e => e.kind === "moment" && e.momentType === choice.type);
+    if (existing) { setMomentId(existing.id); setMessage(""); return; }
+    if (permanent && pendingMoments.current.has(choice.type)) return;
+    if (permanent) pendingMoments.current.add(choice.type);
     const e = commit({
       kind: "moment",
       momentType: choice.type,
-      text: choice.title,
+      text: choice.subtitle ? `${choice.title}: ${choice.subtitle}` : choice.title,
+      ...(permanent && { permanent: true as const }),
     });
+    if (!e) pendingMoments.current.delete(choice.type);
     if (e) {
       setMomentId(e.id);
       setMessage(`${choice.title} recorded. Details are optional.`);
@@ -392,10 +397,14 @@ export function PlayScreen(props: PlayScreenProps) {
       >
         <h2>Track more</h2>
         <div className="play-state-grid">
-          {sortedStateFields.map((field) => {
+          {orderedStateFields.map((field) => {
             const value = summary[field];
+            const health = field === "finalGirlHealth" || field === "killerHealth";
+            const critical = health && value !== undefined && value <= 2;
+            const horror = value ?? startingValues.finalHorrorLevel;
+            const horrorBand = horror <= 1 ? "low" : horror === 7 ? "high" : "mid";
             return (
-              <div key={field} className={`play-state play-state--${field}`}>
+              <div key={field} className={`play-state play-state--${field}`} data-critical={critical || undefined} data-horror={field === "finalHorrorLevel" ? horrorBand : undefined}>
                 {(field === "finalGirlHealth" || field === "killerHealth") &&
                   characterImages[
                     field === "finalGirlHealth" ? finalGirl : killer
@@ -413,7 +422,7 @@ export function PlayScreen(props: PlayScreenProps) {
                 {field === "finalHorrorLevel" && (
                   <img
                     className="play-stat-portrait play-stat-art"
-                    src={horrorImage}
+                    src={horrorBand === "low" ? horrorLow : horrorBand === "high" ? horrorHigh : horrorMid}
                     alt=""
                   />
                 )}
@@ -424,7 +433,9 @@ export function PlayScreen(props: PlayScreenProps) {
                     alt=""
                   />
                 )}
+                {critical && <img className="play-critical-art" src={criticalHealth} alt="" />}
                 <span>{stateLabels[field]}</span>
+                {critical && <small className="play-critical-label">{value === 0 ? "No health remaining" : "Low health"}</small>}
                 {editingState === field ? (
                   <form
                     onSubmit={(e) => {
@@ -505,13 +516,14 @@ export function PlayScreen(props: PlayScreenProps) {
           Remember this <span>The moments that made your night</span>
         </h2>
         <div className="play-moment-choices">
-          {sortedMoments.map((choice) => (
-            <button key={choice.type} onClick={() => pickMoment(choice)}>
-              <img src={choice.image} alt="" loading="lazy" />
-              <choice.icon size={17} aria-hidden="true" />
-              <span>{choice.title}</span>
-            </button>
-          ))}
+          {orderedMoments.map((choice) => {
+            const active = PERMANENT_MOMENTS.includes(choice.type) && summary.entries.some(e => e.kind === "moment" && e.momentType === choice.type);
+            return <button key={choice.type} aria-label={choice.title} data-recorded={active || undefined} aria-pressed={PERMANENT_MOMENTS.includes(choice.type) ? active : undefined} onClick={() => pickMoment(choice)}>
+              <img src={active ? choice.activeImage ?? choice.image : choice.image} alt="" loading="lazy" />
+              {active && <small className="play-moment-seal">{choice.type === "dark-power" || choice.type === "finale" ? "Revealed" : "Returned"}</small>}
+              <span><strong>{choice.title}</strong>{choice.subtitle && <small>{choice.subtitle}</small>}</span>
+            </button>;
+          })}
         </div>
         {moment && (
           <div className="play-moment-editor">

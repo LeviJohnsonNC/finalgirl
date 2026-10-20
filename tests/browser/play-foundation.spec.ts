@@ -39,7 +39,7 @@ test("optional observations preserve zero, survive reload, and reach the ending"
     page.getByRole("button", { name: "Decrease Horror", exact: true }),
   ).toBeDisabled();
   await page
-    .getByRole("button", { name: "Found a weapon or key item", exact: true })
+    .getByRole("button", { name: "Found a weapon/item", exact: true })
     .click();
   await searchPick(page, "Moment detail", "Axe from the cabins");
   await page.getByRole("button", { name: "Record", exact: true }).click();

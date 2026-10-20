@@ -65,6 +65,7 @@ function validField(
       )
     );
   if (module === "billy") {
+    if (key === "powerSourcesReady") return value === true;
     if (key === "rosterComplete") return oneOf(value, [true, false]);
     if (key === "finale")
       return oneOf(
@@ -179,6 +180,7 @@ export function moduleState(
   return state;
 }
 function fieldLabel(module: ModuleObservation["module"], key: string) {
+  if (key === "powerSourcesReady") return "Power sources initialized";
   const [group, id, field] = key.split(".");
   if (group === "source")
     return `Power Source ${id}${field === "room" ? " location" : ""}`;
@@ -231,6 +233,8 @@ export function moduleContext(
     )
       continue;
     const state = moduleState(entries, module);
+    // A UI initialization marker is not a game fact or part of a death fingerprint.
+    delete state.powerSourcesReady;
     if (Object.keys(state).length) context[module] = state;
   }
   return Object.keys(context).length ? context : undefined;

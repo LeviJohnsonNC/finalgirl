@@ -1,7 +1,27 @@
 import { describe, expect, it } from 'vitest';
-import { newPlayEvent as event, summarizePlay, validPlayLog, playStoryBeats } from './events';
+import { newPlayEvent as event, summarizePlay, validPlayLog, playStoryBeats, PERMANENT_MOMENTS } from './events';
 
 describe('play observations', () => {
+  it('locks new milestones, deduplicates merged repeats, and still permits detail edits', () => {
+    for (const momentType of PERMANENT_MOMENTS) {
+      const start = event({kind:'start', saved:0, killed:0, round:1});
+      const milestone = event({kind:'moment', momentType, text:'Recorded milestone', permanent:true});
+      const duplicate = event({kind:'moment', momentType, text:'Duplicate from another device', permanent:true});
+      const log = [start, milestone, event({kind:'undo', target:milestone.id}), duplicate, event({kind:'details', target:milestone.id, detail:'A remembered detail.'})];
+      expect(validPlayLog(log)).toBe(true);
+      const s = summarizePlay(log);
+      expect(s.inactive.has(milestone.id)).toBe(false);
+      expect(s.entries.filter(e => e.momentType === momentType)).toHaveLength(1);
+      expect(s.entries.find(e => e.id === milestone.id)?.detail).toBe('A remembered detail.');
+      expect(s.killed).toBe(0);
+    }
+  });
+  it('preserves legacy corrections and rejects permanent flags on repeatable moments', () => {
+    const old = event({kind:'moment',momentType:'dark-power',text:'Old mistaken reveal'});
+    expect(summarizePlay([event({kind:'start',saved:0,killed:0,round:1}),old,event({kind:'undo',target:old.id})]).entries.some(e => e.id === old.id)).toBe(false);
+    expect(validPlayLog([{...old, momentType:'item',permanent:true}])).toBe(false);
+    expect(validPlayLog([{...old,permanent:'yes'}])).toBe(false);
+  });
   it('keeps untracked distinct from a recorded zero and starts rounds explicitly', () => {
     expect(summarizePlay()).toMatchObject({ tracked: false, saved: null, killed: null, round: null });
     expect(summarizePlay([event({kind:'start',saved:0,killed:0,round:null})])).toMatchObject({tracked:true,saved:0,killed:0,round:null});

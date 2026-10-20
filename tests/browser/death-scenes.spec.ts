@@ -416,7 +416,7 @@ test("opening a legacy death preserves its cached scene until the player changes
     .getByRole("button", { name: "Save and exit", exact: true })
     .click();
   await expect
-    .poll(() => archive.sessions[0]?.state.playEvents)
+    .poll(() => (archive.sessions[0]?.state.playEvents as PlayEvent[] | undefined)?.filter(e => e.kind !== "module"))
     .toHaveLength(2);
   await page
     .getByRole("button", { name: "Latest death scene", exact: true })
@@ -432,7 +432,7 @@ test("opening a legacy death preserves its cached scene until the player changes
     .getByRole("button", { name: "Save and exit", exact: true })
     .click();
   await expect
-    .poll(() => archive.sessions[0]?.state.playEvents)
+    .poll(() => (archive.sessions[0]?.state.playEvents as PlayEvent[] | undefined)?.filter(e => e.kind !== "module"))
     .toHaveLength(3);
   expect(
     (archive.sessions[0].state.playEvents as PlayEvent[]).at(-1),
