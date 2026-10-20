@@ -43,7 +43,7 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
       const copy = opts.system.includes('"title"') ? { title: 'TITLE', tagline: 'TAGLINE' } : {};
       return { text: invalidPlan ? '{' : JSON.stringify({ concepts: ['A doorway with a small figure at the far end.', 'A face seen beside a darkened arcade machine.', 'An empty chair beneath a practical ceiling lamp.'], selected: 1, ...copy }), model: 'text' };
     }, generateImage: async (...args) => { imageCalls.push(args); return { base64: 'dGVzdA==', mimeType: 'image/png', model: 'image' }; }, statusFor: () => 500, userFacingMessage: () => 'failed' },
-    '../_shared/poster.ts': { composePoster: async (_bytes, copy) => { phases.push('compose'); assert.equal(copy.title, invalidPlan ? 'BUDDYLAND' : 'TITLE'); if(composeError) throw new Error('composition failed'); return Buffer.from('complete-poster'); } },
+    '../_shared/poster.ts': { composePoster: async (_bytes, copy) => { phases.push('compose'); assert.equal(copy.title, invalidPlan || incompletePlan ? 'BUDDYLAND' : 'TITLE'); if(composeError) throw new Error('composition failed'); return Buffer.from('complete-poster'); } },
     '../_shared/prompts.ts': prompts,
   };
   new Function('require', 'exports', 'Deno', code)(name => {
@@ -66,6 +66,8 @@ test('opening generation uses only a complete photographic plan, without poster 
     assert.equal(f.textCalls[0].maxTokens, 4000);
     assert.equal(f.textCalls[0].requireComplete, true);
     assert.equal(f.textCalls[0].reasoningEffort, 'low');
+    assert.equal(f.textCalls[0].singleAttempt, true);
+    assert(f.textCalls[0].signal instanceof AbortSignal);
     assert.equal(f.imageCalls[0][1], undefined);
     assert.deepEqual(f.phases, ['upload']);
   const poster = imageHandler();
@@ -149,8 +151,8 @@ test('a failed attachment keeps the previous image available for client retry', 
 
 
 test('only a complete raster poster is uploaded; malformed planning uses bounded fallback copy', async () => {
-  for(const invalidPlan of [false,true]) {
-    const f=imageHandler({invalidPlan});
+  for(const options of [{}, {invalidPlan:true}, {incompletePlan:true}]) {
+    const f=imageHandler(options);
     assert.equal((await f.handler(request())).status,200);
     assert.deepEqual(f.phases,['compose','upload']);
   }

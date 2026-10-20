@@ -70,6 +70,9 @@ serve(async (req) => {
         maxTokens: 4000,
         reasoningEffort: "low",
         requireComplete: true,
+        // Planning must not consume the time reserved for image failover.
+        signal: AbortSignal.timeout(20_000),
+        singleAttempt: true,
       });
       const posterPlan = isPoster ? parseArtPlan(brief.text) : null;
       const plan = isPoster ? posterPlan : parseShotPlan(brief.text);

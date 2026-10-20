@@ -19,7 +19,7 @@ function gateway(status=200,body='') {
     throw Error(name);
   },exports,{env:{get:()=> 'fake-key'}},async(_url,options)=>{
     calls.push(JSON.parse(options.body));
-    if((calls.length===1 || status===401 || (status===422 && calls.length<=2)) && status!==200)return new Response(body,{status});
+    if((calls.length===1 || status===401) && status!==200)return new Response(body,{status});
     return new Response(JSON.stringify({choices:[{message:{images:[{image_url:{url:'data:image/png;base64,dGVzdA=='}}]}}]}));
   });
   return {calls,exports};
@@ -51,21 +51,90 @@ test('opening identity photos carry named subjects and never inherit painted pos
 test('image dimensions survive the existing reference-input fallback',async()=>{
   const {calls,exports}=gateway(422,'Unsupported image input');
   await exports.generateImage('opening photo',own,{aspectRatio:'16:9'});
-  assert.equal(calls.length,3);
+  assert.equal(calls.length,2);
   assert(calls.every(call=>call.image_config.aspect_ratio==='16:9'));
 });
 test('a route rejecting image input falls back to text continuity once',async()=>{
   const {calls,exports}=gateway(422,'Unsupported image input');
   await exports.generateImage('paint the ending',own);
-  assert.equal(calls.length,3);
-  assert.equal(calls[2].messages[0].content,'paint the ending');
+  assert.equal(calls.length,2);
+  assert.equal(calls[1].messages[0].content,'paint the ending');
 });
 test('reference fallback never bypasses credits, safety or authorization errors',async()=>{
   for(const [status,body] of [[402,'credits'],[400,'content policy'],[401,'unauthorized']]) {
     const {calls,exports}=gateway(status,body);
     await assert.rejects(exports.generateImage('paint the ending',own));
-    assert.equal(calls.length,status===401 ? 2 : 1);
+    assert.equal(calls.length,1);
     assert(calls.every(call=>Array.isArray(call.messages[0].content)));
+  }
+});
+
+// Exercise the real gateway with fake providers and clock. No paid AI calls.
+function imageFailover(respond, models = ['primary', 'backup', 'last']) {
+  const calls = [], timeouts = [], exports = {};
+  let now = 0;
+  new Function('require', 'exports', 'Deno', 'fetch', 'Date', 'AbortSignal', compile('../supabase/functions/_shared/aiGateway.ts'))(
+    () => ({ IMAGE_MODEL_CANDIDATES: models }), exports, { env: { get: () => 'fake-key' } },
+    async (_url, options) => {
+      const body = JSON.parse(options.body); calls.push(body);
+      return await respond({ body, signal: options.signal, advance: ms => { now += ms; } });
+    }, { now: () => now }, { timeout: ms => {
+      const controller = new AbortController(); timeouts.push({ ms, controller }); return controller.signal;
+    } },
+  );
+  return { calls, timeouts, exports };
+}
+const generatedImage = () => new Response(JSON.stringify({ choices: [{ message: { images: [{ image_url: { url: 'data:image/png;base64,dGVzdA==' } }] } }] }));
+
+test('the observed slow 503 switches image model instead of repeating the failed provider', async () => {
+  const f = imageFailover(({ body, advance }) => {
+    if (body.model === 'primary') { advance(59_000); return new Response('{"error":{"message":"Service temporarily unavailable","type":"upstream_error"}}', { status: 503 }); }
+    advance(12_000); return generatedImage();
+  });
+  const image = await f.exports.generateImage('paint the recorded ending', own);
+  assert.equal(image.model, 'backup');
+  assert.deepEqual(f.calls.map(call => call.model), ['primary', 'backup']);
+  assert.deepEqual(f.calls[0].messages, f.calls[1].messages);
+  assert.deepEqual(f.timeouts.map(t => t.ms), [65_000, 46_000]);
+});
+
+test('image failover keeps the photographic opening prompt, references and widescreen size', async () => {
+  const f = imageFailover(({ body }) => body.model === 'primary' ? new Response('unavailable', { status: 502 }) : generatedImage());
+  await f.exports.generateImage('Photograph a lifelike scene.', undefined, { aspectRatio: '16:9', references: [{ name: 'Rena', url: 'data:image/jpeg;base64,portrait' }] });
+  assert.deepEqual(f.calls.map(call => call.model), ['primary', 'backup']);
+  assert.deepEqual(f.calls[0].messages, f.calls[1].messages);
+  assert(f.calls.every(call => call.image_config.aspect_ratio === '16:9'));
+  assert.doesNotMatch(f.calls[1].messages[0].content[0].text, /painted medium/);
+});
+
+test('stalled image requests are aborted and all attempts share one finite budget', async () => {
+  let f;
+  f = imageFailover(({ signal, advance }) => new Promise((_resolve, reject) => {
+    signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+    const timeout = f.timeouts.at(-1);
+    advance(timeout.ms);
+    timeout.controller.abort(new DOMException('Timed out', 'TimeoutError'));
+  }));
+  await assert.rejects(f.exports.generateImage('paint the ending', own), error => {
+    assert.equal(f.exports.statusFor(error), 504);
+    assert.match(f.exports.userFacingMessage(error), /temporarily unavailable.*result are safe.*again/i);
+    return true;
+  });
+  assert.deepEqual(f.calls.map(call => call.model), ['primary', 'backup']);
+  assert.deepEqual(f.timeouts.map(t => t.ms), [65_000, 40_000]);
+});
+
+test('repeated outages exhaust distinct image models once and report a retryable service failure', async () => {
+  const f = imageFailover(() => new Response('temporarily unavailable', { status: 503 }), ['primary', 'primary', 'backup']);
+  await assert.rejects(f.exports.generateImage('paint the ending'), error => f.exports.statusFor(error) === 503);
+  assert.deepEqual(f.calls.map(call => call.model), ['primary', 'backup']);
+});
+
+test('image failover does not retry credits, rate limits, authorization, safety or empty output', async () => {
+  for (const [status, body] of [[402, 'credits'], [429, 'rate limit'], [401, 'unauthorized'], [403, 'forbidden'], [400, 'content policy'], [200, '{}']]) {
+    const f = imageFailover(() => new Response(body, { status }));
+    await assert.rejects(f.exports.generateImage('paint the ending', own));
+    assert.deepEqual(f.calls.map(call => call.model), ['primary']);
   }
 });
 
