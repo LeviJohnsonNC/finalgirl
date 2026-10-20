@@ -2,6 +2,30 @@ import { test, expect, activeGame, userId } from './fixtures';
 import { openHistory } from './play-helpers';
 const draft = {...activeGame,playMode:true,selection:{...activeGame.selection,killer:'Billy the Bear',location:'Buddyland',finalGirl:'Rena',filmId:'s4-buddyland'}};
 const key = `final-girl-active-game-v1:${userId}`;
+test('compact session actions fit small phones with the display font and a wider fallback', async ({page,archive}) => {
+  await archive.install(page,{draft});await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  const actions = page.getByRole('navigation',{name:'Session actions'});
+  for (const font of ['"IM Fell English", Georgia, serif','Arial, sans-serif']) {
+    await page.addStyleTag({content:`.play-workspace .play-heading nav > button { font-family: ${font}; }`});
+    for (const width of [320,359,360,390]) {
+      await page.setViewportSize({width,height:900});
+      const layout = await actions.evaluate(el => {
+        const nav = el.getBoundingClientRect();
+        return {available:el.clientWidth,needed:el.scrollWidth,buttons:Array.from(el.querySelectorAll('button'),button=>{
+          const rect = button.getBoundingClientRect();
+          return {label:button.getAttribute('aria-label'),left:rect.left-nav.left,right:rect.right-nav.left,top:rect.top-nav.top,height:rect.height};
+        })};
+      });
+      expect(layout.needed,JSON.stringify({width,font,layout})).toBeLessThanOrEqual(layout.available);
+      expect(new Set(layout.buttons.map(button=>button.top)).size).toBe(1);
+      for (const button of layout.buttons) {
+        expect(button.left).toBeGreaterThanOrEqual(0);
+        expect(button.right).toBeLessThanOrEqual(layout.available + 1);
+        expect(button.height).toBeGreaterThanOrEqual(44);
+      }
+    }
+  }
+});
 test('Ultimate unlocks once, keeps its artwork after reload and still accepts first-record details', async ({page,archive},info) => {
   await archive.install(page,{draft});await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   const ultimate = page.getByRole('button',{name:'Ultimate unlocked',exact:true});
