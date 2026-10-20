@@ -91,7 +91,7 @@ test('ending gives its story the spare screen width and keeps only Save and Narr
   await expect(page.getByRole('button', { name: 'SAVE', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Narrate', exact: true })).toBeVisible();
   const sizes = info.project.name === 'desktop'
-    ? [{ width: 1024, height: 768 }, { width: 1280, height: 800 }, { width: 1382, height: 766 }, { width: 1672, height: 941 }, { width: 1920, height: 1080 }]
+    ? [{ width: 1024, height: 768 }, { width: 1280, height: 800 }, { width: 1382, height: 766 }, { width: 1672, height: 941 }, { width: 1920, height: 1080 }, { width: 2560, height: 1440 }]
     : [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 768, height: 1024 }];
   for (const size of sizes) {
     await page.setViewportSize(size);
@@ -101,7 +101,9 @@ test('ending gives its story the spare screen width and keeps only Save and Narr
     const box = (await reader.boundingBox())!;
     expect(await reader.locator('.narration-prose').evaluate(el => parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(19);
     if (info.project.name === 'desktop') {
-      expect(box.width).toBeGreaterThan(size.width * .48);
+      expect(box.width).toBeGreaterThan(Math.min(size.width * .48, 900));
+      const spread = (await page.locator('.narration-layout--ending').boundingBox())!;
+      expect(Math.abs(spread.x + spread.width / 2 - size.width / 2)).toBeLessThan(1);
       // The reader's ResizeObserver recalculates available height after a resize.
       await expect.poll(async () => {
         const bounds = (await reader.boundingBox())!;
