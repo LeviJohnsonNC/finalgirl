@@ -27,6 +27,31 @@ async function resume(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
 }
 
+test("a slower Toby death survives cloud overhead and displays once without adding another victim", async ({page,archive}) => {
+  await page.clock.install();
+  archive.holdDeath = true;
+  await archive.install(page,{draft:{...draft,selection:{...draft.selection,finalGirl:"Rena"}}});
+  await resume(page);
+  await page.getByRole('button',{name:'Record one victim killed',exact:true}).click();
+  const dialog = page.getByRole('dialog',{name:'Gruesome Death',exact:true});
+  await dialog.getByRole('button',{name:'Buddy / minion',exact:true}).click();
+  await searchPick(page,'Death attacker','Toby');
+  await searchPick(page,'Death location','Arcade');
+  await dialog.getByRole('button',{name:'Gruesome Death',exact:true}).click();
+  await expect.poll(()=>Boolean(archive.releaseDeath)).toBe(true);
+  // End-to-end latency includes sync and persistence, beyond the model's own deadline.
+  await page.clock.fastForward(36000);
+  await expect(dialog.getByRole('region',{name:'Death scene result'})).toHaveAttribute('aria-busy','true');
+  archive.holdDeath = false;archive.releaseDeath!();
+  await expect(dialog.getByRole('region',{name:'Generated death scene'})).toContainText(archive.deathText);
+  await dialog.getByRole('button',{name:'Save and exit',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Record one victim killed',exact:true})).toContainText('1');
+  await page.getByRole('button',{name:'Latest death scene',exact:true}).click();
+  await expect(page.getByRole('region',{name:'Generated death scene'})).toContainText(archive.deathText);
+  expect(archive.calls.filter(name=>name==='generate-death-scene')).toHaveLength(1);
+  expect((archive.sessions[0].state.playEvents as PlayEvent[]).filter(e=>e.kind==='killed')).toHaveLength(1);
+});
+
 test("record first, contextualize optionally, cache and replay without another generation", async ({
   page,
   archive,
