@@ -1,6 +1,7 @@
 import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { ChevronDown } from "lucide-react";
+import { defaultFilter } from "cmdk";
 import { compareDropdownLabels } from "@/lib/dropdownOrder";
 import "@/styles/dropdowns.css";
 import {
@@ -38,7 +39,7 @@ export function PlaySearch({
   if (value) choices.push({id:'clear',label:'Clear selection',value:''});
   if (allowCustom && search.trim() && !options.some(option => option.toLowerCase() === search.trim().toLowerCase()))
     choices.push({id:'custom',label:`Use “${search.trim()}”`,value:search.trim()});
-  const visible = choices.filter(option => option.label.toLowerCase().includes(search.trim().toLowerCase()))
+  const visible = choices.filter(option => defaultFilter(option.label, search.trim()) > 0)
     .sort((a,b) => compareDropdownLabels(a.label,b.label));
   return (
     <Popover.Root modal

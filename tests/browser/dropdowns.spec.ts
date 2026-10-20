@@ -11,12 +11,12 @@ async function ordered(page:Page) {
   return names;
 }
 async function scrollable(viewport:Locator,page:Page) {
-  const sizes = await viewport.evaluate(el=>({client:el.clientHeight,total:el.scrollHeight,gutter:(el as HTMLElement).offsetWidth-el.clientWidth,bar:getComputedStyle(el).scrollbarWidth,pseudo:getComputedStyle(el,'::-webkit-scrollbar').display}));
+  const sizes = await viewport.evaluate(el=>({client:el.clientHeight,total:el.scrollHeight,bar:getComputedStyle(el).scrollbarWidth,pseudo:getComputedStyle(el,'::-webkit-scrollbar').display,rail:parseFloat(getComputedStyle(el,'::-webkit-scrollbar').width)}));
   expect(sizes.total).toBeGreaterThan(sizes.client);
   expect(sizes.bar).not.toBe('none');
   expect(sizes.pseudo).not.toBe('none');
-  // Touch browsers draw overlay scrollbars rather than reserving desktop gutter space.
-  if (!await page.evaluate(()=>matchMedia('(pointer:coarse)').matches)) expect(sizes.gutter).toBeGreaterThan(0);
+  // Native overlay scrollbars need not reserve layout space, even on desktop macOS.
+  expect(sizes.rail).toBeGreaterThan(0);
   await viewport.hover();await page.mouse.wheel(0,1500);
   await expect.poll(()=>viewport.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);
 }
