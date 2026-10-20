@@ -5,7 +5,8 @@ import horrorHigh from "@/assets/play/states/horror-high.webp";
 import criticalHealth from "@/assets/play/states/critical-health.webp";
 import bloodlustImage from "@/assets/play/bloodlust-stain.webp";
 import momentItem from "@/assets/play/moment-item.webp";
-import momentUnlocked from "@/assets/play/moment-ultimate-unlocked.webp";
+import momentLocked from "@/assets/play/states/ultimate-locked.webp";
+import momentUnlocked from "@/assets/play/states/ultimate-unlocked.webp";
 import momentUsed from "@/assets/play/moment-ultimate-used.webp";
 import momentDarkPower from "@/assets/play/roster/moment-dark-power.webp";
 import momentFinale from "@/assets/play/roster/moment-finale.webp";
@@ -106,7 +107,8 @@ const moments: Array<{
   },
   {
     type: "ultimate-unlocked",
-    image: momentUnlocked,
+    image: momentLocked,
+    activeImage: momentUnlocked,
     title: "Ultimate unlocked",
     prompt: "Anything to remember?",
   },
@@ -221,7 +223,10 @@ export function PlayScreen(props: PlayScreenProps) {
     if (!saveMoment()) return;
     const permanent = PERMANENT_MOMENTS.includes(choice.type);
     const existing = permanent && summary.entries.find(e => e.kind === "moment" && e.momentType === choice.type);
-    if (existing) { setMomentId(existing.id); setMessage(""); return; }
+    if (existing) {
+      if (choice.type === "ultimate-unlocked") return;
+      setMomentId(existing.id); setMessage(""); return;
+    }
     if (permanent && pendingMoments.current.has(choice.type)) return;
     if (permanent) pendingMoments.current.add(choice.type);
     const e = commit({
@@ -518,10 +523,11 @@ export function PlayScreen(props: PlayScreenProps) {
         <div className="play-moment-choices">
           {orderedMoments.map((choice) => {
             const active = PERMANENT_MOMENTS.includes(choice.type) && summary.entries.some(e => e.kind === "moment" && e.momentType === choice.type);
-            return <button key={choice.type} aria-label={choice.title} data-recorded={active || undefined} aria-pressed={PERMANENT_MOMENTS.includes(choice.type) ? active : undefined} onClick={() => pickMoment(choice)}>
+            const ultimate = choice.type === "ultimate-unlocked";
+            return <button key={choice.type} aria-label={choice.title} disabled={ultimate && active} data-recorded={active || undefined} aria-pressed={PERMANENT_MOMENTS.includes(choice.type) ? active : undefined} onClick={() => pickMoment(choice)}>
               <img src={active ? choice.activeImage ?? choice.image : choice.image} alt="" loading="lazy" />
-              {active && <small className="play-moment-seal">{choice.type === "dark-power" || choice.type === "finale" ? "Revealed" : "Returned"}</small>}
-              <span><strong>{choice.title}</strong>{choice.subtitle && <small>{choice.subtitle}</small>}</span>
+              {(active || ultimate) && <small className="play-moment-seal">{ultimate ? active ? "Unlocked" : "Locked" : choice.type === "dark-power" || choice.type === "finale" ? "Revealed" : "Returned"}</small>}
+              <span><strong>{ultimate ? "Ultimate" : choice.title}</strong>{choice.subtitle && <small>{choice.subtitle}</small>}</span>
             </button>;
           })}
         </div>
