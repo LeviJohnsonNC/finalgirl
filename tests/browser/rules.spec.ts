@@ -88,7 +88,8 @@ test('owned deep links wait for collection loading and chapter navigation works 
   await expect(page.locator('#location-buddyland-rules')).toBeVisible();
   await expect(page.getByRole('tab', { name: 'Special Rules', exact: true })).toHaveAttribute('aria-selected', 'true');
   if (info.project.name === 'mobile') {
-    await page.getByRole('combobox', { name: 'Choose chapter' }).selectOption('ch-overview');
+    await page.getByRole('combobox', { name: 'Choose chapter' }).click();
+    await page.getByRole('option', {name:'Game Overview',exact:true}).click();
   } else {
     await page.getByRole('navigation', { name: 'Chapter navigation', exact: true }).getByRole('button', { name: '01 Game Overview', exact: true }).click();
   }

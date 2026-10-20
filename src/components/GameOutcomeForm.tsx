@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { OutcomeNumberField } from './outcome/OutcomeNumberField';
 import { OutcomeSelect } from './outcome/OutcomeSelect';
+import { SuggestionInput } from './ui/suggestion-input';
 import { BUDDYLAND_ITEMS, BUDDYLAND_ROOMS } from '@/lib/play/modules';
 import '@/styles/outcome.css';
 import { GameResult } from '@/hooks/useGameHistory';
@@ -457,29 +458,15 @@ export const GameOutcomeForm = ({
             />
             <label className="outcome-text-field">
               <span>Weapon used</span>
-              <input
-                type="text"
-                aria-label="Weapon Used"
+              <SuggestionInput
+                label="Weapon Used"
                 value={weaponUsed}
-                onChange={(event) => setWeaponUsed(event.target.value)}
+                onChange={setWeaponUsed}
                 placeholder="Add a weapon…"
-                list={
-                  result.location === "Buddyland"
-                    ? "outcome-weapon-suggestions"
-                    : undefined
-                }
+                options={result.location === "Buddyland" ? BUDDYLAND_ITEMS.filter(item => /damage|attacking/i.test(item.effect)).map(item => item.name) : []}
               />
             </label>
           </div>
-          {result.location === "Buddyland" && (
-            <datalist id="outcome-weapon-suggestions">
-              {BUDDYLAND_ITEMS.filter((item) =>
-                /damage|attacking/i.test(item.effect),
-              ).sort((a, b) => a.name.localeCompare(b.name)).map((item) => (
-                <option key={item.id} value={item.name} />
-              ))}
-            </datalist>
-          )}
         </section>
         <div className="outcome-modules">
           {/* Section: Poltergeist win conditions */}
@@ -1026,17 +1013,12 @@ export const GameOutcomeForm = ({
         <div className="outcome-last-fields">
           <label className="outcome-text-field">
             <span>Ending location</span>
-            <input
-              type="text"
-              aria-label="Ending Location"
+            <SuggestionInput
+              label="Ending Location"
               value={endingSubLocation}
-              onChange={(event) => setEndingSubLocation(event.target.value)}
+              onChange={setEndingSubLocation}
               placeholder="Where did it end?"
-              list={
-                result.location === "Buddyland"
-                  ? "outcome-room-suggestions"
-                  : undefined
-              }
+              options={result.location === "Buddyland" ? BUDDYLAND_ROOMS : []}
             />
           </label>
           <label className="outcome-text-field">
@@ -1050,13 +1032,6 @@ export const GameOutcomeForm = ({
             />
           </label>
         </div>
-        {result.location === "Buddyland" && (
-          <datalist id="outcome-room-suggestions">
-            {[...BUDDYLAND_ROOMS].sort((a,b) => a.localeCompare(b)).map((room) => (
-              <option key={room} value={room} />
-            ))}
-          </datalist>
-        )}
       </section>
       <div className="outcome-actions">
         <button

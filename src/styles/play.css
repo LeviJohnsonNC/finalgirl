@@ -960,7 +960,7 @@ body:has(.play-workspace) .app-shell {
   border-color: #7e8c6d55;
 }
 .play-search-menu [cmdk-list] {
-  max-height: min(250px, var(--radix-popover-content-available-height));
+  max-height: min(250px, 50dvh, calc(var(--radix-popover-content-available-height, 100dvh) - 60px));
   overscroll-behavior: contain;
 }
 .play-search-menu [cmdk-item] {

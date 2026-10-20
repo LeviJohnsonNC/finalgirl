@@ -9,6 +9,7 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useOwnedFilms } from '@/hooks/useOwnedFilms';
 import { FEATURE_FILMS } from '@/types/gameData';
 import { ENTITY_RULE_MODULES, buildEntityChapter } from '@/data/rules/moduleRules';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const MODULES: RuleModule[] = [coreRules];
 
@@ -315,9 +316,12 @@ const Rules = () => {
             <aside className="rule-reader-nav">
               <button className="rule-back" onClick={handleClose}><ArrowLeft size={15} /> Back to Chapters</button>
               <label className="rule-mobile-chapters">Chapter
-                <select aria-label="Choose chapter" value={activeChapter.id} onChange={event => handleOpen(event.target.value)}>
-                  {visibleChapters.map(ch => <option key={ch.id} value={ch.id}>{ch.number} — {ch.title}</option>)}
-                </select>
+                <Select value={activeChapter.id} onValueChange={handleOpen}>
+                  <SelectTrigger aria-label="Choose chapter" className="rule-chapter-select"><SelectValue /></SelectTrigger>
+                  <SelectContent className="rule-chapter-menu" collisionPadding={12}>
+                    {visibleChapters.map(ch => <SelectItem key={ch.id} value={ch.id}>{ch.title}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </label>
               <nav aria-label="Chapter navigation" className="rule-desktop-chapters">
                 <span className="rule-eyebrow">{isSearching ? 'Search results' : 'Chapter index'}</span>

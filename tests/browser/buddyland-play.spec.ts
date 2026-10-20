@@ -437,7 +437,7 @@ for (const [killer, location] of [
       .getByRole("combobox", { name: "Terror card", exact: true })
       .click();
     const options = await page.getByRole("option").allTextContents();
-    expect(options).toEqual([...options].sort((a, b) => a.localeCompare(b)));
+    expect(options).toEqual([...options].sort((a, b) => a.localeCompare(b,'en',{sensitivity:'base',numeric:true,ignorePunctuation:true})));
     expect(options.includes("Regroup")).toBe(killer === "Billy the Bear");
     expect(options.includes("Earthquake!")).toBe(location === "Buddyland");
   });

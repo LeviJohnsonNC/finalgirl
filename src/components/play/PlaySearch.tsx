@@ -1,6 +1,9 @@
 import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { ChevronDown } from "lucide-react";
+import { defaultFilter } from "cmdk";
+import { compareDropdownLabels } from "@/lib/dropdownOrder";
+import "@/styles/dropdowns.css";
 import {
   Command,
   CommandInput,
@@ -32,8 +35,14 @@ export function PlaySearch({
   const pick = (next: string) => {
     if (onChange(next) !== false) setOpen(false);
   };
+  const choices = [...new Set(options)].map(option => ({id:`option:${option}`,label:option,value:option}));
+  if (value) choices.push({id:'clear',label:'Clear selection',value:''});
+  if (allowCustom && search.trim() && !options.some(option => option.toLowerCase() === search.trim().toLowerCase()))
+    choices.push({id:'custom',label:`Use “${search.trim()}”`,value:search.trim()});
+  const visible = choices.filter(option => defaultFilter(option.label, search.trim()) > 0)
+    .sort((a,b) => compareDropdownLabels(a.label,b.label));
   return (
-    <Popover.Root
+    <Popover.Root modal
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
@@ -45,17 +54,27 @@ export function PlaySearch({
         aria-label={label}
         role="combobox"
         aria-expanded={open}
+        onKeyDown={event => {
+          if (open && event.key === "Escape") {event.preventDefault();event.stopPropagation();setOpen(false);}
+        }}
       >
         <span>{value || placeholder}</span>
         <ChevronDown size={16} />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
-          className="play-search-menu"
+          className="play-search-menu themed-search-menu"
           sideOffset={5}
           collisionPadding={12}
+          onKeyDownCapture={event => {
+            if (event.key === "Escape") {event.preventDefault();event.stopPropagation();setOpen(false);}
+          }}
+          onEscapeKeyDown={event => {
+            // Dismiss only this picker, even inside another modal's focus scope.
+            event.preventDefault();event.stopPropagation();setOpen(false);
+          }}
         >
-          <Command>
+          <Command shouldFilter={false}>
             <CommandInput
               aria-label={`Search ${label}`}
               value={search}
@@ -67,35 +86,9 @@ export function PlaySearch({
               maxLength={160}
             />
             <CommandList aria-label={`${label} options`}>
-              {value && (
-                <CommandItem value="Clear selection" onSelect={() => pick("")}>
-                  Clear selection
-                </CommandItem>
-              )}
-              {[...new Set(options)]
-                .sort((a, b) => a.localeCompare(b))
-                .map((option) => (
-                  <CommandItem
-                    key={option}
-                    value={option}
-                    onSelect={() => pick(option)}
-                  >
-                    {option}
-                  </CommandItem>
-                ))}
-              {allowCustom &&
-                search.trim() &&
-                !options.some(
-                  (o) => o.toLowerCase() === search.trim().toLowerCase(),
-                ) && (
-                  <CommandItem
-                    value={search}
-                    onSelect={() => pick(search.trim())}
-                  >
-                    Use “{search.trim()}”
-                  </CommandItem>
-                )}
-              {!allowCustom && <CommandEmpty>No matching cards.</CommandEmpty>}
+              {visible.map(option => <CommandItem key={option.id} value={option.id}
+                onSelect={() => pick(option.value)}>{option.label}</CommandItem>)}
+              {visible.length === 0 && <CommandEmpty>No matching cards.</CommandEmpty>}
             </CommandList>
           </Command>
         </Popover.Content>

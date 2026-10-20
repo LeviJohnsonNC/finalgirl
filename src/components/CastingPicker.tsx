@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { X, Search } from 'lucide-react';
 import { useActiveImages } from '@/hooks/useActiveImages';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import '@/styles/dropdowns.css';
 
 interface CastingPickerProps {
   type: 'killer' | 'location' | 'finalGirl';
@@ -95,7 +96,7 @@ export const CastingPicker = ({ type, options, onSelect, onClose }: CastingPicke
         </div>
 
         {/* Scrollable grid */}
-        <div className="row-start-2 overflow-y-auto px-3 sm:px-6 py-6 pb-10">
+        <div className="casting-picker-scroll row-start-2 overflow-y-auto px-3 sm:px-6 py-6 pb-10">
           <div className="relative">
             {/* Subtle scanlines over the wall */}
             <div className="scanlines-overlay pointer-events-none absolute inset-0 opacity-20" />

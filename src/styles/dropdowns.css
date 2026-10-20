@@ -1,0 +1,52 @@
+/* Shared dropdown surfaces, including menus rendered outside their page portal. */
+.themed-select-trigger {
+  min-height: 44px;
+  border-color: #a18c625e;
+  border-radius: 3px;
+  color: #eee6d5;
+  background: #101915;
+  text-align: left;
+}
+.themed-select-menu,
+.themed-search-menu {
+  color: #eee6d5;
+  background: linear-gradient(135deg, #1b2520, #0d1512);
+  border: 1px solid #a18c628c;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px #060b09, 0 14px 38px #000b;
+  max-width: calc(100vw - 24px);
+}
+.themed-select-menu { max-height: min(360px, 60dvh, var(--radix-select-content-available-height, 60dvh)); }
+.themed-select-menu [role='option'] {
+  min-height: 44px;
+  padding-block: 10px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 16px;
+  cursor: pointer;
+}
+.themed-select-menu [role='option'][data-highlighted] { background: #354338; color: #fff1cf; }
+.themed-select-menu [data-radix-select-viewport],
+.themed-search-menu :is([cmdk-list], .themed-suggestion-list),
+.casting-picker-scroll {
+  /* Let WebKit's explicitly sized rail render persistently on macOS too. */
+  scrollbar-width: auto;
+  scrollbar-color: #a18c62 #0c1410;
+  scrollbar-gutter: stable;
+  overscroll-behavior-y: contain;
+}
+/* Radix deliberately hides native Select scrollbars; restore the real draggable rail. */
+.themed-select-menu [data-radix-select-viewport]::-webkit-scrollbar,
+.themed-search-menu :is([cmdk-list], .themed-suggestion-list)::-webkit-scrollbar,
+.casting-picker-scroll::-webkit-scrollbar { display: block; width: 10px; }
+.themed-select-menu [data-radix-select-viewport]::-webkit-scrollbar-track,
+.themed-search-menu :is([cmdk-list], .themed-suggestion-list)::-webkit-scrollbar-track,
+.casting-picker-scroll::-webkit-scrollbar-track { background: #0c1410; }
+.themed-select-menu [data-radix-select-viewport]::-webkit-scrollbar-thumb,
+.themed-search-menu :is([cmdk-list], .themed-suggestion-list)::-webkit-scrollbar-thumb,
+.casting-picker-scroll::-webkit-scrollbar-thumb { background: #a18c62; border: 2px solid #0c1410; border-radius: 8px; }
+.themed-search-menu { z-index: 100; padding: 0; overflow: hidden; width: var(--radix-popover-trigger-width); min-width: min(240px, calc(100vw - 24px)); }
+.themed-search-menu :is([cmdk-list], .themed-suggestion-list) { max-height: min(280px, 50dvh, calc(var(--radix-popover-content-available-height, 100dvh) - 60px)); overflow-y: auto; overflow-x: hidden; }
+.themed-search-menu :is([cmdk-item], [role=option]) { min-height: 44px; padding: 10px 13px; font-size: 16px; white-space: normal; overflow-wrap: anywhere; cursor: pointer; }
+.themed-search-menu :is([cmdk-item], [role=option]):is([data-selected='true'], [aria-selected='true']) { background: #354338; color: #fff1cf; }
+.themed-search-menu :is([cmdk-empty], .themed-suggestion-empty) { padding: 12px; color: #bab7a6; font-size: 14px; }
