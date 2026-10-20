@@ -64,6 +64,7 @@ function fixture(options = {}) {
     updates = [],
     filters = [];
   let handler;
+  const deadlines = [];
   const owned = options.foreign ? null : structuredClone(state);
   if (options.undone)
     owned.playEvents.push({
@@ -152,6 +153,14 @@ function fixture(options = {}) {
         assert.equal(opts.maxTokens, 4096);
         assert.equal(opts.reasoningEffort, "low");
         assert.equal(opts.requireComplete, true);
+        // Advance the provider's clock without waiting in real time. The signal is
+        // still a real AbortSignal, so the handler sees the production timeout.
+        if (options.elapsedMs !== undefined) {
+          for (const { ms, controller } of deadlines)
+            if (options.elapsedMs >= ms)
+              controller.abort(new DOMException("Signal timed out.", "TimeoutError"));
+          opts.signal.throwIfAborted();
+        }
         if (options.aiError) throw new Error("offline");
         return {
           text: options.text ?? completeText,
@@ -165,9 +174,9 @@ function fixture(options = {}) {
     "../_shared/models.ts": { DEATH_MODEL_CANDIDATES: ["cheap"] },
     "../_shared/deathPrompt.ts": {
       deathPrompt: (facts) => {
-        assert.equal(facts.location, "Camp Happy Trails");
-        assert.equal(facts.cause, "event");
-        assert.equal(facts.quantity, 2);
+        for (const [key, value] of Object.entries(options.expectedFacts ?? {
+          location: "Camp Happy Trails", cause: "event", quantity: 2,
+        })) assert.deepEqual(facts[key], value);
         return { system: "original", user: JSON.stringify(facts) };
       },
     },
@@ -209,6 +218,7 @@ function fixture(options = {}) {
     "require",
     "exports",
     "Deno",
+    "AbortSignal",
     code("../supabase/functions/generate-death-scene/index.ts"),
   )(
     (name) => {
@@ -224,6 +234,13 @@ function fixture(options = {}) {
     },
     {},
     { env: { get: () => "configured" } },
+    options.elapsedMs === undefined ? AbortSignal : {
+      timeout(ms) {
+        const controller = new AbortController();
+        deadlines.push({ ms, controller });
+        return controller.signal;
+      },
+    },
   );
   const request = (body) =>
     new Request("https://example.test", {
@@ -240,6 +257,35 @@ test("cached and in-flight scenes never reserve quota or call a model", async ()
     assert.equal(r.status, action === "cached" ? 200 : 409);
     assert.deepEqual(f.calls, ["claim"]);
   }
+});
+test("a 21-second Toby death completes; a true timeout stays retryable without another victim", async () => {
+  const options = { elapsedMs: 21000, expectedFacts: {
+    location: "Buddyland", cause: "minion", quantity: 1, attacker: "Toby", room: "Arcade",
+  } };
+  const f = fixture(options);
+  f.owned.selection.location = "Buddyland";
+  Object.assign(f.owned.playEvents[1], {quantity:1,cause:"minion",attacker:"Toby",room:"Arcade"});
+  const original = structuredClone(f.owned.playEvents);
+  const response = await f.handler(f.request());
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).scene.scene_text, completeText);
+  assert.deepEqual(f.owned.playEvents, original);
+  assert.equal(f.calls.filter(c => c === "AI").length, 1);
+
+  const slowOptions = {...options,elapsedMs:31000};
+  const slow = fixture(slowOptions);
+  slow.owned.selection = structuredClone(f.owned.selection);
+  slow.owned.playEvents = structuredClone(original);
+  const timeout = await slow.handler(slow.request());
+  assert.equal(timeout.status, 504);
+  const error = await timeout.json();
+  assert.equal(error.code, "generation_timeout");
+  assert.match(error.error, /took too long/);
+  assert.ok(slow.updates.some(u => u.status === "failed"));
+  slowOptions.elapsedMs = 21000;
+  assert.equal((await slow.handler(slow.request())).status, 200);
+  assert.deepEqual(slow.owned.playEvents, original);
+  assert.equal(slow.owned.playEvents.filter(e => e.kind === "killed").length, 1);
 });
 test("generation uses canonical owned observations and a lease before any paid call", async () => {
   const f = fixture();

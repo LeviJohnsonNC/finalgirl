@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   isDeathScene,
   isCompleteDeathText,
+  DEATH_REQUEST_TIMEOUT_MS,
   type DeathScene,
 } from "@/lib/play/death";
 export type { DeathScene } from "@/lib/play/death";
@@ -81,7 +82,7 @@ export function useDeathScenes(
     generation.current = controller;
     setBusy(true);
     setError(null);
-    const timer = setTimeout(() => controller.abort(), 35000);
+    const timer = setTimeout(() => controller.abort(), DEATH_REQUEST_TIMEOUT_MS);
     try {
       if (!(await syncNow()))
         throw new Error(

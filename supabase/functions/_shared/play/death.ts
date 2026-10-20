@@ -5,6 +5,10 @@ import {
   type PlayEvent,
 } from "./events.ts";
 import { moduleContext } from "./modules.ts";
+// The browser also budgets for up to 20 seconds of cloud sync plus endpoint
+// authorization, claiming and persistence. These are ceilings, not delays.
+export const DEATH_GENERATION_TIMEOUT_MS = 30000;
+export const DEATH_REQUEST_TIMEOUT_MS = 60000;
 export interface DeathSelection {
   killer: string;
   location: string;

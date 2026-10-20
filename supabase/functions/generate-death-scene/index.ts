@@ -15,6 +15,7 @@ import {
   deathFacts,
   deathSignature,
   isCompleteDeathText,
+  DEATH_GENERATION_TIMEOUT_MS,
 } from "../_shared/play/death.ts";
 import { validPlayLog } from "../_shared/play/events.ts";
 
@@ -218,7 +219,7 @@ serve(async (req) => {
       reasoningEffort: "low",
       requireComplete: true,
       temperature: 0.95,
-      signal: AbortSignal.timeout(20000),
+      signal: AbortSignal.timeout(DEATH_GENERATION_TIMEOUT_MS),
       singleAttempt: true,
     });
     await guard.logUsage({ model, kind: "death" });
@@ -245,6 +246,11 @@ serve(async (req) => {
         .eq("lease", claim.lease)
         .eq("status", "pending");
     console.error("Death scene failed:", error);
+    if (error instanceof Error && error.name === "TimeoutError")
+      return json({
+        code: "generation_timeout",
+        error: "The writer took too long. Your death and its details are saved. Try Gruesome Death again when you’re ready.",
+      }, 504);
     return json(
       {
         error: `${userFacingMessage(error)} The death is still recorded. Retry is optional and may use another AI call.`,
