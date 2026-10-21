@@ -26,7 +26,7 @@ for (const status of [503, 504]) {
     const photo = page.getByRole('complementary', { name: 'Opening scene photograph' });
     await expect(photo).toContainText(message);
     await expect(page.getByRole('region', { name: 'Opening narration' })).toContainText(opening);
-    await expect(page.getByRole('button', { name: 'ENTER PLAY MODE', exact: true })).toBeEnabled();
+    await expect(page.getByRole('button', { name: 'Enter Play mode', exact: true })).toBeEnabled();
     await page.screenshot({ path: info.outputPath(`planning-${status}.png`), fullPage: true });
     await photo.getByRole('button', { name: 'Try Again', exact: true }).click();
     await expect(page.getByRole('img', { name: 'Scene still', exact: true })).toBeVisible();
