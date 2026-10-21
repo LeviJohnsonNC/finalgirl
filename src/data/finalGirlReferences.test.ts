@@ -19,6 +19,16 @@ describe('photographed character references',()=>{
     expect(getFinalGirlReference('Adrianne')?.startingRule).toContain('LOWER');
     expect(getFinalGirlReference('Maureen')?.rescueRewards).toEqual([]);
   });
+  it('preserves the visually audited reward and ability exceptions',()=>{
+    expect(getFinalGirlReference('Gretel')).toMatchObject({additionalReward:'Reduce Horror by 1'});
+    expect(getFinalGirlReference('Gretel')?.ultimate).toContain('blank die');
+    expect(getFinalGirlReference('Ava')?.ultimate).toContain('blank die');
+    expect(getFinalGirlReference('Red')?.additionalReward).toBe('Recover 2 health');
+    expect(getFinalGirlReference('Charlie')?.additionalReward).toBe('Gain 1 Time');
+    expect(getFinalGirlReference('Adelaide')?.ultimate).toContain('decrease one type of Wrath to 1; recover all health');
+    expect(getFinalGirlReference('Joy')?.ultimate).toContain('health loss');
+    expect(getFinalGirlReference('Cassie')?.ultimate).toContain('cannot be used with Reaction cards or if it would take Time below zero');
+  });
   it('keeps starting health separate from the observed flip, without healing or changing totals',()=>{
     const start=newPlayEvent({kind:'start',saved:0,killed:0,round:1});
     const health=newPlayEvent({kind:'state',field:'finalGirlHealth',value:1});

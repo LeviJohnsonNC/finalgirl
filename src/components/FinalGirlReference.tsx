@@ -22,7 +22,7 @@ function PrivateItemPhoto({item}:{item:PersonalItem}) {
       if(!live)return;
       if(error || !data){setError(true);return;}
       url=URL.createObjectURL(data);setPhoto({key,url});
-    });
+    }).catch(()=>{if(live)setError(true);});
     return()=>{live=false;if(url)URL.revokeObjectURL(url);};
   },[open,allowed,key,item.image_path]);
   return <div>
