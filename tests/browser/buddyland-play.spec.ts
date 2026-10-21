@@ -425,7 +425,7 @@ for (const [killer, location] of [
     await page.getByRole("button", { name: "Dark Power", exact: true }).click();
     await expect(
       page.getByRole("combobox", { name: "Dark Power card", exact: true }),
-    ).toHaveCount(killer === "Billy the Bear" ? 1 : 0);
+    ).toHaveCount(1);
     await page.getByRole("button", { name: "Record", exact: true }).click();
     await page
       .getByRole("button", { name: "Record one victim killed", exact: true })

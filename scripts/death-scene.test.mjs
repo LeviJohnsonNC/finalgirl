@@ -23,8 +23,10 @@ const buddyland = moduleAt(
   "../supabase/functions/_shared/play/buddyland.ts",
   {},
 );
+const camp = moduleAt("../supabase/functions/_shared/play/camp.ts", {});
 const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", {
   "./buddyland.ts": buddyland,
+  "./camp.ts": camp,
 });
 const events = moduleAt("../supabase/functions/_shared/play/events.ts", {
   "./modules.ts": modules,
@@ -256,6 +258,28 @@ test("cached and in-flight scenes never reserve quota or call a model", async ()
     const r = await f.handler(f.request());
     assert.equal(r.status, action === "cached" ? 200 : 409);
     assert.deepEqual(f.calls, ["claim"]);
+  }
+});
+test('Hans and Camp module logs authorize killer, Terror and Event death payoffs without replaying later state', async () => {
+  for (const cause of ['killer','terror','event']) {
+    const f = fixture({expectedFacts:{killer:'Hans',cause,quantity:1,moduleContext:{
+      hans:{power:'Feed','minor.unholy-rage.health':2},camp:{'event.dark-waters':'active'},
+    }}});
+    f.owned.selection.killer='Hans';
+    const killed={...f.owned.playEvents[1],cause,quantity:1};
+    f.owned.playEvents=[f.owned.playEvents[0],
+      {id:crypto.randomUUID(),at:2,kind:'moment',momentType:'dark-power',text:'Dark Power',killerCard:'Feed'},
+      {id:crypto.randomUUID(),at:3,kind:'module',moduleData:{module:'hans',changes:{'minor.unholy-rage.health':2}}},
+      {id:crypto.randomUUID(),at:4,kind:'module',moduleData:{module:'camp',changes:{'event.dark-waters':'active'}}},
+      killed,
+      {id:crypto.randomUUID(),at:6,kind:'module',moduleData:{module:'camp',changes:{'event.dark-waters':'resolved'}}},
+    ];
+    const original=structuredClone(f.owned.playEvents);
+    const response=await f.handler(f.request());
+    assert.equal(response.status,200);
+    assert.equal((await response.json()).scene.scene_text,completeText);
+    assert.deepEqual(f.owned.playEvents,original);
+    assert.equal(f.calls.filter(c=>c==='AI').length,1);
   }
 });
 test("a 21-second Toby death completes; a true timeout stays retryable without another victim", async () => {

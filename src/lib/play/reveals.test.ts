@@ -24,8 +24,8 @@ describe("remembered killer reveals", () => {
     expect(
       killerMomentCards(selection.killer, "finale").map((c) => c.name),
     ).toEqual(["Encore", "It’s Showtime!", "Power Surge", "Sizzling Power"]);
-    expect(killerMomentCards("Hans", "dark-power")).toEqual([]);
-    expect(killerMomentCards("Hans", "finale")).toEqual([]);
+    expect(killerMomentCards("Hans", "dark-power")).toHaveLength(4);
+    expect(killerMomentCards("Hans", "finale")).toHaveLength(3);
   });
   it("retains old moments and validates optional reveal fields for durable drafts", () => {
     const reveal = event({

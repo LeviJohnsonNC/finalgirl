@@ -1,4 +1,18 @@
-import { BUDDYLAND_EVENTS, BUDDYLAND_TERRORS, BUDDYLAND_ROOMS } from './buddyland.ts';
+import {
+  BUDDYLAND_EVENTS,
+  BUDDYLAND_TERRORS,
+  BUDDYLAND_ROOMS,
+  BUDDYLAND_ITEMS,
+  SPECIAL_VICTIMS,
+} from "./buddyland.ts";
+import {
+  CAMP_EVENTS,
+  CAMP_TERRORS,
+  CAMP_ROOMS,
+  CAMP_ITEMS,
+  CAMP_VICTIMS,
+  HANS_TERRORS,
+} from "./camp.ts";
 /** Researched 2026-10-18. Facts only, summaries paraphrased; provenance per record.
  * A name-only record never supplies an invented effect to the model.
  * This is a narrative companion catalog, not an executable rules engine. */
@@ -12,13 +26,20 @@ export interface PlayCard {
 }
 const wiki = (page: string) => `https://finalgirl.fandom.com/wiki/${page}`;
 const station = wiki("Station_2891");
-const hans = wiki("Hans_the_Butcher");
-const camp = wiki("Camp_Happy_Trails");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
-  ...BUDDYLAND_TERRORS.map(card => ({...card, kind: 'terror' as const, source: 'Owner photo IMG_9309.jpg'})),
-  ...BUDDYLAND_EVENTS.map(card => ({...card, kind: 'event' as const, location: 'Buddyland', source: 'Owner photo IMG_9311.jpg'})),
+  ...BUDDYLAND_TERRORS.map((card) => ({
+    ...card,
+    kind: "terror" as const,
+    source: "Owner photo IMG_9309.jpg",
+  })),
+  ...BUDDYLAND_EVENTS.map((card) => ({
+    ...card,
+    kind: "event" as const,
+    location: "Buddyland",
+    source: "Owner photo IMG_9311.jpg",
+  })),
   ...[
     "It's happy hour!",
     "It's not safe in here!",
@@ -79,84 +100,14 @@ export const PLAY_CARDS: readonly PlayCard[] = [
       "Redistribute lone Victims in pairs through Kitchen, Radio Room, Rec Room and Lab. Add a Victim if needed to complete the last pair, then discard the Event.",
     source: `${rules}#page=11`,
   },
-  ...[
-    "Unholy Rage",
-    "Unholy Speed",
-    "Dark Feast",
-    "Hans wants me. He's always wanted me.",
-    "He just came out of nowhere!",
-    "He just keeps coming!",
-    "He kept swinging his hammer and killing and killing...",
-    "He wants fresh blood!",
-    "He's just...standing there!",
-    "Horrific Hammer Rush",
-  ].map((name) => ({
-    name,
-    kind: "terror" as const,
-    killer: "Hans",
-    source: hans,
-  })),
-  {
-    name: "Taking Souvenirs",
-    kind: "terror",
-    killer: "Hans",
-    effect:
-      "With no Victims, replace this card. Otherwise target a Victim, move twice and attack twice. Each Victim killed this Killer phase adds one extra Bloodlust.",
-    source: wiki("Taking_Souvenirs"),
-  },
-  ...[
-    "I fell asleep. What did I miss?",
-    "Maybe things are starting to go our way!",
-    "That girl, What's-Her-Name... She can help us!",
-    "What's that noise? Let's go and see!",
-    "You can't save us... No one can!",
-  ].map((name) => ({
-    name,
-    kind: "terror" as const,
-    location: "Camp Happy Trails",
-    source: camp,
-  })),
-  ...[
-    "Boyfriend",
-    "Clingy Campers",
-    "Dark Waters",
-    "Deathwish",
-    "Fresh Meat",
-    "Girlfriend",
-    "Secret Tunnel",
-    "Star Crossed Lovers",
-    "Stubborn Kids",
-    "Vengeance",
-  ].map((name) => ({
-    name,
+  ...HANS_TERRORS.map((card) => ({ ...card, kind: "terror" as const })),
+  ...CAMP_TERRORS.map((card) => ({ ...card, kind: "terror" as const })),
+  ...CAMP_EVENTS.map((card) => ({
+    ...card,
     kind: "event" as const,
     location: "Camp Happy Trails",
-    source: camp,
+    source: "Owner photo IMG_9324.jpg",
   })),
-  {
-    name: "Fire!",
-    kind: "terror",
-    location: "Camp Happy Trails",
-    effect:
-      "A die selects the Cabins (1–2), Utility Shed (3–4) or Dock (5–6). Fire kills the Victims there, destroys that space’s Items and deals one damage to you or Enemies there.",
-    source: wiki("%22Fire%21%22"),
-  },
-  {
-    name: "Run for your life!",
-    kind: "terror",
-    location: "Camp Happy Trails",
-    effect:
-      "With no Victims, replace this card. Otherwise panic Victims outside your space, target the Final Girl or a Victim and attack, then target a Victim and move.",
-    source: wiki("%22Run_for_your_life%21%22"),
-  },
-  {
-    name: "Let's go see if the rumors are true!",
-    kind: "terror",
-    location: "Camp Happy Trails",
-    effect:
-      "Add two Victims where the Killer originally started, raise Horror by one, then draw an Event.",
-    source: wiki("%22Let%27s_go_see_if_the_rumors_are_true%21%22"),
-  },
   {
     name: "Fire!",
     kind: "event",
@@ -237,15 +188,7 @@ export const PLAY_ROOMS: Record<string, readonly string[]> = {
     "Helipad",
     "Outside",
   ],
-  "Camp Happy Trails": [
-    "Cabins",
-    "Dock",
-    "Utility Shed",
-    "Cliff",
-    "Firepit",
-    "Lake",
-    "Makeout Point",
-  ],
+  "Camp Happy Trails": CAMP_ROOMS,
   Buddyland: [...BUDDYLAND_ROOMS],
 };
 // These labels record a player's observation, never infer which form is active.
@@ -256,8 +199,13 @@ export function playMechanisms(selection: {
   return [
     "Killer attack",
     "Minion attack",
-    ...(selection.killer === 'Billy the Bear' ? ['Animatronic attack', 'Short circuit'] : []),
-    ...(selection.location === 'Buddyland' ? ['Tragic Collapse'] : []),
+    ...(selection.killer === "Billy the Bear"
+      ? ["Animatronic attack", "Short circuit"]
+      : []),
+    ...(selection.location === "Buddyland" ? ["Tragic Collapse"] : []),
+    ...(selection.location === "Camp Happy Trails"
+      ? ["Dark Waters", "Fire", "Star Crossed Lovers"]
+      : []),
     ...(selection.location === "Station 2891" ? ["Frostbite"] : []),
     ...(selection.killer === "The Organism"
       ? ["Fast Organism", "Tough Organism", "Strong Organism"]
@@ -265,4 +213,22 @@ export function playMechanisms(selection: {
     "Location hazard",
     "Other",
   ];
+}
+
+/** Only the selected Location supplies Items and Special Victim roles. */
+export function playItems(
+  location: string,
+): readonly { name: string; effect: string }[] {
+  return location === "Camp Happy Trails"
+    ? CAMP_ITEMS
+    : location === "Buddyland"
+      ? BUDDYLAND_ITEMS
+      : [];
+}
+export function playVictims(location: string): readonly { name: string }[] {
+  return location === "Camp Happy Trails"
+    ? CAMP_VICTIMS
+    : location === "Buddyland"
+      ? SPECIAL_VICTIMS
+      : [];
 }

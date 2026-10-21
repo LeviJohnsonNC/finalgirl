@@ -1,6 +1,7 @@
 import {DeathSceneDialog} from '@/components/play/DeathSceneDialog';
 import { PlayScreen } from '@/components/play/PlayScreen';
 import { SessionOptions } from '@/components/SessionOptions';
+import { CampControls } from '@/components/play/CampControls';
 import { BuddylandControls } from '@/components/play/BuddylandControls';
 import { validModuleObservation, moduleState } from '@/lib/play/modules';
 import { newPlayEvent, summarizePlay, type PlayDetails, type PlayEvent } from '@/lib/play/events';
@@ -302,7 +303,10 @@ const NowPlaying = ({
     onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying} hasStory={Boolean(story)}
     showDeathDetails={showDeathPanel} onShowDeathDetails={enabled => onCheckpoint({showDeathPanel: enabled})}
     drafts={playDrafts} onDraft={saveDraft}
-    moduleControls={(killer === 'Billy the Bear' || location === 'Buddyland' || ['Rena','Gwynn'].includes(finalGirl)) ? <BuddylandControls killer={killer} location={location} finalGirl={finalGirl} events={playEvents} onEvent={recordPlayEvent}/> : undefined}
+    moduleControls={(killer === 'Billy the Bear' || killer === 'Hans' || location === 'Buddyland' || location === 'Camp Happy Trails') ? <>
+      {(killer === 'Billy the Bear' || location === 'Buddyland') && <BuddylandControls killer={killer} location={location} finalGirl={finalGirl} events={playEvents} onEvent={recordPlayEvent}/>}
+      {(killer === 'Hans' || location === 'Camp Happy Trails') && <CampControls killer={killer} location={location} events={playEvents} onEvent={recordPlayEvent}/>}
+    </> : undefined}
     deathPanel={deathEventId && syncPlayNow ? <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl}} events={playEvents} eventId={deathEventId} draft={playDrafts[deathEventId]} onDraft={saveDraft} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/> : undefined}
     onDeath={event=>setDeathEventId(event.id)}/>;
 

@@ -37,7 +37,8 @@ import {
   playMechanisms,
 } from "@/lib/play/catalog";
 import { useDeathScenes } from "@/hooks/play/useDeathScenes";
-import { BUDDIES, SPECIAL_VICTIMS } from "@/lib/play/modules";
+import { playVictims } from "@/lib/play/catalog";
+import { BUDDIES } from "@/lib/play/modules";
 interface Props {
   sessionId: string;
   selection: DeathSelection;
@@ -343,9 +344,7 @@ export function DeathSceneDialog({
                 }
                 options={[
                   "Regular victim",
-                  ...(selection.location === "Buddyland"
-                    ? SPECIAL_VICTIMS.map((v) => v.name)
-                    : []),
+                  ...playVictims(selection.location).map(v => v.name),
                 ]}
                 placeholder="Regular victim"
               />

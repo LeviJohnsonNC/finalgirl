@@ -20,7 +20,7 @@ const UNKILLABLE_KILLERS = new Set([
 /** Per-killer max HP for killers that can be defeated in combat. */
 const KILLER_MAX_HP: Record<string, number> = {
   // Season 1
-  'Hans': 8,
+  'Hans': 12,
   'Inkanyamba': 8,
   'Geppetto': 9,
   'Dr. Fright': 8,

@@ -3,6 +3,7 @@ import {
   validModuleObservation,
   describeModule,
   moduleStoryBeats,
+  moduleItemBeats,
   type ModuleObservation,
   type ModuleSelection,
 } from "./modules.ts";
@@ -351,9 +352,10 @@ export function playStoryBeats(
       (e) =>
         `${e.currentRound ? `Round ${e.currentRound}: ` : ""}${describeEvent(e).replace(/[—–]/g, ",").slice(0, 145)}`,
     );
-  const moduleBeats = selection
-    ? moduleStoryBeats(selection, s.entries).replace(/[—–]/g, ",").slice(0, 900)
-    : "";
+  const moduleFacts = selection ? moduleStoryBeats(selection, s.entries).replace(/[—–]/g, ',').slice(0,900) : '';
+  // Keep observed state ahead of optional Item descriptions in the bounded ending context.
+  const itemFacts = selection ? moduleItemBeats(selection,s.entries).replace(/[—–]/g, ',').slice(0,Math.max(0,900-moduleFacts.length-1)) : '';
+  const moduleBeats = [moduleFacts,itemFacts].filter(Boolean).join('\n');
   if (!moduleBeats) return lines.join("\n").slice(0, 1800);
   return `${lines.join("\n").slice(0, 875)}\nModule observations:\n${moduleBeats}`.slice(
     0,

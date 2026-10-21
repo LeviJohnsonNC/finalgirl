@@ -6,6 +6,7 @@
 
 // Characters with 5 HP
 const FIVE_HP_GIRLS = new Set([
+  'Laurie',
   'Reiko',
   'Alice',
   'Barbara',
@@ -36,7 +37,6 @@ const FIVE_HP_GIRLS = new Set([
 
 // Characters with 6 HP
 const SIX_HP_GIRLS = new Set([
-  'Laurie',
   'Selena',
   'Adelaide',
   'Charlie',

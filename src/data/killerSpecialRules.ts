@@ -20,7 +20,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
   // ── Season 1 ─────────────────────────────────────────────────────────────
 
   'Hans': {
-    narrativeNote: 'A methodical, powerful butcher who overwhelms with brute force. No supernatural abilities — just size, strength, and terrible patience.',
+    narrativeNote: 'A methodical butcher with a metal pig mask and a heavy sledgehammer. He overwhelms with brute force and terrible patience. Respect recorded Dark Powers, Minor Dark Powers and the Finale; do not infer supernatural abilities or resurrection from a card name.',
   },
 
   'Poltergeist': {

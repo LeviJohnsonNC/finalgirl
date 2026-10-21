@@ -1,3 +1,4 @@
+import { CAMP_EVENTS, CAMP_SETUPS } from '../../supabase/functions/_shared/play/camp';
 import { BUDDYLAND_DETAILS } from '@/data/buddyland';
 
 // Detailed feature film data for story generation
@@ -57,40 +58,8 @@ Reiko was still quiet, but she was no longer as timid as she'd once been. Why wo
     location: {
       name: 'Camp Happy Trails',
       description: `Welcome to Camp Happy Trails, home to teenage love, unforgettable friendships and idyllic summer memories! Go fishing on the lake, get in some archery practice at the range, listen to ghost stories around firepit, or sneak off to makeout point! Life is always an adventure at Camp Happy Trails! Wait a second, is that screaming I hear in the distance? Oh fiddlesticks, those spooky stories must be getting to me, I'm sure it's just screams of joy from the other campers. Hot dawg, summers at Camp Happy Trails really are to die for!`,
-      setupCards: [
-        {
-          name: 'Capture the Flag',
-          description: 'This is a symmetrical setup that puts Hans and the Final Girl on opposite sides of the lake, with victims grouped at the "North" and "South" poles of the map.'
-        },
-        {
-          name: 'Meditation Hour',
-          description: 'This setup spreads victims thin across the perimeter, placing the Final Girl and Hans in a tense, close-proximity start at the bottom of the map.'
-        },
-        {
-          name: 'Skinny Dipping',
-          description: 'This setup places most victims near the water or the lower half of the map, with Hans starting right at the Campfire.'
-        },
-        {
-          name: 'The Bonfire',
-          description: 'As the name suggests, the majority of the victims are grouped together at the campfire, making them easy targets if Hans moves quickly toward the center.'
-        },
-        {
-          name: 'Treasure Hunt!',
-          description: 'Victims are scattered mostly in pairs, requiring the Final Girl to move around the map extensively to clear out the spaces.'
-        }
-      ],
-      events: [
-        { name: 'Boyfriend', description: 'The Victim closest to you is now your Boyfriend.' },
-        { name: 'Clingy Campers', description: 'There is no penalty for the first Victim you save during the Action phase. For each additional Victim saved, lose 1 Health.' },
-        { name: 'Dark Waters', description: 'All Victims at the Lake are killed. Whenever a Victim enters the Lake, they are killed immediately.' },
-        { name: 'Deathwish', description: 'During the Upkeep phase, move the Victim closest to the Killer 1 Space towards it.' },
-        { name: 'Fresh Meat', description: 'Place 2 new Victims at the Cabins, 2 new Victims at the Dock, and 2 new Victims at the Firepit.' },
-        { name: 'Girlfriend', description: 'The Victim closest to you is now your Girlfriend. She will follow you into the Killer\'s space. While she is in your space, roll 1 extra die for each Horror roll. If the Girlfriend dies while in your space, increase Horror by 5.' },
-        { name: 'Secret Tunnel', description: 'Choose two of the following spaces (Utility Shed, Cabins, or Docks) and place a Secret Tunnel token at each. You may move between these spaces as if they were adjacent.' },
-        { name: 'Star Crossed Lovers', description: 'When exactly 2 Victims are in a space and one of them is killed, the other immediately dies as well.' },
-        { name: 'Stubborn Kids', description: '1 less Victim will follow you.' },
-        { name: 'Vengeance', description: 'The Victim farthest from the Killer is now The Damned. Whenever the Killer must choose a Target, The Damned is chosen instead. The Damned can only be saved if it is the last Victim alive. If The Damned dies, increase Bloodlust by 2.' }
-      ]
+      setupCards: [...CAMP_SETUPS],
+      events: CAMP_EVENTS.map(card => ({name:card.name,description:card.effect})),
     },
     killer: {
       name: 'Hans',

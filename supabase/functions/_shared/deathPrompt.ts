@@ -1,7 +1,7 @@
 import type { DeathFacts } from "./play/death.ts";
 import { DEATH_KILLER_CUES, DEATH_LOCATION_CUES } from "./deathLore.ts";
 import { playCardContext } from "./play/catalog.ts";
-import { buddylandReferences } from "./play/modules.ts";
+import { moduleReferences } from "./play/modules.ts";
 import { NARRATIVE_QUANTITIES } from './narrativeStyle.ts';
 export function deathPrompt(facts: DeathFacts, previous: string[]) {
   return {
@@ -16,10 +16,12 @@ Exactly the recorded quantity dies; do not kill or rescue anyone else. Never cha
         facts.terrorCard,
         facts.eventCard,
       ),
-      moduleReferences: buddylandReferences(
+      moduleReferences: moduleReferences(
         facts,
         facts.moduleContext,
         facts.attacker,
+        facts.victim,
+        facts.mechanism,
       ),
       moduleContextNote:
         "Module state is the recorded state at the time of this death. Inventory does not prove an item was used. A nearby Buddy or a recently drawn card does not establish the attacker or cause. Death-specific fields take precedence over broader tracking context. Use the explicitly recorded attacker and death details; do not infer extra deaths or trigger rules.",

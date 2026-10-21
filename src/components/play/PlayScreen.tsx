@@ -51,7 +51,8 @@ import { PlayTimeline } from "./PlayTimeline";
 import { SessionOptions } from "@/components/SessionOptions";
 import "@/styles/play.css";
 import "@/styles/play-finish.css";
-import { BUDDYLAND_ITEMS, killerMomentCards } from "@/lib/play/modules";
+import { killerMomentCards, moduleState } from "@/lib/play/modules";
+import { playItems } from "@/lib/play/catalog";
 import { PlaySelect } from "./PlaySelect";
 import "@/styles/play-state-art.css";
 
@@ -202,6 +203,7 @@ export function PlayScreen(props: PlayScreenProps) {
     ? (props.drafts[moment.id]?.detail ?? moment.detail ?? "")
     : "";
   const momentCard = moment?.killerCard ?? "";
+  const hansState = moduleState(summary.entries, "hans");
   const momentCards = killerMomentCards(killer, moment?.momentType ?? "");
   const isReveal =
     moment?.momentType === "dark-power" || moment?.momentType === "finale";
@@ -547,6 +549,14 @@ export function PlayScreen(props: PlayScreenProps) {
                   value={momentCard}
                   onChange={(e) => {
                     const next = e.target.value;
+                    if (
+                      killer === "Hans" &&
+                      moment.momentType === "dark-power" &&
+                      next && next === hansState.secondPower
+                    ) {
+                      setMessage("That power is already recorded as the second Dark Power.");
+                      return;
+                    }
                     // One immutable detail edit keeps reveal context, Undo and recovery together.
                     commit({
                       kind: "details",
@@ -565,6 +575,24 @@ export function PlayScreen(props: PlayScreenProps) {
                 </PlaySelect>
               </label>
             )}
+            {killer === "Hans" && isReveal && hansState.finale === "Dark, Darker, Darkest" && (
+              <label>
+                Second Dark Power
+                <PlaySelect
+                  aria-label="Second Dark Power card"
+                  value={String(hansState.secondPower ?? "")}
+                  onChange={e => commit({
+                    kind: "module",
+                    moduleData: {module: "hans", changes: {secondPower: e.target.value || null}},
+                  })}
+                >
+                  <option value="">Not specified</option>
+                  {killerMomentCards(killer, "dark-power")
+                    .filter(card => card.name !== hansState.power)
+                    .map(card => <option key={card.id} value={card.name}>{card.name}</option>)}
+                </PlaySelect>
+              </label>
+            )}
             <label>
               {isReveal
                 ? "Anything to remember?"
@@ -574,11 +602,7 @@ export function PlayScreen(props: PlayScreenProps) {
                 <PlaySearch
                   label="Moment detail"
                   value={momentDetail}
-                  options={
-                    location === "Buddyland"
-                      ? BUDDYLAND_ITEMS.map((item) => item.name)
-                      : []
-                  }
+                  options={playItems(location).map(item => item.name)}
                   onSearch={(value) =>
                     props.onDraft(moment.id, {
                       ...props.drafts[moment.id],

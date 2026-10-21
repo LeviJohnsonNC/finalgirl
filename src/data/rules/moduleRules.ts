@@ -1,3 +1,4 @@
+import { hansRules, campRules, HANS_PROMPT_CONTEXT, CAMP_PROMPT_CONTEXT } from './campRules';
 import { RuleBlock, RuleSection, RuleChapter } from './types';
 import { billyRules, buddylandRules, BILLY_PROMPT_CONTEXT, BUDDYLAND_PROMPT_CONTEXT } from './buddylandRules';
 
@@ -631,7 +632,7 @@ const marrekWarehouse: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer, marrekWarehouse];
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer, marrekWarehouse];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -640,6 +641,8 @@ export interface ModulePromptContext {
 }
 
 const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
+  Hans: HANS_PROMPT_CONTEXT,
+  'Camp Happy Trails': CAMP_PROMPT_CONTEXT,
   'Billy the Bear': BILLY_PROMPT_CONTEXT,
   Buddyland: BUDDYLAND_PROMPT_CONTEXT,
   'Mort the Teenage Dirtbag': {
