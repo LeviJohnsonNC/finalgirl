@@ -27,6 +27,7 @@ export type GatewayErrorKind =
   | "empty_response"
   | "incomplete_response"
   | "image_unavailable"
+  | "planning_unavailable"
   | "upstream";
 
 export class GatewayError extends Error {
@@ -50,6 +51,10 @@ export const userFacingMessage = (err: unknown): string => {
         return "The scene stopped before it was finished. Please try again.";
       case "image_unavailable":
         return "The image service is temporarily unavailable. Your story and game result are safe. Try developing the picture again in a moment.";
+      case "planning_unavailable":
+        return err.status === 504
+          ? "Planning the picture took too long. Your story is safe. Please try again."
+          : "The picture could not be planned because the service is temporarily unavailable. Your story is safe. Please try again.";
       default:
         return "The reel jammed. Try again.";
     }
@@ -59,7 +64,7 @@ export const userFacingMessage = (err: unknown): string => {
 
 /** HTTP status to hand back to the client for a given failure. */
 export const statusFor = (err: unknown): number =>
-  err instanceof GatewayError && (err.status === 429 || err.status === 402 || err.kind === "image_unavailable") ? err.status : 500;
+  err instanceof GatewayError && (err.status === 429 || err.status === 402 || err.kind === "image_unavailable" || err.kind === "planning_unavailable") ? err.status : 500;
 
 const apiKey = () => {
   const key = Deno.env.get("LOVABLE_API_KEY");
@@ -451,6 +456,44 @@ export const generateText = async (opts: {
   });
 
   return { text: normalizeGeneratedText(result), model };
+};
+
+// Shot planning sits before image generation. Reserve time for a backup utility
+// model within the existing 20s budget, leaving the 105s image budget intact.
+// Other text callers retain their existing retry and timeout behavior.
+const PLANNING_TOTAL_TIMEOUT_MS = 20_000;
+const PLANNING_MODEL_TIMEOUT_MS = 10_000;
+const planningCanFallback = (error: unknown): boolean => error instanceof GatewayError && (
+  error.kind === "model_unavailable" || error.kind === "planning_unavailable" ||
+  error.kind === "upstream" && [500, 502, 503, 504].includes(error.status)
+);
+
+export const generateShotPlanText = async (
+  opts: Omit<Parameters<typeof generateText>[0], "candidates" | "signal" | "singleAttempt">,
+): Promise<{ text: string; model: string }> => {
+  const deadline = Date.now() + PLANNING_TOTAL_TIMEOUT_MS;
+  try {
+    const { result, model } = await withModelFallback([...new Set(UTILITY_MODEL_CANDIDATES)], async model => {
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) throw new GatewayError("planning_unavailable", "Shot planning deadline exceeded", 504);
+      // Each attempt owns its signal: an aborted primary must not abort its backup.
+      const signal = AbortSignal.timeout(Math.min(PLANNING_MODEL_TIMEOUT_MS, remaining));
+      try {
+        return (await generateText({ ...opts, candidates: [model], signal, singleAttempt: true })).text;
+      } catch (error) {
+        if (signal.aborted) throw new GatewayError("planning_unavailable", "Shot planning model timed out", 504);
+        if (error instanceof TypeError) throw new GatewayError("planning_unavailable", "Shot planning connection failed", 503);
+        throw error;
+      }
+    }, planningCanFallback);
+    return { text: result, model };
+  } catch (error) {
+    if (planningCanFallback(error)) throw new GatewayError(
+      "planning_unavailable", "Shot planning providers unavailable within the request budget",
+      error instanceof GatewayError && error.status === 504 ? 504 : 503,
+    );
+    throw error;
+  }
 };
 
 /**
