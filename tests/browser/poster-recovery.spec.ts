@@ -5,6 +5,39 @@ const ending = 'Laurie made it to the road. The camp fell silent behind her. She
 const formData = { finalGirlHealth: 1, killerHealth: 0, weaponUsed: '', endingSubLocation: '', gameHighlights: '' };
 const unavailable = 'The image service is temporarily unavailable. Your story and game result are safe. Try developing the picture again in a moment.';
 
+for (const status of [503, 504]) {
+  test(`opening planning ${status} displays its specific error and retries the same story`, async ({ page, archive }, info) => {
+    archive.autoImages = true;
+    await archive.install(page, { draft: activeGame });
+    const requests: Array<Record<string, unknown>> = [];
+    const message = status === 504
+      ? 'Planning the picture took too long. Your story is safe. Please try again.'
+      : 'The picture could not be planned because the service is temporarily unavailable. Your story is safe. Please try again.';
+    await page.route('**/functions/v1/generate-scene-image', route => {
+      requests.push(route.request().postDataJSON());
+      const headers = { 'access-control-allow-origin': '*' };
+      return requests.length === 1
+        ? route.fulfill({ status, headers, json: { error: message } })
+        : route.fulfill({ headers, json: { imageUrl: 'http://127.0.0.1:4173/recovered-opening.png' } });
+    });
+    await page.route('**/recovered-opening.png', route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/buddyland.png') }));
+    await page.goto('/');
+    await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
+    const photo = page.getByRole('region', { name: 'Opening scene photograph' });
+    await expect(photo).toContainText(message);
+    await expect(page.getByRole('region', { name: 'Opening narration' })).toContainText(opening);
+    await expect(page.getByRole('button', { name: 'ENTER PLAY MODE', exact: true })).toBeEnabled();
+    await page.screenshot({ path: info.outputPath(`planning-${status}.png`), fullPage: true });
+    await photo.getByRole('button', { name: 'Try Again', exact: true }).click();
+    await expect(page.getByRole('img', { name: 'Scene still', exact: true })).toBeVisible();
+    expect(requests).toHaveLength(2);
+    expect(requests[1]).toEqual(requests[0]);
+    expect(requests[0]).toMatchObject({ gameId, sceneType: 'beginning', story: opening });
+    expect(archive.calls).not.toContain('generate-story');
+    await expect(photo.getByRole('button', { name: 'Try Again', exact: true })).toHaveCount(0);
+  });
+}
+
 for (const failure of ['provider outage', 'platform timeout', 'missing image'] as const) {
   test(`an ending poster ${failure} is visible, retryable and never loses the ending or result`, async ({ page, archive }) => {
     archive.autoImages = true;

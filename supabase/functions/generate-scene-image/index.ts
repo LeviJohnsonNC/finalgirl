@@ -14,7 +14,7 @@ import { getCorsHeaders } from "../_shared/auth.ts";
 import { isDiscardedGame } from "../_shared/discardedGame.ts";
 import { requireUser } from "../_shared/guard.ts";
 import { SceneImageRequestSchema, validateRequest } from "../_shared/validation.ts";
-import { generateImage, generateText, statusFor, userFacingMessage } from "../_shared/aiGateway.ts";
+import { GatewayError, generateImage, generateShotPlanText, statusFor, userFacingMessage } from "../_shared/aiGateway.ts";
 import {
   buildBeginningPrompt,
   buildPosterPrompt,
@@ -64,15 +64,12 @@ serve(async (req) => {
     let briefModel: string | undefined;
     let posterCopy = fallbackPosterCopy(context);
     try {
-      const brief = await generateText({
+      const brief = await generateShotPlanText({
         system: buildShotBriefSystem(context),
         user: buildShotBriefPrompt(context),
         maxTokens: 4000,
         reasoningEffort: "low",
         requireComplete: true,
-        // Planning must not consume the time reserved for image failover.
-        signal: AbortSignal.timeout(20_000),
-        singleAttempt: true,
       });
       const posterPlan = isPoster ? parseArtPlan(brief.text) : null;
       const plan = isPoster ? posterPlan : parseShotPlan(brief.text);
@@ -80,7 +77,7 @@ serve(async (req) => {
         context.shotBrief = plan.concepts[plan.selected];
         if (posterPlan) posterCopy = { title: posterPlan.title, tagline: posterPlan.tagline };
       } else {
-        if (!isPoster) throw new Error("The opening shot plan was incomplete. Please try again.");
+        if (!isPoster) throw new GatewayError("incomplete_response", "The opening shot plan was incomplete.");
         console.warn('Invalid art plan; using fact-constrained story fallback.');
       }
       briefModel = brief.model;

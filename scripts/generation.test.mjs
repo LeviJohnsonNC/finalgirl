@@ -86,6 +86,103 @@ function imageFailover(respond, models = ['primary', 'backup', 'last']) {
 }
 const generatedImage = () => new Response(JSON.stringify({ choices: [{ message: { images: [{ image_url: { url: 'data:image/png;base64,dGVzdA==' } }] } }] }));
 
+function planningFailover(respond, models = ['primary', 'backup']) {
+  const calls = [], timeouts = [], exports = {};
+  let now = 0;
+  new Function('require', 'exports', 'Deno', 'fetch', 'Date', 'AbortSignal', compile('../supabase/functions/_shared/aiGateway.ts'))(
+    () => ({ UTILITY_MODEL_CANDIDATES: models, usesResponsesApi: model => model.startsWith('openai/') }),
+    exports, { env: { get: () => 'fake-key' } },
+    async (_url, options) => {
+      const body = JSON.parse(options.body); calls.push(body);
+      return await respond({ body, signal: options.signal, advance: ms => { now += ms; }, timeout: timeouts.at(-1) });
+    }, { now: () => now }, { timeout: ms => {
+      const controller = new AbortController(); timeouts.push({ ms, controller }); return controller.signal;
+    } },
+  );
+  return { calls, timeouts, exports };
+}
+const planOptions = { system: 'Plan three factual photographic shots.', user: 'Recorded story and cast.', maxTokens: 4000, requireComplete: true, reasoningEffort: 'low' };
+const generatedPlan = () => new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: 'complete plan' } }] }));
+const stallPlanner = ({ signal, advance, timeout }) => new Promise((_resolve, reject) => {
+  signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+  advance(timeout.ms);
+  timeout.controller.abort(new DOMException('Signal timed out.', 'TimeoutError'));
+});
+
+test('the observed planning 503 tries the backup once with the same complete-shot requirements', async () => {
+  const f = planningFailover(({ body, advance }) => {
+    if (body.model === 'primary') { advance(6_000); return new Response('Service temporarily unavailable', { status: 503 }); }
+    return generatedPlan();
+  });
+  assert.deepEqual(await f.exports.generateShotPlanText(planOptions), { text: 'complete plan', model: 'backup' });
+  assert.deepEqual(f.calls.map(call => call.model), ['primary', 'backup']);
+  assert.deepEqual(f.calls[0].messages, f.calls[1].messages);
+  assert(f.calls.every(call => call.max_tokens === 4000 && call.reasoning_effort === 'low'));
+  assert.deepEqual(f.timeouts.map(t => t.ms), [10_000, 10_000]);
+});
+
+test('a timed-out planner leaves a fresh signal and ten seconds for a successful backup', async () => {
+  const f = planningFailover(call => call.body.model === 'primary' ? stallPlanner(call) : generatedPlan());
+  assert.equal((await f.exports.generateShotPlanText(planOptions)).model, 'backup');
+  assert.equal(f.timeouts[0].controller.signal.aborted, true);
+  assert.equal(f.timeouts[1].controller.signal.aborted, false);
+  assert.deepEqual(f.calls.map(call => call.model), ['primary', 'backup']);
+});
+
+test('planning stalls cannot exceed the shared twenty-second budget, including an override model', async () => {
+  const f = planningFailover(stallPlanner, ['override', 'primary', 'backup']);
+  await assert.rejects(f.exports.generateShotPlanText(planOptions), error => {
+    assert.equal(f.exports.statusFor(error), 504);
+    assert.match(f.exports.userFacingMessage(error), /planning.*too long.*story is safe.*try again/i);
+    return true;
+  });
+  assert.deepEqual(f.calls.map(call => call.model), ['override', 'primary']);
+  assert.deepEqual(f.timeouts.map(t => t.ms), [10_000, 10_000]);
+});
+
+test('fast planning outages exhaust distinct candidates and report a specific retryable 503', async () => {
+  const f = planningFailover(() => new Response('unavailable', { status: 503 }), ['primary', 'primary', 'backup']);
+  await assert.rejects(f.exports.generateShotPlanText(planOptions), error => {
+    assert.equal(f.exports.statusFor(error), 503);
+    assert.match(f.exports.userFacingMessage(error), /could not be planned.*temporarily unavailable.*story is safe/i);
+    return true;
+  });
+  assert.deepEqual(f.calls.map(call => call.model), ['primary', 'backup']);
+});
+
+test('planning fails over on availability errors, unknown models and connection loss only', async () => {
+  for (const status of [500, 502, 504, 404]) {
+    const f = planningFailover(({ body }) => body.model === 'primary' ? new Response('unavailable', { status }) : generatedPlan());
+    assert.equal((await f.exports.generateShotPlanText(planOptions)).model, 'backup');
+  }
+  const f = planningFailover(({ body }) => { if (body.model === 'primary') throw new TypeError('connection lost'); return generatedPlan(); });
+  assert.equal((await f.exports.generateShotPlanText(planOptions)).model, 'backup');
+});
+
+test('planning never advances on protected errors, empty output or truncated completions', async () => {
+  for (const [status, body] of [
+    [402, 'credits'], [429, 'rate limit'], [401, 'unauthorized'], [403, 'forbidden'], [400, 'content policy'], [422, 'invalid request'],
+    [200, '{}'], [200, JSON.stringify({ choices: [{ finish_reason: 'length', message: { content: '{partial' } }] })],
+    [200, JSON.stringify({ choices: [{ finish_reason: 'content_filter', message: { refusal: 'declined' } }] })],
+  ]) {
+    const f = planningFailover(() => new Response(body, { status }));
+    await assert.rejects(f.exports.generateShotPlanText(planOptions));
+    assert.deepEqual(f.calls.map(call => call.model), ['primary']);
+  }
+});
+
+test('successful planning never spends another call and also supports Responses overrides', async () => {
+  const f = planningFailover(() => generatedPlan());
+  assert.equal((await f.exports.generateShotPlanText(planOptions)).model, 'primary');
+  assert.equal(f.calls.length, 1);
+  const responses = planningFailover(({ body }) => {
+    assert.deepEqual(body.reasoning, { effort: 'low' });
+    return new Response('data: {"type":"response.output_text.delta","delta":"complete plan"}\n\ndata: {"type":"response.completed"}\n\n');
+  }, ['openai/override']);
+  assert.equal((await responses.exports.generateShotPlanText(planOptions)).text, 'complete plan');
+  assert.equal(responses.calls.length, 1);
+});
+
 test('the observed slow 503 switches image model instead of repeating the failed provider', async () => {
   const f = imageFailover(({ body, advance }) => {
     if (body.model === 'primary') { advance(59_000); return new Response('{"error":{"message":"Service temporarily unavailable","type":"upstream_error"}}', { status: 503 }); }

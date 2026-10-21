@@ -14,7 +14,7 @@ new Function('require', 'exports', compile('../supabase/functions/_shared/prompt
   assert.equal(name, './storyFacts.ts'); return storyFacts;
 }, prompts);
 
-function imageHandler({ rowExists = true, attachError = null, composeError = false, invalidPlan = false, incompletePlan = false, discardedBefore = false, discardedDuring = false } = {}) {
+function imageHandler({ rowExists = true, attachError = null, composeError = false, invalidPlan = false, incompletePlan = false, planningGateway, discardedBefore = false, discardedDuring = false } = {}) {
   const filters = []; const removed = []; const phases = []; const imageCalls = []; const textCalls = []; let handler;
   let uploaded=false;
   const discardedHelpers={};new Function('require','exports',ts.transpileModule(readFileSync(new URL('../supabase/functions/_shared/discardedGame.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(()=>{},discardedHelpers);
@@ -39,12 +39,12 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
     '../_shared/auth.ts': { getCorsHeaders: () => ({ 'Access-Control-Allow-Origin': 'https://example.test' }) },
     '../_shared/guard.ts': { requireUser: async () => ({ ok: true, adminClient:client, user: { id: 'owner-A' }, logUsage: async () => {} }) },
     '../_shared/validation.ts': { validateRequest: (_schema, data) => ({ success: true, data }) },
-    '../_shared/aiGateway.ts': { generateText: async opts => {
+    '../_shared/aiGateway.ts': { generateShotPlanText: planningGateway?.generateShotPlanText ?? (async opts => {
       textCalls.push(opts);
       if (incompletePlan) throw new Error('Generation did not finish: length');
       const copy = opts.system.includes('"title"') ? { title: 'TITLE', tagline: 'TAGLINE' } : {};
       return { text: invalidPlan ? '{' : JSON.stringify({ concepts: ['A doorway with a small figure at the far end.', 'A face seen beside a darkened arcade machine.', 'An empty chair beneath a practical ceiling lamp.'], selected: 1, ...copy }), model: 'text' };
-    }, generateImage: async (...args) => { imageCalls.push(args); return { base64: 'dGVzdA==', mimeType: 'image/png', model: 'image' }; }, statusFor: () => 500, userFacingMessage: () => 'failed' },
+    }), GatewayError: planningGateway?.GatewayError ?? Error, generateImage: async (...args) => { imageCalls.push(args); return { base64: 'dGVzdA==', mimeType: 'image/png', model: 'image' }; }, statusFor: planningGateway?.statusFor ?? (() => 500), userFacingMessage: planningGateway?.userFacingMessage ?? (() => 'failed') },
     '../_shared/poster.ts': { composePoster: async (_bytes, copy) => { phases.push('compose'); assert.equal(copy.title, invalidPlan || incompletePlan ? 'BUDDYLAND' : 'TITLE'); if(composeError) throw new Error('composition failed'); return Buffer.from('complete-poster'); } },
     '../_shared/prompts.ts': prompts,
   };
@@ -68,8 +68,6 @@ test('opening generation uses only a complete photographic plan, without poster 
     assert.equal(f.textCalls[0].maxTokens, 4000);
     assert.equal(f.textCalls[0].requireComplete, true);
     assert.equal(f.textCalls[0].reasoningEffort, 'low');
-    assert.equal(f.textCalls[0].singleAttempt, true);
-    assert(f.textCalls[0].signal instanceof AbortSignal);
     assert.equal(f.imageCalls[0][1], undefined);
     assert.deepEqual(f.phases, ['upload']);
   const poster = imageHandler();
@@ -77,6 +75,32 @@ test('opening generation uses only a complete photographic plan, without poster 
   assert.match(poster.textCalls[0].system, /painted 1980s one-sheet/);
   assert.match(poster.imageCalls[0][0], /Visibly hand-painted/);
   assert.deepEqual(poster.phases, ['compose', 'upload']);
+});
+test('real planning failover reaches one image; exhausted planning never uploads or replaces the opening', async () => {
+  for (const recover of [true, false]) {
+    const calls = [], planningGateway = {};
+    new Function('require', 'exports', 'Deno', 'fetch', compile('../supabase/functions/_shared/aiGateway.ts'))(
+      () => ({ UTILITY_MODEL_CANDIDATES: ['primary', 'backup'], usesResponsesApi: () => false }), planningGateway,
+      { env: { get: () => 'fake-key' } }, async (_url, opts) => {
+        const body = JSON.parse(opts.body); calls.push(body.model);
+        return body.model === 'backup' && recover
+          ? new Response(JSON.stringify({ choices: [{ finish_reason: 'stop', message: { content: JSON.stringify({ concepts: ['A doorway with a small figure at the far end.', 'A face seen beside a darkened arcade machine.', 'An empty chair beneath a practical ceiling lamp.'], selected: 1 }) } }] }))
+          : new Response('Service temporarily unavailable', { status: 503 });
+      },
+    );
+    const f = imageHandler({ planningGateway });
+    const response = await f.handler(request('beginning'));
+    assert.equal(response.status, recover ? 200 : 503);
+    assert.deepEqual(calls, ['primary', 'backup']);
+    assert.equal(f.imageCalls.length, recover ? 1 : 0);
+    if (recover) assert.match(f.imageCalls[0][0], /A face seen beside a darkened arcade machine/);
+    else {
+      assert.match((await response.json()).error, /could not be planned.*story is safe/i);
+      assert.deepEqual(f.phases, []);
+      assert.deepEqual(f.removed, []);
+      assert.deepEqual(f.filters, []);
+    }
+  }
 });
 test('malformed or token-limited opening planning spends no image call and changes no saved image', async () => {
   for (const options of [{ invalidPlan: true }, { incompletePlan: true }]) {
