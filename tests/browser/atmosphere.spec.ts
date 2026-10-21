@@ -54,6 +54,10 @@ test('long weapon lists cannot create an empty tail below the Stats page', async
       expect(metrics.bodyScroll).toBe(0);
     }
     await weapons.scrollIntoViewIfNeeded();
+    // Exercise actual keyboard movement. At the list's existing bottom, End can
+    // chain to the document and the old scrollTop > 0 check passes immediately.
+    await weapons.evaluate(el => { el.scrollTop = 0; });
+    await expect.poll(() => weapons.evaluate(el => el.scrollTop)).toBe(0);
     await weapons.focus();
     await weapons.press('End');
     await expect.poll(() => weapons.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
