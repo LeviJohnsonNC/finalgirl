@@ -23,7 +23,7 @@ for (const status of [503, 504]) {
     await page.route('**/recovered-opening.png', route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/buddyland.png') }));
     await page.goto('/');
     await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
-    const photo = page.getByRole('region', { name: 'Opening scene photograph' });
+    const photo = page.getByRole('complementary', { name: 'Opening scene photograph' });
     await expect(photo).toContainText(message);
     await expect(page.getByRole('region', { name: 'Opening narration' })).toContainText(opening);
     await expect(page.getByRole('button', { name: 'ENTER PLAY MODE', exact: true })).toBeEnabled();
