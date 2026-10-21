@@ -43,6 +43,7 @@ test('unlock confirmation precedes retrieval; pending confirmation stays sealed 
   await searchPick(page,'Moment detail','Private test reference');
   // Opening a reference never records an Item; the existing picker does.
   await expect(page.getByRole('combobox',{name:'Moment detail',exact:true})).toContainText('Private test reference');
+  await page.getByRole('button',{name:'Record',exact:true}).click();
   await file.getByRole('button',{name:'Hide this item again'}).click();
   await expect(file.getByText('Secret item — not revealed')).toBeVisible();
   await expect.poll(()=>archive.unlocks.Laurie).toBe(false);
