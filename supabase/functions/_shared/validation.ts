@@ -99,9 +99,9 @@ export const EndingRequestSchema = z.object({
   // Optional game stats
   finalHorrorLevel: z.number().int().min(0).max(7).optional(),
   weaponUsed: z.string().max(100).optional(),
-  finalGirlHealth: z.number().int().min(0).max(10).optional(),  // Max 6 in official game, buffer for custom
+  finalGirlHealth: z.number().int().min(0).max(10).optional(),  // Photographed cards span 4–7; buffer for explicit observations
   killerHealth: z.number().int().min(0).max(20).optional(),
-  finalGirlMaxHealth: z.number().int().min(5).max(6).optional(),  // Character-specific max health
+  finalGirlMaxHealth: z.number().int().min(1).max(10).optional(),  // Session-specific; photographed cards span 4–7
   victimsSaved: z.number().int().min(0).max(999).optional(),
   victimsKilled: z.number().int().min(0).max(999).optional(),
   endingSubLocation: z.string().max(200).optional(),

@@ -1,7 +1,9 @@
+import { getFinalGirlReference } from './finalGirlReferences';
+
 /**
  * Final Girl Health Data
- * Maps each Final Girl to her starting health value based on official game data.
- * Most characters have either 5 or 6 HP.
+ * Corrected starting health comes from the photographed card catalog.
+ * The legacy 5/6 map remains only for interpreting pre-reference game records.
  */
 
 // Characters with 5 HP
@@ -61,11 +63,11 @@ const SIX_HP_GIRLS = new Set([
 ]);
 
 /**
- * Get the starting/max health for a Final Girl
+ * Historical health reference for records without a per-session snapshot
  * @param name - The Final Girl's name
- * @returns The character's max health (5 or 6, defaults to 5 for unknown characters)
+ * @returns The original app denominator; never use for a new photographed cast
  */
-export function getFinalGirlHealth(name: string): number {
+export function getLegacyFinalGirlHealth(name: string): number {
   if (SIX_HP_GIRLS.has(name)) return 6;
   if (FIVE_HP_GIRLS.has(name)) return 5;
   // Default to 5 for unknown characters (more common value)
@@ -75,6 +77,9 @@ export function getFinalGirlHealth(name: string): number {
 /**
  * Alias for getFinalGirlHealth for clarity in UI contexts
  */
+export function getFinalGirlHealth(name: string): number {
+  return getFinalGirlReference(name)?.startingHealth ?? getLegacyFinalGirlHealth(name);
+}
 export const getFinalGirlMaxHealth = getFinalGirlHealth;
 
 /**

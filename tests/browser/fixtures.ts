@@ -23,6 +23,11 @@ function jsonbRoundTrip(value: unknown): unknown {
 }
 
 export class ArchiveMock {
+  unlocks: Record<string,boolean> = {};
+  itemReads: string[] = [];
+  failUnlocks = false;
+  holdUnlock = false;
+  releaseUnlock: (()=>void)|null = null;
   discarded = new Set<string>();
   failDiscard = false;
   cleanupPending = false;
@@ -116,6 +121,17 @@ export class ArchiveMock {
         const snapshot=this.deathScenes.filter(r=>r.session_id===url.searchParams.get('session_id')?.replace(/^eq\./,''));
         if(this.holdDeathRead)await new Promise<void>(done=>{this.releaseDeathRead=done;});
         return json(snapshot);
+      }
+      if(path.endsWith('/rpc/get_final_girl_unlocks')) return this.failUnlocks?json({message:'offline'},503):json(Object.entries(this.unlocks).map(([girl,unlocked])=>({girl,unlocked})));
+      if(path.endsWith('/rpc/set_final_girl_unlock')) {
+        if(this.failUnlocks)return json({message:'offline'},503);
+        if(this.holdUnlock)await new Promise<void>(done=>{this.releaseUnlock=done;});
+        const b=request.postDataJSON();this.unlocks[b.p_girl]=b.p_unlocked;
+        return json(Object.entries(this.unlocks).map(([girl,unlocked])=>({girl,unlocked})));
+      }
+      if(path.endsWith('/rpc/get_final_girl_item')) {
+        const b=request.postDataJSON();this.itemReads.push(b.p_girl);
+        return json(this.unlocks[b.p_girl]?{girl:b.p_girl,name:'Private test reference',effect:'Synthetic card effect for browser verification.',image_path:'11111111-1111-4111-8111-111111111111.webp'}:null);
       }
       if (path.endsWith('/play_sessions')) return json(this.sessions.filter(row=>!row.closed));
       if (path.endsWith('/discarded_games')) {

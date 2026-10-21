@@ -1,3 +1,4 @@
+import { getFinalGirlHealth } from '@/data/finalGirlHealth';
 import type { StateField } from "./events";
 
 /** Printed starting values where verified. Other casts get editable suggestions,
@@ -10,13 +11,12 @@ export function playStartingValues(
   killer: string,
   finalGirl: string,
 ): Record<StateField, number> {
-  const girlHealth: Record<string, number> = { Rena: 6, Gwynn: 5, Laurie: 5 };
   const killerHealth: Record<string, number> = {
     "Billy the Bear": 8,
     Hans: 12,
   };
   return {
-    finalGirlHealth: girlHealth[finalGirl] ?? 5,
+    finalGirlHealth: getFinalGirlHealth(finalGirl),
     killerHealth: killerHealth[killer] ?? 10,
     finalHorrorLevel: 4,
     bloodlust: 0,

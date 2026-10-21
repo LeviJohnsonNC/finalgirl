@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import { PageLoading } from "@/components/PageLoading";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { PersonalItemsProvider } from "./contexts/PersonalItemsContext";
 import { AuthProvider } from "./hooks/useAuth";
 
 // Lazy: Auth pulls in zod (~130 kB pre-minify) that the entry screen never needs.
@@ -19,6 +20,7 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <PersonalItemsProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -33,6 +35,7 @@ const App = () => (
             </Suspense>
           </BrowserRouter>
         </TooltipProvider>
+        </PersonalItemsProvider>
       </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>

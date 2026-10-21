@@ -1,3 +1,4 @@
+import { FinalGirlReference } from '@/components/FinalGirlReference';
 import { Info } from 'lucide-react';
 import {
   Dialog,
@@ -110,6 +111,7 @@ export const LoreInfoModal = ({ type, name }: LoreInfoModalProps) => {
               </div>
             )}
 
+            {type === 'finalGirl' && <FinalGirlReference name={name}/>}
             {/* Backstory */}
             {lore.backstory && (
               <div className="space-y-2">
