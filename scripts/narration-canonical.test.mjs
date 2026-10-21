@@ -20,7 +20,8 @@ const load = (path, imports) => {
   return ex;
 };
 const buddyland = load('../supabase/functions/_shared/play/buddyland.ts', {});
-const modules = load('../supabase/functions/_shared/play/modules.ts', {'./buddyland.ts':buddyland});
+const camp = load('../supabase/functions/_shared/play/camp.ts', {});
+const modules = load('../supabase/functions/_shared/play/modules.ts', {'./buddyland.ts':buddyland,'./camp.ts':camp});
 const events = load('../supabase/functions/_shared/play/events.ts', {'./modules.ts':modules}),
   death = load('../supabase/functions/_shared/play/death.ts', { './events.ts': events, './modules.ts':modules });
 const schemas = load('../supabase/functions/_shared/validation.ts', {
@@ -33,6 +34,7 @@ async function fixture({
   foreign = false,
   undone = false,
   changed = false,
+  camp = false,
 } = {}) {
   const state = {
     selection: {
@@ -52,6 +54,10 @@ async function fixture({
       { id: eventId, at: 2, kind: 'killed', quantity: 1 },
     ],
   };
+  if (camp) state.playEvents.splice(1,0,
+    {id:'55555555-5555-4555-8555-555555555555',at:1,kind:'module',moduleData:{module:'camp',changes:{'event.dark-waters':'active','victim.boyfriend':'in-play'}}},
+    {id:'66666666-6666-4666-8666-666666666666',at:1,kind:'module',moduleData:{module:'hans',changes:{'minor.unholy-speed.health':1}}},
+  );
   const signature = await death.deathSignature(
     death.deathFacts(state.selection, state.playEvents, eventId),
   );
@@ -188,4 +194,9 @@ test('foreign, undone and context-changed scenes cannot authorize speech', async
     assert.ok([404, 409].includes((await f.handler(f.request())).status));
     assert.deepEqual(f.spoken, []);
   }
+});
+test('saved Camp scenes with Hans observations retain their canonical narration identity',async()=>{
+  const f=await fixture({camp:true});
+  assert.equal((await f.handler(f.request())).status,200);
+  assert.deepEqual(f.spoken,['The canonical owned scene is narrated.']);
 });

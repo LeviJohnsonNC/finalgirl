@@ -82,7 +82,7 @@ export function PlaySearch({
                 setSearch(next);
                 onSearch?.(next);
               }}
-              placeholder="Search or type your own…"
+              placeholder={allowCustom ? "Search or type your own…" : "Search…"}
               maxLength={160}
             />
             <CommandList aria-label={`${label} options`}>

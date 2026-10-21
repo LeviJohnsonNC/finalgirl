@@ -1,0 +1,262 @@
+.play-camp-modules {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  margin-top: 12px;
+}
+.play-camp-panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #9c9b6e65;
+  border-radius: 6px;
+  background: #0b1411;
+  box-shadow: 0 7px 22px #0005;
+}
+.play-camp-panel > summary {
+  display: flex;
+  align-items: center;
+  min-height: 112px;
+  padding: 22px 26px;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
+  list-style: none;
+  gap: 18px;
+}
+.play-camp-panel > summary::-webkit-details-marker {
+  display: none;
+}
+.play-camp-panel > summary::after {
+  content: "+";
+  margin-left: auto;
+  color: #d9c795;
+  font:
+    24px Georgia,
+    serif;
+}
+.play-camp-panel[open] > summary::after {
+  content: "−";
+}
+.play-camp-panel > summary strong {
+  display: block;
+  color: #ede0bc;
+  font:
+    400 clamp(22px, 2.3vw, 30px)/1.2 "Narration Fell",
+    Georgia,
+    serif;
+}
+.play-camp-panel > summary small {
+  display: block;
+  color: #c3c7b3;
+  font-size: 12px;
+  margin-top: 6px;
+}
+.play-hans-panel > summary {
+  min-height: 86px;
+  background:
+    radial-gradient(ellipse at 85% 10%, #742a1c44, transparent 70%),
+    linear-gradient(110deg, #181713, #101a14);
+}
+.play-camp-body {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+}
+.play-camp-body button:focus-visible,
+.play-camp-panel > summary:focus-visible {
+  outline: 2px solid #e5ca82;
+  outline-offset: -3px;
+}
+.play-camp-add {
+  max-width: 360px;
+}
+.play-camp-victims {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.play-camp-person {
+  min-width: 0;
+}
+.play-camp-portrait {
+  display: block;
+  position: relative;
+  width: 100%;
+  padding: 0;
+  aspect-ratio: 1.1;
+  max-height: 240px;
+  overflow: hidden;
+  border: 1px solid #8d956a88;
+  border-radius: 5px;
+  background: #111b18;
+}
+.play-camp-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.play-camp-portrait > span {
+  position: absolute;
+  inset: 40% 0 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 14px;
+  text-align: left;
+  background: linear-gradient(transparent, #050c0bf5);
+}
+.play-camp-portrait strong {
+  color: #f1e2c4;
+  font:
+    400 23px/1.2 Georgia,
+    serif;
+}
+.play-camp-portrait small {
+  color: #c5d8aa;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  margin-top: 4px;
+}
+.play-camp-person[data-state="killed"] .play-camp-portrait {
+  border-color: #bb6559;
+}
+.play-camp-person[data-state="killed"] small {
+  color: #efb1a2;
+}
+.play-camp-person[data-state="saved"] .play-camp-portrait {
+  border-color: #abd081;
+  box-shadow: 0 0 16px #9fcd5922;
+}
+.play-camp-person > .play-select-trigger {
+  margin-top: 8px;
+}
+.play-camp-body .play-camp-clear {
+  display: block;
+  min-height: 44px;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  color: #adb3a2;
+  font-size: 11px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.play-camp-effect {
+  overflow: hidden;
+  min-width: 0;
+  border: 1px solid #9a9e6b55;
+  border-radius: 5px;
+}
+.play-camp-effect-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 88px;
+  width: 100%;
+  padding: 18px 20px;
+  text-align: left;
+  border: 0;
+  background-color: #1c2920;
+  background-position: center;
+  background-size: cover;
+}
+.play-camp-effect-toggle strong {
+  color: #eadbb8;
+  font:
+    400 23px/1.2 Georgia,
+    serif;
+}
+.play-camp-effect-toggle small {
+  margin-left: auto;
+  color: #d0dcab;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+.play-camp-effect[data-active="false"] .play-camp-effect-toggle {
+  filter: saturate(0.4);
+  opacity: 0.7;
+}
+.play-camp-effect > .play-camp-clear {
+  margin-left: 18px;
+}
+.play-camp-tunnel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 16px 18px 0;
+}
+.play-camp-tunnel label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: #c3c7b3;
+  min-width: 0;
+}
+.play-minor-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.play-minor-power {
+  padding: 16px;
+  border: 1px solid #91837755;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #24251c, #141c18);
+}
+.play-minor-power[data-active="true"] {
+  border-color: #bc9f6699;
+}
+.play-minor-power h3 {
+  color: #e9d9b9;
+  font:
+    400 23px/1.2 Georgia,
+    serif;
+  margin: 0 0 14px;
+}
+.play-minor-power > button:not(.play-camp-clear),
+.play-minor-health button {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 6px;
+  border: 1px solid #bca47188;
+  background: #343a29;
+  padding: 8px 14px;
+  color: #f0e1bc;
+}
+.play-minor-health {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #e7daba;
+}
+.play-minor-health button:disabled {
+  opacity: 0.35;
+}
+@media (max-width: 639px) {
+  .play-camp-panel > summary {
+    padding: 20px 16px;
+    min-height: 100px;
+  }
+  .play-camp-body {
+    padding: 14px;
+    gap: 14px;
+  }
+  .play-camp-victims {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .play-camp-portrait strong {
+    font-size: 20px;
+  }
+  .play-minor-grid {
+    grid-template-columns: 1fr;
+  }
+  .play-camp-tunnel {
+    gap: 10px;
+    padding-inline: 12px;
+  }
+  .play-camp-effect-toggle {
+    padding: 16px 14px;
+  }
+}

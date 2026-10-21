@@ -7,10 +7,20 @@ import {
   BUDDYLAND_TERRORS,
   SPECIAL_VICTIMS,
 } from "./buddyland.ts";
+import {
+  CAMP_EVENTS,
+  CAMP_ITEMS,
+  CAMP_TERRORS,
+  CAMP_TUNNEL_ROOMS,
+  CAMP_VICTIMS,
+  HANS_FINALES,
+  HANS_MINOR_POWERS,
+  HANS_POWERS,
+} from "./camp.ts";
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "billy" | "buddyland";
+  module: "billy" | "buddyland" | "hans" | "camp";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -18,10 +28,19 @@ type ObservedEvent = {
   moduleData?: ModuleObservation;
   momentType?: string;
   killerCard?: string;
+  detail?: string;
 };
 
 /** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
 export function killerMomentCards(killer: string, type: string) {
+  if (killer === "Hans")
+    return (
+      type === "dark-power"
+        ? [...HANS_POWERS]
+        : type === "finale"
+          ? [...HANS_FINALES]
+          : []
+    ).sort((a, b) => a.name.localeCompare(b.name));
   const cards =
     killer !== "Billy the Bear"
       ? []
@@ -55,6 +74,34 @@ function validField(
   value: unknown,
 ) {
   const [group, id, field] = key.split(".");
+  if (module === "hans") {
+    if (key === "secondPower")
+      return oneOf(
+        value,
+        HANS_POWERS.map((c) => c.name),
+      );
+    return (
+      /^minor\.[a-z-]+\.health$/.test(key) &&
+      member(HANS_MINOR_POWERS, id) &&
+      count(value, 2)
+    );
+  }
+  if (module === "camp") {
+    if (/^tunnel\.(a|b)$/.test(key)) return oneOf(value, CAMP_TUNNEL_ROOMS);
+    if (
+      group === "victim" &&
+      key.split(".").length === 2 &&
+      member(CAMP_VICTIMS, id)
+    )
+      return oneOf(value, ["in-play", "saved", "killed", "untracked"]);
+    if (
+      group === "event" &&
+      key.split(".").length === 2 &&
+      member(CAMP_EVENTS, id)
+    )
+      return oneOf(value, ["active", "resolved"]);
+    return false;
+  }
   if (key === "lastTerror")
     return (
       value === null ||
@@ -135,7 +182,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["billy", "buddyland"].includes(m.module) ||
+    !["billy", "buddyland", "hans", "camp"].includes(m.module) ||
     !m.changes ||
     typeof m.changes !== "object" ||
     Array.isArray(m.changes)
@@ -155,6 +202,18 @@ export function moduleState(
 ): ModuleState {
   const state: ModuleState = {};
   for (const e of entries) {
+    if (module === "hans" && e.kind === "moment" && e.killerCard) {
+      if (
+        e.momentType === "dark-power" &&
+        HANS_POWERS.some((c) => c.name === e.killerCard)
+      )
+        state.power = e.killerCard;
+      if (
+        e.momentType === "finale" &&
+        HANS_FINALES.some((c) => c.name === e.killerCard)
+      )
+        state.finale = e.killerCard;
+    }
     // Moment details have already been reduced with undo/restore and corrections.
     // A remembered reveal is evidence of a reveal, not proof the power is still active.
     if (module === "billy" && e.kind === "moment" && e.killerCard) {
@@ -180,6 +239,18 @@ export function moduleState(
   return state;
 }
 function fieldLabel(module: ModuleObservation["module"], key: string) {
+  if (module === "hans")
+    return key === "secondPower"
+      ? "Second Dark Power revealed"
+      : `${HANS_MINOR_POWERS.find((c) => key === `minor.${c.id}.health`)?.name ?? key} Health`;
+  if (module === "camp") {
+    const [group, id] = key.split(".");
+    return group === "victim"
+      ? (CAMP_VICTIMS.find((c) => c.id === id)?.name ?? key)
+      : group === "event"
+        ? (CAMP_EVENTS.find((c) => c.id === id)?.name ?? key)
+        : `Secret Tunnel endpoint ${id.toUpperCase()}`;
+  }
   if (key === "powerSourcesReady") return "Power sources initialized";
   const [group, id, field] = key.split(".");
   if (group === "source")
@@ -225,16 +296,31 @@ export function moduleContext(
   entries: readonly ObservedEvent[],
 ) {
   const context: Record<string, ModuleState> = {};
-  for (const module of ["billy", "buddyland"] as const) {
-    if (
+  for (const module of ["billy", "buddyland", "hans", "camp"] as const) {
+    const applies =
       module === "billy"
-        ? selection.killer !== "Billy the Bear"
-        : selection.location !== "Buddyland"
-    )
-      continue;
+        ? selection.killer === "Billy the Bear"
+        : module === "hans"
+          ? selection.killer === "Hans"
+          : module === "camp"
+            ? selection.location === "Camp Happy Trails"
+            : selection.location === "Buddyland";
+    if (!applies) continue;
     const state = moduleState(entries, module);
     // A UI initialization marker is not a game fact or part of a death fingerprint.
     delete state.powerSourcesReady;
+    if (
+      module === "hans" &&
+      (state.finale !== "Dark, Darker, Darkest" ||
+        state.secondPower === state.power)
+    )
+      delete state.secondPower;
+    if (module === "camp" && state["event.secret-tunnel"] !== "active") {
+      delete state["tunnel.a"];
+      delete state["tunnel.b"];
+    }
+    if (module === "camp" && state["tunnel.a"] === state["tunnel.b"])
+      delete state["tunnel.b"];
     if (Object.keys(state).length) context[module] = state;
   }
   return Object.keys(context).length ? context : undefined;
@@ -303,6 +389,31 @@ export function moduleStoryBeats(
           `${i.name}: ${venue[`item.${i.id}.status`]}${venue[`item.${i.id}.uses`] !== undefined ? `, ${venue[`item.${i.id}.uses`]} uses` : ""}`,
         );
   }
+  const hans = context.hans;
+  if (hans) {
+    if (hans.power) lines.push(`Hans Dark Power revealed: ${hans.power}.`);
+    if (hans.finale) lines.push(`Hans Finale revealed: ${hans.finale}.`);
+    if (hans.secondPower)
+      lines.push(`Second Dark Power revealed: ${hans.secondPower}.`);
+    for (const p of HANS_MINOR_POWERS)
+      if (hans[`minor.${p.id}.health`] !== undefined)
+        lines.push(
+          `${p.name}: ${hans[`minor.${p.id}.health`]} Health remaining${hans[`minor.${p.id}.health`] === 0 ? ", removed" : ""}.`,
+        );
+  }
+  const camp = context.camp;
+  if (camp) {
+    for (const v of CAMP_VICTIMS)
+      if (camp[`victim.${v.id}`])
+        lines.push(`${v.name}: ${camp[`victim.${v.id}`]}.`);
+    for (const e of CAMP_EVENTS)
+      if (camp[`event.${e.id}`])
+        lines.push(`Camp Event ${e.name}: ${camp[`event.${e.id}`]}.`);
+    if (camp["tunnel.a"] || camp["tunnel.b"])
+      lines.push(
+        `Secret Tunnel endpoints recorded: ${[camp["tunnel.a"], camp["tunnel.b"]].filter(Boolean).join(" / ")}.`,
+      );
+  }
   return lines.join("\n");
 }
 export function buddylandReferences(
@@ -338,4 +449,87 @@ export function buddylandReferences(
         refs.push({ name: event.name, effect: event.effect });
   }
   return refs;
+}
+
+/** Read only the applicable module's recorded observations. Never trigger effects. */
+export function moduleReferences(
+  selection: ModuleSelection,
+  context?: Record<string, ModuleState>,
+  attacker?: string,
+  victim?: string,
+  mechanism?: string,
+) {
+  const refs = buddylandReferences(selection, context, attacker);
+  if (selection.killer === "Hans" && context?.hans) {
+    const state = context.hans;
+    for (const p of HANS_POWERS)
+      if (state.power === p.name || state.secondPower === p.name)
+        refs.push({
+          name: p.name,
+          effect: `${p.effect} Its reveal was recorded; do not assume it caused this death.`,
+        });
+    const finale = HANS_FINALES.find((c) => c.name === state.finale);
+    if (finale) refs.push({ name: finale.name, effect: finale.effect });
+    for (const p of HANS_MINOR_POWERS) {
+      const health = state[`minor.${p.id}.health`];
+      if (typeof health === "number")
+        refs.push({
+          name: p.name,
+          effect:
+            health === 0
+              ? "Recorded as removed, no longer active."
+              : `${p.effect} ${health} Health remaining. Do not add this Health to Hans’s general Health.`,
+        });
+    }
+  }
+  if (selection.location === "Camp Happy Trails") {
+    const state = context?.camp ?? {};
+    for (const e of CAMP_EVENTS)
+      if (state[`event.${e.id}`] === "active")
+        refs.push({
+          name: e.name,
+          effect: `${e.effect} This recorded ongoing effect does not establish an additional death or rescue.`,
+        });
+    for (const v of CAMP_VICTIMS)
+      if (state[`victim.${v.id}`] || v.name === victim) {
+        const event = CAMP_EVENTS.find((e) => e.name === v.event)!;
+        refs.push({
+          name: v.name,
+          effect: `${v.name === victim ? "Explicitly selected as this scene’s victim." : `Recorded status: ${state[`victim.${v.id}`]}.`} ${event.effect} Do not infer this person is the victim of this scene without a matching death-specific victim field. No additional Health, Horror, Time or Bloodlust change is established.`,
+        });
+      }
+    const hazard =
+      CAMP_EVENTS.find((c) => c.name === mechanism) ??
+      CAMP_TERRORS.find((c) => c.name === "Fire!" && mechanism === "Fire");
+    if (hazard && !refs.some((r) => r.name === hazard.name))
+      refs.push({
+        name: hazard.name,
+        effect: `${hazard.effect} The explicitly recorded mechanism applies to this death only, not proof of an ongoing hazard or extra casualties.`,
+      });
+  }
+  return refs;
+}
+
+/** A remembered find establishes possession at that moment, never later use. */
+export function moduleItemBeats(
+  selection: ModuleSelection,
+  entries: readonly ObservedEvent[],
+) {
+  const catalog = selection.location === "Camp Happy Trails" ? CAMP_ITEMS : [];
+  return entries
+    .filter((e) => e.kind === "moment" && e.momentType === "item" && e.detail)
+    .slice(-2)
+    .flatMap((e) => {
+      const item = catalog.find(
+        (c) =>
+          c.name.toLowerCase().replace(/’/g, "'") ===
+          e.detail!.trim().toLowerCase().replace(/’/g, "'"),
+      );
+      return item
+        ? [
+            `Found ${item.name}: ${item.effect} Finding does not establish use, charges remaining or current inventory.`,
+          ]
+        : [];
+    })
+    .join("\n");
 }

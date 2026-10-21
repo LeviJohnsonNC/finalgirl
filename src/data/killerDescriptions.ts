@@ -1,3 +1,4 @@
+import { HANS_VISUAL } from './rules/campRules';
 import { BUDDYLAND_VISUALS } from './buddyland';
 
 /**
@@ -23,15 +24,7 @@ She grips a heavy, industrial red power drill in her right hand, held upright li
   'Razorface': `A man in his late 20s to mid-30s with a lean, muscular, and athletic build. He has a chilling, authoritative presence that feels ritualistic and intensely focused. His skin is a stark, sickly pale white, providing a high-contrast canvas for the metalwork. His head and face are meticulously pierced with long metal pins arranged in a precise, geometric grid pattern. He has dark, hollowed eyes with an unblinking, cold stare and sharp, angular facial features, including a defined jawline and a thin, expressionless mouth.
 
 He is shirtless, wearing an intricate black leather harness with various straps, buckles, and metal O-rings across his chest. Heavy metal chains are draped around his neck and wrapped around his waist. His forearms are tightly bound in dark, weathered fabric wraps. In his hands, he delicately holds a realistic human heart that has also been pierced by several long pins.`,
-  "Hans": `A tall, broad-shouldered humanoid figure with a heavy, imposing build and an unmistakably predatory presence. The figure wears a realistic pig mask that fully obscures the human face beneath it. The mask has pale, fleshy skin texture, pronounced snout, upright ears, and glowing red eyes that feel artificial and inhuman rather than emotional. The expression of the mask is fixed and unreadable, which makes the figure more unsettling.
-
-The body language is dominant and deliberate—shoulders squared, stance grounded, movements economical and purposeful. This is not a frantic killer; it is controlled, confident, and patient.
-
-The figure wears utilitarian work clothing: a light-colored button-up shirt with sleeves rolled up and a heavily stained, worn apron that suggests slaughterhouse or butcher work. Clothing is practical, dirty, and functional, not theatrical. Arms are bare, muscular, and marked by grime and old stains.
-
-The character carries a large butcher's cleaver held low and casually, as if it's a familiar tool rather than a weapon.
-
-The overall impression is of a human-shaped force of violence hidden behind an animal identity—ritualistic, industrial, and merciless. Realistic pig mask, not cartoonish. Upright ears, full snout, skin-textured latex look. Glowing red eyes (unnatural, not emotional). Mask never changes expression. Industrial, slaughterhouse-adjacent clothing. Apron is mandatory. Fabrics are stiff, stained, and worn. Colors are muted: off-whites, browns, faded blues. Nothing decorative, no symbols, no flair.`,
+  "Hans": HANS_VISUAL,
 
   "Geppetto": `A slender, adult male figure with a tall, wiry build and an exaggerated, theatrical presence. His posture is expressive and performative, with deliberate gestures meant to be seen and savored. He moves like someone on stage even when standing still.
 
