@@ -26,7 +26,7 @@ function PrivateItemPhoto({item}:{item:PersonalItem}) {
     return()=>{live=false;if(url)URL.revokeObjectURL(url);};
   },[open,allowed,key,item.image_path]);
   return <div>
-    <button className="girl-reference-link" onClick={()=>setOpen(value=>!value)} aria-expanded={open}><ZoomIn size={15}/>{open?'Close item card':'View item card'}</button>
+    <button className="girl-reference-link" onClick={()=>setOpen(value=>!value)} aria-expanded={open}><ZoomIn aria-hidden="true" size={15}/>{open?'Close item card':'View item card'}</button>
     {open && allowed && (photo?.key===key?<img className="girl-private-card" src={photo.url} alt={`${item.name} card`} />:error?<p role="status">The card image could not be reached. Close it and try again.</p>:<p role="status">Developing card reference…</p>)}
   </div>;
 }
@@ -37,7 +37,7 @@ export function SecretItemReference({name}:{name:string}) {
   const {item,error,loading,retry}=usePersonalItem(name);
   const [confirm,setConfirm]=useState(false);
   return <section className={`girl-secret-reference ${unlocked?'is-revealed':''}`} aria-label={`${name} secret item`}>
-    <div className="girl-reference-eyebrow"><LockKeyhole size={14}/>{unlocked?'PERSONAL UNLOCK':'SEALED FILE'}</div>
+    <div className="girl-reference-eyebrow"><LockKeyhole aria-hidden="true" size={14}/>{unlocked?'PERSONAL UNLOCK':'SEALED FILE'}</div>
     {!unlocked?<>
       <h4>Secret item — not revealed</h4>
       <p>Keep the discovery at your table. Reveal this reference only after unlocking the physical item.</p>
@@ -67,11 +67,11 @@ export function FinalGirlReference({name,ultimate=false,showSecret=true}:{name:s
   if(!ref)return <p className="girl-reference-note">A verified character-card reference has not been added for {name} yet.</p>;
   const image=getFinalGirlCard(name,face);
   return <div className="girl-reference">
-    <div className="girl-reference-topline"><span className="girl-reference-eyebrow">CHARACTER REFERENCE</span><span className="girl-health"><Heart size={14}/>{ref.startingHealth} starting health{ref.ultimateHealth!==ref.startingHealth?` · ${ref.ultimateHealth} after flip`:''}</span></div>
+    <div className="girl-reference-topline"><span className="girl-reference-eyebrow">CHARACTER REFERENCE</span><span className="girl-health"><Heart aria-hidden="true" size={14}/>{ref.startingHealth} starting health{ref.ultimateHealth!==ref.startingHealth?` · ${ref.ultimateHealth} after flip`:''}</span></div>
     <div className="girl-reference-face" role="group" aria-label={`${name} card face`}>
       <button aria-pressed={!face} onClick={()=>setFace(false)}>Starting side</button><button aria-pressed={face} onClick={()=>setFace(true)}>Ultimate side</button>
     </div>
-    {image && <Dialog><DialogTrigger asChild><button className="girl-card-button" aria-label={`Enlarge ${name} ${face?'Ultimate':'starting'} card`}><img src={image} alt={`${name} ${face?'Ultimate':'starting'} card`} width={600} height={400} loading="lazy"/><span><ZoomIn size={14}/> Inspect card</span></button></DialogTrigger><DialogContent className="girl-card-zoom"><DialogHeader><DialogTitle>{name} · {face?'Ultimate':'Starting'} side</DialogTitle><DialogDescription>Photographed physical card. A readable reference appears below the card in the character file.</DialogDescription></DialogHeader><img src={image} alt={`${name} ${face?'Ultimate':'starting'} card enlarged`} /></DialogContent></Dialog>}
+    {image && <Dialog><DialogTrigger asChild><button className="girl-card-button" aria-label={`Enlarge ${name} ${face?'Ultimate':'starting'} card`}><img src={image} alt={`${name} ${face?'Ultimate':'starting'} card`} width={600} height={400} loading="lazy"/><span><ZoomIn aria-hidden="true" size={14}/> Inspect card</span></button></DialogTrigger><DialogContent className="girl-card-zoom"><DialogHeader><DialogTitle>{name} · {face?'Ultimate':'Starting'} side</DialogTitle><DialogDescription>Photographed physical card. A readable reference appears below the card in the character file.</DialogDescription></DialogHeader><img src={image} alt={`${name} ${face?'Ultimate':'starting'} card enlarged`} /></DialogContent></Dialog>}
     {face?<section className="girl-reference-copy"><h4>Ultimate ability</h4><p>{ref.ultimate}</p><h4>Each additional Victim saved</h4><p>{ref.additionalReward}</p></section>:<section className="girl-reference-copy"><h4>{ref.startingRule?'Rescuing Victims':'Rescue rewards'}</h4>{ref.startingRule?<p>{ref.startingRule}</p>:<><p className="girl-reference-note">Choose an available reward on your physical card. This list follows printed reading order, not a required order of play.</p><ul className="girl-rescue-rewards">{ref.rescueRewards.map((reward,index)=><li key={index}>{reward}</li>)}</ul></>}</section>}
     <p className="girl-reference-note">Viewing a card changes no game state. Record Ultimate unlocked in Remember this when it happens at your table.</p>
     {showSecret && <SecretItemReference key={name} name={name}/>}
@@ -79,10 +79,10 @@ export function FinalGirlReference({name,ultimate=false,showSecret=true}:{name:s
 }
 
 export function FinalGirlReferenceDialog({name}:{name:string}) {
-  return <Dialog><DialogTrigger asChild><button className="girl-reference-link" aria-label={`Open ${name} character reference`}><BookOpen size={14}/>{name}</button></DialogTrigger><DialogContent className="girl-reference-dialog"><DialogHeader><DialogTitle>{name} · Character file</DialogTitle><DialogDescription>Card references and your personal unlocks.</DialogDescription></DialogHeader><FinalGirlReference name={name}/></DialogContent></Dialog>;
+  return <Dialog><DialogTrigger asChild><button className="girl-reference-link" aria-label={`Open ${name} character reference`}><BookOpen aria-hidden="true" size={14}/>{name}</button></DialogTrigger><DialogContent className="girl-reference-dialog"><DialogHeader><DialogTitle>{name} · Character file</DialogTitle><DialogDescription>Card references and your personal unlocks.</DialogDescription></DialogHeader><FinalGirlReference name={name}/></DialogContent></Dialog>;
 }
 
 export function PlayFinalGirlReference({name,ultimate}:{name:string;ultimate:boolean}) {
   if(!getFinalGirlReference(name))return null;
-  return <details className="play-panel girl-play-file"><summary><span><BookOpen size={17}/>{name}’s character file</span><span>{ultimate?'Ultimate recorded':'Starting side'}<ChevronDown size={16}/></span></summary><FinalGirlReference name={name} ultimate={ultimate}/></details>;
+  return <details className="play-panel girl-play-file"><summary><span><BookOpen aria-hidden="true" size={17}/>{name}’s character file</span><span>{ultimate?'Ultimate recorded':'Starting side'}<ChevronDown aria-hidden="true" size={16}/></span></summary><FinalGirlReference name={name} ultimate={ultimate}/></details>;
 }
