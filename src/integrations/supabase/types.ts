@@ -65,6 +65,51 @@ export type Database = {
         }
         Relationships: []
       }
+      final_girl_secret_items: {
+        Row: {
+          effect: string
+          girl: string
+          image_path: string
+          name: string
+          source: string
+        }
+        Insert: {
+          effect: string
+          girl: string
+          image_path: string
+          name: string
+          source?: string
+        }
+        Update: {
+          effect?: string
+          girl?: string
+          image_path?: string
+          name?: string
+          source?: string
+        }
+        Relationships: []
+      }
+      final_girl_unlocks: {
+        Row: {
+          girl: string
+          unlocked: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          girl: string
+          unlocked?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          girl?: string
+          unlocked?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       game_history: {
         Row: {
           created_at: string
@@ -72,6 +117,7 @@ export type Database = {
           ending_sub_location: string | null
           final_girl: string
           final_girl_health: number | null
+          final_girl_max_health: number | null
           final_horror_level: number | null
           game_highlights: string | null
           id: string
@@ -99,6 +145,7 @@ export type Database = {
           ending_sub_location?: string | null
           final_girl: string
           final_girl_health?: number | null
+          final_girl_max_health?: number | null
           final_horror_level?: number | null
           game_highlights?: string | null
           id?: string
@@ -126,6 +173,7 @@ export type Database = {
           ending_sub_location?: string | null
           final_girl?: string
           final_girl_health?: number | null
+          final_girl_max_health?: number | null
           final_horror_level?: number | null
           game_highlights?: string | null
           id?: string
@@ -318,6 +366,11 @@ export type Database = {
         Returns: Json
       }
       discard_game_session: { Args: { p_game_id: string }; Returns: Json }
+      get_final_girl_item: {
+        Args: { p_girl: string; p_owner?: string }
+        Returns: Json
+      }
+      get_final_girl_unlocks: { Args: { p_owner?: string }; Returns: Json[] }
       get_game_history_summary: { Args: never; Returns: Json[] }
       queue_discarded_image_cleanup: {
         Args: { p_game_id: string; p_user_id: string }
@@ -344,6 +397,10 @@ export type Database = {
           p_state: Json
         }
         Returns: Json
+      }
+      set_final_girl_unlock: {
+        Args: { p_girl: string; p_owner?: string; p_unlocked: boolean }
+        Returns: Json[]
       }
     }
     Enums: {
