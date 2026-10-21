@@ -20,7 +20,7 @@ import { getLocationDescription } from '@/data/locationDescriptions';
 import { characterFate } from '../../supabase/functions/_shared/storyFacts';
 import { getMissionByName } from '@/data/falconwoodMissions';
 import { isKillerUnkillable } from '@/data/killerHealth';
-import { getFinalGirlMaxHealth } from '@/data/finalGirlHealth';
+import { getLegacyFinalGirlHealth } from '@/data/finalGirlHealth';
 import { getKillerNarrativeRules } from '@/data/killerSpecialRules';
 import { getModulePromptContext } from '@/data/rules/moduleRules';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
@@ -156,7 +156,7 @@ const TheEnd = ({
       const moduleSpecialRules = moduleContext
         ? [moduleContext.rulesSummary, moduleContext.narrativeGuidance].filter(Boolean).join('\n')
         : undefined;
-      const finalGirlMaxHealth = getFinalGirlMaxHealth(result.finalGirl);
+      const finalGirlMaxHealth = result.finalGirlMaxHealth ?? getLegacyFinalGirlHealth(result.finalGirl);
 
       const payload = {
         mission: getMissionByName(result.mission),

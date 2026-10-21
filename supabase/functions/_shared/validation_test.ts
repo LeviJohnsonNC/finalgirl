@@ -256,3 +256,9 @@ Deno.test('generation context preserves explicit fate and mission while allowing
   assertEquals(SceneImageRequestSchema.safeParse({ ...scene, finalGirlHealth: -1 }).success, false);
   assertEquals(SceneImageRequestSchema.safeParse({ ...scene, mission: { name: 'x', description: 'x'.repeat(1501) } }).success, false);
 });
+
+Deno.test("EndingRequestSchema - supports photographed 4 and 7 maximum health without accepting invalid values",()=>{
+  const base={introStory:"A complete opening story that has more than fifty characters for this health validation case.",outcome:"won",killer:{name:"Hans"},location:{name:"Camp Happy Trails"},finalGirl:{name:"Kate"}};
+  for(const health of [4,7]) assertEquals(validateRequest(EndingRequestSchema,{...base,finalGirlMaxHealth:health}).success,true);
+  for(const health of [0,11,4.5]) assertEquals(validateRequest(EndingRequestSchema,{...base,finalGirlMaxHealth:health}).success,false);
+});

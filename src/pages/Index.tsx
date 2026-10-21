@@ -1,3 +1,5 @@
+import { getFinalGirlHealth } from '@/data/finalGirlHealth';
+import { observedFinalGirlMaxHealth } from '@/data/finalGirlReferences';
 import {trackedOutcome} from '@/lib/play/outcome';
 import { usePlaySessionSync } from '@/hooks/play/usePlaySessionSync';
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
@@ -141,7 +143,7 @@ const IndexContent = () => {
       return;
     }
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
-      selection: { ...selection, filmId: getFilmIdByLocation(selection.location) } })) setCurrentPage('nowPlaying');
+      selection: { ...selection, filmId: getFilmIdByLocation(selection.location), finalGirlStartingHealth: getFinalGirlHealth(selection.finalGirl) } })) setCurrentPage('nowPlaying');
   };
 
   const handleBackFromNowPlaying = goBack;
@@ -151,7 +153,7 @@ const IndexContent = () => {
     if (!game || game.id !== activeGame?.id) return;
     try {
       const result = game.result ?? recordGame({ outcome, ...game.selection, ...trackedOutcome(game.playEvents),
-        introStory: story, sceneImageUrl, visualBible: bible }, game.id);
+        introStory: story, sceneImageUrl, visualBible: bible, finalGirlMaxHealth: observedFinalGirlMaxHealth(game.selection.finalGirl,game.playEvents,game.selection.finalGirlStartingHealth) }, game.id);
       recordedIds.current.add(game.id);
       if (checkpoint(game.id, { phase: 'outcome', result, introStory: story, sceneImageUrl, visualBible: bible })) {
         setCurrentPage('outcome');

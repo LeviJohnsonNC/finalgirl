@@ -5,6 +5,7 @@ export interface GameSelection {
   killer: string; location: string; finalGirl: string;
   setupScenario: string | null; startingEvent: string | null; mission: string | null;
   filmId: string | null;
+  finalGirlStartingHealth?: number;
 }
 export interface EndingFormData {
   finalHorrorLevel?: number; finalGirlHealth?: number; killerHealth?: number;
@@ -30,6 +31,7 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if (game.selection?.finalGirlStartingHealth !== undefined && (!Number.isInteger(game.selection.finalGirlStartingHealth) || game.selection.finalGirlStartingHealth < 1 || game.selection.finalGirlStartingHealth > 10)) return false;
   if (game.playEvents !== undefined && !validPlayLog(game.playEvents)) return false;
   if (game.playDrafts !== undefined && (!game.playDrafts || typeof game.playDrafts !== 'object' || Array.isArray(game.playDrafts) || Object.keys(game.playDrafts).length > 1000 || !Object.values(game.playDrafts).every(validPlayDetails))) return false;
   if (game.showDeathPanel !== undefined && typeof game.showDeathPanel !== 'boolean') return false;

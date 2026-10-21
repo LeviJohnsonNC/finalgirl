@@ -18,6 +18,8 @@ import momentDarkPowerActive from "@/assets/play/states/dark-power-active.webp";
 import momentFinaleActive from "@/assets/play/states/finale-active.webp";
 import momentOther from "@/assets/play/moment-other.webp";
 import { useActiveImages } from "@/hooks/useActiveImages";
+import { PlayFinalGirlReference } from '@/components/FinalGirlReference';
+import { usePersonalItem } from '@/contexts/PersonalItemsContext';
 import { PlaySearch } from "./PlaySearch";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
@@ -161,6 +163,7 @@ const orderedMoments = momentOrder.map(type => moments.find(choice => choice.typ
 export function PlayScreen(props: PlayScreenProps) {
   const { events, onEvent, killer, location, finalGirl } = props;
   const summary = summarizePlay(events);
+  const { item: personalItem } = usePersonalItem(finalGirl);
   const startingValues = playStartingValues(killer, finalGirl);
   const { characterImages } = useActiveImages();
   const [message, setMessage] = useState("");
@@ -398,6 +401,7 @@ export function PlayScreen(props: PlayScreenProps) {
           {summary.killed ?? 0}. Round: {summary.round ?? "unrecorded"}.
         </p>
       </section>
+      <PlayFinalGirlReference name={finalGirl} ultimate={summary.entries.some(event=>event.kind==='moment' && event.momentType==='ultimate-unlocked')}/>
       <section
         className="play-panel play-track-more"
         aria-label="Optional trackers"
@@ -602,7 +606,7 @@ export function PlayScreen(props: PlayScreenProps) {
                 <PlaySearch
                   label="Moment detail"
                   value={momentDetail}
-                  options={playItems(location).map(item => item.name)}
+                  options={[...playItems(location).map(item => item.name), ...(personalItem ? [personalItem.name] : [])]}
                   onSearch={(value) =>
                     props.onDraft(moment.id, {
                       ...props.drafts[moment.id],

@@ -1,5 +1,5 @@
 import { GameResult } from './useGameHistory';
-import { getFinalGirlHealth } from '@/data/finalGirlHealth';
+import { getLegacyFinalGirlHealth } from '@/data/finalGirlHealth';
 import { PlayerArchetype } from './useGameStats';
 
 interface ArchetypeScore {
@@ -103,7 +103,7 @@ function collect(weighted: Weighted[], share: (game: GameResult) => number | nul
 
 const isClutch = (game: GameResult): boolean => {
   if (game.finalGirlHealth == null) return false;
-  const maxHP = getFinalGirlHealth(game.finalGirl);
+  const maxHP = game.finalGirlMaxHealth ?? getLegacyFinalGirlHealth(game.finalGirl);
   return maxHP > 0 && game.finalGirlHealth / maxHP <= 0.33;
 };
 
@@ -227,7 +227,7 @@ const ARCHETYPE_INTROS: Record<Exclude<PlayerArchetype, 'newcomer'>, (ctx: Profi
   survivor: (ctx) => {
     const clutchWins = ctx.wins.filter((g) => {
       if (g.finalGirlHealth == null) return false;
-      const maxHP = getFinalGirlHealth(g.finalGirl);
+      const maxHP = g.finalGirlMaxHealth ?? getLegacyFinalGirlHealth(g.finalGirl);
       return g.finalGirlHealth / maxHP <= 0.33;
     });
     const oneHPWins = clutchWins.filter((g) => g.finalGirlHealth === 1).length;

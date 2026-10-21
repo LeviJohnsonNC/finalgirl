@@ -9,6 +9,7 @@ psql "$TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f tests/database/assertions.sql
 psql "$TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f tests/database/play-sessions.sql
 psql "$TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f tests/database/death-scenes.sql
 psql "$TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f tests/database/discard-games.sql
+psql "$TEST_DATABASE_URL" -X -v ON_ERROR_STOP=1 -f tests/database/final-girl-items.sql
 result_dir=$(mktemp -d)
 trap 'rm -rf "$result_dir"' EXIT
 pids=()

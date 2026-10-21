@@ -90,6 +90,7 @@ export interface GameResult {
   gameHighlights?: string;
   finalHorrorLevel?: number; // 0-7
   finalGirlHealth?: number;
+  finalGirlMaxHealth?: number;
   killerHealth?: number;
   weaponUsed?: string;
   endingSubLocation?: string;
@@ -131,6 +132,7 @@ const toDbRow = (result: GameResult, userId: string) => ({
   game_highlights: result.gameHighlights ?? null,
   final_horror_level: result.finalHorrorLevel ?? null,
   final_girl_health: result.finalGirlHealth ?? null,
+  final_girl_max_health: result.finalGirlMaxHealth ?? null,
   killer_health: result.killerHealth ?? null,
   weapon_used: result.weaponUsed ?? null,
   ending_sub_location: result.endingSubLocation ?? null,
@@ -158,6 +160,7 @@ const fromDbRow = (row: Record<string, unknown>): GameResult => ({
   gameHighlights: (row.game_highlights as string) || undefined,
   finalHorrorLevel: (row.final_horror_level as number | null) ?? undefined,
   finalGirlHealth: (row.final_girl_health as number | null) ?? undefined,
+  finalGirlMaxHealth: (row.final_girl_max_health as number | null) ?? undefined,
   killerHealth: (row.killer_health as number | null) ?? undefined,
   weaponUsed: (row.weapon_used as string) || undefined,
   endingSubLocation: (row.ending_sub_location as string) || undefined,
@@ -181,6 +184,7 @@ const updateColumns: Partial<Record<keyof GameResult, string>> = {
   finalHorrorLevel: 'final_horror_level', finalGirlHealth: 'final_girl_health', killerHealth: 'killer_health',
   weaponUsed: 'weapon_used', endingSubLocation: 'ending_sub_location', victimsSaved: 'victims_saved',
   victimsKilled: 'victims_killed', posterImageUrl: 'poster_image_url', sceneImageUrl: 'scene_image_url',
+  finalGirlMaxHealth: 'final_girl_max_health',
   visualBible: 'visual_bible', roundsPlayed: 'rounds_played', playEvents: 'play_events',
 };
 
