@@ -76,7 +76,7 @@ const TheEnd = ({
   const { locationImages } = useActiveImages();
   const background = locationImages[result.location] ?? nowPlayingBg;
   // Reserve the poster column while it develops, not just once it exists.
-  const showPosterSlot = Boolean(posterImageUrl) || isGeneratingImage || Boolean(imageError);
+  const showPosterSlot = Boolean(posterImageUrl) || isGeneratingImage || Boolean(imageError) || (settingsReady && isAuthenticated && autoGenerate);
 
   // Auto-generate ending story on mount
   useEffect(() => {
@@ -240,14 +240,14 @@ const TheEnd = ({
         <p className={`narration-outcome ${isWin ? 'narration-outcome--won' : 'narration-outcome--lost'}`}>{isWin ? fate === 'died' ? 'Victory came at a terrible cost.' : fate === 'survived' ? 'She survived the night.' : 'The night is over. The cost remains.' : fate === 'survived' ? 'Alive. But the night was lost.' : 'Not every story ends with a survivor.'}</p>
       </>}
       controls={<>
-        <button onClick={handleSave} className="narration-button narration-button--primary">{endingStory && !isGenerating && !error ? 'SAVE' : 'SAVE RESULT'}</button>
-        {endingStory && <div className="narration-control-row">
-          <button onClick={handleNarrate} disabled={isNarrating || isGenerating} className="narration-button narration-button--narrate">
-            {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" /> : isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+        <div className="ending-actions">
+          <button onClick={handleSave} className="narration-button narration-button--primary">{endingStory && !isGenerating && !error ? 'SAVE' : 'SAVE RESULT'}</button>
+          {endingStory && <button onClick={handleNarrate} disabled={isNarrating || isGenerating} className="narration-button narration-button--narrate">
+            {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : isPlaying ? <VolumeX className="w-4 h-4" aria-hidden="true" /> : <Volume2 className="w-4 h-4" aria-hidden="true" />}
             {isNarrating ? 'Generating...' : isPlaying ? 'Stop' : 'Narrate'}
-          </button>
-        </div>}
-        {isPlaying && <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} />}
+          </button>}
+        </div>
+        <div className="ending-transport">{isPlaying && <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} />}</div>
       </>}
       image={showPosterSlot ? <NarrationPhoto variant="poster" imageUrl={posterImageUrl} isGenerating={isGeneratingImage} error={imageError} onRetry={() => developPoster(posterImageUrl || undefined)} caption={`${result.finalGirl} vs ${result.killer}`} /> : undefined}
     >

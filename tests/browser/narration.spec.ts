@@ -74,8 +74,10 @@ for (const outcome of ['won', 'lost'] as const) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.screenshot({ path: testInfo.outputPath(`ending-${outcome}.png`), fullPage: true });
     await expect(page.getByRole('button', { name: 'SAVE', exact: true })).toBeInViewport();
+    const storyTop = (await page.locator('.narration-reader').boundingBox())!.y;
     await page.getByRole('button', { name: 'Narrate', exact: true }).click();
     await expect(page.getByRole('progressbar', { name: 'Narration progress' })).toBeVisible();
+    expect((await page.locator('.narration-reader').boundingBox())!.y).toBe(storyTop);
     await page.getByRole('button', { name: 'Stop', exact: true }).click();
     await page.getByRole('button', { name: 'SAVE', exact: true }).click();
     await expect.poll(() => archive.history[0]?.outcome).toBe(outcome);
@@ -91,7 +93,7 @@ test('ending gives its story the spare screen width and keeps only Save and Narr
   await expect(page.getByRole('button', { name: 'SAVE', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Narrate', exact: true })).toBeVisible();
   const sizes = info.project.name === 'desktop'
-    ? [{ width: 1024, height: 768 }, { width: 1280, height: 800 }, { width: 1382, height: 766 }, { width: 1672, height: 941 }, { width: 1920, height: 1080 }, { width: 2560, height: 1440 }]
+    ? [{ width: 1024, height: 600 }, { width: 1024, height: 768 }, { width: 1280, height: 800 }, { width: 1382, height: 766 }, { width: 1672, height: 941 }, { width: 1920, height: 1080 }, { width: 2560, height: 1440 }]
     : [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 768, height: 1024 }];
   for (const size of sizes) {
     await page.setViewportSize(size);
@@ -104,7 +106,18 @@ test('ending gives its story the spare screen width and keeps only Save and Narr
       expect(box.width).toBeGreaterThan(Math.min(size.width * .48, 900));
       const spread = (await page.locator('.narration-layout--ending').boundingBox())!;
       expect(Math.abs(spread.x + spread.width / 2 - size.width / 2)).toBeLessThan(1);
-      // The reader's ResizeObserver recalculates available height after a resize.
+      const panel = (await page.locator('.narration-reader').boundingBox())!;
+      const art = (await page.locator('.narration-art').boundingBox())!;
+      expect(Math.abs(panel.y - art.y)).toBeLessThan(1);
+      const save = (await page.getByRole('button', { name: 'SAVE', exact: true }).boundingBox())!;
+      const narrate = (await page.getByRole('button', { name: 'Narrate', exact: true }).boundingBox())!;
+      expect(Math.abs(save.y - narrate.y)).toBeLessThan(1);
+      expect(save.x).toBeLessThan(narrate.x);
+      expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true);
+      const poster = page.getByRole('img', { name: 'Movie poster', exact: true });
+      await expect(poster).toBeInViewport({ ratio: 1 });
+      await expect(page.getByRole('button', { name: 'Reshoot', exact: true })).toBeInViewport({ ratio: 1 });
+      // Both panels fit above the live footer, even on a short laptop display.
       await expect.poll(async () => {
         const bounds = (await reader.boundingBox())!;
         const footer = (await page.locator('.app-footer').boundingBox())!;
@@ -115,9 +128,82 @@ test('ending gives its story the spare screen width and keeps only Save and Narr
       await expect(reader).toHaveCSS('max-height', 'none');
       await expect(reader).toHaveCSS('overflow-y', 'visible');
       expect(box.width).toBeGreaterThanOrEqual(Math.min(size.width, 700) - 60);
+      const poster = (await page.locator('.narration-art').boundingBox())!;
+      expect(poster.y).toBeGreaterThan(box.y + box.height);
+      for (const button of await page.locator('.ending-actions button').all()) {
+        expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      }
     }
-    if (size.width === 1382 || size.width === 390) await page.screenshot({ path: info.outputPath(`ending-refined-${size.width}.png`), fullPage: true });
+    if (size.width === 1382 || size.width === 390 || size.height === 600) await page.screenshot({ path: info.outputPath(`ending-refined-${size.width}.png`), fullPage: true });
   }
+});
+
+test('images-off ending keeps unknown fate honest and a readable text-only layout', async ({ page, archive }, info) => {
+  if (info.project.name === 'desktop') await page.setViewportSize({ width: 1024, height: 600 });
+  await archive.install(page, { draft: { ...draft, phase: 'ending', result: { ...selection, id: gameId, timestamp: 1, outcome: 'won' }, endingStory: paragraph, formData: { ...formData, finalGirlHealth: undefined } } });
+  await installTestAudio(page);
+  await resume(page);
+  await expect(page.getByText('The night is over. The cost remains.')).toBeVisible();
+  await expect(page.getByRole('complementary', { name: 'Closing movie poster' })).toHaveCount(0);
+  await expect(page.locator('.narration-layout--text-only')).toBeVisible();
+  expect(archive.calls).not.toContain('generate-scene-image');
+  expect(archive.calls).not.toContain('generate-ending');
+  await page.screenshot({ path: info.outputPath('ending-text-only.png'), fullPage: true });
+  if (info.project.name === 'desktop') expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true);
+  if (info.project.name === 'mobile') await page.setViewportSize({ width: 320, height: 568 });
+  let releaseNarration!: () => void;
+  await page.route('**/functions/v1/narrate-story', async route => {
+    await new Promise<void>(resolve => { releaseNarration = resolve; });
+    await route.fulfill({ headers: { 'access-control-allow-origin': '*' }, json: { audioContent: 'UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=', voiceId: 'Test', persona: 'cold' } });
+  });
+  await page.getByRole('button', { name: 'Narrate', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Generating...', exact: true })).toBeDisabled();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: info.outputPath('ending-narration-generating.png'), fullPage: true });
+  await expect.poll(() => Boolean(releaseNarration)).toBe(true);
+  releaseNarration();
+  await expect(page.getByRole('progressbar', { name: 'Narration progress' })).toBeVisible();
+  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+});
+
+test('ending reserves its poster through story failure, retry and developing', async ({ page, archive }, info) => {
+  if (info.project.name === 'desktop') await page.setViewportSize({ width: 1024, height: 600 });
+  archive.autoImages = true;
+  archive.failStory = true;
+  archive.endingText = paragraph;
+  await archive.install(page, { draft: { ...draft, phase: 'ending', result: { ...selection, id: gameId, timestamp: 1, outcome: 'won' }, formData } });
+  await photos(page);
+  await page.route('https://example.test/poster.png', route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/scrapbooks/final-girl-cover.png') }));
+  await resume(page);
+  const reader = page.getByRole('region', { name: 'Ending narration' });
+  const art = page.getByRole('complementary', { name: 'Closing movie poster' });
+  await expect(reader.getByRole('button', { name: 'Try Again' })).toBeVisible();
+  await expect(art).toContainText('The poster will develop after the ending.');
+  await expect(page.getByRole('button', { name: 'SAVE RESULT', exact: true })).toBeEnabled();
+  const width = (await reader.boundingBox())!.width;
+  await page.screenshot({ path: info.outputPath('ending-story-failed.png'), fullPage: true });
+  archive.failStory = false;
+  await reader.getByRole('button', { name: 'Try Again' }).click();
+  await expect(reader).toContainText('The chain on the side door');
+  await expect(art.locator('.narration-photo-mount')).toHaveAttribute('aria-busy', 'true');
+  expect((await reader.boundingBox())!.width).toBe(width);
+  await page.screenshot({ path: info.outputPath('ending-developing.png'), fullPage: true });
+  await expect.poll(() => Boolean(archive.releaseImage)).toBe(true);
+  archive.releaseImage!();
+  const poster = art.getByRole('img', { name: 'Movie poster', exact: true });
+  await poster.evaluate((img: HTMLImageElement) => img.decode());
+  expect((await reader.boundingBox())!.width).toBe(width);
+  await page.getByRole('button', { name: 'SAVE', exact: true }).scrollIntoViewIfNeeded();
+  await page.screenshot({ path: info.outputPath('ending-short-story.png'), fullPage: true });
+  if (info.project.name === 'desktop') {
+    expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true);
+    const footer = (await page.locator('.app-footer').boundingBox())!;
+    const tools = (await art.getByRole('button', { name: 'Reshoot', exact: true }).boundingBox())!;
+    expect(tools.y + tools.height).toBeLessThan(footer.y);
+  }
+  await art.getByRole('button', { name: 'Expand movie poster' }).click();
+  await expect(page.getByRole('dialog').getByRole('img', { name: 'Rena vs Billy the Bear', exact: true })).toHaveAttribute('src', 'https://example.test/poster.png');
+  await page.getByRole('button', { name: 'Close', exact: true }).click();
 });
 
 test('a broken opening photograph can be developed again without losing the story', async ({ page, archive }) => {

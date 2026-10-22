@@ -228,10 +228,6 @@
 .narration-photo-tools button:hover { color: hsl(var(--narration-paper)); }
 .narration-photo-tools button:disabled { opacity: .55; cursor: wait; }
 .narration-photo-error { margin: 4px 8px; color: hsl(var(--narration-muted)); font-size: 12px; font-family: 'Courier New', monospace; }
-.narration-layout--ending .narration-art { padding-top: 0; }
-.narration-layout--ending .narration-photo { max-width: 500px; }
-.narration-layout--ending .narration-photo--portrait { width: min(100%, calc((100dvh - 190px) * var(--photo-ratio) + 44px)); }
-.narration-layout--ending .narration-reader-scroll { max-height: var(--reader-available, max(300px, calc(100dvh - 435px))); }
 .narration-layout--text-only { grid-template-columns: minmax(0, 820px); justify-content: center; margin-inline: 32px; }
 .narration-session > footer { background: hsl(0 0% 3% / .83); backdrop-filter: none; padding-block: 0; border-color: hsl(35 15% 50% / .15); }
 .narration-session > footer .type-caption { font-size: 12px; letter-spacing: .06em; }
@@ -251,21 +247,6 @@ body:has(.narration-session) [role='dialog'] .film-grain { animation: none; tran
   .narration-reader-scroll { padding: 20px 18px; }
   .narration-prose.story-text { font-size: 20px; line-height: 1.4; }
   .narration-photo-caption { flex-wrap: wrap; gap: 0; }
-}
-
-/* Give the ending's unused poster-column space back to the story. The poster
-   keeps its full portrait and the controls stay compact under the title. */
-@media (min-width: 900px) {
-  .narration-layout--ending:not(.narration-layout--text-only) {
-    grid-template-columns: minmax(0, 1fr) minmax(280px, min(34vw, 500px, calc((100dvh - 190px) * .6667 + 44px)));
-    width: calc(100% - clamp(48px, 8vw, 144px));
-    margin-inline: auto;
-    gap: clamp(28px, 3vw, 56px);
-    --narration-heading-inset: clamp(20px, 2vw, 40px);
-  }
-  .narration-layout--ending .narration-copy { max-width: 960px; }
-  .narration-layout--ending .narration-controls { max-width: 440px; }
-  .narration-layout--ending.narration-layout--text-only { grid-template-columns: minmax(0, 960px); }
 }
 
 /* Once the two-column composition would compromise either the prose or the
@@ -297,7 +278,7 @@ body:has(.narration-session) [role='dialog'] .film-grain { animation: none; tran
   .narration-photo,
   .narration-photo--portrait,
   .narration-layout--ending .narration-photo--portrait { width: 100%; max-width: 500px; }
-  .narration-photo--poster { max-width: 360px !important; }
+  .narration-photo--poster { max-width: 360px; }
   .narration-photo-mount { padding: 16px; }
   .narration-photo-edge { border-width: 20px; }
   .narration-photo-caption { font-size: 9px; }

@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
 import '@/styles/narration.css';
+import '@/styles/ending.css';
 import { ProjectorLeader } from '@/components/ProjectorLeader';
 import { renderStoryText } from '@/lib/textFormatting';
 
@@ -17,12 +18,23 @@ export const NarrationLayout = ({ background, kind, heading, controls, children,
   <section className={`narration-layout narration-layout--${kind}${image ? '' : ' narration-layout--text-only'}`}>
     <div className="narration-backdrop" style={{ backgroundImage: `url(${background})` }} aria-hidden="true" />
     <div className="narration-shade" aria-hidden="true" />
-    <div className="narration-copy">
-      <header className="narration-heading">{heading}</header>
-      <div className="narration-controls">{controls}</div>
-      {children}
-    </div>
-    {image && <aside className="narration-art" aria-label={kind === 'opening' ? 'Opening scene photograph' : 'Closing movie poster'}>{image}</aside>}
+    {kind === 'ending' ? <>
+      <header className="ending-header">
+        <div className="narration-heading">{heading}</div>
+        <div className="narration-controls">{controls}</div>
+      </header>
+      <div className="ending-body">
+        {children}
+        {image && <aside className="narration-art" aria-label="Closing movie poster">{image}</aside>}
+      </div>
+    </> : <>
+      <div className="narration-copy">
+        <header className="narration-heading">{heading}</header>
+        <div className="narration-controls">{controls}</div>
+        {children}
+      </div>
+      {image && <aside className="narration-art" aria-label="Opening scene photograph">{image}</aside>}
+    </>}
   </section>
 );
 
@@ -70,7 +82,8 @@ export const NarrationReader = ({ kind, story, isGenerating, error, onRetry, act
   const scrollRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const scroll = scrollRef.current;
-    if (!scroll) return;
+    // The ending's grid supplies its height; the opening measures its stacked controls.
+    if (!scroll || kind === 'ending') return;
     const resize = () => {
       const footer = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-footer-h')) || 44;
       const actionsHeight = scroll.nextElementSibling?.getBoundingClientRect().height ?? 0;
@@ -85,7 +98,7 @@ export const NarrationReader = ({ kind, story, isGenerating, error, onRetry, act
     let alive = true;
     void document.fonts?.ready.then(() => { if (alive) resize(); });
     return () => { alive = false; observer?.disconnect(); window.removeEventListener('resize', resize); };
-  }, []);
+  }, [kind]);
 
   return (
   <div className="narration-reader">

@@ -37,12 +37,13 @@ export const NarrationPhoto = ({ imageUrl, isGenerating, error, onRetry, variant
               <AlertTriangle className="w-5 h-5" />
               <p>{failure}</p>
               <button className="narration-button narration-button--quiet" onClick={() => { setFailedUrl(null); onRetry(); }}>Try Again</button>
-            </> : null}
+            </> : variant === 'poster' ? <p>The poster will develop after the ending.</p> : null}
           </div>
         )}
+        {variant === 'poster' && <p className="ending-poster-caption" aria-hidden="true"><span>{caption}</span></p>}
       </div>
-      <figcaption className="narration-photo-caption">
-        <span>{caption}</span>
+      <figcaption className={variant === 'poster' ? 'ending-poster-tools' : 'narration-photo-caption'}>
+        <span className={variant === 'poster' ? 'sr-only' : undefined}>{caption}</span>
         {hasImage && <span className="narration-photo-tools">
           <ImageLightbox imageUrl={imageUrl} caption={caption}>
             <button type="button" aria-label={`Expand ${label.toLowerCase()}`}><Expand className="w-3 h-3" /><span>Expand</span></button>
