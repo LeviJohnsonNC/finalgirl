@@ -1,4 +1,4 @@
-import { searchPick, statusPick, openHistory } from "./play-helpers";
+import { searchPick, statusPick, openHistory, openModule } from "./play-helpers";
 import { test, expect, activeGame, userId } from "./fixtures";
 const selection = {
   ...activeGame.selection,
@@ -10,6 +10,8 @@ const selection = {
 async function open(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
+  await openModule(page, "billy");
+  await openModule(page, "buddyland");
 }
 const buddies = ["Allie", "Billy Jr.", "Boris", "Cam", "Ramey", "Roxy", "Toby"];
 const victims = ["Birthday Girl", "Nick the Janitor", "Pizza Guy"];
@@ -170,7 +172,7 @@ test("streamlined portraits and reveals survive reload and reach deaths and endi
     animations: "disabled",
     style: ".app-footer,.news-broadcast { visibility:hidden !important }",
   });
-  await page.locator(".play-portrait-modules").screenshot({
+  await page.locator(".play-module-stack").screenshot({
     path: info.outputPath("play-roster.png"),
     animations: "disabled",
     style: ".app-footer,.news-broadcast { visibility:hidden !important }",
@@ -368,7 +370,7 @@ test("older detailed trackers and retired moments remain recoverable without rec
   await expect(portrait(page, "Toby")).toHaveAttribute("data-state", "active");
   await expect(portrait(page, "Nick the Janitor")).toHaveAttribute(
     "data-state",
-    "off",
+    "saved",
   );
   await expect(portrait(page, "Pizza Guy")).toHaveAttribute(
     "data-state",
