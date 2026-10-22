@@ -170,15 +170,17 @@ function LoreInfoContent({
             </div>
           )}
 
+          {lore?.backstory && type === "finalGirl" && (
+            <section
+              className="girl-backstory"
+              aria-label={`${name} backstory`}
+            >
+              <h3>Backstory</h3>
+              <p>{lore.backstory}</p>
+            </section>
+          )}
           {type === "finalGirl" && (
             <FinalGirlReference name={name} ultimate={ultimate} />
-          )}
-          {/* Backstory */}
-          {lore?.backstory && type === "finalGirl" && (
-            <details className="girl-backstory">
-              <summary>Backstory</summary>
-              <p>{lore.backstory}</p>
-            </details>
           )}
           {lore?.backstory && type !== "finalGirl" && (
             <div className="space-y-2">
