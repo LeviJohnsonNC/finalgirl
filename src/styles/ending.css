@@ -85,12 +85,28 @@
   container-type: size;
 }
 .narration-layout--ending .narration-photo--poster {
-  /* Image is 2:3. Allow for the paper mat, caption and 44px tool row. */
-  width: min(100cqw, calc((100cqh - 64px) * 2 / 3));
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
   max-width: 500px;
 }
-.narration-layout--ending .narration-photo--poster:has(.narration-photo-error) {
-  width: min(100cqw, calc((100cqh - 112px) * 2 / 3));
+.ending-poster-window {
+  /* The caption/tools/error take their natural space; the image uses what is left.
+     On tall screens this stops growing once the full-width portrait fits. */
+  container-type: size;
+  flex: 0 1 auto;
+  height: calc(100cqw * 1.5 + 20px);
+  min-height: 0;
+}
+.ending-poster-window > .narration-photo-mount {
+  /* Account for the paper mat and caption around the 2:3 image. */
+  width: min(100cqw, calc((100cqh - 20px) * 2 / 3));
+  margin-inline: auto;
+}
+.narration-layout--ending .narration-photo-error {
+  flex-shrink: 0;
+  line-height: 1.5;
 }
 .narration-photo--poster .narration-photo-mount {
   padding: 20px 20px 16px;
@@ -128,6 +144,8 @@
   z-index: 3;
 }
 .ending-poster-tools {
+  min-height: 44px;
+  flex-shrink: 0;
   display: flex;
   justify-content: center;
   font-family: "Courier New", monospace;
@@ -196,11 +214,18 @@
     order: 1;
     container-type: normal;
   }
-  .narration-layout--ending .narration-photo--poster,
-  .narration-layout--ending
-    .narration-photo--poster:has(.narration-photo-error) {
+  .narration-layout--ending .narration-photo--poster {
     width: 100%;
+    height: auto;
     max-width: 360px;
+  }
+  .ending-poster-window {
+    container-type: normal;
+    flex: none;
+    height: auto;
+  }
+  .ending-poster-window > .narration-photo-mount {
+    width: 100%;
   }
   .ending-poster-caption {
     font-size: 17px;
