@@ -1,6 +1,7 @@
 // Streams tokens from an edge function that forwards an OpenAI-style SSE
 // chat-completions body (as generate-story and generate-ending do).
 // Calls `onToken` with each delta and returns the full accumulated text.
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
@@ -79,6 +80,11 @@ export const streamChatCompletion = async ({
           // simply stopped, with nothing shown to the reader.
           if (typeof json?.error === "string") {
             throw new Error(json.error);
+          }
+          if (json?.evaluation?.saved === false) {
+            toast.warning("Story ready, evaluation copy wasn't saved", {
+              description: "The evaluation archive is unavailable. This attempt won't be in your export.",
+            });
           }
           const delta: string | undefined = json?.choices?.[0]?.delta?.content;
           if (delta) {

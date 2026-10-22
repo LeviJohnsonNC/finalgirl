@@ -241,7 +241,16 @@ const NowPlaying = ({
 
       const full = await streamChatCompletion({
         functionName: 'generate-story',
-        body: payload,
+        body: {
+          ...payload,
+          evaluation: {
+            gameId: sessionId,
+            context: {
+              selection: { killer, location, finalGirl, setupScenario, startingEvent, mission, filmId },
+              playEvents,
+            },
+          },
+        },
         onToken: (_delta, accumulated) => setStory(accumulated),
         signal: abortController.signal,
       });

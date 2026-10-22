@@ -3,18 +3,23 @@ import { getCorsHeaders } from "../_shared/auth.ts";
 import { StoryRequestSchema, validateRequest } from "../_shared/validation.ts";
 import { requireUser } from "../_shared/guard.ts";
 import { OPENING_SYSTEM, buildOpeningUser } from "../_shared/storyPrompts.ts";
-import { statusFor, streamChat, userFacingMessage } from "../_shared/aiGateway.ts";
+import { statusFor, userFacingMessage } from "../_shared/aiGateway.ts";
+
+import { generateEvaluatedStory } from "../_shared/storyEvaluation.ts";
 
 serve(async (req) => {
-  const cors = getCorsHeaders(req.headers.get('origin'));
+  const cors = getCorsHeaders(req.headers.get("origin"));
 
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: cors });
   }
 
   try {
     // Auth + rate limit
-    const guard = await requireUser(req, cors, { functionName: "generate-story", hourlyLimit: 30 });
+    const guard = await requireUser(req, cors, {
+      functionName: "generate-story",
+      hourlyLimit: 30,
+    });
     if (!guard.ok) return guard.response;
 
     const body = await req.json();
@@ -24,23 +29,31 @@ serve(async (req) => {
     const systemPrompt = OPENING_SYSTEM;
     const userPrompt = buildOpeningUser(validation.data);
 
-    const { body: stream, model } = await streamChat({ system: systemPrompt, user: userPrompt });
+    const { body: stream, model } = await generateEvaluatedStory({
+      guard,
+      kind: "opening",
+      request: body,
+      context: validation.data,
+      system: systemPrompt,
+      user: userPrompt,
+    });
     await guard.logUsage({ model, kind: "story" });
 
-    // Forward the SSE stream directly to the client.
+    // Forward the observed SSE stream without changing its story content.
     return new Response(stream, {
       status: 200,
       headers: {
         ...cors,
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
-        "Connection": "keep-alive",
+        Connection: "keep-alive",
       },
     });
   } catch (error) {
     console.error("generate-story error:", error);
-    return new Response(JSON.stringify({ error: userFacingMessage(error) }),
-      { status: statusFor(error), headers: { ...cors, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: userFacingMessage(error) }), {
+      status: statusFor(error),
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
   }
 });
-

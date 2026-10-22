@@ -13,6 +13,7 @@ import {
 // Apply the same punctuation contract to every text route, including utility
 // prompts and death scenes. Keep the fallback deterministic if a model ignores it.
 const PUNCTUATION_RULE = '\nNever use em dashes (U+2014) in your output. Use commas, colons, semicolons or full stops instead.';
+export const effectiveTextSystem = (system: string): string => system + PUNCTUATION_RULE;
 export const normalizeGeneratedText = (text: string): string => text.replace(/\u2014/g, ', ');
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
@@ -280,6 +281,9 @@ const responsesToChatFrames = (
         return;
       }
 
+      if (event.type === "response.completed") {
+        controller.enqueue(chatFrame({ model, choices: [{ delta: {}, finish_reason: "stop" }] }));
+      }
       const failure = terminalErrorMessage(event);
       if (failure) {
         console.error(`Responses stream ${model} reported failure:`, failure);
@@ -388,7 +392,7 @@ export const generateText = async (opts: {
     if (usesResponsesApi(model)) {
       const text = await collectResponsesText(
         model,
-        opts.system + PUNCTUATION_RULE + lengthHint(opts.maxTokens),
+        effectiveTextSystem(opts.system) + lengthHint(opts.maxTokens),
         opts.user,
         opts.signal,
         {
@@ -405,7 +409,7 @@ export const generateText = async (opts: {
       {
         model,
         messages: [
-          { role: "system", content: opts.system + PUNCTUATION_RULE },
+          { role: "system", content: effectiveTextSystem(opts.system) },
           { role: "user", content: opts.user },
         ],
         max_tokens: opts.maxTokens ?? 400,
@@ -608,7 +612,7 @@ export const streamChat = async (opts: {
 }): Promise<{ body: ReadableStream<Uint8Array>; model: string }> => {
   const { result, model } = await withModelFallback(TEXT_MODEL_CANDIDATES, async (model) => {
     if (usesResponsesApi(model)) {
-      return responsesToChatFrames(await postResponsesStream(model, opts.system + PUNCTUATION_RULE, opts.user), model);
+      return responsesToChatFrames(await postResponsesStream(model, effectiveTextSystem(opts.system), opts.user), model);
     }
 
     const response = await fetch(GATEWAY_URL, {
@@ -617,7 +621,7 @@ export const streamChat = async (opts: {
       body: JSON.stringify({
         model,
         messages: [
-          { role: "system", content: opts.system + PUNCTUATION_RULE },
+          { role: "system", content: effectiveTextSystem(opts.system) },
           { role: "user", content: opts.user },
         ],
         stream: true,

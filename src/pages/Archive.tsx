@@ -1,3 +1,4 @@
+import { StoryEvaluationTools } from '@/components/StoryEvaluationTools';
 import { useState } from 'react';
 import { AlertTriangle, RotateCcw, Trash2 } from 'lucide-react';
 import { FilmToggle } from '@/components/FilmToggle';
@@ -123,7 +124,7 @@ const Archive = () => {
                 Reset All Gameplay Data?
               </AlertDialogTitle>
               <AlertDialogDescription className="type-body-sm text-muted-foreground">
-                This will permanently erase all of your game history, including wins, losses, stories, and posters. Your collection settings will remain unchanged.
+                This will permanently erase all of your game history, including wins, losses, stories, and posters. Your collection settings and separate story evaluation data will remain unchanged.
                 <span className="block mt-2 text-primary/80 font-bold">
                   This action cannot be undone.
                 </span>
@@ -143,6 +144,8 @@ const Archive = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+
+      <StoryEvaluationTools />
 
       {/* Feature Films by Season */}
       {Object.entries(filmsBySeason).map(([season, films]) => {

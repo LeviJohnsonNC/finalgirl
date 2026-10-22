@@ -39,6 +39,8 @@ preserves the cast, completed prose/images, and outcome form; RESUME GAME restor
 it. Game results can be saved without AI narration. Clearing browser site data
 removes device-only drafts and writes that have not reached the archive.
 
+New openings and endings also have a separate private [story evaluation corpus](docs/story-evaluations.md), with full prose, exact prompts, model context and a JSON export in Collection. It is never used as app generation input.
+
 ## Database and deployment
 
 See [the reliability rollout](docs/RELIABILITY_ROLLOUT.md) for PR merge order,
