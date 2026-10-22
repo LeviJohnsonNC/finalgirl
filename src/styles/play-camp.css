@@ -1,276 +1,310 @@
-.play-camp-modules {
+.play-camp-modules,
+.play-camp-body {
   display: grid;
-  gap: 16px;
+  gap: 24px;
   min-width: 0;
-  margin-top: 12px;
 }
-.play-camp-panel {
-  min-width: 0;
-  overflow: hidden;
-  border: 1px solid #9c9b6e65;
-  border-radius: 6px;
-  background: #0b1411;
-  box-shadow: 0 7px 22px #0005;
-}
-.play-camp-panel > summary {
-  display: flex;
-  align-items: center;
-  min-height: 112px;
-  padding: 22px 26px;
-  cursor: pointer;
-  background-size: cover;
-  background-position: center;
-  list-style: none;
-  gap: 18px;
-}
-.play-camp-panel > summary::-webkit-details-marker {
-  display: none;
-}
-.play-camp-panel > summary::after {
-  content: "+";
-  margin-left: auto;
-  color: #d9c795;
+.play-module-subheading {
+  margin: 0 0 8px;
+  color: hsl(var(--foreground));
   font:
-    24px Georgia,
-    serif;
-}
-.play-camp-panel[open] > summary::after {
-  content: "−";
-}
-.play-camp-panel > summary strong {
-  display: block;
-  color: #ede0bc;
-  font:
-    400 clamp(22px, 2.3vw, 30px)/1.2 "Narration Fell",
+    400 24px/1.2 "Narration Fell",
     Georgia,
     serif;
 }
-.play-camp-panel > summary small {
-  display: block;
-  color: #c3c7b3;
-  font-size: 12px;
-  margin-top: 6px;
+.play-module-help {
+  margin: 0 0 16px;
+  color: hsl(var(--foreground) / 0.65);
+  font:
+    12px/1.6 Arial,
+    sans-serif;
 }
-.play-hans-panel > summary {
-  position: relative;
-  isolation: isolate;
-  background: #0b1411;
-}
-.play-hans-panel > summary::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 0 auto;
-  z-index: -1;
-  width: min(70%, 500px);
-  background:
-    linear-gradient(90deg, #0b1411, #0b141144 35%, #0b141122),
-    url("../assets/play/camp/hans-header.webp") center 10% / cover;
-  pointer-events: none;
-}
-.play-hans-panel > summary strong,
-.play-hans-panel > summary small {
-  text-shadow: 0 2px 6px #000;
-}
-.play-camp-body {
-  display: grid;
-  gap: 18px;
-  padding: 22px;
-}
-.play-camp-body button:focus-visible,
-.play-camp-panel > summary:focus-visible {
-  outline: 2px solid #e5ca82;
-  outline-offset: -3px;
-}
-.play-camp-add {
-  max-width: 360px;
-}
-.play-camp-victims {
+.play-camp-victims,
+.play-camp-effects {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
   gap: 16px;
 }
-.play-camp-person {
+.play-camp-person,
+.play-camp-effect,
+.play-minor-power {
   min-width: 0;
+  overflow: hidden;
+  border: 1px solid hsl(var(--foreground) / 0.22);
+  border-radius: 6px;
+  background: hsl(var(--background));
 }
-.play-camp-portrait {
-  display: block;
+.play-camp-portrait,
+.play-camp-effect-toggle {
   position: relative;
+  isolation: isolate;
+  display: block;
   width: 100%;
   padding: 0;
-  aspect-ratio: 1.1;
-  max-height: 240px;
   overflow: hidden;
-  border: 1px solid #8d956a88;
-  border-radius: 5px;
-  background: #111b18;
-}
-.play-camp-portrait img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.play-camp-portrait > span {
-  position: absolute;
-  inset: 40% 0 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 14px;
+  border: 0;
+  background: hsl(var(--background));
   text-align: left;
-  background: linear-gradient(transparent, #050c0bf5);
 }
-.play-camp-portrait strong {
-  color: #f1e2c4;
+.play-camp-portrait {
+  aspect-ratio: 1.1;
+}
+.play-camp-effect-toggle {
+  aspect-ratio: 1.3;
+}
+.play-camp-portrait > .play-module-art,
+.play-camp-effect-toggle > .play-module-art {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+.play-camp-portrait::after,
+.play-camp-effect-toggle::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    0deg,
+    hsl(var(--background) / 0.98),
+    transparent 75%
+  );
+}
+.play-camp-modules .play-tile-caption {
+  left: 14px;
+  right: 10px;
+  bottom: 14px;
+}
+.play-camp-modules .play-tile-caption strong {
   font:
-    400 23px/1.2 Georgia,
+    400 clamp(20px, 2vw, 26px) / 1.1 "Narration Fell",
+    Georgia,
     serif;
+  color: hsl(var(--foreground));
 }
-.play-camp-portrait small {
-  color: #c5d8aa;
-  text-transform: uppercase;
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  margin-top: 4px;
+.play-camp-modules .play-tile-state {
+  color: hsl(var(--foreground) / 0.7);
 }
-.play-camp-person[data-state="killed"] .play-camp-portrait {
-  border-color: #bb6559;
+.play-camp-person[data-state="saved"],
+.play-camp-effect[data-state="active"] {
+  border-color: hsl(var(--secondary) / 0.7);
+  box-shadow: 0 0 18px hsl(var(--secondary) / 0.08);
 }
-.play-camp-person[data-state="killed"] small {
-  color: #efb1a2;
+.play-camp-person[data-state="saved"] .play-tile-state,
+.play-camp-effect[data-state="active"] .play-tile-state {
+  color: hsl(var(--secondary));
 }
-.play-camp-person[data-state="saved"] .play-camp-portrait {
-  border-color: #abd081;
-  box-shadow: 0 0 16px #9fcd5922;
+.play-camp-person[data-state="killed"] {
+  border-color: hsl(var(--destructive) / 0.8);
 }
-.play-camp-person > .play-select-trigger {
-  margin-top: 8px;
+.play-camp-person[data-state="killed"] .play-tile-state {
+  color: hsl(var(--destructive));
 }
-.play-camp-body .play-camp-clear {
+.play-camp-effect[data-state="untracked"] .play-module-art {
+  filter: saturate(0.55) brightness(0.7);
+}
+.play-camp-effect[data-state="resolved"] .play-module-art {
+  filter: saturate(0.15) brightness(0.45);
+}
+.play-camp-outcomes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  border-top: 1px solid hsl(var(--foreground) / 0.15);
+  background: hsl(var(--foreground) / 0.15);
+}
+.play-camp-outcomes button,
+.play-power-reveal {
+  min-height: 44px;
+  padding: 8px;
+  border: 0;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground) / 0.8);
+  font:
+    11px/1.4 Arial,
+    sans-serif;
+}
+.play-camp-outcomes button:disabled {
+  color: hsl(var(--foreground) / 0.3);
+  cursor: default;
+}
+.play-camp-outcomes button[aria-pressed="true"] {
+  color: hsl(var(--secondary));
+  background: hsl(var(--secondary) / 0.1);
+}
+.play-camp-outcomes button[aria-label$="killed"][aria-pressed="true"] {
+  color: hsl(var(--destructive));
+  background: hsl(var(--destructive) / 0.1);
+}
+.play-camp-modules .play-camp-clear {
   display: block;
   min-height: 44px;
-  padding: 6px 0;
+  padding: 8px 12px;
+  margin: 0 auto;
   border: 0;
   background: transparent;
-  color: #adb3a2;
-  font-size: 11px;
+  color: hsl(var(--foreground) / 0.55);
+  font:
+    10px/1.4 Arial,
+    sans-serif;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.play-camp-effect {
-  overflow: hidden;
-  min-width: 0;
-  border: 1px solid #9a9e6b55;
-  border-radius: 5px;
-}
-.play-camp-effect-toggle {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 88px;
-  width: 100%;
-  padding: 18px 20px;
-  text-align: left;
-  border: 0;
-  background-color: #1c2920;
-  background-position: center;
-  background-size: cover;
-}
-.play-camp-effect-toggle strong {
-  color: #eadbb8;
-  font:
-    400 23px/1.2 Georgia,
-    serif;
-}
-.play-camp-effect-toggle small {
-  margin-left: auto;
-  color: #d0dcab;
-  text-transform: uppercase;
-  font-size: 10px;
-  letter-spacing: 0.08em;
-}
-.play-camp-effect[data-active="false"] .play-camp-effect-toggle {
-  filter: saturate(0.4);
-  opacity: 0.7;
-}
-.play-camp-effect > .play-camp-clear {
-  margin-left: 18px;
-}
 .play-camp-tunnel {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  padding: 16px 18px 0;
+  gap: 12px;
+  padding: 14px 12px 0;
 }
 .play-camp-tunnel label {
   display: grid;
   gap: 6px;
-  font-size: 12px;
-  color: #c3c7b3;
   min-width: 0;
+  color: hsl(var(--foreground) / 0.7);
+  font:
+    11px/1.4 Arial,
+    sans-serif;
 }
 .play-minor-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
-.play-minor-power {
-  padding: 16px;
-  border: 1px solid #91837755;
-  border-radius: 5px;
-  background: linear-gradient(135deg, #24251c, #141c18);
+.play-minor-scene {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: 1.4;
+  overflow: hidden;
 }
-.play-minor-power[data-active="true"] {
-  border-color: #bc9f6699;
+.play-minor-scene > .play-module-art {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+.play-minor-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(0deg, hsl(var(--background)), transparent 70%);
 }
 .play-minor-power h3 {
-  color: #e9d9b9;
+  position: absolute;
+  bottom: 12px;
+  left: 16px;
+  right: 12px;
+  margin: 0;
+  color: hsl(var(--foreground));
   font:
-    400 23px/1.2 Georgia,
+    400 clamp(22px, 2.5vw, 32px) / 1.1 "Narration Fell",
+    Georgia,
     serif;
-  margin: 0 0 14px;
 }
-.play-minor-power > button:not(.play-camp-clear),
-.play-minor-health button {
-  min-width: 44px;
-  min-height: 44px;
-  border-radius: 6px;
-  border: 1px solid #bca47188;
-  background: #343a29;
-  padding: 8px 14px;
-  color: #f0e1bc;
+.play-minor-power[data-state="unrevealed"]
+  .play-minor-scene
+  > .play-module-art {
+  filter: saturate(0.1) brightness(0.4);
 }
-.play-minor-health {
+.play-minor-power[data-state="removed"] .play-minor-scene > .play-module-art {
+  filter: saturate(0.25) brightness(0.65);
+}
+.play-minor-power[data-state="full"],
+.play-minor-power[data-state="weakened"] {
+  border-color: hsl(var(--destructive) / 0.5);
+}
+.play-minor-controls {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 4px 10px 0;
+}
+.play-minor-status {
+  margin: 0 0 4px;
+  color: hsl(var(--foreground) / 0.7);
+  font:
+    11px/1.5 Arial,
+    sans-serif;
+  text-align: center;
+}
+.play-power-reveal {
+  min-width: 100px;
+  border: 1px solid hsl(var(--foreground) / 0.3);
+  border-radius: 4px;
+  margin: 8px 0 18px;
+}
+.play-health-tokens {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  color: #e7daba;
+  gap: 10px;
 }
-.play-minor-health button:disabled {
-  opacity: 0.35;
+.play-health-tokens > button {
+  width: 60px;
+  height: 60px;
+  padding: 0;
+  border: 1px solid hsl(var(--destructive) / 0.3);
+  border-radius: 9px;
+  overflow: hidden;
+  background: hsl(var(--background));
+  box-shadow: 0 3px 8px hsl(var(--background) / 0.7);
+  transition: transform 120ms;
+}
+.play-health-tokens > button[aria-pressed="false"] {
+  border-style: dashed;
+  border-color: hsl(var(--foreground) / 0.2);
+}
+.play-health-tokens > button[aria-pressed="false"] .play-module-art {
+  filter: grayscale(1) brightness(0.35);
+}
+.play-health-tokens > button:hover,
+.play-camp-outcomes > button:enabled:hover,
+.play-power-reveal:hover {
+  filter: brightness(1.25);
+}
+.play-health-tokens > button:active {
+  transform: scale(0.93);
+}
+.play-camp-modules button:focus-visible {
+  outline: 2px solid hsl(var(--secondary));
+  outline-offset: -3px;
 }
 @media (max-width: 639px) {
-  .play-camp-panel > summary {
-    padding: 20px 16px;
-    min-height: 100px;
-  }
-  .play-camp-body {
-    padding: 14px;
-    gap: 14px;
-  }
-  .play-camp-victims {
+  .play-camp-victims,
+  .play-camp-effects {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
-  .play-camp-portrait strong {
-    font-size: 20px;
+  .play-camp-modules .play-tile-caption {
+    left: 10px;
+    bottom: 10px;
   }
-  .play-minor-grid {
-    grid-template-columns: 1fr;
+  .play-camp-modules .play-tile-caption strong {
+    font-size: 21px;
   }
-  .play-camp-tunnel {
-    gap: 10px;
-    padding-inline: 12px;
+  .play-camp-modules .play-tile-state {
+    font-size: 9px;
   }
   .play-camp-effect-toggle {
-    padding: 16px 14px;
+    aspect-ratio: 0.95;
+  }
+  .play-minor-grid {
+    gap: 12px;
+  }
+  .play-minor-scene {
+    aspect-ratio: 0.9;
+  }
+  .play-minor-power h3 {
+    left: 10px;
+    font-size: 25px;
+  }
+  .play-health-tokens {
+    gap: 6px;
+  }
+  .play-health-tokens > button {
+    width: 44px;
+    height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .play-health-tokens > button {
+    transition: none;
   }
 }

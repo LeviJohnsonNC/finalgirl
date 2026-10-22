@@ -135,7 +135,9 @@ test("streamlined portraits and reveals survive reload and reach deaths and endi
     .getByRole("button", { name: "Record one victim killed", exact: true })
     .click();
   const causes = await page.locator(".play-cause-choices button").allTextContents();
-  expect(causes).toEqual([...causes].sort((a, b) => a.localeCompare(b)));
+  expect(causes).toEqual([
+    "Killer attack", "Terror card", "Event", "Buddy / minion", "Location hazard", "Other / not sure",
+  ]);
   await page
     .getByRole("button", { name: "Buddy / minion", exact: true })
     .click();
