@@ -6,11 +6,16 @@ async function resume(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
 }
-async function characterInfo(page: Page, name = "Laurie") {
+async function characterInfo(page: Page, name = "Laurie", expand = true) {
   await page
     .getByRole("button", { name: `View ${name} info`, exact: true })
     .click();
-  return page.getByRole("dialog");
+  const dialog = page.getByRole("dialog");
+  if (expand) {
+    await dialog.locator(".girl-ability > summary").click();
+    await dialog.locator(".girl-personal-item > summary").click();
+  }
+  return dialog;
 }
 
 test("Play keeps character facts in compact info without card viewers or gameplay changes", async ({
@@ -20,10 +25,48 @@ test("Play keeps character facts in compact info without card viewers or gamepla
   await archive.install(page, { draft: { ...activeGame, playMode: true } });
   await resume(page);
   await expect(page.locator(".girl-play-file")).toHaveCount(0);
-  const dialog = await characterInfo(page);
+  const dialog = await characterInfo(page, "Laurie", false);
   await dialog.evaluate((el) =>
     Promise.all(el.getAnimations().map((animation) => animation.finished)),
   );
+  const backstory = dialog.getByRole("region", { name: "Laurie backstory" });
+  await expect(backstory.getByText(/Laurie Carpenter was born/)).toBeVisible();
+  await expect(dialog.locator(".girl-ability")).not.toHaveAttribute("open", "");
+  await expect(dialog.locator(".girl-personal-item")).not.toHaveAttribute(
+    "open",
+    "",
+  );
+  await expect(
+    dialog.getByText(
+      "When you are in the same space as an Enemy and inflict damage, deal 1 additional damage.",
+    ),
+  ).not.toBeVisible();
+  await expect(
+    dialog.getByRole("button", { name: "Unlock personal item" }),
+  ).not.toBeVisible();
+  expect(
+    await backstory.evaluate((el) =>
+      Boolean(
+        el.compareDocumentPosition(document.querySelector(".girl-reference")!) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ),
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: info.outputPath("backstory-first.png"),
+    animations: "disabled",
+  });
+  const ability = dialog.locator(".girl-ability > summary");
+  await ability.focus();
+  await ability.press("Enter");
+  await expect(dialog.locator(".girl-ability")).toHaveAttribute("open", "");
+  await expect(dialog.locator(".girl-personal-item")).not.toHaveAttribute(
+    "open",
+    "",
+  );
+  const itemPanel = dialog.locator(".girl-personal-item > summary");
+  await itemPanel.focus();
+  await itemPanel.press("Space");
   await expect(
     dialog.getByText("5 starting health", { exact: true }),
   ).toBeVisible();
@@ -60,9 +103,12 @@ test("Play keeps character facts in compact info without card viewers or gamepla
         }),
       )
       .toBe(true);
+    await dialog
+      .getByRole("button", { name: "Unlock personal item" })
+      .scrollIntoViewIfNeeded();
     await expect(
       dialog.getByRole("button", { name: "Unlock personal item" }),
-    ).toBeVisible();
+    ).toBeInViewport();
     await page.screenshot({
       path: info.outputPath(`character-info-${width}.png`),
     });
@@ -171,11 +217,10 @@ test("Collection shares portrait, facts and backstory; failed unlock loading sta
       "Your unlocks could not be reached. Secret items stay hidden.",
     ),
   ).toBeVisible();
-  const backstory = dialog.locator(".girl-backstory");
-  await expect(backstory).not.toHaveAttribute("open", "");
-  await backstory.locator("summary").click();
-  await expect(backstory.getByText(/Laurie Carpenter was born/)).toBeVisible();
-  await backstory.locator("summary").click();
+  await expect(
+    dialog.locator(".girl-backstory").getByText(/Laurie Carpenter was born/),
+  ).toBeVisible();
+  await expect(dialog.locator(".girl-backstory summary")).toHaveCount(0);
   const image = dialog.getByRole("img", { name: "Laurie", exact: true });
   await expect
     .poll(() =>
@@ -395,14 +440,13 @@ test("casting opens the same compact details and returns to a laptop layout with
       .getByRole("button", { name: new RegExp(name) })
       .click();
   }
-  const dialog = await characterInfo(page);
+  const dialog = await characterInfo(page, "Laurie", false);
   await expect(
     dialog.getByText("5 starting health", { exact: true }),
   ).toBeVisible();
-  await expect(dialog.locator(".girl-backstory")).not.toHaveAttribute(
-    "open",
-    "",
-  );
+  await expect(
+    dialog.locator(".girl-backstory").getByText(/Laurie Carpenter was born/),
+  ).toBeVisible();
   await page.screenshot({
     path: info.outputPath("character-info-casting.png"),
     animations: "disabled",
@@ -454,6 +498,9 @@ test("long character and item text stays readable inside a small dialog", async 
   await expect(
     dialog.getByRole("heading", { name: "Private test reference" }),
   ).toBeVisible();
+  await dialog
+    .getByText("5 starting health", { exact: true })
+    .scrollIntoViewIfNeeded();
   await expect(
     dialog.getByText("5 starting health", { exact: true }),
   ).toBeInViewport();

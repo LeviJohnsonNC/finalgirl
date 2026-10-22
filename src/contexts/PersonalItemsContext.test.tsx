@@ -19,6 +19,7 @@ describe('personal item boundary',()=>{
       return Promise.resolve({data:item,error:null});
     });
     render(wrap(<SecretItemReference name="Laurie"/>));
+    fireEvent.click(screen.getByText("Personal item"));
     const reveal=screen.getByRole('button',{name:'Unlock personal item'});
     await waitFor(()=>expect(reveal).toBeEnabled());
     fireEvent.click(reveal);
