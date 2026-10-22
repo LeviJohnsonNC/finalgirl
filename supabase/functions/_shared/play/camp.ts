@@ -195,6 +195,10 @@ export const CAMP_EVENTS = [
       "The Victim farthest from the Killer becomes The Damned. Whenever the Killer chooses a target, choose The Damned instead. The Damned can only be saved as the last Victim alive. If The Damned dies, increase Bloodlust by two. Discard when The Damned leaves play.",
   },
 ] as const;
+/** Persistent event controls, excluding immediate effects and special-character roles. */
+export const CAMP_ONGOING_EVENTS = CAMP_EVENTS.filter(
+  (event) => !["Boyfriend", "Fresh Meat", "Girlfriend", "Vengeance"].includes(event.name),
+);
 export const CAMP_TERRORS = [
   {
     name: "Fire!",

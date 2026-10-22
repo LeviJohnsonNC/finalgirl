@@ -9,6 +9,7 @@ import {
 } from "./buddyland.ts";
 import {
   CAMP_EVENTS,
+  CAMP_ONGOING_EVENTS,
   CAMP_ITEMS,
   CAMP_TERRORS,
   CAMP_TUNNEL_ROOMS,
@@ -54,6 +55,41 @@ export function killerMomentCards(killer: string, type: string) {
 export interface ModuleSelection {
   killer: string;
   location: string;
+}
+/** Verified starting observations only. Board choices and immediate effects stay manual. */
+export function startingEventObservations(selection: {
+  location: string;
+  startingEvent?: string | null;
+}): ModuleObservation[] {
+  const { location, startingEvent } = selection;
+  if (!startingEvent) return [];
+  if (location === "Camp Happy Trails") {
+    const victim = CAMP_VICTIMS.find(
+      (victim) => victim.event === startingEvent,
+    );
+    if (victim)
+      return [
+        { module: "camp", changes: { [`victim.${victim.id}`]: "in-play" } },
+      ];
+    const event = CAMP_ONGOING_EVENTS.find(
+      (event) => event.name === startingEvent,
+    );
+    if (event)
+      return [{ module: "camp", changes: { [`event.${event.id}`]: "active" } }];
+  }
+  if (location === "Buddyland") {
+    const victim = SPECIAL_VICTIMS.find(
+      (victim) => victim.event === startingEvent,
+    );
+    if (victim)
+      return [
+        {
+          module: "buddyland",
+          changes: { [`victim.${victim.id}`]: "on-board" },
+        },
+      ];
+  }
+  return [];
 }
 export type ModuleState = Record<string, ModuleValue>;
 const oneOf = (value: unknown, options: readonly unknown[]) =>
