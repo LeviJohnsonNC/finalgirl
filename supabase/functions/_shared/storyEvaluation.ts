@@ -169,8 +169,8 @@ export async function generateEvaluatedStory(options: {
         : table.update(values).eq("id", id!).eq("user_id", guard.user.id);
       const { data, error } = await query
         .select("id")
-        .maybeSingle()
-        .abortSignal(AbortSignal.timeout(TIMEOUT_MS));
+        .abortSignal(AbortSignal.timeout(TIMEOUT_MS))
+        .maybeSingle();
       if (error || !data) throw new Error("Evaluation write not acknowledged");
       return true;
     } catch {

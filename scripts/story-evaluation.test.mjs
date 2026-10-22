@@ -203,11 +203,11 @@ function harness(
         select() {
           return query;
         },
-        maybeSingle() {
+        abortSignal(signal) {
+          assert(signal);
           return query;
         },
-        async abortSignal(signal) {
-          assert(signal);
+        async maybeSingle() {
           writes.push({ values, filters, inserting });
           if (failWrite(writes.length)) return { error: Error("offline") };
           if (inserting) rows.push({ ...values });
