@@ -5,15 +5,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { getFinalGirlReference } from '@/data/finalGirlReferences';
 
 interface Unlock { girl: string; unlocked: boolean }
-export interface PersonalItem { girl: string; name: string; effect: string; image_path: string }
+export interface PersonalItem { girl: string; name: string; effect: string }
 interface UnlockContext {
   owner: string | null; ready: boolean; revision: number; error: string | null; pending: number;
   isUnlocked: (girl: string) => boolean;
   change: (girl: string, unlocked: boolean) => boolean;
   retry: () => void;
+  refreshItems: () => void;
 }
 const Context = createContext<UnlockContext>({ owner: null, ready: false, revision: 0, error: null, pending: 0,
-  isUnlocked: () => false, change: () => false, retry: () => {} });
+  isUnlocked: () => false, change: () => false, retry: () => {}, refreshItems: () => {} });
 export const usePersonalUnlocks = () => useContext(Context);
 const rpc = (name: string, args?: Record<string,unknown>) => supabase.rpc(name as never,args as never).abortSignal(AbortSignal.timeout(15000));
 function readUnlocks(data: unknown): Unlock[] {
@@ -68,7 +69,10 @@ export function PersonalItemsProvider({ children }: { children: ReactNode }) {
     try{queue.enqueue({girl,unlocked});return true;}catch(error){setFailure({owner,message:error instanceof Error?error.message:'Could not save your unlock.'});return false;}
   };
   const retry=()=>{void queue.flush();void load();};
-  return <Context.Provider value={{owner,ready:Boolean(owner && state.owner===owner && !loading && !(failure?.owner===owner)),revision:state.revision,error:failure?.owner===owner?failure.message:queue.error,pending:queue.pending.length,isUnlocked,change,retry}}>{children}</Context.Provider>;
+  // Retry every mounted reader together so character details and Play suggestions agree.
+  // This preserves the verified unlock rows and never authorizes a pending unlock.
+  const refreshItems=()=>setState(previous=>previous.owner===owner ? {...previous,revision:previous.revision+1} : previous);
+  return <Context.Provider value={{owner,ready:Boolean(owner && state.owner===owner && !loading && !(failure?.owner===owner)),revision:state.revision,error:failure?.owner===owner?failure.message:queue.error,pending:queue.pending.length,isUnlocked,change,retry,refreshItems}}>{children}</Context.Provider>;
 }
 
 /** Secret text stays in memory, keyed to both account and authorization revision.
@@ -79,7 +83,6 @@ export function usePersonalItem(girl:string,enabled=true) {
   const allowed=enabled && unlocks.isUnlocked(girl);
   const key=`${unlocks.owner}:${girl}:${unlocks.revision}`;
   const [state,setState]=useState<{key:string;item:PersonalItem|null;error:string|null}>();
-  const [attempt,setAttempt]=useState(0);
   useEffect(()=>{
     let live=true;
     if(!allowed){setState(undefined);return;}
@@ -88,11 +91,11 @@ export function usePersonalItem(girl:string,enabled=true) {
         const {data,error}=await rpc('get_final_girl_item',{p_girl:girl,p_owner:unlocks.owner});
         if(error)throw new Error('The item reference could not be reached.');
         const item=data as unknown as PersonalItem|null;
-        if(item && (item.girl!==girl || typeof item.name!=='string' || typeof item.effect!=='string' || !/^[a-f0-9-]{36}\.webp$/.test(item.image_path)))throw new Error('The item reference could not be verified.');
-        if(live)setState({key,item,error:null});
+        if(item && (item.girl!==girl || typeof item.name!=='string' || !item.name.trim() || typeof item.effect!=='string' || !item.effect.trim()))throw new Error('The item reference could not be verified.');
+        if(live)setState({key,item:item ? {girl:item.girl,name:item.name,effect:item.effect} : null,error:null});
       }catch(error){if(live)setState({key,item:null,error:error instanceof Error?error.message:'Reference unavailable.'});}
     })();
     return()=>{live=false;};
-  },[allowed,key,girl,attempt]);
-  return {item:allowed && state?.key===key?state.item:null,error:allowed && state?.key===key?state.error:null,loading:allowed && state?.key!==key,retry:()=>setAttempt(v=>v+1)};
+  },[allowed,key,girl,unlocks.owner]);
+  return {item:allowed && state?.key===key?state.item:null,error:allowed && state?.key===key?state.error:null,loading:allowed && state?.key!==key,retry:unlocks.refreshItems};
 }

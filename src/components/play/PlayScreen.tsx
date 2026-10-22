@@ -18,7 +18,7 @@ import momentDarkPowerActive from "@/assets/play/states/dark-power-active.webp";
 import momentFinaleActive from "@/assets/play/states/finale-active.webp";
 import momentOther from "@/assets/play/moment-other.webp";
 import { useActiveImages } from "@/hooks/useActiveImages";
-import { PlayFinalGirlReference } from '@/components/FinalGirlReference';
+import { LoreInfoModal } from '@/components/LoreInfoModal';
 import { usePersonalItem } from '@/contexts/PersonalItemsContext';
 import { PlaySearch } from "./PlaySearch";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -265,7 +265,10 @@ export function PlayScreen(props: PlayScreenProps) {
           alt={`${finalGirl}'s night at ${location}`}
         />
         <div>
-          <p className="play-eyebrow">PLAY MODE</p>
+          <div className="play-character-heading">
+            <p className="play-eyebrow">PLAY MODE</p>
+            <LoreInfoModal type="finalGirl" name={finalGirl} namedTrigger ultimate={summary.entries.some(event => event.kind === 'moment' && event.momentType === 'ultimate-unlocked')}/>
+          </div>
           <h1>{location}</h1>
         </div>
         <nav aria-label="Session actions">
@@ -401,7 +404,6 @@ export function PlayScreen(props: PlayScreenProps) {
           {summary.killed ?? 0}. Round: {summary.round ?? "unrecorded"}.
         </p>
       </section>
-      <PlayFinalGirlReference name={finalGirl} ultimate={summary.entries.some(event=>event.kind==='moment' && event.momentType==='ultimate-unlocked')}/>
       <section
         className="play-panel play-track-more"
         aria-label="Optional trackers"

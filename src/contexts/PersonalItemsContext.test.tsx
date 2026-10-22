@@ -4,8 +4,8 @@ import { PersonalItemsProvider,usePersonalItem,usePersonalUnlocks } from './Pers
 import { SecretItemReference } from '@/components/FinalGirlReference';
 const mock=vi.hoisted(()=>({owner:'account-a' as string|null,rpc:vi.fn()}));
 vi.mock('@/hooks/useAuth',()=>({useAuth:()=>({user:mock.owner?{id:mock.owner}:null,isAuthReady:true})}));
-vi.mock('@/integrations/supabase/client',()=>({supabase:{rpc:(name:string,args:unknown)=>({abortSignal:()=>mock.rpc(name,args)}),storage:{from:()=>({download:vi.fn()})}}}));
-const item={girl:'Laurie',name:'Private test reference',effect:'Synthetic effect used only by this test.',image_path:'11111111-1111-4111-8111-111111111111.webp'};
+vi.mock('@/integrations/supabase/client',()=>({supabase:{rpc:(name:string,args:unknown)=>({abortSignal:()=>mock.rpc(name,args)})}}));
+const item={girl:'Laurie',name:'Private test reference',effect:'Synthetic effect used only by this test.'};
 function Probe(){const u=usePersonalUnlocks();const i=usePersonalItem('Laurie');return <><div data-testid="owner">{u.owner}</div><div data-testid="item">{i.item?.name??'Hidden'}</div><button onClick={()=>u.change('Laurie',false)}>Hide fixture</button></>;}
 const wrap=(child=<Probe/>)=><PersonalItemsProvider>{child}</PersonalItemsProvider>;
 beforeEach(()=>{mock.owner='account-a';mock.rpc.mockReset();});
@@ -19,11 +19,11 @@ describe('personal item boundary',()=>{
       return Promise.resolve({data:item,error:null});
     });
     render(wrap(<SecretItemReference name="Laurie"/>));
-    const reveal=screen.getByRole('button',{name:'I have unlocked this item'});
+    const reveal=screen.getByRole('button',{name:'Unlock personal item'});
     await waitFor(()=>expect(reveal).toBeEnabled());
     fireEvent.click(reveal);
     expect(mock.rpc.mock.calls.map(c=>c[0])).toEqual(['get_final_girl_unlocks']);
-    fireEvent.click(screen.getByRole('button',{name:'Confirm my unlock'}));
+    fireEvent.click(screen.getByRole('button',{name:'Confirm unlock'}));
     await waitFor(()=>expect(mock.rpc).toHaveBeenCalledWith('set_final_girl_unlock',{p_girl:'Laurie',p_unlocked:true,p_owner:'account-a'}));
     expect(screen.queryByText(item.name)).not.toBeInTheDocument();
     expect(mock.rpc.mock.calls.some(c=>c[0]==='get_final_girl_item')).toBe(false);
