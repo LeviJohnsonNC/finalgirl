@@ -852,7 +852,8 @@ body:has(.play-workspace) .app-shell {
   display: none;
 }
 .play-history {
-  padding: 0 20px;
+  padding: 0;
+  overflow: hidden;
 }
 .play-history-toggle {
   width: 100%;
@@ -860,7 +861,13 @@ body:has(.play-workspace) .app-shell {
   align-items: center;
   justify-content: space-between;
   text-align: left;
-  min-height: 68px !important;
+  min-height: 112px !important;
+  padding: 22px 26px;
+  background:
+    linear-gradient(90deg, #0b1411ed, #0b14114d),
+    url("../assets/play/found-photographs.webp") right 46% / cover;
+  color: #ede0bc;
+  text-shadow: 0 2px 6px #000;
   font:
     22px Georgia,
     serif !important;
@@ -869,14 +876,14 @@ body:has(.play-workspace) .app-shell {
   font:
     11px Arial,
     sans-serif;
-  color: #8e9b8d;
+  color: #c3c7b3;
   margin-left: 12px;
 }
 .play-history-toggle[aria-expanded="true"] > svg {
   transform: rotate(180deg);
 }
 .play-history [aria-label="Game timeline"] {
-  padding: 8px 0 18px;
+  padding: 8px 20px 18px;
 }
 .play-history [aria-label="Game timeline"] > h3 {
   display: none;
@@ -1249,10 +1256,15 @@ body:has(.play-workspace) .app-shell {
     gap: 14px;
   }
   .play-history {
-    padding: 0 16px;
+    padding: 0;
   }
   .play-history-toggle {
     font-size: 20px !important;
+    min-height: 100px !important;
+    padding: 20px 16px;
+  }
+  .play-history [aria-label="Game timeline"] {
+    padding-inline: 16px;
   }
   .play-history-toggle small {
     display: block;
