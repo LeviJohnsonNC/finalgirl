@@ -177,39 +177,41 @@ const CastingRoom = ({ onStartGame, onGoToArchive, initialSelection }: CastingRo
       {/* Content */}
       <div className="casting-content relative z-10 flex flex-col items-center py-8">
         {isDegraded && (
-          <div className="mb-6 border border-primary/30 bg-background/70 px-4 py-2 text-center type-caption text-muted-foreground">
+          <div className="casting-notice mb-6 border border-primary/30 bg-background/70 px-4 py-2 text-center type-caption text-muted-foreground">
             CLOUD ARCHIVE RECONNECTING • USING SAVED COLLECTION
           </div>
         )}
         {/* A landscape scene behind two overlapping portrait photographs */}
-        <div className="casting-tableau">
-          <CastingSlot
-            type="killer"
-            value={selection.killer}
-            options={ownedContent.killers}
-            onShuffle={() => handleSlotShuffle('killer')}
-            onChoose={() => setActivePicker('killer')}
-            isShuffling={isShufflingAll || shufflingSlot === 'killer'}
-            shuffleKey={shuffleKey}
-          />
-          <CastingSlot
-            type="location"
-            value={selection.location}
-            options={ownedContent.locations}
-            onShuffle={() => handleSlotShuffle('location')}
-            onChoose={() => setActivePicker('location')}
-            isShuffling={isShufflingAll || shufflingSlot === 'location'}
-            shuffleKey={shuffleKey}
-          />
-          <CastingSlot
-            type="finalGirl"
-            value={selection.finalGirl}
-            options={ownedContent.finalGirls}
-            onShuffle={() => handleSlotShuffle('finalGirl')}
-            onChoose={() => setActivePicker('finalGirl')}
-            isShuffling={isShufflingAll || shufflingSlot === 'finalGirl'}
-            shuffleKey={shuffleKey}
-          />
+        <div className="casting-stage">
+          <div className="casting-tableau">
+            <CastingSlot
+              type="killer"
+              value={selection.killer}
+              options={ownedContent.killers}
+              onShuffle={() => handleSlotShuffle('killer')}
+              onChoose={() => setActivePicker('killer')}
+              isShuffling={isShufflingAll || shufflingSlot === 'killer'}
+              shuffleKey={shuffleKey}
+            />
+            <CastingSlot
+              type="location"
+              value={selection.location}
+              options={ownedContent.locations}
+              onShuffle={() => handleSlotShuffle('location')}
+              onChoose={() => setActivePicker('location')}
+              isShuffling={isShufflingAll || shufflingSlot === 'location'}
+              shuffleKey={shuffleKey}
+            />
+            <CastingSlot
+              type="finalGirl"
+              value={selection.finalGirl}
+              options={ownedContent.finalGirls}
+              onShuffle={() => handleSlotShuffle('finalGirl')}
+              onChoose={() => setActivePicker('finalGirl')}
+              isShuffling={isShufflingAll || shufflingSlot === 'finalGirl'}
+              shuffleKey={shuffleKey}
+            />
+          </div>
         </div>
 
         <section className="casting-console" aria-label="Scenario and playback">

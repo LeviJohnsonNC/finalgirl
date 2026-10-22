@@ -19,16 +19,14 @@ test('desktop setup preserves the photos and keeps its readable faceplate clear 
       ticker: document.querySelector('.news-broadcast')!.getBoundingClientRect().top,
       footer: document.querySelector('footer')!.getBoundingClientRect().top }));
     measurements.push({ ...size, ...bounds });
-    // A short 720px window may scroll slightly; normal laptop sizes still fit.
-    // Readability never depends on shrinking the photographs or control text.
-    expect(bounds.height, JSON.stringify({ size, bounds })).toBeLessThanOrEqual(size.height + (size.height <= 720 ? 56 : 1));
+    // The full casting page fits above the fixed broadcast and navigation.
+    expect(bounds.height, JSON.stringify({ size, bounds })).toBeLessThanOrEqual(size.height + 1);
     expect(bounds.panel).toBeLessThan(bounds.footer);
     expect(bounds.panel).toBeLessThan(bounds.ticker);
-    // The photographs retain their original sizing formula. Only the console
-    // gains a minimum width so laptop controls no longer shrink with the art.
-    const photosWidth = Math.min(1160, size.width - 96, Math.max(640, (size.height - 510) / .43));
-    expect(bounds.photosWidth).toBeCloseTo(photosWidth, 1);
-    expect(bounds.consoleWidth).toBeCloseTo(Math.max(640, photosWidth * 800 / 1160), 1);
+    expect(bounds.photosWidth).toBeGreaterThan(500);
+    expect(bounds.photosWidth).toBeLessThanOrEqual(size.width - 48);
+    expect(bounds.consoleWidth).toBeGreaterThanOrEqual(640);
+    expect(bounds.consoleWidth).toBeLessThanOrEqual(1100);
     if (size.width === 2048 || size.width === 1280) await page.screenshot({ path: info.outputPath(`setup-proportions-${size.width}-${size.height}.png`) });
   }
   await info.attach('setup-layout-metrics', { body: JSON.stringify(measurements, null, 2), contentType: 'application/json' });

@@ -1,5 +1,6 @@
 import { useState, useMemo, useId } from 'react';
-import { Dices, Clapperboard, MapPin, Crosshair } from 'lucide-react';
+import { Dices, Clapperboard, MapPin, Crosshair, Info } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { getFilmIdByLocation } from '@/types/gameData';
 import { getSetupCardsForLocation, getEventsForLocation } from '@/types/featureFilmDetails';
 import {
@@ -171,11 +172,18 @@ const ScenarioDropdownsForLocation = ({
               <span className="hidden sm:inline">Draw</span>
             </button>
           </div>
-          {selectedMissionData && (
-            <p className="casting-console-mission-description type-caption text-muted-foreground/80 italic">
-              {selectedMissionData.description}
-            </p>
-          )}
+          {selectedMissionData && <Popover>
+            <PopoverTrigger asChild>
+              <button type="button" className="casting-mission-info" aria-label="Read mission details">
+                <Info aria-hidden="true" />
+                <span>Mission details</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="casting-mission-details" side="top" collisionPadding={16} aria-labelledby={`${id}-mission-title`}>
+              <h3 id={`${id}-mission-title`}>{selectedMissionData.name}</h3>
+              <p className="casting-console-mission-description">{selectedMissionData.description}</p>
+            </PopoverContent>
+          </Popover>}
         </div>
       )}
     </div>

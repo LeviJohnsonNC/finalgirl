@@ -50,7 +50,7 @@ test('console selections, keyboard access and responsive frame', async ({ page, 
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const panelBox = (await consolePanel.boundingBox())!;
     const playBox = (await play.boundingBox())!;
-    expect(panelBox.width).toBeLessThanOrEqual(800);
+    expect(panelBox.width).toBeLessThanOrEqual(width >= 900 ? 1100 : 800);
     expect(panelBox.y + panelBox.height - (playBox.y + playBox.height)).toBeGreaterThanOrEqual(24);
     for (const control of [setup, event, play]) {
       const box = (await control.boundingBox())!;
@@ -70,7 +70,7 @@ test('console selections, keyboard access and responsive frame', async ({ page, 
   expect(JSON.stringify(request.body)).toContain('Secret Tunnel');
 });
 
-test('mission row expands and location changes reset all cards', async ({ page, archive }, info) => {
+test('mission controls and details remain accessible and location changes reset all cards', async ({ page, archive }, info) => {
   archive.films = ['s1-camp-happy-trails', 's3-falconwood-files'];
   await archive.install(page);
   await page.goto('/');
@@ -82,7 +82,9 @@ test('mission row expands and location changes reset all cards', async ({ page, 
   await expect(mission).not.toContainText('Select Mission');
   await mission.click();
   await page.getByRole('option', { name: 'Save Your Father', exact: true }).click();
+  await page.getByRole('button', { name: 'Read mission details' }).click();
   await expect(page.getByText(/Government officials have imprisoned your father/)).toBeVisible();
+  await page.keyboard.press('Escape');
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   const playBox = (await page.getByRole('button', { name: 'Press Play', exact: true }).boundingBox())!;
   const footerBox = (await page.locator('footer').boundingBox())!;
@@ -183,9 +185,11 @@ test('long menu names and Mission controls remain contained at laptop and phone 
       expect(await option.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
       await option.click();
     }
+    await page.getByRole('button', { name: 'Read mission details' }).click();
     const description = page.locator('.casting-console-mission-description');
     await expect(description).toBeVisible();
     expect(await description.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+    await page.keyboard.press('Escape');
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     const panel = (await page.locator('.casting-console').boundingBox())!, button = (await page.getByRole('button', { name: 'Press Play', exact: true }).boundingBox())!;
     expect(button.y + button.height).toBeLessThan(panel.y + panel.height - 24);
@@ -194,4 +198,57 @@ test('long menu names and Mission controls remain contained at laptop and phone 
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.locator('.casting-console').screenshot({ path: info.outputPath(`console-mission-${size.width}.png`) });
   }
+});
+
+
+test('laptop casting gives the art the remaining height without page scrolling', async ({ page, archive }, info) => {
+  archive.films = ['s1-camp-happy-trails', 's3-falconwood-files'];
+  await archive.install(page);
+  await page.goto('/');
+  await page.getByRole('button', { name: 'START THE TAPE', exact: true }).click();
+  const sizes = [
+    { width: 1024, height: 600 }, { width: 949, height: 649 }, { width: 1280, height: 720 },
+    { width: 1366, height: 768 }, { width: 1440, height: 900 },
+    { width: 2048, height: 1061 },
+  ];
+  for (const location of ['Camp Happy Trails', 'Falconwood']) {
+    for (const [slot, name] of ['Hans', location, 'Laurie'].entries()) await choose(page, slot, name);
+    if (location === 'Falconwood') {
+      await page.getByRole('button', { name: 'Draw a random mission' }).click();
+    }
+    for (const size of sizes) {
+      await page.setViewportSize(size);
+      await page.evaluate(() => document.fonts.ready);
+      await expect.poll(() => page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(1);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      const panel = (await page.locator('.casting-console').boundingBox())!;
+      const ticker = (await page.locator('.news-broadcast').boundingBox())!;
+      expect(panel.y + panel.height).toBeLessThanOrEqual(ticker.y - 12);
+      if (location === 'Camp Happy Trails') {
+        expect(panel.height).toBeLessThanOrEqual(140);
+        const setup = (await page.getByRole('combobox', { name: 'Setup Scenario' }).boundingBox())!;
+        const play = (await page.getByRole('button', { name: 'Press Play', exact: true }).boundingBox())!;
+        expect(play.y).toBeCloseTo(setup.y, 0);
+        if (size.height >= 768) {
+          const art = (await page.locator('.casting-slot--location .casting-photo').boundingBox())!;
+          const oldWidth = Math.min(1160, size.width - 96, Math.max(640, (size.height - 510) / .43));
+          expect(art.height).toBeGreaterThan(oldWidth * .36 * 1.15);
+        }
+      }
+      const controls = await page.locator('.casting-slot-buttons button, .casting-console-select, .casting-console-play').all();
+      let previous = null;
+      for (const control of controls) {
+        const box = (await control.boundingBox())!;
+        expect(box.height).toBeGreaterThanOrEqual(44);
+        expect(box.y + box.height).toBeLessThan(ticker.y);
+        if (previous && Math.abs(previous.y - box.y) < 1) expect(box.x).toBeGreaterThanOrEqual(previous.x + previous.width - 1);
+        previous = box;
+      }
+      if (size.width === 1366 || size.width === 2048) await page.screenshot({ path: info.outputPath(`casting-fit-${location.replaceAll(' ', '-')}-${size.width}.png`) });
+    }
+  }
+  const shuffle = page.getByRole('button', { name: 'Shuffle', exact: true }).first();
+  await shuffle.click();
+  await expect(shuffle).toBeDisabled();
+  await expect(shuffle).toBeEnabled();
 });
