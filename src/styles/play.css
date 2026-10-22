@@ -882,6 +882,9 @@ body:has(.play-workspace) .app-shell {
 .play-history-toggle[aria-expanded="true"] > svg {
   transform: rotate(180deg);
 }
+.play-workspace .play-history-toggle:focus-visible {
+  outline-offset: -3px;
+}
 .play-history [aria-label="Game timeline"] {
   padding: 8px 20px 18px;
 }
