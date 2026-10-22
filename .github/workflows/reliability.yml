@@ -69,6 +69,13 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - name: Prefer the responsive Ubuntu archive for browser dependencies
+        run: |
+          # The Azure HTTP mirror can stall apt long enough to exhaust the job.
+          # Keep Ubuntu's signed packages and use its working official HTTPS mirror.
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
+          fi
       - run: npx playwright install --with-deps chromium
       - run: npm run build
       - run: npm run test:browser -- --project=${{ matrix.project }}
