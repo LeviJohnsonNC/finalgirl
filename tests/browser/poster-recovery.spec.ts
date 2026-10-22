@@ -39,7 +39,8 @@ for (const status of [503, 504]) {
 }
 
 for (const failure of ['provider outage', 'platform timeout', 'missing image'] as const) {
-  test(`an ending poster ${failure} is visible, retryable and never loses the ending or result`, async ({ page, archive }) => {
+  test(`an ending poster ${failure} is visible, retryable and never loses the ending or result`, async ({ page, archive }, info) => {
+    if (info.project.name === 'desktop') await page.setViewportSize({ width: 1024, height: 600 });
     archive.autoImages = true;
     archive.history.push({ id: gameId, timestamp: 1, outcome: 'won', killer: selection.killer, location: selection.location, final_girl: selection.finalGirl, intro_story: opening });
     await archive.install(page, { draft: { ...activeGame, phase: 'ending', result: { ...selection, id: gameId, timestamp: 1, outcome: 'won' }, endingStory: ending, formData } });
@@ -63,6 +64,13 @@ for (const failure of ['provider outage', 'platform timeout', 'missing image'] a
     await expect(page.getByRole('region', { name: 'Ending narration' })).toContainText(ending);
     await expect(page.getByRole('button', { name: 'SAVE', exact: true })).toBeEnabled();
     expect(requests).toHaveLength(1);
+    await page.screenshot({ path: info.outputPath('ending-poster-error.png'), fullPage: true });
+    if (info.project.name === 'desktop') {
+      const retry = (await photo.getByRole('button', { name: 'Try Again', exact: true }).boundingBox())!;
+      const footer = (await page.locator('.app-footer').boundingBox())!;
+      expect(retry.y + retry.height).toBeLessThan(footer.y);
+      expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true);
+    }
     await photo.getByRole('button', { name: 'Try Again', exact: true }).click();
     const poster = page.getByRole('img', { name: 'Movie poster', exact: true });
     await expect(poster).toBeVisible();
@@ -78,3 +86,69 @@ for (const failure of ['provider outage', 'platform timeout', 'missing image'] a
     expect(archive.calls).not.toContain('generate-ending');
   });
 }
+
+test('a failed ending reshoot keeps the previous poster, error and retry above the footer', async ({
+  page,
+  archive,
+}, info) => {
+  if (info.project.name === 'desktop')
+    await page.setViewportSize({ width: 1024, height: 600 });
+  const url = 'http://127.0.0.1:4173/reshoot-poster.png';
+  await archive.install(page, {
+    draft: {
+      ...activeGame,
+      phase: 'ending',
+      result: { ...selection, id: gameId, timestamp: 1, outcome: 'won' },
+      endingStory: 'Laurie reached the road.',
+      posterImageUrl: url,
+      formData: { finalGirlHealth: 1 },
+    },
+  });
+  archive.history.push({
+    id: gameId,
+    timestamp: 1,
+    outcome: 'won',
+    killer: selection.killer,
+    location: selection.location,
+    final_girl: selection.finalGirl,
+  });
+  await page.route('**/reshoot-poster.png', (route) =>
+    route.fulfill({
+      contentType: 'image/png',
+      path: resolve('src/assets/scrapbooks/final-girl-cover.png'),
+    }),
+  );
+  await page.route('**/functions/v1/generate-scene-image', (route) =>
+    route.fulfill({
+      status: 503,
+      headers: { 'access-control-allow-origin': '*' },
+      json: {
+        error:
+          'The image service is temporarily unavailable. Your story and game result are safe. Try developing the picture again in a moment.',
+      },
+    }),
+  );
+  await page.goto('/');
+  await page.getByRole('button', { name: 'RESUME GAME' }).click();
+  await page.getByRole('button', { name: 'Reshoot', exact: true }).click();
+  const error = page.locator('.narration-photo-error');
+  await expect(error).toBeVisible();
+  await page.screenshot({
+    path: info.outputPath('reshoot-failed.png'),
+    fullPage: true,
+  });
+  const e = (await error.boundingBox())!;
+  const f = (await page.locator('.app-footer').boundingBox())!;
+  if (info.project.name === 'desktop') expect(e.y + e.height).toBeLessThan(f.y);
+  await expect(
+    page.getByRole('img', { name: 'Movie poster', exact: true }),
+  ).toHaveAttribute('src', url);
+  await expect(
+    page.getByRole('button', { name: 'Reshoot', exact: true }),
+  ).toBeEnabled();
+  await page.getByRole('button', { name: 'SAVE', exact: true }).click();
+  await expect.poll(() => archive.history[0]?.poster_image_url).toBe(url);
+  await expect
+    .poll(() => archive.history[0]?.ending_narration)
+    .toBe('Laurie reached the road.');
+});
