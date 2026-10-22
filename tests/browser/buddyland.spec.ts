@@ -24,14 +24,16 @@ test('unlock Buddyland, cast both girls, choose cards and save a complete game',
   await choose(page, 1, 'Buddyland');
   await choose(page, 2, 'Rena');
   await page.getByRole('button', { name: 'View Rena info' }).click();
+  await expect(page.getByRole('dialog').getByRole('heading', { name: 'Ultimate ability', exact: true })).toBeVisible();
+  await page.getByRole('dialog').locator('.girl-backstory > summary').click();
   await expect(page.getByRole('dialog').getByText(/therapist/)).toBeVisible();
-  await expect(page.getByRole('dialog').getByText('Ultimate Ability', { exact: true })).toHaveCount(0);
   await page.screenshot({ path: info.outputPath('rena-dossier.png'), fullPage: true });
   await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
   await choose(page, 2, 'Gwynn');
   await page.getByRole('button', { name: 'View Gwynn info' }).click();
+  await expect(page.getByRole('dialog').getByRole('heading', { name: 'Ultimate ability', exact: true })).toBeVisible();
+  await page.getByRole('dialog').locator('.girl-backstory > summary').click();
   await expect(page.getByRole('dialog').getByText(/mechanic/)).toBeVisible();
-  await expect(page.getByRole('dialog').getByText('Ultimate Ability', { exact: true })).toHaveCount(0);
   await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Buddyland case notes' })).toHaveCount(0);
   for (const name of ['Billy the Bear', 'Buddyland', 'Gwynn']) {

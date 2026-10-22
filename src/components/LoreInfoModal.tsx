@@ -87,7 +87,10 @@ export const LoreInfoModal = ({
           }
           aria-label={`View ${name} info`}
         >
-          <Info className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+          <Info
+            aria-hidden="true"
+            className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors"
+          />
           {namedTrigger && name}
         </button>
       </DialogTrigger>
