@@ -52,10 +52,24 @@
   margin-top: 6px;
 }
 .play-hans-panel > summary {
-  min-height: 86px;
+  position: relative;
+  isolation: isolate;
+  background: #0b1411;
+}
+.play-hans-panel > summary::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: -1;
+  width: min(70%, 500px);
   background:
-    radial-gradient(ellipse at 85% 10%, #742a1c44, transparent 70%),
-    linear-gradient(110deg, #181713, #101a14);
+    linear-gradient(90deg, #0b1411, #0b141144 35%, #0b141122),
+    url("../assets/play/camp/hans-header.webp") center 10% / cover;
+  pointer-events: none;
+}
+.play-hans-panel > summary strong,
+.play-hans-panel > summary small {
+  text-shadow: 0 2px 6px #000;
 }
 .play-camp-body {
   display: grid;
