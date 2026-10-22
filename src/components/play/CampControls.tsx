@@ -7,8 +7,12 @@ import {
   CAMP_VICTIMS,
   HANS_MINOR_POWERS,
 } from "../../../supabase/functions/_shared/play/camp";
-import { PlaySearch } from "./PlaySearch";
 import { PlaySelect } from "./PlaySelect";
+import { IllustratedTile } from "./IllustratedTile";
+import { ModuleArtwork, type ModuleArt } from "./ModuleArtwork";
+import { HealthTokens } from "./HealthTokens";
+import campDetails from "@/assets/play/modules/camp-details.webp";
+import hansPowers from "@/assets/play/modules/hans-powers.webp";
 import "@/styles/play-camp.css";
 
 const art = import.meta.glob<string>("../../assets/play/camp/*.webp", {
@@ -16,7 +20,39 @@ const art = import.meta.glob<string>("../../assets/play/camp/*.webp", {
   query: "?url",
   import: "default",
 });
-const image = (name: string) => art[`../../assets/play/camp/${name}.webp`];
+const image = (name: string): ModuleArt => ({
+  src: art[`../../assets/play/camp/${name}.webp`],
+});
+const campCell = (column: number, row: number): ModuleArt => ({
+  src: campDetails,
+  atlas: {
+    width: 1536,
+    height: 1024,
+    x: column * 384,
+    y: row * 512,
+    cellWidth: 384,
+    cellHeight: 512,
+  },
+});
+const powerCell = (row: number, health: number): ModuleArt => ({
+  src: hansPowers,
+  atlas: {
+    width: 1536,
+    height: 1024,
+    x: (2 - health) * 512,
+    y: row * 512,
+    cellWidth: 512,
+    cellHeight: 512,
+  },
+});
+const effectArt: Record<string, ModuleArt> = {
+  "clingy-campers": campCell(0, 1),
+  "dark-waters": image("dark-waters"),
+  deathwish: campCell(1, 1),
+  "secret-tunnel": image("secret-tunnel"),
+  "star-crossed-lovers": campCell(2, 1),
+  "stubborn-kids": campCell(3, 0),
+};
 const statusLabels = {
   "in-play": "In play",
   killed: "Killed",
@@ -27,6 +63,7 @@ const ongoing = CAMP_EVENTS.filter(
   (e) =>
     !["Boyfriend", "Fresh Meat", "Girlfriend", "Vengeance"].includes(e.name),
 );
+
 export function CampControls({
   killer,
   location,
@@ -54,87 +91,79 @@ export function CampControls({
     setMessage(ok ? "" : "This detail could not be saved. Please try again.");
     return ok;
   };
-  const trackedVictims = CAMP_VICTIMS.filter(
-    (v) => camp[`victim.${v.id}`] !== undefined,
-  );
-  const trackedEvents = ongoing.filter(
-    (e) => camp[`event.${e.id}`] !== undefined,
-  );
-  const available = [
-    ...CAMP_VICTIMS.filter((v) => camp[`victim.${v.id}`] === undefined).map(
-      (v) => v.name,
-    ),
-    ...ongoing
-      .filter((e) => camp[`event.${e.id}`] === undefined)
-      .map((e) => e.name),
-  ];
   return (
     <div className="play-camp-modules">
       {killer === "Hans" && part !== "location" && (
         <section aria-label="Hans tracking">
+          <p className="play-module-help">
+            Reveal a power, then tap a heart to remove or restore one health.
+          </p>
           <div className="play-camp-body play-minor-grid">
-            {HANS_MINOR_POWERS.map((p) => {
-              const health = hans[`minor.${p.id}.health`];
+            {HANS_MINOR_POWERS.map((power, row) => {
+              const value = hans[`minor.${power.id}.health`];
+              const health = typeof value === "number" ? value : undefined;
+              const state =
+                health === undefined
+                  ? "unrevealed"
+                  : health === 2
+                    ? "full"
+                    : health === 1
+                      ? "weakened"
+                      : "removed";
               return (
-                <div
+                <article
                   className="play-minor-power"
-                  data-active={typeof health === "number" && health > 0}
-                  key={p.id}
+                  data-state={state}
+                  key={power.id}
                 >
-                  <h3>{p.name}</h3>
-                  {health === undefined ? (
-                    <button
-                      onClick={() =>
-                        record("hans", { [`minor.${p.id}.health`]: 2 })
-                      }
-                    >
-                      Reveal
-                    </button>
-                  ) : (
-                    <>
-                      <div
-                        className="play-minor-health"
-                        role="group"
-                        aria-label={`${p.name} health`}
-                      >
-                        <button
-                          aria-label={`Decrease ${p.name} health`}
-                          disabled={health === 0}
-                          onClick={() =>
-                            record("hans", {
-                              [`minor.${p.id}.health`]: Number(health) - 1,
-                            })
-                          }
-                        >
-                          −
-                        </button>
-                        <span>
-                          {health === 0 ? "Removed" : `${health} health`}
-                        </span>
-                        <button
-                          aria-label={`Increase ${p.name} health`}
-                          disabled={health === 2}
-                          onClick={() =>
-                            record("hans", {
-                              [`minor.${p.id}.health`]: Number(health) + 1,
-                            })
-                          }
-                        >
-                          +
-                        </button>
-                      </div>
+                  <div className="play-minor-scene">
+                    <ModuleArtwork art={powerCell(row, health ?? 2)} />
+                    <h3>{power.name}</h3>
+                  </div>
+                  <div className="play-minor-controls">
+                    <p className="play-minor-status" aria-live="polite">
+                      {health === undefined
+                        ? "Unrevealed"
+                        : health === 0
+                          ? "Removed · 0/2 health"
+                          : `${health}/2 health`}
+                    </p>
+                    {health === undefined ? (
                       <button
-                        className="play-camp-clear"
-                        aria-label={`Stop tracking ${p.name}`}
+                        className="play-power-reveal"
                         onClick={() =>
-                          record("hans", { [`minor.${p.id}.health`]: null })
+                          record("hans", { [`minor.${power.id}.health`]: 2 })
                         }
                       >
-                        Stop tracking
+                        Reveal
                       </button>
-                    </>
-                  )}
-                </div>
+                    ) : (
+                      <>
+                        <HealthTokens
+                          name={power.name}
+                          health={health}
+                          art={campCell(3, 1)}
+                          onChange={(next) =>
+                            record("hans", {
+                              [`minor.${power.id}.health`]: next,
+                            })
+                          }
+                        />
+                        <button
+                          className="play-camp-clear"
+                          aria-label={`Stop tracking ${power.name}`}
+                          onClick={() =>
+                            record("hans", {
+                              [`minor.${power.id}.health`]: null,
+                            })
+                          }
+                        >
+                          Stop tracking
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </article>
               );
             })}
           </div>
@@ -143,172 +172,166 @@ export function CampControls({
       {location === "Camp Happy Trails" && part !== "killer" && (
         <section aria-label="Camp tracking">
           <div className="play-camp-body">
-            {trackedVictims.length > 0 && (
+            <div>
+              <h3 className="play-module-subheading">Special characters</h3>
+              <p className="play-module-help">
+                Tap a portrait to put them in play. Record their outcome below.
+              </p>
               <div className="play-camp-victims">
-                {trackedVictims.map((v) => {
-                  const state = camp[
-                    `victim.${v.id}`
-                  ] as keyof typeof statusLabels;
-                  const treatment =
-                    state === "killed"
-                      ? "killed"
-                      : state === "untracked"
-                        ? "off"
-                        : "active";
-                  const next =
-                    state === "untracked"
-                      ? "in-play"
-                      : state === "in-play"
-                        ? "killed"
-                        : "untracked";
+                {CAMP_VICTIMS.map((victim, index) => {
+                  const value = camp[`victim.${victim.id}`] as
+                    | keyof typeof statusLabels
+                    | undefined;
+                  const state = value ?? "untracked";
+                  const portrait =
+                    state === "saved"
+                      ? campCell(index, 0)
+                      : image(
+                          `${victim.id}-${state === "killed" ? "killed" : state === "in-play" ? "active" : "off"}`,
+                        );
                   return (
                     <div
                       className="play-camp-person"
-                      key={v.id}
+                      key={victim.id}
                       data-state={state}
                     >
-                      <button
+                      <IllustratedTile
                         className="play-camp-portrait"
-                        aria-label={`${v.name}, ${statusLabels[state]}. ${next === "in-play" ? "Mark in play" : next === "killed" ? "Mark killed" : "Mark untracked"}`}
+                        art={portrait}
+                        title={victim.name}
+                        status={statusLabels[state]}
+                        aria-label={`${victim.name}, ${statusLabels[state]}${state === "in-play" ? "" : ". Mark in play"}`}
+                        aria-disabled={state === "in-play"}
                         onClick={() =>
-                          record("camp", { [`victim.${v.id}`]: next })
+                          state !== "in-play" &&
+                          record("camp", { [`victim.${victim.id}`]: "in-play" })
                         }
+                      />
+                      <div
+                        className="play-camp-outcomes"
+                        role="group"
+                        aria-label={`${victim.name} outcome`}
                       >
-                        <img
-                          src={image(`${v.id}-${treatment}`)}
-                          alt=""
-                          loading="lazy"
-                          decoding="async"
-                        />
-                        <span>
-                          <strong>{v.name}</strong>
-                          <small>{statusLabels[state]}</small>
-                        </span>
-                      </button>
-                      <PlaySelect
-                        aria-label={`${v.name} status`}
-                        value={state}
-                        onChange={(e) =>
-                          record("camp", { [`victim.${v.id}`]: e.target.value })
-                        }
-                      >
-                        {Object.entries(statusLabels).map(([value, label]) => (
-                          <option value={value} key={value}>
-                            {label}
-                          </option>
+                        {(["saved", "killed"] as const).map((outcome) => (
+                          <button
+                            key={outcome}
+                            disabled={state === "untracked"}
+                            aria-label={`Mark ${victim.name} ${outcome}`}
+                            aria-pressed={state === outcome}
+                            onClick={() =>
+                              state !== outcome &&
+                              record("camp", {
+                                [`victim.${victim.id}`]: outcome,
+                              })
+                            }
+                          >
+                            {statusLabels[outcome]}
+                          </button>
                         ))}
-                      </PlaySelect>
-                      <button
-                        className="play-camp-clear"
-                        aria-label={`Remove ${v.name} tracking`}
-                        onClick={() =>
-                          record("camp", { [`victim.${v.id}`]: null })
-                        }
-                      >
-                        Remove
-                      </button>
+                      </div>
+                      {value !== undefined && (
+                        <button
+                          className="play-camp-clear"
+                          aria-label={`Stop tracking ${victim.name}`}
+                          onClick={() =>
+                            record("camp", { [`victim.${victim.id}`]: null })
+                          }
+                        >
+                          Stop tracking
+                        </button>
+                      )}
                     </div>
                   );
                 })}
               </div>
-            )}
-            {trackedEvents.map((e) => {
-              const active = camp[`event.${e.id}`] === "active";
-              return (
-                <div
-                  className="play-camp-effect"
-                  key={e.id}
-                  data-active={active}
-                >
-                  <button
-                    className="play-camp-effect-toggle"
-                    style={
-                      ["dark-waters", "secret-tunnel"].includes(e.id)
-                        ? {
-                            backgroundImage: `linear-gradient(90deg,#07100df2,#07100d33),url(${image(e.id)})`,
+            </div>
+            <div>
+              <h3 className="play-module-subheading">Ongoing events</h3>
+              <p className="play-module-help">
+                Tap an event to activate or resolve it.
+              </p>
+              <div className="play-camp-effects">
+                {ongoing.map((effect) => {
+                  const value = camp[`event.${effect.id}`];
+                  const active = value === "active";
+                  return (
+                    <div
+                      className="play-camp-effect"
+                      key={effect.id}
+                      data-state={value ?? "untracked"}
+                    >
+                      <IllustratedTile
+                        className="play-camp-effect-toggle"
+                        art={effectArt[effect.id]}
+                        title={effect.name}
+                        status={
+                          active
+                            ? "Active"
+                            : value === "resolved"
+                              ? "Resolved"
+                              : "Not recorded"
+                        }
+                        aria-pressed={active}
+                        aria-label={`${effect.name} ${active ? "Active" : value === "resolved" ? "Resolved" : "Not recorded"}`}
+                        onClick={() =>
+                          record("camp", {
+                            [`event.${effect.id}`]: active
+                              ? "resolved"
+                              : "active",
+                          })
+                        }
+                      />
+                      {effect.id === "secret-tunnel" && active && (
+                        <div className="play-camp-tunnel">
+                          {(["a", "b"] as const).map((end, index) => (
+                            <label key={end}>
+                              Endpoint {index + 1}
+                              <PlaySelect
+                                aria-label={`Secret Tunnel endpoint ${index + 1}`}
+                                value={String(camp[`tunnel.${end}`] ?? "")}
+                                onChange={(event) =>
+                                  record("camp", {
+                                    [`tunnel.${end}`]:
+                                      event.target.value || null,
+                                  })
+                                }
+                              >
+                                <option value="">Not recorded</option>
+                                {CAMP_TUNNEL_ROOMS.filter(
+                                  (room) =>
+                                    room !==
+                                    camp[`tunnel.${end === "a" ? "b" : "a"}`],
+                                ).map((room) => (
+                                  <option key={room} value={room}>
+                                    {room}
+                                  </option>
+                                ))}
+                              </PlaySelect>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                      {value !== undefined && (
+                        <button
+                          className="play-camp-clear"
+                          aria-label={`Stop tracking ${effect.name}`}
+                          onClick={() =>
+                            record("camp", {
+                              [`event.${effect.id}`]: null,
+                              ...(effect.id === "secret-tunnel"
+                                ? { "tunnel.a": null, "tunnel.b": null }
+                                : {}),
+                            })
                           }
-                        : undefined
-                    }
-                    aria-pressed={active}
-                    onClick={() =>
-                      record("camp", {
-                        [`event.${e.id}`]: active ? "resolved" : "active",
-                      })
-                    }
-                  >
-                    <strong>{e.name}</strong>
-                    <small>{active ? "Active" : "Resolved"}</small>
-                  </button>
-                  {e.id === "secret-tunnel" && active && (
-                    <div className="play-camp-tunnel">
-                      {(["a", "b"] as const).map((end, i) => (
-                        <label key={end}>
-                          Endpoint {i + 1}
-                          <PlaySelect
-                            aria-label={`Secret Tunnel endpoint ${i + 1}`}
-                            value={String(camp[`tunnel.${end}`] ?? "")}
-                            onChange={(event) =>
-                              record("camp", {
-                                [`tunnel.${end}`]: event.target.value || null,
-                              })
-                            }
-                          >
-                            <option value="">Not recorded</option>
-                            {CAMP_TUNNEL_ROOMS.filter(
-                              (room) =>
-                                room !==
-                                camp[`tunnel.${end === "a" ? "b" : "a"}`],
-                            ).map((room) => (
-                              <option key={room} value={room}>
-                                {room}
-                              </option>
-                            ))}
-                          </PlaySelect>
-                        </label>
-                      ))}
+                        >
+                          Stop tracking
+                        </button>
+                      )}
                     </div>
-                  )}
-                  <button
-                    className="play-camp-clear"
-                    aria-label={`Remove ${e.name} tracking`}
-                    onClick={() =>
-                      record("camp", {
-                        [`event.${e.id}`]: null,
-                        ...(e.id === "secret-tunnel"
-                          ? { "tunnel.a": null, "tunnel.b": null }
-                          : {}),
-                      })
-                    }
-                  >
-                    Remove
-                  </button>
-                </div>
-              );
-            })}
-            {available.length > 0 && (
-              <div className="play-camp-add">
-                <PlaySearch
-                  label="Add Camp detail"
-                  value=""
-                  placeholder="Add detail"
-                  options={available}
-                  allowCustom={false}
-                  onChange={(name) => {
-                    if (!name) return;
-                    const victim = CAMP_VICTIMS.find((v) => v.name === name);
-                    const effect = ongoing.find((e) => e.name === name);
-                    if (victim)
-                      return record("camp", {
-                        [`victim.${victim.id}`]: "in-play",
-                      });
-                    if (effect)
-                      return record("camp", {
-                        [`event.${effect.id}`]: "active",
-                      });
-                  }}
-                />
+                  );
+                })}
               </div>
-            )}
+            </div>
           </div>
         </section>
       )}
