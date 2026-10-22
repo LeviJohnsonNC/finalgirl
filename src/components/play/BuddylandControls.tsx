@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { IllustratedTile } from "./IllustratedTile";
 import {
   BUDDIES,
   SPECIAL_VICTIMS,
@@ -14,12 +15,14 @@ const artwork = import.meta.glob<string>("../../assets/play/roster/*.webp", {
   import: "default",
 });
 const powerArt = import.meta.glob<string>("../../assets/play/states/power-*.webp", { eager: true, query: "?url", import: "default" });
-type PortraitState = "off" | "active" | "killed";
-const labels = { off: "Off", active: "In play", killed: "Killed" };
+type PortraitState = "off" | "active" | "killed" | "saved" | "away";
+const labels = { off: "Off", active: "In play", killed: "Killed", saved: "Saved", away: "Away" };
 const nextState: Record<PortraitState, PortraitState> = {
   off: "active",
   active: "killed",
   killed: "off",
+  saved: "off",
+  away: "off",
 };
 
 function CharacterButton({
@@ -46,33 +49,22 @@ function CharacterButton({
           ? "Mark dead"
           : "Mark killed";
   return (
-    <button
-      type="button"
-      className="play-character"
-      data-state={state}
+    <IllustratedTile className="play-character" data-state={state}
       aria-label={name + ", " + label + ". " + action}
-      onClick={() => onChange(next)}
-    >
-      <img
-        src={artwork["../../assets/play/roster/" + id + "-" + state + ".webp"]}
-        alt=""
-        loading="lazy"
-        decoding="async"
-      />
-      <span className="play-character-caption">
-        <strong>{name}</strong>
-        <span className="play-character-state">{label}</span>
-      </span>
+      onClick={() => onChange(next)} title={name} status={label}
+      art={{ src: artwork["../../assets/play/roster/" + id + "-" + (state === "saved" ? "active" : state === "away" ? "off" : state) + ".webp"] }}>
       <span className="play-character-dots" aria-hidden="true">
         <i />
         <i />
         <i />
       </span>
-    </button>
+    </IllustratedTile>
   );
 }
 
 interface Props {
+  part?: "killer" | "location" | "both";
+  embedded?: boolean;
   killer: string;
   location: string;
   finalGirl: string;
@@ -84,6 +76,8 @@ export function BuddylandControls({
   location,
   events,
   onEvent,
+  part = "both",
+  embedded = false,
 }: Props) {
   const summary = summarizePlay(events);
   const entries = summary.entries;
@@ -96,7 +90,7 @@ export function BuddylandControls({
     powerSourcesReady: true,
   });
   useEffect(() => {
-    if (killer !== "Billy the Bear" || !summary.tracked || billy.powerSourcesReady || initialized.current) return;
+    if (part === "location" || killer !== "Billy the Bear" || !summary.tracked || billy.powerSourcesReady || initialized.current) return;
     initialized.current = true;
     if (!onEvent(newPlayEvent({ kind: "module", moduleData: { module: "billy", changes: defaultSources() } }))) {
       initialized.current = false;
@@ -104,7 +98,7 @@ export function BuddylandControls({
     }
     // An initialization is one atomic observation; never overwrite saved source states.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [killer, summary.tracked, events, onEvent]);
+  }, [part, killer, summary.tracked, events, onEvent]);
   const sourceChange = (id: number, status: "active" | "inactive" | "set-aside") => {
     const ok = onEvent(newPlayEvent({ kind: "module", moduleData: { module: "billy", changes: {
       ...(!billy.powerSourcesReady ? defaultSources() : {}), [`source.${id}.status`]: status,
@@ -114,9 +108,9 @@ export function BuddylandControls({
   const fifthIncluded = billy["source.5.status"] === "active" || billy["source.5.status"] === "inactive";
   return (
     <div className="play-modules play-portrait-modules">
-      {killer === "Billy the Bear" && (
+      {killer === "Billy the Bear" && part !== "location" && (
         <section aria-label="Billy tracking">
-          <h2>Billy &amp; his Buddies</h2>
+          {!embedded && <h2>Billy &amp; his Buddies</h2>}
           <div className="play-power-sources" role="group" aria-label="Power sources">
             <div className="play-power-heading"><h3>Power sources</h3>{fifthIncluded && <button className="play-power-remove" onClick={() => sourceChange(5, "set-aside")}>Remove fifth</button>}</div>
             <div className="play-power-grid">
@@ -187,9 +181,9 @@ export function BuddylandControls({
           </div>
         </section>
       )}
-      {location === "Buddyland" && (
+      {location === "Buddyland" && part !== "killer" && (
         <section aria-label="Buddyland tracking">
-          <h2>Inside Buddyland</h2>
+          {!embedded && <h2>Inside Buddyland</h2>}
           <div className="play-character-grid">
             {[...SPECIAL_VICTIMS]
               .sort((a, b) => a.name.localeCompare(b.name))
@@ -200,7 +194,7 @@ export function BuddylandControls({
                     ? "active"
                     : value === "killed"
                       ? "killed"
-                      : "off";
+                      : value === "saved" ? "saved" : value === "away" ? "away" : "off";
                 return (
                   <CharacterButton
                     key={v.id}

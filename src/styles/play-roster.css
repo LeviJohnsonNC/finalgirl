@@ -65,7 +65,7 @@
     inset 0 0 24px #0007;
   pointer-events: none;
 }
-.play-character-caption {
+.play-tile-caption {
   position: absolute;
   left: 12px;
   right: 12px;
@@ -74,14 +74,14 @@
   flex-direction: column;
   gap: 3px;
 }
-.play-character-caption strong {
+.play-tile-caption strong {
   color: #ded6c4;
   font:
     400 clamp(16px, 1.55vw, 21px)/1.15 Georgia,
     serif;
   text-wrap: balance;
 }
-.play-character-state {
+.play-tile-state {
   font:
     600 10px/1.4 Arial,
     sans-serif;
@@ -117,7 +117,7 @@
     0 4px 10px #0008,
     0 0 14px #a4ca591c;
 }
-.play-character[data-state="active"] .play-character-state {
+.play-character[data-state="active"] .play-tile-state {
   color: #d2dfa9;
 }
 .play-portrait-modules .play-character[data-state="killed"] {
@@ -126,7 +126,7 @@
     0 4px 10px #0008,
     0 0 14px #ce30201c;
 }
-.play-character[data-state="killed"] .play-character-state {
+.play-character[data-state="killed"] .play-tile-state {
   color: #f6a98f;
 }
 .play-character:hover {
@@ -161,14 +161,14 @@
     .play-character-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .play-character-caption {
+  .play-tile-caption {
     left: 10px;
     right: 8px;
   }
-  .play-character-caption strong {
+  .play-tile-caption strong {
     font-size: clamp(16px, 4vw, 20px);
   }
-  .play-character-state {
+  .play-tile-state {
     font-size: 9px;
   }
 }

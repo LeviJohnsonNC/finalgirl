@@ -27,3 +27,12 @@ export async function saveResultOnly(page: Page) {
     .getByRole("button", { name: "Save result without narration", exact: true })
     .click();
 }
+
+/** Open only the requested module; reopening a saved game may remember it. */
+export async function openModule(page: Page, id: string) {
+  await expect(page.locator(".play-module-stack")).toBeAttached();
+  const panel = page.locator(`.play-module-panel[data-module="${id}"]`);
+  if (!(await panel.count())) return;
+  if (!(await panel.evaluate(el => (el as HTMLDetailsElement).open))) await panel.locator(':scope > summary').click();
+  await expect(panel).toHaveAttribute("open", "");
+}

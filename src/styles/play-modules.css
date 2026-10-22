@@ -1,0 +1,42 @@
+.play-module-stack { display: grid; gap: 16px; }
+.play-module-panel { min-width: 0; overflow: hidden; border: 1px solid hsl(var(--foreground) / .22); border-radius: 7px; background: hsl(var(--background) / .88); box-shadow: 0 8px 24px hsl(var(--background) / .5); }
+.play-module-panel > summary {
+  position: relative; isolation: isolate; display: flex; align-items: center; gap: 16px;
+  min-height: 132px; padding: 24px 28px; cursor: pointer; list-style: none; overflow: hidden;
+  background: hsl(var(--background));
+}
+.play-module-panel > summary::-webkit-details-marker { display: none; }
+.play-module-panel > summary::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(90deg, hsl(var(--background) / .94), hsl(var(--background) / .5) 55%, transparent), linear-gradient(0deg, hsl(var(--background) / .65), transparent 65%); }
+.play-module-art { width: 100%; height: 100%; object-fit: cover; display: block; }
+.play-module-panel > summary > .play-module-art { position: absolute; inset: 0; z-index: -2; }
+.play-module-heading { display: grid; gap: 6px; min-width: 0; }
+.play-module-kind { color: hsl(var(--secondary)); font: 10px/1.2 Arial, sans-serif; text-transform: uppercase; letter-spacing: .18em; }
+.play-module-panel > summary h2 { margin: 0; color: hsl(var(--foreground)); font: 400 clamp(24px, 2.8vw, 33px)/1.15 'Narration Fell', Georgia, serif; text-shadow: 0 2px 8px hsl(var(--background)); }
+.play-module-summary { color: hsl(var(--foreground) / .7); font: 12px/1.5 Arial, sans-serif; }
+.play-module-chevron { flex: none; margin-left: auto; color: hsl(var(--foreground) / .8); transition: transform 160ms; }
+.play-module-panel[open] > summary .play-module-chevron { transform: rotate(180deg); }
+.play-module-panel[open] > summary { border-bottom: 1px solid hsl(var(--foreground) / .18); }
+.play-module-content { padding: 22px; }
+.play-module-content .play-modules { display: block; }
+.play-module-content .play-modules > section { padding: 0; border: 0; background: none; box-shadow: none; }
+.play-module-content .play-modules > section > h2 { display: none; }
+.play-module-content .play-camp-modules { margin: 0; gap: 0; }
+.play-module-content .play-camp-body { padding: 0; }
+.play-module-panel.play-camp-panel > summary::after { margin: 0; width: auto; }
+.play-module-panel.play-hans-panel > summary::before { display: none; }
+.play-module-panel > summary:focus-visible { outline: 2px solid hsl(var(--secondary)); outline-offset: -4px; }
+@media (max-width: 639px) {
+  .play-module-panel > summary { min-height: 120px; padding: 20px 16px; }
+  .play-module-panel > summary h2 { font-size: 25px; }
+  .play-module-summary { font-size: 11px; }
+  .play-module-content { padding: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .play-module-chevron { transition: none; } }
+.play-module-content .play-power-grid { max-width: 700px; }
+.play-module-content .play-portrait-modules > section[aria-label="Buddyland tracking"] .play-character-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.play-character[data-state="saved"] .play-tile-state { color: hsl(var(--secondary)); }
+.play-character[data-state="away"] .play-tile-state { color: hsl(var(--foreground) / .7); }
+@media (max-width: 639px) {
+  .play-module-content .play-portrait-modules > section[aria-label="Buddyland tracking"] .play-character-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

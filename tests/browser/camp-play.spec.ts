@@ -1,5 +1,5 @@
 import { test, expect, activeGame } from "./fixtures";
-import { searchPick, statusPick } from "./play-helpers";
+import { searchPick, statusPick, openModule } from "./play-helpers";
 import type { Page } from "@playwright/test";
 import { deathFacts } from "../../src/lib/play/death";
 import type { PlayEvent } from "../../src/lib/play/events";
@@ -8,12 +8,8 @@ async function resume(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
 }
-async function expandCamp(page: Page) {
-  await page
-    .locator(".play-camp-panel > summary")
-    .filter({ hasText: "Inside Camp Happy Trails" })
-    .click();
-}
+async function expandCamp(page: Page) { await openModule(page, "camp"); }
+
 async function reveal(page: Page, kind: "Dark Power" | "Finale", name: string) {
   await page.getByRole("button", { name: kind, exact: true }).click();
   await statusPick(
@@ -72,7 +68,7 @@ test("opt-in Camp portraits, hazards and Minor Dark Powers survive reload withou
     page.getByRole("combobox", { name: "Girlfriend status", exact: true }),
     "Killed",
   );
-  await page.locator(".play-hans-panel > summary").click();
+  await openModule(page, "hans");
   const rage = page
     .locator(".play-minor-power")
     .filter({ hasText: "Unholy Rage" });
@@ -98,7 +94,7 @@ test("opt-in Camp portraits, hazards and Minor Dark Powers survive reload withou
   await page.reload();
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
   await expandCamp(page);
-  await page.locator(".play-hans-panel > summary").click();
+  await openModule(page, "hans");
   await expect(
     page.getByRole("combobox", { name: "Boyfriend status", exact: true }),
   ).toHaveText("Saved");

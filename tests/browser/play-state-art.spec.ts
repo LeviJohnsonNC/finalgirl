@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from './fixtures';
-import { openHistory } from './play-helpers';
+import { openHistory, openModule } from './play-helpers';
 const draft = {...activeGame,playMode:true,selection:{...activeGame.selection,killer:'Billy the Bear',location:'Buddyland',finalGirl:'Rena',filmId:'s4-buddyland'}};
 const key = `final-girl-active-game-v1:${userId}`;
 test('compact session actions fit small phones with the display font and a wider fallback', async ({page,archive}) => {
@@ -57,6 +57,7 @@ test('Ultimate unlocks once, keeps its artwork after reload and still accepts fi
 });
 test('sources and permanent milestones persist without repeat recording or Undo', async ({page,archive}) => {
   await archive.install(page,{draft});await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  await openModule(page, 'billy');
   await expect(page.getByRole('group',{name:'Power sources'}).locator('[aria-pressed="true"]')).toHaveCount(4);
   await page.getByRole('button',{name:'Power source 2, On. Turn off'}).click();
   await page.getByRole('button',{name:'Add fifth power source'}).click();

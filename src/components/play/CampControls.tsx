@@ -32,7 +32,9 @@ export function CampControls({
   location,
   events,
   onEvent,
+  part = "both",
 }: {
+  part?: "killer" | "location" | "both";
   killer: string;
   location: string;
   events: PlayEvent[];
@@ -68,14 +70,8 @@ export function CampControls({
   ];
   return (
     <div className="play-camp-modules">
-      {killer === "Hans" && (
-        <details className="play-camp-panel play-hans-panel">
-          <summary>
-            <span>
-              <strong>Hans the Butcher</strong>
-              <small>Minor Dark Powers</small>
-            </span>
-          </summary>
+      {killer === "Hans" && part !== "location" && (
+        <section aria-label="Hans tracking">
           <div className="play-camp-body play-minor-grid">
             {HANS_MINOR_POWERS.map((p) => {
               const health = hans[`minor.${p.id}.health`];
@@ -142,20 +138,10 @@ export function CampControls({
               );
             })}
           </div>
-        </details>
+        </section>
       )}
-      {location === "Camp Happy Trails" && (
-        <details className="play-camp-panel">
-          <summary
-            style={{
-              backgroundImage: `linear-gradient(90deg,#07100deb,#07100d22),url(${image("camp-header")})`,
-            }}
-          >
-            <span>
-              <strong>Inside Camp Happy Trails</strong>
-              <small>People &amp; details worth remembering</small>
-            </span>
-          </summary>
+      {location === "Camp Happy Trails" && part !== "killer" && (
+        <section aria-label="Camp tracking">
           <div className="play-camp-body">
             {trackedVictims.length > 0 && (
               <div className="play-camp-victims">
@@ -324,7 +310,7 @@ export function CampControls({
               </div>
             )}
           </div>
-        </details>
+        </section>
       )}
       <p className="play-feedback" role="status">
         {message}
