@@ -26,7 +26,7 @@ test('desktop setup preserves the photos and keeps its readable faceplate clear 
     expect(bounds.photosWidth).toBeGreaterThan(500);
     expect(bounds.photosWidth).toBeLessThanOrEqual(size.width - 48);
     expect(bounds.consoleWidth).toBeGreaterThanOrEqual(640);
-    expect(bounds.consoleWidth).toBeLessThanOrEqual(1100);
+    expect(bounds.consoleWidth).toBeCloseTo(Math.max(640, bounds.photosWidth), 0);
     if (size.width === 2048 || size.width === 1280) await page.screenshot({ path: info.outputPath(`setup-proportions-${size.width}-${size.height}.png`) });
   }
   await info.attach('setup-layout-metrics', { body: JSON.stringify(measurements, null, 2), contentType: 'application/json' });

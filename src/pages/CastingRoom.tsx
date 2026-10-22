@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { AlertTriangle, Play, Loader2, RotateCcw } from 'lucide-react';
 import { CastingSlot } from '@/components/CastingSlot';
 import { CastingPicker } from '@/components/CastingPicker';
@@ -59,6 +59,20 @@ const CastingRoom = ({ onStartGame, onGoToArchive, initialSelection }: CastingRo
   const ownedContent = useMemo(() => getOwnedContent(ownedFilms), [ownedFilms]);
   const hasOwnedContent = ownedFilms.length > 0;
   const isComplete = selection.killer && selection.location && selection.finalGirl;
+  const castingContent = useRef<HTMLDivElement>(null);
+  const castingTableau = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const content = castingContent.current, tableau = castingTableau.current;
+    if (!content || !tableau || typeof ResizeObserver === 'undefined') return;
+    // The photo row already fits the available height. Follow its actual width
+    // so the console stays aligned through resizing, zoom and collection notices.
+    const observer = new ResizeObserver(([entry]) => {
+      content.style.setProperty('--casting-tableau-width', `${entry.contentRect.width}px`);
+    });
+    observer.observe(tableau);
+    return () => observer.disconnect();
+  }, [isLoading, hasOwnedContent]);
+
 
   const getRandomItem = useCallback((items: string[]) => {
     if (items.length === 0) return null;
@@ -175,7 +189,7 @@ const CastingRoom = ({ onStartGame, onGoToArchive, initialSelection }: CastingRo
       <div className="vignette fixed inset-0 pointer-events-none" />
       
       {/* Content */}
-      <div className="casting-content relative z-10 flex flex-col items-center py-8">
+      <div ref={castingContent} className="casting-content relative z-10 flex flex-col items-center py-8">
         {isDegraded && (
           <div className="casting-notice mb-6 border border-primary/30 bg-background/70 px-4 py-2 text-center type-caption text-muted-foreground">
             CLOUD ARCHIVE RECONNECTING • USING SAVED COLLECTION
@@ -183,7 +197,7 @@ const CastingRoom = ({ onStartGame, onGoToArchive, initialSelection }: CastingRo
         )}
         {/* A landscape scene behind two overlapping portrait photographs */}
         <div className="casting-stage">
-          <div className="casting-tableau">
+          <div ref={castingTableau} className="casting-tableau">
             <CastingSlot
               type="killer"
               value={selection.killer}

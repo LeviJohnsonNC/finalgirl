@@ -50,7 +50,7 @@ test('console selections, keyboard access and responsive frame', async ({ page, 
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const panelBox = (await consolePanel.boundingBox())!;
     const playBox = (await play.boundingBox())!;
-    expect(panelBox.width).toBeLessThanOrEqual(width >= 900 ? 1100 : 800);
+    expect(panelBox.width).toBeLessThanOrEqual(width >= 900 ? width - 48 : 800);
     expect(panelBox.y + panelBox.height - (playBox.y + playBox.height)).toBeGreaterThanOrEqual(24);
     for (const control of [setup, event, play]) {
       const box = (await control.boundingBox())!;
@@ -109,6 +109,7 @@ test('laptop selectors keep readable text and clear the rim before and after cas
   await page.goto('/');
   await page.getByRole('button', { name: 'START THE TAPE', exact: true }).click();
   const panel = page.locator('.casting-console');
+  await expect(panel.locator('.casting-console-label')).toHaveCount(0);
   const play = page.getByRole('button', { name: 'Press Play', exact: true });
   const sizes = [{ width: 1280, height: 720 }, { width: 1366, height: 768 }, { width: 1440, height: 900 }, { width: 949, height: 649 }];
   const before: number[] = [];
@@ -221,11 +222,18 @@ test('laptop casting gives the art the remaining height without page scrolling',
       await page.evaluate(() => document.fonts.ready);
       await expect.poll(() => page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(1);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      await expect.poll(async () => {
+        const panelWidth = (await page.locator('.casting-console').boundingBox())!.width;
+        const photoWidth = (await page.locator('.casting-tableau').boundingBox())!.width;
+        return Math.abs(panelWidth - Math.max(640, photoWidth));
+      }).toBeLessThan(1);
       const panel = (await page.locator('.casting-console').boundingBox())!;
       const ticker = (await page.locator('.news-broadcast').boundingBox())!;
       expect(panel.y + panel.height).toBeLessThanOrEqual(ticker.y - 12);
       if (location === 'Camp Happy Trails') {
-        expect(panel.height).toBeLessThanOrEqual(140);
+        expect(panel.height).toBeLessThanOrEqual(105);
+        const tableau = (await page.locator('.casting-tableau').boundingBox())!;
+        expect(panel.width).toBeCloseTo(Math.max(640, tableau.width), 0);
         const setup = (await page.getByRole('combobox', { name: 'Setup Scenario' }).boundingBox())!;
         const play = (await page.getByRole('button', { name: 'Press Play', exact: true }).boundingBox())!;
         expect(play.y).toBeCloseTo(setup.y, 0);

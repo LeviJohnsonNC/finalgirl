@@ -1,5 +1,5 @@
 import { useState, useMemo, useId } from 'react';
-import { Dices, Clapperboard, MapPin, Crosshair, Info } from 'lucide-react';
+import { Dices, Crosshair, Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { getFilmIdByLocation } from '@/types/gameData';
 import { getSetupCardsForLocation, getEventsForLocation } from '@/types/featureFilmDetails';
@@ -79,17 +79,13 @@ const ScenarioDropdownsForLocation = ({
     <div className="casting-console-fields">
       {/* Setup Scenario Dropdown */}
       <div className="casting-console-field">
-        <label htmlFor={`${id}-setup`} className="casting-console-label">
-          <span className="casting-console-icon" aria-hidden="true"><Clapperboard /></span>
-          Setup Scenario
-        </label>
         <Select 
           value={selectedSetup || undefined} 
           onValueChange={handleSetupChange}
           disabled={setupCards.length === 0}
         >
-          <SelectTrigger id={`${id}-setup`} aria-label="Setup Scenario" className="casting-console-select">
-            <SelectValue placeholder={!selectedLocation ? "Choose location first" : setupCards.length > 0 ? "Select Setup..." : "Coming Soon"} />
+          <SelectTrigger id={`${id}-setup`} aria-label="Setup Scenario" title={!selectedLocation ? "Choose location first" : `Setup scenario: ${selectedSetup ?? "Not selected"}`} className="casting-console-select">
+            <SelectValue placeholder={!selectedLocation || setupCards.length > 0 ? "Select Setup..." : "Coming Soon"} />
           </SelectTrigger>
           <SelectContent className="scenario-dropdown-content casting-console-menu" side="top">
             {setupCards.map((card) => (
@@ -107,17 +103,13 @@ const ScenarioDropdownsForLocation = ({
 
       {/* Event Dropdown */}
       <div className="casting-console-field casting-console-field--event">
-        <label htmlFor={`${id}-event`} className="casting-console-label">
-          <span className="casting-console-icon" aria-hidden="true"><MapPin /></span>
-          Event
-        </label>
         <Select 
           value={selectedEvent || undefined} 
           onValueChange={handleEventChange}
           disabled={events.length === 0}
         >
-          <SelectTrigger id={`${id}-event`} aria-label="Starting Event" className="casting-console-select">
-            <SelectValue placeholder={!selectedLocation ? "Choose location first" : events.length > 0 ? "Select Event..." : "Coming Soon"} />
+          <SelectTrigger id={`${id}-event`} aria-label="Starting Event" title={!selectedLocation ? "Choose location first" : `Starting event: ${selectedEvent ?? "Not selected"}`} className="casting-console-select">
+            <SelectValue placeholder={!selectedLocation || events.length > 0 ? "Select Event..." : "Coming Soon"} />
           </SelectTrigger>
           <SelectContent className="scenario-dropdown-content casting-console-menu" side="top">
             {events.map((event) => (

@@ -4,7 +4,7 @@ import { moduleState } from '@/lib/play/modules';
 import { BUDDIES, SPECIAL_VICTIMS } from '../../../supabase/functions/_shared/play/buddyland';
 import { CAMP_VICTIMS, HANS_MINOR_POWERS } from '../../../supabase/functions/_shared/play/camp';
 import banners from '@/assets/play/modules/buddyland-banners.webp';
-import hansBanner from '@/assets/play/camp/hans-header.webp';
+import hansBanner from '@/assets/play/modules/hans-header.webp';
 import campBanner from '@/assets/play/camp/camp-header.webp';
 import { BuddylandControls } from './BuddylandControls';
 import { CampControls } from './CampControls';
@@ -38,7 +38,7 @@ const modules: Definition[] = [
       const on = sources.filter(id => state[`source.${id}.status`] === 'active').length;
       return `${active} Buddies in play · ${sources.length ? `${on}/${sources.length} sources on` : 'Sources not recorded'}`;
     }, Controls: props => <BuddylandControls {...props} part="killer" embedded /> },
-  { id: 'hans', owner: 'killer', match: 'Hans', title: 'Hans the Butcher', art: { src: hansBanner },
+  { id: 'hans', owner: 'killer', match: 'Hans', title: 'Hans the Butcher', art: { src: hansBanner, atlas: { width: 1536, height: 1024, x: 0, y: 0, cellWidth: 1536, cellHeight: 512 } },
     summary: state => HANS_MINOR_POWERS.map(power => {
       const health = state[`minor.${power.id}.health`];
       return `${power.name}: ${health === undefined ? 'unrevealed' : `${health}/2`}`;
