@@ -51,7 +51,7 @@ test("private evaluation export is explicit, contains whole attempts and fits bo
   expect(reads).toBe(0);
   const downloaded = page.waitForEvent("download");
   await page
-    .getByRole("button", { name: "EXPORT STORY EVALUATION DATA", exact: true })
+    .getByRole("button", { name: "EXPORT JSON", exact: true })
     .click();
   const file = await downloaded;
   const json = JSON.parse(await readFile((await file.path())!, "utf8"));
@@ -96,7 +96,7 @@ test("empty and failed export explain missing data without downloading", async (
   await page.getByRole("button", { name: "Collection", exact: true }).click();
   await page.getByText("Story evaluation", { exact: true }).click();
   const button = page.getByRole("button", {
-    name: "EXPORT STORY EVALUATION DATA",
+    name: "EXPORT JSON",
     exact: true,
   });
   await button.click();

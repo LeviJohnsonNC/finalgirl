@@ -96,7 +96,6 @@ export function StoryEvaluationTools() {
           <button
             type="button"
             disabled={busy}
-            aria-label={busy ? "PLEASE WAIT" : "EXPORT JSON"}
             onClick={() => void run()}
             className="inline-flex items-center gap-2 border border-primary/40 px-3 py-2 type-label text-primary hover:bg-primary/10 disabled:opacity-50"
           >
@@ -105,7 +104,7 @@ export function StoryEvaluationTools() {
             ) : (
               <Download className="h-4 w-4" />
             )}
-            {busy ? "PLEASE WAIT" : "EXPORT STORY EVALUATION DATA"}
+            {busy ? "PLEASE WAIT" : "EXPORT JSON"}
           </button>
           <button
             type="button"

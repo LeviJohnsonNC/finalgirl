@@ -6,7 +6,7 @@ New, authenticated, validated opening/ending requests write a private evaluation
 
 1. Apply `20261022180000_story_evaluations.sql` before deploying the changed `generate-story` and `generate-ending` functions (their shared dependencies bundle with them).
 2. Deploy the frontend. Older clients still produce captures with `diagnostic_status=not_provided` and no paired game ID. Older functions do not capture anything, even with a new frontend.
-3. Using your own signed-in account, generate an opening and ending for one game, then use **Collection → Story evaluation → Export story evaluation data**. Verify two attempts have the same `game_id`, full text, effective system/user prompts, model context, diagnostic log, actual selected model and terminal status.
+3. Using your own signed-in account, generate an opening and ending for one game, then use **Collection → Story evaluation → Export JSON**. Verify two attempts have the same `game_id`, full text, effective system/user prompts, model context, diagnostic log, actual selected model and terminal status.
 4. If persistence is unavailable, story generation continues and the new frontend shows an evaluation-save warning. Fix deployment/connectivity before collecting evaluation games. No historical prompt reconstruction or backfill is attempted.
 
 ## Interpretation
