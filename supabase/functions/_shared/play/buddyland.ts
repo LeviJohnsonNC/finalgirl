@@ -433,9 +433,9 @@ export const BUDDYLAND_ROOMS = [
   "Ball Pit",
 ] as const;
 export const SPECIAL_VICTIMS = [
-  { id: "nick", name: "Nick the Janitor" },
-  { id: "birthday-girl", name: "Birthday Girl" },
-  { id: "pizza-guy", name: "Pizza Guy" },
+  { id: "nick", name: "Nick the Janitor", event: "Nick the Janitor" },
+  { id: "birthday-girl", name: "Birthday Girl", event: "Birthday Girl" },
+  { id: "pizza-guy", name: "Pizza Guy", event: "Pizza Delivery" },
 ] as const;
 export const FINAL_GIRL_REWARDS = {
   Rena: [

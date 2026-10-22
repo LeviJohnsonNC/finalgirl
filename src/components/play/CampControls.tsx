@@ -2,7 +2,7 @@ import { useState } from "react";
 import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
 import { moduleState, type ModuleValue } from "@/lib/play/modules";
 import {
-  CAMP_EVENTS,
+  CAMP_ONGOING_EVENTS,
   CAMP_TUNNEL_ROOMS,
   CAMP_VICTIMS,
   HANS_MINOR_POWERS,
@@ -59,10 +59,6 @@ const statusLabels = {
   saved: "Saved",
   untracked: "Untracked",
 };
-const ongoing = CAMP_EVENTS.filter(
-  (e) =>
-    !["Boyfriend", "Fresh Meat", "Girlfriend", "Vengeance"].includes(e.name),
-);
 
 export function CampControls({
   killer,
@@ -251,7 +247,7 @@ export function CampControls({
                 Tap an event to activate or resolve it.
               </p>
               <div className="play-camp-effects">
-                {ongoing.map((effect) => {
+                {CAMP_ONGOING_EVENTS.map((effect) => {
                   const value = camp[`event.${effect.id}`];
                   const active = value === "active";
                   return (

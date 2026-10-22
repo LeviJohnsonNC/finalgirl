@@ -79,3 +79,43 @@ it('initializes once for early rapid taps and merges independent durable drafts'
   expect(result.current.activeGame!.playEvents!.filter(e=>e.kind==='start')).toHaveLength(1);
   expect(result.current.activeGame!.playDrafts).toEqual({one:{detail:'Axe'},two:{room:'Kitchen'}});
 });
+
+it('saves starting-event setup atomically and never reapplies it after player edits or reload', () => {
+  const first = renderHook(useActiveGame);
+  act(() => { first.result.current.save({ ...game, selection: { ...game.selection, startingEvent: 'Girlfriend' } }); });
+  act(() => {
+    expect(first.result.current.appendPlayEvent(game.id, newPlayEvent({ kind: 'start', saved: 0, killed: 0, round: 1 }))).toBe(true);
+  });
+  const setup = first.result.current.activeGame!.playEvents!.find(e => e.moduleData?.changes['victim.girlfriend']);
+  expect(setup?.moduleData?.changes['victim.girlfriend']).toBe('in-play');
+  act(() => { first.result.current.appendPlayEvent(game.id, newPlayEvent({ kind: 'undo', target: setup!.id })); });
+  first.unmount();
+  const second = renderHook(useActiveGame);
+  act(() => {
+    expect(second.result.current.appendPlayEvent(game.id, newPlayEvent({ kind: 'start', saved: 0, killed: 0, round: 1 }))).toBe(false);
+    second.result.current.appendPlayEvent(game.id, newPlayEvent({ kind: 'round' }));
+  });
+  expect(second.result.current.activeGame!.playEvents!.filter(e => e.moduleData?.changes['victim.girlfriend'])).toHaveLength(1);
+  expect(summarizePlay(second.result.current.activeGame!.playEvents).inactive.has(setup!.id)).toBe(true);
+});
+
+it('puts setup before an early player observation and never backfills an existing game', () => {
+  const { result } = renderHook(useActiveGame);
+  const selected = { ...game, selection: { ...game.selection, startingEvent: 'Girlfriend' } };
+  act(() => { result.current.save(selected); });
+  act(() => { result.current.appendPlayEvent(game.id, newPlayEvent({ kind: 'module', moduleData: { module: 'camp', changes: { 'victim.girlfriend': 'killed' } } })); });
+  const observations = result.current.activeGame!.playEvents!.filter(e => e.kind === 'module');
+  expect(observations.map(e => e.moduleData!.changes['victim.girlfriend'])).toEqual(['in-play', 'killed']);
+  act(() => { result.current.save({ ...selected, playEvents: [newPlayEvent({ kind: 'start', saved: 0, killed: 0, round: 3 })] }); });
+  act(() => { result.current.appendPlayEvent(game.id, newPlayEvent({ kind: 'round' })); });
+  expect(result.current.activeGame!.playEvents!.some(e => e.kind === 'module')).toBe(false);
+});
+
+it('does not partly apply starting-event setup when durable storage fails', () => {
+  const { result } = renderHook(useActiveGame);
+  act(() => { result.current.save({ ...game, selection: { ...game.selection, startingEvent: 'Girlfriend' } }); });
+  const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('quota'); });
+  act(() => { expect(result.current.appendPlayEvent(game.id, newPlayEvent({ kind: 'start', saved: 0, killed: 0, round: 1 }))).toBe(false); });
+  expect(result.current.activeGame!.playEvents).toBeUndefined();
+  spy.mockRestore();
+});

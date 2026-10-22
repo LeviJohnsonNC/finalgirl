@@ -4,6 +4,7 @@ import { useAuth } from './useAuth';
 import { readStoredValue, useLocalStorage } from './useLocalStorage';
 import { isPlayEvent, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
 import { ActiveGame, isActiveGame } from '@/lib/activeGame';
+import { startingEventObservations } from '@/lib/play/modules';
 import { discardedGamesKey, isGameDiscarded } from '@/lib/discardedGames';
 
 export function useActiveGame() {
@@ -42,9 +43,15 @@ export function useActiveGame() {
       // A tap arriving before the entry effect still gets a durable baseline.
       const baseline = event.kind !== 'start' && !summarizePlay(log).tracked
         ? [newPlayEvent({ kind: 'start', saved: 0, killed: 0, round: 1 })] : [];
-      if (log.length + baseline.length + 1 > 1000) return previous;
+      // Persist setup and the first tap together. Never backfill an existing log:
+      // a player may already have resolved, cleared or undone the starting state.
+      const setup = log.length === 0
+        ? startingEventObservations(previous.selection).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
+        : [];
+      const additions = event.kind === 'start' ? [event, ...setup] : [...baseline, ...setup, event];
+      if (log.length + additions.length > 1000) return previous;
       applied = true;
-      return { ...previous, playEvents: [...log, ...baseline, event] };
+      return { ...previous, playEvents: [...log, ...additions] };
     });
     if (!ok) toast.error('This change could not be saved. Free device storage and try again.');
     return ok && applied;
