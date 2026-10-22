@@ -47,17 +47,20 @@ test('console selections, keyboard access and responsive frame', async ({ page, 
   }
   for (const width of [320, 390, 639, 640, 768, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    const panelBox = (await consolePanel.boundingBox())!;
-    const playBox = (await play.boundingBox())!;
-    expect(panelBox.width).toBeLessThanOrEqual(width >= 900 ? width - 48 : 800);
-    expect(panelBox.y + panelBox.height - (playBox.y + playBox.height)).toBeGreaterThanOrEqual(24);
-    for (const control of [setup, event, play]) {
-      const box = (await control.boundingBox())!;
-      expect(box.height).toBeGreaterThanOrEqual(44);
-      expect(box.x).toBeGreaterThanOrEqual(panelBox.x);
-      expect(box.x + box.width).toBeLessThanOrEqual(panelBox.x + panelBox.width);
-    }
+    // Viewport changes and the tableau ResizeObserver settle asynchronously.
+    await expect(async () => {
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      const panelBox = (await consolePanel.boundingBox())!;
+      const playBox = (await play.boundingBox())!;
+      expect(panelBox.width).toBeLessThanOrEqual(width >= 900 ? width - 48 : 800);
+      expect(panelBox.y + panelBox.height - (playBox.y + playBox.height)).toBeGreaterThanOrEqual(24);
+      for (const control of [setup, event, play]) {
+        const box = (await control.boundingBox())!;
+        expect(box.height).toBeGreaterThanOrEqual(44);
+        expect(box.x).toBeGreaterThanOrEqual(panelBox.x);
+        expect(box.x + box.width).toBeLessThanOrEqual(panelBox.x + panelBox.width);
+      }
+    }).toPass({ timeout: 10000 });
   }
   await setup.click();
   await page.getByRole('option', { name: 'The Bonfire', exact: true }).click();

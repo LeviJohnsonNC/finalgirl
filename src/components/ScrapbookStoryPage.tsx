@@ -2,7 +2,7 @@ import {RecordedDeathScenes} from '@/components/play/RecordedDeathScenes';
 import { PlayTimeline } from '@/components/play/PlayTimeline';
 import { GameResult } from '@/hooks/useGameHistory';
 import { format } from 'date-fns';
-import { getFinalGirlMaxHealth } from '@/data/finalGirlHealth';
+import { getLegacyFinalGirlHealth } from '@/data/finalGirlHealth';
 import { renderStoryText } from '@/lib/textFormatting';
 
 interface ScrapbookStoryPageProps {
@@ -16,7 +16,7 @@ export const ScrapbookStoryPage = ({
   type,
   onDelete,
 }: ScrapbookStoryPageProps) => {
-  const maxFinalGirlHealth = getFinalGirlMaxHealth(game.finalGirl);
+  const maxFinalGirlHealth = game.finalGirlMaxHealth ?? getLegacyFinalGirlHealth(game.finalGirl);
   const isWin = game.outcome === 'won';
 
   return (

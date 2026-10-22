@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FinalGirlReferenceDialog } from '@/components/FinalGirlReference';
+import { LoreInfoModal } from '@/components/LoreInfoModal';
 import { getFinalGirlReference } from '@/data/finalGirlReferences';
 import { Switch } from '@/components/ui/switch';
 import { FeatureFilm, getBoxArtThumbnail } from '@/types/gameData';
@@ -46,7 +46,7 @@ export const FilmToggle = React.forwardRef<HTMLDivElement, FilmToggleProps>(
           <div><dt><MapPin size={13} aria-hidden="true" />Location</dt><dd>{film.isVignette ? 'Your choice' : film.location}</dd></div>
           <div><dt><Users size={13} aria-hidden="true" />Final {film.finalGirls.length === 1 ? 'Girl' : 'Girls'}</dt><dd>{film.finalGirls.join(' & ')}</dd></div>
         </dl>}
-        {!comingSoon && <div className="collection-girl-references">{film.finalGirls.filter(name=>getFinalGirlReference(name)).map(name=><FinalGirlReferenceDialog key={name} name={name}/>)}</div>}
+        {!comingSoon && <div className="collection-girl-references">{film.finalGirls.filter(name=>getFinalGirlReference(name)).map(name=><LoreInfoModal key={name} type="finalGirl" name={name} namedTrigger/>)}</div>}
       </div>
     );
   }

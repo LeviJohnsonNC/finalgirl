@@ -7,7 +7,7 @@ import { BUDDYLAND_ITEMS, BUDDYLAND_ROOMS } from '@/lib/play/modules';
 import '@/styles/outcome.css';
 import { GameResult } from '@/hooks/useGameHistory';
 import { EndingFormData } from '@/pages/TheEnd';
-import { getFinalGirlMaxHealth } from '@/data/finalGirlHealth';
+import { getLegacyFinalGirlHealth } from '@/data/finalGirlHealth';
 import { getKillerMaxHealth, isKillerUnkillable } from '@/data/killerHealth';
 import { BUDDIES, BILLY_FINALES, moduleState } from '@/lib/play/modules';
 import { summarizePlay } from '@/lib/play/events';
@@ -52,10 +52,10 @@ export const GameOutcomeForm = ({
   const isWin = result.outcome === 'won';
   const billyState = moduleState(summarizePlay(result.playEvents).entries, 'billy');
 
-  // Get the Final Girl's max health based on character data
+  // Session snapshots include observed Ultimate changes; old games keep their denominator.
   const maxFinalGirlHealth = useMemo(
-    () => getFinalGirlMaxHealth(result.finalGirl),
-    [result.finalGirl],
+    () => result.finalGirlMaxHealth ?? getLegacyFinalGirlHealth(result.finalGirl),
+    [result.finalGirl, result.finalGirlMaxHealth],
   );
   // Get killer-specific HP and flags
   const maxKillerHealth = useMemo(
