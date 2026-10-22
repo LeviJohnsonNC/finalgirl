@@ -214,37 +214,86 @@
 }
 @media (prefers-reduced-motion: reduce) { .casting-console-select, .casting-console-play { transition: none; } }
 
-/* Preserve the photo composition. The console has its own readable minimum
-   rather than shrinking its controls along with the photographs. */
-@media (min-width: 1024px) {
-  .casting-page { --casting-height-reserve: 510px; --casting-stage-width: min(1160px, calc(100vw - 96px), max(640px, calc((100dvh - var(--casting-height-reserve)) / .43))); }
-  /* Reserve the fixed 48px broadcast plus 12px clearance as well as the footer.
-     Short windows may scroll instead of hiding controls under the ticker. */
-  body:has(.casting-page) main { padding-top: 104px; padding-bottom: calc(var(--app-footer-h, 64px) + 60px); }
-  .casting-content { padding-block: 0; }
-  .casting-tableau { width: var(--casting-stage-width); margin-block: 8px 16px; }
-  .casting-slot-top { gap: 14px; }
-  .casting-slot { gap: 14px; }
-  .casting-slot-controls { position: relative; left: 50%; transform: translateX(-50%); min-width: 180px; margin-inline: 0; }
-  .casting-slot-buttons .plate-btn { font-size: 12px; letter-spacing: .1em; }
-  .casting-slot--location .casting-slot-controls { max-width: 220px; }
-  .casting-console { width: clamp(640px, calc(var(--casting-stage-width) * 800 / 1160), 800px); margin-bottom: 0; }
-  .casting-page:has(.casting-console-field--mission) { --casting-height-reserve: 625px; }
+/* Give the photographs the remaining height after the real console layout.
+   Size containment makes cqh track this row, including a Mission or notice. */
+.casting-stage { width: 100%; min-width: 0; }
+.casting-mission-info {
+  grid-column: 1 / -1; display: inline-flex; align-items: center; gap: 7px;
+  justify-self: start; min-height: 44px; padding: 0 4px;
+  color: hsl(var(--secondary)); font: 14px/1.3 'Console Text', Georgia, serif;
 }
+.casting-mission-info svg { width: 16px; height: 16px; }
+.casting-mission-info:focus-visible { outline: 2px solid hsl(var(--secondary)); outline-offset: 2px; }
+.casting-mission-details { width: min(360px, calc(100vw - 32px)); max-height: 60dvh; overflow-y: auto; }
+.casting-mission-details h3 { margin-bottom: 8px; font-family: var(--font-display); font-size: 22px; }
+.casting-mission-details .casting-console-mission-description { font-size: 18px; line-height: 1.5; }
 
-@media (min-width: 1024px) and (max-height: 850px) {
-  .casting-console { padding-block: 28px 24px; }
+@media (min-width: 900px) and (min-height: 600px) {
+  body:has(.casting-page) main { max-width: none; padding-top: 104px; padding-bottom: calc(var(--app-footer-h, 64px) + 64px); }
+  body:has(.casting-page) .app-header { top: 24px; left: 24px; }
+  body:has(.casting-page) .app-header h1 { font-size: clamp(28px, 2.5vw, 42px); }
+  body:has(.casting-page) .app-header p { font-size: 16px; }
+  .casting-content {
+    height: calc(100dvh - 104px - var(--app-footer-h, 64px) - 64px);
+    padding-block: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto;
+    align-items: stretch; gap: 16px;
+  }
+  .casting-content:has(> .casting-notice) { grid-template-rows: auto minmax(0, 1fr) auto; }
+  .casting-notice { margin-bottom: 0; }
+  .casting-stage { container-type: size; display: flex; align-items: center; justify-content: center; }
+  .casting-tableau {
+    /* .385 includes the rotated portrait corners; 96px covers headings,
+       gaps and the 44px action row. Keep those actions usable as art scales. */
+    width: min(1480px, calc(100cqw - 48px), calc((100cqh - 96px) / .385));
+    max-width: none; margin: 0;
+  }
+  .casting-slot-top, .casting-slot { gap: 12px; }
+  .casting-slot-controls { position: relative; left: 50%; transform: translateX(-50%); min-width: 128px; margin-inline: 0; }
+  .casting-slot-buttons .plate-btn { height: 44px; font-size: 12px; letter-spacing: .1em; }
+  .casting-slot--location .casting-slot-controls { max-width: 180px; }
+  .casting-console {
+    width: min(1100px, calc(100% - 48px)); max-width: none; margin: 0 auto;
+    padding: 28px 32px; display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(200px, .85fr);
+    align-items: end; column-gap: 24px; row-gap: 12px;
+  }
   .casting-console::before { border-image-width: 20px; }
-  .casting-console-play { font-size: 22px; }
-}
+  .casting-console-fields { display: contents; }
+  .casting-console-field--event::before { left: -12px; }
+  .casting-console-playback { grid-column: 3; grid-row: 1; margin: 0; }
+  .casting-console-playback::before, .casting-console-playback::after { display: none; }
+  .casting-console-play { flex-basis: 100%; font-size: clamp(18px, 1.6vw, 22px); letter-spacing: .12em; gap: 12px; white-space: nowrap; }
+  .casting-console-help { position: absolute; bottom: 4px; right: 32px; margin: 0; font-size: 12px; }
+  .casting-console-help:empty { display: none; }
+  .casting-console:has(.casting-console-field--mission) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.25fr) 200px;
+    column-gap: 20px;
+  }
+  .casting-console:has(.casting-console-field--mission) .casting-console-playback { grid-column: 4; }
+  .casting-console .casting-console-field--mission {
+    position: relative; grid-column: 3; grid-row: 1;
+    grid-template-columns: minmax(0, 1fr) 44px;
+    gap: 8px; padding: 0; border: 0;
+  }
+  .casting-console-field--mission .casting-console-label { grid-column: 1 / -1; }
+  .casting-console .casting-console-field--mission .casting-console-select { grid-column: 1; grid-row: 2; }
+  .casting-console .casting-console-field--mission .casting-console-draw {
+    grid-column: 2; grid-row: 2; min-width: 44px; height: 48px; padding: 0;
+  }
+  .casting-console .casting-console-draw > span, .casting-console .casting-mission-info > span { display: none; }
+  .casting-console .casting-mission-info { position: absolute; right: 0; top: -12px; width: 44px; justify-content: center; }
 
-@media (min-width: 1024px) and (max-height: 799px) {
-  .casting-tableau { margin-block: 4px 10px; }
-  .casting-slot-top, .casting-slot { gap: 8px; }
-  .casting-slot-buttons .plate-btn { height: 44px; }
 }
 
 @media (max-width: 639px) {
   .casting-heading-info { left: calc(100% - 4px); }
   .casting-heading-info svg { width: 12px; height: 12px; }
+}
+
+@container (max-width: 500px) {
+  @media (min-width: 900px) and (min-height: 600px) {
+    .casting-slot-controls { min-width: 116px; }
+    .casting-slot--location .casting-slot-controls { max-width: 140px; }
+    .casting-slot-buttons .plate-btn { font-size: 11px; letter-spacing: .04em; padding-inline: 2px; }
+  }
 }
