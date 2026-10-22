@@ -252,7 +252,8 @@
   .casting-slot-buttons .plate-btn { height: 44px; font-size: 12px; letter-spacing: .1em; }
   .casting-slot--location .casting-slot-controls { max-width: 180px; }
   .casting-console {
-    width: min(1100px, calc(100% - 48px)); max-width: none; margin: 0 auto;
+    /* Match the photo row; a readable minimum protects short laptop windows. */
+    width: clamp(640px, var(--casting-tableau-width, 800px), calc(100% - 48px)); max-width: none; margin: 0 auto;
     padding: 28px 32px; display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(200px, .85fr);
     align-items: end; column-gap: 24px; row-gap: 12px;
@@ -263,7 +264,7 @@
   .casting-console-playback { grid-column: 3; grid-row: 1; margin: 0; }
   .casting-console-playback::before, .casting-console-playback::after { display: none; }
   .casting-console-play { flex-basis: 100%; font-size: clamp(18px, 1.6vw, 22px); letter-spacing: .12em; gap: 12px; white-space: nowrap; }
-  .casting-console-help { position: absolute; bottom: 4px; right: 32px; margin: 0; font-size: 12px; }
+  .casting-console-help { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .casting-console-help:empty { display: none; }
   .casting-console:has(.casting-console-field--mission) {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.25fr) 200px;
