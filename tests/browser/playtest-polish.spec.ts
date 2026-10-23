@@ -103,7 +103,7 @@ test('ending poster reclaims image area while the surrounding laptop layout stay
  const old=await page.addStyleTag({content:`.narration-layout--ending .ending-poster-window{display:block;flex:0 1 auto;height:calc(100cqw * 1.5 + 20px)}.narration-layout--ending .ending-poster-window > .narration-photo-mount{width:min(100cqw,calc((100cqh - 20px) * 2 / 3));padding:20px 20px 16px}.narration-layout--ending .narration-photo--poster .narration-photo-edge{border-width:30px}`});
  const before=(await poster.boundingBox())!;
  expect(await page.locator('.narration-reader').boundingBox()).toEqual(reader);expect(await page.locator('.ending-header').boundingBox()).toEqual(header);
- await old.evaluate(el=>el.remove());
+ await old.evaluate(el=>el.parentNode?.removeChild(el));
  await expect.poll(async()=> (await poster.boundingBox())!.width).toBeCloseTo(image.width,0);
  const gain=(image.width*image.height)/(before.width*before.height)-1;
  console.log('Poster image-area gain',size,Math.round(gain*100)+'%',before,image);

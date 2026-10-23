@@ -122,9 +122,10 @@ export function DeathSceneDialog({
       (initial[key as keyof PlayDetails] ?? "") !==
       (values[key as keyof PlayDetails] ?? ""),
   );
+  const selectedId = selected?.id;
   useEffect(() => {
-    if (selected && !dirty && !editingDetails) payoff.current?.focus({ preventScroll: true });
-  }, [selected?.id, dirty, editingDetails]);
+    if (selectedId && !dirty && !editingDetails) payoff.current?.focus({ preventScroll: true });
+  }, [selectedId, dirty, editingDetails]);
   const reading = !editingDetails && !dirty && Boolean(selected || scenes.busy || requested || unfinished);
   const save = () => {
     const clean = Object.fromEntries(
