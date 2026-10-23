@@ -136,12 +136,10 @@ for (const killer of killers)
       const name = await choice.locator("strong").innerText();
       await choice.click();
       await expect(choice).toHaveAttribute("aria-pressed", "true");
-      await panel
-        .locator(".module-card-section")
-        .screenshot({
-          path: info.outputPath(`${killer.id}-${location.id}-cards.png`),
-          style: ".app-footer {visibility:hidden}",
-        });
+      await panel.locator(".module-card-section").screenshot({
+        path: info.outputPath(`${killer.id}-${location.id}-cards.png`),
+        style: ".app-footer {visibility:hidden}",
+      });
       await page
         .getByRole("button", { name: "Dark Power", exact: true })
         .click();
@@ -174,8 +172,38 @@ for (const killer of killers)
         "data-state",
         location.id === "buddyland" ? "on-board" : "in-play",
       );
+      await panel.locator(".module-card-section > summary").click();
       for (const width of [1366, 390, 320]) {
         await page.setViewportSize({ width, height: 768 });
+        await page.evaluate(() => document.fonts.ready);
+        const clipped = await panel
+          .locator(
+            ".module-card-grid .play-tile-caption:visible,.module-minor-art h3:visible",
+          )
+          .evaluateAll((nodes) =>
+            nodes
+              .map((element) => {
+                const title = element.querySelector("strong") ?? element;
+                const tile =
+                  element.closest("button") ?? element.parentElement!;
+                const textBounds = element.getBoundingClientRect(),
+                  tileBounds = tile.getBoundingClientRect();
+                return {
+                  name: title.textContent,
+                  width: title.clientWidth,
+                  needed: title.scrollWidth,
+                  top: textBounds.top - tileBounds.top,
+                  bottom: tileBounds.bottom - textBounds.bottom,
+                };
+              })
+              .filter(
+                (bounds) =>
+                  bounds.needed > bounds.width + 1 ||
+                  bounds.top < -1 ||
+                  bounds.bottom < -1,
+              ),
+          );
+        expect(clipped).toEqual([]);
         expect(
           await page.evaluate(
             () => document.documentElement.scrollWidth <= innerWidth,
