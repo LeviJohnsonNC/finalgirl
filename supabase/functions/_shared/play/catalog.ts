@@ -1,3 +1,4 @@
+import { CARNIVAL_TERRORS, CARNIVAL_EVENTS, CARNIVAL_ITEMS, CARNIVAL_ROOMS, CARNIVAL_TRAPS, CARNIVAL_ITEM_TRAPS, CARNIVAL_PEOPLE, CARNIVAL_SOURCE } from './carnival.ts';
 import { GEPPETTO_TERRORS } from './geppetto.ts';
 import {
   BUDDYLAND_EVENTS,
@@ -30,6 +31,8 @@ const station = wiki("Station_2891");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+  ...CARNIVAL_TERRORS.map(card=>({...card,kind:"terror" as const})),
+  ...CARNIVAL_EVENTS.map(card=>({...card,kind:"event" as const,location:"Carnival of Blood",source:CARNIVAL_SOURCE})),
   ...GEPPETTO_TERRORS.map(card => ({...card, kind: "terror" as const})),
   ...BUDDYLAND_TERRORS.map((card) => ({
     ...card,
@@ -177,6 +180,7 @@ export function playCardContext(
   });
 }
 export const PLAY_ROOMS: Record<string, readonly string[]> = {
+  "Carnival of Blood": CARNIVAL_ROOMS,
   "Station 2891": [
     "Commander's Hut",
     "Supply Closet",
@@ -212,6 +216,7 @@ export function playMechanisms(selection: {
     ...(selection.killer === "The Organism"
       ? ["Fast Organism", "Tough Organism", "Strong Organism"]
       : []),
+    ...(selection.location === "Carnival of Blood" ? [...CARNIVAL_TRAPS, ...CARNIVAL_ITEM_TRAPS].map(t=>t.name) : []),
     "Location hazard",
     "Other",
   ];
@@ -221,14 +226,14 @@ export function playMechanisms(selection: {
 export function playItems(
   location: string,
 ): readonly { name: string; effect: string }[] {
-  return location === "Camp Happy Trails"
+  return location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
     ? CAMP_ITEMS
     : location === "Buddyland"
       ? BUDDYLAND_ITEMS
       : [];
 }
 export function playVictims(location: string): readonly { name: string }[] {
-  return location === "Camp Happy Trails"
+  return location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
     ? CAMP_VICTIMS
     : location === "Buddyland"
       ? SPECIAL_VICTIMS

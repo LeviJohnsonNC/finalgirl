@@ -46,7 +46,7 @@ export function useActiveGame() {
       // Persist setup and the first tap together. Never backfill an existing log:
       // a player may already have resolved, cleared or undone the starting state.
       const setup = log.length === 0
-        ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
+        ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
         : [];
       const additions = event.kind === 'start' ? [event, ...setup] : [...baseline, ...setup, event];
       if (log.length + additions.length > 1000) return previous;

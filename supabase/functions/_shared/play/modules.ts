@@ -1,4 +1,14 @@
 import {
+  CARNIVAL_EVENTS,
+  CARNIVAL_TRAPS,
+  CARNIVAL_ITEMS,
+  CARNIVAL_ITEM_TRAPS,
+  CARNIVAL_PEOPLE,
+  validCarnivalField,
+  carnivalStartingObservations,
+  carnivalStoryFacts,
+} from "./carnival.ts";
+import {
   GEPPETTO_POWERS,
   GEPPETTO_FINALES,
   GEPPETTO_MINOR_POWERS,
@@ -30,7 +40,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "billy" | "buddyland" | "hans" | "camp" | "geppetto";
+  module: "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -126,6 +136,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === "carnival") return validCarnivalField(key, value);
   if (module === "geppetto") return validGeppettoField(key, value);
   const [group, id, field] = key.split(".");
   if (module === "hans") {
@@ -236,7 +247,9 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["billy", "buddyland", "hans", "camp", "geppetto"].includes(m.module) ||
+    !["billy", "buddyland", "hans", "camp", "geppetto", "carnival"].includes(
+      m.module,
+    ) ||
     !m.changes ||
     typeof m.changes !== "object" ||
     Array.isArray(m.changes)
@@ -305,6 +318,31 @@ export function moduleState(
   return state;
 }
 function fieldLabel(module: ModuleObservation["module"], key: string) {
+  if (module === "carnival") {
+    const [group, id, field] = key.split(".");
+    if (group === "trap")
+      return `${CARNIVAL_TRAPS.find((t) => t.id === id)?.name ?? id}${field === "space" ? " space" : ""}`;
+    if (group === "event")
+      return CARNIVAL_EVENTS.find((e) => e.id === id)?.name ?? key;
+    if (group === "person")
+      return CARNIVAL_PEOPLE.find((p) => p.id === id)?.name ?? key;
+    if (group === "condition")
+      return `${CARNIVAL_ITEM_TRAPS.find((t) => t.id === id)?.name ?? id} attached`;
+    return (
+      (
+        {
+          werewolf: "Werewolf",
+          zappo: "Zappo",
+          cart: "Golf Cart",
+          searchPenalty: "Lasting Search penalty",
+          lastTerrorTrap: "Terror Trap card",
+          terrorTrapOutcome: "Terror Trap outcome",
+          lastEncounter: "Item Trap encountered",
+          encounterOutcome: "Encounter outcome",
+        } as Record<string, string>
+      )[key] ?? key
+    );
+  }
   if (module === "geppetto") {
     const [, id, field] = key.split(".");
     if (key.startsWith("minor."))
@@ -350,6 +388,19 @@ function fieldLabel(module: ModuleObservation["module"], key: string) {
 }
 function valueLabel(key: string, value: ModuleValue) {
   if (value === null) return "unrecorded";
+  if (key === "lastTerrorTrap")
+    return CARNIVAL_TRAPS.find((t) => t.id === value)?.name ?? String(value);
+  if (key === "terrorTrapOutcome" || key === "encounterOutcome")
+    return (
+      (
+        {
+          "canceled-footage": "canceled with Found Footage",
+          "avoided-zappo": "avoided using Zappo",
+          resolved: "effects resolved",
+          placed: "token placed",
+        } as Record<string, string>
+      )[String(value)] ?? String(value)
+    );
   if (key === "finale")
     return BILLY_FINALES.find((c) => c.id === value)?.name ?? String(value);
   if (typeof value === "boolean") return value ? "yes" : "no";
@@ -374,17 +425,20 @@ export function moduleContext(
     "hans",
     "camp",
     "geppetto",
+    "carnival",
   ] as const) {
     const applies =
-      module === "geppetto"
-        ? selection.killer === "Geppetto"
-        : module === "billy"
-          ? selection.killer === "Billy the Bear"
-          : module === "hans"
-            ? selection.killer === "Hans"
-            : module === "camp"
-              ? selection.location === "Camp Happy Trails"
-              : selection.location === "Buddyland";
+      module === "carnival"
+        ? selection.location === "Carnival of Blood"
+        : module === "geppetto"
+          ? selection.killer === "Geppetto"
+          : module === "billy"
+            ? selection.killer === "Billy the Bear"
+            : module === "hans"
+              ? selection.killer === "Hans"
+              : module === "camp"
+                ? selection.location === "Camp Happy Trails"
+                : selection.location === "Buddyland";
     if (!applies) continue;
     const state = moduleState(entries, module);
     // A UI initialization marker is not a game fact or part of a death fingerprint.
@@ -401,6 +455,10 @@ export function moduleContext(
     }
     if (module === "camp" && state["tunnel.a"] === state["tunnel.b"])
       delete state["tunnel.b"];
+    if (module === "carnival")
+      for (const trap of CARNIVAL_TRAPS)
+        if (state[`trap.${trap.id}.status`] !== "placed")
+          delete state[`trap.${trap.id}.space`];
     if (Object.keys(state).length) context[module] = state;
   }
   return Object.keys(context).length ? context : undefined;
@@ -408,9 +466,21 @@ export function moduleContext(
 export function moduleStoryBeats(
   selection: ModuleSelection,
   entries: readonly ObservedEvent[],
-) {
+): string {
   const context = moduleContext(selection, entries);
   if (!context) return "";
+  // Preserve the established output for every other location. Each owner gets
+  // room inside the existing 900-character module budget for Carnival mixes.
+  if (context.carnival) {
+    const killer = moduleStoryBeats({ ...selection, location: "" }, entries);
+    const carnival = carnivalStoryFacts(context.carnival).join(" ");
+    return [
+      carnival && `Carnival: ${carnival.slice(0, killer ? 535 : 880)}`,
+      killer && `Killer: ${killer.slice(0, 340)}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
   const lines: string[] = [];
   const geppetto = context.geppetto;
   if (geppetto) {
@@ -562,6 +632,47 @@ export function moduleReferences(
   mechanism?: string,
 ) {
   const refs = buddylandReferences(selection, context, attacker);
+  if (selection.location === "Carnival of Blood") {
+    const state = context?.carnival ?? {};
+    for (const e of CARNIVAL_EVENTS)
+      if (state[`event.${e.id}`] === "active")
+        refs.push({
+          name: e.name,
+          effect: `${e.effect} Reference only; infer no extra casualties or stat changes.`,
+        });
+    for (const t of CARNIVAL_TRAPS)
+      if (state[`trap.${t.id}.status`] === "placed" || mechanism === t.name)
+        refs.push({
+          name: t.name,
+          effect: `${t.effect} Persistent board token: kills Victims there or entering; all Enemies ignore it. A token's presence alone does not establish the cause of this death.`,
+        });
+    for (const t of CARNIVAL_ITEM_TRAPS)
+      if (state[`condition.${t.id}`] === "active" || mechanism === t.name)
+        refs.push({ name: t.name, effect: t.effect });
+    if (state.searchPenalty === true)
+      refs.push({
+        name: "So Much Junk lasting penalty",
+        effect:
+          "Search rolls use one fewer die, minimum one, for the rest of the game. Zappo may have been regained; this penalty remains recorded.",
+      });
+    for (const p of CARNIVAL_PEOPLE)
+      if (state[`person.${p.id}`] || victim === p.name)
+        refs.push({
+          name: p.name,
+          effect: `Recorded status: ${state[`person.${p.id}`] ?? "unrecorded"}. Only a matching death-specific victim field identifies this scene’s victim.`,
+        });
+    if (state.werewolf === "in-play")
+      refs.push({
+        name: "Werewolf",
+        effect:
+          "Full Moon’s transformed performer cannot be targeted, saved or killed; its presence does not establish that it caused this death.",
+      });
+    if (state.zappo)
+      refs.push({
+        name: "Zappo",
+        effect: `Small carnival monkey, current state ${state.zappo}; fleeing or being discarded is not a Victim death.`,
+      });
+  }
   if (selection.killer === "Geppetto") {
     const state = context?.geppetto ?? {};
     if (
@@ -646,7 +757,12 @@ export function moduleItemBeats(
   selection: ModuleSelection,
   entries: readonly ObservedEvent[],
 ) {
-  const catalog = selection.location === "Camp Happy Trails" ? CAMP_ITEMS : [];
+  const catalog =
+    selection.location === "Camp Happy Trails"
+      ? CAMP_ITEMS
+      : selection.location === "Carnival of Blood"
+        ? CARNIVAL_ITEMS
+        : [];
   return entries
     .filter((e) => e.kind === "moment" && e.momentType === "item" && e.detail)
     .slice(-2)
@@ -673,10 +789,19 @@ export function initialModuleObservations(
     startingEvent?: string | null;
   },
   initializeKiller: boolean,
+  initializeCarnival = false,
 ): ModuleObservation[] {
   return [
     ...(initializeKiller && selection.killer === "Geppetto"
       ? [{ module: "geppetto" as const, changes: initialGeppettoPuppets() }]
+      : []),
+    ...(initializeCarnival && selection.location === "Carnival of Blood"
+      ? [
+          {
+            module: "carnival" as const,
+            changes: carnivalStartingObservations(selection.startingEvent),
+          },
+        ]
       : []),
     ...startingEventObservations(selection),
   ];
