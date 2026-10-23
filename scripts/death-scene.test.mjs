@@ -24,9 +24,11 @@ const buddyland = moduleAt(
   {},
 );
 const camp = moduleAt("../supabase/functions/_shared/play/camp.ts", {});
+const geppetto = moduleAt("../supabase/functions/_shared/play/geppetto.ts", {});
 const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", {
   "./buddyland.ts": buddyland,
   "./camp.ts": camp,
+  "./geppetto.ts": geppetto,
 });
 const events = moduleAt("../supabase/functions/_shared/play/events.ts", {
   "./modules.ts": modules,
@@ -438,4 +440,16 @@ test("cached fragments are repaired in the same slot through a fresh lease, and 
     assert.ok(!failed.calls.includes("AI"));
     assert.ok(!failed.calls.includes("guard"));
   }
+});
+
+test('Gepetto observations authorize a Puppet scene from historical owned state without creating another casualty',async()=>{
+ const f=fixture({expectedFacts:{killer:'Geppetto',cause:'minion',quantity:1,attacker:'Puppet 2',moduleContext:{geppetto:{'puppet.1.status':'ready','puppet.2.status':'on-board','puppet.3.status':'exhausted','minor.am-i-a-puppet.health':1}}}});
+ f.owned.selection.killer='Geppetto';
+ const killed={...f.owned.playEvents[1],cause:'minion',quantity:1,attacker:'Puppet 2'};
+ f.owned.playEvents=[f.owned.playEvents[0],{id:crypto.randomUUID(),at:1,kind:'module',moduleData:{module:'geppetto',changes:{'puppet.1.status':'ready','puppet.2.status':'on-board','puppet.3.status':'exhausted','minor.am-i-a-puppet.health':1}}},killed,
+ {id:crypto.randomUUID(),at:3,kind:'module',moduleData:{module:'geppetto',changes:{'puppet.2.status':'exhausted'}}}];
+ const original=structuredClone(f.owned.playEvents);
+ assert.equal((await f.handler(f.request())).status,200);
+ assert.deepEqual(f.owned.playEvents,original);
+ assert.equal(f.calls.filter(c=>c==='AI').length,1);
 });

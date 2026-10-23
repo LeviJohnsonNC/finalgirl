@@ -1,3 +1,4 @@
+import { GEPPETTO_VISUAL } from './play/geppetto.ts';
 import { HANS_VISUAL } from './play/camp.ts';
 // Concise setting cues from src/data/killerDescriptions.ts and locationDescriptions.ts.
 // Fictional appearance only: the player records actual causes and board spaces.
@@ -11,8 +12,7 @@ export const DEATH_KILLER_CUES: Record<string, string> = {
   Razorface:
     'A man in his late 20s to mid-30s with a lean, muscular, and athletic build. He has a chilling, authoritative presence that feels ritualistic and intensely focused. His skin is a stark, sickly pale white, providing a high-contrast canvas for the metalwork. His head and face are meticulously pierced with long metal pins arranged in a precise, geometric grid pattern. He has dark, hollowed eyes with an unblinking, cold stare and sharp, angular facial features, including a defined jawline and a thin, expressionless mouth. He is shirtless, wearing an intricate black leather harness with various straps, buckles, and metal O-rings across his chest.',
   Hans: HANS_VISUAL,
-  Geppetto:
-    'A slender, adult male figure with a tall, wiry build and an exaggerated, theatrical presence. His posture is expressive and performative, with deliberate gestures meant to be seen and savored. He moves like someone on stage even when standing still. His face is fully painted in stark, theatrical makeup: a white-painted base covering the entire face, heavy black makeup smeared and dripping downward from the eyes, and a wide, exaggerated red smile painted across the mouth, partially smeared and stained. The makeup looks worn, cracked, and intentionally grotesque rather than clean or polished.',
+  Geppetto: GEPPETTO_VISUAL,
   'Dr. Fright':
     "A middle-aged man in his late 40s to early 50s with a stocky, work-hardened build and a hunched, aggressive posture. His body language is tense and animalistic—shoulders forward, arms slightly bent, as if perpetually mid-lunge. He looks like someone who has snapped rather than transformed. His face is weathered and rough, with deep lines, broken skin, and fresh cuts smeared with blood. His expression is furious and unhinged—eyes wide, jaw clenched, lips pulled tight in a snarl. There's no irony or playfulness here; his violence is raw and emotional. His eyes are dark and intense, fixed on his target with obsessive focus.",
   'Ratchet Lady':

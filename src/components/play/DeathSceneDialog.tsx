@@ -1,3 +1,5 @@
+import geppettoPuppets from '@/assets/play/geppetto/puppets.webp';
+import { ModuleArtwork } from './ModuleArtwork';
 import causeKiller from "@/assets/play/cause-killer.webp";
 import causeMinion from "@/assets/play/cause-minion.webp";
 import causeTerror from "@/assets/play/cause-terror.webp";
@@ -262,8 +264,10 @@ export function DeathSceneDialog({
                   )
                 }
               >
-                <img src={art} alt="" />
-                <span>{deathCauseLabels[cause]}</span>
+                {cause === 'minion' && selection.killer === 'Geppetto'
+                  ? <ModuleArtwork className="geppetto-cause-art" art={{src:geppettoPuppets,atlas:{width:1254,height:1254,x:421,y:3,cellWidth:412,cellHeight:412}}}/>
+                  : <img src={art} alt="" />}
+                <span>{cause === 'minion' && selection.killer === 'Geppetto' ? 'Puppet / minion' : deathCauseLabels[cause]}</span>
               </button>
             ))}
           </div>
@@ -280,9 +284,9 @@ export function DeathSceneDialog({
                   options={
                     selection.killer === "Billy the Bear"
                       ? BUDDIES.map((b) => b.name)
-                      : []
+                      : selection.killer === "Geppetto" ? ["Puppet", "Puppet 1", "Puppet 2", "Puppet 3"] : []
                   }
-                  placeholder="Choose a Buddy or enter a minion"
+                  placeholder={selection.killer === "Geppetto" ? "Choose a Puppet or enter a minion" : "Choose a Buddy or enter a minion"}
                 />
               </label>
             )}
