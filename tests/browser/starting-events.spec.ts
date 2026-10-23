@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from './fixtures';
-import { openModule } from './play-helpers';
+import { openModule, statusPick } from './play-helpers';
 
 test('Girlfriend starting event is in play once and respects later changes across reload', async ({
   page,
@@ -25,7 +25,7 @@ test('Girlfriend starting event is in play once and respects later changes acros
   await expect(girlfriend).toHaveAttribute('data-state', 'in-play');
   await expect(
     page.locator('.play-camp-person').filter({ hasText: 'Boyfriend' }),
-  ).toHaveAttribute('data-state', 'untracked');
+  ).toHaveAttribute('data-state', 'unrecorded');
   await girlfriend
     .getByRole('button', { name: 'Mark Girlfriend killed', exact: true })
     .click();
@@ -33,13 +33,12 @@ test('Girlfriend starting event is in play once and respects later changes acros
   await page.getByRole('button', { name: 'RESUME GAME' }).click();
   await openModule(page, 'camp');
   await expect(girlfriend).toHaveAttribute('data-state', 'killed');
-  await girlfriend
-    .getByRole('button', { name: 'Stop tracking Girlfriend', exact: true })
-    .click();
+  await girlfriend.locator('.module-correction > summary').click();
+  await statusPick(page,girlfriend.getByRole('combobox',{name:'Girlfriend status',exact:true}),'Not recorded');
   await page.reload();
   await page.getByRole('button', { name: 'RESUME GAME' }).click();
   await openModule(page, 'camp');
-  await expect(girlfriend).toHaveAttribute('data-state', 'untracked');
+  await expect(girlfriend).toHaveAttribute('data-state', 'unrecorded');
   const seeded = await page.evaluate(
     (owner) =>
       JSON.parse(
@@ -69,7 +68,7 @@ for (const name of ['Dark Waters', 'Secret Tunnel'])
     await page.getByRole('button', { name: 'RESUME GAME' }).click();
     await openModule(page, 'camp');
     await expect(
-      page.getByRole('button', { name: name + ' Active', exact: true }),
+      page.getByRole('button', { name: 'View ' + name, exact: true }),
     ).toHaveAttribute('aria-pressed', 'true');
     if (name === 'Secret Tunnel') {
       await expect(
@@ -105,10 +104,9 @@ test('Pizza Delivery starts Pizza Guy at Buddyland even with a different killer'
   await page.goto('/');
   await page.getByRole('button', { name: 'RESUME GAME' }).click();
   await openModule(page, 'buddyland');
-  await expect(page.getByRole('button', { name: /Pizza Guy/ })).toHaveAttribute(
-    'aria-label',
-    /In play|On board|Active/i,
-  );
+  const pizza = page.locator('.module-character').filter({has:page.locator('strong',{hasText:'Pizza Guy'})});
+  await expect(pizza).toHaveAttribute('data-state','on-board');
+  await expect(pizza.getByRole('button',{name:'View Pizza Guy',exact:true})).toContainText('In play');
 });
 
 test('casting a Girlfriend starting event carries its setup through the opening into Play', async ({

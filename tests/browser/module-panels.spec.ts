@@ -8,7 +8,7 @@ for (const [killer, location, expected] of [
   ['Hans', 'Camp Happy Trails', ['hans', 'camp']],
 ] as const) {
   test(`independent illustrated panels: ${killer} at ${location}`, async ({ page, archive }, info) => {
-    await archive.install(page, { draft: { ...activeGame, playMode: true, selection: { ...activeGame.selection, killer, location } } });
+    await archive.install(page, { draft: { ...activeGame, billySetupVersion: killer === 'Billy the Bear' ? 1 : undefined, playMode: true, selection: { ...activeGame.selection, killer, location } } });
     await page.goto('/');
     await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
     const panels = page.locator('.play-module-panel');
@@ -16,7 +16,7 @@ for (const [killer, location, expected] of [
     expect(await panels.evaluateAll(nodes => nodes.map(node => node.getAttribute('data-module')))).toEqual([...expected]);
     for (const panel of await panels.all()) await expect(panel).not.toHaveAttribute('open', '');
     const storageKey = `final-girl-active-game-v1:${userId}`;
-    // Source initialization is the existing Billy setup, independent of panels.
+    // Fresh-cast source setup is durable before any panel is expanded.
     if (killer === 'Billy the Bear') await expect.poll(() => page.evaluate(key => JSON.parse(localStorage.getItem(key)!).playEvents.some((e: {moduleData?:{changes:{powerSourcesReady?:boolean}}}) => e.moduleData?.changes.powerSourcesReady), storageKey)).toBe(true);
     const before = await page.evaluate(key => localStorage.getItem(key), storageKey);
     await openModule(page, expected[0]);
