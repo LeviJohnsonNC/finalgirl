@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { CharacterControl } from "./CharacterControl";
+import { EventControl } from "./EventControl";
+import { useModuleRecord } from "./useModuleRecord";
 import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
 import {
   moduleState,
@@ -68,26 +71,15 @@ export function CarnivalControls({
   onEvent: (event: PlayEvent) => boolean;
 }) {
   const state = moduleState(summarizePlay(events).entries, "carnival");
-  const [message, setMessage] = useState("");
   const [openTrap, setOpenTrap] = useState<string | null>(null);
-  const fingerprint = events.map((e) => e.id).join(",");
-  const pending = useRef<string | null>(null);
-  useEffect(() => {
-    pending.current = null;
-  }, [fingerprint]);
-  const record = (changes: Record<string, ModuleValue>) => {
-    if (pending.current === fingerprint) return false;
-    pending.current = fingerprint;
-    const ok = onEvent(
+  const { record: commit, message } = useModuleRecord(events, onEvent);
+  const record = (changes: Record<string, ModuleValue>) =>
+    commit(
       newPlayEvent({
         kind: "module",
         moduleData: { module: "carnival", changes },
       }),
     );
-    if (!ok) pending.current = null;
-    setMessage(ok ? "" : "This detail could not be saved. Please try again.");
-    return ok;
-  };
   const setActor = (key: string, value: string | null) =>
     record(carnivalActorChanges(key, value, state));
   const activate = (id: string) => {
@@ -297,69 +289,21 @@ export function CarnivalControls({
                 String(value),
               );
             return (
-              <article
+              <CharacterControl
                 key={actor.key}
-                data-state={present ? "active" : value ? "ended" : "unrecorded"}
-              >
-                <IllustratedTile
-                  className="carnival-actor-tile"
-                  art={atlas(peopleArt, actor.index)}
-                  title={actor.name}
-                  status={
-                    value ? statuses[String(value)] : "Not recorded · Add"
-                  }
-                  aria-label={`${present ? "View" : value ? "Correct" : "Add"} ${actor.name}`}
-                  onClick={() => {
-                    if (value === undefined)
-                      setActor(actor.key, actor.values[0]);
-                    else
-                      document.getElementById(`carnival-${actor.key}`)?.focus();
-                  }}
-                />
-                <PlaySelect
-                  id={`carnival-${actor.key}`}
-                  aria-label={`${actor.name} status`}
-                  value={String(value ?? "")}
-                  onChange={(e) => setActor(actor.key, e.target.value || null)}
-                >
-                  <option value="">Not recorded</option>
-                  {actor.values.map((v) => (
-                    <option key={v} value={v}>
-                      {statuses[v]}
-                    </option>
-                  ))}
-                </PlaySelect>
-                <div className="carnival-actor-actions">
-                  {actor.key.startsWith("person.") &&
-                    ["saved", "killed"].map((outcome) => (
-                      <button
-                        key={outcome}
-                        disabled={value !== "in-play"}
-                        aria-label={`Mark ${actor.name} ${outcome}`}
-                        onClick={() => setActor(actor.key, outcome)}
-                      >
-                        {statuses[outcome]}
-                      </button>
-                    ))}
-                  {actor.key === "zappo" && (
-                    <button
-                      disabled={value !== "with-you"}
-                      onClick={() => setActor("zappo", "lost")}
-                    >
-                      Zappo lost / fled
-                    </button>
-                  )}
-                  {actor.key === "cart" && (
-                    <button
-                      disabled={value !== "available"}
-                      onClick={() => setActor("cart", "discarded")}
-                    >
-                      Discard Golf Cart
-                    </button>
-                  )}
-                </div>
-                <p>{actor.help}</p>
-              </article>
+                name={actor.name}
+                value={typeof value === "string" ? value : undefined}
+                present={actor.values[0]}
+                states={actor.values.map((value) => ({
+                  value,
+                  label: statuses[value],
+                }))}
+                outcomes={actor.values.slice(1)}
+                art={atlas(peopleArt, actor.index)}
+                tileClassName="carnival-actor-tile"
+                help={actor.help}
+                onChange={(value) => setActor(actor.key, value)}
+              />
             );
           })}
         </div>
@@ -378,37 +322,18 @@ export function CarnivalControls({
               active = value === "active",
               allowed = activateCarnivalEvent(event.id, state) !== null;
             return (
-              <article
+              <EventControl
                 key={event.id}
-                data-state={active ? "active" : value ? "ended" : "unrecorded"}
-              >
-                <IllustratedTile
-                  className="carnival-event-tile"
-                  art={eventArtwork[event.id]}
-                  title={event.name}
-                  status={
-                    active
-                      ? "Active"
-                      : value === "ended"
-                        ? "Ended"
-                        : "Not recorded · Activate"
-                  }
-                  aria-label={`${active ? "Active" : allowed ? "Activate" : "Correct linked status for"} ${event.name}`}
-                  aria-disabled={!allowed}
-                  onClick={() => activate(event.id)}
-                />
-                <p>{event.effect}</p>
-                {value !== undefined && (
-                  <button
-                    onClick={() =>
-                      record({ [`event.${event.id}`]: active ? "ended" : null })
-                    }
-                  >
-                    {active ? "End effect" : "Clear Event record"}
-                    <span className="sr-only">: {event.name}</span>
-                  </button>
-                )}
-              </article>
+                name={event.name}
+                value={typeof value === "string" ? value : undefined}
+                art={eventArtwork[event.id]}
+                effect={event.effect}
+                tileClassName="carnival-event-tile"
+                allowed={allowed}
+                onActivate={() => activate(event.id)}
+                onEnd={() => record({ [`event.${event.id}`]: "ended" })}
+                onClear={() => record({ [`event.${event.id}`]: null })}
+              />
             );
           })}
         </div>

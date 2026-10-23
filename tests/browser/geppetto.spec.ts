@@ -216,7 +216,7 @@ test("Minor Dark Power hearts change art and survive reload independently of ord
     .click();
   await expect(minor).toHaveAttribute("data-state", "full");
   const original = await minor
-    .locator(".geppetto-minor-art > svg")
+    .locator(".module-minor-art > svg")
     .getAttribute("viewBox");
   await minor
     .getByRole("button", {
@@ -226,7 +226,7 @@ test("Minor Dark Power hearts change art and survive reload independently of ord
     .click();
   await expect(minor).toHaveAttribute("data-state", "weakened");
   expect(
-    await minor.locator(".geppetto-minor-art > svg").getAttribute("viewBox"),
+    await minor.locator(".module-minor-art > svg").getAttribute("viewBox"),
   ).not.toBe(original);
   await minor
     .getByRole("button", {
@@ -301,7 +301,7 @@ test("illustrated power choices share Remember This and first-hit markers reset 
     page.getByRole("combobox", { name: "Dark Power card", exact: true }),
     "Immortal Master",
   );
-  await expect(p.locator(".geppetto-active-power")).toContainText(
+  await expect(p.locator(".module-selected-card")).toContainText(
     "Immortal Master",
   );
   expect(
@@ -338,7 +338,7 @@ test("failed local persistence leaves the tray unchanged and rapid repeated help
   });
   await p.getByRole("button", { name: "Spawn Puppet 1", exact: true }).click();
   await expect(
-    p.getByText("This detail could not be saved. Please try again.", {
+    p.getByText("This change could not be saved. Please try again.", {
       exact: true,
     }),
   ).toBeVisible();

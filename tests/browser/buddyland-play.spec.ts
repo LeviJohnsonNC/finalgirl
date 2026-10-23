@@ -16,7 +16,7 @@ async function open(page: import("@playwright/test").Page) {
 const buddies = ["Allie", "Billy Jr.", "Boris", "Cam", "Ramey", "Roxy", "Toby"];
 const victims = ["Birthday Girl", "Nick the Janitor", "Pizza Guy"];
 function portrait(page: import("@playwright/test").Page, name: string) {
-  return page.locator(".play-character").filter({
+  return page.locator(".play-character,.buddyland-portrait").filter({
     has: page.locator("strong", {
       hasText: new RegExp(
         "^" + name.replace(/[.*+?^$()|[\]\\]/g, "\\$&") + "$",
@@ -40,7 +40,7 @@ async function reveal(
     (x) => x !== "Not specified",
   );
   expect(options).toEqual([...options].sort((a, b) => a.localeCompare(b)));
-  expect(options).toHaveLength(kind === "Dark Power" ? 6 : 4);
+  expect(options).toHaveLength(4);
   await page.getByRole("option", { name, exact: true }).click();
 }
 
@@ -73,7 +73,7 @@ test("streamlined portraits and reveals survive reload and reach deaths and endi
     "Back from the dead",
     "Other moment",
   ]);
-  await expect(page.locator(".play-character strong")).toHaveText([
+  await expect(page.locator(".play-character strong,.buddyland-portrait strong")).toHaveText([
     ...buddies,
     ...victims,
   ]);
@@ -99,14 +99,14 @@ test("streamlined portraits and reveals survive reload and reach deaths and endi
   await boris.click();
   await boris.click();
   await birthday.click();
-  await birthday.click();
+  await page.getByRole("button",{name:"Mark Birthday Girl killed",exact:true}).click();
   await expect(toby).toHaveAttribute("data-state", "active");
   await expect(boris).toHaveAttribute("data-state", "killed");
   await expect(birthday).toHaveAttribute("data-state", "killed");
   await expect(
     page.getByRole("button", { name: "Record one victim killed", exact: true }),
   ).toContainText("0");
-  await reveal(page, "Dark Power", "Backup Generator");
+  await reveal(page, "Dark Power", "Endless Power");
   await page.getByRole("button", { name: "Record", exact: true }).click();
   await reveal(page, "Finale", "Power Surge");
   await page
@@ -206,11 +206,11 @@ test("streamlined portraits and reveals survive reload and reach deaths and endi
     (r) => r.name === "generate-ending",
   )!.body.playSummary;
   expect(ending).toContain("Power Surge");
-  expect(ending).toContain("Backup Generator");
+  expect(ending).toContain("Endless Power");
   expect(ending).not.toContain("Health ?");
 });
 
-test("every portrait cycles distinct artwork, supports keyboard and Undo, and leaves totals alone", async ({
+test("every Buddy portrait cycles distinct artwork, supports keyboard and Undo, and leaves totals alone", async ({
   page,
   archive,
 }) => {
@@ -219,7 +219,7 @@ test("every portrait cycles distinct artwork, supports keyboard and Undo, and le
     draft: { ...activeGame, selection, playMode: true },
   });
   await open(page);
-  for (const name of [...buddies, ...victims]) {
+  for (const name of buddies) {
     const tile = portrait(page, name);
     const sources = new Set<string>();
     for (const state of ["off", "active", "killed"] as const) {
@@ -242,13 +242,13 @@ test("every portrait cycles distinct artwork, supports keyboard and Undo, and le
     await expect(tile).toHaveAttribute("data-state", "off");
   }
   await page.getByRole("button", { name: "Undo", exact: true }).click();
-  await expect(portrait(page, "Pizza Guy")).toHaveAttribute(
+  await expect(portrait(page, "Toby")).toHaveAttribute(
     "data-state",
     "killed",
   );
   await page.reload();
   await open(page);
-  await expect(portrait(page, "Pizza Guy")).toHaveAttribute(
+  await expect(portrait(page, "Toby")).toHaveAttribute(
     "data-state",
     "killed",
   );
@@ -385,12 +385,12 @@ test("older detailed trackers and retired moments remain recoverable without rec
   await portrait(page, "Toby").click();
   await expect
     .poll(() => archive.sessions[0]?.state.playEvents)
-    .toHaveLength(6);
+    .toHaveLength(5);
   const log = archive.sessions[0].state.playEvents as {
     moduleData?: { changes: Record<string, unknown> };
   }[];
   expect(log[1].moduleData!.changes["buddy.toby.health"]).toBe(2);
-  expect(log[5].moduleData!.changes).toMatchObject({
+  expect(log[4].moduleData!.changes).toMatchObject({
     "buddy.toby.status": "defeated",
     "buddy.toby.health": null,
     "buddy.toby.room": null,

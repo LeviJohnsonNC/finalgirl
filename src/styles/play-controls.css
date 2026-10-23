@@ -1,0 +1,338 @@
+/* Shared interaction skin. Artwork and rule-specific states belong to modules. */
+.play-module-content .module-character,
+.play-module-content .module-minor,
+.play-module-content .module-event {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid hsl(var(--foreground) / 0.22);
+  border-radius: 6px;
+  background: hsl(var(--background));
+}
+.play-module-content .module-control-tile {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.1;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  text-align: left;
+  background: hsl(var(--background));
+}
+.module-control-tile > .play-module-art {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+.module-control-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(0deg, #050909fa, transparent 78%);
+}
+.play-module-content .module-control-tile .play-tile-caption {
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+}
+.play-module-content .module-control-tile .play-tile-caption strong {
+  font:
+    400 clamp(19px, 2vw, 25px) / 1.15 "Narration Fell",
+    Georgia,
+    serif;
+  color: hsl(var(--foreground));
+}
+.play-module-content .module-control-tile .play-tile-state {
+  color: hsl(var(--foreground) / 0.8);
+  font:
+    600 10px/1.4 Arial,
+    sans-serif;
+  letter-spacing: 0.06em;
+}
+.module-character[data-state="saved"],
+.module-event[data-state="active"] {
+  border-color: hsl(var(--secondary) / 0.7);
+}
+.module-character[data-state="killed"] {
+  border-color: hsl(var(--destructive) / 0.8);
+}
+.module-character[data-state="saved"] .play-tile-state,
+.module-event[data-state="active"] .play-tile-state {
+  color: hsl(var(--secondary));
+}
+.module-character[data-state="killed"] .play-tile-state {
+  color: hsl(var(--destructive));
+}
+.module-event:not([data-state="active"]) .play-module-art {
+  filter: saturate(0.35) brightness(0.65);
+}
+.module-outcomes {
+  display: flex;
+  gap: 1px;
+  border-top: 1px solid hsl(var(--foreground) / 0.2);
+}
+.module-outcomes > button {
+  flex: 1;
+}
+.play-module-content .module-outcomes button,
+.play-module-content .module-end,
+.play-module-content .module-reveal,
+.play-module-content .module-correction button {
+  min-height: 44px;
+  padding: 9px 12px;
+  font:
+    12px/1.4 Arial,
+    sans-serif;
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--foreground) / 0.2);
+  border-radius: 4px;
+  background: hsl(var(--background));
+}
+.play-module-content .module-outcomes button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.play-module-content .module-correction {
+  padding: 0 10px 8px;
+  min-width: 0;
+}
+.play-module-content .module-correction > summary {
+  display: list-item;
+  min-height: 44px;
+  padding: 13px 0 8px;
+  font:
+    11px/1.5 Arial,
+    sans-serif;
+  color: hsl(var(--foreground) / 0.65);
+  cursor: pointer;
+}
+.module-correction .play-select-trigger {
+  width: 100%;
+  min-height: 44px;
+}
+.module-control-help {
+  margin: 10px 12px;
+  color: hsl(var(--foreground) / 0.72);
+  font:
+    12px/1.55 Arial,
+    sans-serif;
+}
+.module-end {
+  margin: 4px 10px;
+}
+.play-module-content .module-minor {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 10px;
+}
+.module-minor-art {
+  position: relative;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+}
+.module-minor-art h3 {
+  position: absolute;
+  inset: auto 0 0;
+  margin: 0;
+  padding: 30px 12px 10px;
+  font:
+    25px/1.15 "Narration Fell",
+    Georgia,
+    serif;
+  background: linear-gradient(transparent, #050909f5);
+}
+.module-minor[data-state="unrecorded"] .module-minor-art > .play-module-art {
+  filter: grayscale(0.8) brightness(0.5);
+}
+.module-minor .module-control-help {
+  margin: 0;
+}
+.module-health-status {
+  margin: 0;
+  font:
+    12px/1.5 Arial,
+    sans-serif;
+  color: hsl(var(--foreground) / 0.8);
+}
+.module-minor .play-health-tokens {
+  display: flex;
+  gap: 10px;
+}
+.play-module-content .module-minor .play-health-tokens > button {
+  width: 60px;
+  height: 60px;
+  min-height: 44px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid hsl(var(--destructive) / 0.4);
+  border-radius: 8px;
+  background: hsl(var(--background));
+}
+.module-minor
+  .play-health-tokens
+  > button[aria-pressed="false"]
+  .play-module-art {
+  filter: grayscale(1) brightness(0.35);
+}
+.module-reveal {
+  align-self: start;
+}
+.play-module-content .module-card-section {
+  margin: 0 0 20px;
+  border-bottom: 1px solid hsl(var(--foreground) / 0.2);
+  padding-bottom: 12px;
+}
+.play-module-content .module-card-section > summary {
+  min-height: 44px;
+  padding: 10px 0;
+  cursor: pointer;
+  font:
+    22px/1.3 "Narration Fell",
+    Georgia,
+    serif;
+}
+.module-reveal-cards {
+  margin: 12px 0 18px;
+  min-width: 0;
+}
+.module-reveal-cards h3 {
+  margin: 0;
+  font:
+    22px/1.3 "Narration Fell",
+    Georgia,
+    serif;
+}
+.module-reveal-cards .module-control-help {
+  margin: 8px 0 12px;
+}
+.module-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.play-module-content .module-card-grid .module-control-tile,
+.module-reveals .module-control-tile {
+  aspect-ratio: 4/3;
+}
+.module-card-grid [aria-pressed="true"] {
+  box-shadow: inset 0 0 0 3px hsl(var(--secondary));
+}
+.module-selected-card {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 12px;
+  margin: 12px 0;
+  font:
+    12px/1.55 Arial,
+    sans-serif;
+}
+.module-selected-card > .play-module-art {
+  aspect-ratio: 1;
+  height: auto;
+  border-radius: 4px;
+}
+.module-selected-card p {
+  margin: 0;
+}
+.module-reveals {
+  flex-basis: 100%;
+  min-width: 0;
+  width: 100%;
+}
+.module-reveals .module-control-tile {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid hsl(var(--foreground) / 0.3);
+  border-radius: 5px;
+  padding: 0;
+  background: hsl(var(--background));
+  text-align: left;
+}
+.module-reveals .play-tile-caption {
+  bottom: 10px;
+}
+.module-second-power {
+  display: grid;
+  gap: 8px;
+  font:
+    12px/1.5 Arial,
+    sans-serif;
+}
+@media (max-width: 639px) {
+  .module-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.module-minor .module-correction {
+  padding: 0;
+}
+.play-module-content
+  :is(.module-character, .module-minor, .module-event)
+  :is(button, summary):focus-visible {
+  outline: 2px solid hsl(var(--secondary));
+  outline-offset: -3px;
+}
+@media (max-width: 639px) {
+  .play-module-content .module-control-tile {
+    aspect-ratio: 0.95;
+  }
+  .play-module-content .module-control-tile .play-tile-caption {
+    left: 9px;
+    right: 8px;
+    bottom: 10px;
+  }
+  .play-module-content .module-control-tile .play-tile-caption strong {
+    font-size: 21px;
+  }
+  .module-minor-art h3 {
+    font-size: 21px;
+    padding: 24px 8px 8px;
+  }
+  .play-module-content .module-minor .play-health-tokens > button {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+.module-billy-minors {
+  display: grid;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.module-character[data-state="killed"] .module-control-tile > .play-module-art {
+  filter: saturate(0.4) brightness(0.7);
+}
+.module-character[data-state="lost"] .module-control-tile > .play-module-art,
+.module-character[data-state="discarded"]
+  .module-control-tile
+  > .play-module-art {
+  filter: grayscale(0.9) brightness(0.5);
+}
+
+.module-minor:is([data-state="full"], [data-state="weakened"]) {
+  border-color: hsl(var(--destructive) / 0.5);
+}
+.module-unnamed {
+  min-height: 44px;
+  margin-top: 10px;
+  border: 0;
+  background: transparent;
+  text-decoration: underline;
+  color: hsl(var(--foreground) / 0.65);
+  font:
+    11px/1.5 Arial,
+    sans-serif;
+}
+.play-power-token[data-state="unrecorded"] img {
+  filter: grayscale(0.8) brightness(0.5);
+}

@@ -16,6 +16,7 @@ export interface EndingFormData {
 export interface ActiveGame {
   /** Marks new sessions whose verified standard Gepetto tray may be seeded once. */
   geppettoSetupVersion?: 1;
+  billySetupVersion?: 1;
   carnivalSetupVersion?: 1;
   version: 1;
   playEvents?: PlayEvent[];
@@ -34,6 +35,7 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if (game.billySetupVersion !== undefined && game.billySetupVersion !== 1) return false;
   if (game.carnivalSetupVersion !== undefined && game.carnivalSetupVersion !== 1) return false;
   if (game.geppettoSetupVersion !== undefined && game.geppettoSetupVersion !== 1) return false;
   if (game.selection?.finalGirlStartingHealth !== undefined && (!Number.isInteger(game.selection.finalGirlStartingHealth) || game.selection.finalGirlStartingHealth < 1 || game.selection.finalGirlStartingHealth > 10)) return false;

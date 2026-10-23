@@ -13,22 +13,22 @@ function Harness({ initial, killer = 'Billy the Bear', location = 'Camp Happy Tr
 }
 const log = () => JSON.parse(screen.getByTestId('events').textContent!) as PlayEvent[];
 describe('Billy power source controls', () => {
-  it('initializes once, preserves saved off states, includes/removes the fifth, and survives resume at another location', () => {
+  it('keeps legacy unknown sources unknown, preserves off states and explicitly includes/removes the fifth', () => {
     const off = newPlayEvent({kind:'module',moduleData:{module:'billy',changes:{'source.2.status':'inactive'}}});
     const view = render(<Harness initial={[start(),off]}/>);
-    expect(screen.getByRole('button',{name:'Power source 1, On. Turn off'})).toHaveAttribute('aria-pressed','true');
+    expect(screen.getByRole('button',{name:'Power source 1, Not recorded. Turn on'})).toHaveAttribute('aria-pressed','false');
     expect(screen.getByRole('button',{name:'Power source 2, Off. Turn on'})).toHaveAttribute('aria-pressed','false');
     fireEvent.click(screen.getByRole('button',{name:'Add fifth power source'}));
     fireEvent.click(screen.getByRole('button',{name:'Power source 5, On. Turn off'}));
     const saved = log();
-    expect(saved.filter(e => e.moduleData?.changes.powerSourcesReady)).toHaveLength(1);
+    expect(saved.filter(e => e.moduleData?.changes.powerSourcesReady)).toHaveLength(0);
     view.unmount();render(<Harness initial={saved}/>);
     expect(screen.getByRole('button',{name:'Power source 5, Off. Turn on'})).toBeVisible();
     expect(log()).toHaveLength(saved.length);
     fireEvent.click(screen.getByRole('button',{name:'Remove fifth'}));
     expect(screen.getByRole('button',{name:'Add fifth power source'})).toBeVisible();
     const state = moduleState(summarizePlay(log()).entries,'billy');
-    expect(state['source.1.status']).toBe('active');
+    expect(state['source.1.status']).toBeUndefined();
     expect(state['source.2.status']).toBe('inactive');
     expect(state['source.5.status']).toBe('set-aside');
   });
@@ -40,8 +40,8 @@ describe('Billy power source controls', () => {
   });
   it('does not claim a failed token write succeeded', () => {
     render(<Harness initial={[start()]} fail/>);
-    fireEvent.click(screen.getByRole('button',{name:'Power source 1, On. Turn off'}));
-    expect(screen.getByRole('button',{name:'Power source 1, On. Turn off'})).toBeVisible();
+    fireEvent.click(screen.getByRole('button',{name:'Power source 1, Not recorded. Turn on'}));
+    expect(screen.getByRole('button',{name:'Power source 1, Not recorded. Turn on'})).toBeVisible();
     expect(screen.getByText('This change could not be saved. Please try again.')).toBeVisible();
     expect(log()).toHaveLength(1);
   });
