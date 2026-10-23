@@ -113,11 +113,7 @@ export function KillerCards({
                     data-epic={card.epic || undefined}
                   art={card.art}
                   title={card.name}
-                  status={
-                    hans.secondPower === card.name
-                      ? "Revealed"
-                      : "Choose second power"
-                  }
+                  status={`${hans.secondPower === card.name ? "Revealed" : "Choose second power"}${card.epic ? " · Epic" : ""}`}
                   aria-label={`Choose second power ${card.name}`}
                   aria-pressed={hans.secondPower === card.name}
                   onClick={() =>

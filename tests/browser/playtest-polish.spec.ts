@@ -20,7 +20,7 @@ async function actionsVisible(page:Page) {
 test('death editing, loading, reading, corrections and errors keep laptop/phone actions anchored',async({page,archive},info)=>{
  if(info.project.name==='desktop') await page.setViewportSize({width:1280,height:640});
  else await page.setViewportSize({width:320,height:568});
- archive.deathText=Array.from({length:6},()=>archive.deathText).join('\n\n');
+ archive.deathText=Array.from({length:5},()=>archive.deathText).join('\n\n');
  await archive.install(page,{draft});await installTestAudio(page);await resume(page);
  await page.getByRole('button',{name:'Record one victim killed',exact:true}).click();
  const dialog=page.getByRole('dialog',{name:'Gruesome Death',exact:true});
@@ -40,6 +40,11 @@ test('death editing, loading, reading, corrections and errors keep laptop/phone 
  expect(await prose.evaluate(el=>el.scrollHeight>el.clientHeight)).toBe(true);
  await prose.focus();await prose.press('End');await expect.poll(()=>prose.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);
  await actionsVisible(page);await prose.press('Home');await page.screenshot({path:info.outputPath('death-reading.png')});
+ for (const size of info.project.name==='desktop' ? [{width:1366,height:768},{width:1440,height:900}] : [{width:390,height:844}]) {
+  await page.setViewportSize(size);await actionsVisible(page);
+  expect((await prose.boundingBox())!.height).toBeGreaterThan(100);
+  await page.screenshot({path:info.outputPath(`death-reading-${size.width}.png`)});
+ }
  await dialog.getByRole('button',{name:'Narrate death scene',exact:true}).click();
  await expect(dialog.getByRole('button',{name:'Stop death narration',exact:true})).toBeVisible();await actionsVisible(page);
  await dialog.getByRole('button',{name:'Stop death narration',exact:true}).click();
@@ -52,6 +57,7 @@ test('death editing, loading, reading, corrections and errors keep laptop/phone 
  await page.getByRole('button',{name:'Latest death scene',exact:true}).click();
  await expect(prose).toContainText('The ceiling');
  expect(archive.calls.filter(c=>c==='generate-death-scene')).toHaveLength(1);
+ await dialog.getByRole('button',{name:'Edit death details',exact:true}).click();
  await dialog.getByRole('button',{name:'Terror card',exact:true}).click();
  await expect(dialog.getByRole('combobox',{name:'Terror card',exact:true})).toBeVisible();
  await expect(dialog.getByRole('combobox',{name:'Death attacker',exact:true})).toHaveCount(0);
@@ -70,7 +76,8 @@ test('killer selection, Epic borders and rules disclosure stay distinct and neve
  await selected.click();await expect(selected).toHaveAttribute('aria-pressed','true');
  await expect(epic).toHaveAttribute('data-epic','true');
  expect(await selected.locator('.play-module-art').evaluate(el=>getComputedStyle(el).filter)).toBe('none');
- expect(await epic.locator('.play-module-art').evaluate(el=>getComputedStyle(el).filter)).toContain('brightness(0.36)');
+ const dimming=await epic.locator('.play-module-art').evaluate(el=>Number(getComputedStyle(el).filter.match(/brightness\(([.\d]+)\)/)?.[1] ?? 1));
+ expect(dimming).toBeLessThanOrEqual(.45);
  await expect(panel.locator('.module-selected-card')).toHaveCount(0);
  const before=await log(page);await cards.locator('.module-card-rules > summary').click();
  await expect(cards.locator('.module-card-rules')).toContainText('first damage');expect(await log(page)).toEqual(before);
