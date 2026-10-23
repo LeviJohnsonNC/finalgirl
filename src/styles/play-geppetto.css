@@ -1,4 +1,4 @@
-.play-geppetto .play-illustrated-tile {
+.play-geppetto .play-illustrated-tile:not(.module-control-tile) {
   position: relative;
   isolation: isolate;
   display: block;
@@ -9,12 +9,14 @@
   background: hsl(var(--background));
   text-align: left;
 }
-.play-geppetto .play-illustrated-tile > .play-module-art {
+.play-geppetto
+  .play-illustrated-tile:not(.module-control-tile)
+  > .play-module-art {
   position: absolute;
   inset: 0;
   z-index: -2;
 }
-.play-geppetto .play-illustrated-tile::after {
+.play-geppetto .play-illustrated-tile:not(.module-control-tile)::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -99,7 +101,15 @@
 .geppetto-details > summary {
   min-height: 44px;
 }
-.play-geppetto button:not(.play-illustrated-tile):not([role="combobox"]) {
+.play-geppetto
+  :is(
+    .geppetto-puppets,
+    .geppetto-setup,
+    .geppetto-reminder,
+    .geppetto-spawn-step,
+    .geppetto-effect-actions
+  )
+  button:not(.play-illustrated-tile):not([role="combobox"]) {
   border: 1px solid hsl(var(--foreground) / 0.25);
   border-radius: 4px;
   background: hsl(var(--background) / 0.6);
@@ -138,25 +148,6 @@
   color: hsl(var(--foreground) / 0.55);
   font-size: 12px;
 }
-.geppetto-active-power {
-  display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
-  gap: 14px;
-  align-items: start;
-}
-.geppetto-active-power > .play-module-art {
-  aspect-ratio: 1;
-  height: auto;
-  border-radius: 4px;
-}
-.geppetto-active-power small {
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  color: hsl(var(--secondary));
-}
-.geppetto-active-power p {
-  margin-top: 6px;
-}
 .geppetto-details {
   border-top: 1px solid hsl(var(--foreground) / 0.18);
   padding-top: 8px;
@@ -174,74 +165,6 @@
 }
 .geppetto-details[open] > :not(summary) {
   margin-top: 12px;
-}
-.geppetto-card-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-.geppetto-card-grid .play-illustrated-tile {
-  width: 100%;
-  aspect-ratio: 4/3;
-}
-.geppetto-card-grid .play-illustrated-tile[aria-pressed="true"] {
-  border-color: hsl(var(--secondary));
-  box-shadow: 0 0 0 2px hsl(var(--secondary) / 0.35);
-}
-.geppetto-minors {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-.geppetto-minors > article {
-  min-width: 0;
-  display: grid;
-  gap: 10px;
-  align-content: start;
-  border: 1px solid hsl(var(--foreground) / 0.18);
-  border-radius: 5px;
-  padding: 10px;
-}
-.geppetto-minor-art {
-  position: relative;
-  aspect-ratio: 4/3;
-  overflow: hidden;
-}
-.geppetto-minor-art > h3 {
-  position: absolute;
-  inset: auto 0 0;
-  padding: 24px 10px 10px;
-  background: linear-gradient(transparent, hsl(var(--background) / 0.95));
-}
-.geppetto-minors
-  [data-state="unrevealed"]
-  .geppetto-minor-art
-  > .play-module-art {
-  filter: grayscale(0.75) brightness(0.65);
-}
-.geppetto-hearts {
-  display: flex;
-  gap: 10px;
-}
-.play-geppetto .geppetto-hearts > button {
-  width: 66px;
-  height: 66px;
-  padding: 0 !important;
-  border: 0 !important;
-  overflow: hidden;
-  background: none;
-  border-radius: 8px;
-}
-.geppetto-hearts .play-module-art {
-  transition: filter 180ms;
-}
-.geppetto-clear {
-  justify-self: start;
-  font-size: 11px;
-  color: hsl(var(--foreground) / 0.55) !important;
-  border: 0 !important;
-  background: none !important;
-  padding: 0 !important;
 }
 .geppetto-effect-actions {
   display: flex;

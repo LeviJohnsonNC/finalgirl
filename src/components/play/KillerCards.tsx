@@ -105,9 +105,7 @@ export function KillerCards({
                 onClick={() => choose(type, "")}
                 aria-label={`${reveal ? "Clear" : "Record"} ${type === "dark-power" ? "Dark Power" : "Finale"} card name`}
               >
-                {reveal
-                  ? "Clear card name"
-                  : "Reveal without a card name"}
+                {reveal ? "Clear card name" : "Reveal without a card name"}
               </button>
             </section>
           );
@@ -180,7 +178,7 @@ export function KillerCards({
   return typeOnly ? (
     <div className="module-reveals">{content}</div>
   ) : (
-    <details className="module-card-section">
+    <details className="module-card-section" data-module-control="reveals">
       <summary>Dark Power &amp; Finale</summary>
       {content}
     </details>
