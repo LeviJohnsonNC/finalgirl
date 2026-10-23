@@ -153,6 +153,7 @@ describe("shared player interaction contracts", () => {
       );
     }
     render(<Power />);
+    expect(screen.getByText("Test rule")).toBeInTheDocument();
     expect(
       screen.getByText("Not recorded", { selector: ".module-health-status" }),
     ).toBeVisible();

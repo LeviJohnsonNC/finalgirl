@@ -97,6 +97,7 @@
   cursor: default;
 }
 .play-module-content .module-correction {
+  border: 0;
   padding: 0 10px 8px;
   min-width: 0;
 }
