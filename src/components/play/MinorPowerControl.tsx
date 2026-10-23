@@ -66,6 +66,7 @@ export function MinorPowerControl({
         <summary>
           Details &amp; corrections<span className="sr-only">: {name}</span>
         </summary>
+        <p className="module-control-help">{effect}</p>
         <PlaySelect
           aria-label={`${name} health correction`}
           value={health === undefined ? "" : String(health)}
