@@ -75,7 +75,7 @@ test('killer selection, Epic borders and rules disclosure stay distinct and neve
  const epic=cards.getByRole('button',{name:'Choose Join the Family',exact:true});
  await selected.click();await expect(selected).toHaveAttribute('aria-pressed','true');
  await expect(epic).toHaveAttribute('data-epic','true');
- expect(await selected.locator('.play-module-art').evaluate(el=>getComputedStyle(el).filter)).toBe('none');
+ await expect.poll(()=>selected.locator('.play-module-art').evaluate(el=>getComputedStyle(el).filter)).toBe('none');
  const dimming=await epic.locator('.play-module-art').evaluate(el=>Number(getComputedStyle(el).filter.match(/brightness\(([.\d]+)\)/)?.[1] ?? 1));
  expect(dimming).toBeLessThanOrEqual(.45);
  await expect(panel.locator('.module-selected-card')).toHaveCount(0);
