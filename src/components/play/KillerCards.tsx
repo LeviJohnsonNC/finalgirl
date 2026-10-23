@@ -1,7 +1,6 @@
 import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
 import { moduleState } from "@/lib/play/modules";
 import { IllustratedTile } from "./IllustratedTile";
-import { ModuleArtwork } from "./ModuleArtwork";
 import { PlaySelect } from "./PlaySelect";
 import { illustratedKillerCards } from "./killerPresentation";
 import { useModuleRecord } from "./useModuleRecord";
@@ -65,27 +64,13 @@ export function KillerCards({
               aria-label={`${type === "dark-power" ? "Dark Power" : "Finale"} selection`}
             >
               <h3>{type === "dark-power" ? "Dark Power" : "Finale"}</h3>
-              <p className="module-control-help">
-                {reveal
-                  ? `Revealed · ${reveal.killerCard || "Card not specified"}`
-                  : "No reveal recorded"}
-                . Select only when revealed; resolve card effects on your board.
-              </p>
-              {selected && (
-                <div className="module-selected-card">
-                  <ModuleArtwork art={selected.art} />
-                  <p>
-                    <strong>{selected.name}</strong>
-                    <br />
-                    {selected.effect}
-                  </p>
-                </div>
-              )}
+              {reveal && !selected && <p className="module-control-help">{reveal.killerCard || "Card name not specified"}</p>}
               <div className="module-card-grid">
                 {cards.map((card) => (
                   <IllustratedTile
                     key={card.id}
-                    className="module-control-tile"
+                    className="module-control-tile module-killer-card"
+                    data-epic={card.epic || undefined}
                     art={card.art}
                     title={card.name}
                     status={`${selected?.id === card.id ? "Revealed" : "Choose when revealed"}${card.epic ? " · Epic" : ""}`}
@@ -100,6 +85,10 @@ export function KillerCards({
                   />
                 ))}
               </div>
+              {selected && <details className="module-card-rules">
+                <summary>Card rules</summary>
+                <p>{selected.effect}</p>
+              </details>}
               <button
                 className="module-unnamed"
                 onClick={() => choose(type, "")}
@@ -120,14 +109,11 @@ export function KillerCards({
               .map((card) => (
                 <IllustratedTile
                   key={card.id}
-                  className="module-control-tile"
+                  className="module-control-tile module-killer-card"
+                    data-epic={card.epic || undefined}
                   art={card.art}
                   title={card.name}
-                  status={
-                    hans.secondPower === card.name
-                      ? "Revealed"
-                      : "Choose second power"
-                  }
+                  status={`${hans.secondPower === card.name ? "Revealed" : "Choose second power"}${card.epic ? " · Epic" : ""}`}
                   aria-label={`Choose second power ${card.name}`}
                   aria-pressed={hans.secondPower === card.name}
                   onClick={() =>

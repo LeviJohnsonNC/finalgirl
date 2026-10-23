@@ -446,6 +446,7 @@ test("opening a legacy death preserves its cached scene until the player changes
   await page
     .getByRole("button", { name: "Latest death scene", exact: true })
     .click();
+  await page.getByRole("button", { name: "Edit death details", exact: true }).click();
   await page.getByRole("button", { name: "Event", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Generated death scene", exact: true }),

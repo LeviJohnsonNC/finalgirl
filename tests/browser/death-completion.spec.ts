@@ -74,7 +74,7 @@ test("the screenshot fragment is repaired in the same saved slot and the reading
   await expect(story).toContainText(archive.deathText);
   await expect(story).not.toContainText("TAKE 1");
   await expect(story).not.toContainText("Audio is optional");
-  await expect(story.locator(".play-death-story-heading svg")).toHaveCount(0);
+  await expect(story.locator(".play-death-story-heading > svg")).toHaveCount(0);
   const audio = story.getByRole("button", {
     name: "Narrate death scene",
     exact: true,

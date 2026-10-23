@@ -129,9 +129,9 @@ test("Gruesome Death works with optional details and visibly delivers two story 
   await expect(story).toContainText("This time, it used his voice.");
   await expect(story.locator(".play-death-prose")).toHaveCount(2);
   await expect(payoff).toHaveAttribute("aria-busy", "false");
-  await expect
-    .poll(() => dialog.evaluate((el) => el.scrollTop))
-    .toBeGreaterThan(beforeStoryScroll);
+  expect(await dialog.evaluate((el) => el.scrollTop)).toBe(beforeStoryScroll);
+  for (const name of ["Cancel", "Save and exit", "Gruesome Death"])
+    await expect(actions.getByRole("button", { name, exact: true })).toBeInViewport({ ratio: 1 });
   expect(
     await dialog.evaluate((el) => {
       const result = el

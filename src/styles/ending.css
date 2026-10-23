@@ -243,3 +243,20 @@
     padding: 20px 18px;
   }
 }
+
+/* Spend the existing art column on the image, rather than an oversized paper mat.
+   Fit includes the measured caption, so long matchups never push tools offscreen. */
+@media (min-width: 900px) and (min-height: 500px) {
+  .narration-layout--ending .ending-poster-window {
+    flex: 1 1 auto;
+    height: auto;
+    display: grid;
+    align-items: start;
+    justify-items: center;
+  }
+  .narration-layout--ending .ending-poster-window > .narration-photo-mount {
+    width: min(100cqw, calc((100cqh - var(--poster-caption-height, 36px) - 16px) * 2 / 3 + 16px));
+    padding: 8px;
+  }
+  .narration-layout--ending .narration-photo--poster .narration-photo-edge { border-width: 16px; }
+}

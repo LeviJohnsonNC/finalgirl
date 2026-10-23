@@ -301,9 +301,8 @@ test("illustrated power choices share Remember This and first-hit markers reset 
     page.getByRole("combobox", { name: "Dark Power card", exact: true }),
     "Immortal Master",
   );
-  await expect(p.locator(".module-selected-card")).toContainText(
-    "Immortal Master",
-  );
+  await expect(p.getByRole("button", { name: "Choose Immortal Master", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(p.locator(".module-selected-card")).toHaveCount(0);
   expect(
     (await log(page)).filter(
       (e) => e.kind === "moment" && e.momentType === "dark-power",

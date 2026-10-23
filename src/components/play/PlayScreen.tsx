@@ -169,6 +169,7 @@ export function PlayScreen(props: PlayScreenProps) {
   const startingValues = playStartingValues(killer, finalGirl);
   const { characterImages } = useActiveImages();
   const [message, setMessage] = useState("");
+  const [announcement, setAnnouncement] = useState("");
   const [finishOpen, setFinishOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [momentId, setMomentId] = useState<string | null>(null);
@@ -245,7 +246,7 @@ export function PlayScreen(props: PlayScreenProps) {
     if (!e) pendingMoments.current.delete(choice.type);
     if (e) {
       setMomentId(e.id);
-      setMessage(`${choice.title} recorded. Details are optional.`);
+      setAnnouncement(`${choice.title} recorded.`);
     }
   };
   const setState = (field: StateField, value: number | null) => {
@@ -526,6 +527,7 @@ export function PlayScreen(props: PlayScreenProps) {
         </div>
       </section>
       {props.deathPanel}
+      <p className="sr-only" role="status">{announcement}</p>
       <section className="play-panel play-moments" aria-label="Remember this">
         <h2>
           Remember this <span>The moments that made your night</span>

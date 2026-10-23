@@ -73,7 +73,7 @@ for (const cause of ["Killer attack", "Terror card"]) {
     archive.releaseDeathRead!();
     await lateLookup;
     // A roundtrip gives React time to process the late lookup, with no test sleeps.
-    await dialog.getByLabel("Death context", { exact: true }).focus();
+    await dialog.getByRole("button", { name: "Narrate death scene", exact: true }).focus();
     await expect(story).toContainText(archive.deathText);
     await expect(dialog).not.toContainText("Your death is saved.");
     await dialog.evaluate((el) => {

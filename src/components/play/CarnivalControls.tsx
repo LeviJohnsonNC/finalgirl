@@ -188,7 +188,7 @@ export function CarnivalControls({
                     setOpenTrap(trap.id);
                 }}
               />
-              <p>{trap.effect}</p>
+              <details className="module-card-rules"><summary>Rules<span className="sr-only">: {trap.name}</span></summary><p>{trap.effect}</p></details>
               <button
                 className="carnival-cancel"
                 aria-label={`Card canceled with Found Footage: ${trap.name}`}
@@ -278,10 +278,7 @@ export function CarnivalControls({
       )}
       <details className="carnival-section">
         <summary>People & props</summary>
-        <p className="carnival-help">
-          Activate their Event below, or record current state here. Marking a
-          person’s outcome does not change the saved/killed counters.
-        </p>
+
         <div className="carnival-actors">
           {actors.map((actor) => {
             const value = state[actor.key],
@@ -352,11 +349,7 @@ export function CarnivalControls({
       </details>
       <details className="carnival-section">
         <summary>Item Trap encounters</summary>
-        <p className="carnival-help">
-          Record what actually happened. Found Footage availability is not
-          inferred from a remembered find. Encounters can recur after cards
-          return to the decks.
-        </p>
+
         <div className="carnival-item-traps">
           {CARNIVAL_ITEM_TRAPS.map((trap, index) => {
             const value = state[`condition.${trap.id}`],
@@ -388,7 +381,7 @@ export function CarnivalControls({
                     if (c) record(c);
                   }}
                 />
-                <p>{trap.effect}</p>
+                <details className="module-card-rules"><summary>Rules<span className="sr-only">: {trap.name}</span></summary><p>{trap.effect}</p></details>
                 <div className="carnival-encounter-actions">
                   {(
                     ["resolved", "canceled-footage", "avoided-zappo"] as const

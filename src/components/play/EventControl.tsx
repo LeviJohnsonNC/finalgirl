@@ -57,7 +57,7 @@ export function EventControl({
           else if (allowed) onActivate();
         }}
       />
-      {effect && <p className="module-control-help">{effect}</p>}
+      {effect && <details className="module-card-rules"><summary>Rules<span className="sr-only">: {name}</span></summary><p>{effect}</p></details>}
       {active && (
         <button
           className="module-end"
