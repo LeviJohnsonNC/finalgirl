@@ -90,10 +90,7 @@ export function CampControls({
         <section aria-label="Hans tracking">
           <KillerCards killer={killer} events={events} onEvent={onEvent} />
           <h3 className="play-module-subheading">Minor Dark Powers</h3>
-          <p className="play-module-help">
-            Reveal a power, then tap a filled or empty heart to remove or
-            restore one health.
-          </p>
+
           <div className="play-camp-body module-minor-grid">
             {HANS_MINOR_POWERS.map((power, row) => {
               const value = hans[`minor.${power.id}.health`];
@@ -120,9 +117,7 @@ export function CampControls({
           <div className="play-camp-body">
             <div>
               <h3 className="play-module-subheading">Special characters</h3>
-              <p className="play-module-help">
-                Tap a portrait to put them in play. Record their outcome below.
-              </p>
+
               <div className="play-camp-victims">
                 {CAMP_VICTIMS.map((victim, index) => {
                   const value = camp[`victim.${victim.id}`] as
@@ -160,10 +155,7 @@ export function CampControls({
             </div>
             <div>
               <h3 className="play-module-subheading">Ongoing events</h3>
-              <p className="play-module-help">
-                Tap an event to activate it. Use End effect when it stops
-                applying.
-              </p>
+
               <div className="play-camp-effects">
                 {CAMP_ONGOING_EVENTS.map((effect) => {
                   const value = camp[`event.${effect.id}`];

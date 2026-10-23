@@ -96,10 +96,9 @@ export function CharacterControl({
               </option>
             ))}
           </PlaySelect>
-          <p className="module-control-help">Correct a mistaken record here.</p>
         </div>
       </details>
-      {help && <p className="module-control-help">{help}</p>}
+      {help && <details className="module-card-rules"><summary>Rules<span className="sr-only">: {name}</span></summary><div>{help}</div></details>}
     </article>
   );
 }

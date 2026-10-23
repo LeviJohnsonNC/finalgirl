@@ -181,8 +181,7 @@ export function GeppettoControls({
       {power?.id === "massive-abominations" && (
         <div className="geppetto-reminder">
           <p>
-            Each Puppet ignores its first damage each turn. Reset these markers
-            explicitly for a new turn; they are not extra Health.
+            Each Puppet ignores its first damage each turn.
           </p>
           <button
             disabled={GEPPETTO_PUPPETS.every(
@@ -229,9 +228,6 @@ export function GeppettoControls({
             </button>
           </>
         )}
-        <p className="geppetto-quiet">
-          Resolve movement, attacks and physical placements on your board.
-        </p>
       </div>
       <KillerCards killer="Geppetto" events={events} onEvent={onEvent} />
       {power?.id === "immortal-master" && (

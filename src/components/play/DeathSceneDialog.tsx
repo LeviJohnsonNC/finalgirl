@@ -84,23 +84,8 @@ export function DeathSceneDialog({
   const [signature, setSignature] = useState("");
   const [take, setTake] = useState(0);
   const [requested, setRequested] = useState(false);
+  const [editingDetails, setEditingDetails] = useState(false);
   const payoff = useRef<HTMLElement>(null);
-  const revealTimer = useRef<ReturnType<typeof setTimeout>>();
-  useEffect(() => () => clearTimeout(revealTimer.current), []);
-  const revealPayoff = () => {
-    clearTimeout(revealTimer.current);
-    revealTimer.current = setTimeout(
-      () =>
-        payoff.current?.scrollIntoView({
-          block: "nearest",
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-            .matches
-            ? "instant"
-            : "smooth",
-        }),
-      80,
-    );
-  };
   const [message, setMessage] = useState("");
   const [resultError, setResultError] = useState("");
   const scenes = useDeathScenes(sessionId, syncNow);
@@ -137,6 +122,10 @@ export function DeathSceneDialog({
       (initial[key as keyof PlayDetails] ?? "") !==
       (values[key as keyof PlayDetails] ?? ""),
   );
+  useEffect(() => {
+    if (selected && !dirty && !editingDetails) payoff.current?.focus({ preventScroll: true });
+  }, [selected?.id, dirty, editingDetails]);
+  const reading = !editingDetails && !dirty && Boolean(selected || scenes.busy || requested || unfinished);
   const save = () => {
     const clean = Object.fromEntries(
       Object.entries(values).map(([key, value]) => [
@@ -152,7 +141,7 @@ export function DeathSceneDialog({
     if (ok) {
       saved.current = text;
       setValues(clean);
-      setMessage("Details saved.");
+      setMessage("");
     } else setMessage("Details could not be saved. Please try again.");
     return ok;
   };
@@ -161,7 +150,7 @@ export function DeathSceneDialog({
     setResultError("");
     if (save()) {
       setTake(next);
-      revealPayoff();
+      setEditingDetails(false);
       const clean = Object.fromEntries(
         Object.entries(values).map(([key, value]) => [
           key,
@@ -186,8 +175,7 @@ export function DeathSceneDialog({
           "A story was returned for different saved details. Close and reopen this death to load its saved story before trying again.",
         );
       }
-      revealPayoff();
-    } else revealPayoff();
+    }
   };
   const cancel = () => {
     // Keep the recorded death and any already saved/generated facts, discard this edit.
@@ -220,7 +208,7 @@ export function DeathSceneDialog({
       }}
     >
       <DialogContent
-        className="play-death-modal play-death-modal--illustrated"
+        className="play-death-modal play-death-modal--illustrated play-death-modal--compact"
         onOpenAutoFocus={(e) => {
           e.preventDefault();
           document
@@ -237,8 +225,13 @@ export function DeathSceneDialog({
             The death is recorded. Add what you know, or return to the game.
           </DialogDescription>
         </div>
+        <div className="play-death-body" data-mode={reading ? "reading" : "editing"}>
         <div className="play-cause-section" id="play-cause-first" tabIndex={-1}>
-          <h3>What caused it?</h3>
+          <div className="play-death-section-heading">
+            <h3>What caused it?</h3>
+            {reading && <button className="play-death-edit" disabled={scenes.busy} onClick={() => setEditingDetails(true)}>Edit death details</button>}
+            {editingDetails && selected && !dirty && <button className="play-death-edit" onClick={() => setEditingDetails(false)}>Read scene</button>}
+          </div>
           <div
             className="play-cause-choices"
             role="group"
@@ -258,11 +251,15 @@ export function DeathSceneDialog({
                 key={cause}
                 className={`play-cause-tile play-cause-tile--${cause}`}
                 aria-pressed={values.cause === cause}
-                onClick={() =>
-                  setValues((previous) =>
-                    detailsForCause({ ...previous, cause }, selection.killer),
-                  )
-                }
+                disabled={scenes.busy}
+                onClick={() => {
+                  if (values.cause !== cause) {
+                    setValues((previous) => detailsForCause({ ...previous, cause }, selection.killer));
+                    setEditingDetails(true);
+                    setRequested(false);
+                    setResultError("");
+                  }
+                }}
               >
                 {cause === 'minion' && selection.killer === 'Geppetto'
                   ? <ModuleArtwork className="geppetto-cause-art" art={{src:geppettoPuppets,atlas:{width:1254,height:1254,x:421,y:3,cellWidth:412,cellHeight:412}}}/>
@@ -272,7 +269,7 @@ export function DeathSceneDialog({
             ))}
           </div>
         </div>
-        {values.cause !== "unspecified" && (
+        {!reading && values.cause !== "unspecified" && (
           <div className="play-death-fields">
             {values.cause === "minion" && (
               <label>
@@ -365,7 +362,7 @@ export function DeathSceneDialog({
             </label>
           </div>
         )}
-        {(requested || selected || unfinished || scenes.error || message) && (
+        {((!editingDetails && (requested || selected || unfinished)) || scenes.error || resultError || message) && (
           <section
             ref={payoff}
             className="play-death-payoff"
@@ -385,7 +382,9 @@ export function DeathSceneDialog({
               <section aria-label="Generated death scene">
                 <div className="play-death-story-heading">
                   <h3>The last thing they saw</h3>
+                  <DeathNarration key={selected.id} scene={selected} filmId={getFilmIdByLocation(selection.location)} />
                 </div>
+                <div className="play-death-prose-scroll" role="region" aria-label="Death scene text" tabIndex={0}>
                 {selected.scene_text
                   .split(/\n\s*\n/)
                   .filter(Boolean)
@@ -394,12 +393,8 @@ export function DeathSceneDialog({
                       {paragraph}
                     </p>
                   ))}
+                </div>
                 <div className="play-death-story-tools">
-                  <DeathNarration
-                    key={selected.id}
-                    scene={selected}
-                    filmId={getFilmIdByLocation(selection.location)}
-                  />
                   {takes.length > 1 && (
                     <div role="group" aria-label="Death scene takes">
                       {takes.map((scene) => (
@@ -439,6 +434,10 @@ export function DeathSceneDialog({
             )}
           </section>
         )}
+        {!scenes.signedIn && (
+          <p className="play-card-note">Sign in to generate a gruesome death. You can still record and save details.</p>
+        )}
+        </div>
         <div className="play-death-actions">
           <button onClick={cancel}>Cancel</button>
           <button
@@ -464,12 +463,6 @@ export function DeathSceneDialog({
             {scenes.busy ? "Writing the death…" : "Gruesome Death"}
           </button>
         </div>
-        {!scenes.signedIn && (
-          <p className="play-card-note">
-            Sign in to generate a gruesome death. You can still record and save
-            details.
-          </p>
-        )}
       </DialogContent>
     </Dialog>
   );
