@@ -1,6 +1,6 @@
 import { test, expect, activeGame, userId } from './fixtures';
 import { openHistory, openModule } from './play-helpers';
-const draft = {...activeGame,playMode:true,selection:{...activeGame.selection,killer:'Billy the Bear',location:'Buddyland',finalGirl:'Rena',filmId:'s4-buddyland'}};
+const draft = {...activeGame,billySetupVersion:1,playMode:true,selection:{...activeGame.selection,killer:'Billy the Bear',location:'Buddyland',finalGirl:'Rena',filmId:'s4-buddyland'}};
 const key = `final-girl-active-game-v1:${userId}`;
 test('compact session actions fit small phones with the display font and a wider fallback', async ({page,archive}) => {
   await archive.install(page,{draft});await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
