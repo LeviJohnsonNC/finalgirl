@@ -196,7 +196,21 @@ const TheEnd = ({
 
       const full = await streamChatCompletion({
         functionName: 'generate-ending',
-        body: payload,
+        body: {
+          ...payload,
+          evaluation: {
+            gameId: result.id,
+            context: {
+              selection: {
+                killer: result.killer, location: result.location, finalGirl: result.finalGirl,
+                setupScenario: result.setupScenario, startingEvent: result.startingEvent,
+                mission: result.mission, finalGirlMaxHealth,
+              },
+              playEvents: result.playEvents ?? [],
+              reviewedResult: formData,
+            },
+          },
+        },
         onToken: (_delta, accumulated) => setEndingStory(accumulated),
         signal: abortController.signal,
       });
