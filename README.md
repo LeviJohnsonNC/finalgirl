@@ -6,6 +6,8 @@ or affiliated with Van Ryder Games.
 
 ## Development
 
+For adding killers, locations or photographed cards, start with the [module import playbook](docs/MODULE_IMPORT_PLAYBOOK.md). It defines source verification, integration scope, the established Play interface, and completion evidence. Keep a [per-module import record](docs/templates/MODULE_IMPORT_RECORD.md) so later sessions can continue from verified sources and outstanding work.
+
 Use **Node 22** (`nvm use`). npm and `package-lock.json` are the CI dependency source.
 
 ```sh
