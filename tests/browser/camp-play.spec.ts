@@ -38,14 +38,18 @@ test("illustrated Camp states and Hans hearts survive reload without changing to
   await expect(page.locator(".play-camp-effect")).toHaveCount(6);
   for (const name of ["Boyfriend", "Girlfriend", "The Damned"]) {
     const person = page.locator(".play-camp-person").filter({ hasText: name });
-    await expect(person).toHaveAttribute("data-state", "untracked");
+    await expect(person).toHaveAttribute("data-state", "unrecorded");
     await expect(
       person.getByRole("button", { name: `Mark ${name} saved`, exact: true }),
     ).toBeDisabled();
     const portraits = new Set<string>();
-    for (const state of ["untracked", "in-play", "saved", "killed"]) {
+    for (const state of ["unrecorded", "in-play", "saved", "killed"]) {
       if (state === "in-play")
         await person.locator(".play-camp-portrait").click();
+      if (state === "killed") {
+        await person.locator(".module-correction > summary").click();
+        await statusPick(page, person.getByRole("combobox"), "In play");
+      }
       if (state === "saved" || state === "killed")
         await person
           .getByRole("button", { name: `Mark ${name} ${state}`, exact: true })
@@ -62,16 +66,12 @@ test("illustrated Camp states and Hans hearts survive reload without changing to
       );
     }
     expect(portraits.size).toBe(4);
-    await person
-      .getByRole("button", { name: `Mark ${name} saved`, exact: true })
-      .click();
+    await statusPick(page,person.getByRole("combobox"),"Saved");
   }
-  await page
-    .getByRole("button", { name: "Mark Girlfriend killed", exact: true })
-    .click();
+  await statusPick(page,page.getByRole("combobox",{name:"Girlfriend status",exact:true}),"Killed");
   for (const detail of ["Dark Waters", "Secret Tunnel"])
     await page
-      .getByRole("button", { name: `${detail} Not recorded`, exact: true })
+      .getByRole("button", { name: `Activate ${detail}`, exact: true })
       .click();
   await statusPick(
     page,
@@ -91,8 +91,8 @@ test("illustrated Camp states and Hans hearts survive reload without changing to
   await openModule(page, "hans");
   for (const name of ["Unholy Rage", "Unholy Speed"]) {
     const power = page.locator(".play-minor-power").filter({ hasText: name });
-    await expect(power).toHaveAttribute("data-state", "unrevealed");
-    await power.getByRole("button", { name: "Reveal", exact: true }).click();
+    await expect(power).toHaveAttribute("data-state", "unrecorded");
+    await power.getByRole("button", { name: `Reveal ${name}`, exact: true }).click();
     const views = new Set<string>();
     for (const health of [2, 1, 0]) {
       await expect(power).toContainText(`${health}/2 health`);
@@ -100,7 +100,7 @@ test("illustrated Camp states and Hans hearts survive reload without changing to
         power.locator('.play-health-tokens button[aria-pressed="true"]'),
       ).toHaveCount(health);
       views.add(
-        (await power.locator(".play-minor-scene svg").getAttribute("viewBox"))!,
+        (await power.locator(".module-minor-art svg").getAttribute("viewBox"))!,
       );
       await power.screenshot({
         path: info.outputPath(`${name.replaceAll(' ', '-').toLowerCase()}-${health}.png`),
@@ -200,7 +200,7 @@ test("Camp and Hans corrections preserve immutable history, Undo, restore and tu
   await expandCamp(page);
   await page
     .getByRole("button", {
-      name: "Boyfriend, Untracked. Mark in play",
+      name: "Add Boyfriend",
       exact: true,
     })
     .click();
@@ -219,25 +219,23 @@ test("Camp and Hans corrections preserve immutable history, Undo, restore and tu
     .filter({ hasText: "UNDONE" });
   await undone.getByRole("button", { name: /^Restore/ }).click();
   await expect(boyfriend).toHaveAttribute("data-state", "saved");
-  await page
-    .getByRole("button", { name: "Stop tracking Boyfriend", exact: true })
-    .click();
-  await expect(boyfriend).toHaveAttribute("data-state", "untracked");
+  await boyfriend.locator(".module-correction > summary").click();
+  await statusPick(page,boyfriend.getByRole("combobox"),"Not recorded");
+  await expect(boyfriend).toHaveAttribute("data-state", "unrecorded");
   await page.getByRole("button", { name: "Undo", exact: true }).click();
   await expect(boyfriend).toHaveAttribute("data-state", "saved");
   await openModule(page, "hans");
   const rage = page
     .locator(".play-minor-power")
     .filter({ hasText: "Unholy Rage" });
-  await rage.getByRole("button", { name: "Reveal", exact: true }).click();
-  await page
-    .getByRole("button", { name: "Stop tracking Unholy Rage", exact: true })
-    .click();
-  await expect(rage).toHaveAttribute("data-state", "unrevealed");
+  await rage.getByRole("button", { name: "Reveal Unholy Rage", exact: true }).click();
+  await rage.locator(".module-correction > summary").click();
+  await rage.getByRole("button",{name:"Clear record: Unholy Rage",exact:true}).click();
+  await expect(rage).toHaveAttribute("data-state", "unrecorded");
   await page.getByRole("button", { name: "Undo", exact: true }).click();
   await expect(rage).toHaveAttribute("data-state", "full");
   await page
-    .getByRole("button", { name: "Secret Tunnel Not recorded", exact: true })
+    .getByRole("button", { name: "Activate Secret Tunnel", exact: true })
     .click();
   await statusPick(
     page,
@@ -255,11 +253,10 @@ test("Camp and Hans corrections preserve immutable history, Undo, restore and tu
     }),
     "Dock",
   );
+  await page.locator(".module-event").filter({hasText:"Secret Tunnel"}).locator(".module-correction > summary").click();
+  await page.getByRole("button",{name:"Clear record: Secret Tunnel",exact:true}).click();
   await page
-    .getByRole("button", { name: "Stop tracking Secret Tunnel", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "Secret Tunnel Not recorded", exact: true })
+    .getByRole("button", { name: "Activate Secret Tunnel", exact: true })
     .click();
   await expect(
     page.getByRole("combobox", {
@@ -322,20 +319,20 @@ test("art controls reject failed local saves and recover offline observations on
   });
   await page
     .getByRole("button", {
-      name: "Boyfriend, Untracked. Mark in play",
+      name: "Add Boyfriend",
       exact: true,
     })
     .click();
   await expect(
     page.locator(".play-camp-person").filter({ hasText: "Boyfriend" }),
-  ).toHaveAttribute("data-state", "untracked");
+  ).toHaveAttribute("data-state", "unrecorded");
   const rage = page
     .locator(".play-minor-power")
     .filter({ hasText: "Unholy Rage" });
-  await rage.getByRole("button", { name: "Reveal", exact: true }).click();
-  await expect(rage).toHaveAttribute("data-state", "unrevealed");
+  await rage.getByRole("button", { name: "Reveal Unholy Rage", exact: true }).click();
+  await expect(rage).toHaveAttribute("data-state", "unrecorded");
   await expect(
-    page.getByText("This detail could not be saved. Please try again.", {
+    page.getByText("This change could not be saved. Please try again.", {
       exact: true,
     }),
   ).toHaveCount(2);
@@ -352,11 +349,11 @@ test("art controls reject failed local saves and recover offline observations on
   );
   await page
     .getByRole("button", {
-      name: "Boyfriend, Untracked. Mark in play",
+      name: "Add Boyfriend",
       exact: true,
     })
     .click();
-  await rage.getByRole("button", { name: "Reveal", exact: true }).click();
+  await rage.getByRole("button", { name: "Reveal Unholy Rage", exact: true }).click();
   await page
     .getByRole("button", {
       name: "Remove one Unholy Rage health, heart 2",
@@ -457,7 +454,7 @@ test("Camp death payoff keeps its original Event context after later observation
   await resume(page);
   await expandCamp(page);
   await page
-    .getByRole("button", { name: "Dark Waters Not recorded", exact: true })
+    .getByRole("button", { name: "Activate Dark Waters", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Record one victim killed", exact: true })
@@ -497,7 +494,7 @@ test("Camp death payoff keeps its original Event context after later observation
     room: "Lake",
   });
   await page
-    .getByRole("button", { name: "Dark Waters Active", exact: true })
+    .getByRole("button", { name: "End effect: Dark Waters", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Latest death scene", exact: true })

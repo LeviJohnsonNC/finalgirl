@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useModuleRecord } from "./useModuleRecord";
+import { KillerCards } from "./KillerCards";
+import { MinorPowerControl } from "./MinorPowerControl";
 import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
 import {
   moduleState,
@@ -17,7 +19,7 @@ import puppetAtlas from "@/assets/play/geppetto/puppets.webp";
 import cardsAtlas from "@/assets/play/geppetto/cards.webp";
 import minorAtlas from "@/assets/play/geppetto/minors.webp";
 import { IllustratedTile } from "./IllustratedTile";
-import { ModuleArtwork, type ModuleArt } from "./ModuleArtwork";
+import type { ModuleArt } from "./ModuleArtwork";
 import { PlaySelect } from "./PlaySelect";
 import "@/styles/play-geppetto.css";
 
@@ -70,22 +72,9 @@ export function GeppettoControls({
   const entries = summarizePlay(events).entries,
     state = moduleState(entries, "geppetto"),
     counts = geppettoPuppetCounts(state);
-  const [message, setMessage] = useState("");
-  const fingerprint = events.map((e) => e.id).join(",");
-  const pending = useRef<string | null>(null);
-  useEffect(() => {
-    pending.current = null;
-  }, [fingerprint]);
+  const { record, message } = useModuleRecord(events, onEvent);
   const power = GEPPETTO_POWERS.find((c) => c.id === state.power),
     finale = GEPPETTO_FINALES.find((c) => c.id === state.finale);
-  const record = (event: PlayEvent) => {
-    if (pending.current === fingerprint) return false;
-    pending.current = fingerprint;
-    const ok = onEvent(event);
-    if (!ok) pending.current = null;
-    setMessage(ok ? "" : "This detail could not be saved. Please try again.");
-    return ok;
-  };
   const change = (changes: Record<string, ModuleValue>) =>
     record(
       newPlayEvent({
@@ -93,26 +82,6 @@ export function GeppettoControls({
         moduleData: { module: "geppetto", changes },
       }),
     );
-  const reveal = (type: "dark-power" | "finale", name: string) => {
-    const existing = entries.find(
-      (e) => e.kind === "moment" && e.momentType === type,
-    );
-    if (existing?.killerCard === name) return;
-    record(
-      newPlayEvent(
-        existing
-          ? { kind: "details", target: existing.id, killerCard: name }
-          : {
-              kind: "moment",
-              momentType: type,
-              killerCard: name,
-              text:
-                type === "finale" ? "Finale revealed" : "Dark Power revealed",
-              permanent: true,
-            },
-      ),
-    );
-  };
   const normal = geppettoSpawnChanges(state, "normal");
   const preview = normal ? geppettoPuppetCounts({ ...state, ...normal }) : null;
   const applySpawn = (kind: "normal" | "one" | "all") => {
@@ -264,69 +233,14 @@ export function GeppettoControls({
           Resolve movement, attacks and physical placements on your board.
         </p>
       </div>
-      {power && (
-        <div className="geppetto-active-power">
-          <ModuleArtwork
-            art={squareCell(cardsAtlas, GEPPETTO_POWERS.indexOf(power))}
-          />
-          <div>
-            <small>REVEALED DARK POWER</small>
-            <h3>{power.name}</h3>
-            <p>{power.effect}</p>
-            {power.id === "immortal-master" && (
-              <p>
-                {counts.recorded && counts.onBoard === 3
-                  ? "All three are recorded on board: protect Geppetto’s Final Health token."
-                  : "Check the physical board before applying its protection."}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-      <details className="geppetto-details">
-        <summary>
-          Dark Power &amp; Finale
-          {state.powerRevealed && !power ? " · power not specified" : ""}
-        </summary>
+      <KillerCards killer="Geppetto" events={events} onEvent={onEvent} />
+      {power?.id === "immortal-master" && (
         <p className="geppetto-quiet">
-          Choose the revealed card, or correct its name. This uses the same
-          reveal as Remember This. Card effects are not automatically resolved.
+          {counts.recorded && counts.onBoard === 3
+            ? "All three are recorded on board: protect Geppetto’s Final Health token."
+            : "Check the physical board before applying its protection."}
         </p>
-        <h3>Dark Power</h3>
-        <div className="geppetto-card-grid">
-          {GEPPETTO_POWERS.map((c, i) => (
-            <IllustratedTile
-              key={c.id}
-              art={squareCell(cardsAtlas, i)}
-              title={c.name}
-              status={
-                "epic" in c
-                  ? "Epic Dark Power"
-                  : state.power === c.id
-                    ? "Revealed"
-                    : "Choose when revealed"
-              }
-              aria-pressed={state.power === c.id}
-              onClick={() => reveal("dark-power", c.name)}
-            />
-          ))}
-        </div>
-        <h3>Finale</h3>
-        <div className="geppetto-card-grid">
-          {GEPPETTO_FINALES.map((c, i) => (
-            <IllustratedTile
-              key={c.id}
-              art={squareCell(cardsAtlas, i + 4)}
-              title={c.name}
-              status={
-                state.finale === c.id ? "Revealed" : "Choose when revealed"
-              }
-              aria-pressed={state.finale === c.id}
-              onClick={() => reveal("finale", c.name)}
-            />
-          ))}
-        </div>
-      </details>
+      )}
       <details className="geppetto-details">
         <summary>Minor Dark Powers</summary>
         <p className="geppetto-quiet">
@@ -339,73 +253,17 @@ export function GeppettoControls({
             const value = state[`minor.${c.id}.health`],
               health = typeof value === "number" ? value : undefined;
             return (
-              <article
+              <MinorPowerControl
                 key={c.id}
-                data-state={
-                  health === undefined
-                    ? "unrevealed"
-                    : health === 0
-                      ? "removed"
-                      : health === 1
-                        ? "weakened"
-                        : "full"
+                name={c.name}
+                effect={c.effect}
+                health={health}
+                art={(health) => minorCell(row, health)}
+                heartArt={squareCell(cardsAtlas, 7)}
+                onChange={(health) =>
+                  change({ [`minor.${c.id}.health`]: health })
                 }
-              >
-                <div className="geppetto-minor-art">
-                  <ModuleArtwork art={minorCell(row, health ?? 2)} />
-                  <h3>{c.name}</h3>
-                </div>
-                <p>{c.effect}</p>
-                <p aria-live="polite">
-                  {health === undefined
-                    ? "Not recorded"
-                    : health === 0
-                      ? "Removed · 0/2 Health"
-                      : `${health}/2 Health`}
-                </p>
-                {health === undefined ? (
-                  <button
-                    onClick={() => change({ [`minor.${c.id}.health`]: 2 })}
-                  >
-                    Reveal {c.name}
-                  </button>
-                ) : (
-                  <>
-                    <div
-                      className="geppetto-hearts"
-                      role="group"
-                      aria-label={`${c.name} health`}
-                    >
-                      {[0, 1].map((i) => {
-                        const filled = i < health;
-                        return (
-                          <button
-                            key={i}
-                            aria-pressed={filled}
-                            aria-label={`${filled ? "Remove" : "Restore"} one ${c.name} health, heart ${i + 1}`}
-                            onClick={() =>
-                              change({
-                                [`minor.${c.id}.health`]:
-                                  health + (filled ? -1 : 1),
-                              })
-                            }
-                          >
-                            <ModuleArtwork
-                              art={squareCell(cardsAtlas, filled ? 7 : 8)}
-                            />
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <button
-                      className="geppetto-clear"
-                      onClick={() => change({ [`minor.${c.id}.health`]: null })}
-                    >
-                      Stop tracking {c.name}
-                    </button>
-                  </>
-                )}
-              </article>
+              />
             );
           })}
         </div>

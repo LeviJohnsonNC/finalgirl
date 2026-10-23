@@ -31,6 +31,10 @@ async function section(page: import("@playwright/test").Page, name: string) {
     ))
   )
     await summary.click();
+  if(name === "People & props") {
+    for(const correction of await panel(page).locator(".carnival-actors .module-correction").all())
+      if(!(await correction.evaluate(el => (el as HTMLDetailsElement).open))) await correction.locator("summary").click();
+  }
 }
 async function log(
   page: import("@playwright/test").Page,
@@ -237,7 +241,7 @@ test("Werewolf has no illegal outcomes and discarding the Golf Cart ends its Eve
   ).toHaveCount(0);
   await page.keyboard.press("Escape");
   await p
-    .getByRole("button", { name: "Discard Golf Cart", exact: true })
+    .getByRole("button", { name: "Mark Golf Cart discarded", exact: true })
     .click();
   expect((await log(page)).at(-1)!.moduleData?.changes).toEqual({
     cart: "discarded",

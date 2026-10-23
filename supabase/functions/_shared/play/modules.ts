@@ -790,8 +790,12 @@ export function initialModuleObservations(
   },
   initializeKiller: boolean,
   initializeCarnival = false,
+  initializeBilly = false,
 ): ModuleObservation[] {
   return [
+    ...(initializeBilly && selection.killer === "Billy the Bear" ? [{ module:"billy" as const, changes:{
+      powerSourcesReady:true, ...Object.fromEntries([1,2,3,4,5].map(id => [`source.${id}.status`,id === 5 ? "set-aside" : "active"])),
+    } }] : []),
     ...(initializeKiller && selection.killer === "Geppetto"
       ? [{ module: "geppetto" as const, changes: initialGeppettoPuppets() }]
       : []),

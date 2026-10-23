@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 import { readStoredValue, useLocalStorage } from './useLocalStorage';
-import { isPlayEvent, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
+import { isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
 import { ActiveGame, isActiveGame } from '@/lib/activeGame';
 import { initialModuleObservations } from '@/lib/play/modules';
 import { discardedGamesKey, isGameDiscarded } from '@/lib/discardedGames';
@@ -39,6 +39,9 @@ export function useActiveGame() {
     const ok = setStored(previous => {
       if (previous?.id !== id || (previous.playEvents?.length ?? 0) >= 1000 || previous.playEvents?.some(e => e.id === event.id)) return previous;
       if (event.kind === 'start' && summarizePlay(previous.playEvents).tracked) return previous;
+      // Shared reveal controls can be reached from two places. The durable log
+      // owns uniqueness, including two taps arriving before React renders.
+      if (isPermanentMoment(event) && summarizePlay(previous.playEvents).entries.some(entry => entry.kind === 'moment' && entry.momentType === event.momentType)) return previous;
       const log = previous.playEvents ?? [];
       // A tap arriving before the entry effect still gets a durable baseline.
       const baseline = event.kind !== 'start' && !summarizePlay(log).tracked
@@ -46,7 +49,7 @@ export function useActiveGame() {
       // Persist setup and the first tap together. Never backfill an existing log:
       // a player may already have resolved, cleared or undone the starting state.
       const setup = log.length === 0
-        ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
+        ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
         : [];
       const additions = event.kind === 'start' ? [event, ...setup] : [...baseline, ...setup, event];
       if (log.length + additions.length > 1000) return previous;

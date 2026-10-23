@@ -1,3 +1,5 @@
+import { KillerCards } from "./KillerCards";
+import { illustratedKillerCards } from "./killerPresentation";
 import { playStartingValues } from "@/lib/play/defaults";
 import horrorLow from "@/assets/play/states/horror-low.webp";
 import horrorMid from "@/assets/play/states/horror-mid.webp";
@@ -207,7 +209,7 @@ export function PlayScreen(props: PlayScreenProps) {
     : "";
   const momentCard = moment?.killerCard ?? "";
   const hansState = moduleState(summary.entries, "hans");
-  const momentCards = killerMomentCards(killer, moment?.momentType ?? "");
+  const momentCards = moment?.momentType === "dark-power" || moment?.momentType === "finale" ? illustratedKillerCards(killer, moment.momentType) : [];
   const isReveal =
     moment?.momentType === "dark-power" || moment?.momentType === "finale";
   const saveMoment = () => {
@@ -541,6 +543,7 @@ export function PlayScreen(props: PlayScreenProps) {
         </div>
         {moment && (
           <div className="play-moment-editor">
+            {isReveal && <KillerCards killer={killer} events={events} onEvent={onEvent} typeOnly={moment.momentType as "dark-power" | "finale"} />}
             {isReveal && momentCards.length > 0 && (
               <label>
                 {moment.momentType === "dark-power"
@@ -573,6 +576,7 @@ export function PlayScreen(props: PlayScreenProps) {
                   }}
                 >
                   <option value="">Not specified</option>
+                  {momentCard && !momentCards.some(card => card.name === momentCard) && <option value={momentCard}>{momentCard} (earlier record)</option>}
                   {momentCards.map((card) => (
                     <option key={card.id} value={card.name}>
                       {card.name}

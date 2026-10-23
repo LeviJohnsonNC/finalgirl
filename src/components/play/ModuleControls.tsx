@@ -50,7 +50,7 @@ const modules: Definition[] = [
   { id: 'hans', owner: 'killer', match: 'Hans', title: 'Hans the Butcher', art: { src: hansBanner, atlas: { width: 1536, height: 1024, x: 0, y: 0, cellWidth: 1536, cellHeight: 512 } },
     summary: state => HANS_MINOR_POWERS.map(power => {
       const health = state[`minor.${power.id}.health`];
-      return `${power.name}: ${health === undefined ? 'unrevealed' : `${health}/2`}`;
+      return `${power.name}: ${health === undefined ? 'not recorded' : `${health}/2`}`;
     }).join(' · '), Controls: props => <CampControls {...props} part="killer" /> },
   { id: 'buddyland', owner: 'location', match: 'Buddyland', title: 'Inside Buddyland', art: atlas(512),
     summary: state => peopleSummary(state, SPECIAL_VICTIMS, 'victim', 'on-board'),

@@ -13,6 +13,33 @@ const game: ActiveGame = { version: 1, id: 'session-A', phase: 'nowPlaying', sel
 } };
 
 describe('recoverable active game', () => {
+  it('seeds fresh Billy sources once with the first observation and never backfills older games', () => {
+    const { result } = renderHook(useActiveGame);
+    const fresh = {...game,billySetupVersion:1 as const,selection:{...game.selection,killer:'Billy the Bear',startingEvent:'Girlfriend'}};
+    act(()=>{ result.current.save(fresh); });
+    act(()=>{ result.current.appendPlayEvent(game.id,newPlayEvent({kind:'saved',quantity:1})); });
+    const initial = result.current.activeGame.playEvents;
+    expect(initial.filter(e=>e.moduleData?.changes.powerSourcesReady)).toHaveLength(1);
+    expect(initial.find(e=>e.moduleData?.changes.powerSourcesReady).moduleData.changes).toMatchObject({'source.1.status':'active','source.5.status':'set-aside'});
+    act(()=>{ result.current.appendPlayEvent(game.id,newPlayEvent({kind:'module',moduleData:{module:'billy',changes:{'source.1.status':'inactive'}}})); });
+    expect(result.current.activeGame.playEvents.filter(e=>e.moduleData?.changes.powerSourcesReady)).toHaveLength(1);
+    act(()=>{ result.current.save({...fresh,billySetupVersion:undefined,playEvents:[]}); });
+    act(()=>{ result.current.appendPlayEvent(game.id,newPlayEvent({kind:'saved',quantity:1})); });
+    expect(result.current.activeGame.playEvents.some(e=>e.moduleData?.module === 'billy')).toBe(false);
+  });
+  it('keeps one permanent reveal when separate entry points race and allows details corrections', () => {
+    const {result} = renderHook(useActiveGame);
+    act(()=>{result.current.save(game);});
+    const reveal = newPlayEvent({kind:'moment',momentType:'dark-power',text:'Dark Power',permanent:true,killerCard:'Feed'});
+    act(()=>{
+      expect(result.current.appendPlayEvent(game.id,reveal)).toBe(true);
+      expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'moment',momentType:'dark-power',text:'Dark Power',permanent:true,killerCard:'Dark Obsession'}))).toBe(false);
+      expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'details',target:reveal.id,killerCard:'Dark Obsession'}))).toBe(true);
+    });
+    const entries = summarizePlay(result.current.activeGame.playEvents).entries.filter(e=>e.momentType === 'dark-power');
+    expect(entries).toHaveLength(1);
+    expect(entries[0].killerCard).toBe('Dark Obsession');
+  });
   it('atomically appends rapid taps, ignores duplicate IDs and keeps unknown fields recoverable', () => {
     const { result } = renderHook(useActiveGame);
     act(() => { result.current.save(game); });
