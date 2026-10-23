@@ -1,3 +1,4 @@
+import { CARNIVAL_VISUAL } from '../../supabase/functions/_shared/play/carnival';
 import { BUDDYLAND_VISUALS } from './buddyland';
 
 /**
@@ -61,15 +62,7 @@ The surrounding forest is dense, dark, and enclosing—tall trees press in close
 
 The camp feels quiet, suspended, and watchful—as if something is present but waiting. Key elements: Lakeside setting with visible mist or fog. Small wooden cabins with warm interior light. Central fire pit with log seating. Dense forest enclosing the space. A single access path or dirt road.`,
 
-  "Carnival of Blood": `A derelict traveling carnival frozen in time, set under a storm-heavy sky. The grounds are muddy and uneven, with puddles reflecting strings of warm carnival lights that still glow despite the absence of joy. Everything feels recently active but wrong—like the crowd left in a hurry.
-
-At the center stands a large striped circus tent ("The Big Top"), its fabric sagging slightly with age and moisture. The entrance is lit and open, inviting but ominous, as if something inside is waiting for an audience that never arrived.
-
-Surrounding the big top are decaying attractions: A House of Mirrors with flickering marquee lights. A Ferris wheel looming silently in the background. Rusted animal cages on wagons, doors closed but suggestive. A small ticket booth still staffed or recently abandoned. Old carnival signage, hand-painted and weathered.
-
-The ground is churned mud, suggesting heavy foot traffic followed by rain. Light bulbs glow warmly, contrasting sharply with the cold sky and dark surroundings.
-
-The carnival feels theatrical but rotten—performance stripped of innocence. Key elements: Large striped big top tent at center. Carnival lights glowing despite abandonment. House of Mirrors or funhouse facade. Ferris wheel visible in silhouette. Animal cages or wagons present. Mud, puddles, and stormy skies.`,
+  "Carnival of Blood": CARNIVAL_VISUAL,
 
   "Maple Lane": `A calm, middle-class suburban neighborhood at dusk or early night, centered on a four-way residential intersection. Modest single-family homes with pitched roofs and tidy lawns line the streets, their porch lights and interior lamps glowing warmly. Everything appears orderly, safe, and routine.
 

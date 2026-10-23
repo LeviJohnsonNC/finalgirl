@@ -144,3 +144,22 @@ it('leaves an older untracked Gepetto session’s tray unknown even when its fir
  act(()=>{result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',round:1,saved:0,killed:0}));});
  expect(result.current.activeGame!.playEvents!.some(e=>e.moduleData?.module==='geppetto')).toBe(false);
 });
+
+
+it('seeds Carnival and its starting Event with the first tap once, independently of the killer',()=>{
+ const {result}=renderHook(useActiveGame);
+ act(()=>{result.current.save({...game,carnivalSetupVersion:1,selection:{...game.selection,killer:'Hans',location:'Carnival of Blood',startingEvent:'So Much Junk'}});});
+ act(()=>{expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'module',moduleData:{module:'carnival',changes:{zappo:'lost',searchPenalty:true}}}))).toBe(true);});
+ const log=result.current.activeGame!.playEvents!;
+ expect(log.filter(e=>e.moduleData?.module==='carnival')).toHaveLength(2);
+ expect(log.find(e=>e.moduleData?.changes['event.junk'])?.moduleData?.changes).toMatchObject({zappo:'with-you','event.junk':'active','trap.acid.status':'not-placed'});
+ act(()=>{result.current.appendPlayEvent(game.id,newPlayEvent({kind:'round'}));});
+ expect(result.current.activeGame!.playEvents!.filter(e=>e.moduleData?.module==='carnival')).toHaveLength(2);
+});
+
+it('never backfills Carnival for an older empty log, even with a selected starting Event',()=>{
+ const {result}=renderHook(useActiveGame);
+ act(()=>{result.current.save({...game,selection:{...game.selection,location:'Carnival of Blood',startingEvent:'Full Moon'}});});
+ act(()=>{result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',round:1,saved:0,killed:0}));});
+ expect(result.current.activeGame!.playEvents!.some(e=>e.moduleData?.module==='carnival')).toBe(false);
+});

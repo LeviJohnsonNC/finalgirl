@@ -1,3 +1,6 @@
+import { CarnivalControls } from './CarnivalControls';
+import carnivalBanner from '@/assets/play/carnival/banner.webp';
+import { carnivalSummary } from '@/lib/play/modules';
 import { GeppettoControls } from './GeppettoControls';
 import geppettoBanner from '@/assets/play/geppetto/banner.webp';
 import { geppettoPuppetCounts } from '@/lib/play/modules';
@@ -20,7 +23,7 @@ interface ControlsProps {
 }
 type State = ReturnType<typeof moduleState>;
 interface Definition {
-  id: 'billy' | 'hans' | 'buddyland' | 'camp' | 'geppetto'; owner: 'killer' | 'location'; match: string;
+  id: 'billy' | 'hans' | 'buddyland' | 'camp' | 'geppetto' | 'carnival'; owner: 'killer' | 'location'; match: string;
   title: string; art: ModuleArt; summary: (state: State) => string;
   Controls: (props: ControlsProps) => React.ReactNode;
 }
@@ -57,6 +60,7 @@ const modules: Definition[] = [
       const active = Object.entries(state).filter(([key, value]) => key.startsWith('event.') && value === 'active').length;
       return `${peopleSummary(state, CAMP_VICTIMS, 'victim', 'in-play')} · ${active} active effects`;
     }, Controls: props => <CampControls {...props} part="location" /> },
+  {id:'carnival',owner:'location',match:'Carnival of Blood',title:'Inside Carnival of Blood',art:{src:carnivalBanner},summary:carnivalSummary,Controls:props=><CarnivalControls {...props}/>},
 ];
 export function ModuleControls({ sessionId, ...props }: ControlsProps & { sessionId: string }) {
   const { user } = useAuth();

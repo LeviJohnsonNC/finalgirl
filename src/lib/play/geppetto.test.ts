@@ -63,7 +63,7 @@ describe("verified Gepetto catalog and module isolation", () => {
         (c) => c.killer === "Geppetto",
       ),
     ).toBe(false);
-    expect(playItems("Carnival of Blood")).toEqual([]); // Location implementation is separate.
+    expect(playItems("Carnival of Blood")).toHaveLength(18); // Independent location catalog.
     expect(
       ENTITY_RULE_MODULES.find((c) => c.entity === "Geppetto")?.source,
     ).toContain("IMG_9333");

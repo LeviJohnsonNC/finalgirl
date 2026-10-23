@@ -14,11 +14,13 @@ import {
 
 /** A themed, keyboard-accessible replacement for the small native status menus. */
 export function PlaySelect({
+  id,
   value,
   onChange,
   children,
   "aria-label": label,
 }: {
+  id?: string;
   value: string;
   onChange: (event: ChangeEvent<HTMLSelectElement>) => void;
   children: ReactNode;
@@ -46,7 +48,7 @@ export function PlaySelect({
         } as ChangeEvent<HTMLSelectElement>)
       }
     >
-      <SelectTrigger className="play-select-trigger" aria-label={label}>
+      <SelectTrigger id={id} className="play-select-trigger" aria-label={label}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent className="play-select-menu" position="popper">

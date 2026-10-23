@@ -25,10 +25,12 @@ const buddyland = moduleAt(
 );
 const camp = moduleAt("../supabase/functions/_shared/play/camp.ts", {});
 const geppetto = moduleAt("../supabase/functions/_shared/play/geppetto.ts", {});
+const carnival = moduleAt("../supabase/functions/_shared/play/carnival.ts", {});
 const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", {
   "./buddyland.ts": buddyland,
   "./camp.ts": camp,
   "./geppetto.ts": geppetto,
+  "./carnival.ts": carnival,
 });
 const events = moduleAt("../supabase/functions/_shared/play/events.ts", {
   "./modules.ts": modules,
@@ -452,4 +454,15 @@ test('Gepetto observations authorize a Puppet scene from historical owned state 
  assert.equal((await f.handler(f.request())).status,200);
  assert.deepEqual(f.owned.playEvents,original);
  assert.equal(f.calls.filter(c=>c==='AI').length,1);
+});
+
+
+test('Carnival trap scenes authorize from historical canonical state and preserve old non-Carnival signatures',async()=>{
+ const f=fixture({expectedFacts:{location:'Carnival of Blood',cause:'hazard',quantity:1,mechanism:'Acid Pitfall Trap',moduleContext:{carnival:{'trap.acid.status':'placed','trap.acid.space':'Outer path',searchPenalty:true,zappo:'lost'}}}});
+ f.owned.selection.location='Carnival of Blood';
+ const killed={...f.owned.playEvents[1],cause:'hazard',quantity:1,mechanism:'Acid Pitfall Trap'};
+ f.owned.playEvents=[f.owned.playEvents[0],{id:crypto.randomUUID(),at:1,kind:'module',moduleData:{module:'carnival',changes:{'trap.acid.status':'placed','trap.acid.space':'Outer path',searchPenalty:true,zappo:'lost'}}},killed,{id:crypto.randomUUID(),at:3,kind:'module',moduleData:{module:'carnival',changes:{'trap.acid.status':'not-placed'}}}];
+ const original=structuredClone(f.owned.playEvents);
+ assert.equal((await f.handler(f.request())).status,200);
+ assert.deepEqual(f.owned.playEvents,original);
 });

@@ -1,3 +1,4 @@
+import { CARNIVAL_VISUAL } from './play/carnival.ts';
 import { GEPPETTO_VISUAL } from './play/geppetto.ts';
 import { HANS_VISUAL } from './play/camp.ts';
 // Concise setting cues from src/data/killerDescriptions.ts and locationDescriptions.ts.
@@ -51,8 +52,7 @@ export const DEATH_LOCATION_CUES: Record<string, string> = {
     'A cavernous, soot-stained industrial foundry defined by heavy iron structures, massive overhead support beams, and a floor of reinforced metal grating. The environment is thick with age and grime, feeling oppressive and sweltering—a place where the scale of the machinery dwarfs the people operating it. At the center of the scene is a pit of incandescent molten metal, radiating an intense, blinding orange glow that serves as the primary light source.',
   'Camp Happy Trails':
     'A secluded lakeside summer camp set deep in a forest, composed of small wooden cabins arranged loosely around a central dirt path and communal fire pit. The camp feels modest, old-fashioned, and slightly neglected rather than abandoned—structures are intact but weathered, with peeling wood, uneven steps, and soft yellow light glowing from cabin windows. At the heart of the camp is a large circular fire pit surrounded by rough-hewn log benches. The fire burns steadily, casting long, flickering shadows across the ground and nearby trees.',
-  'Carnival of Blood':
-    'A derelict traveling carnival frozen in time, set under a storm-heavy sky. The grounds are muddy and uneven, with puddles reflecting strings of warm carnival lights that still glow despite the absence of joy. Everything feels recently active but wrong—like the crowd left in a hurry. At the center stands a large striped circus tent ("The Big Top"), its fabric sagging slightly with age and moisture. The entrance is lit and open, inviting but ominous, as if something inside is waiting for an audience that never arrived.',
+  'Carnival of Blood': CARNIVAL_VISUAL,
   'Maple Lane':
     'A calm, middle-class suburban neighborhood at dusk or early night, centered on a four-way residential intersection. Modest single-family homes with pitched roofs and tidy lawns line the streets, their porch lights and interior lamps glowing warmly. Everything appears orderly, safe, and routine. Streetlights cast soft pools of amber light onto damp asphalt, creating reflective patches on the road surface. The streets are empty—no pedestrians, no moving cars—just stillness. The silence feels intentional rather than late.',
   'Wolfe Asylum':
