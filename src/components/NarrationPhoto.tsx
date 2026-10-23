@@ -20,9 +20,9 @@ export const NarrationPhoto = ({ imageUrl, isGenerating, error, onRetry, variant
     if (variant !== 'poster' || !posterCaption.current) return;
     const measure = () => figure.current?.style.setProperty('--poster-caption-height', `${posterCaption.current?.getBoundingClientRect().height ?? 36}px`);
     measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(posterCaption.current);
-    return () => observer.disconnect();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    observer?.observe(posterCaption.current);
+    return () => observer?.disconnect();
   }, [variant, caption]);
   const [dimensions, setDimensions] = useState({ url: '', ratio: 4 / 3 });
   const [failedUrl, setFailedUrl] = useState<string | null>(null);

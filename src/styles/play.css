@@ -2205,3 +2205,5 @@ body:has(.play-workspace) .app-shell {
   .play-death-body[data-mode="reading"] .play-cause-tile { min-height: 44px; }
 }
 .play-death-prose-scroll:focus-visible { outline: 1px solid #d7bd86; outline-offset: 3px; }
+.play-death-footer { flex: 0 0 auto; background: #0c1210; }
+.play-death-save-error { color: #ffbcb0; padding: 10px 24px 0; margin: 0; font: 13px/1.5 Arial, sans-serif; }

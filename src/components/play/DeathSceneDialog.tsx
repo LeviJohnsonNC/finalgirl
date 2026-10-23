@@ -362,7 +362,7 @@ export function DeathSceneDialog({
             </label>
           </div>
         )}
-        {((!editingDetails && (requested || selected || unfinished)) || scenes.error || resultError || message) && (
+        {((!editingDetails && (requested || selected || unfinished)) || scenes.error || resultError) && (
           <section
             ref={payoff}
             className="play-death-payoff"
@@ -417,7 +417,6 @@ export function DeathSceneDialog({
                   (unfinished
                     ? "This saved scene was cut short. Use Gruesome Death to write it again."
                     : "") ||
-                  message ||
                   "Your details are saved. Create a gruesome death when you’re ready."}
               </p>
             )}
@@ -438,6 +437,8 @@ export function DeathSceneDialog({
           <p className="play-card-note">Sign in to generate a gruesome death. You can still record and save details.</p>
         )}
         </div>
+        <div className="play-death-footer">
+        {message && <p className="play-death-save-error" role="alert">{message}</p>}
         <div className="play-death-actions">
           <button onClick={cancel}>Cancel</button>
           <button
@@ -462,6 +463,7 @@ export function DeathSceneDialog({
           >
             {scenes.busy ? "Writing the death…" : "Gruesome Death"}
           </button>
+        </div>
         </div>
       </DialogContent>
     </Dialog>
