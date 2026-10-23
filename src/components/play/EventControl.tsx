@@ -34,6 +34,7 @@ export function EventControl({
   const active = value === "active";
   return (
     <article
+      data-module-control="event"
       className={`module-event ${className}`}
       data-state={value ?? "unrecorded"}
     >

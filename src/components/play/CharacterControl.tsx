@@ -38,6 +38,7 @@ export function CharacterControl({
   const active = value === present;
   return (
     <article
+      data-module-control="character"
       className={`module-character ${className}`}
       data-state={value ?? "unrecorded"}
     >
