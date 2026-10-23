@@ -55,11 +55,12 @@ Paths below are current entry points, not a guarantee that adding one registry r
 | Concern | Entry points |
 | --- | --- |
 | Film/entity selection and descriptions | `src/types/gameData.ts`, `src/types/featureFilmDetails.ts` |
+| Lore and visual identities | `src/data/killerDescriptions.ts`, `src/data/locationDescriptions.ts`, `src/data/killerSpecialRules.ts`; supplied Final Girl facts/descriptions only where in scope |
 | Verified game facts and Play domain | `supabase/functions/_shared/play/<owner>.ts`, `catalog.ts`, `modules.ts`, `events.ts`, `death.ts`; `src/lib/play/` re-exports the shared domain |
 | Rules registration and prompt guidance | `src/data/rules/<owner>Rules.ts`, `src/data/rules/moduleRules.ts`, existing Rules search/rendering and story-prompt callers |
 | Panels and capabilities | `src/components/play/moduleDefinitions.tsx`, owner Controls, `KillerCards.tsx`, `killerPresentation.ts`, shared controls named in `module-controls.md` |
 | Session setup and persistence | `src/hooks/useActiveGame.ts`, current cast/session types and setup provenance; shared observation validation/reducers |
-| Narratives and server contracts | Shared Play context/death builders, `supabase/functions/_shared/deathPrompt.ts`, `src/lib/storyPrompts.ts`, function request validators and affected edge handlers |
+| Narratives and server contracts | Shared Play context/death builders; `supabase/functions/_shared/storyFacts.ts`, `storyPrompts.ts`, `deathPrompt.ts`, `prompts.ts`; request validators, affected edge handlers and current frontend prompt callers |
 | Visual presentation | `src/assets/play/<owner>/` and its art README, `illustrated-tile.css`, `play-controls.css`, `play-modules.css`, owner-scoped CSS |
 | Verification | `src/components/play/moduleControls.contract.test.tsx`, domain/catalog tests, module browser journeys, `tests/browser/module-consistency.spec.ts`, existing death/narration/Rules/recovery specs, Reliability CI |
 
