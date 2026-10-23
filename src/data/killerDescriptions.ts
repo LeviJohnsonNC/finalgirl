@@ -1,3 +1,4 @@
+import { GEPPETTO_VISUAL } from '../../supabase/functions/_shared/play/geppetto';
 import { HANS_VISUAL } from './rules/campRules';
 import { BUDDYLAND_VISUALS } from './buddyland';
 
@@ -26,19 +27,7 @@ She grips a heavy, industrial red power drill in her right hand, held upright li
 He is shirtless, wearing an intricate black leather harness with various straps, buckles, and metal O-rings across his chest. Heavy metal chains are draped around his neck and wrapped around his waist. His forearms are tightly bound in dark, weathered fabric wraps. In his hands, he delicately holds a realistic human heart that has also been pierced by several long pins.`,
   "Hans": HANS_VISUAL,
 
-  "Geppetto": `A slender, adult male figure with a tall, wiry build and an exaggerated, theatrical presence. His posture is expressive and performative, with deliberate gestures meant to be seen and savored. He moves like someone on stage even when standing still.
-
-His face is fully painted in stark, theatrical makeup: a white-painted base covering the entire face, heavy black makeup smeared and dripping downward from the eyes, and a wide, exaggerated red smile painted across the mouth, partially smeared and stained. The makeup looks worn, cracked, and intentionally grotesque rather than clean or polished. His expression beneath the paint is knowingly playful and predatory—eyes locked directly on the viewer, amused and inviting.
-
-His eyes are light-colored (pale gray or light hazel), sharp and expressive, communicating delight rather than rage.
-
-He has medium-length brown hair, slightly messy and unstyled, peeking out from beneath a tall black top hat. The hat is worn and scuffed, not pristine. He wears an ornate, old-fashioned ringmaster or carnival showman outfit:
-
-A deep red velvet tailcoat with gold trim and epaulettes. A high-collared shirt or cravat beneath, stained and rumpled. High-waisted trousers with bold vertical stripes (yellow and dark tones). Decorative elements feel theatrical but aged and damaged. The outfit must feel once-grand, now decayed—torn, stained, and lived-in.
-
-He holds wooden marionette control bars with long strings dangling down, implying control over unseen victims. The marionette strings are essential symbolism, even if no puppet is visible.
-
-This character radiates playful cruelty. He enjoys being watched. Violence is a performance, not a necessity. He taunts rather than rushes, smiles rather than scowls, and always appears one step ahead. He is not frantic. He is entertained.`,
+  "Geppetto": GEPPETTO_VISUAL,
 
   "Dr. Fright": `A grotesque, stocky middle-aged man with pockmarked, scarred skin, milky-white eyes and thinning disheveled brown hair. Mustard sweater vest over a worn long-sleeve shirt and work trousers; a rusted pitchfork. His unsettling physical identity stays consistent in dreams and waking imagery. He is the supernatural Dream Doctor, not a non-supernatural farmer. A dark cloudlike presence may appear only when the story establishes it. The selected location and scene determine his pose, lighting and surroundings.`,
 

@@ -1,3 +1,6 @@
+import { GeppettoControls } from './GeppettoControls';
+import geppettoBanner from '@/assets/play/geppetto/banner.webp';
+import { geppettoPuppetCounts } from '@/lib/play/modules';
 import { useAuth } from '@/hooks/useAuth';
 import { summarizePlay, type PlayEvent } from '@/lib/play/events';
 import { moduleState } from '@/lib/play/modules';
@@ -17,7 +20,7 @@ interface ControlsProps {
 }
 type State = ReturnType<typeof moduleState>;
 interface Definition {
-  id: 'billy' | 'hans' | 'buddyland' | 'camp'; owner: 'killer' | 'location'; match: string;
+  id: 'billy' | 'hans' | 'buddyland' | 'camp' | 'geppetto'; owner: 'killer' | 'location'; match: string;
   title: string; art: ModuleArt; summary: (state: State) => string;
   Controls: (props: ControlsProps) => React.ReactNode;
 }
@@ -31,6 +34,9 @@ const peopleSummary = (state: State, ids: readonly { id: string }[], prefix: str
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
 const modules: Definition[] = [
+  {id:'geppetto',owner:'killer',match:'Geppetto',title:'Geppetto & his Puppets',art:{src:geppettoBanner},summary:state=>{
+    const c=geppettoPuppetCounts(state);return c.recorded?`${c.onBoard} on board · ${c.ready} ready · ${c.exhausted} exhausted`:'Puppet tray not recorded';
+  },Controls:props=><GeppettoControls {...props}/>},
   { id: 'billy', owner: 'killer', match: 'Billy the Bear', title: 'Billy & his Buddies', art: atlas(0),
     summary: state => {
       const active = BUDDIES.filter(b => state[`buddy.${b.id}.status`] === 'active').length;

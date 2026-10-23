@@ -37,7 +37,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   'Geppetto': {
     narrativeNote:
-      'A theatrical, sadistic puppeteer who uses marionettes as proxies and can appear to teleport around his carnival domain. He is playful and enjoys taunting; violence is performance to him.',
+      'A theatrical puppeteer whose humanlike marionette Minions follow their recorded Ready, on-board and Exhausted states. Use the selected location. Do not invent teleportation or apply unrevealed powers or Finales.',
   },
 
   'Dr. Fright': {

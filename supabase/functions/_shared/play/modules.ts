@@ -1,4 +1,13 @@
 import {
+  GEPPETTO_POWERS,
+  GEPPETTO_FINALES,
+  GEPPETTO_MINOR_POWERS,
+  GEPPETTO_PUPPETS,
+  validGeppettoField,
+  initialGeppettoPuppets,
+  geppettoPuppetCounts,
+} from "./geppetto.ts";
+import {
   BUDDIES,
   BILLY_FINALES,
   BILLY_POWERS,
@@ -21,7 +30,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "billy" | "buddyland" | "hans" | "camp";
+  module: "billy" | "buddyland" | "hans" | "camp" | "geppetto";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -34,6 +43,14 @@ type ObservedEvent = {
 
 /** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
 export function killerMomentCards(killer: string, type: string) {
+  if (killer === "Geppetto")
+    return [
+      ...(type === "dark-power"
+        ? GEPPETTO_POWERS
+        : type === "finale"
+          ? GEPPETTO_FINALES
+          : []),
+    ].sort((a, b) => a.name.localeCompare(b.name));
   if (killer === "Hans")
     return (
       type === "dark-power"
@@ -109,6 +126,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === "geppetto") return validGeppettoField(key, value);
   const [group, id, field] = key.split(".");
   if (module === "hans") {
     if (key === "secondPower")
@@ -218,7 +236,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["billy", "buddyland", "hans", "camp"].includes(m.module) ||
+    !["billy", "buddyland", "hans", "camp", "geppetto"].includes(m.module) ||
     !m.changes ||
     typeof m.changes !== "object" ||
     Array.isArray(m.changes)
@@ -238,6 +256,18 @@ export function moduleState(
 ): ModuleState {
   const state: ModuleState = {};
   for (const e of entries) {
+    if (module === "geppetto" && e.kind === "moment") {
+      if (e.momentType === "finale") {
+        state.finaleRevealed = true;
+        const card = GEPPETTO_FINALES.find((c) => c.name === e.killerCard);
+        if (card) state.finale = card.id;
+      }
+      if (e.momentType === "dark-power") {
+        state.powerRevealed = true;
+        const card = GEPPETTO_POWERS.find((c) => c.name === e.killerCard);
+        if (card) state.power = card.id;
+      }
+    }
     if (module === "hans" && e.kind === "moment" && e.killerCard) {
       if (
         e.momentType === "dark-power" &&
@@ -275,6 +305,12 @@ export function moduleState(
   return state;
 }
 function fieldLabel(module: ModuleObservation["module"], key: string) {
+  if (module === "geppetto") {
+    const [, id, field] = key.split(".");
+    if (key.startsWith("minor."))
+      return `${GEPPETTO_MINOR_POWERS.find((p) => p.id === id)?.name ?? id} Health`;
+    return `Puppet ${id}${field === "protectionUsed" ? " first-hit protection used" : ""}`;
+  }
   if (module === "hans")
     return key === "secondPower"
       ? "Second Dark Power revealed"
@@ -332,15 +368,23 @@ export function moduleContext(
   entries: readonly ObservedEvent[],
 ) {
   const context: Record<string, ModuleState> = {};
-  for (const module of ["billy", "buddyland", "hans", "camp"] as const) {
+  for (const module of [
+    "billy",
+    "buddyland",
+    "hans",
+    "camp",
+    "geppetto",
+  ] as const) {
     const applies =
-      module === "billy"
-        ? selection.killer === "Billy the Bear"
-        : module === "hans"
-          ? selection.killer === "Hans"
-          : module === "camp"
-            ? selection.location === "Camp Happy Trails"
-            : selection.location === "Buddyland";
+      module === "geppetto"
+        ? selection.killer === "Geppetto"
+        : module === "billy"
+          ? selection.killer === "Billy the Bear"
+          : module === "hans"
+            ? selection.killer === "Hans"
+            : module === "camp"
+              ? selection.location === "Camp Happy Trails"
+              : selection.location === "Buddyland";
     if (!applies) continue;
     const state = moduleState(entries, module);
     // A UI initialization marker is not a game fact or part of a death fingerprint.
@@ -368,6 +412,28 @@ export function moduleStoryBeats(
   const context = moduleContext(selection, entries);
   if (!context) return "";
   const lines: string[] = [];
+  const geppetto = context.geppetto;
+  if (geppetto) {
+    const count = geppettoPuppetCounts(geppetto);
+    if (geppetto.finaleRevealed)
+      lines.push(
+        `Geppetto Finale revealed: ${GEPPETTO_FINALES.find((c) => c.id === geppetto.finale)?.name ?? "card not specified"}.`,
+      );
+    if (geppetto.powerRevealed)
+      lines.push(
+        `Geppetto Dark Power revealed: ${GEPPETTO_POWERS.find((c) => c.id === geppetto.power)?.name ?? "card not specified"}.`,
+      );
+    lines.push(
+      count.recorded
+        ? `Puppets: ${count.onBoard} on board, ${count.ready} Ready, ${count.exhausted} Exhausted. Exhausted is reusable, not permanent death; no victim deaths inferred.`
+        : "Puppet tray incompletely recorded.",
+    );
+    for (const p of GEPPETTO_MINOR_POWERS)
+      if (typeof geppetto[`minor.${p.id}.health`] === "number")
+        lines.push(
+          `${p.name}: ${geppetto[`minor.${p.id}.health`]}/2 Health${geppetto[`minor.${p.id}.health`] === 0 ? ", removed" : ""}.`,
+        );
+  }
   const billy = context.billy;
   if (billy) {
     if (billy.finale)
@@ -496,6 +562,35 @@ export function moduleReferences(
   mechanism?: string,
 ) {
   const refs = buddylandReferences(selection, context, attacker);
+  if (selection.killer === "Geppetto") {
+    const state = context?.geppetto ?? {};
+    if (
+      attacker === "Puppet" ||
+      GEPPETTO_PUPPETS.some((p) => p.name === attacker)
+    )
+      refs.push({
+        name: attacker!,
+        effect:
+          "Geppetto’s humanlike marionette Minion, normally one Health and one damage, with movement matching Geppetto. Two-space tether applies unless the recorded Finale changes it. A selected attacker establishes this scene’s attacker only. Never substitute Buddyland animatronics.",
+      });
+    for (const c of [...GEPPETTO_POWERS, ...GEPPETTO_FINALES])
+      if (state.power === c.id || state.finale === c.id)
+        refs.push({
+          name: c.name,
+          effect: `${c.effect} Reference only: a reveal does not establish that this effect caused the recorded death.`,
+        });
+    for (const p of GEPPETTO_MINOR_POWERS) {
+      const health = state[`minor.${p.id}.health`];
+      if (typeof health === "number")
+        refs.push({
+          name: p.name,
+          effect:
+            health === 0
+              ? "Recorded as removed, no longer active."
+              : `${p.effect} ${health}/2 separate Health remaining. Do not infer extra damage or deaths.`,
+        });
+    }
+  }
   if (selection.killer === "Hans" && context?.hans) {
     const state = context.hans;
     for (const p of HANS_POWERS)
@@ -568,4 +663,21 @@ export function moduleItemBeats(
         : [];
     })
     .join("\n");
+}
+
+/** Called only for a brand-new log, persisted with its first observation. */
+export function initialModuleObservations(
+  selection: {
+    killer: string;
+    location: string;
+    startingEvent?: string | null;
+  },
+  initializeKiller: boolean,
+): ModuleObservation[] {
+  return [
+    ...(initializeKiller && selection.killer === "Geppetto"
+      ? [{ module: "geppetto" as const, changes: initialGeppettoPuppets() }]
+      : []),
+    ...startingEventObservations(selection),
+  ];
 }

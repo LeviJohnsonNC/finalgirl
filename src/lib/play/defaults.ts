@@ -14,6 +14,7 @@ export function playStartingValues(
   const killerHealth: Record<string, number> = {
     "Billy the Bear": 8,
     Hans: 12,
+    Geppetto: 8,
   };
   return {
     finalGirlHealth: getFinalGirlHealth(finalGirl),

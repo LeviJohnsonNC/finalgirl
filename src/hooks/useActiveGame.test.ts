@@ -119,3 +119,28 @@ it('does not partly apply starting-event setup when durable storage fails', () =
   expect(result.current.activeGame!.playEvents).toBeUndefined();
   spy.mockRestore();
 });
+
+it('initializes Gepetto once and preserves unknown legacy trays and explicit first-tap corrections', () => {
+  const selected={...game,geppettoSetupVersion:1 as const,selection:{...game.selection,killer:'Geppetto',startingEvent:'Girlfriend'}};
+  const first=renderHook(useActiveGame);
+  act(()=>{first.result.current.save(selected);});
+  act(()=>{expect(first.result.current.appendPlayEvent(game.id,newPlayEvent({kind:'module',moduleData:{module:'geppetto',changes:{'puppet.1.status':'on-board'}}}))).toBe(true);});
+  const log=first.result.current.activeGame!.playEvents!;
+  expect(log.filter(e=>e.moduleData?.module==='geppetto')).toHaveLength(2);
+  expect(log.find(e=>e.moduleData?.module==='camp')?.moduleData?.changes['victim.girlfriend']).toBe('in-play');
+  first.unmount();
+  const second=renderHook(useActiveGame);
+  act(()=>{second.result.current.appendPlayEvent(game.id,newPlayEvent({kind:'round'}));});
+  expect(second.result.current.activeGame!.playEvents!.filter(e=>e.moduleData?.module==='geppetto')).toHaveLength(2);
+  act(()=>{second.result.current.save({...selected,playEvents:[newPlayEvent({kind:'start',round:5,saved:2,killed:1})]});});
+  act(()=>{second.result.current.appendPlayEvent(game.id,newPlayEvent({kind:'round'}));});
+  expect(second.result.current.activeGame!.playEvents!.some(e=>e.moduleData?.module==='geppetto')).toBe(false);
+});
+
+
+it('leaves an older untracked Gepetto session’s tray unknown even when its first play log is empty',()=>{
+ const {result}=renderHook(useActiveGame);
+ act(()=>{result.current.save({...game,selection:{...game.selection,killer:'Geppetto'}});});
+ act(()=>{result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',round:1,saved:0,killed:0}));});
+ expect(result.current.activeGame!.playEvents!.some(e=>e.moduleData?.module==='geppetto')).toBe(false);
+});

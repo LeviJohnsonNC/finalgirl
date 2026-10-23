@@ -21,7 +21,8 @@ const load = (path, imports) => {
 };
 const buddyland = load('../supabase/functions/_shared/play/buddyland.ts', {});
 const camp = load('../supabase/functions/_shared/play/camp.ts', {});
-const modules = load('../supabase/functions/_shared/play/modules.ts', {'./buddyland.ts':buddyland,'./camp.ts':camp});
+const geppetto = load('../supabase/functions/_shared/play/geppetto.ts', {});
+const modules = load('../supabase/functions/_shared/play/modules.ts', {'./buddyland.ts':buddyland,'./camp.ts':camp,'./geppetto.ts':geppetto});
 const events = load('../supabase/functions/_shared/play/events.ts', {'./modules.ts':modules}),
   death = load('../supabase/functions/_shared/play/death.ts', { './events.ts': events, './modules.ts':modules });
 const schemas = load('../supabase/functions/_shared/validation.ts', {

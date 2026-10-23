@@ -1,3 +1,4 @@
+import { GEPPETTO_TERRORS } from './geppetto.ts';
 import {
   BUDDYLAND_EVENTS,
   BUDDYLAND_TERRORS,
@@ -29,6 +30,7 @@ const station = wiki("Station_2891");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+  ...GEPPETTO_TERRORS.map(card => ({...card, kind: "terror" as const})),
   ...BUDDYLAND_TERRORS.map((card) => ({
     ...card,
     kind: "terror" as const,
