@@ -1,0 +1,111 @@
+# Killer and location import playbook
+
+Read this before planning or implementing an import from Levi's photographs. It records the expected product quality and the work needed across the app. Follow the current request's scope and approval instructions; this document does not add an approval step. If the request is planning only, stop before implementation.
+
+## Product goal
+
+An imported killer or location should feel as complete and considered as the current Billy/Buddyland, Hans/Camp and Geppetto/Carnival modules: accurate searchable rules, useful illustrated Play sections, appropriate card suggestions, and stories that respect the selected entities and recorded game. A Rules entry, catalog entry or working panel alone is not a complete import.
+
+Keep the current cinematic horror presentation and interaction language. Give new mechanics appropriate controls and artwork; reuse shared controls for equivalent actions. Preserve the module's character without redesigning established pages or forcing every mechanic into another killer's lifecycle. This remains a companion to a physical game, not a combat, movement or inventory simulator.
+
+## First actions in every import
+
+1. Read root `AGENTS.md`, [the interaction standard](module-controls.md), [the latest Play polish](PLAYTEST_POLISH.md), and relevant existing module documents. Inspect the current code and rendered UI; historical documents describe previous changes, not necessarily current support.
+2. Create/update `docs/imports/<owner-slug>.md` from [the import record template](templates/MODULE_IMPORT_RECORD.md). Keep separate killer/location ownership even if both arrive in one photo batch. Cross-link paired records. Do not create records for unrelated existing modules.
+3. Inventory every supplied image and card face. If Levi says more pictures are coming, accumulate and reconcile the batch before treating missing photos as omissions. Preserve useful findings between batches.
+4. Audit existing support. A selectable film can have generic lore, partial rules or name-only cards without verified effects or Play controls. Identify what is already correct, what the photos correct, what must be added and what remains unknown.
+5. Briefly state consequential uncertainties and the intended integration. Continue authorized independent work; request only the particular missing photo/crop or decision needed to resolve a real blocker. Do not repeatedly seek approval for routine implementation choices.
+
+## Source verification and corrections
+
+Use the supplied physical components as evidence for their edition and mode. Check both sides where relevant: killer board and pre-Finale action line, special rules/setup, regular and Epic Dark Powers, Finales, Minor Powers, Terror cards, location board and named spaces, Setups, Events, Items, special tokens/characters and reference cards. Include Final Girl facts only when part of the requested import. Standard mode is the default; distinguish any supplied Extreme Horror, scenario or variant content explicitly.
+
+Record a stable source identifier, filename or accessible reference and the relevant face/region. A source ledger must survive the chat: do not write only “see the screenshots above” or rely on temporary workspace paths. Keep source photos in their existing persistent location where available; do not ship or commit raw card photos by default. If a later session cannot access evidence it needs, say so rather than reconstructing it from memory.
+
+For each component, verify names, quantities, conditions, targets, timing, exceptions and persistence. Inspect small icons at usable resolution. Distinguish Health loss from attack damage, Time from Horror, Action-phase end from other phase icons, Enemies from Minions/Victims, per-turn from per-round, and physical token limits from reusable pieces. Read setup diagrams as well as text. Do not guess obscured symbols, the reverse of a card or missing deck counts.
+
+Use the component list or other verified evidence to reconcile expected versus photographed counts, including duplicate cards and relevant faces. If the total is not established, record “unknown”; a photographed subset is not proof of a complete deck.
+
+Use three evidence states: **verified**, **unclear/missing**, and **conflicting**. Store a faithful factual paraphrase and source for verified rules; record unresolved details separately. Name-only entries must not acquire invented effects. For a correction, record the previous claim, the verified replacement and affected surfaces. Keep game facts separate from thematic interpretation.
+
+When a rule is consequentially ambiguous, consult applicable publisher rules/errata or ask for a clearer image. Record edition/mode and why one source governs; do not silently reconcile conflicting printings or treat a fan summary/model recollection as verification. Retain source attribution and relevant credits. Never fabricate citations or claim a rule was checked against an inaccessible photo.
+
+## Integration checklist
+
+Every row needs evidence of completion, a reason it is inapplicable, or an explicit remaining gap in the import record. Do not label a missing requested feature “not applicable.” Update existing records rather than adding a second conflicting catalog.
+
+| Surface | Expected result |
+| --- | --- |
+| Selection and ownership | Correct stable film/entity IDs, names and aliases. Existing films are extended without duplicate choices. Collection ownership, casting and unlock visibility remain correct. A killer and location can be selected independently. |
+| Rules | Correct Setup/Rules content, searchable names/tags/cross-references, card effects and source attribution. Replace obsolete claims across affected rule sections; preserve valid existing content. |
+| Canonical card data | Verified powers, Finales, Terror cards, Events, Items, spaces and special entities have the right owner. Rules, Play suggestions and prompt references reuse the same verified facts where possible. Catalog counts match the evidence ledger. |
+| Play sections | An illustrated registered killer panel and/or location panel, concise current-state summary, legal mechanic controls, read-only rules disclosures and explicit corrections. Killer controls remain first. Required controls do not depend on selecting the matching film's other half. |
+| Shared entry points | Remember This and the killer panel use the same Power/Finale chooser and one permanent reveal. Applicable Minor Powers, special characters and Events use shared controls. Ordinary item finds remain observations rather than inferred current inventory. |
+| Setup and recovery | Verified initial values apply only to genuinely new games through the durable session boundary. Legacy/part-played games retain unknown values. Explicit corrections, Undo, reload, offline recovery and rejected saves behave correctly. |
+| Gruesome Death | Appropriate owner-filtered causes, attackers, spaces, Terror/Event/Item references and unique mechanisms. Only supported facts enter the historical death context. Saving, generation, cached reopening, takes and narration work with the new observations. |
+| Opening, ending and images | Correct selected-owner lore, visual identity and bounded rule guidance. Recorded module facts reach the ending; the death uses facts at that event. A rule or reveal does not imply an unrecorded action, injury, casualty or item use. |
+| Character details, results and archive | Update relevant verified health/default ranges or supplied character facts where affected. Preserve older sessions, results, scrapbook rendering and statistics. Do not expand unrelated Final Girl or personal-item work implicitly. |
+| Artwork | Real, reviewed original assets for required banners, cards, tokens and meaningful states. Correct identities, atlas coordinates, crops and state mappings; no missing/stub images or source-photo UI. |
+| Release | Explicit frontend/function/migration requirements, applicable automated and visual checks, and an honest distinction between implemented, deployed and live-verified. |
+
+## Code map: inspect callers before editing
+
+Paths below are current entry points, not a guarantee that adding one registry row wires everything. Find all selectors, module ID unions, validation allowlists, setup provenance, reference builders and budgets that a new owner touches.
+
+| Concern | Entry points |
+| --- | --- |
+| Film/entity selection and descriptions | `src/types/gameData.ts`, `src/types/featureFilmDetails.ts` |
+| Verified game facts and Play domain | `supabase/functions/_shared/play/<owner>.ts`, `catalog.ts`, `modules.ts`, `events.ts`, `death.ts`; `src/lib/play/` re-exports the shared domain |
+| Rules registration and prompt guidance | `src/data/rules/<owner>Rules.ts`, `src/data/rules/moduleRules.ts`, existing Rules search/rendering and story-prompt callers |
+| Panels and capabilities | `src/components/play/moduleDefinitions.tsx`, owner Controls, `KillerCards.tsx`, `killerPresentation.ts`, shared controls named in `module-controls.md` |
+| Session setup and persistence | `src/hooks/useActiveGame.ts`, current cast/session types and setup provenance; shared observation validation/reducers |
+| Narratives and server contracts | Shared Play context/death builders, `supabase/functions/_shared/deathPrompt.ts`, `src/lib/storyPrompts.ts`, function request validators and affected edge handlers |
+| Visual presentation | `src/assets/play/<owner>/` and its art README, `illustrated-tile.css`, `play-controls.css`, `play-modules.css`, owner-scoped CSS |
+| Verification | `src/components/play/moduleControls.contract.test.tsx`, domain/catalog tests, module browser journeys, `tests/browser/module-consistency.spec.ts`, existing death/narration/Rules/recovery specs, Reliability CI |
+
+Use the existing architecture. Do not build an import engine, generic rules engine, new schema or new dependency just to add content. Extend shared abstractions only when the actual mechanic justifies it. New shared fields/types must be accepted by the server as well as the frontend; edge bundles cannot import from `src/`.
+
+## Play interaction and visual contract
+
+- Keep banners, artwork, HTML names, state and primary action together. Use compact collapsed summaries and predictable ordering; do not reorder tiles when their state changes. New locations get location art, not the selected killer's banner.
+- Keep unselected Power/Finale artwork heavily darkened/desaturated and names readable. Selected art stays vivid. Verified Epic cards retain the distressed blood border, separate selection/focus cues and an Epic label. Do not restore the duplicated selected-card preview above the chooser.
+- Put full effects, secondary explanations and correction tools under Rules/Details. Keep current consequential penalties, state, required choices, spawn previews and errors visible. Omit filler such as “Record what actually happened” and routine “recorded; details are optional” messages. Use assistive announcements for routine success.
+- Keep the compact Gruesome Death design: six cause tiles in a 3×2 laptop grid, illustrated header, anchored action footer, form scrolling while editing and prose scrolling while reading. On narrow phones, reading may show only the selected cause; Edit restores the full form. Preserve accessible audio, draft/Cancel behavior and error visibility. Buttons must not require page scrolling on a short laptop.
+- Preserve the ending page's existing columns and larger, complete poster fit. Keep proportions, caption and tools; no cropping/stretching or incidental layout redesign during an import.
+- Use at least 44px touch targets, visible keyboard focus, accessible names and readable contrast. Do not encode rules, labels or interactive state into generated images or rely on color alone. Respect reduced motion; prevent horizontal overflow at 320px.
+- Expanded Play sections may scroll vertically. Do not shrink targets or clip controls to fit all expanded panels on one screen. The fixed-action requirement belongs to dialogs such as Gruesome Death, not to every open panel.
+- Match the established medium for the surface: module illustrations and portraits, photographic opening stills, painted ending posters. Inspect real neighboring assets before generating missing artwork. Keep good existing art. Generic emoji, arbitrary gradients or unrelated reused pictures are not finished module artwork.
+- Give an art atlas a README with dimensions, cell order, stable entity/state mapping and source provenance. Verify mapping before alphabetical display sorting. Review full, depleted, inactive and unknown states as applicable; do not merely darken art where a distinct physical state needs a distinct depiction.
+
+## State and rules boundaries
+
+- Model the mechanic's actual legal states/transitions. Minions are not automatically Victims; reusable tokens are not permanently killed; permanent terrain is not consumed just to fit an existing widget. Document legitimate shared-control exceptions.
+- Preserve immutable observations, Undo/restore, stable event/entity IDs and existing field meanings. Linked changes save atomically. Failed durable writes leave displayed gameplay unchanged and retryable; rapid taps must not duplicate a transition.
+- Opening a panel, viewing a rule, loading a catalog or rendering a component never records gameplay. Unknown is distinct from zero, depleted, absent or unrevealed.
+- Keep victim totals separate from character/token status. Do not infer damage, Bloodlust, rescue rewards, inventory, adjacency, movement, card resolution or once-per-turn resets from another observation unless the verified mechanic and an explicit action require the linked write.
+- Gate verified setup through fresh-session provenance at the existing durable boundary. Do not backfill old games, silently reset tokens on reload or rewrite old health values/stories/results from today's catalog.
+- Killer rules follow the killer; location rules follow the location. Test each new owner with other existing counterparts, not only its paired film. Reject observations belonging to the wrong owner.
+- Death facts use the log at that death, not current token state. Preserve unaffected historical signature shapes/cache identity and test affected compatibility. Keep both owners represented within current narrative budgets; avoid solving overflow by blindly truncating away one owner's facts.
+- If personal items are supplied/requested, follow [Final Girl references](FINAL_GIRL_REFERENCES.md): locked identities/effects remain private, never in public source/assets/test fixtures/build output. Unlock does not mean found/equipped/used. Use synthetic secrets in tests.
+
+## Verification and completion
+
+First write down evidence-based expected behavior; a test that repeats an unverified implementation does not establish rules accuracy. Test meaningful mechanic boundaries and the new integration, reusing existing contracts rather than duplicating trivial markup assertions.
+
+| Evidence | Required demonstrations for applicable changes |
+| --- | --- |
+| Source reconciliation | Every supplied component/face is accounted for; verified counts and rule corrections match canonical data. Missing/uncertain evidence is listed. |
+| Domain and persistence | Legal/illegal transitions, token limits and conditional effects; unknown/legacy state; explicit setup; atomic Undo; rejected-write retry; reload/offline recovery; separate totals and owner isolation. |
+| Real UI journeys | Rules search; fresh and resumed Play; both reveal entry points; corrections; details that never write; relevant Event/character/minor mechanics; contextual death, cached replay and narration; pending/failed cloud sync and generation retry without duplicate deaths; ending/archive behavior where affected. |
+| Mixed films | Exercise the new killer with each existing supported location and/or the new location with each supported killer. Extend the current mixed-module matrix where appropriate; choose mechanic-specific assertions instead of pretending every owner has the same capabilities. |
+| Visual inspection | Inspect actual loaded images and controls at 1280×640, 1366×768 and 1440×900, plus 320×568 and 390×844. Include useful collapsed/expanded states, long labels, selected/unselected/Epic art, full/depleted/unknown states, death editing/loading/reading/errors and the ending where affected. Check overflow, focus, contrast and reachable actions. Fix material problems before claiming completion. |
+| Automated gates | Run applicable domain/shared/browser tests, `npm run check`, `npm run check:assets` and `npm run build`. Require the current commit's relevant Reliability CI checks, including native edge/database checks when applicable. Record exact results and intentional skips; do not hardcode today's suite count as a future target. |
+| Deployment | Identify exact affected functions/migrations. If Play validation/context changes, assess at least `generate-death-scene` and `narrate-story` and all other callers. Deploy compatible backend bundles before the frontend that sends new observations. CI/merge does not prove deployed compatibility. |
+
+Automated browser tests use mocked services and cannot prove live generation, audio/provider quality or production deployment. When live verification is authorized and available, smoke-test a signed-in mixed game, save/reload, the new mechanic, a contextual death and saved narration. Respect the current authorization for merge, deployment and paid generation. If unavailable, finish independent work and name the precise remaining release check; do not claim the app is live-verified.
+
+An import is ready for review when all in-scope applicable surfaces above are implemented, source-backed, tested and visually inspected, with no undisclosed material gap. A source-limited import may be useful, but must be explicitly called partial. Record deployment/live-smoke status separately. Deliver a concise summary, PR, verification evidence and any real unresolved item.
+
+## Keep this useful for the next session
+
+Update the module import record as work progresses: verified facts, source gaps, cross-surface corrections, art mappings, intentional UI exceptions, test/screenshot evidence and deployment status. Record only remaining next steps, not abandoned plans. If a playtest establishes a reusable product decision, update this playbook or the interaction standard as well as the module record. Do not rely on chat memory to preserve the requirement.
