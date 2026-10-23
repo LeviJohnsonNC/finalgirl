@@ -248,7 +248,7 @@ export function GeppettoControls({
           Health. Tap a filled heart to remove one, or an empty heart to restore
           one.
         </p>
-        <div className="geppetto-minors">
+        <div className="geppetto-minors module-minor-grid">
           {GEPPETTO_MINOR_POWERS.map((c, row) => {
             const value = state[`minor.${c.id}.health`],
               health = typeof value === "number" ? value : undefined;

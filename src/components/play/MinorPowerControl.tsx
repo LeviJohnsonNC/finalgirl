@@ -24,6 +24,7 @@ export function MinorPowerControl({
 }) {
   return (
     <article
+      data-module-control="minor-power"
       className={`module-minor ${className}`}
       data-state={
         health === undefined

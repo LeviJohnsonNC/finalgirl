@@ -94,7 +94,7 @@ export function CampControls({
             Reveal a power, then tap a filled or empty heart to remove or
             restore one health.
           </p>
-          <div className="play-camp-body play-minor-grid">
+          <div className="play-camp-body module-minor-grid">
             {HANS_MINOR_POWERS.map((power, row) => {
               const value = hans[`minor.${power.id}.health`];
               return (

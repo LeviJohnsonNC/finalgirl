@@ -1,0 +1,25 @@
+/* Presentation shared by every illustrated control, independent of a module stylesheet. */
+.play-tile-caption {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 19px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.play-tile-caption strong {
+  color: #ded6c4;
+  font:
+    400 clamp(16px, 1.55vw, 21px) / 1.15 Georgia,
+    serif;
+  text-wrap: balance;
+}
+.play-tile-state {
+  font:
+    600 10px/1.4 Arial,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #a5aeac;
+}
