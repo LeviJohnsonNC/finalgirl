@@ -76,6 +76,11 @@ export const slide = async (page: Page, name: string) => {
   );
 };
 export async function footerVisible(page: Page) {
+  for (const button of await dialog(page).locator('.boiler-direction').all()) {
+    const bounds = (await button.boundingBox())!;
+    expect(bounds.width).toBeGreaterThanOrEqual(44);
+    expect(bounds.height).toBeGreaterThanOrEqual(44);
+  }
   for (const button of await dialog(page)
     .locator(".boiler-footer button")
     .all())
