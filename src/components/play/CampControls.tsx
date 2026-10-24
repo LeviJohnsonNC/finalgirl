@@ -7,6 +7,7 @@ import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
 import { moduleState, type ModuleValue } from "@/lib/play/modules";
 import {
   CAMP_ONGOING_EVENTS,
+  CAMP_EVENTS,
   CAMP_TUNNEL_ROOMS,
   CAMP_VICTIMS,
   HANS_MINOR_POWERS,
@@ -60,6 +61,19 @@ const statusLabels = {
   killed: "Killed",
   saved: "Saved",
   untracked: "Untracked",
+};
+
+// Consequential ongoing facts only; initial placement/resolution stays in Rules.
+const campReminders: Record<string,string> = {
+  boyfriend: "If he dies in your space: start the next Action phase with 12 Time.",
+  girlfriend: "Together: +1 die to Horror Rolls. Her death in your space: +5 Horror.",
+  "the-damned": "Killer targets The Damned. Save only as the last Victim alive. Death: +2 Bloodlust.",
+  "clingy-campers": "After the first Victim saved this Action phase, lose 1 Health per additional save.",
+  "dark-waters": "Victims at or entering the Lake are killed.",
+  deathwish: "Upkeep: move the Victim closest to the Killer 1 space toward it, unless already together.",
+  "secret-tunnel": "Only you may use the tunnel; Enemies cannot.",
+  "star-crossed-lovers": "Exactly 2 Victims together: if one is killed, the other dies too.",
+  "stubborn-kids": "One fewer Victim follows you.",
 };
 
 export function CampControls({
@@ -138,6 +152,8 @@ export function CampControls({
                       name={victim.name}
                       value={value === "untracked" ? undefined : value}
                       present="in-play"
+                      help={CAMP_EVENTS.find(event=>event.name===victim.event)?.effect}
+                      reminder={campReminders[victim.id]}
                       art={portrait}
                       states={[
                         { value: "in-play", label: "In play" },
@@ -169,6 +185,8 @@ export function CampControls({
                       value={typeof value === "string" ? value : undefined}
                       ended="resolved"
                       art={effectArt[effect.id]}
+                      effect={effect.effect}
+                      reminder={campReminders[effect.id]}
                       onActivate={() =>
                         record("camp", { [`event.${effect.id}`]: "active" })
                       }

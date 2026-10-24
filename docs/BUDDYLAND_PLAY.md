@@ -1,5 +1,34 @@
 # Bad Times at Buddyland: Play mode
 
+## Current QA parity update (2026-10-24)
+
+The older streamlined-control history below is superseded where the current
+shared-control standard applies. Special Victims now have explicit saved/killed
+outcomes, correction disclosures and full Rules. Billy retains his streamlined
+Buddy lifecycle and separate source controls. His summary distinguishes an
+unknown roster from zero and reports partial coverage without inferring totals.
+
+Billy/Buddyland Rulebook chapters now expose the existing verified Powers,
+Finales, Buddies, Terror cards, Events and Items through the canonical catalogs.
+Camp Event/character and Buddyland character disclosures use the same shared
+Rules presentation; Camp's consequential active effects have concise reminders.
+Opening those disclosures never records gameplay. Rulebook search treats printed
+curly apostrophes and ordinary keyboard apostrophes equivalently.
+
+Found Buddyland Items now supply their location-specific effects to the bounded
+ending context, without establishing use, remaining charges or current inventory.
+No observation schema, migration, dependency, artwork or gameplay default changed.
+This parity PR needs a frontend deployment only: `moduleItemBeats` enriches the
+browser-built ending summary; the edge endpoints do not call it. Shared validation,
+death facts and fingerprints are unchanged. The compatible edge bundles required
+by the earlier module imports remain a separate release prerequisite. No production
+deployment is claimed by this PR.
+
+Regression evidence: `moduleParity.test.tsx`, `module-parity.spec.ts`, existing
+mixed-film/recovery/death suites and current-head Reliability CI. Browser artifacts
+include Rulebook search, active Camp reminders and character Rules on laptop and
+phone layouts. Source gaps are listed in the [reference checklist](module-reference-gaps.md).
+
 This extends the functional Play mode foundation with optional Billy and Buddyland observations. The cinematic dashboard presents these controls in optional expandable panels. Cards are factual paraphrases of owner-supplied photographs, not reproductions of card artwork or flavor text.
 
 ## Streamlined Play controls

@@ -22,6 +22,11 @@
 
 `data-module-control` is a shared-component capability marker used by registry tests. New modules declare only capabilities they actually implement. A different mechanic does not need to pretend to be one of these capabilities.
 
+Supply verified `effect`/`help` text for Event/character Rules disclosures. The
+optional shared `reminder` is visible only while that entity/effect is active;
+use it for consequential ongoing restrictions or penalties. Do not repeat initial
+placement or automatically apply damage, bonuses or casualties from a reminder.
+
 ## State and history
 
 - Use **Not recorded** for unknown observations. Reserve **unrevealed** for affirmative card-reveal information; absent data alone cannot prove a card was never revealed.

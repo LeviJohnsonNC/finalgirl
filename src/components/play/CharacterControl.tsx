@@ -17,6 +17,7 @@ export function CharacterControl({
   art,
   onChange,
   help,
+  reminder,
   className = "",
   tileClassName = "",
   outcomes = [],
@@ -28,6 +29,7 @@ export function CharacterControl({
   art: ModuleArt;
   onChange: (value: string | null) => unknown;
   help?: ReactNode;
+  reminder?: ReactNode;
   className?: string;
   tileClassName?: string;
   outcomes?: readonly string[];
@@ -75,6 +77,7 @@ export function CharacterControl({
           ))}
         </div>
       )}
+      {active && reminder && <p className="module-active-reminder">{reminder}</p>}
       <details
         className="module-correction"
         open={open}

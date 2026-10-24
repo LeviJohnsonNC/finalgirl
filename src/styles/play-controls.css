@@ -429,3 +429,11 @@
 @media (prefers-reduced-motion: reduce) {
   .module-card-grid .module-killer-card > .play-module-art { transition: none; }
 }
+
+.module-active-reminder {
+  margin: 10px 12px;
+  padding-left: 10px;
+  border-left: 2px solid hsl(var(--accent));
+  color: hsl(var(--foreground) / .88);
+  font: 12px/1.5 Arial, sans-serif;
+}
