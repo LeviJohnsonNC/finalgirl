@@ -260,7 +260,8 @@
   isolation: isolate;
 }
 .boiler-stage--ready {
-  touch-action: pan-y;
+  /* SVG groups alone do not suppress panning in a scrollable phone dialog. */
+  touch-action: none;
 }
 .boiler-stage--ready .boiler-moving-stack {
   touch-action: none;

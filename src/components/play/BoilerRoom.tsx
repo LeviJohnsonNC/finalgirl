@@ -48,6 +48,10 @@ export function BoilerRoom({
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const artwork = useRef<BoilerArtworkHandle>(null);
+  const changeOpen = (value: boolean) => {
+    if (!value) artwork.current?.cancel();
+    setOpen(value);
+  };
   const [large, setLarge] = useState(false);
   const [dismissedTrip, setDismissedTrip] = useState<string | null>(null);
   const completed = Boolean(
@@ -97,13 +101,7 @@ export function BoilerRoom({
         </span>
         <Moon size={24} />
       </button>
-      <Dialog
-        open={open}
-        onOpenChange={(value) => {
-          if (!value) artwork.current?.cancel();
-          setOpen(value);
-        }}
-      >
+      <Dialog open={open} onOpenChange={changeOpen}>
         <DialogContent
           className="boiler-dialog"
           onEscapeKeyDown={(event) => {
@@ -170,7 +168,7 @@ export function BoilerRoom({
               deal={deal}
               awake={state.sleep === "awake"}
               onSlide={onSlide}
-              disabled={!canSlide}
+              disabled={!canSlide || !open}
               large={large}
             />
             <div
@@ -248,7 +246,7 @@ export function BoilerRoom({
             <button
               type="button"
               className="boiler-back"
-              onClick={() => setOpen(false)}
+              onClick={() => changeOpen(false)}
             >
               Back to game
             </button>
