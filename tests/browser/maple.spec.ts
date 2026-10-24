@@ -189,6 +189,7 @@ test("legacy unknowns, rejected local save, retry and corrections retain accurat
   await archive.install(page, { draft: draft("Hans", false) });
   await resume(page);
   await expect(panel(page)).toContainText("House searches not recorded");
+  await expect(panel(page)).toContainText("Exit status not recorded");
   await page.evaluate(() => {
     const original = Storage.prototype.setItem;
     Storage.prototype.setItem = function (key, value) {
@@ -218,7 +219,8 @@ test("legacy unknowns, rejected local save, retry and corrections retain accurat
     .poll(async () => (await state(page))["house.nw-west"])
     .toBe(true);
   await panel(page)
-    .getByText("Search corrections", { exact: true })
+    .locator("summary")
+    .filter({ hasText: "Search corrections" })
     .first()
     .click();
   await pick(page, "NW · West house search status", "Not recorded");
@@ -336,7 +338,7 @@ test("Rules search, mixed death save/cache/narration and later state preserve th
     .click();
   await page
     .getByRole("textbox", { name: "Search rules", exact: true })
-    .fill("Convince");
+    .fill("Convince and occupied Houses");
   await page.getByRole("tab", { name: "Special Rules", exact: true }).click();
   await expect(page.locator("#location-maple-lane-rules")).toContainText(
     "Convince and occupied Houses",

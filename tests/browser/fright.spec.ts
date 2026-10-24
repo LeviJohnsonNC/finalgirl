@@ -86,6 +86,7 @@ for (const [location, id] of [
   ["Buddyland", "buddyland"],
   ["Camp Happy Trails", "camp"],
   ["Carnival of Blood", "carnival"],
+  ["Maple Lane", "maple"],
 ]) {
   test(`Dr. Fright stays independent at ${location}; Rules disclosure never writes`, async ({
     page,

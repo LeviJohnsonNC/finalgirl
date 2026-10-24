@@ -569,7 +569,11 @@ export function MapleControls({
           ).map((prop) => (
             <article className="maple-prop" key={prop.key}>
               <StatusArt
-                art={scene(prop.cell)}
+                art={
+                  state[prop.key] === undefined || state[prop.key] === "none"
+                    ? { src: banner }
+                    : scene(prop.cell)
+                }
                 title={prop.title}
                 status={streetName(state[prop.key])}
               />
@@ -623,7 +627,11 @@ export function MapleControls({
               art={scene(
                 MAPLE_HOUSES.some((h) => state[`trap.${h.id}`] === "placed")
                   ? 10
-                  : 11,
+                  : MAPLE_HOUSES.some(
+                        (h) => state[`trap.${h.id}`] === "triggered",
+                      )
+                    ? 11
+                    : 0,
               )}
               title="Booby Traps"
               status={`${MAPLE_HOUSES.filter((h) => state[`trap.${h.id}`] === "placed").length} placed · ${MAPLE_HOUSES.filter((h) => typeof state[`trap.${h.id}`] === "string").length}/12 recorded`}

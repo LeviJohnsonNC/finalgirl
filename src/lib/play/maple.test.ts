@@ -37,6 +37,7 @@ import {
 } from "@/data/rules/moduleRules";
 import { FEATURE_FILM_DETAILS } from "@/types/featureFilmDetails";
 import { deathPrompt } from "../../../supabase/functions/_shared/deathPrompt";
+import { initialFright } from "../../../supabase/functions/_shared/play/fright";
 const cast = {
   killer: "Hans",
   location: "Maple Lane",
@@ -234,6 +235,41 @@ describe("Maple Lane observations, setup and Undo", () => {
   );
 });
 describe("Maple Lane historical narrative boundaries", () => {
+  it("keeps concealed Dr. Fright deals out of Maple Lane's mixed context", () => {
+    const hidden = {
+      ...initialFright(),
+      mode: "digital",
+      command: "asleep",
+      sleep: "asleep",
+      cycle: 1,
+      deal: "0132",
+      reserve: "2301",
+    };
+    const entries = summarizePlay([
+      start(),
+      observation({ fire: "ne-boyfriend" }),
+      newPlayEvent({
+        kind: "module",
+        moduleData: {
+          module: "fright",
+          changes: { snapshot: JSON.stringify(hidden) },
+        },
+      }),
+    ]).entries;
+    const selection = { ...cast, killer: "Dr. Fright" };
+    expect(moduleContext(selection, entries)?.fright).toMatchObject({
+      sleep: "asleep",
+      boilerCardsResolved: 0,
+    });
+    const publicContext = JSON.stringify([
+      moduleContext(selection, entries),
+      moduleStoryBeats(selection, entries),
+    ]);
+    expect(publicContext).toContain("ne-boyfriend");
+    for (const privateFact of ["0132", "2301", "reserve", "snapshot", "parent"])
+      expect(publicContext).not.toContain(privateFact);
+  });
+
   it("keeps old signatures unchanged and later corrections outside an earlier death", async () => {
     const death = newPlayEvent({
       kind: "killed",

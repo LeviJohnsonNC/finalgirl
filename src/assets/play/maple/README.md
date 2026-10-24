@@ -6,7 +6,7 @@ Publisher component art/credits and photo evidence are in
 [the import record](../../../../docs/imports/maple-lane.md).
 
 - `banner.webp`: 1996×788, suburban crossroads at night. Dedicated location header;
-  clear-road crops also represent no Roadblock / absent or departed Cop Car.
+  clear-road crops also represent no Roadblock / absent or departed Cop Car and unplaced Item props.
 - `scenes.webp`: 1448×1086. Four columns, three rows, 362×362 cells, row-major.
   Cells 0–3: NW house, NE/Boyfriend house, SW/Smalley house, SE house.
   Cells 4–7: burning house, Roadblock, Cop Car, Bicycle.
