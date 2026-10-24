@@ -15,6 +15,7 @@ export function playStartingValues(
     "Billy the Bear": 8,
     Hans: 12,
     Geppetto: 8,
+    'Dr. Fright': 9,
   };
   return {
     finalGirlHealth: getFinalGirlHealth(finalGirl),

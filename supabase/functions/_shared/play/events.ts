@@ -1,4 +1,5 @@
 /** Immutable observations, shared by the app and edge runtime. */
+import { parseFright } from "./fright.ts";
 import {
   validModuleObservation,
   describeModule,
@@ -208,12 +209,18 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     entries: [],
     inactive,
   };
+  let frightParent = "root";
   for (const original of log) {
     if (
       inactive.has(original.id) ||
       ["undo", "restore", "details"].includes(original.kind)
     )
       continue;
+    if (original.kind === "module" && original.moduleData?.module === "fright") {
+      const snapshot = parseFright(original.moduleData.changes.snapshot);
+      if (!snapshot || snapshot.parent !== frightParent) { summary.inactive.add(original.id); continue; }
+      frightParent = original.id;
+    }
     const e = { ...original };
     if (e.kind === "killed" || e.kind === "saved") {
       e.quantity = Math.max(0, e.quantity! - (reductions.get(e.id) ?? 0));

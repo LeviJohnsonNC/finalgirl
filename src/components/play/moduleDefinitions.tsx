@@ -20,8 +20,11 @@ import campBanner from "@/assets/play/camp/camp-header.webp";
 import { BuddylandControls } from "./BuddylandControls";
 import { CampControls } from "./CampControls";
 import type { ModuleArt } from "./ModuleArtwork";
+import { FrightControls } from "./FrightControls";
+import frightBanner from "@/assets/play/fright/banner.webp";
 
 export interface ControlsProps {
+  blocked?: boolean;
   killer: string;
   location: string;
   finalGirl: string;
@@ -36,7 +39,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival";
+  id: "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -73,6 +76,7 @@ const peopleSummary = (
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
 export const moduleDefinitions: Definition[] = [
+  {id:"fright",owner:"killer",match:"Dr. Fright",title:"Dr. Fright · The Dream Doctor",art:{src:frightBanner},capabilities:["reveals"],summary:state=>state.sleep?`${state.sleep === "unknown"?"Sleep state not recorded":state.sleep === "asleep"?"Asleep":"Awake"}${state.mode === "digital"?` · Boiler Room ${state.progress}/4`:" · Physical cards"}`:"Sleep state not recorded",Controls:props=><FrightControls {...props}/>},
   {
     id: "geppetto",
     capabilities: ["reveals", "minor-power"],

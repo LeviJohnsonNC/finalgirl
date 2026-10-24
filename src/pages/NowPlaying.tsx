@@ -31,6 +31,7 @@ import type { ActiveGame } from '@/lib/activeGame';
 import { parseVisualBible } from '../../supabase/functions/_shared/prompts';
 
 interface NowPlayingProps {
+  playSyncBlocked?: boolean;
   onDiscard?: () => void;
   sessionId: string;
   playEvents?: PlayEvent[];
@@ -56,7 +57,7 @@ interface NowPlayingProps {
 }
 
 const NowPlaying = ({
-  playEvents = [], playDrafts = {}, playMode = false, showDeathPanel = true, syncPlayNow, onPlayEvent,
+  playEvents = [], playDrafts = {}, playMode = false, showDeathPanel = true, syncPlayNow, onPlayEvent, playSyncBlocked=false,
   sessionId, initialStory, initialSceneImageUrl, initialVisualBible, onCheckpoint, onDiscard,
   killer,
   location,
@@ -311,7 +312,7 @@ const NowPlaying = ({
     onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying} hasStory={Boolean(story)}
     showDeathDetails={showDeathPanel} onShowDeathDetails={enabled => onCheckpoint({showDeathPanel: enabled})}
     drafts={playDrafts} onDraft={saveDraft}
-    moduleControls={<ModuleControls sessionId={sessionId} killer={killer} location={location} finalGirl={finalGirl} events={playEvents} onEvent={recordPlayEvent} />}
+    moduleControls={<ModuleControls sessionId={sessionId} killer={killer} location={location} finalGirl={finalGirl} events={playEvents} onEvent={recordPlayEvent} blocked={playSyncBlocked} />}
     deathPanel={deathEventId && syncPlayNow ? <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl}} events={playEvents} eventId={deathEventId} draft={playDrafts[deathEventId]} onDraft={saveDraft} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/> : undefined}
     onDeath={event=>setDeathEventId(event.id)}/>;
 

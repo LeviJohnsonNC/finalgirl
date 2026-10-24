@@ -5,11 +5,14 @@ import {
   HANS_FINALES,
   GEPPETTO_POWERS,
   GEPPETTO_FINALES,
+  FRIGHT_POWERS,
+  FRIGHT_FINALES,
 } from "@/lib/play/modules";
 import type { ModuleArt } from "./ModuleArtwork";
 import billyCards from "@/assets/play/consistent/billy-cards.webp";
 import hansCards from "@/assets/play/consistent/hans-cards.webp";
 import geppettoCards from "@/assets/play/geppetto/cards.webp";
+import frightCards from "@/assets/play/fright/cards.webp";
 
 export interface IllustratedKillerCard {
   id: string;
@@ -54,7 +57,7 @@ export function illustratedKillerCards(
           ? power
             ? GEPPETTO_POWERS
             : GEPPETTO_FINALES
-          : [];
+          : killer === "Dr. Fright" ? power ? FRIGHT_POWERS : FRIGHT_FINALES : [];
   return cards
     .map((card, index) => ({
       ...card,
@@ -62,7 +65,7 @@ export function illustratedKillerCards(
         ("epic" in card && card.epic === true) ||
         card.effect.startsWith("Epic"),
       art:
-        killer === "Geppetto"
+        killer === "Dr. Fright" ? atlasCell(frightCards,index+(power?0:4),1254,1254) : killer === "Geppetto"
           ? atlasCell(geppettoCards, index + (power ? 0 : 4), 1254, 1254)
           : atlasCell(
               killer === "Hans" ? hansCards : billyCards,
