@@ -219,9 +219,9 @@ export const BoilerArtwork = forwardRef<BoilerArtworkHandle, Props>(
       const target = boilerFrame(scene.path);
       const from = frame.current;
       cancelAnimationFrame(cameraRaf.current);
-    // A restored/new deck starts fully framed before it accepts a pointer.
-    // Only our committed slide eases its camera after settling.
-    if (reduced.current || phaseRef.current === "idle") {
+      // A restored/new deck starts fully framed before it accepts a pointer.
+      // Only our committed slide eases its camera after settling.
+      if (reduced.current || phaseRef.current === "idle") {
         frame.current = target;
         svg.current?.setAttribute("viewBox", frameText(target));
         return;
