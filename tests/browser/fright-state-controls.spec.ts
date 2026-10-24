@@ -58,7 +58,7 @@ test("main controls and modal share one-click sleep changes, conceal partial dec
   expect((await log(page)).length).toBe(before.length + 1);
   await concealed(page, "asleep");
   await expect(
-    dialog(page).locator(".boiler-meter, .boiler-result"),
+    dialog(page).locator(".boiler-meter, .boiler-result, .boiler-direction"),
   ).toHaveCount(0);
   await expect(dialog(page)).toHaveCSS("background-image", /modal-background/);
   await slide(page, "up");
@@ -184,7 +184,7 @@ test("fourth-card attacks finish before the fresh Awake deck; reopening never re
     await page.setViewportSize(size);
     await footerVisible(page);
     for (const button of await dialog(page)
-      .locator(".boiler-direction, .fright-sleep-grid button")
+      .locator(".fright-sleep-grid button")
       .all())
       await expect(button).toBeInViewport({ ratio: 1 });
     expect(

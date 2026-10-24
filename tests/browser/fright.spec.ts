@@ -91,23 +91,18 @@ test("printed Boiler Room sequence, attack pause, quarter reveal and offline rel
   await page.screenshot({ path: info.outputPath("boiler-start.png") });
   await slide(page, "up");
   await expect(dialog(page)).toContainText("No attack from this reveal.");
-  await expect(
-    dialog(page).getByRole("button", {
-      name: "Slide down; reveal top",
-      exact: true,
-    }),
-  ).toBeDisabled();
+  const blockedBefore = await log(page);
+  await slide(page, "down");
+  expect(await log(page)).toEqual(blockedBefore);
   await expect(dialog(page).locator('image[href*="doctor-"]')).toHaveCount(0);
   await slide(page, "up");
   await slide(page, "left");
   await expect(dialog(page)).toContainText("Dr. Fright attacks.");
   await footerVisible(page);
-  await expect(
-    dialog(page).getByRole("button", {
-      name: "Slide up; reveal bottom",
-      exact: true,
-    }),
-  ).toBeDisabled();
+  await expect(dialog(page).locator(".boiler-stage")).toHaveAttribute(
+    "aria-disabled",
+    "true",
+  );
   await page.screenshot({ path: info.outputPath("boiler-attack.png") });
   const before = await log(page);
   await dialog(page)
@@ -125,6 +120,30 @@ test("printed Boiler Room sequence, attack pause, quarter reveal and offline rel
     .getByRole("button", { name: "Attack resolved", exact: true })
     .click();
   await slide(page, "down");
+  await expect(
+    dialog(page).locator(".boiler-card-layer:not(.boiler-cover)"),
+  ).toHaveCount(4);
+  await expect(dialog(page)).toContainText("Select Awake");
+  await expect(dialog(page).locator(".boiler-cover image")).toHaveAttribute(
+    "href",
+    /asleep-back/,
+  );
+  const held = await log(page);
+  await page.screenshot({
+    path: info.outputPath("boiler-safe-fourth-awaiting-awake.png"),
+  });
+  await page.reload();
+  await resume(page);
+  await panel(page)
+    .getByRole("button", { name: /Continue Boiler Room/ })
+    .click();
+  expect(await log(page)).toEqual(held);
+  await expect(
+    dialog(page).locator(".boiler-card-layer:not(.boiler-cover)"),
+  ).toHaveCount(4);
+  await dialog(page)
+    .getByRole("button", { name: "Record Final Girl Awake", exact: true })
+    .click();
   await expect(dialog(page)).toContainText("You woke up.");
   await footerVisible(page);
   await expect(
@@ -197,13 +216,14 @@ test("a failed durable save and rapid or canceled gestures never reveal or consu
       window as unknown as { restoreFrightStorage: () => void }
     ).restoreFrightStorage(),
   );
-  const target = dialog(page).getByRole("button", {
-    name: "Slide up; reveal bottom",
-    exact: true,
-  });
-  await target.evaluate((button: HTMLButtonElement) => {
-    button.click();
-    button.click();
+  const target = dialog(page).locator(".boiler-stage");
+  await target.evaluate((stage) => {
+    stage.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true }),
+    );
+    stage.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true }),
+    );
   });
   await expect(
     dialog(page).locator(".boiler-stage .boiler-card-layer:not(.boiler-cover)"),
@@ -215,11 +235,13 @@ test("a failed durable save and rapid or canceled gestures never reveal or consu
     exact: true,
   });
   const b = (await art.locator(".boiler-cover").boundingBox())!;
-  await expect(target).toBeEnabled();
+  await expect(target).toHaveAttribute("aria-disabled", "false");
+  await expect(target).toHaveAttribute("data-phase", "idle");
   await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
   await page.mouse.down();
   await page.mouse.move(b.x + b.width / 2 + 10, b.y + b.height / 2);
   await page.mouse.up();
+  await expect(art).toHaveAttribute("data-phase", "idle");
   expect(await log(page)).toEqual(before);
   await page.screenshot({ path: info.outputPath("boiler-save-retry.png") });
   // A committed drag and keyboard activation share the same durable slide path.
@@ -236,13 +258,7 @@ test("a failed durable save and rapid or canceled gestures never reveal or consu
   await expect(
     dialog(page).locator(".boiler-stage .boiler-card-layer:not(.boiler-cover)"),
   ).toHaveCount(2);
-  const left = dialog(page).getByRole("button", {
-    name: "Slide left; reveal right",
-    exact: true,
-  });
-  await expect(left).toBeEnabled();
-  await left.focus();
-  await page.keyboard.press("Enter");
+  await slide(page, "left");
   await expect(dialog(page)).toContainText("Dr. Fright attacks.");
   expect((await log(page)).length).toBe(before.length + 2);
 });

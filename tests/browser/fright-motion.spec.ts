@@ -265,12 +265,9 @@ test.describe("Boiler Room direct manipulation", () => {
     expect(await log(page)).toEqual(before);
     await g.up();
     await expect(g.stage).toHaveAttribute("data-phase", "idle");
-    const target = dialog(page).getByRole("button", {
-      name: "Slide up; reveal bottom",
-      exact: true,
-    });
+    const target = dialog(page).locator(".boiler-stage");
     await target.focus();
-    await page.keyboard.press("Enter");
+    await page.keyboard.press("ArrowUp");
     await expect(g.stage).toHaveAttribute("data-phase", "idle");
     expect((await log(page)).length).toBe(before.length + 2);
     await expect(g.stage.locator(".boiler-doctor--entering")).toHaveCount(0);
