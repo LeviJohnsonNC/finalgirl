@@ -200,7 +200,6 @@
   grid-template-columns: 1fr 1fr;
   gap: 6px;
   margin-top: 10px;
-  text-transform: capitalize;
 }
 .maple-consequence {
   padding: 10px;

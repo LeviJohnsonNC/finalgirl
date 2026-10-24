@@ -1,86 +1,18 @@
-import { test, expect, activeGame, userId, installTestAudio } from "./fixtures";
+import { test, expect, installTestAudio } from "./fixtures";
 import { openModule, openHistory } from "./play-helpers";
+import { parseFright } from "../../supabase/functions/_shared/play/fright";
+import { summarizePlay } from "../../src/lib/play/events";
 import {
-  initialFright,
-  parseFright,
-} from "../../supabase/functions/_shared/play/fright";
-import {
-  newPlayEvent,
-  summarizePlay,
-  type PlayEvent,
-} from "../../src/lib/play/events";
-import type { Page } from "@playwright/test";
-
-const start = newPlayEvent({ kind: "start", saved: 0, killed: 0, round: 1 });
-const seed = newPlayEvent({
-  kind: "module",
-  moduleData: {
-    module: "fright",
-    changes: { snapshot: JSON.stringify(initialFright()) },
-  },
-});
-const digital = newPlayEvent({
-  kind: "module",
-  moduleData: {
-    module: "fright",
-    changes: {
-      snapshot: JSON.stringify({
-        ...initialFright(),
-        parent: seed.id,
-        command: "digital",
-        mode: "digital",
-        cycle: 1,
-        deal: "0132",
-        reserve: "2301",
-      }),
-    },
-  },
-});
-const draft = {
-  ...activeGame,
-  playMode: true,
-  selection: { ...activeGame.selection, killer: "Dr. Fright" },
-  playEvents: [start, seed, digital],
-};
-const panel = (page: Page) => page.locator('[data-module="fright"]');
-const dialog = (page: Page) =>
-  page.getByRole("dialog", { name: "The Boiler Room", exact: true });
-async function resume(page: Page) {
-  await page.goto("/");
-  await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
-  await openModule(page, "fright");
-}
-const log = (page: Page): Promise<PlayEvent[]> =>
-  page.evaluate(
-    (owner) =>
-      JSON.parse(localStorage.getItem("final-girl-active-game-v1:" + owner)!)
-        .playEvents,
-    userId,
-  );
-async function enter(page: Page) {
-  await panel(page)
-    .getByRole("button", { name: /Enter the Boiler Room/ })
-    .click();
-  await dialog(page)
-    .getByRole("button", { name: "Record falling Asleep", exact: true })
-    .click();
-}
-const slide = (page: Page, name: string) =>
-  dialog(page)
-    .getByRole("button", {
-      name: `Slide ${name}; reveal ${{ up: "bottom", down: "top", left: "right", right: "left" }[name]}`,
-      exact: true,
-    })
-    .click();
-async function footerVisible(page: Page) {
-  for (const button of await dialog(page)
-    .locator(".boiler-footer button")
-    .all())
-    await expect(button).toBeInViewport({ ratio: 1 });
-  expect(
-    await dialog(page).evaluate((el) => el.scrollHeight <= el.clientHeight + 1),
-  ).toBe(true);
-}
+  start,
+  draft,
+  panel,
+  dialog,
+  resume,
+  enter,
+  log,
+  slide,
+  footerVisible,
+} from "./fright-helpers";
 
 for (const [location, id] of [
   ["Buddyland", "buddyland"],
@@ -291,7 +223,7 @@ test("a failed durable save and rapid or canceled gestures never reveal or consu
     name: "Boiler Room revealed cards",
     exact: true,
   });
-  const b = (await art.boundingBox())!;
+  const b = (await art.locator(".boiler-cover").boundingBox())!;
   await expect(target).toBeEnabled();
   await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
   await page.mouse.down();

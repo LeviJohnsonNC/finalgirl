@@ -260,11 +260,15 @@
   isolation: isolate;
 }
 .boiler-stage--ready {
+  touch-action: pan-y;
+}
+.boiler-stage--ready .boiler-moving-stack {
   touch-action: none;
   cursor: grab;
 }
-.boiler-stage--ready:active {
+.boiler-stage[data-phase="dragging"] .boiler-moving-stack {
   cursor: grabbing;
+  filter: drop-shadow(0 10px 9px #000c);
 }
 .boiler-tableau {
   width: 100%;
@@ -273,8 +277,32 @@
   max-height: 100%;
   filter: drop-shadow(0 6px 8px #0009);
 }
-.boiler-card-layer {
-  transition: transform 280ms cubic-bezier(0.2, 0.75, 0.2, 1);
+.boiler-moving-stack {
+  filter: drop-shadow(0 3px 3px #0008);
+  will-change: transform;
+}
+.boiler-concealed-surface {
+  pointer-events: none;
+}
+.boiler-doctor {
+  filter: drop-shadow(0 2px 2px #000b);
+}
+.boiler-doctor--entering {
+  animation: boiler-emerge 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes boiler-emerge {
+  0% {
+    transform: translateY(9px) scale(0.9);
+    filter: drop-shadow(0 1px 1px #0008);
+  }
+  62% {
+    transform: translateY(-2px) scale(1.06);
+    filter: drop-shadow(0 6px 3px #cc6d2855);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 2px 2px #000b);
+  }
 }
 .boiler-stage--large {
   grid-column: 1/-1;
@@ -291,26 +319,22 @@
 }
 .boiler-drag-preview {
   position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: #101714ef;
-  border: 2px solid #bc8b4c;
-  border-radius: 7px;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 16px);
+  padding: 7px 11px;
+  background: #101714ed;
+  border: 1px solid #bc8b4c88;
+  border-radius: 20px;
   color: #edd5a7;
   font:
-    24px Georgia,
-    serif;
-  pointer-events: none;
-}
-.boiler-drag-preview span {
-  font:
-    12px Arial,
+    11px/1.4 Arial,
     sans-serif;
-  margin-top: 10px;
-  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: capitalize;
+  pointer-events: none;
 }
 .boiler-result {
   grid-column: 2;
@@ -470,8 +494,8 @@
     font-size: 11px;
   }
   .boiler-stage {
-    flex: 1 0 190px;
-    min-height: 190px;
+    flex: 1 0 260px;
+    min-height: 260px;
     padding: 7px;
   }
   .boiler-tableau {
@@ -537,8 +561,8 @@
     font-size: 8px;
   }
   .boiler-stage {
-    flex-basis: 155px;
-    min-height: 155px;
+    flex-basis: 240px;
+    min-height: 240px;
   }
   .boiler-tableau {
     min-height: 145px;
@@ -551,7 +575,10 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .boiler-card-layer {
+  .boiler-moving-stack {
     transition: none;
+  }
+  .boiler-doctor--entering {
+    animation: none;
   }
 }

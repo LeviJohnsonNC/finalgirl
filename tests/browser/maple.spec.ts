@@ -69,6 +69,19 @@ for (const [killer, id] of [
       "data-searched",
       "true",
     );
+    await panel(page)
+      .getByRole("button", {
+        name: "Mark NW · West house unsearched",
+        exact: true,
+      })
+      .click();
+    expect((await state(page))["house.nw-west"]).toBe(false);
+    await panel(page)
+      .getByRole("button", {
+        name: "Mark NW · West house searched",
+        exact: true,
+      })
+      .click();
     const before = await log(page);
     await panel(page)
       .getByText("House & Convince rules", { exact: true })
@@ -124,7 +137,7 @@ test("explicit fire, exit, Cop Car and Item props survive offline reload; ending
   ).toBeDisabled();
   expect((await state(page))["house.ne-boyfriend"]).toBe(false);
   await panel(page)
-    .getByRole("button", { name: "Block north Exit", exact: true })
+    .getByRole("button", { name: "Block North exit", exact: true })
     .click();
   await pick(page, "Cop Car starting Exit", "west Exit");
   await panel(page)
@@ -225,6 +238,76 @@ test("legacy unknowns, rejected local save, retry and corrections retain accurat
     .click();
   await pick(page, "NW · West house search status", "Not recorded");
   expect((await state(page))["house.nw-west"]).toBeUndefined();
+});
+
+test("House corrections retain unknown, fire and Undo semantics and Roadblocks use readable names", async ({
+  page,
+  archive,
+}) => {
+  await archive.install(page, { draft: draft("Dr. Fright", false) });
+  await resume(page);
+  const mark = () =>
+    panel(page).getByRole("button", {
+      name: "Mark The Boyfriend’s House searched",
+      exact: true,
+    });
+  const unmark = () =>
+    panel(page).getByRole("button", {
+      name: "Mark The Boyfriend’s House unsearched",
+      exact: true,
+    });
+  expect((await state(page))["house.ne-boyfriend"]).toBeUndefined();
+  await mark().click();
+  await pick(page, "Burning House", "The Boyfriend’s House");
+  await panel(page)
+    .getByRole("button", { name: "Record fire", exact: true })
+    .click();
+  await unmark().click();
+  expect(await state(page)).toMatchObject({
+    "house.ne-boyfriend": false,
+    fire: "ne-boyfriend",
+  });
+  await expect(mark()).toBeDisabled();
+  await openHistory(page);
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  expect(await state(page)).toMatchObject({
+    "house.ne-boyfriend": true,
+    fire: "ne-boyfriend",
+  });
+  await page.reload();
+  await resume(page);
+  await page.evaluate(() => {
+    const original = Storage.prototype.setItem;
+    Object.assign(window, {
+      restoreMapleStorage: () => {
+        Storage.prototype.setItem = original;
+      },
+    });
+    Storage.prototype.setItem = function (key, value) {
+      if (key.startsWith("final-girl-active-game-v1:")) throw new Error("Full");
+      return original.call(this, key, value);
+    };
+  });
+  await unmark().click();
+  await expect(panel(page).getByRole("status")).toContainText(
+    "could not be saved",
+  );
+  await expect(unmark()).toHaveAttribute("aria-pressed", "true");
+  await page.evaluate(() =>
+    (
+      window as unknown as { restoreMapleStorage: () => void }
+    ).restoreMapleStorage(),
+  );
+  await unmark().click();
+  expect((await state(page))["house.ne-boyfriend"]).toBe(false);
+  for (const direction of ["North", "East", "South", "West"])
+    await expect(
+      panel(page).getByRole("button", {
+        name: `Block ${direction} exit`,
+        exact: true,
+      }),
+    ).toHaveText(`${direction} · Unknown`);
+  expect(summarizePlay(await log(page))).toMatchObject({ saved: 0, killed: 0 });
 });
 
 test("loaded artwork, labels and controls fit the five required viewports", async ({
