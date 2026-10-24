@@ -12,9 +12,13 @@ async function actionsVisible(page:Page) {
  const dialog=page.getByRole('dialog',{name:'Gruesome Death',exact:true});
  for(const name of ['Cancel','Save and exit']) await expect(dialog.getByRole('button',{name,exact:true})).toBeInViewport({ratio:1});
  await expect(dialog.locator('.play-gruesome-action')).toBeInViewport({ratio:1});
- const frame=(await dialog.boundingBox())!;const footer=(await dialog.locator('.play-death-actions').boundingBox())!;
- expect(footer.y+footer.height).toBeLessThanOrEqual(frame.y+frame.height+1);
- expect(await dialog.evaluate(el=>el.scrollHeight<=el.clientHeight+1)).toBe(true);
+ // Viewport changes can leave the dialog transitioning between measurements.
+ // Read both bounds in one frame, and retain the same one-pixel fit requirement.
+ await expect.poll(()=>dialog.evaluate(el=>{
+  const frame=el.getBoundingClientRect();
+  const footer=el.querySelector('.play-death-actions')!.getBoundingClientRect();
+  return footer.bottom<=frame.bottom+1 && el.scrollHeight<=el.clientHeight+1;
+ })).toBe(true);
 }
 
 test('death editing, loading, reading, corrections and errors keep laptop/phone actions anchored',async({page,archive},info)=>{
