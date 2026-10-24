@@ -16,6 +16,7 @@ import { getFilmDetails } from '@/types/featureFilmDetails';
 import { getFilmIdByKiller, getFilmIdByLocation, getFilmIdByFinalGirl, FEATURE_FILMS } from '@/types/gameData';
 import { useActiveImages } from '@/hooks/useActiveImages';
 import { getKillerNarrativeRules } from '@/data/killerSpecialRules';
+import { getStoryRequestRules } from '@/lib/storyRequestContext';
 import { getKillerDescription } from '@/data/killerDescriptions';
 import { getFinalGirlDescription } from '@/data/finalGirlDescriptions';
 import { getLocationDescription } from '@/data/locationDescriptions';
@@ -204,11 +205,7 @@ const NowPlaying = ({
       const locationDetails = locationFilmDetails?.location;
       const finalGirlDetails = finalGirlFilmDetails?.finalGirls?.find(fg => fg.name === finalGirl);
 
-      const killerRules = getKillerNarrativeRules(killer);
-      const moduleSpecialRules = moduleContext
-        ? [moduleContext.rulesSummary, moduleContext.narrativeGuidance].filter(Boolean).join('\n')
-        : undefined;
-      const locationSpecialRules = moduleSpecialRules;
+      const { killerRules, locationRules } = getStoryRequestRules(killer, location);
 
       // Build payload with complete objects matching the edge function's StoryRequest interface
       const payload = {
@@ -216,14 +213,12 @@ const NowPlaying = ({
         killer: {
           name: killer,
           description: killerDetails?.description || `A terrifying killer known as ${killer}.`,
-          ...((killerRules || moduleSpecialRules) && {
-            specialRules: [killerRules, moduleSpecialRules].filter(Boolean).join('\n'),
-          }),
+          ...(killerRules && { specialRules: killerRules }),
         },
         location: {
           name: location,
           description: locationDetails?.description || `A dangerous place called ${location}.`,
-          ...(locationSpecialRules && { specialRules: locationSpecialRules }),
+          ...(locationRules && { specialRules: locationRules }),
         },
         finalGirl: {
           name: finalGirl,

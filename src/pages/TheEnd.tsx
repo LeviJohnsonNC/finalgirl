@@ -22,6 +22,7 @@ import { getMissionByName } from '@/data/falconwoodMissions';
 import { isKillerUnkillable } from '@/data/killerHealth';
 import { getLegacyFinalGirlHealth } from '@/data/finalGirlHealth';
 import { getKillerNarrativeRules } from '@/data/killerSpecialRules';
+import { getStoryRequestRules } from '@/lib/storyRequestContext';
 import { getModulePromptContext } from '@/data/rules/moduleRules';
 import { useImageGeneration } from '@/hooks/useImageGeneration';
 
@@ -152,10 +153,7 @@ const TheEnd = ({
         ? getFilmDetails(finalGirlFilmId)?.finalGirls.find(girl => girl.name === result.finalGirl)?.backstory
         : undefined) ?? getFinalGirlDescription(result.finalGirl);
       const locationDescription = getLocationDescription(result.location);
-      const killerRules = getKillerNarrativeRules(result.killer);
-      const moduleSpecialRules = moduleContext
-        ? [moduleContext.rulesSummary, moduleContext.narrativeGuidance].filter(Boolean).join('\n')
-        : undefined;
+      const { killerRules, locationRules } = getStoryRequestRules(result.killer, result.location);
       const finalGirlMaxHealth = result.finalGirlMaxHealth ?? getLegacyFinalGirlHealth(result.finalGirl);
 
       const payload = {
@@ -165,14 +163,12 @@ const TheEnd = ({
         killer: {
           name: result.killer,
           description: killerDescription,
-          ...((killerRules || moduleSpecialRules) && {
-            specialRules: [killerRules, moduleSpecialRules].filter(Boolean).join('\n'),
-          }),
+          ...(killerRules && { specialRules: killerRules }),
         },
         location: {
           name: result.location,
           description: locationDescription,
-          ...(moduleSpecialRules && { specialRules: moduleSpecialRules }),
+          ...(locationRules && { specialRules: locationRules }),
         },
         finalGirl: {
           name: result.finalGirl,

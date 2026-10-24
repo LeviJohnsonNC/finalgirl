@@ -696,8 +696,12 @@ const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
   },
 };
 
+export function getEntityPromptContext(entity: string): ModulePromptContext | undefined {
+  return MODULE_PROMPT_CONTEXT[entity];
+}
+
 export function getModulePromptContext(killer: string, location: string): ModulePromptContext | null {
-  const contexts = [MODULE_PROMPT_CONTEXT[killer], MODULE_PROMPT_CONTEXT[location]].filter(Boolean) as ModulePromptContext[];
+  const contexts = [getEntityPromptContext(killer), getEntityPromptContext(location)].filter(Boolean) as ModulePromptContext[];
   if (contexts.length === 0) return null;
   return {
     narrativeGuidance: contexts.map((c) => c.narrativeGuidance).join('\n'),
