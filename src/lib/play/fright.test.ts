@@ -9,6 +9,7 @@ import {
   frightTransition,
   frightState,
   frightPublic,
+  validFrightSuccessor,
   FRIGHT_POWERS,
   FRIGHT_FINALES,
   type FrightSnapshot,
@@ -179,6 +180,78 @@ describe("owner-verified Dr. Fright", () => {
     a.step({ command: "slide", direction: "D" });
     expect(a.state().deal).toBe(completed.deal);
     expect(a.state().reserve).toBe(completed.reserve);
+  });
+  it("wakes mid-trip atomically, validates the successor, and reuses the prepared deck after Undo", () => {
+    const a = session();
+    a.step({ command: "asleep" });
+    a.step({ command: "slide", direction: "U" });
+    const before = a.state();
+    const entries = summarizePlay(a.log).entries;
+    const wake = frightTransition(
+      before,
+      { command: "awake" },
+      a.log,
+      entries,
+      () => "3210",
+    )!;
+    expect(validFrightSuccessor(wake, a.log, entries)).toBe(true);
+    expect(
+      validFrightSuccessor({ ...wake, deal: "1230" }, a.log, entries),
+    ).toBe(false);
+    a.step({ command: "awake" });
+    const wakeEvent = a.log[a.log.length - 1]!;
+    expect(a.state()).toMatchObject({
+      sleep: "awake",
+      path: "",
+      pending: false,
+      cycle: 2,
+      deal: "2301",
+      lastPath: "",
+    });
+    expect(a.step({ command: "awake" })).toBeNull();
+    a.log.push(newPlayEvent({ kind: "undo", target: wakeEvent.id }));
+    expect(a.state().path).toBe("U");
+    a.step({ command: "awake" });
+    expect(a.state()).toMatchObject({
+      deal: "2301",
+      reserve: "3210",
+      path: "",
+    });
+    a.step({ command: "asleep" });
+    expect(a.state()).toMatchObject({
+      sleep: "asleep",
+      deal: "2301",
+      reserve: "3210",
+      cycle: 2,
+      path: "",
+    });
+    expect(summarizePlay(a.log)).toMatchObject({ killed: 0, saved: 0 });
+  });
+  it("switches an untouched deck without rerolling and refuses to bypass an attack or forced sleep", () => {
+    const a = session();
+    a.step({ command: "asleep" });
+    a.step({ command: "awake" });
+    expect(a.state()).toMatchObject({
+      cycle: 1,
+      deal: "0132",
+      reserve: "2301",
+    });
+    a.step({ command: "asleep" });
+    a.step({ command: "slide", direction: "D" });
+    expect(a.state().pending).toBe(true);
+    expect(a.step({ command: "awake" })).toBeNull();
+    expect(a.step({ command: "asleep" })).toBeNull();
+    a.step({ command: "defended" });
+    a.log.push(
+      newPlayEvent({
+        kind: "moment",
+        momentType: "finale",
+        text: "Finale revealed",
+        permanent: true,
+        killerCard: "Face Your Fright",
+      }),
+    );
+    expect(a.step({ command: "awake" })).toBeNull();
   });
   it("applies a reveal effect explicitly once and stays asleep across Face Your Fright exits", () => {
     const a = session();

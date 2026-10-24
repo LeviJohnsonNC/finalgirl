@@ -34,7 +34,13 @@ export interface BoilerArtworkHandle {
   cancel: () => void;
 }
 type Scene = { path: string; deal: string; awake: boolean };
-type Phase = "idle" | "dragging" | "returning" | "settling" | "revealing";
+type Phase =
+  | "idle"
+  | "dragging"
+  | "returning"
+  | "settling"
+  | "revealing"
+  | "gathering";
 type Pointer = {
   id: number;
   x: number;
@@ -42,11 +48,13 @@ type Pointer = {
   inverse: DOMMatrix;
   start: DOMPoint;
   axis: Axis | null;
+  viewport: { width: number; height: number };
 };
 interface Props extends Scene {
   revision: string;
   disabled: boolean;
   large: boolean;
+  describedBy?: string;
   onSlide: (direction: Direction) => boolean;
   onBusyChange: (busy: boolean) => void;
 }
@@ -77,7 +85,7 @@ export const BoilerArtwork = forwardRef<BoilerArtworkHandle, Props>(
     const expected = useRef<{ path: string; deal: string } | null>(null);
     const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
     const cameraRaf = useRef(0);
-    const initialFrame = useRef(boilerFrame(props.path));
+    const initialFrame = useRef(boilerFrame(props.path, !props.awake));
     const frame = useRef(initialFrame.current);
     const reduced = useRef(
       window.matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -134,7 +142,7 @@ export const BoilerArtwork = forwardRef<BoilerArtworkHandle, Props>(
       } else {
         paintOffset({ x: 0, y: 0 });
         show(latest.current);
-        frame.current = boilerFrame(latest.current.path);
+        frame.current = boilerFrame(latest.current.path, !latest.current.awake);
         svg.current?.setAttribute("viewBox", frameText(frame.current));
         phaseTo("idle");
       }
@@ -207,6 +215,22 @@ export const BoilerArtwork = forwardRef<BoilerArtworkHandle, Props>(
         next.deal === expected.current.deal
       )
         return;
+      if (sceneRef.current.path && !next.path && !reduced.current) {
+        // A saved wake/reset gathers only public layers, then removes them.
+        // Historical layouts never reconstruct the live scene.
+        releasePointer();
+        clearMotion();
+        expected.current = null;
+        setCue(null);
+        setPop([]);
+        paintOffset({ x: 0, y: 0 });
+        phaseTo("gathering");
+        later(() => {
+          show(latest.current);
+          phaseTo("idle");
+        }, 240);
+        return;
+      }
       if (phaseRef.current !== "idle") callbacks.current.cancel(true);
       else if (!sameScene(sceneRef.current, next)) show(next);
     }, [props.path, props.deal, props.awake, props.revision]);
@@ -216,7 +240,7 @@ export const BoilerArtwork = forwardRef<BoilerArtworkHandle, Props>(
     }, [props.disabled]);
 
     useLayoutEffect(() => {
-      const target = boilerFrame(scene.path);
+      const target = boilerFrame(scene.path, !scene.awake);
       const from = frame.current;
       cancelAnimationFrame(cameraRaf.current);
       // A restored/new deck starts fully framed before it accepts a pointer.
@@ -243,7 +267,7 @@ export const BoilerArtwork = forwardRef<BoilerArtworkHandle, Props>(
       };
       cameraRaf.current = requestAnimationFrame(tick);
       return () => cancelAnimationFrame(cameraRaf.current);
-    }, [scene.path]);
+    }, [scene.path, scene.awake]);
 
     useEffect(() => {
       const stop = () => {
@@ -296,6 +320,7 @@ export const BoilerArtwork = forwardRef<BoilerArtworkHandle, Props>(
         className={`boiler-stage${props.large ? " boiler-stage--large" : ""}${!props.disabled ? " boiler-stage--ready" : ""}`}
         role="group"
         aria-label="Boiler Room revealed cards"
+        aria-describedby={props.describedBy}
         tabIndex={-1}
         data-phase={phase}
         onPointerDown={(e) => {
@@ -317,6 +342,7 @@ export const BoilerArtwork = forwardRef<BoilerArtworkHandle, Props>(
             inverse,
             start: new DOMPoint(e.clientX, e.clientY).matrixTransform(inverse),
             axis: null,
+            viewport: { width: window.innerWidth, height: window.innerHeight },
           };
           e.currentTarget.setPointerCapture(e.pointerId);
           e.currentTarget.focus({ preventScroll: true });
@@ -325,6 +351,13 @@ export const BoilerArtwork = forwardRef<BoilerArtworkHandle, Props>(
         }}
         onPointerMove={(e) => {
           if (pointer.current?.id !== e.pointerId) return;
+          if (
+            pointer.current.viewport.width !== window.innerWidth ||
+            pointer.current.viewport.height !== window.innerHeight
+          ) {
+            cancel(true);
+            return;
+          }
           const movement = position(e.clientX, e.clientY);
           paintOffset(movement.offset);
           setCue(
@@ -337,7 +370,11 @@ export const BoilerArtwork = forwardRef<BoilerArtworkHandle, Props>(
         }}
         onPointerUp={(e) => {
           if (pointer.current?.id !== e.pointerId) return;
-          if (latest.current.disabled) {
+          if (
+            latest.current.disabled ||
+            pointer.current.viewport.width !== window.innerWidth ||
+            pointer.current.viewport.height !== window.innerHeight
+          ) {
             cancel(true);
             return;
           }

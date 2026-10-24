@@ -5,6 +5,16 @@ import {
 } from "../../../supabase/functions/_shared/play/fright";
 import { boilerFrame, dragPosition } from "./boilerPresentation";
 
+it("fits the non-interactive Awake cover without reserving unusable slide space", () => {
+  expect(boilerFrame("", false)).toEqual({
+    x: -14,
+    y: -14,
+    width: 228,
+    height: 328,
+  });
+  expect(boilerFrame("").height).toBeGreaterThan(boilerFrame("", false).height);
+});
+
 it("reserves complete card travel for every reachable next slide without consulting a deal", () => {
   function check(path: string) {
     const frame = boilerFrame(path);

@@ -13,10 +13,11 @@ export type Offset = { x: number; y: number };
 export type Axis = "x" | "y";
 
 /** Reserve legal travel before pickup, so dragging never reframes the scene. */
-export function boilerFrame(path: string): Frame {
-  const geometries = [path, ...legalDirections(path).map((d) => path + d)].map(
-    (p) => boilerGeometry(p)!,
-  );
+export function boilerFrame(path: string, reserveTravel = true): Frame {
+  const geometries = [
+    path,
+    ...(reserveTravel ? legalDirections(path).map((d) => path + d) : []),
+  ].map((p) => boilerGeometry(p)!);
   const positions = geometries.flatMap((g) => [g.cover, ...g.cards]);
   const left = Math.min(...positions.map((p) => p.x));
   const top = Math.min(...positions.map((p) => p.y));

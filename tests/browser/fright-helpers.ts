@@ -60,7 +60,7 @@ export async function enter(page: Page) {
     .getByRole("button", { name: /Enter the Boiler Room/ })
     .click();
   await dialog(page)
-    .getByRole("button", { name: "Record falling Asleep", exact: true })
+    .getByRole("button", { name: "Record Final Girl Asleep", exact: true })
     .click();
 }
 export const slide = async (page: Page, name: string) => {
