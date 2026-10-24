@@ -17,8 +17,11 @@ Opening those disclosures never records gameplay.
 Found Buddyland Items now supply their location-specific effects to the bounded
 ending context, without establishing use, remaining charges or current inventory.
 No observation schema, migration, dependency, artwork or gameplay default changed.
-Redeploy `generate-death-scene` and `narrate-story` with the changed shared module
-bundle before the frontend. No production deployment is claimed by the PR.
+This parity PR needs a frontend deployment only: `moduleItemBeats` enriches the
+browser-built ending summary; the edge endpoints do not call it. Shared validation,
+death facts and fingerprints are unchanged. The compatible edge bundles required
+by the earlier module imports remain a separate release prerequisite. No production
+deployment is claimed by this PR.
 
 Regression evidence: `moduleParity.test.tsx`, `module-parity.spec.ts`, existing
 mixed-film/recovery/death suites and current-head Reliability CI. Browser artifacts

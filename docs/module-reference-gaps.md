@@ -57,7 +57,8 @@ to resend an entire box to fill a specific gap.
 
 ## Release verification, separate from source photos
 
-After compatible functions and the frontend are deployed, verify a signed-in
+This parity PR adds no backend/schema requirement; confirm the earlier imports’
+compatible functions are already deployed before publishing the frontend. Then verify a signed-in
 mixed game: save/reload, one module action, a contextual death, cached reopening,
 saved narration and an ending. Automated tests mock the providers; CI and source
 photos do not establish live AI/audio quality or deployed compatibility.

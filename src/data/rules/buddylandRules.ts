@@ -19,7 +19,7 @@ export const billyRules: EntityRuleModule = {
   kind: "killer",
   filmId: "s4-buddyland",
   source:
-    "Bad Times at Buddyland — Billy the Bear Killer Sheet; Core Rules p. 32 (Minions)",
+    "Billy the Bear Killer Sheet; Core Rules p. 32 (Minions); owner photos IMG_9308–IMG_9309 and IMG_9313",
   credits: { design: "Motti Eisenbach", art: "Jacqui Davis" },
   tags: [
     "billy",
@@ -113,7 +113,7 @@ export const buddylandRules: EntityRuleModule = {
   kind: "location",
   filmId: "s4-buddyland",
   source:
-    "Bad Times at Buddyland — Buddyland Location Sheet and owner-supplied Location cards",
+    "Buddyland Location Sheet; owner photos IMG_9309 and IMG_9311–IMG_9312 (Terrors, Events and Items)",
   credits: {
     design: "Motti Eisenbach",
     art: "Jacqui Davis; board and Item art: Agnieszka Dąbrowiecka",
