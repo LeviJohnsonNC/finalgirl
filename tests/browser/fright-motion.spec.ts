@@ -200,7 +200,7 @@ test.describe("Boiler Room direct manipulation", () => {
         await dialog(page)
           .getByRole("button", { name: "Back to game", exact: true })
           .focus();
-        await page.keyboard.press("ArrowUp");
+        await page.keyboard.press("Enter");
       }
       if (cancel === "cancel") await g.cancel();
       else await g.up();

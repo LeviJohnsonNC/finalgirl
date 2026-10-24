@@ -65,6 +65,7 @@ export async function enter(page: Page) {
 }
 export const slide = async (page: Page, name: string) => {
   const stage = dialog(page).locator(".boiler-stage");
+  await expect(stage).toHaveAttribute("data-phase", "idle");
   await stage.focus();
   await stage.press(`Arrow${name[0].toUpperCase() + name.slice(1)}`);
   await expect(dialog(page).locator(".boiler-stage")).toHaveAttribute(

@@ -241,6 +241,7 @@ test("a failed durable save and rapid or canceled gestures never reveal or consu
   await page.mouse.down();
   await page.mouse.move(b.x + b.width / 2 + 10, b.y + b.height / 2);
   await page.mouse.up();
+  await expect(art).toHaveAttribute("data-phase", "idle");
   expect(await log(page)).toEqual(before);
   await page.screenshot({ path: info.outputPath("boiler-save-retry.png") });
   // A committed drag and keyboard activation share the same durable slide path.
