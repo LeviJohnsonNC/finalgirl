@@ -9,6 +9,7 @@ export function EventControl({
   ended = "ended",
   art,
   effect,
+  reminder,
   allowed = true,
   onActivate,
   onEnd,
@@ -22,6 +23,7 @@ export function EventControl({
   ended?: string;
   art: ModuleArt;
   effect?: string;
+  reminder?: ReactNode;
   allowed?: boolean;
   onActivate: () => unknown;
   onEnd: () => unknown;
@@ -58,6 +60,7 @@ export function EventControl({
         }}
       />
       {effect && <details className="module-card-rules"><summary>Rules<span className="sr-only">: {name}</span></summary><p>{effect}</p></details>}
+      {active && reminder && <p className="module-active-reminder">{reminder}</p>}
       {active && (
         <button
           className="module-end"

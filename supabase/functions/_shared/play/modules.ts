@@ -805,6 +805,8 @@ export function moduleItemBeats(
       ? CAMP_ITEMS
       : selection.location === "Carnival of Blood"
         ? CARNIVAL_ITEMS
+        : selection.location === "Buddyland"
+          ? BUDDYLAND_ITEMS
         : [];
   return entries
     .filter((e) => e.kind === "moment" && e.momentType === "item" && e.detail)

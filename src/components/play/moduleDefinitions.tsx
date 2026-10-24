@@ -114,13 +114,14 @@ export const moduleDefinitions: Definition[] = [
       const active = BUDDIES.filter(
         (b) => state[`buddy.${b.id}.status`] === "active",
       ).length;
+      const recorded = BUDDIES.filter(b => state[`buddy.${b.id}.status`] !== undefined).length;
       const sources = [1, 2, 3, 4, 5].filter((id) =>
         ["active", "inactive"].includes(String(state[`source.${id}.status`])),
       );
       const on = sources.filter(
         (id) => state[`source.${id}.status`] === "active",
       ).length;
-      return `${active} Buddies in play · ${sources.length ? `${on}/${sources.length} sources on` : "Sources not recorded"}`;
+      return `${recorded ? `${active} ${active === 1 ? "Buddy" : "Buddies"} in play (${recorded}/${BUDDIES.length} recorded)` : "Buddies not recorded"} · ${sources.length ? `${on}/${sources.length} sources on` : "Sources not recorded"}`;
     },
     Controls: (props) => (
       <BuddylandControls {...props} part="killer" embedded />

@@ -10,6 +10,7 @@ import {
   BUDDIES,
   SPECIAL_VICTIMS,
   BILLY_POWERS,
+  BUDDYLAND_EVENTS,
   moduleState,
 } from "@/lib/play/modules";
 import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
@@ -310,6 +311,7 @@ export function BuddylandControls({
                     tileClassName="buddyland-portrait"
                     value={typeof value === "string" ? value : undefined}
                     present="on-board"
+                    help={BUDDYLAND_EVENTS.find(event=>event.name===v.event)?.effect}
                     art={{
                       src: artwork[
                         "../../assets/play/roster/" +
