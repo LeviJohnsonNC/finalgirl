@@ -128,11 +128,8 @@ test("printed Boiler Room sequence, attack pause, quarter reveal and offline rel
   await expect(dialog(page)).toContainText("You woke up.");
   await footerVisible(page);
   await expect(
-    dialog(page).getByRole("list", {
-      name: "4 of 4 Boiler Room cards revealed",
-      exact: true,
-    }),
-  ).toBeVisible();
+    dialog(page).locator(".boiler-stage .boiler-card-layer:not(.boiler-cover)"),
+  ).toHaveCount(0);
   await page.screenshot({
     path: info.outputPath("boiler-quarter-complete.png"),
   });
@@ -192,11 +189,8 @@ test("a failed durable save and rapid or canceled gestures never reveal or consu
     "could not be saved",
   );
   await expect(
-    dialog(page).getByRole("list", {
-      name: "0 of 4 Boiler Room cards revealed",
-      exact: true,
-    }),
-  ).toBeVisible();
+    dialog(page).locator(".boiler-stage .boiler-card-layer:not(.boiler-cover)"),
+  ).toHaveCount(0);
   await footerVisible(page);
   await page.evaluate(() =>
     (
@@ -212,11 +206,8 @@ test("a failed durable save and rapid or canceled gestures never reveal or consu
     button.click();
   });
   await expect(
-    dialog(page).getByRole("list", {
-      name: "1 of 4 Boiler Room cards revealed",
-      exact: true,
-    }),
-  ).toBeVisible();
+    dialog(page).locator(".boiler-stage .boiler-card-layer:not(.boiler-cover)"),
+  ).toHaveCount(1);
   // A sub-threshold drag is canceled without writing or exposing the next card.
   const before = await log(page);
   const art = dialog(page).getByRole("group", {
@@ -243,11 +234,8 @@ test("a failed durable save and rapid or canceled gestures never reveal or consu
   expect(await log(page)).toEqual(before);
   await page.mouse.up();
   await expect(
-    dialog(page).getByRole("list", {
-      name: "2 of 4 Boiler Room cards revealed",
-      exact: true,
-    }),
-  ).toBeVisible();
+    dialog(page).locator(".boiler-stage .boiler-card-layer:not(.boiler-cover)"),
+  ).toHaveCount(2);
   const left = dialog(page).getByRole("button", {
     name: "Slide left; reveal right",
     exact: true,
@@ -354,11 +342,8 @@ test("fresh casts use verified setup once, and timeline Undo rewinds a dependent
     .getByRole("button", { name: /Continue Boiler Room/ })
     .click();
   await expect(
-    dialog(page).getByRole("list", {
-      name: "0 of 4 Boiler Room cards revealed",
-      exact: true,
-    }),
-  ).toBeVisible();
+    dialog(page).locator(".boiler-stage .boiler-card-layer:not(.boiler-cover)"),
+  ).toHaveCount(0);
   await slide(page, "up");
   const current = (await log(page))
     .filter((e) => e.moduleData?.module === "fright")
@@ -408,12 +393,14 @@ test("Finale correction never reapplies a reveal effect and forced sleep survive
         .getByRole("button", { name: "Attack resolved", exact: true })
         .click();
   }
-  await expect(dialog(page)).toContainText("The nightmare continues.");
+  await expect(dialog(page)).toContainText(
+    "Face Your Fright keeps you Asleep.",
+  );
+  await expect(
+    dialog(page).locator(".boiler-stage .boiler-card-layer:not(.boiler-cover)"),
+  ).toHaveCount(0);
   await footerVisible(page);
   await page.screenshot({ path: info.outputPath("boiler-forced-sleep.png") });
-  await dialog(page)
-    .getByRole("button", { name: "Continue nightmare", exact: true })
-    .click();
   await expect(dialog(page)).toContainText("Choose your first direction.");
   await dialog(page)
     .getByRole("button", { name: "Back to game", exact: true })

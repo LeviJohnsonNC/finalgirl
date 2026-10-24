@@ -3,8 +3,7 @@ import { useRef } from "react";
 import { useModuleRecord } from "./useModuleRecord";
 import { KillerCards } from "./KillerCards";
 import { BoilerRoom } from "./BoilerRoom";
-import { IllustratedTile } from "./IllustratedTile";
-import { atlasCell } from "./killerPresentation";
+import { FrightSleepControls } from "./FrightSleepControls";
 import {
   frightState,
   frightTransition,
@@ -12,7 +11,6 @@ import {
   type FrightCommand,
   type Direction,
 } from "../../../supabase/functions/_shared/play/fright";
-import cardsArt from "@/assets/play/fright/cards.webp";
 import type { ControlsProps } from "./moduleDefinitions";
 import "@/styles/fright.css";
 
@@ -86,32 +84,13 @@ export function FrightControls({
   ];
   return (
     <div className="fright-controls">
-      <div
-        className="fright-sleep-grid"
-        role="group"
-        aria-label="Final Girl sleep state"
-      >
-        <IllustratedTile
-          art={atlasCell(cardsArt, 7, 1254, 1254)}
-          title="Awake"
-          status={sleep === "awake" ? "Recorded" : "Normal world"}
-          aria-label="Record Final Girl Awake"
-          aria-pressed={sleep === "awake"}
-          disabled={
-            blocked || forced || state?.mode === "digital" || sleep === "awake"
-          }
-          onClick={() => act("awake")}
-        />
-        <IllustratedTile
-          art={atlasCell(cardsArt, 8, 1254, 1254)}
-          title="Asleep"
-          status={sleep === "asleep" ? "Recorded" : "The Boiler Room"}
-          aria-label="Record Final Girl Asleep"
-          aria-pressed={asleep}
-          disabled={blocked || asleep}
-          onClick={() => act("asleep")}
-        />
-      </div>
+      <FrightSleepControls
+        sleep={sleep}
+        forced={forced}
+        disabled={blocked}
+        pending={state?.pending}
+        onChange={(value) => act(value)}
+      />
       <p className="fright-consequence">
         {sleep === "unknown"
           ? "Sleep state not recorded."
@@ -164,9 +143,10 @@ export function FrightControls({
           state={state}
           blocked={blocked}
           message={message}
+          forced={forced}
           onSlide={(d) => act("slide", d)}
           onDefended={() => act("defended")}
-          onSleep={() => act("asleep")}
+          onSleepChange={(value) => act(value)}
           onUndo={() =>
             record(newPlayEvent({ kind: "undo", target: state.eventId }))
           }

@@ -368,8 +368,11 @@ export function frightTransition(
       next.lastDeal = "";
       break;
     case "awake":
-      if (base.mode !== "physical" || forced || base.sleep === "awake")
-        return null;
+      if (forced || base.sleep === "awake") return null;
+      // A deliberate wake ends a partial digital trip atomically. Promote the
+      // already shuffled reserve; Undo must reuse it rather than reroll it.
+      if (base.mode === "digital" && base.path)
+        fresh(base.cycle + 1, base.reserve);
       next.sleep = "awake";
       break;
     case "asleep":

@@ -102,7 +102,7 @@ test.describe("Boiler Room direct manipulation", () => {
           path: info.outputPath("boiler-premium-awake.png"),
         });
       await dialog(page)
-        .getByRole("button", { name: "Record falling Asleep", exact: true })
+        .getByRole("button", { name: "Record Final Girl Asleep", exact: true })
         .click();
       await expect(stage.locator(".boiler-cover image")).toHaveAttribute(
         "href",

@@ -8,6 +8,48 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+it("gathers public cards after a saved wake, then shows only the fresh Awake cover", () => {
+  vi.useFakeTimers();
+  const props = {
+    path: "U",
+    deal: "0132",
+    awake: false,
+    revision: "slide",
+    disabled: false,
+    large: false,
+    onSlide: () => false,
+    onBusyChange: () => {},
+  };
+  const view = render(<BoilerArtwork {...props} />);
+  view.rerender(
+    <BoilerArtwork
+      {...props}
+      path=""
+      deal="2301"
+      awake
+      revision="wake"
+      disabled
+    />,
+  );
+  expect(view.container.querySelector(".boiler-stage")).toHaveAttribute(
+    "data-phase",
+    "gathering",
+  );
+  act(() => vi.advanceTimersByTime(240));
+  expect(
+    view.container.querySelectorAll(
+      ".boiler-card-layer:not(.boiler-cover), .boiler-doctor",
+    ),
+  ).toHaveLength(0);
+  expect(
+    view.container.querySelector(".boiler-cover image")?.getAttribute("href"),
+  ).toContain("awake-back");
+  expect(view.container.querySelector(".boiler-stage")).toHaveAttribute(
+    "data-phase",
+    "idle",
+  );
+});
+
 it("a rejected slide never mounts a new card or cutout and becomes retryable", () => {
   vi.useFakeTimers();
   const ref = createRef<BoilerArtworkHandle>();
