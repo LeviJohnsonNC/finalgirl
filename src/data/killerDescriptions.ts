@@ -1,3 +1,4 @@
+import { FRIGHT_VISUAL } from '../../supabase/functions/_shared/play/fright';
 import { GEPPETTO_VISUAL } from '../../supabase/functions/_shared/play/geppetto';
 import { HANS_VISUAL } from './rules/campRules';
 import { BUDDYLAND_VISUALS } from './buddyland';
@@ -29,7 +30,7 @@ He is shirtless, wearing an intricate black leather harness with various straps,
 
   "Geppetto": GEPPETTO_VISUAL,
 
-  "Dr. Fright": `A grotesque, stocky middle-aged man with pockmarked, scarred skin, milky-white eyes and thinning disheveled brown hair. Mustard sweater vest over a worn long-sleeve shirt and work trousers; a rusted pitchfork. His unsettling physical identity stays consistent in dreams and waking imagery. He is the supernatural Dream Doctor, not a non-supernatural farmer. A dark cloudlike presence may appear only when the story establishes it. The selected location and scene determine his pose, lighting and surroundings.`,
+  "Dr. Fright": FRIGHT_VISUAL,
 
   "Ratchet Lady": `A woman in her early 30s with a lean, frantic build and a terrifying, visceral presence. Her skin is pale and sallow, heavily smudged with soot and grime. Her face is almost entirely encased in thick, dingy medical bandages that wrap tightly around her head and eyes, leaving only her mouth exposed. Her expression is one of primal, unhinged ferocity, with her jaw dropped in a wide, silent scream.
 

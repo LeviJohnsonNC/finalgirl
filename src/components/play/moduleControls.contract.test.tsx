@@ -15,6 +15,8 @@ import { CharacterControl } from "./CharacterControl";
 import { EventControl } from "./EventControl";
 import { MinorPowerControl } from "./MinorPowerControl";
 import { useModuleRecord } from "./useModuleRecord";
+import { FrightControls } from "./FrightControls";
+import { initialFright } from "../../../supabase/functions/_shared/play/fright";
 
 afterEach(cleanup);
 const art = { src: "/test-art.webp" };
@@ -62,6 +64,54 @@ describe("registered modules use their declared shared interactions", () => {
 });
 
 describe("shared player interaction contracts", () => {
+  it("a known save conflict leaves the Boiler Room readable but prevents revealing or resolving cards", () => {
+    const onEvent = vi.fn(() => true);
+    const event = newPlayEvent({
+      kind: "module",
+      moduleData: {
+        module: "fright",
+        changes: {
+          snapshot: JSON.stringify({
+            ...initialFright(),
+            mode: "digital",
+            sleep: "asleep",
+            cycle: 1,
+            deal: "0132",
+            reserve: "2301",
+            path: "UUL",
+            pending: true,
+          }),
+        },
+      },
+    });
+    render(
+      <FrightControls
+        killer="Dr. Fright"
+        location="Camp Happy Trails"
+        finalGirl="Laurie"
+        events={[
+          newPlayEvent({ kind: "start", saved: 0, killed: 0, round: 1 }),
+          event,
+        ]}
+        onEvent={onEvent}
+        blocked
+      />,
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: /Continue Boiler Room/ }),
+    );
+    expect(
+      screen.getByText("Choose which saved game to continue."),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Attack resolved" }),
+    ).toBeDisabled();
+    for (const direction of screen.getAllByRole("button", { name: /^Slide / }))
+      expect(direction).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Attack resolved" }));
+    fireEvent.click(screen.getByRole("button", { name: "Back to game" }));
+    expect(onEvent).not.toHaveBeenCalled();
+  });
   it("portrait disclosure never resurrects an ended character or changes their outcome", () => {
     const observed = vi.fn();
     function Person() {

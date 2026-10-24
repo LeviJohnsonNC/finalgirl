@@ -145,6 +145,7 @@ const IndexContent = () => {
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
       ...(selection.killer === 'Billy the Bear' && {billySetupVersion: 1 as const}),
       ...(selection.killer === 'Geppetto' && {geppettoSetupVersion: 1 as const}),
+      ...(selection.killer === 'Dr. Fright' && {frightSetupVersion: 1 as const}),
       ...(selection.location === 'Carnival of Blood' && {carnivalSetupVersion: 1 as const}),
       selection: { ...selection, filmId: getFilmIdByLocation(selection.location), finalGirlStartingHealth: getFinalGirlHealth(selection.finalGirl) } })) setCurrentPage('nowPlaying');
   };
@@ -286,6 +287,7 @@ const IndexContent = () => {
               playMode={activeGame.playMode}
               showDeathPanel={activeGame.showDeathPanel}
               syncPlayNow={cloudPlay.syncNow}
+              playSyncBlocked={Boolean(cloudPlay.conflict)}
               onPlayEvent={event => appendPlayEvent(activeGame.id, event)}
               initialStory={activeGame.introStory}
               initialSceneImageUrl={activeGame.sceneImageUrl}

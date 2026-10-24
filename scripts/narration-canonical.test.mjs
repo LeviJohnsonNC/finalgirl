@@ -23,8 +23,9 @@ const buddyland = load('../supabase/functions/_shared/play/buddyland.ts', {});
 const camp = load('../supabase/functions/_shared/play/camp.ts', {});
 const geppetto = load('../supabase/functions/_shared/play/geppetto.ts', {});
 const carnival = load("../supabase/functions/_shared/play/carnival.ts", {});
-const modules = load('../supabase/functions/_shared/play/modules.ts', {'./buddyland.ts':buddyland,'./camp.ts':camp,'./geppetto.ts':geppetto,'./carnival.ts':carnival});
-const events = load('../supabase/functions/_shared/play/events.ts', {'./modules.ts':modules}),
+const fright = load("../supabase/functions/_shared/play/fright.ts", {});
+const modules = load('../supabase/functions/_shared/play/modules.ts', {'./buddyland.ts':buddyland,'./camp.ts':camp,'./geppetto.ts':geppetto,'./carnival.ts':carnival,'./fright.ts':fright});
+const events = load('../supabase/functions/_shared/play/events.ts', {'./modules.ts':modules,'./fright.ts':fright}),
   death = load('../supabase/functions/_shared/play/death.ts', { './events.ts': events, './modules.ts':modules });
 const schemas = load('../supabase/functions/_shared/validation.ts', {
   'https://deno.land/x/zod@v3.22.4/mod.ts': require('zod'),
@@ -37,6 +38,7 @@ async function fixture({
   undone = false,
   changed = false,
   camp = false,
+  drFright = false,
 } = {}) {
   const state = {
     selection: {
@@ -60,6 +62,17 @@ async function fixture({
     {id:'55555555-5555-4555-8555-555555555555',at:1,kind:'module',moduleData:{module:'camp',changes:{'event.dark-waters':'active','victim.boyfriend':'in-play'}}},
     {id:'66666666-6666-4666-8666-666666666666',at:1,kind:'module',moduleData:{module:'hans',changes:{'minor.unholy-speed.health':1}}},
   );
+  if (drFright) {
+    state.selection.killer='Dr. Fright';
+    const deathEvent=state.playEvents.pop();
+    state.playEvents.push(events.newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(fright.initialFright())}}}));
+    for(const action of [{command:'digital'},{command:'asleep'},{command:'slide',direction:'U'}]) {
+      const entries=events.summarizePlay(state.playEvents).entries;
+      const snapshot=fright.frightTransition(fright.frightState(entries),action,state.playEvents,entries,()=> '0132');
+      state.playEvents.push(events.newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(snapshot)}}}));
+    }
+    state.playEvents.push(deathEvent);
+  }
   const signature = await death.deathSignature(
     death.deathFacts(state.selection, state.playEvents, eventId),
   );
@@ -202,3 +215,5 @@ test('saved Camp scenes with Hans observations retain their canonical narration 
   assert.equal((await f.handler(f.request())).status,200);
   assert.deepEqual(f.spoken,['The canonical owned scene is narrated.']);
 });
+
+test('Dr. Fright saved narration accepts owned snapshots with public historical identity',async()=>{const f=await fixture({drFright:true});assert.equal((await f.handler(f.request())).status,200);assert.deepEqual(f.spoken,['The canonical owned scene is narrated.']);});

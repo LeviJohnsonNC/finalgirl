@@ -5,6 +5,7 @@ import { readStoredValue, useLocalStorage } from './useLocalStorage';
 import { isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
 import { ActiveGame, isActiveGame } from '@/lib/activeGame';
 import { initialModuleObservations } from '@/lib/play/modules';
+import { frightState, parseFright, initialFright, validFrightSuccessor } from '../../supabase/functions/_shared/play/fright';
 import { discardedGamesKey, isGameDiscarded } from '@/lib/discardedGames';
 
 export function useActiveGame() {
@@ -43,6 +44,10 @@ export function useActiveGame() {
       // owns uniqueness, including two taps arriving before React renders.
       if (isPermanentMoment(event) && summarizePlay(previous.playEvents).entries.some(entry => entry.kind === 'moment' && entry.momentType === event.momentType)) return previous;
       const log = previous.playEvents ?? [];
+      if (event.moduleData?.module === 'fright') {
+        const snapshot=parseFright(event.moduleData.changes.snapshot);
+        if (previous.selection.killer !== 'Dr. Fright' || !snapshot || snapshot.parent !== (frightState(summarizePlay(log).entries)?.eventId ?? 'root') || !validFrightSuccessor(snapshot,log,summarizePlay(log).entries)) return previous;
+      }
       // A tap arriving before the entry effect still gets a durable baseline.
       const baseline = event.kind !== 'start' && !summarizePlay(log).tracked
         ? [newPlayEvent({ kind: 'start', saved: 0, killed: 0, round: 1 })] : [];
@@ -51,6 +56,7 @@ export function useActiveGame() {
       const setup = log.length === 0
         ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
         : [];
+      if (log.length === 0 && previous.frightSetupVersion === 1 && previous.selection.killer === 'Dr. Fright' && event.moduleData?.module !== 'fright') setup.unshift(newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(initialFright())}}}));
       const additions = event.kind === 'start' ? [event, ...setup] : [...baseline, ...setup, event];
       if (log.length + additions.length > 1000) return previous;
       applied = true;

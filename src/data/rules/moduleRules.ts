@@ -1,4 +1,5 @@
 import { carnivalRules, CARNIVAL_PROMPT_CONTEXT } from './carnivalRules';
+import { frightRules, FRIGHT_PROMPT_CONTEXT } from './frightRules';
 import { geppettoRules, GEPPETTO_PROMPT_CONTEXT } from './geppettoRules';
 import { hansRules, campRules, HANS_PROMPT_CONTEXT, CAMP_PROMPT_CONTEXT } from './campRules';
 import { RuleBlock, RuleSection, RuleChapter } from './types';
@@ -635,7 +636,7 @@ const marrekWarehouse: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer, marrekWarehouse];
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer, marrekWarehouse];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -644,6 +645,7 @@ export interface ModulePromptContext {
 }
 
 const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
+  "Dr. Fright": FRIGHT_PROMPT_CONTEXT,
   "Carnival of Blood": CARNIVAL_PROMPT_CONTEXT,
   Geppetto: GEPPETTO_PROMPT_CONTEXT,
   Hans: HANS_PROMPT_CONTEXT,

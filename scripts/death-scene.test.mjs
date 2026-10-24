@@ -26,18 +26,22 @@ const buddyland = moduleAt(
 const camp = moduleAt("../supabase/functions/_shared/play/camp.ts", {});
 const geppetto = moduleAt("../supabase/functions/_shared/play/geppetto.ts", {});
 const carnival = moduleAt("../supabase/functions/_shared/play/carnival.ts", {});
+const fright = moduleAt("../supabase/functions/_shared/play/fright.ts", {});
 const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", {
   "./buddyland.ts": buddyland,
   "./camp.ts": camp,
   "./geppetto.ts": geppetto,
   "./carnival.ts": carnival,
+  "./fright.ts": fright,
 });
 const events = moduleAt("../supabase/functions/_shared/play/events.ts", {
   "./modules.ts": modules,
+  "./fright.ts": fright,
 });
 const death = moduleAt("../supabase/functions/_shared/play/death.ts", {
   "./events.ts": events,
   "./modules.ts": modules,
+  "./fright.ts": fright,
 });
 const schemas = moduleAt("../supabase/functions/_shared/validation.ts", {
   "https://deno.land/x/zod@v3.22.4/mod.ts": require("zod"),
@@ -462,6 +466,24 @@ test('Carnival trap scenes authorize from historical canonical state and preserv
  f.owned.selection.location='Carnival of Blood';
  const killed={...f.owned.playEvents[1],cause:'hazard',quantity:1,mechanism:'Acid Pitfall Trap'};
  f.owned.playEvents=[f.owned.playEvents[0],{id:crypto.randomUUID(),at:1,kind:'module',moduleData:{module:'carnival',changes:{'trap.acid.status':'placed','trap.acid.space':'Outer path',searchPenalty:true,zappo:'lost'}}},killed,{id:crypto.randomUUID(),at:3,kind:'module',moduleData:{module:'carnival',changes:{'trap.acid.status':'not-placed'}}}];
+ const original=structuredClone(f.owned.playEvents);
+ assert.equal((await f.handler(f.request())).status,200);
+ assert.deepEqual(f.owned.playEvents,original);
+});
+
+test('Dr. Fright snapshots authorize historical public facts without exposing or changing a deal',async()=>{
+ const f=fixture({expectedFacts:{killer:'Dr. Fright',cause:'killer',quantity:1,moduleContext:{fright:{sleep:'asleep',boilerCardsResolved:1,attackPending:false}}}});
+ f.owned.selection.killer='Dr. Fright';
+ const killed={...f.owned.playEvents[1],cause:'killer',quantity:1};
+ f.owned.playEvents=[f.owned.playEvents[0],events.newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(fright.initialFright())}}})];
+ for(const action of [{command:'digital'},{command:'asleep'},{command:'slide',direction:'U'}]){
+  const entries=events.summarizePlay(f.owned.playEvents).entries;
+  const snapshot=fright.frightTransition(fright.frightState(entries),action,f.owned.playEvents,entries,()=> '0132');
+  f.owned.playEvents.push(events.newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(snapshot)}}}));
+ }
+ f.owned.playEvents.push(killed);
+ const historical=death.deathFacts(f.owned.selection,f.owned.playEvents,eventId);
+ assert.ok(!JSON.stringify(historical).includes('0132'));
  const original=structuredClone(f.owned.playEvents);
  assert.equal((await f.handler(f.request())).status,200);
  assert.deepEqual(f.owned.playEvents,original);

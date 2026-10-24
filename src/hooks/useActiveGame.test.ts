@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useActiveGame } from './useActiveGame';
 import { newPlayEvent, summarizePlay } from '@/lib/play/events';
 import type { ActiveGame } from '@/lib/activeGame';
+import {frightState,frightTransition,parseFright} from '../../supabase/functions/_shared/play/fright';
 const mock = vi.hoisted(() => ({ user: { id: 'A' } as { id: string } | null }));
 vi.mock('./useAuth', () => ({ useAuth: () => ({ user: mock.user, isAuthReady: true }) }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
@@ -13,6 +14,27 @@ const game: ActiveGame = { version: 1, id: 'session-A', phase: 'nowPlaying', sel
 } };
 
 describe('recoverable active game', () => {
+  it('seeds only fresh Dr. Fright games; rejects stale, foreign and impossible Boiler Room writes',()=>{
+    const {result}=renderHook(useActiveGame);
+    const fresh={...game,frightSetupVersion:1 as const,selection:{...game.selection,killer:'Dr. Fright'},formDraft:{killerHealth:8}};
+    act(()=>{result.current.save(fresh);result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));});
+    let raw=result.current.activeGame.playEvents;
+    expect(frightState(summarizePlay(raw).entries)?.sleep).toBe('awake');
+    expect(result.current.activeGame.formDraft.killerHealth).toBe(8);
+    const digital=frightTransition(frightState(summarizePlay(raw).entries),{command:'digital'},raw,summarizePlay(raw).entries,()=> '0123');
+    act(()=>{
+      expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(digital)}}}))).toBe(true);
+      expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(digital)}}}))).toBe(false);
+    });
+    raw=result.current.activeGame.playEvents;
+    const current=frightState(summarizePlay(raw).entries);
+    const skipped=parseFright(JSON.stringify({...current,eventId:undefined,parent:current.eventId,command:'slide',sleep:'asleep',path:'U',pending:false}));
+    act(()=>expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(skipped)}}}))).toBe(false));
+    act(()=>{result.current.save({...fresh,frightSetupVersion:undefined,playEvents:[]});result.current.appendPlayEvent(game.id,newPlayEvent({kind:'saved',quantity:1}));});
+    expect(frightState(summarizePlay(result.current.activeGame.playEvents).entries)).toBeNull();
+    act(()=>result.current.save(game));
+    act(()=>expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(digital)}}}))).toBe(false));
+  });
   it('seeds fresh Billy sources once with the first observation and never backfills older games', () => {
     const { result } = renderHook(useActiveGame);
     const fresh = {...game,billySetupVersion:1 as const,selection:{...game.selection,killer:'Billy the Bear',startingEvent:'Girlfriend'}};

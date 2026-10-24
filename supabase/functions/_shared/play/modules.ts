@@ -1,3 +1,5 @@
+import { FRIGHT_POWERS, FRIGHT_FINALES, validFrightChanges, parseFright, frightState, frightPublic, describeFright } from "./fright.ts";
+export { FRIGHT_POWERS, FRIGHT_FINALES } from "./fright.ts";
 import {
   CARNIVAL_EVENTS,
   CARNIVAL_TRAPS,
@@ -40,10 +42,11 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival";
+  module: "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
+  id?: string;
   kind: string;
   moduleData?: ModuleObservation;
   momentType?: string;
@@ -53,6 +56,7 @@ type ObservedEvent = {
 
 /** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
 export function killerMomentCards(killer: string, type: string) {
+  if (killer === "Dr. Fright") return [...(type === "dark-power" ? FRIGHT_POWERS : type === "finale" ? FRIGHT_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Geppetto")
     return [
       ...(type === "dark-power"
@@ -247,7 +251,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["billy", "buddyland", "hans", "camp", "geppetto", "carnival"].includes(
+    !["billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -256,6 +260,7 @@ export function validModuleObservation(
   )
     return false;
   const entries = Object.entries(m.changes);
+  if (m.module === "fright") return validFrightChanges(m.changes);
   return (
     entries.length > 0 &&
     entries.length <= 20 &&
@@ -267,6 +272,7 @@ export function moduleState(
   entries: readonly ObservedEvent[],
   module: ModuleObservation["module"],
 ): ModuleState {
+  if (module === "fright") { const state=frightState(entries); if(!state) return {}; const {eventId:_id,...snapshot}=state; return {snapshot:JSON.stringify(snapshot),sleep:state.sleep,mode:state.mode,progress:state.path.length}; }
   const state: ModuleState = {};
   for (const e of entries) {
     if (module === "geppetto" && e.kind === "moment") {
@@ -407,6 +413,7 @@ function valueLabel(key: string, value: ModuleValue) {
   return String(value);
 }
 export function describeModule(observation: ModuleObservation) {
+  if (observation.module === "fright") { const s=parseFright(observation.changes.snapshot); return s ? describeFright(s) : "Dr. Fright observation"; }
   return Object.entries(observation.changes)
     .map(
       ([key, value]) =>
@@ -419,6 +426,7 @@ export function moduleContext(
   entries: readonly ObservedEvent[],
 ) {
   const context: Record<string, ModuleState> = {};
+  if (selection.killer === "Dr. Fright") { const facts=frightPublic(entries); if(facts) context.fright=facts; }
   for (const module of [
     "billy",
     "buddyland",
@@ -482,6 +490,13 @@ export function moduleStoryBeats(
       .join("\n");
   }
   const lines: string[] = [];
+  if (context.fright) {
+    const s=context.fright;
+    lines.push(`Dr. Fright: Final Girl ${s.sleep}. ${s.sleep === "asleep" ? "She may attack him normally but cannot save Victims or have them follow. Ordinary Victims remain in the physical Location." : "Awake normally prevents attacks between her and Dr. Fright; apply only recorded card exceptions."}`);
+    if(s.boilerCardsResolved !== undefined) lines.push(`Boiler Room: ${s.boilerCardsResolved}/4 cards resolved${s.attackPending?", an attack awaits physical defense":""}. A revealed attack does not establish damage.`);
+    if(s.power) lines.push(`Power: ${FRIGHT_POWERS.find(c=>c.id===s.power)?.name}.`);
+    if(s.finale) lines.push(`Finale: ${FRIGHT_FINALES.find(c=>c.id===s.finale)?.name}.`);
+  }
   const geppetto = context.geppetto;
   if (geppetto) {
     const count = geppettoPuppetCounts(geppetto);
@@ -632,6 +647,11 @@ export function moduleReferences(
   mechanism?: string,
 ) {
   const refs = buddylandReferences(selection, context, attacker);
+  if (selection.killer === "Dr. Fright") {
+    const state=context?.fright;
+    for(const card of [...FRIGHT_POWERS,...FRIGHT_FINALES]) if(card.id === state?.power || card.id === state?.finale) refs.push({name:card.name,effect:card.effect});
+    refs.push({name:"Dr. Fright — Awake and Asleep",effect:"Awake normally prevents attacks between the Final Girl and Dr. Fright, except his recorded Power. Asleep permits normal combat but Victims cannot follow or be saved. Boiler Room attacks target the Final Girl, not ordinary Victims; never infer damage or transport Victims into her dream."});
+  }
   if (selection.location === "Carnival of Blood") {
     const state = context?.carnival ?? {};
     for (const e of CARNIVAL_EVENTS)

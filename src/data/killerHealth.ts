@@ -23,7 +23,7 @@ const KILLER_MAX_HP: Record<string, number> = {
   'Hans': 12,
   'Inkanyamba': 8,
   'Geppetto': 8,
-  'Dr. Fright': 8,
+  'Dr. Fright': 9,
 
   // Season 2
   'Evomorph': 10,
