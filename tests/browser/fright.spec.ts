@@ -291,12 +291,39 @@ test("a failed durable save and rapid or canceled gestures never reveal or consu
     exact: true,
   });
   const b = (await art.boundingBox())!;
+  await expect(target).toBeEnabled();
   await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
   await page.mouse.down();
   await page.mouse.move(b.x + b.width / 2 + 10, b.y + b.height / 2);
   await page.mouse.up();
   expect(await log(page)).toEqual(before);
   await page.screenshot({ path: info.outputPath("boiler-save-retry.png") });
+  // A committed drag and keyboard activation share the same durable slide path.
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2 - 60, {
+    steps: 4,
+  });
+  await expect(dialog(page).locator(".boiler-drag-preview")).toContainText(
+    "Release to reveal",
+  );
+  expect(await log(page)).toEqual(before);
+  await page.mouse.up();
+  await expect(
+    dialog(page).getByRole("list", {
+      name: "2 of 4 Boiler Room cards revealed",
+      exact: true,
+    }),
+  ).toBeVisible();
+  const left = dialog(page).getByRole("button", {
+    name: "Slide left; reveal right",
+    exact: true,
+  });
+  await expect(left).toBeEnabled();
+  await left.focus();
+  await page.keyboard.press("Enter");
+  await expect(dialog(page)).toContainText("Dr. Fright attacks.");
+  expect((await log(page)).length).toBe(before.length + 2);
 });
 
 test("legacy games remain unknown; fresh games initialize once and physical cards remain usable", async ({
