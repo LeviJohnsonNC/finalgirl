@@ -26,8 +26,10 @@ const buddyland = moduleAt(
 const camp = moduleAt("../supabase/functions/_shared/play/camp.ts", {});
 const geppetto = moduleAt("../supabase/functions/_shared/play/geppetto.ts", {});
 const carnival = moduleAt("../supabase/functions/_shared/play/carnival.ts", {});
+const maple = moduleAt("../supabase/functions/_shared/play/maple.ts", {});
 const fright = moduleAt("../supabase/functions/_shared/play/fright.ts", {});
 const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", {
+  "./maple.ts": maple,
   "./buddyland.ts": buddyland,
   "./camp.ts": camp,
   "./geppetto.ts": geppetto,

@@ -1,3 +1,4 @@
+import { MAPLE_EVENTS, MAPLE_SETUPS } from "../../supabase/functions/_shared/play/maple";
 import { CARNIVAL_EVENTS, CARNIVAL_SETUPS } from '../../supabase/functions/_shared/play/carnival';
 import { CAMP_EVENTS, CAMP_SETUPS } from '../../supabase/functions/_shared/play/camp';
 import { BUDDYLAND_DETAILS } from '@/data/buddyland';
@@ -129,40 +130,8 @@ Nancy was always extremely resilient and persistent. She'd beat the odds even wh
     location: {
       name: 'Maple Lane',
       description: `Maple Lane runs through a typical American suburban neighborhood in the quaint town of Spring Hill. Maple Lane was a street like any other... at least until someone got murdered. Now the residents are fearful of outsiders and weary of each other, but that doesn't stop them from gathering for holidays and letting their children play in the streets. They may soon regret having such a false sense of security.`,
-      setupCards: [
-        {
-          name: 'A Quiet Place',
-          description: 'Victims are spread apart, with relatively low clustering, and the Killer starts offset rather than embedded in a dense group.'
-        },
-        {
-          name: 'Block Party',
-          description: 'A large cluster of victims in the central space (including a high-value victim), with the Killer starting nearby.'
-        },
-        {
-          name: 'Maple Lane',
-          description: 'A balanced distribution: moderate clustering, reasonable spacing, and neutral Killer positioning.'
-        },
-        {
-          name: 'Revenge',
-          description: 'The Final Girl begins closer to danger, while victims are positioned such that intervention often requires stepping into the Killer\'s path.'
-        },
-        {
-          name: 'Playtime',
-          description: 'Victims are clustered near the center, but not as tightly as Block Party, and the Killer starts close enough to threaten quickly without immediate overlap.'
-        }
-      ],
-      events: [
-        { name: 'Boyfriend', description: 'Place this Special Victim in the Boyfriend\'s House. This is your Boyfriend! If the Killer would target you, the Killer instead targets the Boyfriend.' },
-        { name: 'Fire!', description: 'Roll a die and place the Fire token in: 1-3: The Boyfriend\'s House 4-6: The Smalley\'s House Any Victims in the House Space or that panic into the House Space are killed. You or Enemies in the House Space take 1 damage. The House Space may no longer be entered or searched.' },
-        { name: 'Friendly Neighbors', description: 'Roll +1 Dice when resolving Convince Action cards.' },
-        { name: 'It\'s Raining', description: 'Panic Victims in the Intersection. Then, move every Victim that is on a Street space to its adjacent House Space.' },
-        { name: '"It\'s the 4th of July!"', description: 'Move all Victims inside a House Space to the adjacent Street space.' },
-        { name: 'Officer Kopp', description: 'Place the Cop Car token on the Exit Space of your choice. Each Upkeep, move it one space towards the opposite exit. Victims in the space with the Cop Car will move with it and are considered saved when they reach the Exit Space.' },
-        { name: 'Party in the Burbs!', description: 'Place 4 new Victims in any House Space that contains at least one Victim. If none do, place them in the Intersection.' },
-        { name: 'The Smalleys', description: 'Place 2 Special Victims in the Smalley\'s House. Each time one of the Smalleys is killed, +1 Bloodlust.' },
-        { name: 'Under Construction', description: 'Roll a die and place a Roadblock token on the following Exit Space: 1: West 2: East 3: North 4: South 5: East or West 6: North or South Victims may not be saved from that space.' },
-        { name: '"What is going on over there?"', description: 'Place 1 new Victim on each Exit Space.' }
-      ]
+      setupCards: MAPLE_SETUPS.map(name=>({name,description:`Use the printed ${name} Setup diagram to place the Final Girl, Killer and normal Victims. Physical positions remain on the board.`})),
+      events: MAPLE_EVENTS.map(e => ({name:e.name,description:e.effect}))
     },
     killer: {
       name: 'Dr. Fright',

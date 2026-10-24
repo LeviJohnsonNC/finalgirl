@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useActiveGame } from './useActiveGame';
 import { newPlayEvent, summarizePlay } from '@/lib/play/events';
 import type { ActiveGame } from '@/lib/activeGame';
+import {moduleState} from '@/lib/play/modules';
 import {frightState,frightTransition,parseFright} from '../../supabase/functions/_shared/play/fright';
 const mock = vi.hoisted(() => ({ user: { id: 'A' } as { id: string } | null }));
 vi.mock('./useAuth', () => ({ useAuth: () => ({ user: mock.user, isAuthReady: true }) }));
@@ -211,4 +212,37 @@ it('never backfills Carnival for an older empty log, even with a selected starti
  act(()=>{result.current.save({...game,selection:{...game.selection,location:'Carnival of Blood',startingEvent:'Full Moon'}});});
  act(()=>{result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',round:1,saved:0,killed:0}));});
  expect(result.current.activeGame!.playEvents!.some(e=>e.moduleData?.module==='carnival')).toBe(false);
+});
+
+
+describe('Maple Lane durable setup and linked writes',()=>{
+  const maple={...game,mapleSetupVersion:1 as const,selection:{...game.selection,location:'Maple Lane',startingEvent:'The Smalleys'}};
+  const change=(changes:Record<string,string|number|boolean|null>)=>newPlayEvent({kind:'module',moduleData:{module:'maple',changes}});
+  it('persists fresh setup and the first tap once; rapid independent departures end the Event atomically',()=>{
+    const {result}=renderHook(useActiveGame);
+    act(()=>{result.current.save(maple);});
+    act(()=>{
+      expect(result.current.appendPlayEvent(game.id,change({'person.smalley-1':'saved','event.smalleys':'active'}))).toBe(true);
+      expect(result.current.appendPlayEvent(game.id,change({'person.smalley-2':'killed','event.smalleys':'active'}))).toBe(true);
+    });
+    const log=result.current.activeGame!.playEvents!;
+    expect(log.filter(e=>e.moduleData?.changes['house.nw-west']===false)).toHaveLength(1);
+    expect(moduleState(summarizePlay(log).entries,'maple')).toMatchObject({'person.smalley-1':'saved','person.smalley-2':'killed','event.smalleys':'ended'});
+    expect(summarizePlay(log)).toMatchObject({saved:0,killed:0});
+  });
+  it('does not backfill a resumed game and refuses another Location’s observation',()=>{
+    const {result}=renderHook(useActiveGame);
+    act(()=>{result.current.save({...maple,mapleSetupVersion:undefined});result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));});
+    expect(moduleState(summarizePlay(result.current.activeGame!.playEvents!).entries,'maple')).toEqual({});
+    act(()=>{result.current.save(game);});
+    act(()=>{expect(result.current.appendPlayEvent(game.id,change({'house.nw-west':true}))).toBe(false);});
+  });
+  it('keeps a failed first write retryable with no half-initialized gameplay',()=>{
+    const {result}=renderHook(useActiveGame);act(()=>{result.current.save(maple);});
+    const spy=vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('quota');});
+    act(()=>{expect(result.current.appendPlayEvent(game.id,change({'house.nw-west':true}))).toBe(false);});
+    expect(result.current.activeGame!.playEvents).toBeUndefined();spy.mockRestore();
+    act(()=>{expect(result.current.appendPlayEvent(game.id,change({'house.nw-west':true}))).toBe(true);});
+    expect(moduleState(summarizePlay(result.current.activeGame!.playEvents!).entries,'maple')['house.nw-west']).toBe(true);
+  });
 });

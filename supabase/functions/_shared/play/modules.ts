@@ -1,3 +1,4 @@
+import { MAPLE_EVENTS, MAPLE_PEOPLE, MAPLE_ITEMS, validMapleField, mapleLabel, mapleValue, mapleStoryFacts, mapleStartingObservations } from "./maple.ts";
 import { FRIGHT_POWERS, FRIGHT_FINALES, validFrightChanges, parseFright, frightState, frightPublic, describeFright } from "./fright.ts";
 export { FRIGHT_POWERS, FRIGHT_FINALES } from "./fright.ts";
 import {
@@ -42,7 +43,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright";
+  module: "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -140,6 +141,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === "maple") return validMapleField(key, value);
   if (module === "carnival") return validCarnivalField(key, value);
   if (module === "geppetto") return validGeppettoField(key, value);
   const [group, id, field] = key.split(".");
@@ -251,7 +253,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright"].includes(
+    !["billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -324,6 +326,7 @@ export function moduleState(
   return state;
 }
 function fieldLabel(module: ModuleObservation["module"], key: string) {
+  if (module === "maple") return mapleLabel(key);
   if (module === "carnival") {
     const [group, id, field] = key.split(".");
     if (group === "trap")
@@ -413,6 +416,7 @@ function valueLabel(key: string, value: ModuleValue) {
   return String(value);
 }
 export function describeModule(observation: ModuleObservation) {
+  if (observation.module === "maple") return Object.entries(observation.changes).map(([key,value])=>`${mapleLabel(key)}: ${mapleValue(key,value)}`).join("; ");
   if (observation.module === "fright") { const s=parseFright(observation.changes.snapshot); return s ? describeFright(s) : "Dr. Fright observation"; }
   return Object.entries(observation.changes)
     .map(
@@ -434,9 +438,10 @@ export function moduleContext(
     "camp",
     "geppetto",
     "carnival",
+    "maple",
   ] as const) {
     const applies =
-      module === "carnival"
+      module === "maple" ? selection.location === "Maple Lane" : module === "carnival"
         ? selection.location === "Carnival of Blood"
         : module === "geppetto"
           ? selection.killer === "Geppetto"
@@ -479,6 +484,15 @@ export function moduleStoryBeats(
   if (!context) return "";
   // Preserve the established output for every other location. Each owner gets
   // room inside the existing 900-character module budget for Carnival mixes.
+  if (context.maple) {
+    const killer = moduleStoryBeats({ ...selection, location: "" }, entries);
+    const facts = mapleStoryFacts(context.maple);
+    // Reserve both owners' space before composing the bounded ending context.
+    const budget = killer ? 535 : 880;
+    let location = "";
+    for (const fact of facts) if (location.length + fact.length + 1 <= budget) location += `${fact} `;
+    return [location && `Maple Lane: ${location.trim()}`,killer && `Killer: ${killer.slice(0,340)}`].filter(Boolean).join("\n");
+  }
   if (context.carnival) {
     const killer = moduleStoryBeats({ ...selection, location: "" }, entries);
     const carnival = carnivalStoryFacts(context.carnival).join(" ");
@@ -647,6 +661,15 @@ export function moduleReferences(
   mechanism?: string,
 ) {
   const refs = buddylandReferences(selection, context, attacker);
+  if (selection.location === "Maple Lane") {
+    const state = context?.maple ?? {};
+    for (const person of MAPLE_PEOPLE) if (state[`person.${person.id}`] || victim === person.name) refs.push({name:person.name,effect:`${victim === person.name ? "Explicit scene victim." : "Not established as this scene’s victim."} Recorded status: ${state[`person.${person.id}`] ?? "unknown"}. ${MAPLE_EVENTS.find(e=>e.id===person.event)!.effect}`});
+    for (const event of MAPLE_EVENTS) if (state[`event.${event.id}`] === "active") refs.push({name:event.name,effect:`${event.effect} Card activation is not proof of physical effects or extra casualties.`});
+    for (const fact of mapleStoryFacts(state)) refs.push({name:"Maple Lane observation",effect:fact});
+    if (mechanism === "Fire") refs.push({name:"Fire",effect:MAPLE_EVENTS.find(e=>e.id==="fire")!.effect});
+    if (mechanism === "Booby Trap") refs.push({name:"Booby Trap",effect:MAPLE_ITEMS.find(i=>i.id==="odds")!.effect+" Its printed target is an Enemy. Do not infer an ordinary Victim death from an armed trap."});
+    if (mechanism === "Street traffic") refs.push({name:"Street traffic",effect:"Only the explicit death details establish a traffic casualty; the Cop Car's presence does not establish an attacker."});
+  }
   if (selection.killer === "Dr. Fright") {
     const state=context?.fright;
     for(const card of [...FRIGHT_POWERS,...FRIGHT_FINALES]) if(card.id === state?.power || card.id === state?.finale) refs.push({name:card.name,effect:card.effect});
@@ -778,7 +801,7 @@ export function moduleItemBeats(
   entries: readonly ObservedEvent[],
 ) {
   const catalog =
-    selection.location === "Camp Happy Trails"
+    selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
       ? CAMP_ITEMS
       : selection.location === "Carnival of Blood"
         ? CARNIVAL_ITEMS
@@ -811,6 +834,7 @@ export function initialModuleObservations(
   initializeKiller: boolean,
   initializeCarnival = false,
   initializeBilly = false,
+  initializeMaple = false,
 ): ModuleObservation[] {
   return [
     ...(initializeBilly && selection.killer === "Billy the Bear" ? [{ module:"billy" as const, changes:{
@@ -827,6 +851,7 @@ export function initialModuleObservations(
           },
         ]
       : []),
+    ...(initializeMaple && selection.location === "Maple Lane" ? mapleStartingObservations(selection.startingEvent).map(changes=>({module:"maple" as const,changes})) : []),
     ...startingEventObservations(selection),
   ];
 }
