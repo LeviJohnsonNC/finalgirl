@@ -35,7 +35,16 @@ Canonical mechanics/catalog: `_shared/play/fright.ts`. Rules and prompt guidance
 
 The panel uses shared Power/Finale artwork and the same chooser in Remember This. Unselected art is dimmed, selected art vivid, and Shock Factor has the independent Epic frame. Full rules/corrections are disclosed; consequential active restrictions remain visible. No unsupported Minor Power substitutes or generic creature controls.
 
-Digital Boiler Room is opt-in at a fresh-deck boundary. Physical sleep tracking remains available. No import of an unknown partly revealed physical deck. The illustrated slider offers four directional buttons, keyboard operation, drag/swipe, opaque uncommitted previews, fixed dialog actions, enlargement, exposed-card history and reduced motion. See [art mapping](../../src/assets/play/fright/README.md).
+Digital Boiler Room is opt-in at a fresh-deck boundary. Physical sleep tracking remains available. No import of an unknown partly revealed physical deck. The illustrated slider offers four directional buttons, keyboard operation, direct drag/swipe with concealed-safe previews, fixed dialog actions, enlargement, exposed-card history and reduced motion. See [art mapping](../../src/assets/play/fright/README.md).
+
+### October 24 interaction polish
+
+- Supplied open-eye Awake and closed-eye Asleep card backs replace the placeholder cover. Full source IDs, 2:3 dimensions and conversions are recorded in the [art mapping](../../src/assets/play/fright/README.md). Existing sleep-selector illustrations and the Dream Doctor cutout are preserved.
+- The cover and all previously exposed cards follow one captured primary pointer in SVG coordinates. Framing reserves legal travel before pickup, stays fixed during dragging/settling, then eases to the next frame. Direction locks after a small pickup threshold; unavailable directions resist movement. Only a legal release past the threshold requests one existing atomic slide.
+- Save acknowledgment gates settling and new faces. Dragging renders only public cutouts and a neutral unresolved surface. Failed saves return the stack without consuming/exposing a card. A newly public cutout rises briefly with a small overshoot and shadow, clipped to exposed quadrants. Reopening, defense and Undo never replay the entrance.
+- Short/canceled gestures, capture loss, Escape, resize, blur, closing and conflict changes clear transient motion. Buttons share the slide path and remain available for keyboard users. Reduced motion preserves direct dragging with immediate settling and no pop/camera animation.
+- This presentation/callback follow-up changes no snapshot, validation, shuffled deal, attack, narrative or historical signature contract. Publish the frontend only; the original import's backend release requirements below remain historical prerequisites.
+- Verification includes native mouse/touch displacement before release, no pre-release log writes/cutouts, all four directions, exact single commits, save rejection/retry, cancellation paths, reduced motion and keyboard operation. Successful motion videos and laptop/phone stills are retained in the implementation PR's current-head CI artifacts.
 
 ## Persistence, information boundaries and Undo
 

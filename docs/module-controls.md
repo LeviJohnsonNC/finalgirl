@@ -49,6 +49,8 @@ Controls stay at least 44px tall, keyboard operable with visible focus, stable i
 - Geppetto's Puppets are reusable Ready/on-board/Exhausted tokens with a rule-specific spawning helper and explicit protection reset.
 - Carnival's Terror Traps remain placed; Item Trap encounters can recur and are not inventory. Werewolf has no saved/killed outcomes. Zappo and the Golf Cart have their own legal outcomes and linked Event consequences.
 - Hans's additional Dark Power appears only for Dark, Darker, Darkest.
+- Maple Lane House tiles toggle their search mark directly as a tracker correction. Burning Houses permit removing an accidental mark while blocking new searches. Unknown remains a separate explicit correction; no physical Search effects are reversed.
+- Dr. Fright's digital Boiler Room moves the cover and prior cards as one stack. Temporary pointer motion never records gameplay or exposes a new cutout; the existing saved-slide acknowledgment gates settling/reveal. Native cancellation, keyboard alternatives and reduced motion retain the same domain transitions.
 
 ## Verification evidence
 

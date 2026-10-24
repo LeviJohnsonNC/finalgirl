@@ -25,16 +25,17 @@ export function FrightControls({
   const state = frightState(entries);
   const cards = frightCards(entries);
   const { record, message } = useModuleRecord(events, onEvent);
-  const revision = events.map(event => event.id).join(',');
-  const committedAction = useRef({revision, committed:false});
-  if (committedAction.current.revision !== revision) committedAction.current={revision,committed:false};
+  const revision = events.map((event) => event.id).join(",");
+  const committedAction = useRef({ revision, committed: false });
+  if (committedAction.current.revision !== revision)
+    committedAction.current = { revision, committed: false };
   const act = (
     command: FrightCommand,
     direction?: Direction,
     effect?: string,
   ) => {
-    if (blocked) return;
-    if (committedAction.current.committed) return;
+    if (blocked) return false;
+    if (committedAction.current.committed) return false;
     const next = frightTransition(
       state,
       { command, direction, effect },
@@ -53,7 +54,9 @@ export function FrightControls({
         }),
       );
       if (!saved) committedAction.current.committed = false;
+      return saved;
     }
+    return false;
   };
   const forced = cards.finale?.id === "face-your-fright";
   const asleep = state?.sleep === "asleep";

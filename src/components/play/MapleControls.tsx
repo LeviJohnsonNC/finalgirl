@@ -54,6 +54,9 @@ const effect = (id: string) => MAPLE_EVENTS.find((e) => e.id === id)!.effect;
 const item = (id: string) => MAPLE_ITEMS.find((e) => e.id === id)!.effect;
 const houseName = (id: unknown) =>
   MAPLE_HOUSES.find((h) => h.id === id)?.name ?? "Not recorded";
+const exitName = (exit: string) =>
+  ({ north: "North", east: "East", south: "South", west: "West" })[exit] ??
+  exit;
 const streetName = (id: unknown) =>
   MAPLE_STREETS.find((s) => s.id === id)?.name ??
   (id === "none"
@@ -157,14 +160,14 @@ export function MapleControls({
                           status={`${burning ? "Burning · " : ""}${value === true ? "Searched" : value === false ? "Unsearched" : "Not recorded"}`}
                           aria-label={
                             value === true
-                              ? `View ${h.name} searched`
+                              ? `Mark ${h.name} unsearched`
                               : `Mark ${h.name} searched`
                           }
-                          disabled={burning || value === true}
-                          onClick={() => {
-                            if (value !== true)
-                              record({ [`house.${h.id}`]: true });
-                          }}
+                          aria-pressed={value === true}
+                          disabled={burning && value !== true}
+                          onClick={() =>
+                            record({ [`house.${h.id}`]: value !== true })
+                          }
                         >
                           {value === true && (
                             <span
@@ -351,12 +354,12 @@ export function MapleControls({
                 <button
                   key={exit}
                   className="maple-action"
-                  aria-label={`Block ${exit} Exit`}
+                  aria-label={`Block ${exitName(exit)} exit`}
                   aria-pressed={state[`exit.${exit}`] === true}
                   disabled={state[`exit.${exit}`] === true}
                   onClick={() => record({ [`exit.${exit}`]: true })}
                 >
-                  {exit} ·{" "}
+                  {exitName(exit)} ·{" "}
                   {state[`exit.${exit}`] === true
                     ? "Blocked"
                     : state[`exit.${exit}`] === false
@@ -367,7 +370,7 @@ export function MapleControls({
             </div>
             {MAPLE_EXITS.some((e) => state[`exit.${e}`] === true) && (
               <p className="maple-consequence">
-                Blocked Exits prevent rescue, not movement.
+                Blocked exits prevent rescue, not movement.
               </p>
             )}
             <details className="maple-details">
@@ -375,9 +378,9 @@ export function MapleControls({
               <p>{effect("construction")}</p>
               {MAPLE_EXITS.map((exit) => (
                 <label key={exit}>
-                  {exit} Exit
+                  {exitName(exit)} exit
                   <PlaySelect
-                    aria-label={`${exit} Exit correction`}
+                    aria-label={`${exitName(exit)} exit correction`}
                     value={
                       state[`exit.${exit}`] === true
                         ? "blocked"
