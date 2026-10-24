@@ -20,14 +20,16 @@ test("imported Buddyland and Billy references are searchable in the owned Rulebo
     name: "Search rules",
     exact: true,
   });
-  for (const [term, id] of [
-    ["Sing-A-Long", "location-buddyland-rules"],
-    ["Janitor’s Mop", "location-buddyland-rules"],
-    ["Merciless Minions", "killer-billy-the-bear-rules"],
-    ["Backup Generator", "killer-billy-the-bear-rules"],
+  for (const [term, expected, id] of [
+    ["Sing-A-Long", "Sing-A-Long", "location-buddyland-rules"],
+    ["Janitor's Mop", "Janitor’s Mop", "location-buddyland-rules"],
+    ["Janitor’s Mop", "Janitor’s Mop", "location-buddyland-rules"],
+    ["It's Showtime!", "It’s Showtime!", "killer-billy-the-bear-rules"],
+    ["Merciless Minions", "Merciless Minions", "killer-billy-the-bear-rules"],
+    ["Backup Generator", "Backup Generator", "killer-billy-the-bear-rules"],
   ]) {
     await search.fill(term);
-    await expect(page.locator("#" + id)).toContainText(term);
+    await expect(page.locator("#" + id)).toContainText(expected);
   }
   await page.screenshot({ path: info.outputPath("parity-rulebook.png") });
 });

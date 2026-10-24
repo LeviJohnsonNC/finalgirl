@@ -12,7 +12,8 @@ Billy/Buddyland Rulebook chapters now expose the existing verified Powers,
 Finales, Buddies, Terror cards, Events and Items through the canonical catalogs.
 Camp Event/character and Buddyland character disclosures use the same shared
 Rules presentation; Camp's consequential active effects have concise reminders.
-Opening those disclosures never records gameplay.
+Opening those disclosures never records gameplay. Rulebook search treats printed
+curly apostrophes and ordinary keyboard apostrophes equivalently.
 
 Found Buddyland Items now supply their location-specific effects to the bounded
 ending context, without establishing use, remaining charges or current inventory.

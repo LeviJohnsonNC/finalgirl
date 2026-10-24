@@ -33,14 +33,17 @@ function blockToText(block: RuleBlock): string {
   }
 }
 
+// Printed typography and ordinary keyboard apostrophes identify the same rule.
+const foldRuleSearch = (text: string) => text.toLowerCase().replace(/[‘’]/g, "'");
+
 function sectionMatches(section: RuleSectionType, query: string): number {
   if (!query) return 0;
-  const q = query.toLowerCase();
+  const q = foldRuleSearch(query);
   let count = 0;
-  if (section.title.toLowerCase().includes(q)) count += 3;
-  if (section.tags?.some((t) => t.toLowerCase().includes(q))) count += 2;
+  if (foldRuleSearch(section.title).includes(q)) count += 3;
+  if (section.tags?.some((t) => foldRuleSearch(t).includes(q))) count += 2;
   for (const block of section.body) {
-    const text = blockToText(block).toLowerCase();
+    const text = foldRuleSearch(blockToText(block));
     let idx = 0;
     while ((idx = text.indexOf(q, idx)) !== -1) {
       count += 1;
@@ -135,9 +138,9 @@ const Rules = () => {
 
   const glossaryHits = useMemo(() => {
     if (!query.trim()) return 0;
-    const q = query.trim().toLowerCase();
+    const q = foldRuleSearch(query.trim());
     return module.glossary.filter(
-      (t) => t.term.toLowerCase().includes(q) || t.short.toLowerCase().includes(q)
+      (t) => foldRuleSearch(t.term).includes(q) || foldRuleSearch(t.short).includes(q)
     ).length;
   }, [query, module]);
 
@@ -145,8 +148,8 @@ const Rules = () => {
   const chapterMatchCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const ch of module.chapters) {
-      const title = `${ch.title} ${ch.subtitle ?? ''}`.toLowerCase();
-      const titleHits = query.trim() && title.includes(query.trim().toLowerCase()) ? 3 : 0;
+      const title = foldRuleSearch(`${ch.title} ${ch.subtitle ?? ''}`);
+      const titleHits = query.trim() && title.includes(foldRuleSearch(query.trim())) ? 3 : 0;
       if (ch.id === 'ch-glossary') {
         if (glossaryHits + titleHits > 0) counts[ch.id] = glossaryHits + titleHits;
         continue;
@@ -247,8 +250,8 @@ const Rules = () => {
     return () => cancelAnimationFrame(frame);
   }, [openChapterId]);
 
-  const filteredGlossary = module.glossary.filter(t => !isSearching || query.trim().toLowerCase() === 'glossary'
-    || `${t.term} ${t.short}`.toLowerCase().includes(query.trim().toLowerCase()));
+  const filteredGlossary = module.glossary.filter(t => !isSearching || foldRuleSearch(query.trim()) === 'glossary'
+    || foldRuleSearch(`${t.term} ${t.short}`).includes(foldRuleSearch(query.trim())));
   const glossaryBody = (
     <div className="rule-glossary">
       {filteredGlossary.map(term => (
@@ -332,7 +335,7 @@ const Rules = () => {
               <a className="rule-official-link" href="https://gamers-hq.de/media/pdf/22/ba/4a/FinalGirl_Rules.pdf" target="_blank" rel="noopener noreferrer">Official Core Rulebook ↗</a>
             </aside>
             <div className="rule-reader-main">
-              <RuleChapter key={`${activeChapter.id}:${query.trim().toLowerCase()}`} chapter={activeChapter} allSections={module.sections} glossary={module.glossary}
+              <RuleChapter key={`${activeChapter.id}:${foldRuleSearch(query.trim())}`} chapter={activeChapter} allSections={module.sections} glossary={module.glossary}
                 initialSubId={initialSubBySection[activeChapter.id]} onJumpTo={handleJumpTo}
                 customBody={activeChapter.id === 'ch-glossary' ? glossaryBody : undefined} />
               <nav className="rule-reader-footer" aria-label="Reading navigation">
