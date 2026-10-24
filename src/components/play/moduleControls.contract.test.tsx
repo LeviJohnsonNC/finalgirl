@@ -106,8 +106,14 @@ describe("shared player interaction contracts", () => {
     expect(
       screen.getByRole("button", { name: "Attack resolved" }),
     ).toBeDisabled();
-    for (const direction of screen.getAllByRole("button", { name: /^Slide / }))
-      expect(direction).toBeDisabled();
+    expect(screen.queryAllByRole("button", { name: /^Slide / })).toHaveLength(
+      0,
+    );
+    const stage = screen.getByRole("group", {
+      name: "Boiler Room revealed cards",
+    });
+    expect(stage).toHaveAttribute("aria-disabled", "true");
+    fireEvent.keyDown(stage, { key: "ArrowDown" });
     fireEvent.click(screen.getByRole("button", { name: "Attack resolved" }));
     fireEvent.click(screen.getByRole("button", { name: "Back to game" }));
     expect(onEvent).not.toHaveBeenCalled();

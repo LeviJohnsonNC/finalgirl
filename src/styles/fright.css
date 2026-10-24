@@ -236,8 +236,9 @@
 .boiler-controls {
   flex: 0 0 auto;
   display: grid;
-  grid-template-columns: minmax(240px, 0.85fr) minmax(360px, 1fr);
-  gap: 18px;
+  width: min(520px, 100%);
+  align-self: center;
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
 }
 .boiler-tableau {
@@ -295,45 +296,6 @@
     filter: drop-shadow(0 2px 2px #000b);
   }
 }
-.boiler-directions {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-}
-.boiler-direction {
-  min-height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  text-align: left;
-  padding: 10px 8px;
-  border: 1px solid #977646;
-  border-radius: 6px;
-  background: linear-gradient(#28291fed, #151b16ed);
-  color: #ecd4a7;
-  box-shadow:
-    inset 0 1px #c5ac6320,
-    0 2px 5px #0008;
-}
-.boiler-direction svg {
-  flex-shrink: 0;
-}
-.boiler-direction span {
-  text-transform: capitalize;
-  font:
-    14px Arial,
-    sans-serif;
-}
-.boiler-direction small {
-  display: block;
-  margin-top: 4px;
-  font:
-    10px/1.3 Arial,
-    sans-serif;
-  text-transform: none;
-  color: #c6b99a;
-}
 .boiler-dialog button:disabled,
 .fright-controls button:disabled {
   opacity: 0.42;
@@ -380,6 +342,59 @@
   border: 1px solid #d28b45;
   background: linear-gradient(#79401e, #4d2617);
   box-shadow: inset 0 1px #f5c27d40;
+}
+.boiler-footer .boiler-resolve {
+  position: relative;
+  min-height: 52px;
+  min-width: 220px;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid #e0af63;
+  border-radius: 6px;
+  background:
+    repeating-linear-gradient(135deg, #e9b96c0b 0 2px, transparent 2px 6px),
+    linear-gradient(180deg, #a6532e, #6b2a18 48%, #40170f);
+  color: #fff0cc;
+  font:
+    20px/1.1 "Narration Fell",
+    Georgia,
+    serif;
+  text-shadow: 0 2px 3px #160a08;
+  box-shadow:
+    inset 0 1px #ffdfa578,
+    inset 0 -3px #180a0870,
+    0 3px 12px #0009,
+    0 0 18px #c35c1a26;
+  transition:
+    filter 150ms,
+    box-shadow 150ms;
+}
+.boiler-resolve::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid #e6b86d55;
+  border-radius: 3px;
+  pointer-events: none;
+}
+.boiler-resolve svg {
+  color: #f8d28c;
+  filter: drop-shadow(0 1px 2px #180904);
+}
+.boiler-footer .boiler-resolve:not(:disabled):hover {
+  filter: brightness(1.15);
+  box-shadow:
+    inset 0 1px #ffdfa59c,
+    inset 0 -3px #180a0870,
+    0 3px 14px #0009,
+    0 0 24px #d77c3345;
+}
+.boiler-footer .boiler-resolve:not(:disabled):active {
+  filter: brightness(0.95);
+}
+.boiler-stage:focus-visible {
+  outline: 2px solid #e4c78b;
+  outline-offset: -3px;
 }
 .boiler-error,
 .boiler-notice {
@@ -439,22 +454,6 @@
   .fright-sleep-grid--compact .play-tile-caption strong {
     font-size: 18px;
   }
-  .boiler-directions {
-    gap: 5px;
-  }
-  .boiler-direction {
-    min-height: 48px;
-    flex-direction: column;
-    gap: 3px;
-    padding: 5px 3px;
-    text-align: center;
-  }
-  .boiler-direction span {
-    font-size: 12px;
-  }
-  .boiler-direction small {
-    display: none;
-  }
   .boiler-footer {
     padding: 8px 12px;
     gap: 8px;
@@ -463,6 +462,10 @@
     flex: 1;
     font-size: 12px;
     padding: 9px 7px;
+  }
+  .boiler-footer .boiler-resolve {
+    min-width: 0;
+    font-size: 18px;
   }
   .boiler-notice {
     font-size: 11px;

@@ -1,14 +1,5 @@
 import { useId, useRef, useState } from "react";
-import {
-  ArrowUp,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  Moon,
-  Undo2,
-  Maximize2,
-  Minimize2,
-} from "lucide-react";
+import { ShieldCheck, Moon, Undo2, Maximize2, Minimize2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -17,17 +8,13 @@ import {
 } from "@/components/ui/dialog";
 import {
   boilerAttack,
-  legalDirections,
-  DIRECTION_NAMES,
-  REVEAL_NAMES,
+  boilerAwaitingWake,
   type Direction,
   type FrightState,
 } from "../../../supabase/functions/_shared/play/fright";
 import { BoilerArtwork, type BoilerArtworkHandle } from "./BoilerArtwork";
 import { FrightSleepControls } from "./FrightSleepControls";
 
-const icons = { U: ArrowUp, D: ArrowDown, L: ArrowLeft, R: ArrowRight };
-const order: Direction[] = ["U", "L", "D", "R"];
 interface Props {
   state: FrightState;
   blocked: boolean;
@@ -57,17 +44,22 @@ export function BoilerRoom({
     if (!value) artwork.current?.cancel();
     setOpen(value);
   };
-  // Completed layouts remain in durable history for Undo, never on the live deck.
-  const canSlide = state.sleep === "asleep" && !state.pending && !blocked;
+  const awaitingWake = boilerAwaitingWake(state, forced);
+  const path = awaitingWake ? state.lastPath : state.path;
+  const deal = awaitingWake ? state.lastDeal : state.deal;
+  const canSlide =
+    state.sleep === "asleep" && !state.pending && !awaitingWake && !blocked;
   const announcement = state.pending
     ? "Dr. Fright attacks."
     : state.sleep === "awake"
       ? "You woke up. The next deck is shuffled and concealed."
-      : !state.path
-        ? "Choose your first direction."
-        : boilerAttack(state.deal, state.path)
-          ? "Attack resolved."
-          : "No attack from this reveal.";
+      : awaitingWake
+        ? "Four cards revealed. Select Awake to wake up and shuffle the deck."
+        : !state.path
+          ? "Choose your first direction."
+          : boilerAttack(state.deal, state.path)
+            ? "Attack resolved."
+            : "No attack from this reveal.";
   return (
     <>
       <button
@@ -84,7 +76,7 @@ export function BoilerRoom({
           <small>
             {state.sleep === "awake"
               ? "Digital cards · Ready for your next nightmare"
-              : `${state.path.length}/4 revealed${state.pending ? " · Attack pending" : ""}`}
+              : `${path.length}/4 revealed${state.pending ? " · Attack pending" : ""}`}
           </small>
         </span>
         <Moon size={24} />
@@ -105,8 +97,9 @@ export function BoilerRoom({
               <DialogTitle>The Boiler Room</DialogTitle>
             </div>
             <DialogDescription className="sr-only">
-              Slide the covered stack or use the direction buttons to reveal a
-              card. Use Awake and Asleep to record your sleep state.
+              Drag the covered stack to reveal a card, or focus the cards and
+              use the arrow keys. Use Awake and Asleep to record your sleep
+              state.
             </DialogDescription>
             <button
               type="button"
@@ -133,15 +126,14 @@ export function BoilerRoom({
               aria-live="polite"
               aria-atomic="true"
             >
-              {announcement} {state.path.length} of 4 Boiler Room cards
-              revealed.
+              {announcement} {path.length} of 4 Boiler Room cards revealed.
             </p>
             <BoilerArtwork
               ref={artwork}
               revision={state.eventId}
               onBusyChange={setBusy}
-              path={state.path}
-              deal={state.deal}
+              path={path}
+              deal={deal}
               awake={state.sleep === "awake"}
               onSlide={onSlide}
               disabled={!canSlide || !open}
@@ -157,44 +149,17 @@ export function BoilerRoom({
                 disabled={blocked || busy}
                 onChange={onSleepChange}
               />
-              <div
-                className="boiler-directions"
-                role="group"
-                aria-label="Boiler Room directions"
-              >
-                {order.map((d) => {
-                  const Icon = icons[d];
-                  return (
-                    <button
-                      key={d}
-                      type="button"
-                      className={`boiler-direction boiler-direction--${d}`}
-                      aria-label={`Slide ${DIRECTION_NAMES[d]}; reveal ${REVEAL_NAMES[d]}`}
-                      disabled={
-                        !canSlide ||
-                        busy ||
-                        !legalDirections(state.path).includes(d)
-                      }
-                      onClick={() => artwork.current?.slide(d)}
-                    >
-                      <Icon size={19} />
-                      <span>
-                        {DIRECTION_NAMES[d]}
-                        <small>Reveal {REVEAL_NAMES[d]}</small>
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
             </div>
           </div>
           <footer className="boiler-footer">
-            {(blocked || state.pending || forced) && (
+            {(blocked || state.pending || forced || awaitingWake) && (
               <p className="boiler-notice" role="status">
                 {blocked ? (
                   <strong>Choose which saved game to continue.</strong>
                 ) : state.pending ? (
                   "Dr. Fright attacks. Defend normally; record damage separately."
+                ) : awaitingWake ? (
+                  "Four cards revealed. Select Awake to wake up and shuffle the deck."
                 ) : (
                   "Face Your Fright keeps you Asleep. Each completed deck resets automatically."
                 )}
@@ -215,11 +180,12 @@ export function BoilerRoom({
             {state.pending ? (
               <button
                 type="button"
-                className="boiler-primary"
+                className="boiler-primary boiler-resolve"
                 disabled={blocked || busy}
                 onClick={onDefended}
               >
-                Attack resolved
+                <ShieldCheck size={21} aria-hidden="true" />
+                <span>Attack resolved</span>
               </button>
             ) : (
               <button

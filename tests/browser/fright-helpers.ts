@@ -64,19 +64,18 @@ export async function enter(page: Page) {
     .click();
 }
 export const slide = async (page: Page, name: string) => {
-  await dialog(page)
-    .getByRole("button", {
-      name: `Slide ${name}; reveal ${{ up: "bottom", down: "top", left: "right", right: "left" }[name]}`,
-      exact: true,
-    })
-    .click();
+  const stage = dialog(page).locator(".boiler-stage");
+  await stage.focus();
+  await stage.press(`Arrow${name[0].toUpperCase() + name.slice(1)}`);
   await expect(dialog(page).locator(".boiler-stage")).toHaveAttribute(
     "data-phase",
     "idle",
   );
 };
 export async function footerVisible(page: Page) {
-  for (const button of await dialog(page).locator(".boiler-direction").all()) {
+  for (const button of await dialog(page)
+    .locator(".fright-sleep-grid button")
+    .all()) {
     const bounds = (await button.boundingBox())!;
     expect(bounds.width).toBeGreaterThanOrEqual(44);
     expect(bounds.height).toBeGreaterThanOrEqual(44);

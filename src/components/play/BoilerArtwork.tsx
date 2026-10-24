@@ -35,12 +35,7 @@ export interface BoilerArtworkHandle {
 }
 type Scene = { path: string; deal: string; awake: boolean };
 type Phase =
-  | "idle"
-  | "dragging"
-  | "returning"
-  | "settling"
-  | "revealing"
-  | "gathering";
+  "idle" | "dragging" | "returning" | "settling" | "revealing" | "gathering";
 type Pointer = {
   id: number;
   x: number;
@@ -321,7 +316,9 @@ export const BoilerArtwork = forwardRef<BoilerArtworkHandle, Props>(
         role="group"
         aria-label="Boiler Room revealed cards"
         aria-describedby={props.describedBy}
-        tabIndex={-1}
+        aria-disabled={props.disabled}
+        aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight"
+        tabIndex={props.disabled ? -1 : 0}
         data-phase={phase}
         onPointerDown={(e) => {
           if (
@@ -398,6 +395,18 @@ export const BoilerArtwork = forwardRef<BoilerArtworkHandle, Props>(
           if (e.key === "Escape" && phaseRef.current !== "idle") {
             e.stopPropagation();
             cancel();
+          }
+          const direction = (
+            {
+              ArrowUp: "U",
+              ArrowDown: "D",
+              ArrowLeft: "L",
+              ArrowRight: "R",
+            } as const
+          )[e.key];
+          if (direction && !props.disabled) {
+            e.preventDefault();
+            slide(direction);
           }
         }}
       >

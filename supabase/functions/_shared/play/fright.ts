@@ -144,9 +144,9 @@ export function boilerAttack(deal: string, path: string) {
     validDeal(deal) &&
     Boolean(
       path.length &&
-        geometry?.visible[path.length - 1].includes(
-          Number(deal[path.length - 1]),
-        ),
+      geometry?.visible[path.length - 1].includes(
+        Number(deal[path.length - 1]),
+      ),
     )
   );
 }
@@ -186,6 +186,18 @@ export interface FrightObservation {
   killerCard?: string;
 }
 export type FrightState = FrightSnapshot & { eventId: string };
+/** A safe completed trip stays on the table until the player chooses Awake.
+ * The prepared next shuffle remains concealed, just like the existing reserve. */
+export function boilerAwaitingWake(state: FrightSnapshot, forced = false) {
+  return (
+    !forced &&
+    state.mode === "digital" &&
+    state.sleep === "asleep" &&
+    !state.path &&
+    state.lastPath.length === 4 &&
+    !boilerAttack(state.lastDeal, state.lastPath)
+  );
+}
 const uuid =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export function parseFright(value: unknown): FrightSnapshot | null {
@@ -346,7 +358,7 @@ export function frightTransition(
     fresh(base.cycle + 1, base.reserve);
     next.lastPath = path;
     next.lastDeal = base.deal;
-    next.sleep = forced ? "asleep" : "awake";
+    next.sleep = forced || action.command === "slide" ? "asleep" : "awake";
   };
   if (base.pending && action.command !== "defended") return null;
   switch (action.command) {
@@ -385,6 +397,7 @@ export function frightTransition(
       if (
         base.mode !== "digital" ||
         base.sleep !== "asleep" ||
+        boilerAwaitingWake(base, forced) ||
         !action.direction ||
         !legalDirections(base.path).includes(action.direction)
       )
@@ -454,11 +467,11 @@ export function validFrightSuccessor(
   );
   return Boolean(
     expected &&
-      Object.keys(expected).every(
-        (key) =>
-          JSON.stringify(expected[key as keyof FrightSnapshot]) ===
-          JSON.stringify(proposed[key as keyof FrightSnapshot]),
-      ),
+    Object.keys(expected).every(
+      (key) =>
+        JSON.stringify(expected[key as keyof FrightSnapshot]) ===
+        JSON.stringify(proposed[key as keyof FrightSnapshot]),
+    ),
   );
 }
 /** Safe projection only. Internal deals, parents, effect IDs and paths never enter prose/cache identity. */

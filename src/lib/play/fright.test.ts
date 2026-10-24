@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   boilerGeometry,
   boilerAttack,
+  boilerAwaitingWake,
   DIRECTIONS,
   legalDirections,
   parseFright,
@@ -226,6 +227,52 @@ describe("owner-verified Dr. Fright", () => {
       path: "",
     });
     expect(summarizePlay(a.log)).toMatchObject({ killed: 0, saved: 0 });
+  });
+  it("holds a safe fourth reveal durably until Awake, then shuffles once and preserves Undo", () => {
+    const a = session();
+    a.step({ command: "asleep" });
+    for (const direction of ["U", "U", "L", "D"] as const) {
+      a.step({ command: "slide", direction });
+      if (a.state().pending) a.step({ command: "defended" });
+    }
+    expect(a.state()).toMatchObject({
+      path: "",
+      lastPath: "UULD",
+      lastDeal: "0132",
+      pending: false,
+      sleep: "asleep",
+      cycle: 2,
+      deal: "2301",
+    });
+    expect(boilerAwaitingWake(a.state())).toBe(true);
+    expect(
+      parseFright(a.log[a.log.length - 1].moduleData!.changes.snapshot),
+    ).not.toBeNull();
+    expect(a.step({ command: "slide", direction: "U" })).toBeNull();
+    expect(a.step({ command: "defended" })).toBeNull();
+    const raw = [...a.log];
+    const wake = a.step({ command: "awake" })!;
+    expect(validFrightSuccessor(wake, raw, summarizePlay(raw).entries)).toBe(
+      true,
+    );
+    expect(a.state()).toMatchObject({
+      path: "",
+      sleep: "awake",
+      cycle: 2,
+      deal: "2301",
+      lastPath: "UULD",
+      lastDeal: "0132",
+    });
+    const wakeEvent = a.log[a.log.length - 1];
+    a.log.push(newPlayEvent({ kind: "undo", target: wakeEvent.id }));
+    expect(a.state()).toMatchObject({
+      lastPath: "UULD",
+      sleep: "asleep",
+      cycle: 2,
+    });
+    a.step({ command: "awake" });
+    expect(a.state().deal).toBe(wake.deal);
+    expect(a.state().reserve).toBe(wake.reserve);
   });
   it("switches an untouched deck without rerolling and refuses to bypass an attack or forced sleep", () => {
     const a = session();
