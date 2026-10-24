@@ -1,5 +1,29 @@
 # Story and artwork direction
 
+## Request compatibility correction (2026-10-24)
+
+The expanded Dr. Fright context exposed a request-size bug in both opening and
+ending generation. Each API field repeated the combined killer/location context;
+Dr. Fright at Maple Lane sent 3,321 characters under `killer.specialRules` and
+3,097 under `location.specialRules`, exceeding their existing 3,000-character
+limits. All four imported locations reproduced the rejection with Dr. Fright.
+
+Opening and ending requests now use one shared helper to put the complete killer
+guidance under the killer and the complete location guidance under the location.
+No rules are truncated, and the API limits remain unchanged. Combined context for
+artwork and visual continuity remains available through its existing interface.
+This correction requires publishing the frontend only; no function deployment,
+migration or new secret is required. Existing failed sessions can retry generation
+after loading the corrected frontend.
+
+Regression coverage validates every catalog killer/location rules pairing against
+the actual opening and ending schemas. Desktop/phone journeys submit Dr. Fright
+with each of the four imported locations through both readers, with real request
+validation before mocked generation. Provider prose/art quality remains a separate
+live check.
+
+## Original prompt overhaul
+
 This change implements the approved prompt overhaul. It does **not** establish a 10/10 production-output score. The app's gateway key is unavailable in the development workspace, and the revised edge functions have not been deployed. Keep the PR in draft until the live output review below is completed in an authorized preview.
 
 ## What changed
