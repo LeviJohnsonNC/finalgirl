@@ -146,6 +146,7 @@ const IndexContent = () => {
       ...(selection.killer === 'Billy the Bear' && {billySetupVersion: 1 as const}),
       ...(selection.killer === 'Geppetto' && {geppettoSetupVersion: 1 as const}),
       ...(selection.killer === 'Dr. Fright' && {frightSetupVersion: 1 as const}),
+      ...(selection.location === 'Maple Lane' && {mapleSetupVersion: 1 as const}),
       ...(selection.location === 'Carnival of Blood' && {carnivalSetupVersion: 1 as const}),
       selection: { ...selection, filmId: getFilmIdByLocation(selection.location), finalGirlStartingHealth: getFinalGirlHealth(selection.finalGirl) } })) setCurrentPage('nowPlaying');
   };

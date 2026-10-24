@@ -4,7 +4,8 @@ import { useAuth } from './useAuth';
 import { readStoredValue, useLocalStorage } from './useLocalStorage';
 import { isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
 import { ActiveGame, isActiveGame } from '@/lib/activeGame';
-import { initialModuleObservations } from '@/lib/play/modules';
+import { mapleLinkedChange } from '../../supabase/functions/_shared/play/maple';
+import { initialModuleObservations, moduleState } from '@/lib/play/modules';
 import { frightState, parseFright, initialFright, validFrightSuccessor } from '../../supabase/functions/_shared/play/fright';
 import { discardedGamesKey, isGameDiscarded } from '@/lib/discardedGames';
 
@@ -44,6 +45,8 @@ export function useActiveGame() {
       // owns uniqueness, including two taps arriving before React renders.
       if (isPermanentMoment(event) && summarizePlay(previous.playEvents).entries.some(entry => entry.kind === 'moment' && entry.momentType === event.momentType)) return previous;
       const log = previous.playEvents ?? [];
+      let accepted = event;
+      if (event.moduleData?.module === 'maple' && previous.selection.location !== 'Maple Lane') return previous;
       if (event.moduleData?.module === 'fright') {
         const snapshot=parseFright(event.moduleData.changes.snapshot);
         if (previous.selection.killer !== 'Dr. Fright' || !snapshot || snapshot.parent !== (frightState(summarizePlay(log).entries)?.eventId ?? 'root') || !validFrightSuccessor(snapshot,log,summarizePlay(log).entries)) return previous;
@@ -54,10 +57,18 @@ export function useActiveGame() {
       // Persist setup and the first tap together. Never backfill an existing log:
       // a player may already have resolved, cleared or undone the starting state.
       const setup = log.length === 0
-        ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
+        ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1, previous.mapleSetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
         : [];
       if (log.length === 0 && previous.frightSetupVersion === 1 && previous.selection.killer === 'Dr. Fright' && event.moduleData?.module !== 'fright') setup.unshift(newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(initialFright())}}}));
-      const additions = event.kind === 'start' ? [event, ...setup] : [...baseline, ...setup, event];
+      if (event.moduleData?.module === 'maple') {
+        if (previous.selection.location !== 'Maple Lane') return previous;
+        const current=moduleState(summarizePlay([...log,...baseline,...setup]).entries,'maple');
+        const changes=mapleLinkedChange(current,event.moduleData.changes);
+        if(Object.entries(changes).every(([key,value])=>value === null ? current[key] === undefined : current[key] === value)) return previous;
+        accepted={...event,moduleData:{module:'maple',changes}};
+        if (!isPlayEvent(accepted)) return previous;
+      }
+      const additions = event.kind === 'start' ? [accepted, ...setup] : [...baseline, ...setup, accepted];
       if (log.length + additions.length > 1000) return previous;
       applied = true;
       return { ...previous, playEvents: [...log, ...additions] };

@@ -14,6 +14,7 @@ export function ModuleControls({
     <div className="play-module-stack">
       {moduleDefinitions
         .filter((module) => props[module.owner] === module.match)
+        .sort((a,b)=>a.owner===b.owner?0:a.owner==="killer"?-1:1)
         .map((module) => {
           const key = `final-girl-module-panel-v1:${user?.id ?? "guest"}:${sessionId}:${module.id}`;
           return (
