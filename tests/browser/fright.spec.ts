@@ -97,6 +97,21 @@ for (const [location, id] of [
     await resume(page);
     await openModule(page, id);
     await expect(page.locator(".play-module-panel")).toHaveCount(2);
+    for (const title of ["Awake", "Asleep"]) {
+      const tile = panel(page).getByRole("button", {
+        name: `Record Final Girl ${title}`,
+        exact: true,
+      });
+      const bounds = await tile.boundingBox();
+      const caption = await tile
+        .getByText(title, { exact: true })
+        .boundingBox();
+      expect(bounds!.height).toBeLessThanOrEqual(180);
+      expect(caption!.y).toBeGreaterThanOrEqual(bounds!.y);
+      expect(caption!.y + caption!.height).toBeLessThanOrEqual(
+        bounds!.y + bounds!.height,
+      );
+    }
     const before = await log(page);
     await panel(page).locator(".fright-details > summary").click();
     expect(await log(page)).toEqual(before);

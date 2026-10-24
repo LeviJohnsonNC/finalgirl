@@ -8,7 +8,35 @@
   gap: 12px;
 }
 .fright-sleep-grid .play-illustrated-tile {
-  min-height: 142px;
+  position: relative;
+  isolation: isolate;
+  display: block;
+  overflow: hidden;
+  height: 160px;
+  padding: 0;
+  border: 1px solid #806b48;
+  border-radius: 6px;
+  background: #101411;
+  text-align: left;
+}
+.fright-sleep-grid .play-illustrated-tile > .play-module-art {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+.fright-sleep-grid .play-illustrated-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(0deg, #050808f5, transparent 85%);
+  pointer-events: none;
+}
+.fright-sleep-grid .play-tile-caption {
+  bottom: 14px;
+}
+.fright-sleep-grid .play-tile-state {
+  color: #d4c8ae;
 }
 .fright-sleep-grid [aria-pressed="false"] .play-module-art {
   filter: brightness(0.38) saturate(0.6);
@@ -352,6 +380,9 @@
 .fright-controls button:disabled {
   opacity: 0.42;
   cursor: default;
+}
+.fright-sleep-grid button[aria-pressed="true"]:disabled {
+  opacity: 1;
 }
 .boiler-dialog button:focus-visible,
 .fright-controls button:focus-visible {
