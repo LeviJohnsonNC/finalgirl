@@ -14,6 +14,7 @@ export interface EndingFormData {
   endingSubLocation: string; gameHighlights: string;
 }
 export interface ActiveGame {
+  inkanyambaSetupVersion?: 1;
   mapleSetupVersion?: 1;
   frightSetupVersion?: 1;
   /** Marks new sessions whose verified standard Gepetto tray may be seeded once. */
@@ -37,6 +38,7 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if (game.inkanyambaSetupVersion !== undefined && game.inkanyambaSetupVersion !== 1) return false;
   if (game.mapleSetupVersion !== undefined && game.mapleSetupVersion !== 1) return false;
   if (game.frightSetupVersion !== undefined && game.frightSetupVersion !== 1) return false;
   if (game.billySetupVersion !== undefined && game.billySetupVersion !== 1) return false;

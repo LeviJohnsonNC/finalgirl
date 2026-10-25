@@ -12,16 +12,19 @@ export function KillerCards({
   events,
   onEvent,
   typeOnly,
+  disabled = false,
 }: {
   killer: string;
   events: PlayEvent[];
   onEvent: (event: PlayEvent) => boolean;
   typeOnly?: "dark-power" | "finale";
+  disabled?: boolean;
 }) {
   const entries = summarizePlay(events).entries;
   const hans = moduleState(entries, "hans");
   const { record, message } = useModuleRecord(events, onEvent);
   const choose = (type: "dark-power" | "finale", name: string) => {
+    if (disabled) return;
     const existing = entries.find(
       (event) => event.kind === "moment" && event.momentType === type,
     );
@@ -82,9 +85,9 @@ export function KillerCards({
                     aria-label={`Choose ${card.name}`}
                     aria-pressed={selected?.id === card.id}
                     disabled={
-                      killer === "Hans" &&
+                      disabled || (killer === "Hans" &&
                       type === "dark-power" &&
-                      hans.secondPower === card.name
+                      hans.secondPower === card.name)
                     }
                     onClick={() => choose(type, card.name)}
                   >
@@ -98,6 +101,7 @@ export function KillerCards({
               </details>}
               <button
                 className="module-unnamed"
+                disabled={disabled}
                 onClick={() => choose(type, "")}
                 aria-label={`${reveal ? "Clear" : "Record"} ${type === "dark-power" ? "Dark Power" : "Finale"} card name`}
               >

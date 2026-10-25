@@ -1,3 +1,5 @@
+import { InkanyambaControls } from "./InkanyambaControls";
+import inkanyambaBanner from "@/assets/play/inkanyamba/banner.webp";
 import { MapleControls } from "./MapleControls";
 import mapleBanner from "@/assets/play/maple/banner.webp";
 import { MAPLE_HOUSES, MAPLE_EXITS, MAPLE_PEOPLE } from "../../../supabase/functions/_shared/play/maple";
@@ -42,7 +44,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -79,6 +81,7 @@ const peopleSummary = (
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
 export const moduleDefinitions: Definition[] = [
+  {id:"inkanyamba",owner:"killer",match:"Inkanyamba",title:"Inkanyamba · The Avenger",art:{src:inkanyambaBanner},capabilities:["reveals","minor-power"],summary:state=>`Killer Wrath ${typeof state.wrath === "number" ? `${state.wrath}/10` : "not recorded"}`,Controls:props=><InkanyambaControls {...props}/>},
   { id:"maple", owner:"location", match:"Maple Lane", title:"Inside Maple Lane", art:{src:mapleBanner}, capabilities:["character","event"], summary:state=>{
     const known=MAPLE_HOUSES.filter(h=>typeof state[`house.${h.id}`]==="boolean");
     const searched=known.filter(h=>state[`house.${h.id}`]===true).length;

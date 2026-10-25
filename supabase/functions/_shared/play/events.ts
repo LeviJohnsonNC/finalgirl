@@ -70,6 +70,8 @@ export interface PlayDetails {
   killerCard?: string;
 }
 export interface PlayEvent extends PlayDetails {
+  /** Provenance for newly recorded Inkanyamba card facts; legacy death hashes stay unchanged. */
+  inkanyambaReference?: true;
   permanent?: true;
   id: string;
   at: number;
@@ -127,6 +129,7 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if (e.inkanyambaReference !== undefined && (e.inkanyambaReference !== true || e.kind !== "moment" || !["dark-power", "finale"].includes(e.momentType!))) return false;
   if (e.permanent !== undefined && (e.permanent !== true || !isPermanentMoment(e))) return false;
   if (!uuid.test(e.id) || !integer(e.at, Number.MAX_SAFE_INTEGER)) return false;
   if (

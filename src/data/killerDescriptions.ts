@@ -1,3 +1,4 @@
+import { INKANYAMBA_VISUAL } from "../../supabase/functions/_shared/play/inkanyamba";
 import { FRIGHT_VISUAL } from '../../supabase/functions/_shared/play/fright';
 import { GEPPETTO_VISUAL } from '../../supabase/functions/_shared/play/geppetto';
 import { HANS_VISUAL } from './rules/campRules';
@@ -9,6 +10,7 @@ import { BUDDYLAND_VISUALS } from './buddyland';
  */
 
 export const KILLER_DESCRIPTIONS: Record<string, string> = {
+  Inkanyamba: INKANYAMBA_VISUAL,
   'Billy the Bear': BUDDYLAND_VISUALS.billy,
   // Season 3 - Don't Make a Sound
   'The Eyeless': `A humanoid creature with a pale, greyish-beige complexion and a powerful, lean muscularity. The skin is highly textured with visible veins, mottled discoloration, and a matte, leathery quality that suggests practical prosthetic makeup rather than digital effects. The most striking feature is a large, fan-like crest extending from the forehead and temples, ribbed with bony ridges and parchment-like membranes that appear both ancient and organic.

@@ -143,6 +143,7 @@ const IndexContent = () => {
       return;
     }
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
+      ...(selection.killer === 'Inkanyamba' && {inkanyambaSetupVersion: 1 as const}),
       ...(selection.killer === 'Billy the Bear' && {billySetupVersion: 1 as const}),
       ...(selection.killer === 'Geppetto' && {geppettoSetupVersion: 1 as const}),
       ...(selection.killer === 'Dr. Fright' && {frightSetupVersion: 1 as const}),
