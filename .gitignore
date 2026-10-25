@@ -6,6 +6,9 @@ dist-ssr
 
 # Test output
 playwright-report/
+blob-report/
+all-blob-reports/
+shard-results/
 test-results/
 coverage/
 
