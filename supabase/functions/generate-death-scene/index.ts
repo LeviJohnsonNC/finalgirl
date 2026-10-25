@@ -58,7 +58,7 @@ serve(async (req) => {
   try {
     const parsed = validateRequest(DeathRequestSchema, await req.json(), cors);
     if (!parsed.success) return parsed.error;
-    const { sessionId, eventId, take } = parsed.data;
+    const { sessionId, eventId, take, narrativeProfile } = parsed.data;
     const auth = req.headers.get("Authorization");
     if (!auth)
       return json({ error: "Sign in to generate a death scene." }, 401);
@@ -102,7 +102,8 @@ serve(async (req) => {
     const facts = deathFacts(state.selection, state.playEvents, eventId);
     if (!facts)
       return json({ error: "That death is not active in this game." }, 409);
-    const signature = await deathSignature(facts);
+    // Old open tabs still expect the pre-profile hash during backend-first rollout.
+    const signature = await deathSignature(facts, narrativeProfile ? "current" : "legacy");
     admin = createClient(url, serviceKey);
     const claimScene = () =>
       admin!.rpc("claim_death_scene", {

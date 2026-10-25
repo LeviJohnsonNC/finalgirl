@@ -66,7 +66,7 @@ export function useDeathScenes(
       generation.current?.abort();
     };
   }, [refresh]);
-  const generate = async (eventId: string, take: number) => {
+  const generate = async (eventId: string, take: number, narrativeProfile?: "fright-private-nightmares-v1") => {
     if (generation.current) return null;
     if (!user || !syncNow) {
       setError(
@@ -103,7 +103,7 @@ export function useDeathScenes(
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             Authorization: `Bearer ${session.access_token}`,
           },
-          body: JSON.stringify({ sessionId, eventId, take }),
+          body: JSON.stringify({ sessionId, eventId, take, ...(narrativeProfile && {narrativeProfile}) }),
           signal: controller.signal,
         },
       );

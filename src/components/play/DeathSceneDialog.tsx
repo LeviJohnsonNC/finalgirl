@@ -176,7 +176,7 @@ export function DeathSceneDialog({
         ],
         eventId,
       );
-      const response = await scenes.generate(eventId, next);
+      const response = await scenes.generate(eventId, next, selection.killer === "Dr. Fright" ? "fright-private-nightmares-v1" : undefined);
       if (
         response &&
         expected &&
