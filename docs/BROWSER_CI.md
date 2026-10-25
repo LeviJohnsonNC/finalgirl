@@ -15,3 +15,20 @@ The successful unsharded [run 40204562328](https://github.com/LeviJohnsonNC/fina
 The first sharded run must demonstrate all 249 desktop cases and 249 mobile cases (including the existing intentional mobile skip), successful merged HTML reports with attachments, and a green required aggregate. Compare observed end-to-end timing with the baseline; do not treat a predicted speedup as a measured result.
 
 Reference: [Playwright sharding and report merging](https://playwright.dev/docs/test-sharding).
+
+
+## October 19 investigation
+
+In run `39282541839`, all 204 browser checks passed in 7.9 minutes. The browser step finished at 16:13:57 UTC, its report upload finished at 16:14:09 UTC, and the log reached orphan-process cleanup. GitHub nevertheless continued reporting the job as in progress until the run was updated to successful at 16:32:39 UTC. There was no Playwright timeout, failed test, retry, or hung report server in that run's log.
+
+The earlier split into separate device projects reduced the normal critical path from running both on one two-worker machine. The replacement workflow starts fresh runners; a platform failure to finalize an already-completed job cannot be repaired in application code. Inspect the raw job log as well as the summary status when diagnosing that discrepancy.
+
+Run the same project locally against a production build:
+
+```sh
+npm run build
+CI=true npm run test:browser -- --project=desktop
+CI=true npm run test:browser -- --project=mobile
+```
+
+Each runner starts its own preview server. Locally, run those commands sequentially because they share port 4173. Keep the 20-minute device-job ceiling so browser installation, a full retry, and report upload remain bounded.
