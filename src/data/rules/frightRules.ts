@@ -3,6 +3,9 @@ import {
   FRIGHT_VISUAL,
   FRIGHT_POWERS,
   FRIGHT_FINALES,
+  FRIGHT_STARTING_ACTION,
+  FRIGHT_MINOR_POWERS,
+  FRIGHT_TERRORS,
 } from "../../../supabase/functions/_shared/play/fright";
 import type { EntityRuleModule, ModulePromptContext } from "./moduleRules";
 export const frightRules: EntityRuleModule = {
@@ -35,6 +38,8 @@ export const frightRules: EntityRuleModule = {
     },
   ],
   rules: [
+    { type: "heading", level: 3, text: "Starting Killer Action" },
+    { type: "paragraph", text: FRIGHT_STARTING_ACTION },
     { type: "heading", level: 3, text: "Awake and Asleep" },
     {
       type: "list",
@@ -52,7 +57,7 @@ export const frightRules: EntityRuleModule = {
         "While Asleep, resolve as many Boiler Room cards as desired during the Action phase, including none. Resolve exactly one at the end of the Killer phase unless a game effect changes this.",
         "Slide the cover and already exposed stack up, down, left or right, keeping the unresolved cards underneath. Reveal a half, or sometimes a quarter, of the next unresolved card. A direction must expose part of that card and extend the previously revealed stack. Never expose later cards accidentally.",
         "If Dr. Fright is visible on the newly revealed card, resolve target Final Girl, then attack, regardless of his board position. Defend normally. The reveal itself does not establish damage, Health loss or a casualty.",
-        "Each of the four Boiler Room cards places him in a different quadrant. Previously exposed portions supply information for later choices. Resolve all four cards to exit, wake up, and immediately shuffle them facedown with Awake on top. Face Your Fright changes the wake-up rule.",
+        "Each of the four Boiler Room cards places him in a different quadrant. Previously exposed portions supply information for later choices. Resolve all four cards to exit, wake up, and immediately shuffle them facedown with Awake on top. Face Your Fright and an active Endless Sleep change the wake-up rule. In the digital tracker, a safe fourth reveal waits for your explicit Awake acknowledgment.",
         "At the top Bloodlust effect: if Asleep, reset the Boiler Room deck; otherwise fall Asleep. Record that effect explicitly. Reaching a tracked round number does not itself reset or resolve cards.",
       ],
     },
@@ -68,6 +73,28 @@ export const frightRules: EntityRuleModule = {
         (c) => `${c.name}${"epic" in c ? " (Epic)" : ""}: ${c.effect}`,
       ),
     },
+    { type: "heading", level: 3, text: "Minor Dark Powers" },
+    {
+      type: "list",
+      items: FRIGHT_MINOR_POWERS.map(
+        (c) => `${c.name} (${c.health} Health): ${c.effect}`,
+      ),
+    },
+    {
+      type: "paragraph",
+      text: "Damage Minor Dark Powers before Dr. Fright, following the core rules. Remove a power when its final Health is lost. Removing Endless Sleep permits waking only if Face Your Fright is not active; removal does not itself wake you. The Play controls record Health separately from Dr. Fright's Health.",
+    },
+    { type: "heading", level: 3, text: "Terror cards" },
+    {
+      type: "list",
+      items: FRIGHT_TERRORS.filter(
+        (c) => !FRIGHT_MINOR_POWERS.some((p) => p.id === c.id),
+      ).map((c) => `${c.name}: ${c.effect}`),
+    },
+    {
+      type: "paragraph",
+      text: "Resolve each card from top to bottom, including its conditional instructions and each separate Killer Action. Track temporary effects explicitly in Play and end them at their printed timing. Reading or selecting a reference does not resolve its actions, change victim totals, apply damage, establish an Item's possession or use, or move physical pieces.",
+    },
     { type: "heading", level: 3, text: "Finales" },
     {
       type: "list",
@@ -77,7 +104,7 @@ export const frightRules: EntityRuleModule = {
       type: "callout",
       variant: "note",
       title: "Reference coverage",
-      text: "The owner supplied the special rules, standard board, four Boiler Room faces, three regular Powers, one Epic Power and three Finales. The sixteen-card Terror deck, two Minor Dark Power faces and uncovered pre-Finale action strip have not yet been supplied. Their missing text is not inferred. Maple Lane’s Location module is a separate import.",
+      text: "Verified against the owner’s standard board, special rules, four Boiler Room faces, three regular Powers, one Epic Power, three Finales and all sixteen Terror cards (including both Minor Dark Powers). Starting Killer Action confirmed directly by the owner: target Final Girl/Victim, then attack, without moving. Maple Lane has its own separate Location module.",
     },
   ],
 };
@@ -86,8 +113,10 @@ export const FRIGHT_PROMPT_CONTEXT: ModulePromptContext = {
     "Dr. Fright is the supernatural Dream Doctor. Use the selected Location, not an automatic Maple Lane backdrop. Follow only recorded Awake/Asleep facts; unknown is not Awake. Dreams do not place ordinary Victims in the Boiler Room. An attack pending defense is not evidence of injury. Apply recorded card exceptions, never unrecorded effects or casualties.",
   visualGuidance: FRIGHT_VISUAL,
   rulesSummary: [
-    "Standard Dr. Fright: 9 Health, Horror 4. Start Awake. Awake normally prevents attacks between him and the Final Girl. Asleep permits normal combat, but Victims cannot follow or be saved. Boiler Room reveals can trigger an attack from anywhere; resolve physical defense separately. Clear all four to wake and shuffle unless Face Your Fright keeps her Asleep. Catalog reference only; apply cards only when recorded.",
-    ...FRIGHT_POWERS.map((c) => `${c.name}: ${c.effect}`),
-    ...FRIGHT_FINALES.map((c) => `${c.name}: ${c.effect}`),
+    "Standard Dr. Fright: 9 Health, Horror 4; starts Awake. Awake normally prevents mutual attacks. Asleep permits combat, but Victims cannot follow or be saved. Boiler Room attacks target only the Final Girl from any board position; defense and damage are separate. Clear four cards to wake and shuffle, except forced sleep. Apply card effects only when recorded.",
+    FRIGHT_STARTING_ACTION,
+    "Pitchfork Assault: +1 Horror whenever he damages the Final Girl. The Frightmare Is Inevitable: he may attack her while Awake, but she cannot attack him. Never Really Dead: replace his black Final Health token with white on reveal; when last Health is lost, reveal three reserve black tokens and restore accordingly. Shock Factor (Epic): panic kills Victims instead, maximum three per turn.",
+    "Face Your Fright: fall Asleep on reveal, remain Asleep, immediately reset on each exit; action targets closest Final Girl/Victim, moves, attacks. Time to Die: Awake during Upkeep costs two Health then sleep; action targets Final Girl, moves, attacks twice. Everyone Must Die: remove him onto Finale; she may attack him from any space while Asleep; action kills two chosen Victims, or costs her four Health if none remain.",
+    "Hellish Pursuit (2 separate Health): while Asleep, one additional Boiler Room reveal at Killer-phase end if able. Endless Sleep (1 separate Health): fall Asleep on reveal, remain Asleep and reset after each exit while active. Removing it does not wake her or override Face Your Fright. Blurred Reality permits mutual Awake damage only until next Killer phase when explicitly active.",
   ].join("\n"),
 };

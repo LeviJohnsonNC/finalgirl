@@ -1,3 +1,4 @@
+import { FRIGHT_TERRORS } from "./fright.ts";
 import { MAPLE_TERRORS, MAPLE_EVENTS, MAPLE_ITEMS, MAPLE_PEOPLE, MAPLE_HOUSES, MAPLE_STREETS, MAPLE_SOURCE } from "./maple.ts";
 import { CARNIVAL_TERRORS, CARNIVAL_EVENTS, CARNIVAL_ITEMS, CARNIVAL_ROOMS, CARNIVAL_TRAPS, CARNIVAL_ITEM_TRAPS, CARNIVAL_PEOPLE, CARNIVAL_SOURCE } from './carnival.ts';
 import { GEPPETTO_TERRORS } from './geppetto.ts';
@@ -32,6 +33,7 @@ const station = wiki("Station_2891");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+  ...FRIGHT_TERRORS.map(card => ({...card, kind: "terror" as const})),
   ...MAPLE_TERRORS.map(card=>({...card,kind:"terror" as const})),
   ...MAPLE_EVENTS.map(card=>({...card,kind:"event" as const,location:"Maple Lane",source:MAPLE_SOURCE})),
   ...CARNIVAL_TERRORS.map(card=>({...card,kind:"terror" as const})),

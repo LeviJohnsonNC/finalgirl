@@ -7,9 +7,13 @@ export function HealthTokens({
   health,
   art,
   onChange,
+  maxHealth = 2,
+  disabled = false,
 }: {
   name: string;
   health: number;
+  maxHealth?: number;
+  disabled?: boolean;
   art: ModuleArt;
   onChange: (health: number) => void;
 }) {
@@ -19,12 +23,13 @@ export function HealthTokens({
       role="group"
       aria-label={`${name} health`}
     >
-      {[0, 1].map((index) => {
+      {Array.from({ length: maxHealth }, (_, index) => index).map((index) => {
         const filled = index < health;
         return (
           <button
             key={index}
             type="button"
+            disabled={disabled}
             aria-pressed={filled}
             aria-label={`${filled ? "Remove" : "Restore"} one ${name} health, heart ${index + 1}`}
             onClick={() => onChange(health + (filled ? -1 : 1))}

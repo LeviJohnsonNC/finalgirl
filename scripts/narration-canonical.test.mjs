@@ -40,6 +40,7 @@ async function fixture({
   changed = false,
   camp = false,
   drFright = false,
+  expandedFright = false,
 } = {}) {
   const state = {
     selection: {
@@ -70,6 +71,12 @@ async function fixture({
     for(const action of [{command:'digital'},{command:'asleep'},{command:'slide',direction:'U'}]) {
       const entries=events.summarizePlay(state.playEvents).entries;
       const snapshot=fright.frightTransition(fright.frightState(entries),action,state.playEvents,entries,()=> '0132');
+      state.playEvents.push(events.newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(snapshot)}}}));
+    }
+    if (expandedFright) for (const action of [{command:'minor',minor:'endless-sleep',health:1},{command:'condition',condition:'blurred-reality',active:true}]) {
+      const entries=events.summarizePlay(state.playEvents).entries;
+      const snapshot=fright.frightTransition(fright.frightState(entries),action,state.playEvents,entries,()=> '0132');
+      assert.ok(snapshot);
       state.playEvents.push(events.newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(snapshot)}}}));
     }
     state.playEvents.push(deathEvent);
@@ -218,3 +225,5 @@ test('saved Camp scenes with Hans observations retain their canonical narration 
 });
 
 test('Dr. Fright saved narration accepts owned snapshots with public historical identity',async()=>{const f=await fixture({drFright:true});assert.equal((await f.handler(f.request())).status,200);assert.deepEqual(f.spoken,['The canonical owned scene is narrated.']);});
+
+test('expanded Dr. Fright saved scenes narrate with canonical Minor and temporary-effect identity',async()=>{const f=await fixture({drFright:true,expandedFright:true});assert.equal((await f.handler(f.request())).status,200);assert.deepEqual(f.spoken,['The canonical owned scene is narrated.']);});

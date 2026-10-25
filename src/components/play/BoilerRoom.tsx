@@ -20,6 +20,7 @@ interface Props {
   blocked: boolean;
   message: string;
   forced: boolean;
+  forcedReason?: string;
   onSlide: (d: Direction) => boolean;
   onDefended: () => void;
   onSleepChange: (sleep: "awake" | "asleep") => void;
@@ -30,6 +31,7 @@ export function BoilerRoom({
   blocked,
   message,
   forced,
+  forcedReason = "Face Your Fright",
   onSlide,
   onDefended,
   onSleepChange,
@@ -145,6 +147,7 @@ export function BoilerRoom({
                 compact
                 sleep={state.sleep}
                 forced={forced}
+                forcedReason={forcedReason}
                 pending={state.pending}
                 disabled={blocked || busy}
                 onChange={onSleepChange}
@@ -161,7 +164,7 @@ export function BoilerRoom({
                 ) : awaitingWake ? (
                   "Four cards revealed. Select Awake to wake up and shuffle the deck."
                 ) : (
-                  "Face Your Fright keeps you Asleep. Each completed deck resets automatically."
+                  `${forcedReason} keeps you Asleep. Each completed deck resets automatically.`
                 )}
               </p>
             )}

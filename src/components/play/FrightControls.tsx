@@ -1,13 +1,24 @@
 import { summarizePlay, newPlayEvent } from "@/lib/play/events";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useModuleRecord } from "./useModuleRecord";
+import { MinorPowerControl } from "./MinorPowerControl";
+import { PlaySearch } from "./PlaySearch";
+import minorArt from "@/assets/play/fright/minors.webp";
 import { KillerCards } from "./KillerCards";
 import { BoilerRoom } from "./BoilerRoom";
 import { FrightSleepControls } from "./FrightSleepControls";
 import {
   frightState,
+  parseFright,
   frightTransition,
   frightCards,
+  frightForcedSleep,
+  frightSleepReason,
+  FRIGHT_MINOR_POWERS,
+  FRIGHT_TERRORS,
+  FRIGHT_CONDITIONS,
+  FRIGHT_STARTING_ACTION,
+  type FrightAction,
   type FrightCommand,
   type Direction,
 } from "../../../supabase/functions/_shared/play/fright";
@@ -19,6 +30,7 @@ export function FrightControls({
   onEvent,
   blocked = false,
 }: ControlsProps) {
+  const [reference, setReference] = useState("");
   const entries = summarizePlay(events).entries;
   const state = frightState(entries);
   const cards = frightCards(entries);
@@ -31,12 +43,13 @@ export function FrightControls({
     command: FrightCommand,
     direction?: Direction,
     effect?: string,
+    extra?: Partial<FrightAction>,
   ) => {
     if (blocked) return false;
     if (committedAction.current.committed) return false;
     const next = frightTransition(
       state,
-      { command, direction, effect },
+      { command, direction, effect, ...extra },
       events,
       entries,
     );
@@ -56,7 +69,22 @@ export function FrightControls({
     }
     return false;
   };
-  const forced = cards.finale?.id === "face-your-fright";
+  const forced = frightForcedSleep(entries);
+  const forcedReason = frightSleepReason(entries);
+  const condition = FRIGHT_CONDITIONS.find((c) => c.name === reference);
+  const selectedTerror = FRIGHT_TERRORS.find((c) => c.name === reference);
+  const minorDisabled = blocked || Boolean(state?.pending);
+  const minorCell = (index: number) => ({
+    src: minorArt,
+    atlas: {
+      width: 1536,
+      height: 1024,
+      x: (index % 3) * 512 + 3,
+      y: Math.floor(index / 3) * 512 + 3,
+      cellWidth: 506,
+      cellHeight: 506,
+    },
+  });
   const asleep = state?.sleep === "asleep";
   const sleep = state?.sleep ?? "unknown";
   const exceptional = cards.power?.id === "frightmare-inevitable";
@@ -87,6 +115,7 @@ export function FrightControls({
       <FrightSleepControls
         sleep={sleep}
         forced={forced}
+        forcedReason={forcedReason}
         disabled={blocked}
         pending={state?.pending}
         onChange={(value) => act(value)}
@@ -96,13 +125,15 @@ export function FrightControls({
           ? "Sleep state not recorded."
           : asleep
             ? "Victims cannot follow or be saved. Normal attacks are possible."
-            : exceptional
-              ? "Dr. Fright may attack you while Awake. You cannot attack him."
-              : "You and Dr. Fright cannot attack each other while Awake."}
+            : state?.conditions?.["blurred-reality"]
+              ? "Blurred Reality: you and Dr. Fright may damage each other while Awake until the next Killer phase."
+              : exceptional
+                ? "Dr. Fright may attack you while Awake. You cannot attack him."
+                : "You and Dr. Fright cannot attack each other while Awake."}
       </p>
       {forced && (
         <p className="fright-consequence">
-          Face Your Fright: remain Asleep; reset the Boiler Room on every exit.
+          {forcedReason}: remain Asleep; reset the Boiler Room on every exit.
         </p>
       )}
       {cards.finale?.id === "time-to-die" && (
@@ -138,12 +169,38 @@ export function FrightControls({
             {effect.label}
           </button>
         ))}
+      {(state?.minor?.["hellish-pursuit"] ?? 0) > 0 && (
+        <p className="fright-consequence">
+          Hellish Pursuit: while Asleep, resolve one additional Boiler Room card
+          at the end of the Killer phase, if able.
+        </p>
+      )}
+      {FRIGHT_CONDITIONS.filter((c) => state?.conditions?.[c.id]).map((c) => (
+        <div className="fright-active-effect" key={c.id}>
+          <p>
+            <strong>{c.name}</strong> · {c.effect}
+          </p>
+          <button
+            aria-label={`End effect: ${c.name}`}
+            disabled={minorDisabled}
+            onClick={() =>
+              act("condition", undefined, undefined, {
+                condition: c.id,
+                active: false,
+              })
+            }
+          >
+            End effect<span className="sr-only">: {c.name}</span>
+          </button>
+        </div>
+      ))}
       {state?.mode === "digital" ? (
         <BoilerRoom
           state={state}
           blocked={blocked}
           message={message}
           forced={forced}
+          forcedReason={forcedReason}
           onSlide={(d) => act("slide", d)}
           onDefended={() => act("defended")}
           onSleepChange={(value) => act(value)}
@@ -168,6 +225,7 @@ export function FrightControls({
       )}
       <details className="module-card-rules fright-details">
         <summary>Rules &amp; corrections</summary>
+        <p>Starting Killer Action: {FRIGHT_STARTING_ACTION}</p>
         <p>
           Start Awake. Resolving Short Rest or Long Rest makes you fall Asleep
           regardless of its result. Resolve the normal Action card effects
@@ -209,6 +267,87 @@ export function FrightControls({
           Undoing an earlier Boiler Room observation also rewinds its dependent
           steps. The same decks are retained; information already seen cannot be
           unlearned.
+        </p>
+      </details>
+      <section
+        className="fright-minors"
+        aria-label="Dr. Fright Minor Dark Powers"
+      >
+        <h3>Minor Dark Powers</h3>
+        <div className="fright-minor-grid">
+          {FRIGHT_MINOR_POWERS.map((power, row) => (
+            <MinorPowerControl
+              key={power.id}
+              name={power.name}
+              effect={power.effect}
+              health={state?.minor?.[power.id]}
+              maxHealth={power.health}
+              disabled={minorDisabled}
+              previouslyRevealed={entries.some(
+                (e) =>
+                  e.moduleData?.module === "fright" &&
+                  (parseFright(e.moduleData.changes.snapshot)?.minor?.[
+                    power.id
+                  ] ?? 0) > 0,
+              )}
+              art={(health) =>
+                minorCell(row === 0 ? 2 - health : health > 0 ? 3 : 4)
+              }
+              heartArt={minorCell(5)}
+              onChange={(health) =>
+                act("minor", undefined, undefined, { minor: power.id, health })
+              }
+            />
+          ))}
+        </div>
+      </section>
+      <details className="module-card-rules fright-terrors">
+        <summary>Terror cards &amp; temporary effects</summary>
+        <PlaySearch
+          label="Dr. Fright Terror card reference"
+          value={reference}
+          onChange={setReference}
+          allowCustom={false}
+          options={FRIGHT_TERRORS.map((c) => c.name)}
+          placeholder="Choose a Terror card"
+        />
+        {selectedTerror && (
+          <p className="fright-terror-reference">{selectedTerror.effect}</p>
+        )}
+        {condition && !state?.conditions?.[condition.id] && (
+          <button
+            className="fright-effect"
+            disabled={minorDisabled}
+            onClick={() =>
+              act("condition", undefined, undefined, {
+                condition: condition.id,
+                active: true,
+              })
+            }
+          >
+            Track {condition.name} effect
+          </button>
+        )}
+        {reference === "Never Sleep Again" &&
+          state?.mode === "digital" &&
+          asleep && (
+            <button
+              className="fright-effect"
+              disabled={minorDisabled}
+              onClick={() => act("reshuffle")}
+            >
+              Reset Boiler Room · remain Asleep
+            </button>
+          )}
+        {reference === "Better Stay Up Late" && asleep && (
+          <p>
+            Resolve every remaining card in the Boiler Room, defending each
+            attack before continuing.
+          </p>
+        )}
+        <p>
+          Track a temporary effect only when its condition applies. End it at
+          the printed timing. Choosing a reference does not resolve the card.
         </p>
       </details>
       <KillerCards killer="Dr. Fright" events={events} onEvent={onEvent} />

@@ -15,12 +15,14 @@ import {
 /** A themed, keyboard-accessible replacement for the small native status menus. */
 export function PlaySelect({
   id,
+  disabled = false,
   value,
   onChange,
   children,
   "aria-label": label,
 }: {
   id?: string;
+  disabled?: boolean;
   value: string;
   onChange: (event: ChangeEvent<HTMLSelectElement>) => void;
   children: ReactNode;
@@ -41,6 +43,7 @@ export function PlaySelect({
   visit(children);
   return (
     <Select
+      disabled={disabled}
       value={value || "__empty__"}
       onValueChange={(next) =>
         onChange({

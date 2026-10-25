@@ -1,5 +1,5 @@
 import { MAPLE_EVENTS, MAPLE_PEOPLE, MAPLE_ITEMS, validMapleField, mapleLabel, mapleValue, mapleStoryFacts, mapleStartingObservations } from "./maple.ts";
-import { FRIGHT_POWERS, FRIGHT_FINALES, validFrightChanges, parseFright, frightState, frightPublic, describeFright } from "./fright.ts";
+import { FRIGHT_MINOR_POWERS, FRIGHT_CONDITIONS, FRIGHT_POWERS, FRIGHT_FINALES, validFrightChanges, parseFright, frightState, frightPublic, describeFright } from "./fright.ts";
 export { FRIGHT_POWERS, FRIGHT_FINALES } from "./fright.ts";
 import {
   CARNIVAL_EVENTS,
@@ -274,7 +274,7 @@ export function moduleState(
   entries: readonly ObservedEvent[],
   module: ModuleObservation["module"],
 ): ModuleState {
-  if (module === "fright") { const state=frightState(entries); if(!state) return {}; const {eventId:_id,...snapshot}=state; return {snapshot:JSON.stringify(snapshot),sleep:state.sleep,mode:state.mode,progress:state.path.length}; }
+  if (module === "fright") { const state=frightState(entries); if(!state) return {}; const {eventId:_id,...snapshot}=state; return {snapshot:JSON.stringify(snapshot),sleep:state.sleep,mode:state.mode,progress:state.path.length,...frightPublic(entries)}; }
   const state: ModuleState = {};
   for (const e of entries) {
     if (module === "geppetto" && e.kind === "moment") {
@@ -506,7 +506,10 @@ export function moduleStoryBeats(
   const lines: string[] = [];
   if (context.fright) {
     const s=context.fright;
-    lines.push(`Dr. Fright: Final Girl ${s.sleep}. ${s.sleep === "asleep" ? "She may attack him normally but cannot save Victims or have them follow. Ordinary Victims remain in the physical Location." : "Awake normally prevents attacks between her and Dr. Fright; apply only recorded card exceptions."}`);
+    const recorded = FRIGHT_MINOR_POWERS.filter(p => s[`minor.${p.id}.health`] !== undefined).map(p => `${p.name} ${s[`minor.${p.id}.health`]}/${p.health}${s[`minor.${p.id}.health`] === 0 ? " removed" : ""}`);
+    const conditions = FRIGHT_CONDITIONS.filter(c => s[`condition.${c.id}`] === true).map(c => c.name);
+    if (recorded.length || conditions.length) lines.push(`Dr. Fright: Final Girl ${s.sleep}. ${recorded.join("; ")}${conditions.length ? "; Active: " + conditions.join(", ") : ""}.`);
+    else lines.push(`Dr. Fright: Final Girl ${s.sleep}. ${s.sleep === "asleep" ? "She may attack him normally but cannot save Victims or have them follow. Ordinary Victims remain in the physical Location." : "Awake normally prevents attacks between her and Dr. Fright; apply only recorded card exceptions."}`);
     if(s.boilerCardsResolved !== undefined) lines.push(`Boiler Room: ${s.boilerCardsResolved}/4 cards resolved${s.attackPending?", an attack awaits physical defense":""}. A revealed attack does not establish damage.`);
     if(s.power) lines.push(`Power: ${FRIGHT_POWERS.find(c=>c.id===s.power)?.name}.`);
     if(s.finale) lines.push(`Finale: ${FRIGHT_FINALES.find(c=>c.id===s.finale)?.name}.`);
@@ -672,8 +675,13 @@ export function moduleReferences(
   }
   if (selection.killer === "Dr. Fright") {
     const state=context?.fright;
+    for (const p of FRIGHT_MINOR_POWERS) {
+      const health = state?.[`minor.${p.id}.health`];
+      if (typeof health === "number") refs.push({ name: p.name, effect: health === 0 ? "Recorded as removed, no longer active." : `${p.effect} ${health}/${p.health} separate Health remaining. Infer no extra damage or deaths.` });
+    }
+    for (const c of FRIGHT_CONDITIONS) if (state?.[`condition.${c.id}`] === true) refs.push({name:c.name,effect:c.effect});
     for(const card of [...FRIGHT_POWERS,...FRIGHT_FINALES]) if(card.id === state?.power || card.id === state?.finale) refs.push({name:card.name,effect:card.effect});
-    refs.push({name:"Dr. Fright — Awake and Asleep",effect:"Awake normally prevents attacks between the Final Girl and Dr. Fright, except his recorded Power. Asleep permits normal combat but Victims cannot follow or be saved. Boiler Room attacks target the Final Girl, not ordinary Victims; never infer damage or transport Victims into her dream."});
+    refs.push({name:"Dr. Fright — Awake and Asleep",effect:"Awake normally prevents attacks between the Final Girl and Dr. Fright, except a recorded applicable Power or temporary card effect. Asleep permits normal combat but Victims cannot follow or be saved. Boiler Room attacks target the Final Girl, not ordinary Victims; never infer damage or transport Victims into her dream."});
   }
   if (selection.location === "Carnival of Blood") {
     const state = context?.carnival ?? {};

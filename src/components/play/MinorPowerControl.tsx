@@ -12,10 +12,14 @@ export function MinorPowerControl({
   onChange,
   className = "",
   previouslyRevealed = false,
+  maxHealth = 2,
+  disabled = false,
 }: {
   name: string;
   effect: string;
   health?: number;
+  maxHealth?: number;
+  disabled?: boolean;
   art: (health: number) => ModuleArt;
   heartArt: ModuleArt;
   onChange: (health: number | null) => unknown;
@@ -31,13 +35,13 @@ export function MinorPowerControl({
           ? "unrecorded"
           : health === 0
             ? "removed"
-            : health === 1
+            : health < maxHealth
               ? "weakened"
               : "full"
       }
     >
       <div className="module-minor-art">
-        <ModuleArtwork art={art(health ?? 2)} />
+        <ModuleArtwork art={art(health ?? maxHealth)} />
         <h3>{name}</h3>
       </div>
       <p className="module-health-status" aria-live="polite">
@@ -46,11 +50,15 @@ export function MinorPowerControl({
             ? "Revealed earlier · health not recorded"
             : "Not recorded"
           : health === 0
-            ? "Removed · 0/2 health"
-            : `${health}/2 health`}
+            ? `Removed · 0/${maxHealth} health`
+            : `${health}/${maxHealth} health`}
       </p>
       {health === undefined ? (
-        <button className="module-reveal" onClick={() => onChange(2)}>
+        <button
+          className="module-reveal"
+          disabled={disabled}
+          onClick={() => onChange(maxHealth)}
+        >
           {previouslyRevealed ? "Record full health for" : "Reveal"} {name}
         </button>
       ) : (
@@ -59,6 +67,8 @@ export function MinorPowerControl({
             name={name}
             health={health}
             art={heartArt}
+            maxHealth={maxHealth}
+            disabled={disabled}
             onChange={onChange}
           />
         </>
@@ -70,6 +80,7 @@ export function MinorPowerControl({
         <p className="module-control-help">{effect}</p>
         <PlaySelect
           aria-label={`${name} health correction`}
+          disabled={disabled}
           value={health === undefined ? "" : String(health)}
           onChange={(event) =>
             onChange(
@@ -78,11 +89,18 @@ export function MinorPowerControl({
           }
         >
           <option value="">Not recorded</option>
-          <option value="2">2/2 health</option>
-          <option value="1">1/2 health</option>
-          <option value="0">Removed · 0/2 health</option>
+          {Array.from(
+            { length: maxHealth },
+            (_, index) => maxHealth - index,
+          ).map((value) => (
+            <option key={value} value={value}>
+              {value}/{maxHealth} health
+            </option>
+          ))}
+          <option value="0">Removed · 0/{maxHealth} health</option>
         </PlaySelect>
         <button
+          disabled={disabled}
           aria-label={`Clear record: ${name}`}
           onClick={() => onChange(null)}
         >
