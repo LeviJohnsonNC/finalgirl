@@ -13,7 +13,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { PlaySearch } from "./PlaySearch";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { DeathNarration } from "./DeathNarration";
 import { getFilmIdByLocation } from "@/types/gameData";
@@ -137,6 +137,7 @@ export function DeathSceneDialog({
     if (selectedId && !dirty && !editingDetails) payoff.current?.focus({ preventScroll: true });
   }, [selectedId, dirty, editingDetails]);
   const reading = !editingDetails && !dirty && Boolean(selected || scenes.busy || requested || unfinished);
+  const hasStory = Boolean(selected && !dirty);
   const save = () => {
     const clean = Object.fromEntries(
       Object.entries(values).map(([key, value]) => [
@@ -196,6 +197,11 @@ export function DeathSceneDialog({
       setTake(0);
     } else setMessage("The victim count could not be changed. Please try again.");
   };
+  const generateNext = () => void generate(
+    !dirty
+      ? ([0, 1, 2].find(next => !currentTakes.some(r => r.take === next)) ?? 2)
+      : 0,
+  );
   const cancel = () => {
     // Keep the recorded death and any already saved/generated facts, discard this edit.
     if (onDraft(eventId, initial)) onClose();
@@ -416,6 +422,18 @@ export function DeathSceneDialog({
                 <section aria-label="Generated death scene">
                   <div className="play-death-story-heading">
                     <h3>The last thing they saw</h3>
+                    {currentTakes.length < 3 && (
+                      <button
+                        className="play-death-edit play-death-alternate"
+                        aria-label={legacyPortrayal ? "Rewrite death" : "Another version"}
+                        title={legacyPortrayal ? "Rewrite death" : "Another version"}
+                        disabled={scenes.busy || !signature}
+                        onClick={generateNext}
+                      >
+                        <RefreshCw size={16} aria-hidden="true" />
+                        <span>{legacyPortrayal ? "Rewrite death" : "Another version"}</span>
+                      </button>
+                    )}
                     <DeathNarration key={selected.id} scene={selected} filmId={getFilmIdByLocation(selection.location)} />
                   </div>
                   <div className="play-death-prose-scroll" role="region" aria-label="Death scene text" tabIndex={0}>
@@ -473,30 +491,23 @@ export function DeathSceneDialog({
         </div>
         <div className="play-death-footer">
         {message && <p className="play-death-save-error" role="alert">{message}</p>}
-        <div className="play-death-actions">
-          <button onClick={cancel}>{reading ? "Back to game" : "Cancel"}</button>
+        <div className="play-death-actions" data-complete={hasStory}>
+          <button onClick={cancel}>Cancel</button>
           <button
+            className={hasStory ? "play-gruesome-action" : undefined}
             onClick={() => {
               if (save()) onClose();
             }}
           >
             Save and exit
           </button>
-          <button
+          {!hasStory && <button
             className="play-gruesome-action"
             disabled={scenes.busy || !signature || (!dirty && currentTakes.length >= 3)}
-            onClick={() =>
-              void generate(
-                !dirty
-                  ? ([0, 1, 2].find(
-                      (next) => !currentTakes.some((r) => r.take === next),
-                    ) ?? 2)
-                  : 0,
-              )
-            }
+            onClick={generateNext}
           >
             {scenes.busy ? "Writing the death…" : legacyPortrayal && !dirty ? "Rewrite death" : "Gruesome Death"}
-          </button>
+          </button>}
         </div>
         </div>
       </DialogContent>
