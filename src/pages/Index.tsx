@@ -288,6 +288,7 @@ const IndexContent = () => {
               playMode={activeGame.playMode}
               showDeathPanel={activeGame.showDeathPanel}
               syncPlayNow={cloudPlay.syncNow}
+              getPlayEvents={() => getCurrentGame()?.playEvents ?? []}
               playSyncBlocked={Boolean(cloudPlay.conflict)}
               onPlayEvent={event => appendPlayEvent(activeGame.id, event)}
               initialStory={activeGame.introStory}

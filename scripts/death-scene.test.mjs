@@ -506,3 +506,17 @@ test('expanded Dr. Fright Minor Powers and temporary effects authorize canonical
  assert.ok(!JSON.stringify(facts).includes('0132'));
  assert.equal((await f.handler(f.request())).status,200);
 });
+
+test('group count corrections reach canonical generation after a later manual baseline',async()=>{
+ const f=fixture({expectedFacts:{killer:'Dr. Fright',quantity:3,round:1,cause:'killer'}});
+ f.owned.selection.killer='Dr. Fright';
+ const killed={...f.owned.playEvents[1],quantity:1,cause:'killer'};
+ f.owned.playEvents=[f.owned.playEvents[0],killed,
+   events.newPlayEvent({kind:'adjust',saved:5,killed:8,round:9}),
+   events.newPlayEvent({kind:'death-count',target:killed.id,delta:1}),
+   events.newPlayEvent({kind:'death-count',target:killed.id,delta:1})];
+ assert.equal(events.summarizePlay(f.owned.playEvents).killed,10);
+ const response=await f.handler(f.request());
+ assert.equal(response.status,200);
+ assert.ok(f.calls.includes('AI'));
+});

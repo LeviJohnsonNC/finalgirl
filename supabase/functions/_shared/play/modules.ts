@@ -681,7 +681,7 @@ export function moduleReferences(
     }
     for (const c of FRIGHT_CONDITIONS) if (state?.[`condition.${c.id}`] === true) refs.push({name:c.name,effect:c.effect});
     for(const card of [...FRIGHT_POWERS,...FRIGHT_FINALES]) if(card.id === state?.power || card.id === state?.finale) refs.push({name:card.name,effect:card.effect});
-    refs.push({name:"Dr. Fright — Awake and Asleep",effect:"Awake normally prevents attacks between the Final Girl and Dr. Fright, except a recorded applicable Power or temporary card effect. Asleep permits normal combat but Victims cannot follow or be saved. Boiler Room attacks target the Final Girl, not ordinary Victims; never infer damage or transport Victims into her dream."});
+    refs.push({name:"Dr. Fright — Awake and Asleep",effect:"Awake normally prevents attacks between the Final Girl and Dr. Fright, except a recorded applicable Power or temporary card effect. Asleep permits normal combat but Victims cannot follow or be saved. The tracked Boiler Room attacks target only the Final Girl; never infer damage or transport Victims into her sequence. Victims can experience their own private nightmares while their bodies remain at the selected Location. Her sleep status is not theirs."});
   }
   if (selection.location === "Carnival of Blood") {
     const state = context?.carnival ?? {};

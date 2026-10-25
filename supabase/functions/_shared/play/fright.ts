@@ -2,7 +2,7 @@
 export const FRIGHT_SOURCE =
   "Owner photos IMG_9345–IMG_9350 (standard mode); starting Action confirmed by owner October 24, 2026";
 export const FRIGHT_VISUAL =
-  "Dr. Fright is a grotesque stocky middle-aged man with scarred pockmarked skin, milky-white eyes, thinning disheveled brown hair, ragged mustard-yellow work clothes and a rusty three-tined pitchfork. He is the supernatural Dream Doctor, not a farmer or masked slasher. Preserve the selected physical Location. The Boiler Room is the Final Girl’s dream state, not a place to transport ordinary Victims. Never expose an unresolved Boiler Room card or invent a recorded attack or injury.";
+  "Dr. Fright is a grotesque stocky middle-aged man with scarred pockmarked skin, milky-white eyes, thinning disheveled brown hair, ragged mustard-yellow work clothes and a rusty three-tined pitchfork. He is the supernatural Dream Doctor, not a farmer or masked slasher. Preserve the selected physical Location. The tracked Boiler Room sequence belongs to the Final Girl. Victims remain in the physical Location while experiencing their own private nightmares. Never expose an unresolved Boiler Room card or invent a recorded attack or injury.";
 export const FRIGHT_POWERS = [
   {
     id: "pitchfork-assault",

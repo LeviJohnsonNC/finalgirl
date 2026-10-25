@@ -1,5 +1,6 @@
 import { CARNIVAL_VISUAL } from './play/carnival.ts';
 import { GEPPETTO_VISUAL } from './play/geppetto.ts';
+import { FRIGHT_VISUAL } from './play/fright.ts';
 import { HANS_VISUAL } from './play/camp.ts';
 // Concise setting cues from src/data/killerDescriptions.ts and locationDescriptions.ts.
 // Fictional appearance only: the player records actual causes and board spaces.
@@ -14,8 +15,7 @@ export const DEATH_KILLER_CUES: Record<string, string> = {
     'A man in his late 20s to mid-30s with a lean, muscular, and athletic build. He has a chilling, authoritative presence that feels ritualistic and intensely focused. His skin is a stark, sickly pale white, providing a high-contrast canvas for the metalwork. His head and face are meticulously pierced with long metal pins arranged in a precise, geometric grid pattern. He has dark, hollowed eyes with an unblinking, cold stare and sharp, angular facial features, including a defined jawline and a thin, expressionless mouth. He is shirtless, wearing an intricate black leather harness with various straps, buckles, and metal O-rings across his chest.',
   Hans: HANS_VISUAL,
   Geppetto: GEPPETTO_VISUAL,
-  'Dr. Fright':
-    "A middle-aged man in his late 40s to early 50s with a stocky, work-hardened build and a hunched, aggressive posture. His body language is tense and animalistic—shoulders forward, arms slightly bent, as if perpetually mid-lunge. He looks like someone who has snapped rather than transformed. His face is weathered and rough, with deep lines, broken skin, and fresh cuts smeared with blood. His expression is furious and unhinged—eyes wide, jaw clenched, lips pulled tight in a snarl. There's no irony or playfulness here; his violence is raw and emotional. His eyes are dark and intense, fixed on his target with obsessive focus.",
+  'Dr. Fright': FRIGHT_VISUAL,
   'Ratchet Lady':
     'A woman in her early 30s with a lean, frantic build and a terrifying, visceral presence. Her skin is pale and sallow, heavily smudged with soot and grime. Her face is almost entirely encased in thick, dingy medical bandages that wrap tightly around her head and eyes, leaving only her mouth exposed. Her expression is one of primal, unhinged ferocity, with her jaw dropped in a wide, silent scream. She has no visible hair or features beyond the bandages, creating a sense of total anonymity and psychological distress.',
   'The Hunter':

@@ -10,7 +10,8 @@ async function resume(page:Page) {await page.goto('/');await page.getByRole('but
 const log = (page:Page) => page.evaluate(owner => JSON.parse(localStorage.getItem('final-girl-active-game-v1:'+owner)!).playEvents,userId);
 async function actionsVisible(page:Page) {
  const dialog=page.getByRole('dialog',{name:'Gruesome Death',exact:true});
- for(const name of ['Cancel','Save and exit']) await expect(dialog.getByRole('button',{name,exact:true})).toBeInViewport({ratio:1});
+ await expect(dialog.getByRole('button',{name:/^(Cancel|Back to game)$/})).toBeInViewport({ratio:1});
+ for(const name of ['Save and exit']) await expect(dialog.getByRole('button',{name,exact:true})).toBeInViewport({ratio:1});
  await expect(dialog.locator('.play-gruesome-action')).toBeInViewport({ratio:1});
  // Viewport changes can leave the dialog transitioning between measurements.
  // Read both bounds in one frame, and retain the same one-pixel fit requirement.
@@ -40,7 +41,7 @@ test('death editing, loading, reading, corrections and errors keep laptop/phone 
  await expect(dialog.getByRole('region',{name:'Generated death scene',exact:true})).toContainText('The ceiling');
  await actionsVisible(page);
  const prose=dialog.getByRole('region',{name:'Death scene text',exact:true});
- expect((await prose.boundingBox())!.height).toBeGreaterThan(100);
+ expect((await prose.boundingBox())!.height).toBeGreaterThan(info.project.name === "desktop" ? 300 : 200);
  expect(await prose.evaluate(el=>el.scrollHeight>el.clientHeight)).toBe(true);
  await prose.focus();await prose.press('End');await expect.poll(()=>prose.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);
  await actionsVisible(page);await prose.press('Home');await page.screenshot({path:info.outputPath('death-reading.png')});

@@ -65,14 +65,20 @@ export function deathFacts(
   };
 }
 export type DeathFacts = NonNullable<ReturnType<typeof deathFacts>>;
-export async function deathSignature(facts: DeathFacts) {
+/** Only Dr. Fright gets a new cache namespace; historical fact hashes stay valid. */
+export async function deathSignature(facts: DeathFacts, profile: "current" | "legacy" = "current") {
   const bytes = await crypto.subtle.digest(
     "SHA-256",
-    new TextEncoder().encode(JSON.stringify(facts)),
+    new TextEncoder().encode(JSON.stringify(profile === "current" && facts.killer === "Dr. Fright"
+      ? { ...facts, narrativeProfile: "fright-private-nightmares-v1" } : facts)),
   );
   return Array.from(new Uint8Array(bytes), (b) =>
     b.toString(16).padStart(2, "0"),
   ).join("");
+}
+/** Authorize only canonical saved-fact identities, including pre-profile scenes. */
+export async function deathSignatures(facts: DeathFacts): Promise<string[]> {
+  return [...new Set(await Promise.all([deathSignature(facts), deathSignature(facts, "legacy")]))];
 }
 /** Only names already verified in the owner's Buddyland board/cards. Other boards accept free text. */
 export const deathRooms: Record<string, readonly string[]> = {

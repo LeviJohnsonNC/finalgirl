@@ -53,6 +53,7 @@ export type PlayKind =
   | "moment"
   | "module"
   | "details"
+  | "death-count"
   | "reduce"
   | "undo"
   | "restore";
@@ -74,6 +75,7 @@ export interface PlayEvent extends PlayDetails {
   at: number;
   kind: PlayKind;
   quantity?: number;
+  delta?: number;
   saved?: number;
   killed?: number;
   round?: number | null;
@@ -168,6 +170,8 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
       return typeof e.text === "string" && e.text.trim().length > 0;
     case "module":
       return validModuleObservation(e.moduleData);
+    case "death-count":
+      return (e.delta === 1 || e.delta === -1) && typeof e.target === "string" && uuid.test(e.target);
     case "details":
     case "reduce":
     case "undo":
@@ -196,11 +200,32 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     if (e.kind === "undo" && targets.has(e.target!)) inactive.add(e.target!);
     if (e.kind === "restore") inactive.delete(e.target!);
   }
+  // Project group quantities separately from the chronological tally. Legacy
+  // reductions still correct the original observation. Once a group has a count
+  // correction, subsequent reductions are chronological, just like that correction.
+  // This preserves old signatures while allowing corrections after a totals baseline.
+  const quantities = new Map<string, number>();
   const reductions = new Map<string, number>();
+  const deltas = new Map<string, number>();
+  const corrected = new Set<string>();
+  for (const e of log) {
+    if (inactive.has(e.id)) continue;
+    if (e.kind === "killed" || e.kind === "saved") quantities.set(e.id, e.quantity!);
+    if (e.kind !== "reduce" && e.kind !== "death-count") continue;
+    const quantity = quantities.get(e.target!);
+    const target = log.find(original => original.id === e.target);
+    if (quantity === undefined || quantity < 1 ||
+        (e.kind === "death-count" && (target?.kind !== "killed" || quantity + e.delta! < 1 || quantity + e.delta! > 50))) {
+      inactive.add(e.id);
+      continue;
+    }
+    const delta = e.kind === "reduce" ? -1 : e.delta!;
+    quantities.set(e.target!, quantity + delta);
+    if (e.kind === "death-count") corrected.add(e.target!);
+    if (corrected.has(e.target!)) deltas.set(e.id, delta);
+    else reductions.set(e.target!, (reductions.get(e.target!) ?? 0) + 1);
+  }
   const milestones = new Set<MomentType>();
-  for (const e of log)
-    if (e.kind === "reduce" && !inactive.has(e.id))
-      reductions.set(e.target!, (reductions.get(e.target!) ?? 0) + 1);
   const summary: PlaySummary = {
     tracked: false,
     saved: null,
@@ -223,8 +248,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     }
     const e = { ...original };
     if (e.kind === "killed" || e.kind === "saved") {
-      e.quantity = Math.max(0, e.quantity! - (reductions.get(e.id) ?? 0));
-      if (!e.quantity) continue;
+      e.quantity = quantities.get(e.id) ?? e.quantity!;
     }
     if (e.kind === "killed" || e.kind === "moment")
       for (const edit of log) {
@@ -261,18 +285,28 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       summary.round = e.round ?? null;
     }
     if (e.kind === "saved")
-      summary.saved = Math.min(999, summary.saved! + e.quantity!);
+      summary.saved = Math.min(999, summary.saved! + original.quantity! - (reductions.get(e.id) ?? 0));
     if (e.kind === "killed")
-      summary.killed = Math.min(999, summary.killed! + e.quantity!);
+      summary.killed = Math.min(999, summary.killed! + original.quantity! - (reductions.get(e.id) ?? 0));
+    if (deltas.has(e.id)) summary.killed = Math.max(0, Math.min(999, summary.killed! + deltas.get(e.id)!));
     if (e.kind === "round")
       summary.round = Math.min(999, (summary.round ?? 0) + 1);
     if (e.kind === "state") {
       if (e.value === null) delete summary[e.field!];
       else summary[e.field!] = e.value!;
     }
-    summary.entries.push({ ...e, currentRound: summary.round });
+    if (!(e.kind === "killed" || e.kind === "saved") || e.quantity)
+      summary.entries.push({ ...e, currentRound: summary.round });
   }
   return summary;
+}
+/** Relative taps use the latest durable state, including taps before React renders. */
+export function canChangeDeathCount(log: readonly PlayEvent[], event: PlayEvent): boolean {
+  if (event.kind !== "death-count" || !isPlayEvent(event)) return false;
+  const summary = summarizePlay(log);
+  const group = summary.entries.find(e => e.id === event.target && e.kind === "killed");
+  return Boolean(group && group.quantity! + event.delta! >= 1 && group.quantity! + event.delta! <= 50 &&
+    summary.killed !== null && summary.killed + event.delta! >= 0 && summary.killed + event.delta! <= 999);
 }
 /** Correct the latest matching observation, never undo an unrelated action.
  * Partial correction of legacy group records preserves death identity. */
@@ -315,6 +349,8 @@ export function describeEvent(e: PlayEvent): string {
       return "Next round";
     case "adjust":
       return `Totals corrected: ${e.saved} saved, ${e.killed} killed${e.round ? `, round ${e.round}` : ""}`;
+    case "death-count":
+      return e.delta === 1 ? "Added one victim to a death" : "Removed one victim from a death";
     case "reduce":
       return "Corrected one victim from a group record";
     case "state":

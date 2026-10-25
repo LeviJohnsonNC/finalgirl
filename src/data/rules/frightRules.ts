@@ -110,7 +110,7 @@ export const frightRules: EntityRuleModule = {
 };
 export const FRIGHT_PROMPT_CONTEXT: ModulePromptContext = {
   narrativeGuidance:
-    "Dr. Fright is the supernatural Dream Doctor. Use the selected Location, not an automatic Maple Lane backdrop. Follow only recorded Awake/Asleep facts; unknown is not Awake. Dreams do not place ordinary Victims in the Boiler Room. An attack pending defense is not evidence of injury. Apply recorded card exceptions, never unrecorded effects or casualties.",
+    "Dr. Fright is the supernatural Dream Doctor. Use the selected Location, not an automatic Maple Lane backdrop. Follow only recorded Awake/Asleep facts; unknown is not Awake. The tracked Boiler Room sequence belongs to the Final Girl. Ordinary Victims may experience private nightmares while remaining physically at the selected Location; her sleep status is not theirs. An attack pending defense is not evidence of injury. Apply recorded card exceptions, never unrecorded effects or casualties.",
   visualGuidance: FRIGHT_VISUAL,
   rulesSummary: [
     "Standard Dr. Fright: 9 Health, Horror 4; starts Awake. Awake normally prevents mutual attacks. Asleep permits combat, but Victims cannot follow or be saved. Boiler Room attacks target only the Final Girl from any board position; defense and damage are separate. Clear four cards to wake and shuffle, except forced sleep. Apply card effects only when recorded.",

@@ -97,3 +97,57 @@ describe('corrections and meaningful moments', () => {
     expect(summarizePlay([...log,event({kind:'state',field:'finalHorrorLevel',value:null})]).finalHorrorLevel).toBeUndefined();
   });
 });
+
+describe('death group count corrections', () => {
+  const start = () => event({kind:'start',saved:4,killed:2,round:6});
+  const change = (target: string, delta: 1 | -1) => event({kind:'death-count',target,delta});
+  it('keeps one historical death and counts relative taps once, without touching saved victims', () => {
+    const death=event({kind:'killed',quantity:1,cause:'killer',victim:'Toby'});
+    const log=[start(),death,event({kind:'round'}),change(death.id,1),change(death.id,1)];
+    const summary=summarizePlay(log);
+    expect(summary).toMatchObject({saved:4,killed:5,round:7});
+    expect(summary.entries.filter(e=>e.kind==='killed')).toEqual([expect.objectContaining({id:death.id,quantity:3,currentRound:6,victim:'Toby'})]);
+    expect(playStoryBeats(log)).toContain('3 victims killed');
+    expect(validPlayLog(log)).toBe(true);
+    expect(validPlayLog([{...log[log.length-1],delta:2}])).toBe(false);
+  });
+  it('supports legacy reductions, later baseline corrections and per-tap Undo/restore', () => {
+    const death=event({kind:'killed',quantity:3});
+    const add=change(death.id,1);
+    const remove=change(death.id,-1);
+    const log=[start(),death,event({kind:'reduce',target:death.id}),event({kind:'adjust',saved:8,killed:10,round:9}),add,remove];
+    expect(summarizePlay(log)).toMatchObject({saved:8,killed:10});
+    expect(summarizePlay(log).entries.find(e=>e.id===death.id)).toMatchObject({quantity:2,currentRound:6});
+    const undo=event({kind:'undo',target:remove.id});
+    expect(summarizePlay([...log,undo]).killed).toBe(11);
+    expect(summarizePlay([...log,undo,event({kind:'restore',target:remove.id})]).killed).toBe(10);
+    expect(summarizePlay([...log,event({kind:'undo',target:death.id})]).killed).toBe(10);
+  });
+  it('main counter reductions after additions remove actual members and undo the whole group atomically', async () => {
+    const {decrementPlay}=await import('./events');
+    const death=event({kind:'killed',quantity:1});
+    const log=[start(),death,change(death.id,1),change(death.id,1)];
+    log.push(event(decrementPlay(log,'killed')!));
+    expect(summarizePlay(log).killed).toBe(4);
+    expect(summarizePlay(log).entries.find(e=>e.id===death.id)?.quantity).toBe(2);
+    log.push(event(decrementPlay(log,'killed')!));
+    expect(summarizePlay(log).killed).toBe(3);
+    log.push(event(decrementPlay(log,'killed')!));
+    expect(summarizePlay(log).killed).toBe(2);
+    expect(summarizePlay(log).entries.some(e=>e.id===death.id)).toBe(false);
+    log.push(event({kind:'restore',target:death.id}));
+    expect(summarizePlay(log).entries.find(e=>e.id===death.id)?.quantity).toBe(1);
+  });
+  it('does not resurrect undone/empty groups or overflow group/tally bounds', async () => {
+    const {canChangeDeathCount}=await import('./events');
+    const death=event({kind:'killed',quantity:1});
+    const log=[start(),death];
+    expect(canChangeDeathCount(log,change(death.id,-1))).toBe(false);
+    expect(canChangeDeathCount([...log,event({kind:'undo',target:death.id})],change(death.id,1))).toBe(false);
+    expect(canChangeDeathCount([...log,event({kind:'reduce',target:death.id})],change(death.id,1))).toBe(false);
+    expect(summarizePlay([...log,event({kind:'undo',target:death.id}),change(death.id,1)]).killed).toBe(2);
+    const full=event({kind:'killed',quantity:50});
+    expect(canChangeDeathCount([start(),full],change(full.id,1))).toBe(false);
+    expect(canChangeDeathCount([...log,event({kind:'adjust',saved:8,killed:999,round:null})],change(death.id,1))).toBe(false);
+  });
+});

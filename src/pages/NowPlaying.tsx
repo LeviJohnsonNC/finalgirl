@@ -39,6 +39,7 @@ interface NowPlayingProps {
   playMode?: boolean;
   playDrafts?: Record<string, PlayDetails>;
   showDeathPanel?: boolean;
+  getPlayEvents?: () => PlayEvent[];
   syncPlayNow?: ()=>Promise<boolean>;
   onPlayEvent?: (event: PlayEvent) => boolean;
   initialStory?: string;
@@ -58,7 +59,7 @@ interface NowPlayingProps {
 }
 
 const NowPlaying = ({
-  playEvents = [], playDrafts = {}, playMode = false, showDeathPanel = true, syncPlayNow, onPlayEvent, playSyncBlocked=false,
+  playEvents = [], playDrafts = {}, playMode = false, showDeathPanel = true, syncPlayNow, getPlayEvents, onPlayEvent, playSyncBlocked=false,
   sessionId, initialStory, initialSceneImageUrl, initialVisualBible, onCheckpoint, onDiscard,
   killer,
   location,
@@ -308,7 +309,7 @@ const NowPlaying = ({
     showDeathDetails={showDeathPanel} onShowDeathDetails={enabled => onCheckpoint({showDeathPanel: enabled})}
     drafts={playDrafts} onDraft={saveDraft}
     moduleControls={<ModuleControls sessionId={sessionId} killer={killer} location={location} finalGirl={finalGirl} events={playEvents} onEvent={recordPlayEvent} blocked={playSyncBlocked} />}
-    deathPanel={deathEventId && syncPlayNow ? <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl}} events={playEvents} eventId={deathEventId} draft={playDrafts[deathEventId]} onDraft={saveDraft} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/> : undefined}
+    deathPanel={deathEventId && syncPlayNow ? <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl}} events={playEvents} getEvents={getPlayEvents} eventId={deathEventId} draft={playDrafts[deathEventId]} onDraft={saveDraft} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/> : undefined}
     onDeath={event=>setDeathEventId(event.id)}/>;
 
   return (

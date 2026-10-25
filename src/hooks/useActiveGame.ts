@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 import { readStoredValue, useLocalStorage } from './useLocalStorage';
-import { isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
+import { canChangeDeathCount, isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
 import { ActiveGame, isActiveGame } from '@/lib/activeGame';
 import { mapleLinkedChange } from '../../supabase/functions/_shared/play/maple';
 import { initialModuleObservations, moduleState } from '@/lib/play/modules';
@@ -45,6 +45,7 @@ export function useActiveGame() {
       // owns uniqueness, including two taps arriving before React renders.
       if (isPermanentMoment(event) && summarizePlay(previous.playEvents).entries.some(entry => entry.kind === 'moment' && entry.momentType === event.momentType)) return previous;
       const log = previous.playEvents ?? [];
+      if (event.kind === 'death-count' && !canChangeDeathCount(log, event)) return previous;
       let accepted = event;
       if (event.moduleData?.module === 'maple' && previous.selection.location !== 'Maple Lane') return previous;
       if (event.moduleData?.module === 'fright') {

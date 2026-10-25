@@ -41,6 +41,8 @@ async function fixture({
   camp = false,
   drFright = false,
   expandedFright = false,
+  legacy = false,
+  countChanged = false,
 } = {}) {
   const state = {
     selection: {
@@ -82,8 +84,9 @@ async function fixture({
     state.playEvents.push(deathEvent);
   }
   const signature = await death.deathSignature(
-    death.deathFacts(state.selection, state.playEvents, eventId),
+    death.deathFacts(state.selection, state.playEvents, eventId), legacy ? "legacy" : "current",
   );
+  if (countChanged) state.playEvents.push(events.newPlayEvent({kind:"death-count",target:eventId,delta:1}));
   if (undone)
     state.playEvents.push({
       id: '44444444-4444-4444-8444-444444444444',
@@ -227,3 +230,11 @@ test('saved Camp scenes with Hans observations retain their canonical narration 
 test('Dr. Fright saved narration accepts owned snapshots with public historical identity',async()=>{const f=await fixture({drFright:true});assert.equal((await f.handler(f.request())).status,200);assert.deepEqual(f.spoken,['The canonical owned scene is narrated.']);});
 
 test('expanded Dr. Fright saved scenes narrate with canonical Minor and temporary-effect identity',async()=>{const f=await fixture({drFright:true,expandedFright:true});assert.equal((await f.handler(f.request())).status,200);assert.deepEqual(f.spoken,['The canonical owned scene is narrated.']);});
+
+for (const legacy of [false,true]) test(`Dr. Fright ${legacy?'legacy':'current'} canonical narration survives profile changes but rejects a changed victim count`, async()=>{
+  const valid=await fixture({drFright:true,legacy});
+  assert.equal((await valid.handler(valid.request())).status,200);
+  const changed=await fixture({drFright:true,legacy,countChanged:true});
+  assert.equal((await changed.handler(changed.request())).status,409);
+  assert.deepEqual(changed.spoken,[]);
+});

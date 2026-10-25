@@ -27,6 +27,7 @@ import {
 import {
   deathFacts,
   deathSignature,
+  deathSignatures,
   deathCauseLabels,
   detailsForCause,
   isCompleteDeathText,
@@ -45,6 +46,7 @@ interface Props {
   sessionId: string;
   selection: DeathSelection;
   events: PlayEvent[];
+  getEvents?: () => PlayEvent[];
   eventId: string;
   onClose: () => void;
   onEvent: (e: PlayEvent) => boolean;
@@ -57,6 +59,7 @@ export function DeathSceneDialog({
   sessionId,
   selection,
   events,
+  getEvents,
   eventId,
   onClose,
   onEvent,
@@ -81,7 +84,7 @@ export function DeathSceneDialog({
     ...initial,
     ...draft,
   }));
-  const [signature, setSignature] = useState("");
+  const [signatures, setSignatures] = useState<string[]>([]);
   const [take, setTake] = useState(0);
   const [requested, setRequested] = useState(false);
   const [editingDetails, setEditingDetails] = useState(false);
@@ -102,17 +105,24 @@ export function DeathSceneDialog({
   }, [eventId, draftText]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     let live = true;
-    setSignature("");
+    setSignatures([]);
     if (facts)
-      void deathSignature(facts).then((value) => {
-        if (live) setSignature(value);
+      void deathSignatures(facts).then((value) => {
+        if (live) setSignatures(value);
       });
     return () => {
       live = false;
     };
   }, [serialized]); // eslint-disable-line react-hooks/exhaustive-deps
+  const signature = signatures[0];
+  const currentScenes = scenes.rows.filter(r => r.event_id === eventId && r.signature === signature);
+  // Reopening old scenes is free. The primary action explicitly writes the new
+  // portrayal, with its own three slots, without deleting old text or audio.
+  const currentTakes = currentScenes.filter(r => isCompleteDeathText(r.scene_text));
+  const displaySignature = currentTakes.length ? signature : (signatures.find(sig => scenes.rows.some(r => r.event_id === eventId && r.signature === sig && isCompleteDeathText(r.scene_text))) ?? signature);
+  const legacyPortrayal = Boolean(displaySignature && signature && displaySignature !== signature);
   const matchingScenes = scenes.rows
-    .filter((r) => r.event_id === eventId && r.signature === signature)
+    .filter((r) => r.event_id === eventId && r.signature === displaySignature)
     .sort((a, b) => a.take - b.take);
   const takes = matchingScenes.filter((r) => isCompleteDeathText(r.scene_text));
   const unfinished = matchingScenes.length > takes.length;
@@ -147,9 +157,9 @@ export function DeathSceneDialog({
     return ok;
   };
   const generate = async (next: number) => {
-    setRequested(true);
     setResultError("");
     if (save()) {
+      setRequested(true);
       setTake(next);
       setEditingDetails(false);
       const clean = Object.fromEntries(
@@ -161,7 +171,7 @@ export function DeathSceneDialog({
       const expected = deathFacts(
         selection,
         [
-          ...events,
+          ...(getEvents?.() ?? events),
           newPlayEvent({ kind: "details", target: eventId, ...clean }),
         ],
         eventId,
@@ -177,6 +187,14 @@ export function DeathSceneDialog({
         );
       }
     }
+  };
+  const changeCount = (delta: 1 | -1) => {
+    if (onEvent(newPlayEvent({kind: "death-count", target: eventId, delta}))) {
+      setMessage("");
+      setResultError("");
+      setRequested(false);
+      setTake(0);
+    } else setMessage("The victim count could not be changed. Please try again.");
   };
   const cancel = () => {
     // Keep the recorded death and any already saved/generated facts, discard this edit.
@@ -210,6 +228,7 @@ export function DeathSceneDialog({
     >
       <DialogContent
         className="play-death-modal play-death-modal--illustrated play-death-modal--compact"
+        data-reading={reading}
         onOpenAutoFocus={(e) => {
           e.preventDefault();
           document
@@ -219,19 +238,33 @@ export function DeathSceneDialog({
       >
         <div className="play-death-heading">
           <p className="play-eyebrow">
-            ONE LESS SOUL / ROUND {facts.round ?? "?"}
+            {facts.quantity === 1 ? "ONE LESS SOUL" : `${facts.quantity} SOULS LOST`} / ROUND {facts.round ?? "?"}
           </p>
           <DialogTitle>Gruesome Death</DialogTitle>
           <DialogDescription>
-            Add details, or return to the game.
+            {reading ? "" : "Add details, or return to the game."}
           </DialogDescription>
         </div>
         <div className="play-death-body" data-mode={reading ? "reading" : "editing"}>
-          <div className="play-cause-section" id="play-cause-first" tabIndex={-1}>
+          {reading ? (
+            <div className="play-death-context">
+              <p><strong>{facts.quantity} {facts.quantity === 1 ? "victim" : "victims"}</strong> · {deathCauseLabels[facts.cause]}{facts.room ? ` · ${facts.room}` : ""}</p>
+              <button className="play-death-edit" disabled={scenes.busy} onClick={() => {
+                setEditingDetails(true);
+                requestAnimationFrame(() => document.getElementById("play-cause-first")?.focus({ preventScroll: true }));
+              }}>Edit death details</button>
+            </div>
+          ) : <div className="play-cause-section" id="play-cause-first" tabIndex={-1}>
             <div className="play-death-section-heading">
               <h3>What caused it?</h3>
-              {reading && <button className="play-death-edit" disabled={scenes.busy} onClick={() => setEditingDetails(true)}>Edit death details</button>}
               {editingDetails && selected && !dirty && <button className="play-death-edit" onClick={() => setEditingDetails(false)}>Read scene</button>}
+            </div>
+            <div className="play-death-count" role="group" aria-label="Victims in this death">
+              <span>Victims</span>
+              <button aria-label="Remove one victim from this death" disabled={scenes.busy || facts.quantity <= 1} onClick={() => changeCount(-1)}>−</button>
+              <output aria-live="polite" aria-label="Victim count">{facts.quantity}</output>
+              <button aria-label="Add one victim to this death" disabled={scenes.busy || facts.quantity >= 50} onClick={() => changeCount(1)}>+</button>
+              <span className="sr-only">Count changes are recorded immediately and can be undone in the timeline.</span>
             </div>
             <div
               className="play-cause-choices"
@@ -269,7 +302,7 @@ export function DeathSceneDialog({
                 </button>
               ))}
             </div>
-          </div>
+          </div>}
           {!reading && values.cause !== "unspecified" && (
             <div className="play-death-fields">
               {values.cause === "minion" && (
@@ -337,7 +370,7 @@ export function DeathSceneDialog({
                 />
               </label>
               <label>
-                Victim
+                {facts.quantity > 1 ? "Victims / group" : "Victim"}
                 <PlaySearch
                   label="Victim name or role"
                   value={values.victim || "Regular victim"}
@@ -348,7 +381,7 @@ export function DeathSceneDialog({
                     "Regular victim",
                     ...playVictims(selection.location).map(v => v.name),
                   ]}
-                  placeholder="Regular victim"
+                  placeholder={facts.quantity > 1 ? "Names or a group description" : "Regular victim"}
                 />
               </label>
               <label className="play-death-note">
@@ -427,7 +460,7 @@ export function DeathSceneDialog({
               {!scenes.busy && resultError && selected && !dirty && (
                 <p role="alert">{resultError}</p>
               )}
-              {!scenes.busy && selected && !dirty && takes.length >= 3 && (
+              {!scenes.busy && selected && !dirty && currentTakes.length >= 3 && (
                 <p className="play-card-note">
                   Three versions are saved for this death.
                 </p>
@@ -441,7 +474,7 @@ export function DeathSceneDialog({
         <div className="play-death-footer">
         {message && <p className="play-death-save-error" role="alert">{message}</p>}
         <div className="play-death-actions">
-          <button onClick={cancel}>Cancel</button>
+          <button onClick={cancel}>{reading ? "Back to game" : "Cancel"}</button>
           <button
             onClick={() => {
               if (save()) onClose();
@@ -451,18 +484,18 @@ export function DeathSceneDialog({
           </button>
           <button
             className="play-gruesome-action"
-            disabled={scenes.busy || (!dirty && takes.length >= 3)}
+            disabled={scenes.busy || !signature || (!dirty && currentTakes.length >= 3)}
             onClick={() =>
               void generate(
                 !dirty
                   ? ([0, 1, 2].find(
-                      (next) => !takes.some((r) => r.take === next),
+                      (next) => !currentTakes.some((r) => r.take === next),
                     ) ?? 2)
                   : 0,
               )
             }
           >
-            {scenes.busy ? "Writing the death…" : "Gruesome Death"}
+            {scenes.busy ? "Writing the death…" : legacyPortrayal && !dirty ? "Rewrite death" : "Gruesome Death"}
           </button>
         </div>
         </div>

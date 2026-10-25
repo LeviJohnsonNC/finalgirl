@@ -2,12 +2,12 @@ import { DeathNarration } from './DeathNarration';
 import { getFilmIdByLocation } from '@/types/gameData';
 import { useEffect, useState } from 'react';
 import { useDeathScenes } from '@/hooks/play/useDeathScenes';
-import { deathFacts, deathSignature } from '@/lib/play/death';
+import { deathFacts, deathSignatures } from '@/lib/play/death';
 import type { GameResult } from '@/hooks/useGameHistory';
 export function RecordedDeathScenes({ game }: { game: GameResult }) {
   const [expanded, setExpanded] = useState(false);
   const { rows, error, refresh } = useDeathScenes(game.id);
-  const [signatures, setSignatures] = useState<Record<string, string>>({});
+  const [signatures, setSignatures] = useState<Record<string, string[]>>({});
   useEffect(() => {
     let live = true;
     void (async () => {
@@ -16,19 +16,19 @@ export function RecordedDeathScenes({ game }: { game: GameResult }) {
           .filter((e) => e.kind === 'killed')
           .map(async (e) => {
             const f = deathFacts(game, game.playEvents!, e.id);
-            return f ? [e.id, await deathSignature(f)] : null;
+            return f ? [e.id, await deathSignatures(f)] as [string, string[]] : null;
           }),
       );
       if (live)
         setSignatures(
-          Object.fromEntries(pairs.filter((p): p is string[] => p !== null)),
+          Object.fromEntries(pairs.filter((p): p is [string, string[]] => p !== null)),
         );
     })();
     return () => {
       live = false;
     };
   }, [game]);
-  const scenes = rows.filter((r) => r.signature === signatures[r.event_id]);
+  const scenes = rows.filter((r) => signatures[r.event_id]?.includes(r.signature));
   if (!scenes.length && !error) return null;
   return (
     <details

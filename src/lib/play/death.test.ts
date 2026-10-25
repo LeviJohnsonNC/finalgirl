@@ -202,3 +202,35 @@ describe("death prose completeness", () => {
     expect(isCompleteDeathText(paragraph.repeat(10))).toBe(false);
   });
 });
+
+it('versions only Dr. Fright generation and preserves canonical legacy scene authorization', async () => {
+  const {deathSignatures}=await import('./death');
+  const death=newPlayEvent({kind:'killed',quantity:1,cause:'killer'});
+  const log=[newPlayEvent({kind:'start',saved:0,killed:0,round:4}),death];
+  const facts=deathFacts({...selection,killer:'Dr. Fright'},log,death.id)!;
+  expect(await deathSignature(facts)).not.toBe(await deathSignature(facts,'legacy'));
+  expect(await deathSignatures(facts)).toHaveLength(2);
+  const unrelated=deathFacts(selection,log,death.id)!;
+  expect(await deathSignatures(unrelated)).toHaveLength(1);
+  const change=newPlayEvent({kind:'death-count',target:death.id,delta:1});
+  const updated=deathFacts({...selection,killer:'Dr. Fright'},[...log,change],death.id)!;
+  expect(updated).toMatchObject({quantity:2,round:4});
+  expect(await deathSignatures(updated)).not.toContain(await deathSignature(facts,'legacy'));
+  const restored=deathFacts({...selection,killer:'Dr. Fright'},[...log,change,newPlayEvent({kind:'undo',target:change.id})],death.id)!;
+  expect(await deathSignatures(restored)).toEqual(await deathSignatures(facts));
+});
+
+it('gives Dr. Fright explicit private-dream direction without overriding recorded causes or other killers', async () => {
+  const {deathPrompt}=await import('../../../supabase/functions/_shared/deathPrompt');
+  const death=newPlayEvent({kind:'killed',quantity:3,cause:'hazard',mechanism:'Fire',victim:'One named adult'});
+  const log=[newPlayEvent({kind:'start',saved:0,killed:0,round:1}),death];
+  const prompt=deathPrompt(deathFacts({...selection,killer:'Dr. Fright'},log,death.id)!,[]);
+  expect(prompt.system).toContain("victims' private nightmares");
+  expect(prompt.system).toContain('Preserve any explicit fire, hazard');
+  expect(prompt.system).toContain('never duplicate that person');
+  const data=JSON.parse(prompt.user);
+  expect(data.recordedFacts).toMatchObject({quantity:3,cause:'hazard',mechanism:'Fire',location:'Camp Happy Trails'});
+  expect(data.killerCue).toContain('milky-white eyes');
+  expect(data.killerCue).toContain('three-tined pitchfork');
+  expect(deathPrompt(deathFacts(selection,log,death.id)!,[]).system).not.toContain('Dr. Fright creative direction');
+});
