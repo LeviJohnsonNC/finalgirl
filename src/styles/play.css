@@ -2144,7 +2144,14 @@ body:has(.play-workspace) .app-shell {
   justify-content: space-between;
   margin: 0 0 10px;
 }
-.play-death-modal--compact .play-death-story-heading h3 { font-size: 23px; }
+.play-death-modal--compact .play-death-story-heading h3 { font-size: 23px; flex: 1; min-width: 0; }
+.play-death-modal--compact .play-death-alternate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
 .play-death-modal--compact .play-death-narration { flex: 0 1 auto; }
 .play-death-prose-scroll {
   min-height: 0;
@@ -2188,6 +2195,8 @@ body:has(.play-workspace) .app-shell {
   .play-death-modal--compact .play-death-actions > .play-gruesome-action { grid-column: 1/-1; grid-row: 2; }
   .play-death-body[data-mode="reading"] .play-death-payoff { padding: 12px; }
   .play-death-modal--compact .play-death-story-heading h3 { font-size: 19px; }
+  .play-death-modal--compact .play-death-alternate { width: 44px; padding: 6px; }
+  .play-death-modal--compact .play-death-alternate > span { display: none; }
   .play-death-modal--compact .play-death-prose { font-size: 17px; }
   .play-death-modal--compact .play-death-edit { padding-inline: 6px; font-size: 12px; }
 }

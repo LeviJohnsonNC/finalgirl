@@ -80,10 +80,16 @@ test('killer selection, Epic borders and rules disclosure stay distinct and neve
  const epic=cards.getByRole('button',{name:'Choose Join the Family',exact:true});
  await selected.click();await expect(selected).toHaveAttribute('aria-pressed','true');
  await expect(epic).toHaveAttribute('data-epic','true');
- await expect.poll(()=>selected.locator('.play-module-art').evaluate(el=>getComputedStyle(el).filter)).toBe('none');
+ const brightness=(tile:typeof selected)=>tile.locator('.play-module-art').evaluate(el=>Number(getComputedStyle(el).filter.match(/brightness\(([.\d]+)\)/)?.[1] ?? 1));
+ await expect.poll(()=>brightness(selected)).toBeGreaterThanOrEqual(1);
+ // Selection stays vivid while hovered, focused, or under a phone's sticky hover.
+ await selected.hover();await expect.poll(()=>brightness(selected)).toBeGreaterThanOrEqual(1);
+ await selected.focus();await expect.poll(()=>brightness(selected)).toBeGreaterThanOrEqual(1);
+ await cards.getByRole('heading',{name:'Dark Power',exact:true}).hover();
  const dimming=await epic.locator('.play-module-art').evaluate(el=>Number(getComputedStyle(el).filter.match(/brightness\(([.\d]+)\)/)?.[1] ?? 1));
  expect(dimming).toBeLessThanOrEqual(.45);
- await expect(panel.locator('.module-selected-card')).toHaveCount(0);
+ await expect(cards.locator('[aria-pressed="true"]')).toHaveCount(1);
+ await expect(selected.locator('.module-power-selected')).toBeVisible();
  const before=await log(page);await cards.locator('.module-card-rules > summary').click();
  await expect(cards.locator('.module-card-rules')).toContainText('first damage');expect(await log(page)).toEqual(before);
  await epic.click();await expect(epic).toHaveAttribute('aria-pressed','true');

@@ -13,7 +13,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { PlaySearch } from "./PlaySearch";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { DeathNarration } from "./DeathNarration";
 import { getFilmIdByLocation } from "@/types/gameData";
@@ -422,6 +422,18 @@ export function DeathSceneDialog({
                 <section aria-label="Generated death scene">
                   <div className="play-death-story-heading">
                     <h3>The last thing they saw</h3>
+                    {currentTakes.length < 3 && (
+                      <button
+                        className="play-death-edit play-death-alternate"
+                        aria-label={legacyPortrayal ? "Rewrite death" : "Another version"}
+                        title={legacyPortrayal ? "Rewrite death" : "Another version"}
+                        disabled={scenes.busy || !signature}
+                        onClick={generateNext}
+                      >
+                        <RefreshCw size={16} aria-hidden="true" />
+                        <span>{legacyPortrayal ? "Rewrite death" : "Another version"}</span>
+                      </button>
+                    )}
                     <DeathNarration key={selected.id} scene={selected} filmId={getFilmIdByLocation(selection.location)} />
                   </div>
                   <div className="play-death-prose-scroll" role="region" aria-label="Death scene text" tabIndex={0}>
@@ -435,11 +447,6 @@ export function DeathSceneDialog({
                     ))}
                   </div>
                   <div className="play-death-story-tools">
-                    {currentTakes.length < 3 && (
-                      <button className="play-death-edit" disabled={scenes.busy || !signature} onClick={generateNext}>
-                        {legacyPortrayal ? "Rewrite death" : "Another version"}
-                      </button>
-                    )}
                     {takes.length > 1 && (
                       <div role="group" aria-label="Death scene takes">
                         {takes.map((scene) => (

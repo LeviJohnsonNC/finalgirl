@@ -377,8 +377,8 @@
   filter: brightness(.36) saturate(.45);
   transition: filter 160ms ease;
 }
-.module-card-grid .module-killer-card:hover:not(:disabled) > .play-module-art,
-.module-card-grid .module-killer-card:focus-visible > .play-module-art {
+.module-card-grid .module-killer-card:not([aria-pressed="true"]):hover:not(:disabled) > .play-module-art,
+.module-card-grid .module-killer-card:not([aria-pressed="true"]):focus-visible > .play-module-art {
   filter: brightness(.6) saturate(.65);
 }
 .module-card-grid .module-killer-card[aria-pressed="true"] > .play-module-art {
