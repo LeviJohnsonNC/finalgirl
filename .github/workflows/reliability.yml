@@ -87,7 +87,7 @@ jobs:
           path: |
             blob-report/
             test-results/
-          retention-days: 1
+          retention-days: 14
   browser-reports:
     # Preserve the device check names and one complete HTML report per device.
     name: browser (${{ matrix.project }})
