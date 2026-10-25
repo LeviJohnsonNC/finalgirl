@@ -32,7 +32,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   'Inkanyamba': {
     narrativeNote:
-      'A powerful serpentine creature tied to storms and water. Its movements and aggression are influenced by weather conditions — a rising storm means a more dangerous Inkanyamba.',
+      'A masked human-shaped avenger wielding paired curved weapons. Killer Wrath ranges from 1 to 10 and is separate from Bloodlust and any location Wrath. Use the selected location and only recorded outcomes; do not invent weather-controlled movement, a serpent body, or extra casualties.',
   },
 
   'Geppetto': {

@@ -1,3 +1,4 @@
+import { INKANYAMBA_VISUAL } from "./play/inkanyamba.ts";
 import { CARNIVAL_VISUAL } from './play/carnival.ts';
 import { GEPPETTO_VISUAL } from './play/geppetto.ts';
 import { FRIGHT_VISUAL } from './play/fright.ts';
@@ -5,6 +6,7 @@ import { HANS_VISUAL } from './play/camp.ts';
 // Concise setting cues from src/data/killerDescriptions.ts and locationDescriptions.ts.
 // Fictional appearance only: the player records actual causes and board spaces.
 export const DEATH_KILLER_CUES: Record<string, string> = {
+  Inkanyamba: INKANYAMBA_VISUAL,
   'Billy the Bear':
     'A short, stocky orange-brown animatronic bear with a ruined plush suit, round ears, pink glowing mechanical eye sockets, a blue collar, and a torn muzzle with visible teeth. Torn fabric exposes blue-black metal joints and a skeletal mechanical arm. He is a physical machine, not a human wearing a costume. Keep his cartoon welcome unsettling rather than friendly.',
   'The Eyeless':

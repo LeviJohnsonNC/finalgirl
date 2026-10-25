@@ -1,3 +1,5 @@
+import { inkanyambaCell } from "./inkanyambaArt";
+import { INKANYAMBA_POWERS, INKANYAMBA_FINALES } from "../../../supabase/functions/_shared/play/inkanyamba";
 import {
   BILLY_POWERS,
   BILLY_FINALES,
@@ -45,7 +47,7 @@ export function illustratedKillerCards(
 ): IllustratedKillerCard[] {
   const power = type === "dark-power";
   const cards =
-    killer === "Billy the Bear"
+    killer === "Inkanyamba" ? power ? INKANYAMBA_POWERS : INKANYAMBA_FINALES : killer === "Billy the Bear"
       ? power
         ? BILLY_POWERS.filter((card) => !("health" in card))
         : BILLY_FINALES
@@ -65,7 +67,7 @@ export function illustratedKillerCards(
         ("epic" in card && card.epic === true) ||
         card.effect.startsWith("Epic"),
       art:
-        killer === "Dr. Fright" ? atlasCell(frightCards,index+(power?0:4),1254,1254) : killer === "Geppetto"
+        killer === "Inkanyamba" ? inkanyambaCell(index + (power ? 0 : 4)) : killer === "Dr. Fright" ? atlasCell(frightCards,index+(power?0:4),1254,1254) : killer === "Geppetto"
           ? atlasCell(geppettoCards, index + (power ? 0 : 4), 1254, 1254)
           : atlasCell(
               killer === "Hans" ? hansCards : billyCards,

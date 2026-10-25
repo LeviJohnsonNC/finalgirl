@@ -269,3 +269,40 @@ it('persists rapid relative death-count taps, rejects duplicate/stale/failed wri
   act(()=>expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'death-count',target:death.id,delta:1}))).toBe(false));
   expect(summarizePlay(result.current.activeGame.playEvents).killed).toBe(0);
 });
+
+describe('Inkanyamba durable boundaries',()=>{
+  const ink={...game,inkanyambaSetupVersion:1 as const,selection:{...game.selection,killer:'Inkanyamba'},formDraft:{killerHealth:4}};
+  const change=(changes:Record<string,number|boolean|null>)=>newPlayEvent({kind:'module',moduleData:{module:'inkanyamba',changes}});
+  it('seeds fresh setup once, preserves saved health, and never backfills a legacy session',()=>{
+    const {result}=renderHook(useActiveGame);
+    act(()=>{result.current.save(ink);result.current.appendPlayEvent(game.id,newPlayEvent({kind:'saved',quantity:1}));});
+    expect(moduleState(summarizePlay(result.current.activeGame.playEvents).entries,'inkanyamba').wrath).toBe(2);
+    expect(result.current.activeGame.formDraft.killerHealth).toBe(4);
+    act(()=>{result.current.appendPlayEvent(game.id,change({wrath:null}));});
+    act(()=>{result.current.appendPlayEvent(game.id,newPlayEvent({kind:'saved',quantity:1}));});
+    expect(moduleState(summarizePlay(result.current.activeGame.playEvents).entries,'inkanyamba').wrath).toBeUndefined();
+    act(()=>{result.current.save({...ink,inkanyambaSetupVersion:undefined,playEvents:[]});result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));});
+    expect(moduleState(summarizePlay(result.current.activeGame.playEvents).entries,'inkanyamba')).toEqual({});
+  });
+  it('rejects foreign writes and duplicate or unearned Finale resolution; supports atomic Undo',()=>{
+    const {result}=renderHook(useActiveGame);
+    act(()=>result.current.save(game));
+    act(()=>expect(result.current.appendPlayEvent(game.id,change({wrath:3}))).toBe(false));
+    act(()=>result.current.save(ink));
+    act(()=>expect(result.current.appendPlayEvent(game.id,change({wrath:10,miracleResolved:true}))).toBe(false));
+    const reveal=newPlayEvent({kind:'moment',momentType:'finale',text:'Finale revealed',killerCard:'We Need a Miracle',permanent:true});
+    act(()=>{result.current.appendPlayEvent(game.id,reveal);});
+    const resolution=change({wrath:10,miracleResolved:true});
+    act(()=>{
+      expect(result.current.appendPlayEvent(game.id,resolution)).toBe(true);
+      expect(result.current.appendPlayEvent(game.id,change({wrath:10,miracleResolved:true}))).toBe(false);
+    });
+    act(()=>{result.current.appendPlayEvent(game.id,change({wrath:4}));result.current.appendPlayEvent(game.id,newPlayEvent({kind:'details',target:reveal.id,killerCard:'Violent Tantrum'}));result.current.appendPlayEvent(game.id,newPlayEvent({kind:'details',target:reveal.id,killerCard:'We Need a Miracle'}));});
+    expect(moduleState(summarizePlay(result.current.activeGame.playEvents).entries,'inkanyamba').wrath).toBe(4);
+    act(()=>expect(result.current.appendPlayEvent(game.id,change({wrath:10,miracleResolved:true}))).toBe(false));
+    act(()=>result.current.appendPlayEvent(game.id,newPlayEvent({kind:'undo',target:resolution.id})));
+    const s=moduleState(summarizePlay(result.current.activeGame.playEvents).entries,'inkanyamba');
+    expect(s.wrath).toBe(4);expect(s.miracleResolved).toBeUndefined();
+    act(()=>expect(result.current.appendPlayEvent(game.id,change({wrath:10,miracleResolved:true}))).toBe(true));
+  });
+});

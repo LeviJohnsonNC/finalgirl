@@ -1,0 +1,246 @@
+.play-inkanyamba {
+  --ink-amber: #f0bb72;
+  --ink-red: #d74636;
+  display: grid;
+  gap: 1rem;
+  color: #e7d9c8;
+}
+.ink-wrath {
+  border: 1px solid #84513480;
+  border-radius: 12px;
+  padding: clamp(0.8rem, 2vw, 1.25rem);
+  background: linear-gradient(135deg, #251d18, #110f10 70%);
+  box-shadow: inset 0 1px #ffffff09;
+}
+.ink-wrath-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+.ink-wrath-heading h3 {
+  font-family: var(--font-display, "Bebas Neue", sans-serif);
+  font-size: 1.6rem;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+.ink-eyebrow {
+  font-size: 0.64rem;
+  letter-spacing: 0.25em;
+  color: var(--ink-amber);
+}
+.ink-wrath-heading output {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: var(--ink-amber);
+  line-height: 1;
+}
+.ink-wrath-heading output small {
+  font-size: 0.85rem;
+  color: #a38f7b;
+  margin-left: 0.25rem;
+}
+.ink-track {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+.ink-track button {
+  min-height: 44px;
+  border: 1px solid #5b4638;
+  border-radius: 5px;
+  background: #1c1715;
+  color: #b6a293;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.ink-track button[data-filled="true"] {
+  background: #642a20;
+  color: #f4d2ac;
+  border-color: #a25136;
+}
+.ink-track button[aria-pressed="true"] {
+  background: var(--ink-amber);
+  color: #24150d;
+  outline: 2px solid #fff1d2;
+  outline-offset: 2px;
+  box-shadow: 0 0 18px #e8914930;
+}
+.ink-adjust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  margin: 0.85rem 0;
+}
+.ink-adjust button {
+  width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  background: #30231d;
+  border: 1px solid #81604a;
+  font-size: 1.5rem;
+  color: #f0d9ba;
+}
+.ink-adjust span {
+  min-width: 110px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #c8b29a;
+}
+.ink-unleash {
+  display: flex;
+  gap: 0.8rem;
+  padding: 0.9rem;
+  border-left: 3px solid var(--ink-red);
+  background: #120b0b;
+  border-radius: 0 8px 8px 0;
+}
+.ink-bolt {
+  font-size: 2.7rem;
+  color: var(--ink-red);
+  line-height: 1;
+}
+.play-inkanyamba h4 {
+  font-weight: 700;
+  color: #f5d9b7;
+  margin: 0 0 0.3rem;
+}
+.play-inkanyamba p {
+  font-size: 0.86rem;
+  line-height: 1.6;
+  margin: 0.25rem 0;
+}
+.ink-reminders {
+  margin-top: 0.8rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #79513960;
+  background: #261911;
+  border-radius: 7px;
+}
+.ink-reminders strong {
+  color: var(--ink-amber);
+}
+.ink-details {
+  border-top: 1px solid #78503750;
+  padding-top: 0.65rem;
+  margin-top: 0.6rem;
+}
+.ink-details summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: #c8b29b;
+  font-size: 0.85rem;
+}
+.ink-details p {
+  color: #bba894;
+}
+.ink-details > button,
+.ink-miracle button {
+  min-height: 44px;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #70513d;
+  border-radius: 6px;
+  background: #2a1c16;
+  color: #ead5bd;
+  margin-top: 0.5rem;
+}
+.ink-atonement {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+.ink-atonement button {
+  min-height: 64px;
+  display: grid;
+  gap: 0.25rem;
+  background: #201b17;
+  border: 1px solid #5f4b36;
+  border-radius: 7px;
+  padding: 0.5rem;
+  color: #d9c4aa;
+}
+.ink-atonement button span {
+  font-size: 0.7rem;
+}
+.ink-atonement button strong {
+  color: var(--ink-amber);
+  font-size: 1rem;
+}
+.ink-action {
+  padding: 0.8rem 1rem;
+  background: #181311;
+  border: 1px solid #72523c60;
+  border-radius: 8px;
+}
+.ink-miracle {
+  border-top: 1px solid #64442d;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+}
+.ink-minors > h3 {
+  font-size: 1rem;
+  color: #dbc2a5;
+  margin: 0 0 0.75rem;
+}
+.ink-minor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+.ink-minor-grid .module-minor {
+  min-width: 0;
+}
+.ink-details ol {
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.ink-details li strong {
+  color: var(--ink-amber);
+  margin-right: 0.4rem;
+}
+.ink-reference-art {
+  display: none;
+}
+.play-inkanyamba button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.play-inkanyamba button:focus-visible,
+.play-inkanyamba summary:focus-visible {
+  outline: 2px solid #ffcd88;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .ink-track {
+    grid-template-columns: repeat(5, minmax(44px, 1fr));
+    gap: 0.25rem;
+  }
+  .ink-minor-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ink-wrath-heading h3 {
+    font-size: 1.4rem;
+  }
+  .ink-atonement {
+    gap: 0.35rem;
+  }
+  .ink-atonement button {
+    padding: 0.4rem 0.2rem;
+  }
+}
+/* Keep the actual mask visible in the wide laptop header crop. */
+.play-module-panel[data-module="inkanyamba"] > summary {
+  min-height: 160px;
+}
+.play-module-panel[data-module="inkanyamba"] > summary > img.play-module-art {
+  object-position: 50% 25%;
+}

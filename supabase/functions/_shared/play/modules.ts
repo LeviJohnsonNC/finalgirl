@@ -1,3 +1,5 @@
+import { INKANYAMBA_POWERS, INKANYAMBA_FINALES, INKANYAMBA_MINOR_POWERS, validInkanyambaField, inkanyambaFacts } from "./inkanyamba.ts";
+export { INKANYAMBA_POWERS, INKANYAMBA_FINALES, INKANYAMBA_MINOR_POWERS } from "./inkanyamba.ts";
 import { MAPLE_EVENTS, MAPLE_PEOPLE, MAPLE_ITEMS, validMapleField, mapleLabel, mapleValue, mapleStoryFacts, mapleStartingObservations } from "./maple.ts";
 import { FRIGHT_MINOR_POWERS, FRIGHT_CONDITIONS, FRIGHT_POWERS, FRIGHT_FINALES, validFrightChanges, parseFright, frightState, frightPublic, describeFright } from "./fright.ts";
 export { FRIGHT_POWERS, FRIGHT_FINALES } from "./fright.ts";
@@ -43,10 +45,11 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
+  inkanyambaReference?: true;
   id?: string;
   kind: string;
   moduleData?: ModuleObservation;
@@ -57,6 +60,7 @@ type ObservedEvent = {
 
 /** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
 export function killerMomentCards(killer: string, type: string) {
+  if (killer === "Inkanyamba") return [...(type === "dark-power" ? INKANYAMBA_POWERS : type === "finale" ? INKANYAMBA_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Dr. Fright") return [...(type === "dark-power" ? FRIGHT_POWERS : type === "finale" ? FRIGHT_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Geppetto")
     return [
@@ -141,6 +145,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === "inkanyamba") return validInkanyambaField(key, value);
   if (module === "maple") return validMapleField(key, value);
   if (module === "carnival") return validCarnivalField(key, value);
   if (module === "geppetto") return validGeppettoField(key, value);
@@ -253,7 +258,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    !["inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -277,6 +282,10 @@ export function moduleState(
   if (module === "fright") { const state=frightState(entries); if(!state) return {}; const {eventId:_id,...snapshot}=state; return {snapshot:JSON.stringify(snapshot),sleep:state.sleep,mode:state.mode,progress:state.path.length,...frightPublic(entries)}; }
   const state: ModuleState = {};
   for (const e of entries) {
+    if (module === "inkanyamba" && e.kind === "moment") {
+      if (e.momentType === "dark-power") { state.powerRevealed = true; state.power = INKANYAMBA_POWERS.find(c => c.name === e.killerCard)?.id ?? null; }
+      if (e.momentType === "finale") { state.finaleRevealed = true; state.finale = INKANYAMBA_FINALES.find(c => c.name === e.killerCard)?.id ?? null; }
+    }
     if (module === "geppetto" && e.kind === "moment") {
       if (e.momentType === "finale") {
         state.finaleRevealed = true;
@@ -326,6 +335,7 @@ export function moduleState(
   return state;
 }
 function fieldLabel(module: ModuleObservation["module"], key: string) {
+  if (module === "inkanyamba") return key === "wrath" ? "Killer Wrath" : key === "miracleResolved" ? "We Need a Miracle Wrath recorded" : `${INKANYAMBA_MINOR_POWERS.find(p => key === `minor.${p.id}.health`)?.name ?? key} Health`;
   if (module === "maple") return mapleLabel(key);
   if (module === "carnival") {
     const [group, id, field] = key.split(".");
@@ -432,6 +442,7 @@ export function moduleContext(
   const context: Record<string, ModuleState> = {};
   if (selection.killer === "Dr. Fright") { const facts=frightPublic(entries); if(facts) context.fright=facts; }
   for (const module of [
+    "inkanyamba",
     "billy",
     "buddyland",
     "hans",
@@ -441,7 +452,7 @@ export function moduleContext(
     "maple",
   ] as const) {
     const applies =
-      module === "maple" ? selection.location === "Maple Lane" : module === "carnival"
+      module === "inkanyamba" ? selection.killer === "Inkanyamba" : module === "maple" ? selection.location === "Maple Lane" : module === "carnival"
         ? selection.location === "Carnival of Blood"
         : module === "geppetto"
           ? selection.killer === "Geppetto"
@@ -453,9 +464,13 @@ export function moduleContext(
                 ? selection.location === "Camp Happy Trails"
                 : selection.location === "Buddyland";
     if (!applies) continue;
+    // Older generic Inkanyamba reveals had no module context. Do not change
+    // historical death fingerprints until an explicit owner observation exists.
+    if (module === "inkanyamba" && !entries.some(e => (e.kind === "module" && e.moduleData?.module === "inkanyamba") || e.inkanyambaReference === true)) continue;
     const state = moduleState(entries, module);
     // A UI initialization marker is not a game fact or part of a death fingerprint.
     delete state.powerSourcesReady;
+    if (module === "inkanyamba") delete state.miracleResolved;
     if (
       module === "hans" &&
       (state.finale !== "Dark, Darker, Darkest" ||
@@ -504,6 +519,7 @@ export function moduleStoryBeats(
       .join("\n");
   }
   const lines: string[] = [];
+  if (context.inkanyamba) lines.push(...inkanyambaFacts(context.inkanyamba));
   if (context.fright) {
     const s=context.fright;
     const recorded = FRIGHT_MINOR_POWERS.filter(p => s[`minor.${p.id}.health`] !== undefined).map(p => `${p.name} ${s[`minor.${p.id}.health`]}/${p.health}${s[`minor.${p.id}.health`] === 0 ? " removed" : ""}`);
@@ -626,6 +642,12 @@ export function buddylandReferences(
   attacker?: string,
 ) {
   const refs: { name: string; effect: string }[] = [];
+  if (selection.killer === "Inkanyamba") {
+    const state = context?.inkanyamba ?? {};
+    refs.push({name:"Inkanyamba the Avenger", effect:"A masked human-shaped avenger with paired curved weapons in the selected Location; never a serpent or weather-controlled creature. Wrath is recorded anger, not proof of an Unleash, injury, movement or extra casualty."});
+    for (const c of [...INKANYAMBA_POWERS, ...INKANYAMBA_FINALES]) if(c.id === state.power || c.id === state.finale) refs.push({name:c.name,effect:`${c.effect} A reveal does not establish that its conditional effects occurred.`});
+    for (const p of INKANYAMBA_MINOR_POWERS) { const h=state[`minor.${p.id}.health`]; if(typeof h === "number") refs.push({name:p.name,effect:h === 0 ? "Recorded removed; no longer active." : `${p.effect} ${h}/3 separate Health. Do not infer unrecorded rolls or outcomes.`}); }
+  }
   if (selection.killer === "Billy the Bear") {
     const state = context?.billy ?? {};
     for (const p of BILLY_POWERS)
@@ -845,8 +867,10 @@ export function initialModuleObservations(
   initializeCarnival = false,
   initializeBilly = false,
   initializeMaple = false,
+  initializeInkanyamba = false,
 ): ModuleObservation[] {
   return [
+    ...(initializeInkanyamba && selection.killer === "Inkanyamba" ? [{module:"inkanyamba" as const,changes:{wrath:2}}] : []),
     ...(initializeBilly && selection.killer === "Billy the Bear" ? [{ module:"billy" as const, changes:{
       powerSourcesReady:true, ...Object.fromEntries([1,2,3,4,5].map(id => [`source.${id}.status`,id === 5 ? "set-aside" : "active"])),
     } }] : []),

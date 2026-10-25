@@ -12,6 +12,7 @@ export function playStartingValues(
   finalGirl: string,
 ): Record<StateField, number> {
   const killerHealth: Record<string, number> = {
+    Inkanyamba: 9,
     "Billy the Bear": 8,
     Hans: 12,
     Geppetto: 8,

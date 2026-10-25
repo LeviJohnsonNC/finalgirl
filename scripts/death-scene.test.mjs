@@ -28,7 +28,9 @@ const geppetto = moduleAt("../supabase/functions/_shared/play/geppetto.ts", {});
 const carnival = moduleAt("../supabase/functions/_shared/play/carnival.ts", {});
 const maple = moduleAt("../supabase/functions/_shared/play/maple.ts", {});
 const fright = moduleAt("../supabase/functions/_shared/play/fright.ts", {});
+const inkanyamba = moduleAt("../supabase/functions/_shared/play/inkanyamba.ts", {});
 const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", {
+  "./inkanyamba.ts": inkanyamba,
   "./maple.ts": maple,
   "./buddyland.ts": buddyland,
   "./camp.ts": camp,
@@ -534,4 +536,14 @@ test('backend-first rollout preserves old-tab identities and opts new Dr. Fright
  const rejected=await f.handler(f.request({sessionId,eventId,narrativeProfile:'arbitrary-cache-slot'}));
  assert.equal(rejected.status,400);
  assert.ok(!f.calls.includes('AI'));
+});
+
+test('Inkanyamba observations reach the real death handler at historical Wrath without applying physical effects',async()=>{
+ const f=fixture({expectedFacts:{killer:'Inkanyamba',cause:'killer',quantity:1,moduleContext:{inkanyamba:{wrath:7,'minor.boiling-anger.health':0}}}});
+ f.owned.selection.killer='Inkanyamba';
+ f.owned.playEvents=[f.owned.playEvents[0],{id:crypto.randomUUID(),at:1,kind:'module',moduleData:{module:'inkanyamba',changes:{wrath:7,'minor.boiling-anger.health':0}}},{...f.owned.playEvents[1],cause:'killer',quantity:1}, {id:crypto.randomUUID(),at:3,kind:'module',moduleData:{module:'inkanyamba',changes:{wrath:10}}}];
+ const original=structuredClone(f.owned.playEvents);
+ assert.equal((await f.handler(f.request())).status,200);
+ assert.deepEqual(f.owned.playEvents,original);
+ assert.equal(f.calls.filter(c=>c==='AI').length,1);
 });

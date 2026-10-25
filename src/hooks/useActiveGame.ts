@@ -47,6 +47,14 @@ export function useActiveGame() {
       const log = previous.playEvents ?? [];
       if (event.kind === 'death-count' && !canChangeDeathCount(log, event)) return previous;
       let accepted = event;
+      if (previous.selection.killer === "Inkanyamba" && event.kind === "moment" && ["dark-power", "finale"].includes(event.momentType!)) accepted = {...event, inkanyambaReference:true};
+      if (event.moduleData?.module === 'inkanyamba') {
+        if (previous.selection.killer !== 'Inkanyamba') return previous;
+        const state = moduleState(summarizePlay(log).entries, 'inkanyamba');
+        const changes = event.moduleData.changes;
+        if (changes.miracleResolved === true && (state.miracleResolved === true || state.finale !== 'we-need-a-miracle' || changes.wrath !== 10)) return previous;
+        if (Object.entries(changes).every(([key,value]) => value === null ? state[key] === undefined : state[key] === value)) return previous;
+      }
       if (event.moduleData?.module === 'maple' && previous.selection.location !== 'Maple Lane') return previous;
       if (event.moduleData?.module === 'fright') {
         const snapshot=parseFright(event.moduleData.changes.snapshot);
@@ -58,7 +66,7 @@ export function useActiveGame() {
       // Persist setup and the first tap together. Never backfill an existing log:
       // a player may already have resolved, cleared or undone the starting state.
       const setup = log.length === 0
-        ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1, previous.mapleSetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
+        ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1, previous.mapleSetupVersion === 1, previous.inkanyambaSetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
         : [];
       if (log.length === 0 && previous.frightSetupVersion === 1 && previous.selection.killer === 'Dr. Fright' && event.moduleData?.module !== 'fright') setup.unshift(newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(initialFright())}}}));
       if (event.moduleData?.module === 'maple') {

@@ -59,7 +59,7 @@ export const GameOutcomeForm = ({
   );
   // Get killer-specific HP and flags
   const maxKillerHealth = useMemo(
-    () => result.killer === 'Geppetto' ? Math.max(getKillerMaxHealth(result.killer), result.killerHealth ?? 0, Number(initialDraft?.killerHealth) || 0) : getKillerMaxHealth(result.killer),
+    () => ['Geppetto', 'Inkanyamba'].includes(result.killer) ? Math.max(getKillerMaxHealth(result.killer), result.killerHealth ?? 0, Number(initialDraft?.killerHealth) || 0) : getKillerMaxHealth(result.killer),
     [result.killer, result.killerHealth, initialDraft?.killerHealth],
   );
   const killerIsUnkillable = useMemo(
