@@ -117,7 +117,7 @@ jobs:
             shard_dir="shard-results/browser-shard-${{ matrix.project }}-$shard"
             # Missing reports fail this job rather than silently hiding a shard.
             test -d "$shard_dir/blob-report"
-            cp "$source"/blob-report/*.zip all-blob-reports/
+            cp "$shard_dir"/blob-report/*.zip all-blob-reports/
             if [ -d "$shard_dir/test-results" ]; then
               cp -R "$shard_dir/test-results" "test-results/shard-$shard"
             fi
