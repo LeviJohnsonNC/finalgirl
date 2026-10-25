@@ -130,7 +130,16 @@ test("Gruesome Death works with optional details and visibly delivers two story 
   await expect(story.locator(".play-death-prose")).toHaveCount(2);
   await expect(payoff).toHaveAttribute("aria-busy", "false");
   expect(await dialog.evaluate((el) => el.scrollTop)).toBe(beforeStoryScroll);
-  for (const name of ["Back to game", "Save and exit", "Gruesome Death"])
+  await expect(actions.getByRole("button")).toHaveCount(2);
+  await expect(actions.getByRole("button", { name: "Gruesome Death", exact: true })).toHaveCount(0);
+  await expect(actions.getByRole("button", { name: "Save and exit", exact: true })).toHaveClass(/play-gruesome-action/);
+  const footer = (await actions.boundingBox())!;
+  const cancel = (await actions.getByRole("button", { name: "Cancel", exact: true }).boundingBox())!;
+  const save = (await actions.getByRole("button", { name: "Save and exit", exact: true }).boundingBox())!;
+  expect(save.x).toBeGreaterThan(cancel.x);
+  expect(Math.abs(save.y - cancel.y)).toBeLessThan(3);
+  expect(footer.x + footer.width - save.x - save.width).toBeLessThan(30);
+  for (const name of ["Cancel", "Save and exit"])
     await expect(actions.getByRole("button", { name, exact: true })).toBeInViewport({ ratio: 1 });
   expect(
     await dialog.evaluate((el) => {

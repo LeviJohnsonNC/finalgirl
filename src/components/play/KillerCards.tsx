@@ -4,6 +4,7 @@ import { IllustratedTile } from "./IllustratedTile";
 import { PlaySelect } from "./PlaySelect";
 import { illustratedKillerCards } from "./killerPresentation";
 import { useModuleRecord } from "./useModuleRecord";
+import type { CSSProperties } from "react";
 import "@/styles/play-controls.css";
 
 export function KillerCards({
@@ -65,7 +66,11 @@ export function KillerCards({
             >
               <h3>{type === "dark-power" ? "Dark Power" : "Finale"}</h3>
               {reveal && !selected && <p className="module-control-help">{reveal.killerCard || "Card name not specified"}</p>}
-              <div className="module-card-grid">
+              <div
+                className={`module-card-grid${type === "dark-power" ? " module-dark-power-grid" : ""}`}
+                data-has-selection={Boolean(selected)}
+                style={type === "dark-power" ? { "--power-alternatives": Math.max(1, cards.length - 1) } as CSSProperties : undefined}
+              >
                 {cards.map((card) => (
                   <IllustratedTile
                     key={card.id}
@@ -82,7 +87,9 @@ export function KillerCards({
                       hans.secondPower === card.name
                     }
                     onClick={() => choose(type, card.name)}
-                  />
+                  >
+                    {type === "dark-power" && selected?.id === card.id && <span className="module-power-selected">Selected</span>}
+                  </IllustratedTile>
                 ))}
               </div>
               {selected && <details className="module-card-rules">

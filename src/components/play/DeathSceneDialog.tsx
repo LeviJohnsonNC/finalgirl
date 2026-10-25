@@ -137,6 +137,7 @@ export function DeathSceneDialog({
     if (selectedId && !dirty && !editingDetails) payoff.current?.focus({ preventScroll: true });
   }, [selectedId, dirty, editingDetails]);
   const reading = !editingDetails && !dirty && Boolean(selected || scenes.busy || requested || unfinished);
+  const hasStory = Boolean(selected && !dirty);
   const save = () => {
     const clean = Object.fromEntries(
       Object.entries(values).map(([key, value]) => [
@@ -196,6 +197,11 @@ export function DeathSceneDialog({
       setTake(0);
     } else setMessage("The victim count could not be changed. Please try again.");
   };
+  const generateNext = () => void generate(
+    !dirty
+      ? ([0, 1, 2].find(next => !currentTakes.some(r => r.take === next)) ?? 2)
+      : 0,
+  );
   const cancel = () => {
     // Keep the recorded death and any already saved/generated facts, discard this edit.
     if (onDraft(eventId, initial)) onClose();
@@ -429,6 +435,11 @@ export function DeathSceneDialog({
                     ))}
                   </div>
                   <div className="play-death-story-tools">
+                    {currentTakes.length < 3 && (
+                      <button className="play-death-edit" disabled={scenes.busy || !signature} onClick={generateNext}>
+                        {legacyPortrayal ? "Rewrite death" : "Another version"}
+                      </button>
+                    )}
                     {takes.length > 1 && (
                       <div role="group" aria-label="Death scene takes">
                         {takes.map((scene) => (
@@ -473,30 +484,23 @@ export function DeathSceneDialog({
         </div>
         <div className="play-death-footer">
         {message && <p className="play-death-save-error" role="alert">{message}</p>}
-        <div className="play-death-actions">
-          <button onClick={cancel}>{reading ? "Back to game" : "Cancel"}</button>
+        <div className="play-death-actions" data-complete={hasStory}>
+          <button onClick={cancel}>Cancel</button>
           <button
+            className={hasStory ? "play-gruesome-action" : undefined}
             onClick={() => {
               if (save()) onClose();
             }}
           >
             Save and exit
           </button>
-          <button
+          {!hasStory && <button
             className="play-gruesome-action"
             disabled={scenes.busy || !signature || (!dirty && currentTakes.length >= 3)}
-            onClick={() =>
-              void generate(
-                !dirty
-                  ? ([0, 1, 2].find(
-                      (next) => !currentTakes.some((r) => r.take === next),
-                    ) ?? 2)
-                  : 0,
-              )
-            }
+            onClick={generateNext}
           >
             {scenes.busy ? "Writing the death…" : legacyPortrayal && !dirty ? "Rewrite death" : "Gruesome Death"}
-          </button>
+          </button>}
         </div>
         </div>
       </DialogContent>

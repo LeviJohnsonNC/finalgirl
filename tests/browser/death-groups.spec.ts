@@ -38,7 +38,7 @@ test('one death plus two extra victims survives narration, count corrections, re
  await expect(dialog.getByRole('region',{name:'Death scene text',exact:true})).toBeVisible();
  expect(archive.calls.filter(c=>c==='generate-death-scene')).toHaveLength(1);
  await page.screenshot({path:info.outputPath('group-reading.png')});
- await dialog.getByRole('button',{name:'Back to game',exact:true}).click();
+ await dialog.getByRole('button',{name:'Cancel',exact:true}).click();
  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
  await expect(page.getByRole('button',{name:'Record one victim killed',exact:true})).toContainText('3');
  expect((await log(page)).filter(e=>e.kind==='killed')).toHaveLength(1);
@@ -92,10 +92,10 @@ test('three old Dr. Fright takes reopen freely and allow an explicit dream portr
  await expect(page.getByRole('region',{name:'Death scene text',exact:true})).toBeVisible();
  expect(archive.calls.filter(c=>c==='generate-death-scene')).toHaveLength(0);
  await page.getByRole('button',{name:'Rewrite death',exact:true}).click();
- await expect(page.getByRole('button',{name:'Gruesome Death',exact:true})).toBeEnabled();
+ await expect(page.getByRole('button',{name:'Another version',exact:true})).toBeEnabled();
  expect(archive.deathScenes).toHaveLength(4);
  expect(archive.deathScenes[3].signature).toBe(await deathSignature(facts));
- await page.getByRole('button',{name:'Back to game',exact:true}).click();
+ await page.getByRole('button',{name:'Cancel',exact:true}).click();
  await openHistory(page);
  await page.getByRole('button',{name:/Undo 1 victim killed at Cabin/}).click();
  await expect(page.getByRole('button',{name:'Latest death scene',exact:true})).toHaveCount(0);

@@ -140,8 +140,9 @@ test("three old fragments do not exhaust the repair action or create extra victi
     exact: true,
   });
   for (const take of [0, 1, 2]) {
-    await expect(generate).toBeEnabled();
-    await generate.click();
+    const action = take === 0 ? generate : page.getByRole("button", { name: "Another version", exact: true });
+    await expect(action).toBeEnabled();
+    await action.click();
     await expect
       .poll(
         () =>
@@ -150,7 +151,8 @@ test("three old fragments do not exhaust the repair action or create extra victi
       )
       .toBe(take + 1);
   }
-  await expect(generate).toBeDisabled();
+  await expect(generate).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Another version", exact: true })).toHaveCount(0);
   expect(
     archive.generationRequests
       .filter((r) => r.name === "generate-death-scene")

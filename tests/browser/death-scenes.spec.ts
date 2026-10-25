@@ -130,20 +130,20 @@ test("record first, contextualize optionally, cache and replay without another g
     archive.calls.filter((c) => c === "generate-death-scene"),
   ).toHaveLength(1);
   await page
-    .getByRole("button", { name: "Gruesome Death", exact: true })
+    .getByRole("button", { name: "Another version", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Version 2", exact: true }),
   ).toBeVisible();
   await page
-    .getByRole("button", { name: "Gruesome Death", exact: true })
+    .getByRole("button", { name: "Another version", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Version 3", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Gruesome Death", exact: true }),
-  ).toBeDisabled();
+    page.getByRole("button", { name: "Another version", exact: true }),
+  ).toHaveCount(0);
   await page
     .getByRole("button", { name: "Save and exit", exact: true })
     .click();
