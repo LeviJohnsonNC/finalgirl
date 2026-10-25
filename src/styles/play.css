@@ -2215,3 +2215,21 @@ body:has(.play-workspace) .app-shell {
   .play-death-modal--compact .play-death-story-heading h3 { font-size: 17px; }
   .play-death-modal--compact .play-death-actions > .play-gruesome-action { min-height: 44px; }
 }
+
+/* Reading trades the setup grid for one compact, editable context line. */
+.play-death-modal--compact[data-reading="true"] .play-death-heading { padding-block: 10px; }
+.play-death-modal--compact[data-reading="true"] .play-death-heading h2 { font-size: 27px; margin-block: 3px; }
+.play-death-modal--compact[data-reading="true"] .play-death-heading p:last-child { display: none; }
+.play-death-context { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.play-death-context p { margin: 0; color: #d6ccb8; font: 13px/1.5 Arial, sans-serif; overflow-wrap: anywhere; min-width: 0; }
+.play-death-context strong { color: #f2e5c8; }
+.play-death-context .play-death-edit { flex: 0 0 auto; }
+.play-death-count { display: flex; align-items: center; gap: 8px; margin: -5px 0 10px; color: #e5d7b9; font: 13px/1.4 Arial, sans-serif; }
+.play-death-count > span:first-child { margin-right: auto; }
+.play-death-count button { width: 44px; height: 44px; border: 1px solid #9b8d746b; border-radius: 50%; background: #16201b; color: #f2e5c8; font-size: 21px; }
+.play-death-count output { min-width: 22px; text-align: center; font-variant-numeric: tabular-nums; font-size: 16px; }
+@media (max-width: 639px) {
+  .play-death-context { gap: 8px; }
+  .play-death-context p { font-size: 12px; }
+  .play-death-context .play-death-edit { max-width: 90px; }
+}

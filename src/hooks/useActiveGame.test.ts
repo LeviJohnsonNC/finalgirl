@@ -246,3 +246,26 @@ describe('Maple Lane durable setup and linked writes',()=>{
     expect(moduleState(summarizePlay(result.current.activeGame!.playEvents!).entries,'maple')['house.nw-west']).toBe(true);
   });
 });
+
+it('persists rapid relative death-count taps, rejects duplicate/stale/failed writes and permits retry', () => {
+  const {result}=renderHook(useActiveGame);
+  const death=newPlayEvent({kind:'killed',quantity:1});
+  act(()=>{result.current.save({...game,playEvents:[newPlayEvent({kind:'start',saved:0,killed:0,round:3}),death]});});
+  const tap=newPlayEvent({kind:'death-count',target:death.id,delta:1});
+  act(()=>{
+    expect(result.current.appendPlayEvent(game.id,tap)).toBe(true);
+    expect(result.current.appendPlayEvent(game.id,tap)).toBe(false);
+    expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'death-count',target:death.id,delta:1}))).toBe(true);
+  });
+  expect(summarizePlay(result.current.activeGame.playEvents).killed).toBe(3);
+  const retry=newPlayEvent({kind:'death-count',target:death.id,delta:1});
+  const spy=vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('quota');});
+  act(()=>expect(result.current.appendPlayEvent(game.id,retry)).toBe(false));
+  expect(summarizePlay(result.current.activeGame.playEvents).killed).toBe(3);
+  spy.mockRestore();
+  act(()=>expect(result.current.appendPlayEvent(game.id,retry)).toBe(true));
+  expect(summarizePlay(result.current.getCurrentGame().playEvents).killed).toBe(4);
+  act(()=>{result.current.appendPlayEvent(game.id,newPlayEvent({kind:'undo',target:death.id}));});
+  act(()=>expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'death-count',target:death.id,delta:1}))).toBe(false));
+  expect(summarizePlay(result.current.activeGame.playEvents).killed).toBe(0);
+});

@@ -1,4 +1,4 @@
-import {deathFacts,deathSignature} from '../_shared/play/death.ts';
+import {deathFacts,deathSignatures} from '../_shared/play/death.ts';
 import {validPlayLog} from '../_shared/play/events.ts';
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { decode as base64Decode, encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
@@ -100,7 +100,7 @@ serve(async (req) => {
       const {data:session}=await guard.adminClient.from('play_sessions').select('state').eq('id',scene.session_id).eq('user_id',guard.user.id).maybeSingle();
       const state=session?.state;
       const facts=state&&validPlayLog(state.playEvents)&&state.selection?deathFacts(state.selection,state.playEvents,scene.event_id):null;
-      if(!facts||await deathSignature(facts)!==scene.signature)return new Response(JSON.stringify({error:'That death was changed or undone.'}),{status:409,headers:{...cors,'Content-Type':'application/json'}});
+      if(!facts||!(await deathSignatures(facts)).includes(scene.signature))return new Response(JSON.stringify({error:'That death was changed or undone.'}),{status:409,headers:{...cors,'Content-Type':'application/json'}});
       text=scene.scene_text;
     }
 
