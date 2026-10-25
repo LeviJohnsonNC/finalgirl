@@ -1,14 +1,29 @@
-# Browser CI
+# Browser CI: full coverage with shorter wall time
 
-The reliability workflow runs the complete desktop and mobile Playwright projects on separate runners. Each project uses two workers in CI, retains its retry, and uploads a uniquely named report. `fail-fast: false` lets both device reports finish even if one fails.
+The complete desktop and mobile suites each run in four concurrent shards. Every runner keeps the existing two-worker limit, one retry, 45-second test timeout, failure traces/screenshots and module-specific videos. CI uses `fullyParallel` to distribute individual independent journeys rather than keeping a large file on one shard. Each test still executes its own steps in order, with a fresh browser context and test-scoped ArchiveMock; there are no suite-level hooks or serial groups to preserve. Local scheduling stays unchanged. No test selection filters, smaller viewport matrix, reduced timeouts or new skips are introduced.
 
-The final `browser` job preserves the existing required check name. It runs even if a device job fails, is cancelled, or is skipped, and succeeds only when the entire browser matrix succeeds. No test or device coverage is removed.
+Local discovery verifies the complete case set for each device is exactly the union of its four shards, with no omitted or duplicate cases. The counts are measured during verification, not hardcoded as a future test target. Playwright owns discovery and partitioning as the suite grows.
+
+Each shard uploads a blob report and its raw diagnostics. Two report jobs merge all four blobs into the existing `browser-results-desktop` and `browser-results-mobile` HTML artifacts, retained for 14 days. Raw output stays under per-shard folders so diagnostic files cannot overwrite one another. Shard artifacts also remain for 14 days as a fallback if report merging itself fails; the merged reports retain their attachments. Missing shard reports fail collection. The existing required `browser` check fails if any shard or report job fails or is skipped; both per-device check names remain.
+
+The tradeoff is more concurrent runners and a little more setup work. On hosted GitHub runners this avoids overloading individual machines with extra Chromium workers. Jobs from superseded commits still cancel through the existing workflow concurrency rule. The frontend, database and native edge gates are unchanged.
+
+## Baseline and verification
+
+The successful unsharded [run 40204562328](https://github.com/LeviJohnsonNC/finalgirl/actions/runs/40204562328) took 9m30s for desktop tests and 11m27s for phone tests. Browser installation took approximately 30 seconds in the preceding measured run. Sharding addresses the test runtime rather than adding a browser cache whose restore time could consume most of the saving.
+
+An initial file-sharded run completed the browser gate in 6m27s versus the baseline 12m53s. Its larger phone file limited balance, so CI now shards individual independent tests with the same two-worker limit.
+
+The final sharded run must demonstrate all 249 desktop cases and 249 mobile cases (including the existing intentional mobile skip), successful merged HTML reports with attachments, and a green required aggregate. Compare observed end-to-end timing with the baseline; do not treat a predicted speedup as a measured result.
+
+Reference: [Playwright sharding and report merging](https://playwright.dev/docs/test-sharding).
+
 
 ## October 19 investigation
 
 In run `39282541839`, all 204 browser checks passed in 7.9 minutes. The browser step finished at 16:13:57 UTC, its report upload finished at 16:14:09 UTC, and the log reached orphan-process cleanup. GitHub nevertheless continued reporting the job as in progress until the run was updated to successful at 16:32:39 UTC. There was no Playwright timeout, failed test, retry, or hung report server in that run's log.
 
-Separating the projects reduces the normal critical path from running both on one two-worker machine. The replacement workflow starts fresh runners; a platform failure to finalize an already-completed job cannot be repaired in application code. Inspect the raw job log as well as the summary status when diagnosing that discrepancy.
+The earlier split into separate device projects reduced the normal critical path from running both on one two-worker machine. The replacement workflow starts fresh runners; a platform failure to finalize an already-completed job cannot be repaired in application code. Inspect the raw job log as well as the summary status when diagnosing that discrepancy.
 
 Run the same project locally against a production build:
 

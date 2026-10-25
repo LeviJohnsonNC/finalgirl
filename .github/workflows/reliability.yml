@@ -55,13 +55,14 @@ jobs:
       - run: deno test --no-config --no-lock --allow-net=deno.land,cdn.jsdelivr.net supabase/functions/_shared/poster_test.ts
       - run: deno check --no-config --no-lock --node-modules-dir=auto supabase/functions/*/index.ts
   browser-tests:
-    name: browser (${{ matrix.project }})
+    name: browser (${{ matrix.project }}, shard ${{ matrix.shard }}/4)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         project: [desktop, mobile]
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -78,8 +79,51 @@ jobs:
           fi
       - run: npx playwright install --with-deps chromium
       - run: npm run build
-      - run: npm run test:browser -- --project=${{ matrix.project }}
+      - run: npm run test:browser -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}/4 --reporter=list,blob
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: browser-shard-${{ matrix.project }}-${{ matrix.shard }}
+          path: |
+            blob-report/
+            test-results/
+          retention-days: 14
+  browser-reports:
+    # Preserve the device check names and one complete HTML report per device.
+    name: browser (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: browser-tests
+    if: ${{ always() && !cancelled() }}
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop, mobile]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: browser-shard-${{ matrix.project }}-*
+          path: shard-results
+      - name: Collect every shard without overwriting its diagnostics
+        run: |
+          mkdir -p all-blob-reports test-results
+          for shard in 1 2 3 4; do
+            shard_dir="shard-results/browser-shard-${{ matrix.project }}-$shard"
+            # Missing reports fail this job rather than silently hiding a shard.
+            test -d "$shard_dir/blob-report"
+            cp "$shard_dir"/blob-report/*.zip all-blob-reports/
+            if [ -d "$shard_dir/test-results" ]; then
+              cp -R "$shard_dir/test-results" "test-results/shard-$shard"
+            fi
+          done
+      - run: npx playwright merge-reports --reporter html all-blob-reports
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: browser-results-${{ matrix.project }}
@@ -87,14 +131,21 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 14
+      - name: Require all shards to pass
+        env:
+          BROWSER_RESULT: ${{ needs.browser-tests.result }}
+        run: test "$BROWSER_RESULT" = success
   # Keep the existing required check name; neither device can be skipped or fail.
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 2
-    needs: browser-tests
+    needs: [browser-tests, browser-reports]
     if: ${{ always() }}
     steps:
-      - name: Require both browser projects
+      - name: Require every browser shard and both complete reports
         env:
           BROWSER_RESULT: ${{ needs.browser-tests.result }}
-        run: test "$BROWSER_RESULT" = success
+          REPORT_RESULT: ${{ needs.browser-reports.result }}
+        run: |
+          test "$BROWSER_RESULT" = success
+          test "$REPORT_RESULT" = success
