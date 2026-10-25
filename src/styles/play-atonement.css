@@ -1,0 +1,49 @@
+.wrath-atonement {
+  margin-top: 0.8rem;
+  border-top: 1px solid #81684470;
+  padding-top: 0.3rem;
+}
+.wrath-atonement summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  cursor: pointer;
+  color: #e5c793;
+}
+.wrath-atonement p {
+  font-size: 0.83rem;
+  line-height: 1.6;
+  color: #c8bca8;
+  margin: 0.4rem 0;
+}
+.wrath-outcomes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0.7rem 0;
+}
+.wrath-outcomes button {
+  min-height: 64px;
+  display: grid;
+  gap: 0.25rem;
+  background: #201b17;
+  border: 1px solid #796340;
+  border-radius: 7px;
+  padding: 0.5rem 0.2rem;
+  color: #e2cba4;
+}
+.wrath-outcomes button span {
+  font-size: 0.7rem;
+}
+.wrath-outcomes button strong {
+  font-size: 1rem;
+  color: #f5d18e;
+}
+.wrath-outcomes button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.wrath-outcomes button:focus-visible {
+  outline: 2px solid #ffd18e;
+  outline-offset: 3px;
+}

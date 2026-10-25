@@ -3,8 +3,8 @@
 ## Scope and current status
 
 - Killer: Inkanyamba the Avenger; existing film ID `s1-sacred-groves`; module ID `inkanyamba`.
-- Scope: killer only. Sacred Groves and Final Girl abilities are deferred.
-- Stage: implemented and locally verified; final CI is tracked on the implementation PR. Not deployed.
+- Scope: killer only. The separate [Sacred Groves location import](sacred-groves.md) now supplies Divine Wrath and shared Atonement integration. Final Girl abilities remain outside scope.
+- Stage: implemented and locally verified; PR #121 merged with passing CI. Deployment was not performed in this work.
 - Branch: `feat/inkanyamba-killer-import`; reviewed and implemented 2026-10-25. Existing selection and film identity retained.
 - Photos are persistently available through the Library identifiers below; do not commit raw card photos.
 
@@ -37,7 +37,7 @@
 - Preserve actual effect order, live Power/Minor modifiers, and Finale reveal effects. Do not infer physical movement, casualties, adjacency or Action-card inventory.
 - Atonement has 3+/2/1/0-success outcomes. A reduction by half rounded up is a rounded-up reduction, not a rounded-up remaining level.
 - Minor health range is 0–3; the existing shared control is reused with configurable maxHealth.
-- Divine Wrath belongs to Sacred Groves and is deferred. Preserve references in the Atonement rules without inventing a location tracker for mixed games.
+- Divine Wrath belongs to the separate Sacred Groves module. Its import shares Atonement while preserving killer/location ownership; no Divine track is invented at other locations.
 
 ## Integration coverage
 
@@ -50,7 +50,7 @@
 | Narration/deaths | Corrected avenger identity, owner-filtered card/mechanism references, bounded ending facts and death-time context. New reveal provenance supplies facts even when legacy Wrath is unknown; old generic reveals do not retroactively change cached death hashes. |
 | Artwork | Reviewed original header, seven Power/Finale illustrations, eight Minor health-state images, heart token and corrected default portrait; mapping/provenance in `src/assets/play/inkanyamba/README.md`. |
 | Archive/stats | Existing stable owner IDs and archive contracts retained. Browser casting → Play → result → ending → archive verifies identity and Wrath context; historical health above the new reference stays editable. No statistics formula changes needed. |
-| Compatibility | Inkanyamba journeys at Camp Happy Trails, Buddyland, Carnival of Blood and Maple Lane on desktop/mobile. Existing shared-control combinations covered separately. Sacred Groves remains deferred. |
+| Compatibility | Inkanyamba journeys at Camp Happy Trails, Buddyland, Carnival of Blood and Maple Lane on desktop/mobile. Existing shared-control combinations covered separately. Sacred Groves compatibility is covered in its separate import record. |
 | Verification | See evidence below and current PR Reliability checks. |
 | Deployment | Backend-first: `generate-death-scene`, `narrate-story`, then frontend. No SQL migration. Not deployed or live-provider verified. |
 
@@ -58,7 +58,7 @@
 
 - Tracker +/- and level buttons record physical levels, never trigger chained healing, Horror, casualty, upkeep or movement changes.
 - Unleash is an ordered reference for the currently recorded level, not a digital board-resolution action. Low-level Wrath increases do not recursively Unleash.
-- Atonement helper changes only recorded Killer Wrath, with the rounded-up reduction and lower bound enforced. The complete physical Time/Horror/Divine Wrath outcomes are in Rules; no new Time resource or location tracker.
+- Original killer-only Atonement changes Killer Wrath with the rounded-up reduction and lower bound enforced. The Sacred Groves import factors this into a shared helper: at Sacred Groves it appears in the location panel and targets one chosen eligible track; elsewhere Inkanyamba retains its Killer Wrath helper. Time/hand/inventory stay physical.
 - Both reveal entry points share one permanent reveal. We Need a Miracle exposes an explicit atomic `wrath:10` + `miracleResolved:true` action; durable checks reject repeats/unearned applications. Undo reverts that observation, not the permanent reveal. Card corrections never resolve effects.
 - Shared MinorPowerControl/HealthTokens use maxHealth=3. Unknown, full, damaged and removed remain distinct. Health is separate from killer health and victim totals; prior reveal evidence survives an explicit unknown-health correction.
 - Save conflicts disable all new mutations, including shared chooser buttons. Ordinary offline failure keeps durable local tracking available and retryable.
@@ -79,10 +79,10 @@
 
 ## Release and remaining work
 
-1. Review and merge the PR after its current-head Reliability checks pass.
+1. PR #121 is merged. Current paired-location work and its release status are tracked in the separate Sacred Groves record.
 2. Deploy `generate-death-scene` and `narrate-story` with their updated shared Play validators, context, card references and death cue before publishing the frontend. These are the changed backend import graphs; opening/ending/image/bible handlers were checked but require no additional deployment for this import because their supplied frontend guidance uses existing contracts.
 3. Publish the frontend. No SQL migration, schema changes, new model or dependency is required.
 4. Production signed-in smoke: new mixed game, Wrath/Minor change, save/reload, one contextual death, cached reopening and saved narration. Deployment/live smoke are pending, not claimed complete.
-5. Await the separate Sacred Groves upload for its location import. Final Girl abilities and Divine Wrath tracking remain out of scope.
+5. Sacred Groves is now handled by the separate location import. Final Girl abilities remain out of scope.
 
 No killer source gaps remain for standard mode. Raw card photos are retained at their existing persistent references and excluded from Git/build output.

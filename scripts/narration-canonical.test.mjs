@@ -26,8 +26,9 @@ const carnival = load("../supabase/functions/_shared/play/carnival.ts", {});
 const maple = load("../supabase/functions/_shared/play/maple.ts", {});
 const fright = load("../supabase/functions/_shared/play/fright.ts", {});
 const inkanyamba = load("../supabase/functions/_shared/play/inkanyamba.ts", {});
-const modules = load('../supabase/functions/_shared/play/modules.ts', {'./inkanyamba.ts':inkanyamba,'./maple.ts':maple,'./buddyland.ts':buddyland,'./camp.ts':camp,'./geppetto.ts':geppetto,'./carnival.ts':carnival,'./fright.ts':fright});
-const events = load('../supabase/functions/_shared/play/events.ts', {'./modules.ts':modules,'./fright.ts':fright}),
+const groves = load("../supabase/functions/_shared/play/groves.ts", {"./inkanyamba.ts":inkanyamba});
+const modules = load('../supabase/functions/_shared/play/modules.ts', {'./groves.ts':groves,'./inkanyamba.ts':inkanyamba,'./maple.ts':maple,'./buddyland.ts':buddyland,'./camp.ts':camp,'./geppetto.ts':geppetto,'./carnival.ts':carnival,'./fright.ts':fright});
+const events = load('../supabase/functions/_shared/play/events.ts', {'./groves.ts':groves,'./modules.ts':modules,'./fright.ts':fright}),
   death = load('../supabase/functions/_shared/play/death.ts', { './events.ts': events, './modules.ts':modules });
 const schemas = load('../supabase/functions/_shared/validation.ts', {
   'https://deno.land/x/zod@v3.22.4/mod.ts': require('zod'),
@@ -44,6 +45,7 @@ async function fixture({
   expandedFright = false,
   legacy = false,
   countChanged = false,
+  sacredGroves = false,
 } = {}) {
   const state = {
     selection: {
@@ -83,6 +85,10 @@ async function fixture({
       state.playEvents.push(events.newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(snapshot)}}}));
     }
     state.playEvents.push(deathEvent);
+  }
+  if (sacredGroves) {
+    state.selection.killer='Inkanyamba';state.selection.location='Sacred Groves';
+    state.playEvents.splice(1,0,{id:crypto.randomUUID(),at:1,kind:'module',moduleData:{module:'groves',changes:{wrath:1,'person.holy-man':'removed','event.holy-man':'ended'}},linkedModule:{module:'inkanyamba',changes:{wrath:1}},grovesAction:{kind:'outcome',parent:'root',person:'holy-man',outcome:'blessed',incense:false}});
   }
   const signature = await death.deathSignature(
     death.deathFacts(state.selection, state.playEvents, eventId), legacy ? "legacy" : "current",
@@ -239,3 +245,5 @@ for (const legacy of [false,true]) test(`Dr. Fright ${legacy?'legacy':'current'}
   assert.equal((await changed.handler(changed.request())).status,409);
   assert.deepEqual(changed.spoken,[]);
 });
+
+ test('Sacred Groves linked history retains canonical saved narration identity',async()=>{const f=await fixture({sacredGroves:true});assert.equal((await f.handler(f.request())).status,200);assert.deepEqual(f.spoken,['The canonical owned scene is narrated.']);});

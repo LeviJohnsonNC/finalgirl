@@ -1,3 +1,4 @@
+import { grovesRules, GROVES_PROMPT_CONTEXT } from "./grovesRules";
 import { inkanyambaRules, INKANYAMBA_PROMPT_CONTEXT } from "./inkanyambaRules";
 import { mapleRules, MAPLE_PROMPT_CONTEXT } from './mapleRules';
 import { carnivalRules, CARNIVAL_PROMPT_CONTEXT } from './carnivalRules';
@@ -638,7 +639,7 @@ const marrekWarehouse: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer, marrekWarehouse];
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer, marrekWarehouse];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -647,6 +648,7 @@ export interface ModulePromptContext {
 }
 
 const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
+  "Sacred Groves": GROVES_PROMPT_CONTEXT,
   Inkanyamba: INKANYAMBA_PROMPT_CONTEXT,
   "Maple Lane": MAPLE_PROMPT_CONTEXT,
   "Dr. Fright": FRIGHT_PROMPT_CONTEXT,

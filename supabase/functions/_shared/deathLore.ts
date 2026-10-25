@@ -1,3 +1,4 @@
+import { GROVES_VISUAL } from "./play/groves.ts";
 import { INKANYAMBA_VISUAL } from "./play/inkanyamba.ts";
 import { CARNIVAL_VISUAL } from './play/carnival.ts';
 import { GEPPETTO_VISUAL } from './play/geppetto.ts';
@@ -44,6 +45,7 @@ export const DEATH_KILLER_CUES: Record<string, string> = {
     "A masked teen-slasher figure wearing a charcoal gray hoodie with the hood up, red-and-black pants, and a white ghost mask with one oversized black eye and a smaller dark eye socket. The silhouette is casual and convention-ready rather than gothic: hoodie, sneakers, loose posture, and a knife implied or held low. Mort's threat is disguise and misdirection — the same figure may seem to be Hans, Geppetto, Dr. Fright, the Big Bad Wolf, or another familiar horror persona moments before the mask comes off.",
 };
 export const DEATH_LOCATION_CUES: Record<string, string> = {
+  "Sacred Groves": GROVES_VISUAL,
   Buddyland:
     'An abandoned indoor pizza restaurant and children’s arcade. Checkerboard flooring, dusty cabinets around four central Arcade spaces, pizza tables, a Prize Counter, faded party decorations, a Jungle Gym and a Ball Pit. Amber practical lights clash with cyan and magenta arcade glow. No outdoor roller coasters or carnival tents. Populate only with the selected Killer and the explicitly established game state.',
   Utopia:

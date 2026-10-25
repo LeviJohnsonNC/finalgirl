@@ -1,4 +1,5 @@
 export type RuleBlock =
+  | { type: 'groves-setup'; setup: string }
   | { type: 'paragraph'; text: string }
   | { type: 'list'; ordered?: boolean; items: string[] }
   | { type: 'callout'; variant?: 'note' | 'critical' | 'designer' | 'tip'; title?: string; text: string }

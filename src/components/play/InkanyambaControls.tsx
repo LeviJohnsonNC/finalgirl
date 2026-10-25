@@ -1,3 +1,4 @@
+import { AtonementControl } from "./AtonementControl";
 import { useModuleRecord } from "./useModuleRecord";
 import { KillerCards } from "./KillerCards";
 import { MinorPowerControl } from "./MinorPowerControl";
@@ -8,7 +9,6 @@ import {
   INKANYAMBA_FINALES,
   INKANYAMBA_MINOR_POWERS,
   INKANYAMBA_UNLEASH,
-  INKANYAMBA_ATONEMENT,
   INKANYAMBA_PRE_FINALE,
   atonementWrath,
 } from "../../../supabase/functions/_shared/play/inkanyamba";
@@ -18,6 +18,7 @@ import "@/styles/play-inkanyamba.css";
 
 export function InkanyambaControls({
   events,
+  location,
   onEvent,
   blocked,
 }: ControlsProps) {
@@ -110,42 +111,12 @@ export function InkanyambaControls({
             ))}
           </aside>
         )}
-        <details className="ink-details">
-          <summary>Atonement &amp; corrections</summary>
-          <p>{INKANYAMBA_ATONEMENT}</p>
-          <div
-            className="ink-atonement"
-            role="group"
-            aria-label="Record Atonement Killer Wrath outcome"
-          >
-            {[1, 2, 3].map((n) => (
-              <button
-                key={n}
-                disabled={
-                  blocked ||
-                  wrath === undefined ||
-                  atonementWrath(wrath, n) === wrath
-                }
-                onClick={() => change({ wrath: atonementWrath(wrath!, n) })}
-              >
-                <span>
-                  {n === 3 ? "3+" : n} {n === 1 ? "success" : "successes"}
-                </span>
-                <strong>
-                  {wrath === undefined
-                    ? "Not recorded"
-                    : `${wrath} → ${atonementWrath(wrath, n)}`}
-                </strong>
-              </button>
-            ))}
-          </div>
-          <button
-            disabled={blocked || wrath === undefined}
-            onClick={() => change({ wrath: null })}
-          >
-            Clear Wrath record
-          </button>
-        </details>
+        {location !== "Sacred Groves" ? <AtonementControl title="Atonement & corrections" targets={[{id:"killer",label:"Killer Wrath",wrath}]} disabled={blocked} onResolve={(_target,successes)=>change({wrath:atonementWrath(wrath!,successes)})}>
+          <button disabled={blocked || wrath === undefined} onClick={()=>change({wrath:null})}>Clear Wrath record</button>
+        </AtonementControl> : <details className="ink-details"><summary>Wrath corrections</summary>
+          <p>Atonement in the Sacred Groves panel lets you choose either Wrath track.</p>
+          <button disabled={blocked || wrath === undefined} onClick={()=>change({wrath:null})}>Clear Wrath record</button>
+        </details>}
       </div>
       <div className="ink-action">
         <h4>

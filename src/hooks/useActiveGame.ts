@@ -1,3 +1,4 @@
+import { resolveGrovesAction } from "../../supabase/functions/_shared/play/groves";
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from './useAuth';
@@ -47,7 +48,11 @@ export function useActiveGame() {
       const log = previous.playEvents ?? [];
       if (event.kind === 'death-count' && !canChangeDeathCount(log, event)) return previous;
       let accepted = event;
-      if (previous.selection.killer === "Inkanyamba" && event.kind === "moment" && ["dark-power", "finale"].includes(event.momentType!)) accepted = {...event, inkanyambaReference:true};
+      if (event.moduleData?.module === 'groves' && previous.selection.location !== 'Sacred Groves') return previous;
+      if (event.linkedModule && (previous.selection.location !== 'Sacred Groves' || previous.selection.killer !== 'Inkanyamba')) return previous;
+      if (event.grovesAction && event.grovesAction.parent !== (log[log.length-1]?.id ?? 'root')) return previous;
+      if (previous.selection.location === 'Sacred Groves' && event.kind === 'moment' && event.momentType === 'finale') accepted = {...accepted, grovesReference:true};
+      if (previous.selection.killer === "Inkanyamba" && event.kind === "moment" && ["dark-power", "finale"].includes(event.momentType!)) accepted = {...accepted, inkanyambaReference:true};
       if (event.moduleData?.module === 'inkanyamba') {
         if (previous.selection.killer !== 'Inkanyamba') return previous;
         const state = moduleState(summarizePlay(log).entries, 'inkanyamba');
@@ -66,7 +71,7 @@ export function useActiveGame() {
       // Persist setup and the first tap together. Never backfill an existing log:
       // a player may already have resolved, cleared or undone the starting state.
       const setup = log.length === 0
-        ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1, previous.mapleSetupVersion === 1, previous.inkanyambaSetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
+        ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1, previous.mapleSetupVersion === 1, previous.inkanyambaSetupVersion === 1, previous.grovesSetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
         : [];
       if (log.length === 0 && previous.frightSetupVersion === 1 && previous.selection.killer === 'Dr. Fright' && event.moduleData?.module !== 'fright') setup.unshift(newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(initialFright())}}}));
       if (event.moduleData?.module === 'maple') {
@@ -76,6 +81,18 @@ export function useActiveGame() {
         if(Object.entries(changes).every(([key,value])=>value === null ? current[key] === undefined : current[key] === value)) return previous;
         accepted={...event,moduleData:{module:'maple',changes}};
         if (!isPlayEvent(accepted)) return previous;
+      }
+      if (event.grovesAction) {
+        const entries=summarizePlay([...log,...baseline,...setup]).entries;
+        const result=resolveGrovesAction(event.grovesAction,moduleState(entries,'groves'),moduleState(entries,'inkanyamba'),previous.selection.killer);
+        if(!result) return previous;
+        accepted={...event,moduleData:{module:'groves',changes:result.changes},...(result.linkedModule ? {linkedModule:result.linkedModule} : {})};
+        if(!result.linkedModule) delete accepted.linkedModule;
+        if(!isPlayEvent(accepted)) return previous;
+      }
+      if(event.moduleData?.module === 'groves' && !event.grovesAction) {
+        const current=moduleState(summarizePlay([...log,...baseline,...setup]).entries,'groves');
+        if(Object.entries(event.moduleData.changes).every(([k,v])=>v === null ? current[k] === undefined : current[k] === v)) return previous;
       }
       const additions = event.kind === 'start' ? [accepted, ...setup] : [...baseline, ...setup, accepted];
       if (log.length + additions.length > 1000) return previous;

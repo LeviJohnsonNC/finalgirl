@@ -306,3 +306,67 @@ describe('Inkanyamba durable boundaries',()=>{
     act(()=>expect(result.current.appendPlayEvent(game.id,change({wrath:10,miracleResolved:true}))).toBe(true));
   });
 });
+
+describe('Sacred Groves durable linked actions',()=>{
+  const groves:ActiveGame={...game,grovesSetupVersion:1,inkanyambaSetupVersion:1,selection:{...game.selection,killer:'Inkanyamba',location:'Sacred Groves',filmId:'s1-sacred-groves'}};
+  const change=(changes:Record<string,string|number|boolean|null>)=>newPlayEvent({kind:'module',moduleData:{module:'groves',changes}});
+  it('seeds fresh location state exactly once; keeps selected starting choices manual and legacy unknown',()=>{
+    const {result}=renderHook(useActiveGame);
+    act(()=>{result.current.save({...groves,selection:{...groves.selection,startingEvent:'Fire and Brimstone'}});result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));});
+    const raw=result.current.activeGame.playEvents;
+    expect(moduleState(summarizePlay(raw).entries,'groves')).toMatchObject({wrath:2,closed:'none',fire:'none','sign.1':'none','sign.2':'none'});
+    expect(moduleState(summarizePlay(raw).entries,'groves')['event.fire']).toBeUndefined();
+    act(()=>{result.current.appendPlayEvent(game.id,change({wrath:7}));});
+    expect(result.current.activeGame.playEvents.filter(e=>e.moduleData?.module === 'groves' && e.moduleData.changes.wrath === 2)).toHaveLength(1);
+    act(()=>{result.current.save({...groves,grovesSetupVersion:undefined,playEvents:[]});result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));});
+    expect(moduleState(summarizePlay(result.current.activeGame.playEvents).entries,'groves').wrath).toBeUndefined();
+  });
+  it('computes both outcomes from durable state and rejects duplicate or stale actions; one Undo restores both',()=>{
+    const {result}=renderHook(useActiveGame);
+    act(()=>{result.current.save(groves);result.current.appendPlayEvent(game.id,change({wrath:8,'person.holy-man':'in-play','event.holy-man':'active'}));});
+    const raw=result.current.activeGame.playEvents;
+    const resolution=newPlayEvent({kind:'module',moduleData:{module:'groves',changes:{wrath:9}},grovesAction:{kind:'outcome',parent:raw[raw.length-1].id,person:'holy-man',outcome:'blessed',incense:false}});
+    act(()=>{
+      expect(result.current.appendPlayEvent(game.id,resolution)).toBe(true);
+      expect(result.current.appendPlayEvent(game.id,{...resolution,id:crypto.randomUUID()})).toBe(false);
+    });
+    let entries=summarizePlay(result.current.activeGame.playEvents).entries;
+    expect(moduleState(entries,'groves')).toMatchObject({wrath:1,'person.holy-man':'removed','event.holy-man':'ended'});
+    expect(moduleState(entries,'inkanyamba').wrath).toBe(1);
+    act(()=>{result.current.appendPlayEvent(game.id,newPlayEvent({kind:'undo',target:resolution.id}));});
+    entries=summarizePlay(result.current.activeGame.playEvents).entries;
+    expect(moduleState(entries,'groves').wrath).toBe(8);expect(moduleState(entries,'inkanyamba').wrath).toBe(2);
+    act(()=>{result.current.appendPlayEvent(game.id,newPlayEvent({kind:'restore',target:resolution.id}));});
+    expect(moduleState(summarizePlay(result.current.activeGame.playEvents).entries,'inkanyamba').wrath).toBe(1);
+    expect(summarizePlay(result.current.activeGame.playEvents).killed).toBe(0);
+  });
+  it('has no half-written role/track state on failure; the same action remains retryable and reloadable',()=>{
+    const {result,unmount}=renderHook(useActiveGame);
+    act(()=>{result.current.save(groves);result.current.appendPlayEvent(game.id,change({wrath:8,'person.holy-man':'in-play'}));});
+    const before=result.current.activeGame;
+    const last=before.playEvents[before.playEvents.length-1];
+    const resolution=newPlayEvent({kind:'module',moduleData:{module:'groves',changes:{wrath:1}},grovesAction:{kind:'outcome',parent:last.id,person:'holy-man',outcome:'blessed',incense:false}});
+    const spy=vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('quota');});
+    act(()=>expect(result.current.appendPlayEvent(game.id,resolution)).toBe(false));
+    expect(result.current.activeGame).toEqual(before);spy.mockRestore();
+    act(()=>expect(result.current.appendPlayEvent(game.id,resolution)).toBe(true));
+    unmount();const resumed=renderHook(useActiveGame);
+    const entries=summarizePlay(resumed.result.current.activeGame.playEvents).entries;
+    expect(moduleState(entries,'groves').wrath).toBe(1);expect(moduleState(entries,'inkanyamba').wrath).toBe(1);
+  });
+  it('rejects foreign module writes and never adds Killer Wrath for another killer',()=>{
+    const {result}=renderHook(useActiveGame);act(()=>result.current.save(game));
+    act(()=>expect(result.current.appendPlayEvent(game.id,change({wrath:4}))).toBe(false));
+    act(()=>{result.current.save({...groves,selection:{...groves.selection,killer:'Hans'}});result.current.appendPlayEvent(game.id,change({wrath:3,'person.holy-man':'in-play'}));});
+    const raw=result.current.activeGame.playEvents;
+    act(()=>expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'module',moduleData:{module:'groves',changes:{wrath:10}},grovesAction:{kind:'outcome',parent:raw[raw.length-1].id,person:'holy-man',outcome:'angered',incense:false}}))).toBe(true));
+    const entries=summarizePlay(result.current.activeGame.playEvents).entries;
+    expect(moduleState(entries,'groves')).toMatchObject({wrath:10,holyManProvisional:true,'person.holy-man':'removed'});expect(moduleState(entries,'inkanyamba')).toEqual({});
+  });
+  it('marks a new paired Finale for both owners without resolving the location extension',()=>{
+    const {result}=renderHook(useActiveGame);act(()=>{result.current.save(groves);result.current.appendPlayEvent(game.id,newPlayEvent({kind:'moment',momentType:'finale',text:'Finale',permanent:true}));});
+    const reveal=result.current.activeGame.playEvents.find(e=>e.momentType === 'finale');
+    expect(reveal.grovesReference).toBe(true);expect(reveal.inkanyambaReference).toBe(true);
+    expect(moduleState(summarizePlay(result.current.activeGame.playEvents).entries,'groves')).toMatchObject({wrath:2,finaleRevealed:true});
+  });
+});

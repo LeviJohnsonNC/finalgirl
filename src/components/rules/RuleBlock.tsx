@@ -1,3 +1,4 @@
+import { GrovesBoard } from "../play/GrovesBoard";
 import { RuleBlock as RuleBlockType, GlossaryTerm as GlossaryTermType } from '@/data/rules/types';
 import { GlossaryTerm } from './GlossaryTerm';
 import { AlertTriangle, Info, Lightbulb, Pencil } from 'lucide-react';
@@ -60,6 +61,7 @@ const calloutStyles: Record<string, { className: string; icon: React.ReactNode; 
 
 export const RuleBlock = ({ block, glossary, onJumpTo }: RuleBlockProps) => {
   switch (block.type) {
+    case "groves-setup": return <GrovesBoard setup={block.setup}/>;
     case 'paragraph':
       return (
         <p className="rule-paragraph text-foreground/90 leading-7 type-body-sm">

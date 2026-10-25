@@ -1,3 +1,4 @@
+import { validGrovesField, grovesLabel, grovesValue, grovesFacts, GROVES_EVENTS, GROVES_ITEMS, GROVES_VISUAL, GROVES_PEOPLE } from "./groves.ts";
 import { INKANYAMBA_POWERS, INKANYAMBA_FINALES, INKANYAMBA_MINOR_POWERS, validInkanyambaField, inkanyambaFacts } from "./inkanyamba.ts";
 export { INKANYAMBA_POWERS, INKANYAMBA_FINALES, INKANYAMBA_MINOR_POWERS } from "./inkanyamba.ts";
 import { MAPLE_EVENTS, MAPLE_PEOPLE, MAPLE_ITEMS, validMapleField, mapleLabel, mapleValue, mapleStoryFacts, mapleStartingObservations } from "./maple.ts";
@@ -45,11 +46,13 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
   inkanyambaReference?: true;
+  grovesReference?: true;
+  linkedModule?: ModuleObservation;
   id?: string;
   kind: string;
   moduleData?: ModuleObservation;
@@ -145,6 +148,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === "groves") return validGrovesField(key, value);
   if (module === "inkanyamba") return validInkanyambaField(key, value);
   if (module === "maple") return validMapleField(key, value);
   if (module === "carnival") return validCarnivalField(key, value);
@@ -258,7 +262,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    !["groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -282,6 +286,7 @@ export function moduleState(
   if (module === "fright") { const state=frightState(entries); if(!state) return {}; const {eventId:_id,...snapshot}=state; return {snapshot:JSON.stringify(snapshot),sleep:state.sleep,mode:state.mode,progress:state.path.length,...frightPublic(entries)}; }
   const state: ModuleState = {};
   for (const e of entries) {
+    if (module === "groves" && e.kind === "moment" && e.momentType === "finale") state.finaleRevealed = true;
     if (module === "inkanyamba" && e.kind === "moment") {
       if (e.momentType === "dark-power") { state.powerRevealed = true; state.power = INKANYAMBA_POWERS.find(c => c.name === e.killerCard)?.id ?? null; }
       if (e.momentType === "finale") { state.finaleRevealed = true; state.finale = INKANYAMBA_FINALES.find(c => c.name === e.killerCard)?.id ?? null; }
@@ -321,13 +326,9 @@ export function moduleState(
         if (power) state[`power.${power.id}.revealed`] = true;
       }
     }
-    if (
-      e.kind !== "module" ||
-      e.moduleData?.module !== module ||
-      !validModuleObservation(e.moduleData)
-    )
-      continue;
-    for (const [key, value] of Object.entries(e.moduleData.changes)) {
+    const observation = e.moduleData?.module === module ? e.moduleData : e.moduleData?.module === "groves" && e.linkedModule?.module === module ? e.linkedModule : undefined;
+    if (e.kind !== "module" || !validModuleObservation(observation)) continue;
+    for (const [key, value] of Object.entries(observation.changes)) {
       if (value === null) delete state[key];
       else state[key] = value;
     }
@@ -335,6 +336,7 @@ export function moduleState(
   return state;
 }
 function fieldLabel(module: ModuleObservation["module"], key: string) {
+  if (module === "groves") return grovesLabel(key);
   if (module === "inkanyamba") return key === "wrath" ? "Killer Wrath" : key === "miracleResolved" ? "We Need a Miracle Wrath recorded" : `${INKANYAMBA_MINOR_POWERS.find(p => key === `minor.${p.id}.health`)?.name ?? key} Health`;
   if (module === "maple") return mapleLabel(key);
   if (module === "carnival") {
@@ -426,6 +428,7 @@ function valueLabel(key: string, value: ModuleValue) {
   return String(value);
 }
 export function describeModule(observation: ModuleObservation) {
+  if (observation.module === "groves") return Object.entries(observation.changes).map(([key,value])=>`${grovesLabel(key)}: ${grovesValue(key,value)}`).join("; ");
   if (observation.module === "maple") return Object.entries(observation.changes).map(([key,value])=>`${mapleLabel(key)}: ${mapleValue(key,value)}`).join("; ");
   if (observation.module === "fright") { const s=parseFright(observation.changes.snapshot); return s ? describeFright(s) : "Dr. Fright observation"; }
   return Object.entries(observation.changes)
@@ -442,6 +445,7 @@ export function moduleContext(
   const context: Record<string, ModuleState> = {};
   if (selection.killer === "Dr. Fright") { const facts=frightPublic(entries); if(facts) context.fright=facts; }
   for (const module of [
+    "groves",
     "inkanyamba",
     "billy",
     "buddyland",
@@ -452,7 +456,7 @@ export function moduleContext(
     "maple",
   ] as const) {
     const applies =
-      module === "inkanyamba" ? selection.killer === "Inkanyamba" : module === "maple" ? selection.location === "Maple Lane" : module === "carnival"
+      module === "groves" ? selection.location === "Sacred Groves" : module === "inkanyamba" ? selection.killer === "Inkanyamba" : module === "maple" ? selection.location === "Maple Lane" : module === "carnival"
         ? selection.location === "Carnival of Blood"
         : module === "geppetto"
           ? selection.killer === "Geppetto"
@@ -466,8 +470,10 @@ export function moduleContext(
     if (!applies) continue;
     // Older generic Inkanyamba reveals had no module context. Do not change
     // historical death fingerprints until an explicit owner observation exists.
-    if (module === "inkanyamba" && !entries.some(e => (e.kind === "module" && e.moduleData?.module === "inkanyamba") || e.inkanyambaReference === true)) continue;
+    if (module === "inkanyamba" && !entries.some(e => (e.kind === "module" && (e.moduleData?.module === "inkanyamba" || e.linkedModule?.module === "inkanyamba")) || e.inkanyambaReference === true)) continue;
+    if (module === "groves" && !entries.some(e => (e.kind === "module" && e.moduleData?.module === "groves") || e.grovesReference === true)) continue;
     const state = moduleState(entries, module);
+    if (module === "groves") { delete state.holyManProvisional; }
     // A UI initialization marker is not a game fact or part of a death fingerprint.
     delete state.powerSourcesReady;
     if (module === "inkanyamba") delete state.miracleResolved;
@@ -499,6 +505,11 @@ export function moduleStoryBeats(
   if (!context) return "";
   // Preserve the established output for every other location. Each owner gets
   // room inside the existing 900-character module budget for Carnival mixes.
+  if (context.groves) {
+    const killer = moduleStoryBeats({ ...selection, location: "" }, entries);
+    const facts = grovesFacts(context.groves);
+    return [`Sacred Groves: ${facts.slice(0,killer ? 525 : 875)}`, killer && `Killer: ${killer.slice(0,340)}`].filter(Boolean).join("\n");
+  }
   if (context.maple) {
     const killer = moduleStoryBeats({ ...selection, location: "" }, entries);
     const facts = mapleStoryFacts(context.maple);
@@ -642,6 +653,10 @@ export function buddylandReferences(
   attacker?: string,
 ) {
   const refs: { name: string; effect: string }[] = [];
+  if (selection.location === "Sacred Groves") {
+    refs.push({name:"Sacred Groves",effect:GROVES_VISUAL});
+    for(const e of GROVES_EVENTS) if(context?.groves?.[`event.${e.id}`] === "active") refs.push({name:e.name,effect:`${e.effect} Activation alone does not prove any conditional effect occurred.`});
+  }
   if (selection.killer === "Inkanyamba") {
     const state = context?.inkanyamba ?? {};
     refs.push({name:"Inkanyamba the Avenger", effect:"A masked human-shaped avenger with paired curved weapons in the selected Location; never a serpent or weather-controlled creature. Wrath is recorded anger, not proof of an Unleash, injury, movement or extra casualty."});
@@ -686,6 +701,11 @@ export function moduleReferences(
   mechanism?: string,
 ) {
   const refs = buddylandReferences(selection, context, attacker);
+  if (selection.location === "Sacred Groves") {
+    const state=context?.groves ?? {};
+    for(const person of GROVES_PEOPLE) if(state[`person.${person.id}`] || victim === person.name) refs.push({name:person.name,effect:`${victim === person.name ? "Explicit scene victim." : "Not established as this scene's victim."} Recorded role status: ${state[`person.${person.id}`] ?? "unknown"}. The role identifies an existing Victim; the Holy Man's ritual removal is not a kill.`});
+    const facts=grovesFacts(state);if(facts)refs.push({name:"Sacred Groves observations",effect:facts});
+  }
   if (selection.location === "Maple Lane") {
     const state = context?.maple ?? {};
     for (const person of MAPLE_PEOPLE) if (state[`person.${person.id}`] || victim === person.name) refs.push({name:person.name,effect:`${victim === person.name ? "Explicit scene victim." : "Not established as this scene’s victim."} Recorded status: ${state[`person.${person.id}`] ?? "unknown"}. ${MAPLE_EVENTS.find(e=>e.id===person.event)!.effect}`});
@@ -831,7 +851,7 @@ export function moduleItemBeats(
   entries: readonly ObservedEvent[],
 ) {
   const catalog =
-    selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
+    selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
       ? CAMP_ITEMS
       : selection.location === "Carnival of Blood"
         ? CARNIVAL_ITEMS
@@ -868,8 +888,10 @@ export function initialModuleObservations(
   initializeBilly = false,
   initializeMaple = false,
   initializeInkanyamba = false,
+  initializeGroves = false,
 ): ModuleObservation[] {
   return [
+    ...(initializeGroves && selection.location === "Sacred Groves" ? [{module:"groves" as const,changes:{wrath:2,closed:"none",fire:"none",hallowed:"none","sign.1":"none","sign.2":"none"}}] : []),
     ...(initializeInkanyamba && selection.killer === "Inkanyamba" ? [{module:"inkanyamba" as const,changes:{wrath:2}}] : []),
     ...(initializeBilly && selection.killer === "Billy the Bear" ? [{ module:"billy" as const, changes:{
       powerSourcesReady:true, ...Object.fromEntries([1,2,3,4,5].map(id => [`source.${id}.status`,id === 5 ? "set-aside" : "active"])),

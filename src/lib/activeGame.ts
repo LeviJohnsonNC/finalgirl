@@ -14,6 +14,7 @@ export interface EndingFormData {
   endingSubLocation: string; gameHighlights: string;
 }
 export interface ActiveGame {
+  grovesSetupVersion?: 1;
   inkanyambaSetupVersion?: 1;
   mapleSetupVersion?: 1;
   frightSetupVersion?: 1;
@@ -38,6 +39,7 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if (game.grovesSetupVersion !== undefined && game.grovesSetupVersion !== 1) return false;
   if (game.inkanyambaSetupVersion !== undefined && game.inkanyambaSetupVersion !== 1) return false;
   if (game.mapleSetupVersion !== undefined && game.mapleSetupVersion !== 1) return false;
   if (game.frightSetupVersion !== undefined && game.frightSetupVersion !== 1) return false;
