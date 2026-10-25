@@ -370,7 +370,10 @@ export function GrovesControls({
               </li>
             ))}
           </ol>
-          <button onClick={() => record({ wrath: null })}>
+          <button
+            disabled={wrath === undefined}
+            onClick={() => record({ wrath: null })}
+          >
             Clear Divine Wrath record
           </button>
         </details>

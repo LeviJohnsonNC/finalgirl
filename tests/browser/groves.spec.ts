@@ -305,6 +305,10 @@ test("legacy unknown state, rejected writes and offline recovery remain usable",
   await resume(page);
   const p = panel(page);
   await expect(p.getByLabel("Current Divine Wrath")).toHaveText("?/10");
+  await p.getByText("Wrath rules & corrections", { exact: true }).click();
+  await expect(
+    p.getByRole("button", { name: "Clear Divine Wrath record", exact: true }),
+  ).toBeDisabled();
   await page.evaluate(() => {
     const original = Storage.prototype.setItem;
     Storage.prototype.setItem = function (k, v) {

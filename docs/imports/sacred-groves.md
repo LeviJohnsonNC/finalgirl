@@ -5,6 +5,7 @@
 - Location: Sacred Groves; existing film ID `s1-sacred-groves`, module ID `groves`.
 - Standard location import. Related [Inkanyamba import](inkanyamba.md), merged PR #121. Final Girl abilities, personal items, scenarios and Extreme Horror are outside scope.
 - Implemented and locally verified on `feat/sacred-groves-location`, 2026-10-25. Review/CI status belongs to the implementation PR; not deployed or live-provider verified.
+- Implementation PR: [#122](https://github.com/LeviJohnsonNC/finalgirl/pull/122).
 - Retains existing selection, ownership, film identity and good location painting. Replaces generic Setup descriptions and incomplete Event data with shared verified references. Adds the missing illustrated location panel and visual/narrative guidance.
 - Six photos reconcile the supplied standard location components. No additional photo is currently needed. Raw photographs remain at their persistent references and are not committed or shipped.
 
@@ -81,7 +82,7 @@
 - Linked actions save with one immutable event; local write rejection leaves all displayed states unchanged and retryable. Parent preconditions reject races; undo/restore covers both owners.
 - Original cinematic styling, HTML labels, dimmed unselected/Epic treatment, death-dialog footer/prose behavior and complete ending poster fit are retained. Expanded sections may scroll; controls are not shrunk or clipped to fit.
 - All primary controls have at least 44px targets, focus treatment and readable contrast; no page overflow at 320px. Connection selection uses a list rather than tiny interactive SVG edges.
-- During visual/browser review, fixed escaped site captions caused by missing shared tile styling, and a Rules search crash caused by the new diagram block lacking a text projection. Added regression coverage for caption containment and full Rules navigation.
+- During visual/browser review, fixed escaped site captions caused by missing shared tile styling, and a Rules search crash caused by the new diagram block lacking a text projection. Added regression coverage for caption containment and full Rules navigation. An already-unknown Divine Wrath record cannot be cleared again, avoiding a misleading failed-save message; the legacy recovery journey covers this boundary.
 
 ## Verification evidence
 
