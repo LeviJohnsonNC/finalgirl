@@ -151,3 +151,21 @@ describe('death group count corrections', () => {
     expect(canChangeDeathCount([...log,event({kind:'adjust',saved:8,killed:999,round:null})],change(death.id,1))).toBe(false);
   });
 });
+
+it('main minus follows a recent correction to an older death across a manual baseline',async()=>{
+  const {decrementPlay}=await import('./events');
+  const death=event({kind:'killed',quantity:1});
+  const log=[event({kind:'start',saved:2,killed:0,round:3}),death,
+    event({kind:'adjust',saved:2,killed:8,round:9}),
+    event({kind:'death-count',target:death.id,delta:1}),
+    event({kind:'death-count',target:death.id,delta:1})];
+  log.push(event(decrementPlay(log,'killed')!));
+  expect(summarizePlay(log).killed).toBe(9);
+  expect(summarizePlay(log).entries.find(e=>e.id===death.id)).toMatchObject({quantity:2,currentRound:3});
+  log.push(event(decrementPlay(log,'killed')!));
+  expect(summarizePlay(log).killed).toBe(8);
+  expect(summarizePlay(log).entries.find(e=>e.id===death.id)?.quantity).toBe(1);
+  // The baseline also contains other casualties. Never make the minus button a no-op.
+  log.push(event(decrementPlay(log,'killed')!));
+  expect(summarizePlay(log).killed).toBe(7);
+});

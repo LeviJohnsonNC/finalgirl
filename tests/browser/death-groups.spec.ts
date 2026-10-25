@@ -117,3 +117,18 @@ test('timeline Undo and Restore change the group and tally together without anot
  await expect(page.getByRole('button',{name:'Latest death scene',exact:true})).toHaveCount(0);
  expect(archive.calls.filter(c=>c==='generate-death-scene')).toHaveLength(0);
 });
+
+test('main minus corrects an older expanded death after manual totals without losing its original round',async({page,archive})=>{
+ const events:PlayEvent[]=[start,kill,
+  {id:'44444444-4444-4444-8444-444444444444',at:3,kind:'adjust',saved:0,killed:8,round:9},
+  {id:'55555555-5555-4555-8555-555555555555',at:4,kind:'death-count',target:kill.id,delta:1},
+  {id:'66666666-6666-4666-8666-666666666666',at:5,kind:'death-count',target:kill.id,delta:1}];
+ await archive.install(page,{draft:{...draft,playEvents:events}});await resume(page);
+ await expect(page.getByRole('button',{name:'Record one victim killed',exact:true})).toContainText('10');
+ await page.getByRole('button',{name:'Decrease killed',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Record one victim killed',exact:true})).toContainText('9');
+ await page.getByRole('button',{name:'Latest death scene',exact:true}).click();
+ const dialog=page.getByRole('dialog',{name:'Gruesome Death',exact:true});
+ await expect(dialog.getByLabel('Victim count',{exact:true})).toHaveText('2');
+ await expect(dialog).toContainText('ROUND 4');
+});

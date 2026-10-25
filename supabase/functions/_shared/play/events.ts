@@ -321,14 +321,22 @@ export function decrementPlay(
     .reverse()
     .find((e) => e.kind === "start" || e.kind === "adjust");
   const baselineIndex = baseline ? s.entries.indexOf(baseline) : -1;
-  const matching = s.entries
-    .slice(baselineIndex + 1)
-    .reverse()
-    .find((e) => e.kind === counter);
-  if (matching)
-    return matching.quantity && matching.quantity > 1
-      ? { kind: "reduce", target: matching.id }
-      : { kind: "undo", target: matching.id };
+  const recent = s.entries.slice(baselineIndex + 1);
+  const matching = [...recent].reverse().find((e) =>
+    e.kind === counter || (counter === "killed" && e.kind === "death-count"));
+  if (matching) {
+    const group = matching.kind === "death-count"
+      ? s.entries.find(e => e.id === matching.target && e.kind === "killed")
+      : matching;
+    if (group?.quantity && group.quantity > 1)
+      return matching.kind === "death-count"
+        ? { kind: "death-count", target: group.id, delta: -1 }
+        : { kind: "reduce", target: group.id };
+    // Undoing a pre-baseline death cannot change that manual baseline. If its
+    // group is already one, correct the overall total instead of a no-op Undo.
+    if (group && recent.some(e => e.id === group.id))
+      return { kind: "undo", target: group.id };
+  }
   return {
     kind: "adjust",
     saved: s.saved!,
