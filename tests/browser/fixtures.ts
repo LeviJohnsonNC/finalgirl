@@ -92,7 +92,7 @@ export class ArchiveMock {
           const b=request.postDataJSON();const session=this.sessions.find(r=>r.id===b.sessionId);
           const f=session?deathFacts(session.state.selection as typeof selection,session.state.playEvents as PlayEvent[],b.eventId):null;
           if(!f)return json({error:'Sync the recorded death first.'},409);
-          const signature=this.deathSignatureOverride ?? await deathSignature(f);
+          const signature=this.deathSignatureOverride ?? await deathSignature(f, b.narrativeProfile ? "current" : "legacy");
           let scene=this.deathScenes.find(r=>r.session_id===b.sessionId&&r.event_id===b.eventId&&r.signature===signature&&r.take===b.take);
           const cached=!!scene && isCompleteDeathText(scene.scene_text);
           if(scene && !cached)scene.scene_text=this.deathText;

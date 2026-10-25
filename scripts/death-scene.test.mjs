@@ -520,3 +520,18 @@ test('group count corrections reach canonical generation after a later manual ba
  assert.equal(response.status,200);
  assert.ok(f.calls.includes('AI'));
 });
+
+test('backend-first rollout preserves old-tab identities and opts new Dr. Fright requests into the new profile',async()=>{
+ for(const narrativeProfile of [undefined,'fright-private-nightmares-v1']){
+  const f=fixture({expectedFacts:{killer:'Dr. Fright',quantity:2,cause:'event'}});
+  f.owned.selection.killer='Dr. Fright';
+  const response=await f.handler(f.request({sessionId,eventId,...(narrativeProfile&&{narrativeProfile})}));
+  assert.equal(response.status,200);
+  const body=await response.json();
+  assert.equal(body.scene.signature,await death.deathSignature(death.deathFacts(f.owned.selection,f.owned.playEvents,eventId),narrativeProfile?'current':'legacy'));
+ }
+ const f=fixture();
+ const rejected=await f.handler(f.request({sessionId,eventId,narrativeProfile:'arbitrary-cache-slot'}));
+ assert.equal(rejected.status,400);
+ assert.ok(!f.calls.includes('AI'));
+});
