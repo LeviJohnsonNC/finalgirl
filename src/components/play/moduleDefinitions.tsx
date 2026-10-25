@@ -87,7 +87,7 @@ export const moduleDefinitions: Definition[] = [
     const present=MAPLE_PEOPLE.filter(p=>state[`person.${p.id}`]==="in-play").length;
     return `${known.length?`${searched}/${known.length} recorded Houses searched`:"House searches not recorded"} · ${knownExits?`${blocked} blocked Exits (${knownExits}/4 recorded)`:"Exit status not recorded"}${state.fire&&state.fire!=="none"?" · Fire active":""}${present?` · ${present} people in play`:""}`;
   },Controls:props=><MapleControls {...props}/> },
-  {id:"fright",owner:"killer",match:"Dr. Fright",title:"Dr. Fright · The Dream Doctor",art:{src:frightBanner},capabilities:["reveals"],summary:state=>state.sleep?`${state.sleep === "unknown"?"Sleep state not recorded":state.sleep === "asleep"?"Asleep":"Awake"}${state.mode === "digital"?` · Boiler Room ${state.progress}/4`:" · Physical cards"}`:"Sleep state not recorded",Controls:props=><FrightControls {...props}/>},
+  {id:"fright",owner:"killer",match:"Dr. Fright",title:"Dr. Fright · The Dream Doctor",art:{src:frightBanner},capabilities:["reveals","minor-power"],summary:state=>state.sleep?`${state.sleep === "unknown"?"Sleep state not recorded":state.sleep === "asleep"?"Asleep":"Awake"}${state.mode === "digital"?` · Boiler Room ${state.progress}/4`:" · Physical cards"}`:"Sleep state not recorded",Controls:props=><FrightControls {...props}/>},
   {
     id: "geppetto",
     capabilities: ["reveals", "minor-power"],

@@ -6,6 +6,7 @@ import cardsArt from "@/assets/play/fright/cards.webp";
 export function FrightSleepControls({
   sleep,
   forced = false,
+  forcedReason = "Face Your Fright",
   disabled = false,
   pending = false,
   compact = false,
@@ -13,6 +14,7 @@ export function FrightSleepControls({
 }: {
   sleep: "awake" | "asleep" | "unknown";
   forced?: boolean;
+  forcedReason?: string;
   disabled?: boolean;
   pending?: boolean;
   compact?: boolean;
@@ -42,7 +44,7 @@ export function FrightSleepControls({
             pending
               ? "Resolve the pending attack before switching sleep state."
               : forced && value === "awake"
-                ? "Face Your Fright keeps you Asleep."
+                ? `${forcedReason} ${forcedReason.includes(" and ") ? "keep" : "keeps"} you Asleep.`
                 : undefined
           }
           disabled={

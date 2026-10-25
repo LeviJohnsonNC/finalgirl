@@ -490,3 +490,19 @@ test('Dr. Fright snapshots authorize historical public facts without exposing or
  assert.equal((await f.handler(f.request())).status,200);
  assert.deepEqual(f.owned.playEvents,original);
 });
+
+test('expanded Dr. Fright Minor Powers and temporary effects authorize canonical scenes without exposing a deal', async()=>{
+ const f=fixture({expectedFacts:{killer:'Dr. Fright',cause:'terror',quantity:2}});f.owned.selection.killer='Dr. Fright';
+ f.owned.playEvents=[f.owned.playEvents[0],events.newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(fright.initialFright())}}})];
+ for(const action of [{command:'digital'},{command:'minor',minor:'endless-sleep',health:1},{command:'condition',condition:'blurred-reality',active:true}]){
+  const entries=events.summarizePlay(f.owned.playEvents).entries;
+  const snapshot=fright.frightTransition(fright.frightState(entries),action,f.owned.playEvents,entries,()=> '0132');
+  assert.ok(snapshot);f.owned.playEvents.push(events.newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(snapshot)}}}));
+ }
+ f.owned.playEvents.push({...state.playEvents[1],cause:'terror',terrorCard:'Grab Your Crucifix'});
+ const facts=death.deathFacts(f.owned.selection,f.owned.playEvents,eventId);
+ assert.equal(facts.moduleContext.fright['minor.endless-sleep.health'],1);
+ assert.equal(facts.moduleContext.fright['condition.blurred-reality'],true);
+ assert.ok(!JSON.stringify(facts).includes('0132'));
+ assert.equal((await f.handler(f.request())).status,200);
+});

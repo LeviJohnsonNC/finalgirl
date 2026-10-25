@@ -13,8 +13,8 @@ Standard-mode Killer, `Dr. Fright`, film `s1-maple-lane`, module `fright`. Paire
 | Epic Power | Shock Factor | IMG_9348.jpg | 1/1 verified |
 | Finales | Face Your Fright; Time to Die; Everyone Must Die | IMG_9348.jpg | 3/3 verified |
 | Boiler Room | Four faces, one Dr. Fright quadrant on each | IMG_9349.jpg; Library `libfile_60bdfe52d9c08191b28217feec50adcd` | 4/4 verified |
-| Terror deck and Minor Powers | Sheet lists sixteen Terror cards; board has two Minor Power slots | Components in IMG_9345; slots in IMG_9347 | Faces not supplied; no invented catalog or Minor controls |
-| Pre-Finale actions | Facedown Finale/action strip | IMG_9347 | Covered; needs a clear additional photograph |
+| Terror deck and Minor Powers | Sheet lists sixteen Terror cards; board has two Minor Power slots | Components in IMG_9345; slots in IMG_9347 | All 16 faces now supplied in IMG_9350.jpg, including Hellish Pursuit (2 Health) and Endless Sleep (1 Health) |
+| Pre-Finale actions | Facedown Finale/action strip | IMG_9347 | Owner confirmed October 24: target Final Girl/Victim, then attack, no movement |
 
 Designer A.J. Porfirio; original publisher artist Roland MacDonald, as credited on the supplied sheet. Raw photos are retained outside the public app/repository; use the stable identifiers to retrieve evidence, rather than relying on this session's temporary paths.
 
@@ -63,7 +63,7 @@ Timeline descriptions and narrative/death projections explicitly omit raw snapsh
 
 No SQL migration, new secret or dependency. Deploy **generate-death-scene** and **narrate-story** from this revision with the new shared Play module before publishing the frontend. The old edge bundles reject unknown module observations. Verify the actual deployed revision, then smoke-test an authorized signed-in Dr. Fright mixed game with save/reload, Boiler Room progress, a contextual death and saved narration. Merge/CI alone does not deploy the linked app.
 
-Remaining source coverage: Terror/Minor card faces and uncovered pre-Finale action strip. Do not call the entire killer deck verified until those arrive. All supplied verified components and the digital Boiler Room are the agreed implementation scope.
+Source gaps closed October 24: IMG_9350 supplies all 16 Terror faces; the owner directly confirmed the starting Action. See the follow-up below for implementation and release status.
 
 ### October 24 concealed reset and direct sleep controls
 
@@ -81,3 +81,18 @@ Remaining source coverage: Terror/Minor card faces and uncovered pre-Finale acti
 - After a safe fourth reveal, keep the completed Asleep layout visible until the player chooses Awake from either entry point. The finished sequence remains durable across close/reopen/reload and cannot advance to the next trip before that acknowledgment. As before, the next shuffle is prepared privately once at completion; Awake conceals the finished layout without rerolling it. A fourth-card attack still finishes through Attack resolved, and Face Your Fright still resets automatically because Awake is forbidden.
 - The existing v1 snapshot representation, parser and public story/death projection remain unchanged. A completed safe trip uses its retained lastPath/lastDeal only during the explicit review state. No database migration or backend deployment is needed.
 - Tests cover the deliberate wake, reload, Undo/re-wake without a reroll, blocked fifth reveals, keyboard alternatives, absent direction buttons, and existing native drag/cancellation journeys. Browser screenshots include the held safe-fourth layout and the updated attack action.
+
+
+### October 24 full Terror deck follow-up
+
+- Evidence: `IMG_9350.jpg`, Library `libfile_5e98df20a3b48191a8f3d3546d0f5586`, all 16 faces (14 ordinary Terror cards plus 2 Minor Dark Powers). Re-supplied board/rules/Powers/Finales: `IMG_9345(1).jpg` (`libfile_919b96edbc98819191e809a0a500b03e`), `IMG_9346(1).jpg` (`libfile_273cf5005aa881918426aab280dc1de8`), `IMG_9347(1).jpg` (`libfile_5c6ac2cb1db48191a5a09228a0223daf`), `IMG_9348(1).jpg` (`libfile_0fd3f1b347148191968f0c6efec6c031`). Existing regular/Epic Powers and Finales match. Starting Action confirmed in the owner's October 24 instruction: target Final Girl/Victim, then attack; no movement.
+- Canonical catalog includes all 16 names and paraphrased effects, correctly owned by the killer in every Location. Death picker, Rules and Terror reference share this catalog. Card-reference selection alone never records gameplay, invents an Item or applies physical outcomes.
+- Hellish Pursuit: 2 Health, one additional Boiler Room reveal at the end of the Killer phase while Asleep, if able. Endless Sleep: 1 Health, atomic reveal/fall Asleep; while active forbids waking and immediately resets completed decks. Removing/clearing its observation does not wake the player, and Face Your Fright independently keeps its restriction. Shared MinorPowerControl/HealthTokens accept a health maximum, defaulting to the existing 2 for other killers.
+- Optional bounded `minor` and `conditions` maps extend the existing v1 snapshot; old snapshots remain unchanged. Each explicit update remains a parent-linked immutable observation and is checked by the durable successor guard. Pending attacks block these changes. Unknown/zero and failed writes remain distinct. Optional properties enter historical public context only when explicitly recorded, preserving old signatures and never projecting deals/reserves/paths/parent IDs.
+- Temporary effect reminders: Blurred Reality, Better Lock the Door, Marked for Death, Better Stay Up Late, and the conditional Never Sleep Again extra reveal. Activation and ending are deliberate observations; the tracker does not invent phase timing. Blurred Reality updates the mutual Awake-damage reminder. Never Sleep Again's optional digital reset preserves Asleep and promotes the prepared reserve; Undo/retry retain deal identities. Better Stay Up Late reminds the player to resolve all remaining cards and defend each attack.
+- Release requirement: deploy **generate-death-scene** and **narrate-story** with the updated shared validators/context before publishing the frontend. No SQL migration. The Lovable connector previously rejected writes because its authorization lacks `projects:write`; deployment and signed-in production smoke verification remain pending until access is restored. CI fixtures alone do not establish a live fix.
+- Validation and visual review: results belong to the follow-up PR's current head.
+
+- Icon reconciliation: the orange wrench in Better Lock the Door and Slash Her means **Search space**, not a House or Exit; Better Stay Up Late’s red die means **one fewer Horror-roll die** (minimum one), not one fewer success. Verified enlarged IMG_9350 crops against the publisher’s Core rulebook, Location board/Search spaces (printed p.6), Horror Rolls (p.10) and back-cover icon reference: https://gamers-hq.de/media/pdf/22/ba/4a/FinalGirl_Rules.pdf. Enlarged title confirms **Franky’s Coming for You**. These corrected interpretations are covered by catalog regression assertions.
+
+- Enlarged per-card Action-strip reconciliation: Didn’t You Know They Were Already Dead? targets the closest **Victim**, not the Final Girl. OMG... He’s Slicing Off His Own Fingers! has **two Move symbols**. Both are explicit catalog regression assertions. All other Action strips, branches, phase timings and symbols were re-read in enlarged IMG_9350 crops before final verification.

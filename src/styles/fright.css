@@ -479,3 +479,15 @@
     animation: none;
   }
 }
+
+/* Temporary card reminders remain visible; references and corrections disclose locally. */
+.fright-minors { margin-block: 22px; }
+.fright-minors > h3 { font: 24px/1.3 "IM Fell English", Georgia, serif; color: #e7d5b5; margin-bottom: 12px; }
+.fright-minor-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.fright-active-effect { margin:12px 0; padding:12px; border:1px solid #a17442; border-radius:6px; background:#241b15; color:#e7d5b5; }
+.fright-active-effect p { font:14px/1.6 Arial,sans-serif; margin:0; }
+.fright-active-effect button { min-height:44px; margin-top:6px; padding:8px 12px; border:1px solid #a17442; border-radius:5px; }
+.fright-terrors > .play-select-trigger { width:100%; margin-block:8px; }
+.fright-terror-reference { color:#e7d5b5; }
+.fright-controls button:disabled { cursor:not-allowed; }
+@media(max-width:599px) { .fright-minor-grid { grid-template-columns:1fr; } }

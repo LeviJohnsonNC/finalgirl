@@ -1,5 +1,6 @@
-/** Standard Dr. Fright: owner photos IMG_9345–IMG_9349. No inferred Terror cards. */
-export const FRIGHT_SOURCE = "Owner photos IMG_9345–IMG_9349 (standard mode)";
+/** Standard Dr. Fright: owner photos IMG_9345–IMG_9349. Terror deck verified from IMG_9350; starting Action confirmed by owner. */
+export const FRIGHT_SOURCE =
+  "Owner photos IMG_9345–IMG_9350 (standard mode); starting Action confirmed by owner October 24, 2026";
 export const FRIGHT_VISUAL =
   "Dr. Fright is a grotesque stocky middle-aged man with scarred pockmarked skin, milky-white eyes, thinning disheveled brown hair, ragged mustard-yellow work clothes and a rusty three-tined pitchfork. He is the supernatural Dream Doctor, not a farmer or masked slasher. Preserve the selected physical Location. The Boiler Room is the Final Girl’s dream state, not a place to transport ordinary Victims. Never expose an unresolved Boiler Room card or invent a recorded attack or injury.";
 export const FRIGHT_POWERS = [
@@ -49,6 +50,159 @@ export const FRIGHT_FINALES = [
       "When revealed, remove Dr. Fright from the board and place him on this Finale. While Asleep, the Final Girl may attack him from any space. Killer Action: choose and kill two Victims automatically; if none remain, the Final Girl loses four Health. Record actual outcomes separately.",
   },
 ] as const;
+
+/** Starting action has no movement symbol (owner confirmation, October 24). */
+export const FRIGHT_STARTING_ACTION =
+  "Target the closest Final Girl or Victim, then attack. No movement.";
+export const FRIGHT_MINOR_POWERS = [
+  {
+    id: "hellish-pursuit",
+    name: "Hellish Pursuit",
+    health: 2,
+    effect:
+      "While Asleep, resolve one additional Boiler Room card at the end of the Killer phase, if able.",
+  },
+  {
+    id: "endless-sleep",
+    name: "Endless Sleep",
+    health: 1,
+    effect:
+      "When revealed, fall Asleep. While active, remain Asleep and reset the Boiler Room immediately after exiting it.",
+  },
+] as const;
+export type FrightMinor = (typeof FRIGHT_MINOR_POWERS)[number]["id"];
+/** Explicit, player-ended reminders: there is no automatic phase engine. */
+export const FRIGHT_CONDITIONS = [
+  {
+    id: "blurred-reality",
+    name: "Blurred Reality",
+    effect:
+      "Until the next Killer phase, you and Dr. Fright may damage each other even while Awake.",
+  },
+  {
+    id: "better-lock-the-door",
+    name: "Better Lock the Door",
+    effect:
+      "During the next Action phase, you may not enter a Search space occupied by a Victim.",
+  },
+  {
+    id: "marked-for-death",
+    name: "Marked for Death",
+    effect:
+      "Until the next Killer phase, all Victims in your space immediately panic.",
+  },
+  {
+    id: "better-stay-up-late",
+    name: "Better Stay Up Late",
+    effect:
+      "If drawn while Awake: roll one fewer die for Horror rolls during the next Action phase, minimum one die.",
+  },
+  {
+    id: "never-sleep-again",
+    name: "Never Sleep Again",
+    effect:
+      "If already Asleep and you declined the optional reset: resolve one additional Boiler Room card at the end of this Killer phase.",
+  },
+] as const;
+export type FrightCondition = (typeof FRIGHT_CONDITIONS)[number]["id"];
+export const FRIGHT_TERRORS = [
+  {
+    id: "blurred-reality",
+    name: "Blurred Reality",
+    effect:
+      FRIGHT_CONDITIONS[0].effect +
+      " Then target the closest Final Girl or Victim, move and attack.",
+  },
+  {
+    id: "better-lock-the-door",
+    name: "Better Lock the Door",
+    effect:
+      "Target the Final Girl and move. Then target the closest Final Girl or Victim and attack. " +
+      FRIGHT_CONDITIONS[1].effect,
+  },
+  {
+    id: "marked-for-death",
+    name: "Marked for Death",
+    effect:
+      FRIGHT_CONDITIONS[2].effect +
+      " Target the Final Girl and move, then target the closest Final Girl or Victim and attack. If Dr. Fright did not attack you and you are Awake, fall Asleep.",
+  },
+  {
+    id: "im-so-sleepy",
+    name: "I’m So Sleepy...",
+    effect:
+      "If Awake, roll a die; fall Asleep if the result is below the current Horror level. If Asleep instead, resolve one Boiler Room card and increase Horror by one if it damages you. Then target the closest Victim and move.",
+  },
+  {
+    id: "better-stay-up-late",
+    name: "Better Stay Up Late",
+    effect:
+      FRIGHT_CONDITIONS[3].effect +
+      " If drawn while Asleep instead, immediately resolve all remaining Boiler Room cards. Then target the closest Final Girl or Victim, move and attack.",
+  },
+  {
+    id: "slash-her",
+    name: "Slash Her",
+    effect:
+      "Target the closest Final Girl or Victim and attack. Then target the closest Final Girl or Victim, move and attack. Panic every Victim outside a Search space.",
+  },
+  {
+    id: "already-dead",
+    name: "Didn’t You Know They Were Already Dead?",
+    effect:
+      "If no Victims have been saved or your Final Girl card has been flipped, replace this card with the next Terror card. Otherwise remove one Victim from a Saved Victim space on your Final Girl card, then target the closest Victim, move and attack. Removing a saved Victim is not automatically a new death.",
+  },
+  {
+    id: "own-fingers",
+    name: "OMG... He’s Slicing Off His Own Fingers!",
+    effect:
+      "Target the closest Final Girl or Victim and move twice. Dr. Fright takes one damage unless he has only a Final Health token remaining. If he took damage, increase Horror by three, then panic the Final Girl and all Victims in his space.",
+  },
+  {
+    id: "youre-dead",
+    name: "But You Can’t Be Here... You’re Dead!",
+    effect:
+      "With zero dead Victims, fall Asleep; with one to three, add one Bloodlust; with four or more, add two Bloodlust. Then target the closest Final Girl or Victim, move and attack.",
+  },
+  {
+    id: "grab-your-crucifix",
+    name: "Grab Your Crucifix",
+    effect:
+      "You may discard a Crucifix you possess to ignore the rest of this card. Otherwise target the closest Final Girl or Victim, move and attack, then repeat that complete action. Selecting this card does not establish Crucifix possession or use.",
+  },
+  {
+    id: "never-sleep-again",
+    name: "Never Sleep Again",
+    effect:
+      "Increase Horror by one, then fall Asleep. If already Asleep, you may reset the Boiler Room deck; if you decline, resolve one additional Boiler Room card at the end of the Killer phase.",
+  },
+  {
+    id: "disgusting",
+    name: "Ewwwww! He’s Disgusting!",
+    effect: "Increase Horror by two.",
+  },
+  {
+    id: "if-this-is-a-dream",
+    name: "But If This Is a Dream Then I Can...",
+    effect:
+      "If Awake, replace this card with the next Terror card. Otherwise you may add one Bloodlust to choose one: take the top Item from any deck, move to any space, or gain four Time.",
+  },
+  {
+    id: "frankys-coming",
+    name: "Franky’s Coming for You",
+    effect:
+      "With no Victims on the board, replace this card with the next Terror card. Otherwise target the closest Victim and move. If Dr. Fright shares a space with a Victim, increase Horror by two; otherwise increase it by one.",
+  },
+  ...FRIGHT_MINOR_POWERS.map((p) => ({
+    id: p.id,
+    name: p.name,
+    effect: p.effect,
+  })),
+].map((card) => ({
+  ...card,
+  killer: "Dr. Fright",
+  source: "Owner photo IMG_9350.jpg",
+}));
 
 export const DIRECTIONS = ["U", "D", "L", "R"] as const;
 export type Direction = (typeof DIRECTIONS)[number];
@@ -144,9 +298,9 @@ export function boilerAttack(deal: string, path: string) {
     validDeal(deal) &&
     Boolean(
       path.length &&
-      geometry?.visible[path.length - 1].includes(
-        Number(deal[path.length - 1]),
-      ),
+        geometry?.visible[path.length - 1].includes(
+          Number(deal[path.length - 1]),
+        ),
     )
   );
 }
@@ -161,6 +315,9 @@ export const FRIGHT_COMMANDS = [
   "defended",
   "reset",
   "effect",
+  "minor",
+  "condition",
+  "reshuffle",
 ] as const;
 export type FrightCommand = (typeof FRIGHT_COMMANDS)[number];
 export interface FrightSnapshot {
@@ -177,6 +334,8 @@ export interface FrightSnapshot {
   lastPath: string;
   lastDeal: string;
   effects: string[];
+  minor?: Partial<Record<FrightMinor, number>>;
+  conditions?: Partial<Record<FrightCondition, boolean>>;
 }
 export interface FrightObservation {
   id?: string;
@@ -206,7 +365,10 @@ export function parseFright(value: unknown): FrightSnapshot | null {
     const s = JSON.parse(value) as FrightSnapshot;
     if (
       !s ||
-      Object.keys(s).sort().join() !==
+      Object.keys(s)
+        .filter((k) => k !== "minor" && k !== "conditions")
+        .sort()
+        .join() !==
         "command,cycle,deal,effects,lastDeal,lastPath,mode,parent,path,pending,reserve,sleep,v" ||
       s.v !== 1 ||
       !(s.parent === "root" || uuid.test(s.parent)) ||
@@ -237,6 +399,34 @@ export function parseFright(value: unknown): FrightSnapshot | null {
             key,
           ),
       )
+    )
+      return null;
+    if (
+      s.minor !== undefined &&
+      (!s.minor ||
+        typeof s.minor !== "object" ||
+        Array.isArray(s.minor) ||
+        Object.entries(s.minor).some(([id, value]) => {
+          const card = FRIGHT_MINOR_POWERS.find((p) => p.id === id);
+          return (
+            !card ||
+            !Number.isInteger(value) ||
+            value < 0 ||
+            value > card.health
+          );
+        }))
+    )
+      return null;
+    if (
+      s.conditions !== undefined &&
+      (!s.conditions ||
+        typeof s.conditions !== "object" ||
+        Array.isArray(s.conditions) ||
+        Object.entries(s.conditions).some(
+          ([id, value]) =>
+            !FRIGHT_CONDITIONS.some((c) => c.id === id) ||
+            typeof value !== "boolean",
+        ))
     )
       return null;
     if (
@@ -308,15 +498,19 @@ export function initialFright(): FrightSnapshot {
     effects: [],
   };
 }
-type Action = {
+export type FrightAction = {
   command: FrightCommand;
   direction?: Direction;
   effect?: string;
+  minor?: FrightMinor;
+  health?: number | null;
+  condition?: FrightCondition;
+  active?: boolean | null;
 };
 /** Raw history is used ONLY to reuse previously dealt randomness after Undo. Never render it. */
 export function frightTransition(
   current: FrightState | null,
-  action: Action,
+  action: FrightAction,
   raw: readonly FrightObservation[],
   entries: readonly FrightObservation[],
   shuffle: (kind?: "deal" | "reserve") => string = shuffleBoilerRoom,
@@ -332,7 +526,7 @@ export function frightTransition(
     command: action.command,
     effects: [...base.effects],
   };
-  const forced = frightCards(entries).finale?.id === "face-your-fright";
+  const forced = frightForcedSleep(entries);
   const history = raw.flatMap((e) =>
     e.moduleData?.module === "fright"
       ? ([parseFright(e.moduleData.changes.snapshot)].filter(
@@ -416,6 +610,62 @@ export function frightTransition(
       next.sleep = "asleep";
       if (base.mode === "digital") fresh(base.cycle + 1);
       break;
+    case "minor": {
+      const card = FRIGHT_MINOR_POWERS.find((p) => p.id === action.minor);
+      if (
+        !card ||
+        action.health === undefined ||
+        (action.health !== null &&
+          (!Number.isInteger(action.health) ||
+            action.health < 0 ||
+            action.health > card.health)) ||
+        base.minor?.[card.id] === (action.health ?? undefined)
+      )
+        return null;
+      next.minor = { ...base.minor };
+      if (action.health === null) delete next.minor[card.id];
+      else next.minor[card.id] = action.health;
+      if (
+        card.id === "endless-sleep" &&
+        (action.health ?? 0) > 0 &&
+        (base.minor?.[card.id] ?? 0) === 0
+      )
+        next.sleep = "asleep";
+      // A forced completion already promoted the next deck. Removing the lock
+      // must not redisplay the previous completed trip as an unacknowledged wake.
+      if (
+        card.id === "endless-sleep" &&
+        (action.health ?? 0) === 0 &&
+        (base.minor?.[card.id] ?? 0) > 0 &&
+        !base.path
+      ) {
+        next.lastPath = "";
+        next.lastDeal = "";
+      }
+      if (!Object.keys(next.minor).length) delete next.minor;
+      break;
+    }
+    case "condition": {
+      const card = FRIGHT_CONDITIONS.find((p) => p.id === action.condition);
+      if (
+        !card ||
+        action.active === undefined ||
+        (action.active !== null && typeof action.active !== "boolean") ||
+        base.conditions?.[card.id] === (action.active ?? undefined)
+      )
+        return null;
+      next.conditions = { ...base.conditions };
+      if (action.active === null) delete next.conditions[card.id];
+      else next.conditions[card.id] = action.active;
+      if (!Object.keys(next.conditions).length) delete next.conditions;
+      break;
+    }
+    case "reshuffle":
+      if (base.mode !== "digital" || base.sleep !== "asleep") return null;
+      fresh(base.cycle + 1, base.reserve);
+      if (base.conditions?.["never-sleep-again"])
+        next.conditions = { ...base.conditions, "never-sleep-again": false };
+      break;
     case "effect": {
       const cards = frightCards(entries);
       const available = [
@@ -454,12 +704,24 @@ export function validFrightSuccessor(
   const added = proposed.effects.filter(
     (effect) => !current?.effects.includes(effect),
   );
+  const minor = FRIGHT_MINOR_POWERS.find(
+    (p) => proposed.minor?.[p.id] !== current?.minor?.[p.id],
+  );
+  const condition = FRIGHT_CONDITIONS.find(
+    (p) => proposed.conditions?.[p.id] !== current?.conditions?.[p.id],
+  );
   const expected = frightTransition(
     current,
     {
       command: proposed.command,
       direction: path[path.length - 1] as Direction,
       effect: added.length === 1 ? added[0] : undefined,
+      minor: minor?.id,
+      health: minor ? (proposed.minor?.[minor.id] ?? null) : undefined,
+      condition: condition?.id,
+      active: condition
+        ? (proposed.conditions?.[condition.id] ?? null)
+        : undefined,
     },
     raw,
     entries,
@@ -467,12 +729,30 @@ export function validFrightSuccessor(
   );
   return Boolean(
     expected &&
-    Object.keys(expected).every(
-      (key) =>
-        JSON.stringify(expected[key as keyof FrightSnapshot]) ===
-        JSON.stringify(proposed[key as keyof FrightSnapshot]),
-    ),
+      Object.keys(expected).every(
+        (key) =>
+          JSON.stringify(expected[key as keyof FrightSnapshot]) ===
+          JSON.stringify(proposed[key as keyof FrightSnapshot]),
+      ),
   );
+}
+export function frightForcedSleep(entries: readonly FrightObservation[]) {
+  return (
+    frightCards(entries).finale?.id === "face-your-fright" ||
+    (frightState(entries)?.minor?.["endless-sleep"] ?? 0) > 0
+  );
+}
+export function frightSleepReason(entries: readonly FrightObservation[]) {
+  return [
+    frightCards(entries).finale?.id === "face-your-fright"
+      ? "Face Your Fright"
+      : "",
+    (frightState(entries)?.minor?.["endless-sleep"] ?? 0) > 0
+      ? "Endless Sleep"
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" and ");
 }
 /** Safe projection only. Internal deals, parents, effect IDs and paths never enter prose/cache identity. */
 export function frightPublic(entries: readonly FrightObservation[]) {
@@ -486,12 +766,41 @@ export function frightPublic(entries: readonly FrightObservation[]) {
     ...(state?.sleep === "asleep" && state.mode === "digital"
       ? { boilerCardsResolved: state.path.length, attackPending: state.pending }
       : {}),
+    ...Object.fromEntries(
+      FRIGHT_MINOR_POWERS.filter((p) => state.minor?.[p.id] !== undefined).map(
+        (p) => [`minor.${p.id}.health`, state.minor![p.id]!],
+      ),
+    ),
+    ...Object.fromEntries(
+      FRIGHT_CONDITIONS.filter((c) => state.conditions?.[c.id] === true).map(
+        (c) => [`condition.${c.id}`, true],
+      ),
+    ),
     ...(cards.power ? { power: cards.power.id } : {}),
     ...(cards.finale ? { finale: cards.finale.id } : {}),
   };
 }
 export function describeFright(snapshot: FrightSnapshot) {
   switch (snapshot.command) {
+    case "minor":
+      return (
+        "Minor Dark Power health updated: " +
+        FRIGHT_MINOR_POWERS.map(
+          (p) =>
+            `${p.name}: ${snapshot.minor?.[p.id] === undefined ? "not recorded" : `${snapshot.minor[p.id]}/${p.health}`}`,
+        ).join("; ") +
+        "."
+      );
+    case "condition":
+      return (
+        "Temporary Dr. Fright effects: " +
+        (FRIGHT_CONDITIONS.filter((c) => snapshot.conditions?.[c.id])
+          .map((c) => c.name)
+          .join(", ") || "none recorded active") +
+        "."
+      );
+    case "reshuffle":
+      return "Reset the Boiler Room while remaining Asleep.";
     case "slide":
       return `Boiler Room card ${snapshot.path.length || 4} resolved${snapshot.pending ? ": Dr. Fright attacks" : ""}.`;
     case "defended":
