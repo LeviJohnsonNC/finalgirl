@@ -28,3 +28,15 @@ Same-story, same-font measurements from the previous build versus this build (a 
 The fixture is UI verification text, not evidence of provider narrative quality. Arbitrarily long text still scrolls. Production deployment and actual generated prose must be verified separately; backend and frontend changes are not live merely because CI passes.
 
 Local verification: `npm run check` passes (411 unit/component tests and 100 server tests; 11 existing lint warnings, no errors), all 285 artwork files pass `check:assets`, and the production build passes. Existing and new death journeys pass on desktop/phone; final Reliability CI and deployment status are recorded below when available. Screenshots inspected at all five viewports include editing, loading, reading, error and grouped-death views.
+
+## Release handoff
+
+Implementation: [PR #117](https://github.com/LeviJohnsonNC/finalgirl/pull/117). Native edge checks and database checks passed in [Reliability run 40203014394](https://github.com/LeviJohnsonNC/finalgirl/actions/runs/40203014394); full browser CI is tracked on the PR's latest head.
+
+Backend deployment was attempted and rejected by Lovable: the connector lacks `projects:write`. Lovable's response says to remove the connector/app and add it back to authorize the current permissions; simply disconnecting/reconnecting reuses the old scope. No new backend or frontend was deployed by this work.
+
+After access is restored:
+
+1. Deploy `generate-death-scene` and `narrate-story` with the exact shared sources from this PR (implementation commit `438ba3012c19d54ff71a8e943e8027e1d816443a`; later documentation-only commits do not change the bundles). Confirm deployment succeeded before releasing the frontend.
+2. Publish the frontend through the existing release flow.
+3. In an isolated signed-in game, generate and read one- and three-adult-victim Dr. Fright scenes while the Final Girl is Awake, including a mixed Location, and an explicit hazard counterexample. Check private nightmares versus real location, precise victim count, varied imagery, preserved cause, and manual narration. Confirm reload, the final tally and archived scenes. No live prose-quality claim has been made from mocked browser text.
