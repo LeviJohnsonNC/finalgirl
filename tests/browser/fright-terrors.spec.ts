@@ -1,5 +1,13 @@
 import { test, expect, installTestAudio } from "./fixtures";
-import { draft, panel, dialog, resume, log, slide } from "./fright-helpers";
+import {
+  draft,
+  panel,
+  dialog,
+  resume,
+  log,
+  slide,
+  footerVisible,
+} from "./fright-helpers";
 import { searchPick, openHistory } from "./play-helpers";
 import {
   frightState,
@@ -8,29 +16,97 @@ import {
 import { summarizePlay } from "../../src/lib/play/events";
 import { deathFacts } from "../../src/lib/play/death";
 
-test("Minor Power artwork, empty/full/removed states and temporary reminders fit laptop and phone layouts", async ({page,archive},info) => {
-  await archive.install(page,{draft});await resume(page);
-  const sizes=info.project.name==='desktop'?[{width:1280,height:640},{width:1366,height:768},{width:1440,height:900}]:[{width:320,height:568},{width:390,height:844}];
-  for(const size of sizes){
+test("Minor Power artwork, empty/full/removed states and temporary reminders fit laptop and phone layouts", async ({
+  page,
+  archive,
+}, info) => {
+  await archive.install(page, { draft });
+  await resume(page);
+  const sizes =
+    info.project.name === "desktop"
+      ? [
+          { width: 1280, height: 640 },
+          { width: 1366, height: 768 },
+          { width: 1440, height: 900 },
+        ]
+      : [
+          { width: 320, height: 568 },
+          { width: 390, height: 844 },
+        ];
+  for (const size of sizes) {
     await page.setViewportSize(size);
-    await panel(page).locator('.fright-minors').scrollIntoViewIfNeeded();
-    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-    await panel(page).locator('.fright-minors').screenshot({path:info.outputPath(`minor-unknown-${size.width}.png`),animations:'disabled'});
+    await panel(page).locator(".fright-minors").scrollIntoViewIfNeeded();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await panel(page)
+      .locator(".fright-minors")
+      .screenshot({
+        path: info.outputPath(`minor-unknown-${size.width}.png`),
+        animations: "disabled",
+      });
   }
-  await panel(page).getByRole('button',{name:'Reveal Endless Sleep',exact:true}).click();
-  await panel(page).getByRole('button',{name:'Reveal Hellish Pursuit',exact:true}).click();
-  await panel(page).locator('.fright-minors').screenshot({path:info.outputPath('minor-full.png'),animations:'disabled'});
-  for(const button of await panel(page).locator('.fright-minors').getByRole('button').all()){
-    const box=await button.boundingBox();expect(box?.height).toBeGreaterThanOrEqual(44);
+  await panel(page)
+    .getByRole("button", { name: "Reveal Endless Sleep", exact: true })
+    .click();
+  await panel(page)
+    .getByRole("button", { name: "Reveal Hellish Pursuit", exact: true })
+    .click();
+  await panel(page)
+    .locator(".fright-minors")
+    .screenshot({
+      path: info.outputPath("minor-full.png"),
+      animations: "disabled",
+    });
+  for (const button of await panel(page)
+    .locator(".fright-minors")
+    .getByRole("button")
+    .all()) {
+    const box = await button.boundingBox();
+    expect(box?.height).toBeGreaterThanOrEqual(44);
   }
-  await panel(page).getByRole('button',{name:'Remove one Endless Sleep health, heart 1'}).click();
-  for(let i=0;i<2;i++)await panel(page).getByRole('button',{name:'Remove one Hellish Pursuit health, heart 1'}).click();
-  await panel(page).locator('.fright-minors').screenshot({path:info.outputPath('minor-removed.png'),animations:'disabled'});
-  await panel(page).getByText('Terror cards & temporary effects',{exact:true}).click();
-  await searchPick(page,'Dr. Fright Terror card reference','Better Stay Up Late');
-  await panel(page).getByRole('button',{name:'Track Better Stay Up Late effect',exact:true}).click();
-  await panel(page).locator('.fright-active-effect').screenshot({path:info.outputPath('temporary-effect.png'),animations:'disabled'});
-  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await panel(page)
+    .getByRole("button", { name: "Remove one Endless Sleep health, heart 1" })
+    .click();
+  for (let i = 0; i < 2; i++)
+    await panel(page)
+      .getByRole("button", {
+        name: "Remove one Hellish Pursuit health, heart 1",
+      })
+      .click();
+  await panel(page)
+    .locator(".fright-minors")
+    .screenshot({
+      path: info.outputPath("minor-removed.png"),
+      animations: "disabled",
+    });
+  await panel(page)
+    .getByText("Terror cards & temporary effects", { exact: true })
+    .click();
+  await searchPick(
+    page,
+    "Dr. Fright Terror card reference",
+    "Better Stay Up Late",
+  );
+  await panel(page)
+    .getByRole("button", {
+      name: "Track Better Stay Up Late effect",
+      exact: true,
+    })
+    .click();
+  await panel(page)
+    .locator(".fright-active-effect")
+    .screenshot({
+      path: info.outputPath("temporary-effect.png"),
+      animations: "disabled",
+    });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
 });
 
 for (const location of [
@@ -211,7 +287,7 @@ test("temporary card references never write until tracked; reminders end explici
 test("Endless Sleep resets completed decks and cannot override a Finale when removed", async ({
   page,
   archive,
-}) => {
+}, info) => {
   await archive.install(page, { draft });
   await resume(page);
   await panel(page)
@@ -250,6 +326,24 @@ test("Endless Sleep resets completed decks and cannot override a Finale when rem
   await panel(page).locator(".module-card-section > summary").click();
   await panel(page)
     .getByRole("button", { name: "Choose Face Your Fright", exact: true })
+    .click();
+  await page.setViewportSize(
+    info.project.name === "desktop"
+      ? { width: 1280, height: 640 }
+      : { width: 320, height: 568 },
+  );
+  await panel(page)
+    .getByRole("button", { name: /Continue Boiler Room/ })
+    .click();
+  await expect(dialog(page).locator(".boiler-notice")).toContainText(
+    "Face Your Fright and Endless Sleep keep you Asleep",
+  );
+  await footerVisible(page);
+  await page.screenshot({
+    path: info.outputPath("fright-combined-forced.png"),
+  });
+  await dialog(page)
+    .getByRole("button", { name: "Back to game", exact: true })
     .click();
   await panel(page)
     .getByRole("button", { name: "Remove one Endless Sleep health, heart 1" })

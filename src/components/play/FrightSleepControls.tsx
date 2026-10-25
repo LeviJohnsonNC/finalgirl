@@ -44,7 +44,7 @@ export function FrightSleepControls({
             pending
               ? "Resolve the pending attack before switching sleep state."
               : forced && value === "awake"
-                ? `${forcedReason} keeps you Asleep.`
+                ? `${forcedReason} ${forcedReason.includes(" and ") ? "keep" : "keeps"} you Asleep.`
                 : undefined
           }
           disabled={

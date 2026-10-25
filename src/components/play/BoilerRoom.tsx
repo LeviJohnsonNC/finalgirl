@@ -164,7 +164,7 @@ export function BoilerRoom({
                 ) : awaitingWake ? (
                   "Four cards revealed. Select Awake to wake up and shuffle the deck."
                 ) : (
-                  `${forcedReason} keeps you Asleep. Each completed deck resets automatically.`
+                  `${forcedReason} ${forcedReason.includes(" and ") ? "keep" : "keeps"} you Asleep. Each completed deck resets automatically.`
                 )}
               </p>
             )}

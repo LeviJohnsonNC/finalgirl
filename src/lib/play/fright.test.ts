@@ -28,7 +28,10 @@ import { moduleContext, killerMomentCards } from "./modules";
 import { deathFacts, deathSignature } from "./death";
 import { playStartingValues } from "./defaults";
 import { getKillerMaxHealth } from "@/data/killerHealth";
-import { applicablePlayCards, playCardContext } from "../../../supabase/functions/_shared/play/catalog";
+import {
+  applicablePlayCards,
+  playCardContext,
+} from "../../../supabase/functions/_shared/play/catalog";
 
 const selection = {
   killer: "Dr. Fright",
@@ -389,73 +392,181 @@ describe("owner-verified Dr. Fright", () => {
   });
 });
 
-describe('complete Dr. Fright deck from IMG_9350', () => {
-  it('owns all 16 cards across locations and supplies verified Crucifix context without assuming possession', () => {
+describe("complete Dr. Fright deck from IMG_9350", () => {
+  it("owns all 16 cards across locations and supplies verified Crucifix context without assuming possession", () => {
     expect(FRIGHT_TERRORS).toHaveLength(16);
-    expect(new Set(FRIGHT_TERRORS.map(c=>c.id)).size).toBe(16);
-    for (const location of ['Maple Lane','Camp Happy Trails','Buddyland','Carnival of Blood']) {
-      expect(applicablePlayCards({...selection,location},'terror').filter(c=>c.killer==='Dr. Fright')).toHaveLength(16);
-      expect(applicablePlayCards({killer:'Hans',location},'terror').some(c=>c.name==='Grab Your Crucifix')).toBe(false);
+    expect(new Set(FRIGHT_TERRORS.map((c) => c.id)).size).toBe(16);
+    for (const location of [
+      "Maple Lane",
+      "Camp Happy Trails",
+      "Buddyland",
+      "Carnival of Blood",
+    ]) {
+      expect(
+        applicablePlayCards({ ...selection, location }, "terror").filter(
+          (c) => c.killer === "Dr. Fright",
+        ),
+      ).toHaveLength(16);
+      expect(
+        applicablePlayCards({ killer: "Hans", location }, "terror").some(
+          (c) => c.name === "Grab Your Crucifix",
+        ),
+      ).toBe(false);
     }
-    expect(playCardContext(selection,'Grab Your Crucifix')[0].effect).toMatch(/may discard.*possess/);
-    expect(playCardContext(selection,'Grab Your Crucifix')[0].effect).toContain('repeat that complete action');
-    expect(FRIGHT_STARTING_ACTION).toBe('Target the closest Final Girl or Victim, then attack. No movement.');
+    expect(playCardContext(selection, "Grab Your Crucifix")[0].effect).toMatch(
+      /may discard.*possess/,
+    );
+    expect(
+      playCardContext(selection, "Grab Your Crucifix")[0].effect,
+    ).toContain("repeat that complete action");
+    expect(FRIGHT_STARTING_ACTION).toBe(
+      "Target the closest Final Girl or Victim, then attack. No movement.",
+    );
   });
-  it('reveals the one-Health Endless Sleep atomically, enforces sleep, and preserves the independent Finale lock', () => {
-    const s=session();
-    const before=s.state();
-    const next=s.step({command:'minor',minor:'endless-sleep',health:1})!;
-    expect(next).toMatchObject({sleep:'asleep',minor:{'endless-sleep':1},deal:before.deal});
-    expect(validFrightSuccessor(next,s.log.slice(0,-1),summarizePlay(s.log.slice(0,-1)).entries)).toBe(true);
-    expect(s.step({command:'awake'})).toBeNull();
-    expect(s.step({command:'minor',minor:'endless-sleep',health:2})).toBeNull();
-    expect(s.step({command:'minor',minor:'endless-sleep',health:0})!.sleep).toBe('asleep');
-    expect(s.step({command:'awake'})!.sleep).toBe('awake');
-    s.step({command:'minor',minor:'endless-sleep',health:1});
-    s.log.push(newPlayEvent({kind:'moment',momentType:'finale',text:'Finale',killerCard:'Face Your Fright'}));
-    s.step({command:'minor',minor:'endless-sleep',health:0});
+  it("reveals the one-Health Endless Sleep atomically, enforces sleep, and preserves the independent Finale lock", () => {
+    const s = session();
+    const before = s.state();
+    const next = s.step({
+      command: "minor",
+      minor: "endless-sleep",
+      health: 1,
+    })!;
+    expect(next).toMatchObject({
+      sleep: "asleep",
+      minor: { "endless-sleep": 1 },
+      deal: before.deal,
+    });
+    expect(
+      validFrightSuccessor(
+        next,
+        s.log.slice(0, -1),
+        summarizePlay(s.log.slice(0, -1)).entries,
+      ),
+    ).toBe(true);
+    expect(s.step({ command: "awake" })).toBeNull();
+    expect(
+      s.step({ command: "minor", minor: "endless-sleep", health: 2 }),
+    ).toBeNull();
+    expect(
+      s.step({ command: "minor", minor: "endless-sleep", health: 0 })!.sleep,
+    ).toBe("asleep");
+    expect(s.step({ command: "awake" })!.sleep).toBe("awake");
+    s.step({ command: "minor", minor: "endless-sleep", health: 1 });
+    s.log.push(
+      newPlayEvent({
+        kind: "moment",
+        momentType: "finale",
+        text: "Finale",
+        killerCard: "Face Your Fright",
+      }),
+    );
+    s.step({ command: "minor", minor: "endless-sleep", health: 0 });
     expect(frightForcedSleep(summarizePlay(s.log).entries)).toBe(true);
-    expect(s.step({command:'awake'})).toBeNull();
+    expect(s.step({ command: "awake" })).toBeNull();
   });
-  it('resets a safe final reveal under Endless Sleep, with no wake acknowledgment required', () => {
-    const s=session();s.step({command:'minor',minor:'endless-sleep',health:1});
-    for(const direction of ['U','U','L'] as const)s.step({command:'slide',direction});
+  it("resets a safe final reveal under Endless Sleep, with no wake acknowledgment required", () => {
+    const s = session();
+    s.step({ command: "minor", minor: "endless-sleep", health: 1 });
+    for (const direction of ["U", "U", "L"] as const)
+      s.step({ command: "slide", direction });
     expect(s.state().pending).toBe(true);
-    expect(s.step({command:'minor',minor:'endless-sleep',health:0})).toBeNull();
-    s.step({command:'defended'});s.step({command:'slide',direction:'D'});
-    expect(s.state()).toMatchObject({sleep:'asleep',path:'',cycle:2,deal:'2301'});
-    expect(boilerAwaitingWake(s.state(),frightForcedSleep(summarizePlay(s.log).entries))).toBe(false);
-    s.step({command:'minor',minor:'endless-sleep',health:0});
-    expect(boilerAwaitingWake(s.state(),false)).toBe(false);
-    expect(s.state().deal).toBe('2301');
-    expect(s.step({command:'slide',direction:'U'})).not.toBeNull();
+    expect(
+      s.step({ command: "minor", minor: "endless-sleep", health: 0 }),
+    ).toBeNull();
+    s.step({ command: "defended" });
+    s.step({ command: "slide", direction: "D" });
+    expect(s.state()).toMatchObject({
+      sleep: "asleep",
+      path: "",
+      cycle: 2,
+      deal: "2301",
+    });
+    expect(
+      boilerAwaitingWake(
+        s.state(),
+        frightForcedSleep(summarizePlay(s.log).entries),
+      ),
+    ).toBe(false);
+    s.step({ command: "minor", minor: "endless-sleep", health: 0 });
+    expect(boilerAwaitingWake(s.state(), false)).toBe(false);
+    expect(s.state().deal).toBe("2301");
+    expect(s.step({ command: "slide", direction: "U" })).not.toBeNull();
   });
-  it('retains temporary effects and optional reset randomness across Undo, with one guarded change per observation', () => {
-    const s=session();s.step({command:'condition',condition:'blurred-reality',active:true});
-    expect(s.state().sleep).toBe('awake');
-    expect(frightPublic(summarizePlay(s.log).entries)).toMatchObject({'condition.blurred-reality':true});
-    expect(s.step({command:'condition',condition:'blurred-reality',active:true})).toBeNull();
-    s.step({command:'asleep'});s.step({command:'slide',direction:'U'});
-    const reset=s.step({command:'reshuffle'})!;
-    expect(reset).toMatchObject({sleep:'asleep',path:'',deal:'2301'});
-    s.log.push(newPlayEvent({kind:'undo',target:s.log[s.log.length-1]!.id}));
-    expect(s.step({command:'reshuffle'})).toMatchObject({deal:reset.deal,reserve:reset.reserve});
-    const invalid={...s.state(),parent:s.state().eventId,command:'minor' as const,minor:{'endless-sleep':1,'hellish-pursuit':2},sleep:'asleep' as const};
-    const {eventId:_id,...forged}=invalid;
-    expect(validFrightSuccessor(forged,s.log,summarizePlay(s.log).entries)).toBe(false);
-    expect(parseFright(JSON.stringify({...reset,minor:{'endless-sleep':2}}))).toBeNull();
-    expect(parseFright(JSON.stringify({...reset,conditions:{'foreign-power':true}}))).toBeNull();
+  it("retains temporary effects and optional reset randomness across Undo, with one guarded change per observation", () => {
+    const s = session();
+    s.step({
+      command: "condition",
+      condition: "blurred-reality",
+      active: true,
+    });
+    expect(s.state().sleep).toBe("awake");
+    expect(frightPublic(summarizePlay(s.log).entries)).toMatchObject({
+      "condition.blurred-reality": true,
+    });
+    expect(
+      s.step({
+        command: "condition",
+        condition: "blurred-reality",
+        active: true,
+      }),
+    ).toBeNull();
+    s.step({ command: "asleep" });
+    s.step({ command: "slide", direction: "U" });
+    const reset = s.step({ command: "reshuffle" })!;
+    expect(reset).toMatchObject({ sleep: "asleep", path: "", deal: "2301" });
+    s.log.push(
+      newPlayEvent({ kind: "undo", target: s.log[s.log.length - 1]!.id }),
+    );
+    expect(s.step({ command: "reshuffle" })).toMatchObject({
+      deal: reset.deal,
+      reserve: reset.reserve,
+    });
+    const invalid = {
+      ...s.state(),
+      parent: s.state().eventId,
+      command: "minor" as const,
+      minor: { "endless-sleep": 1, "hellish-pursuit": 2 },
+      sleep: "asleep" as const,
+    };
+    const { eventId: _id, ...forged } = invalid;
+    expect(
+      validFrightSuccessor(forged, s.log, summarizePlay(s.log).entries),
+    ).toBe(false);
+    expect(
+      parseFright(JSON.stringify({ ...reset, minor: { "endless-sleep": 2 } })),
+    ).toBeNull();
+    expect(
+      parseFright(
+        JSON.stringify({ ...reset, conditions: { "foreign-power": true } }),
+      ),
+    ).toBeNull();
   });
-  it('Undo rewinds linked minor/sleep steps, while death context stays historical and excludes concealed data', async () => {
-    const s=session();s.step({command:'minor',minor:'endless-sleep',health:1});const reveal=s.log[s.log.length-1]!;
-    const killed=newPlayEvent({kind:'killed',quantity:1,cause:'terror',terrorCard:'Grab Your Crucifix'});s.log.push(killed);
-    const facts=deathFacts(selection,s.log,killed.id)!;const signature=await deathSignature(facts);
-    expect(facts.moduleContext?.fright).toMatchObject({sleep:'asleep','minor.endless-sleep.health':1});
-    s.step({command:'minor',minor:'endless-sleep',health:0});
-    expect(await deathSignature(deathFacts(selection,s.log,killed.id)!)).toBe(signature);
-    expect(JSON.stringify(facts)).not.toMatch(/0132|2301|reserve|snapshot|parent/);
-    s.log.push(newPlayEvent({kind:'undo',target:reveal.id}));
-    expect(s.state().sleep).toBe('awake');
+  it("Undo rewinds linked minor/sleep steps, while death context stays historical and excludes concealed data", async () => {
+    const s = session();
+    s.step({ command: "minor", minor: "endless-sleep", health: 1 });
+    const reveal = s.log[s.log.length - 1]!;
+    const killed = newPlayEvent({
+      kind: "killed",
+      quantity: 1,
+      cause: "terror",
+      terrorCard: "Grab Your Crucifix",
+    });
+    s.log.push(killed);
+    const facts = deathFacts(selection, s.log, killed.id)!;
+    const signature = await deathSignature(facts);
+    expect(facts.moduleContext?.fright).toMatchObject({
+      sleep: "asleep",
+      "minor.endless-sleep.health": 1,
+    });
+    s.step({ command: "minor", minor: "endless-sleep", health: 0 });
+    expect(await deathSignature(deathFacts(selection, s.log, killed.id)!)).toBe(
+      signature,
+    );
+    expect(JSON.stringify(facts)).not.toMatch(
+      /0132|2301|reserve|snapshot|parent/,
+    );
+    s.log.push(newPlayEvent({ kind: "undo", target: reveal.id }));
+    expect(s.state().sleep).toBe("awake");
     expect(summarizePlay(s.log).killed).toBe(1);
   });
 });
