@@ -83,7 +83,7 @@ export const FRIGHT_CONDITIONS = [
     id: "better-lock-the-door",
     name: "Better Lock the Door",
     effect:
-      "During the next Action phase, you may not enter a House occupied by a Victim.",
+      "During the next Action phase, you may not enter a Search space occupied by a Victim.",
   },
   {
     id: "marked-for-death",
@@ -95,7 +95,7 @@ export const FRIGHT_CONDITIONS = [
     id: "better-stay-up-late",
     name: "Better Stay Up Late",
     effect:
-      "If drawn while Awake: subtract one success from Horror rolls during the next Action phase.",
+      "If drawn while Awake: roll one fewer die for Horror rolls during the next Action phase, minimum one die.",
   },
   {
     id: "never-sleep-again",
@@ -144,19 +144,19 @@ export const FRIGHT_TERRORS = [
     id: "slash-her",
     name: "Slash Her",
     effect:
-      "Target the closest Final Girl or Victim and attack. Then target the closest Final Girl or Victim, move and attack. Panic every Victim outside a House.",
+      "Target the closest Final Girl or Victim and attack. Then target the closest Final Girl or Victim, move and attack. Panic every Victim outside a Search space.",
   },
   {
     id: "already-dead",
     name: "Didn’t You Know They Were Already Dead?",
     effect:
-      "If no Victims have been saved or your Final Girl card has been flipped, replace this card with the next Terror card. Otherwise remove one Victim from a Saved Victim space on your Final Girl card, then target the Final Girl, move and attack. Removing a saved Victim is not automatically a new death.",
+      "If no Victims have been saved or your Final Girl card has been flipped, replace this card with the next Terror card. Otherwise remove one Victim from a Saved Victim space on your Final Girl card, then target the closest Victim, move and attack. Removing a saved Victim is not automatically a new death.",
   },
   {
     id: "own-fingers",
     name: "OMG... He’s Slicing Off His Own Fingers!",
     effect:
-      "Target the closest Final Girl or Victim and move. Dr. Fright takes one damage unless he has only a Final Health token remaining. If he took damage, increase Horror by three, then panic the Final Girl and all Victims in his space.",
+      "Target the closest Final Girl or Victim and move twice. Dr. Fright takes one damage unless he has only a Final Health token remaining. If he took damage, increase Horror by three, then panic the Final Girl and all Victims in his space.",
   },
   {
     id: "youre-dead",
@@ -188,8 +188,8 @@ export const FRIGHT_TERRORS = [
       "If Awake, replace this card with the next Terror card. Otherwise you may add one Bloodlust to choose one: take the top Item from any deck, move to any space, or gain four Time.",
   },
   {
-    id: "frannys-coming",
-    name: "Franny’s Coming for You",
+    id: "frankys-coming",
+    name: "Franky’s Coming for You",
     effect:
       "With no Victims on the board, replace this card with the next Terror card. Otherwise target the closest Victim and move. If Dr. Fright shares a space with a Victim, increase Horror by two; otherwise increase it by one.",
   },

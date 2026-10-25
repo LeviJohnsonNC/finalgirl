@@ -419,6 +419,31 @@ describe("complete Dr. Fright deck from IMG_9350", () => {
     expect(
       playCardContext(selection, "Grab Your Crucifix")[0].effect,
     ).toContain("repeat that complete action");
+    // The orange wrench is a Search space; the red three-dimensional die is
+    // a dice-count modifier, not a removed success. See the source ledger.
+    expect(
+      playCardContext(selection, "Better Lock the Door")[0].effect,
+    ).toContain("Search space occupied by a Victim");
+    expect(playCardContext(selection, "Slash Her")[0].effect).toContain(
+      "outside a Search space",
+    );
+    expect(
+      playCardContext(selection, "Better Stay Up Late")[0].effect,
+    ).toContain("one fewer die");
+    expect(
+      playCardContext(selection, "Better Stay Up Late")[0].effect,
+    ).toContain("minimum one die");
+    expect(FRIGHT_TERRORS.find((c) => c.id === "frankys-coming")?.name).toBe(
+      "Franky’s Coming for You",
+    );
+    expect(
+      playCardContext(selection, "Didn't You Know They Were Already Dead?")[0]
+        .effect,
+    ).toContain("target the closest Victim, move and attack");
+    expect(
+      playCardContext(selection, "OMG... He's Slicing Off His Own Fingers!")[0]
+        .effect,
+    ).toContain("move twice");
     expect(FRIGHT_STARTING_ACTION).toBe(
       "Target the closest Final Girl or Victim, then attack. No movement.",
     );
