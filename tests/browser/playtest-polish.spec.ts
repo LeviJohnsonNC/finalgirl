@@ -110,7 +110,7 @@ test("killer selection and Epic borders stay distinct with a read-only revealed 
   await hero.click();
   expect(await log(page)).toEqual(before);
   await cards
-    .getByRole("button", { name: "Change Dark Power", exact: true })
+    .getByRole("button", { name: "Clear Dark Power card name", exact: true })
     .click();
   await epic.click();
   await expect(hero).toHaveAttribute("data-epic", "true");

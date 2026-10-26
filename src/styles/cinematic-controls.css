@@ -618,3 +618,28 @@
     height: 54px;
   }
 }
+
+/* Secondary record corrections stay quiet and keyboard/touch accessible. */
+.module-cinematic-minor .module-minor-clear {
+  display: block;
+  width: fit-content;
+  min-height: 44px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #aaa89e;
+  text-decoration: underline;
+  font:
+    500 11px/1.5 "Source Sans 3",
+    Arial,
+    sans-serif;
+}
+.module-minor-clear:focus-visible {
+  outline: 2px dashed #efd9af;
+  outline-offset: -3px;
+}
+.module-reveals .module-unnamed {
+  padding-inline: 0;
+  text-align: left;
+}

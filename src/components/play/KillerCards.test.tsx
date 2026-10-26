@@ -2,15 +2,17 @@ import { useState } from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { KillerCards } from "./KillerCards";
-import { newPlayEvent, type PlayEvent } from "@/lib/play/events";
+import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
 afterEach(cleanup);
-it("hides alternatives after a reveal, opens correction without writes, and retains a failed correction for retry", () => {
+it("clears only the Dark Power name, retains its permanent reveal, and retries rejected clear/reselection", () => {
   let accepting = true;
+  let saved: PlayEvent[] = [];
   const save = vi.fn(() => accepting);
   function Harness() {
     const [events, setEvents] = useState<PlayEvent[]>([
       newPlayEvent({ kind: "start", saved: 0, killed: 0, round: 1 }),
     ]);
+    saved = events;
     return (
       <KillerCards
         killer="Inkanyamba"
@@ -27,17 +29,25 @@ it("hides alternatives after a reveal, opens correction without writes, and reta
   render(<Harness />);
   fireEvent.click(screen.getByRole("button", { name: "Choose Rising Dread" }));
   expect(
+    screen.queryByRole("button", { name: "Change Dark Power" }),
+  ).toBeNull();
+  expect(
     screen.queryByRole("button", { name: "Choose Volatile Temper" }),
   ).toBeNull();
+  accepting = false;
+  fireEvent.click(
+    screen.getByRole("button", { name: "Clear Dark Power card name" }),
+  );
   expect(screen.getByRole("heading", { name: "Rising Dread" })).toBeVisible();
-  const calls = save.mock.calls.length;
-  fireEvent.click(screen.getByRole("button", { name: "Change Dark Power" }));
-  expect(save).toHaveBeenCalledTimes(calls);
+  accepting = true;
+  fireEvent.click(
+    screen.getByRole("button", { name: "Clear Dark Power card name" }),
+  );
+  expect(screen.queryByRole("heading", { name: "Rising Dread" })).toBeNull();
   accepting = false;
   fireEvent.click(
     screen.getByRole("button", { name: "Choose Volatile Temper" }),
   );
-  expect(screen.getByRole("heading", { name: "Rising Dread" })).toBeVisible();
   expect(
     screen.getByRole("button", { name: "Choose Volatile Temper" }),
   ).toBeVisible();
@@ -49,13 +59,10 @@ it("hides alternatives after a reveal, opens correction without writes, and reta
     screen.getByRole("heading", { name: "Volatile Temper" }),
   ).toBeVisible();
   expect(
-    screen.queryByRole("button", { name: "Choose Rising Dread" }),
-  ).toBeNull();
-  fireEvent.click(
-    screen.getByRole("button", { name: "Clear Dark Power card name" }),
-  );
-  expect(screen.queryByRole("heading", { name: "Volatile Temper" })).toBeNull();
+    saved.filter((e) => e.kind === "moment" && e.momentType === "dark-power"),
+  ).toHaveLength(1);
   expect(
-    screen.getByRole("button", { name: "Choose Rising Dread" }),
-  ).toBeVisible();
+    summarizePlay(saved).entries.find((e) => e.momentType === "dark-power")
+      ?.killerCard,
+  ).toBe("Volatile Temper");
 });

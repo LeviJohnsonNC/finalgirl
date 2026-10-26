@@ -252,7 +252,6 @@ export function BuddylandControls({
                 <MinorPowerControl
                   key={power.id}
                   name={power.name}
-                  effect={power.effect}
                   health={typeof health === "number" ? health : undefined}
                   previouslyRevealed={
                     billy[`power.${power.id}.revealed`] === true ||

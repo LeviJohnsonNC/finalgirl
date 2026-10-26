@@ -145,7 +145,7 @@ export function KillerCards({
                   choose={(name) => choose(type, name)}
                 />
               )}
-              {selected && (
+              {selected && type === "finale" && (
                 <button
                   type="button"
                   className="module-change-choice"

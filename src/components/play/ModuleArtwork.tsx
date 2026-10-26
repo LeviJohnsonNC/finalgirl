@@ -5,6 +5,7 @@ export interface ModuleArt {
   src: string;
   fit?: "meet" | "slice";
   align?: "right";
+  position?: string;
   atlas?: {
     width: number;
     height: number;
@@ -34,7 +35,9 @@ export function ModuleArtwork({
               : art.fit === "meet"
                 ? "contain"
                 : undefined,
-          objectPosition: art.align === "right" ? "right center" : undefined,
+          objectPosition:
+            art.position ??
+            (art.align === "right" ? "right center" : undefined),
         }}
         alt=""
         loading="lazy"

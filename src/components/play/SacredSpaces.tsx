@@ -38,11 +38,7 @@ export function SacredSpaces({
                 title={site.name}
                 status={[
                   ...tokens.map((k) => sacredTokenNames[k]),
-                  ...(unknown
-                    ? ["Tokens not fully recorded"]
-                    : tokens.length
-                      ? []
-                      : ["No tokens"]),
+                  ...(unknown ? ["Tokens not fully recorded"] : []),
                 ].join(" · ")}
                 aria-label={`Cycle tokens: ${site.name}`}
                 disabled={disabled}

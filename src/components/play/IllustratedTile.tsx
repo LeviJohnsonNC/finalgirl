@@ -26,7 +26,7 @@ export function IllustratedTile({
       <ModuleArtwork art={art} />
       <span className="play-tile-caption">
         <strong>{title}</strong>
-        <small className="play-tile-state">{status}</small>
+        {status && <small className="play-tile-state">{status}</small>}
       </span>
       {children}
     </button>

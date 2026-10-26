@@ -113,7 +113,6 @@ export function CampControls({
                   key={power.id}
                   className="play-minor-power"
                   name={power.name}
-                  effect={power.effect}
                   health={typeof value === "number" ? value : undefined}
                   art={(health) => powerCell(row, health)}
                   heroArt={modulePhoto("Hans", 7 + row)}

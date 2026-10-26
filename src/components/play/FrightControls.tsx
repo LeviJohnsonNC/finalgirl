@@ -281,7 +281,6 @@ export function FrightControls({
             <MinorPowerControl
               key={power.id}
               name={power.name}
-              effect={power.effect}
               health={state?.minor?.[power.id]}
               maxHealth={power.health}
               disabled={minorDisabled}

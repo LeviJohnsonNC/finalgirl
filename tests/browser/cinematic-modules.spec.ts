@@ -211,13 +211,13 @@ test("Hans keeps two distinct revealed powers in both entry points and reduced m
     panel.locator(".module-second-power .module-revealed-hero h4"),
   ).toHaveText("Feed");
   await panel
-    .getByRole("button", { name: "Change Dark Power", exact: true })
+    .getByRole("button", { name: "Clear Dark Power card name", exact: true })
     .click();
   await expect(
     panel.getByRole("button", { name: "Choose Feed", exact: true }),
   ).toBeDisabled();
   await panel
-    .getByRole("button", { name: "Cancel changing Dark Power", exact: true })
+    .getByRole("button", { name: "Choose Dark Obsession", exact: true })
     .click();
   const hero = panel
     .getByRole("region", { name: "Dark Power selection", exact: true })

@@ -54,7 +54,13 @@ export async function chooseKillerCard(
   });
   if (!(await choice.isVisible()))
     await section
-      .getByRole("button", { name: `Change ${type}`, exact: true })
+      .getByRole("button", {
+        name:
+          type === "Dark Power"
+            ? "Clear Dark Power card name"
+            : `Change ${type}`,
+        exact: true,
+      })
       .click();
   await choice.click();
   await expect(section.locator(".module-revealed-hero h4")).toHaveText(name);

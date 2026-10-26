@@ -1,12 +1,10 @@
 import { HealthTokens } from "./HealthTokens";
-import { PlaySelect } from "./PlaySelect";
 import { ModuleArtwork, type ModuleArt } from "./ModuleArtwork";
 import "@/styles/play-controls.css";
 import "@/styles/cinematic-controls.css";
 
 export function MinorPowerControl({
   name,
-  effect,
   health,
   art,
   heroArt,
@@ -18,7 +16,6 @@ export function MinorPowerControl({
   disabled = false,
 }: {
   name: string;
-  effect: string;
   health?: number;
   maxHealth?: number;
   disabled?: boolean;
@@ -97,43 +94,15 @@ export function MinorPowerControl({
           </div>
         </div>
       )}
-      <details className="module-correction">
-        <summary>
-          Details &amp; corrections<span className="sr-only">: {name}</span>
-        </summary>
-        <p className="module-control-help">{effect}</p>
-        <PlaySelect
-          aria-label={`${name} health correction`}
-          disabled={disabled}
-          value={health === undefined ? "" : String(health)}
-          onChange={(event) =>
-            onChange(
-              event.target.value === "" ? null : Number(event.target.value),
-            )
-          }
-        >
-          <option value="">Not recorded</option>
-          {Array.from(
-            { length: maxHealth },
-            (_, index) => maxHealth - index,
-          ).map((value) => (
-            <option key={value} value={value}>
-              {value}/{maxHealth} health
-            </option>
-          ))}
-          <option value="0">Removed · 0/{maxHealth} health</option>
-        </PlaySelect>
-        <button
-          disabled={disabled}
-          aria-label={`Clear record: ${name}`}
-          onClick={() => onChange(null)}
-        >
-          Clear record<span className="sr-only">: {name}</span>
-        </button>
-        <p className="module-control-help">
-          Clears the observation; does not undo damage on your board.
-        </p>
-      </details>
+      <button
+        type="button"
+        className="module-minor-clear"
+        disabled={disabled}
+        aria-label={`Clear record: ${name}`}
+        onClick={() => onChange(null)}
+      >
+        Clear record
+      </button>
     </article>
   );
 }

@@ -41,6 +41,8 @@ describe("registered modules use their declared shared interactions", () => {
           container.querySelector(`[data-module-control="${capability}"]`),
         ).not.toBeNull();
       expect(onEvent).not.toHaveBeenCalled();
+      expect(module.art.src).toMatch(/banners\//);
+      expect(module.art.position).toMatch(/% center$/);
       if (module.capabilities.includes("reveals"))
         for (const type of ["dark-power", "finale"] as const) {
           const cards = illustratedKillerCards(module.match, type);
@@ -51,7 +53,8 @@ describe("registered modules use their declared shared interactions", () => {
           );
         }
     });
-  it("registers unique owner/match pairs and IDs", () => {
+  it("registers unique owner/match pairs, IDs and owner-specific banners", () => {
+    expect(new Set(moduleDefinitions.map(module => module.art.src)).size).toBe(moduleDefinitions.length);
     expect(new Set(moduleDefinitions.map((module) => module.id)).size).toBe(
       moduleDefinitions.length,
     );
@@ -200,7 +203,6 @@ describe("shared player interaction contracts", () => {
       return (
         <MinorPowerControl
           name="Nightfall"
-          effect="Test rule"
           health={health}
           art={() => art}
           heartArt={art}
@@ -209,7 +211,7 @@ describe("shared player interaction contracts", () => {
       );
     }
     render(<Power />);
-    expect(screen.getByText("Test rule")).toBeInTheDocument();
+    expect(screen.queryByRole("combobox")).toBeNull();
     expect(
       screen.getByText("Not recorded", { selector: ".module-health-status" }),
     ).toBeVisible();
@@ -246,7 +248,6 @@ describe("shared player interaction contracts", () => {
     render(
       <MinorPowerControl
         name="Old power"
-        effect="Rule"
         previouslyRevealed
         art={() => art}
         heartArt={art}
@@ -306,7 +307,7 @@ describe("durable module observation contract", () => {
 it('one-Health Minor Powers reveal at one, show one heart, remove and restore exactly one, and disable every mutation', () => {
   function OneHeart({disabled=false}) {
     const [health,setHealth]=useState<number|undefined>();
-    return <MinorPowerControl name="Endless Sleep" effect="Remain Asleep" maxHealth={1} disabled={disabled} health={health} art={()=>art} heartArt={art} onChange={n=>setHealth(n??undefined)}/>;
+    return <MinorPowerControl name="Endless Sleep" maxHealth={1} disabled={disabled} health={health} art={()=>art} heartArt={art} onChange={n=>setHealth(n??undefined)}/>;
   }
   const view=render(<OneHeart/>);
   expect(screen.getByRole('article',{name:'Endless Sleep'})).toHaveAttribute('data-state','unrecorded');
@@ -318,8 +319,12 @@ it('one-Health Minor Powers reveal at one, show one heart, remove and restore ex
   expect(screen.getByText('Removed · 0/1 health',{selector:'p'})).toBeVisible();
   expect(screen.getByRole('article',{name:'Endless Sleep'})).toHaveAttribute('data-state','removed');
   fireEvent.click(screen.getByRole('button',{name:'Restore one Endless Sleep health, heart 1'}));
+  fireEvent.click(screen.getByRole('button',{name:'Clear record: Endless Sleep'}));
+  expect(screen.getByRole('article',{name:'Endless Sleep'})).toHaveAttribute('data-state','unrecorded');
+  expect(screen.queryByRole('group',{name:'Endless Sleep health'})).toBeNull();
+  fireEvent.click(screen.getByRole('button',{name:'Reveal Endless Sleep'}));
   view.rerender(<OneHeart disabled/>);
   expect(screen.getByRole('button',{name:'Remove one Endless Sleep health, heart 1'})).toBeDisabled();
-  expect(screen.getByRole('combobox',{name:'Endless Sleep health correction'})).toBeDisabled();
+  expect(screen.queryByRole('combobox',{name:'Endless Sleep health correction'})).toBeNull();
   expect(screen.getByRole('button',{name:'Clear record: Endless Sleep'})).toBeDisabled();
 });

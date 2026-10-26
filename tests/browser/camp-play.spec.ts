@@ -239,7 +239,6 @@ test("Camp and Hans corrections preserve immutable history, Undo, restore and tu
   await rage
     .getByRole("button", { name: "Reveal Unholy Rage", exact: true })
     .click();
-  await rage.locator(".module-correction > summary").click();
   await rage
     .getByRole("button", { name: "Clear record: Unholy Rage", exact: true })
     .click();
