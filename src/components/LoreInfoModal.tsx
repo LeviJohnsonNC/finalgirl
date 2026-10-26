@@ -15,7 +15,7 @@ import { FINAL_GIRL_DESCRIPTIONS } from "@/data/finalGirlDescriptions";
 import { FEATURE_FILMS } from "@/types/gameData";
 import { useActiveImages } from "@/hooks/useActiveImages";
 import { getFinalGirlReference } from "@/data/finalGirlReferences";
-import type { ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import "@/styles/final-girl-dossier.css";
 
 interface LoreInfoModalProps {
@@ -80,6 +80,7 @@ export const LoreInfoModal = ({
   triggerClassName,
 }: LoreInfoModalProps) => {
   const lore = getLoreDetails(type, name);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   if (!lore && type !== "finalGirl") return null;
 
@@ -107,6 +108,19 @@ export const LoreInfoModal = ({
         </button>
       </DialogTrigger>
       <DialogContent
+        ref={dialogRef}
+        overlayClassName={
+          type === "finalGirl" ? "girl-dossier-overlay" : undefined
+        }
+        onOpenAutoFocus={
+          type === "finalGirl"
+            ? (event) => {
+                // Begin at the dossier, rather than auto-focusing the story scroller.
+                event.preventDefault();
+                dialogRef.current?.focus();
+              }
+            : undefined
+        }
         className={
           type === "finalGirl"
             ? "final-girl-dialog"
@@ -167,25 +181,14 @@ function LoreInfoContent({
             aria-label={`${name} character details`}
           >
             {lore?.backstory && (
-              <section
-                className="girl-backstory"
-                aria-label={`${name} backstory`}
-                tabIndex={0}
-              >
-                <h3>Backstory</h3>
-                {lore.backstory.split(/\n\s*\n/).map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
-                ))}
-              </section>
+              <CharacterBackstory name={name} text={lore.backstory} />
             )}
             {!lore?.backstory && !getFinalGirlReference(name) && (
-              <section
-                className="girl-backstory"
-                aria-label={`${name} details`}
-              >
-                <h3>Character details</h3>
-                <p>Details aren’t available yet.</p>
-              </section>
+              <CharacterBackstory
+                name={name}
+                text="Details aren’t available yet."
+                unavailable
+              />
             )}
             <FinalGirlReference name={name} ultimate={ultimate} />
           </div>
@@ -249,5 +252,56 @@ function LoreInfoContent({
         </div>
       </div>
     </>
+  );
+}
+
+/** The fade describes remaining story content; reaching the end removes it. */
+function CharacterBackstory({
+  name,
+  text,
+  unavailable = false,
+}: {
+  name: string;
+  text: string;
+  unavailable?: boolean;
+}) {
+  const scrollRef = useRef<HTMLElement>(null);
+  const copyRef = useRef<HTMLDivElement>(null);
+  const [moreBelow, setMoreBelow] = useState(false);
+  useLayoutEffect(() => {
+    const scroll = scrollRef.current;
+    const copy = copyRef.current;
+    if (!scroll || !copy) return;
+    const update = () =>
+      setMoreBelow(
+        scroll.scrollHeight - scroll.clientHeight - scroll.scrollTop > 1,
+      );
+    const resize = new ResizeObserver(update);
+    resize.observe(scroll);
+    resize.observe(copy);
+    scroll.addEventListener("scroll", update, { passive: true });
+    update();
+    return () => {
+      resize.disconnect();
+      scroll.removeEventListener("scroll", update);
+    };
+  }, [text]);
+  return (
+    <div className="girl-backstory-frame">
+      <section
+        ref={scrollRef}
+        className="girl-backstory"
+        tabIndex={0}
+        aria-label={`${name} ${unavailable ? "details" : "backstory"}`}
+        data-more-below={moreBelow || undefined}
+      >
+        <div ref={copyRef}>
+          <h3>{unavailable ? "Character details" : "Backstory"}</h3>
+          {text.split(/\n\s*\n/).map((paragraph, index) => (
+            <p key={index}>{paragraph}</p>
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }

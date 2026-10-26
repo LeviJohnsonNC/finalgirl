@@ -141,25 +141,27 @@ export function FinalGirlReference({
           ? ` · ${ref.ultimateHealth} with Ultimate`
           : ""}
       </p>
-      <details
-        className="girl-info-panel girl-ability"
-        aria-label={`${name} Ultimate ability`}
-      >
-        <summary className="girl-item-heading">
-          <h4>
-            <Zap aria-hidden="true" size={16} />
-            Ultimate ability
-          </h4>
-          {ultimate && <span>Recorded this game</span>}
-        </summary>
-        <div className="girl-panel-content">
-          <p>{ref.ultimate}</p>
-          <p className="girl-reference-note">
-            Additional Victims saved: {ref.additionalReward}
-          </p>
-        </div>
-      </details>
-      <SecretItemReference key={name} name={name} />
+      <div className="girl-reference-panels">
+        <details
+          className="girl-info-panel girl-ability"
+          aria-label={`${name} Ultimate ability`}
+        >
+          <summary className="girl-item-heading">
+            <h4>
+              <Zap aria-hidden="true" size={16} />
+              Ultimate ability
+            </h4>
+            {ultimate && <span>Recorded this game</span>}
+          </summary>
+          <div className="girl-panel-content">
+            <p>{ref.ultimate}</p>
+            <p className="girl-reference-note">
+              Additional Victims saved: {ref.additionalReward}
+            </p>
+          </div>
+        </details>
+        <SecretItemReference key={name} name={name} />
+      </div>
     </div>
   );
 }
