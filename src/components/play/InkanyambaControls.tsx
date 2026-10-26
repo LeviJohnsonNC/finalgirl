@@ -8,8 +8,8 @@ import {
   INKANYAMBA_POWERS,
   INKANYAMBA_FINALES,
   INKANYAMBA_MINOR_POWERS,
-  INKANYAMBA_UNLEASH,
 } from "../../../supabase/functions/_shared/play/inkanyamba";
+import { inkanyambaHero } from "./inkanyambaHeroes";
 import { inkanyambaCell } from "./inkanyambaArt";
 import type { ControlsProps } from "./moduleDefinitions";
 import "@/styles/play-inkanyamba.css";
@@ -42,11 +42,6 @@ export function InkanyambaControls({
         value={wrath}
         disabled={blocked}
         onChange={(wrath) => change({ wrath })}
-        effect={
-          wrath === undefined
-            ? "Set the current level to see its Unleash effects."
-            : INKANYAMBA_UNLEASH[wrath - 1]
-        }
       >
         {(power || activeMinors.length > 0) && (
           <aside className="ink-reminders" aria-label="Power reminders">
@@ -75,6 +70,7 @@ export function InkanyambaControls({
               maxHealth={p.health}
               disabled={blocked}
               art={(h) => inkanyambaCell(8 + row * 4 + 3 - h)}
+              heroArt={inkanyambaHero(7 + row)}
               heartArt={inkanyambaCell(7)}
               previouslyRevealed={entries.some(
                 (e) =>
@@ -107,20 +103,6 @@ export function InkanyambaControls({
           </button>
         </div>
       )}
-      <details className="ink-details">
-        <summary>Wrath reference</summary>
-        <ol>
-          {INKANYAMBA_UNLEASH.map((effect, i) => (
-            <li key={effect}>
-              <strong>{i + 1}.</strong> {effect}
-            </li>
-          ))}
-        </ol>
-        <p>
-          Tracker corrections do not resolve Power triggers, Horror, health,
-          attacks or casualties.
-        </p>
-      </details>
       {message && (
         <p role="alert" className="play-module-error">
           {message}

@@ -2,7 +2,6 @@
   --wrath-accent: #df4b39;
   --wrath-active: #ffe1a1;
   --wrath-low: #67251f;
-  --wrath-scene: url("../assets/play/inkanyamba/banner.webp");
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -23,7 +22,7 @@
   background:
     linear-gradient(90deg, #08090ce8, #08090c33 70%),
     linear-gradient(0deg, #08090c 0%, #08090caa 45%, transparent),
-    var(--wrath-scene) right 22% / cover;
+    linear-gradient(0deg, #08090cc9, transparent 80%);
   opacity: 0.8;
 }
 .wrath-board::after {
@@ -32,20 +31,14 @@
   z-index: -1;
   inset: 0;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse at 0 100%, #861c1d66, transparent 34%),
-    radial-gradient(ellipse at 100% 100%, #861c1d44, transparent 25%),
-    url("../assets/final-girl/board.webp") center / cover;
+  background: radial-gradient(ellipse at 0 100%, #861c1d55, transparent 44%);
   opacity: 0.25;
-  box-shadow:
-    inset 0 0 0 3px #a27e5033,
-    inset 0 0 35px #000;
+  box-shadow: inset 0 0 28px #0009;
 }
 .wrath-board--divine {
   --wrath-accent: #cfb477;
   --wrath-low: #45472b;
   --wrath-active: #e9d3a1;
-  --wrath-scene: url("../assets/locations/ai/sacred-groves.png");
   border-color: #7b8062;
   background-color: #0a1510;
 }
@@ -53,7 +46,7 @@
   background:
     linear-gradient(90deg, #09150fea, #09150f40 75%),
     linear-gradient(0deg, #09150f 0%, #09150faa 45%, transparent),
-    var(--wrath-scene) center / cover;
+    linear-gradient(0deg, #09150fc9, transparent 80%);
 }
 .wrath-board--divine::after {
   opacity: 0.14;
@@ -163,38 +156,6 @@
   min-width: 100px;
   text-align: center;
 }
-.wrath-unleash {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  border: 1px solid #9e88624d;
-  border-left: 4px solid var(--wrath-accent);
-  background: #050807e0;
-  padding: 16px;
-  border-radius: 2px 5px 3px 4px;
-  box-shadow: inset 0 1px #e8cf8c15;
-}
-.wrath-unleash > svg {
-  width: 33px;
-  height: 38px;
-  flex-shrink: 0;
-  color: var(--wrath-accent);
-  fill: color-mix(in srgb, var(--wrath-accent), transparent 65%);
-}
-.wrath-board .wrath-unleash h4 {
-  margin: 0 0 5px;
-  color: #f0dfc4;
-  font:
-    600 15px/1.35 Arial,
-    sans-serif;
-}
-.wrath-board .wrath-unleash p {
-  margin: 0;
-  color: #ddd1be;
-  font:
-    400 14px/1.55 Arial,
-    sans-serif;
-}
 .wrath-board button:focus-visible {
   outline: 2px dashed #fff0bf;
   outline-offset: 3px;
@@ -231,8 +192,26 @@
   .wrath-adjust {
     gap: 16px;
   }
-  .wrath-unleash {
-    padding: 12px;
-    gap: 10px;
+}
+
+.wrath-background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  z-index: -3;
+}
+.wrath-board[data-wrath-stage="unknown"] .wrath-background {
+  filter: grayscale(0.75) brightness(0.65);
+}
+.wrath-board--divine::after {
+  background: radial-gradient(ellipse at 0 100%, #a1874155, transparent 44%);
+}
+
+@media (max-width: 750px) {
+  .wrath-board--killer .wrath-background {
+    object-position: 88% center;
   }
 }

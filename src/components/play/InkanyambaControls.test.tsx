@@ -20,7 +20,8 @@ describe("Inkanyamba player controls", () => {
   it("does not write on mount, opening details, or viewing unknown state", () => {
     const onEvent = vi.fn(() => true);
     render(<InkanyambaControls {...props} events={[]} onEvent={onEvent} />);
-    fireEvent.click(screen.getByText("Wrath reference"));
+    expect(screen.queryByText("Wrath reference")).toBeNull();
+    fireEvent.click(screen.getByText("Dark Power & Finale"));
     expect(onEvent).not.toHaveBeenCalled();
     expect(
       screen.getByRole("button", { name: "Increase Killer Wrath" }),
@@ -71,12 +72,16 @@ describe("Inkanyamba player controls", () => {
       );
     }
     render(<Harness />);
-    fireEvent.click(screen.getByRole("button", { name: "Set Killer Wrath to 2" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Set Killer Wrath to 2" }),
+    );
     expect(screen.getByLabelText("Current Killer Wrath")).toHaveTextContent(
       "2/10",
     );
-    expect(document.querySelector(".wrath-unleash p")).toHaveTextContent(
-      "Increase Killer Wrath by 2.",
+    expect(document.querySelector(".wrath-unleash")).toBeNull();
+    expect(document.querySelector(".wrath-board")).toHaveAttribute(
+      "data-wrath-stage",
+      "1",
     );
   });
   it("disables every mutation while a save conflict is known", () => {

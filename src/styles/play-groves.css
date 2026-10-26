@@ -486,19 +486,17 @@
   border-color: #f0daa6;
 }
 .play-groves .groves-ongoing-terror {
-  display: grid;
-  grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
+  display: block;
+  width: min(100%, 390px);
 }
 .play-groves .groves-ongoing-terror .module-control-tile {
-  min-height: 130px;
-  height: 130px;
+  min-height: 195px;
+  height: 195px;
   aspect-ratio: auto;
   border-radius: 7px;
 }
 .groves-ongoing-terror .play-tile-caption strong {
-  font-size: 19px;
+  font-size: 28px;
 }
 .groves-ongoing-terror
   .module-control-tile[aria-pressed="false"]

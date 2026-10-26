@@ -7,7 +7,7 @@ for (const [killer, id] of [
   ["Geppetto", "geppetto"],
   ["Dr. Fright", "fright"],
 ]) {
-  test(`${killer} retains compact Power and Finale selections in source order`, async ({
+  test(`${killer} keeps compact choices and expands the revealed Power and Finale`, async ({
     page,
     archive,
   }, info) => {
@@ -54,6 +54,19 @@ for (const [killer, id] of [
       );
       await cards.last().click();
       await expect(cards.last()).toHaveAttribute("aria-pressed", "true");
+      const hero = panel
+        .getByRole("region", { name: `${type} selection` })
+        .locator(".module-revealed-hero");
+      await expect(hero).toBeVisible();
+      expect((await hero.boundingBox())!.height).toBeGreaterThan(
+        (await cards.last().boundingBox())!.height * 1.4,
+      );
+      await expect(hero.locator("h4")).toHaveText(
+        await cards.last().locator("strong").innerText(),
+      );
+      await expect(panel.getByText("Card rules", { exact: true })).toHaveCount(
+        0,
+      );
       const after = await cards.evaluateAll((els) =>
         els.map((el) => ({
           label: el.getAttribute("aria-label"),

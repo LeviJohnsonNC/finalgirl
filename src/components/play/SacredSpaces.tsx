@@ -34,7 +34,7 @@ export function SacredSpaces({
             <article className="groves-site" key={site.id}>
               <IllustratedTile
                 className="module-control-tile"
-                art={grovesSite(i, tokens[0])}
+                art={grovesSite(i, tokens)}
                 title={site.name}
                 status={[
                   ...tokens.map((k) => sacredTokenNames[k]),
