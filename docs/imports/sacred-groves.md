@@ -108,3 +108,11 @@ Mocks cannot establish production deployment or live model/audio quality. No pai
 3. Publish the frontend. No SQL migration: save_play_session stores bounded JSONB and does not enumerate module types; existing revision/ownership transactions are unchanged. Opening/ending/visual-bible/image request contracts remain compatible.
 4. Signed-in production smoke after deployment: mixed game, Divine/Killer Wrath or role outcome, save/reload, contextual death, cached reopening and saved narration. Deployment and this live check are pending, not implied by merge/CI.
 5. The only rule interpretation still unconfirmed by an explicit official ruling is the Holy Man's absent-Killer-Wrath allocation. The user-approved Divine-only interpretation is implemented and labelled provisional; this is not an implementation blocker or an undisclosed automation omission.
+
+## Play presentation follow-up, 2026-10-26
+
+User-approved simplification replaces the Wrath presentation with the shared `WrathTrack`, themed separately for this owner. Power/Finale cards are compact and stable across selection; Minor Powers precede them and preserve full artwork motifs/health semantics. Shared atlas framing now clips each source cell explicitly. Source facts, validators, setup provenance, immutable historical observations and story/death context are unchanged.
+
+Play removes the requested reference/correction panels. The dedicated Rules page retains mechanics and source attribution; obsolete references to retired UI helpers are corrected. Existing observations from hidden controls remain compatible and are not migrated or erased. Special-victim Rules disclosures are omitted while outcome actions and consequential reminders remain. Holy Man allocation remains provisional as previously approved. Sacred-space image cycling, explicit combined/unknown editing and Fickleness presence toggling use existing fields only. These UI conveniences never execute physical board effects, alter totals or infer Event/token state from one another.
+
+Release: frontend/artwork only; no new SQL or edge deployment. Current-head CI and the final PR record verification results separately from production publication.

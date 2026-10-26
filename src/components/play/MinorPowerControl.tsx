@@ -41,7 +41,7 @@ export function MinorPowerControl({
       }
     >
       <div className="module-minor-art">
-        <ModuleArtwork art={art(health ?? maxHealth)} />
+        <ModuleArtwork art={{...art(health ?? maxHealth),fit:"meet"}} />
         <h3>{name}</h3>
       </div>
       <p className="module-health-status" aria-live="polite">

@@ -86,3 +86,11 @@
 5. Sacred Groves is now handled by the separate location import. Final Girl abilities remain out of scope.
 
 No killer source gaps remain for standard mode. Raw card photos are retained at their existing persistent references and excluded from Git/build output.
+
+## Play presentation follow-up, 2026-10-26
+
+User-approved simplification replaces the Wrath presentation with the shared `WrathTrack`, themed separately for this owner. Power/Finale cards are compact and stable across selection; Minor Powers precede them and preserve full artwork motifs/health semantics. Shared atlas framing now clips each source cell explicitly. Source facts, validators, setup provenance, immutable historical observations and story/death context are unchanged.
+
+Play removes the requested reference/correction panels. The dedicated Rules page retains mechanics and source attribution; obsolete references to retired UI helpers are corrected. Existing observations from hidden controls remain compatible and are not migrated or erased. Special-victim Rules disclosures are omitted while outcome actions and consequential reminders remain. Holy Man allocation remains provisional as previously approved. Sacred-space image cycling, explicit combined/unknown editing and Fickleness presence toggling use existing fields only. These UI conveniences never execute physical board effects, alter totals or infer Event/token state from one another.
+
+Release: frontend/artwork only; no new SQL or edge deployment. Current-head CI and the final PR record verification results separately from production publication.

@@ -1,5 +1,8 @@
 import { inkanyambaCell } from "./inkanyambaArt";
-import { INKANYAMBA_POWERS, INKANYAMBA_FINALES } from "../../../supabase/functions/_shared/play/inkanyamba";
+import {
+  INKANYAMBA_POWERS,
+  INKANYAMBA_FINALES,
+} from "../../../supabase/functions/_shared/play/inkanyamba";
 import {
   BILLY_POWERS,
   BILLY_FINALES,
@@ -47,19 +50,27 @@ export function illustratedKillerCards(
 ): IllustratedKillerCard[] {
   const power = type === "dark-power";
   const cards =
-    killer === "Inkanyamba" ? power ? INKANYAMBA_POWERS : INKANYAMBA_FINALES : killer === "Billy the Bear"
+    killer === "Inkanyamba"
       ? power
-        ? BILLY_POWERS.filter((card) => !("health" in card))
-        : BILLY_FINALES
-      : killer === "Hans"
+        ? INKANYAMBA_POWERS
+        : INKANYAMBA_FINALES
+      : killer === "Billy the Bear"
         ? power
-          ? HANS_POWERS
-          : HANS_FINALES
-        : killer === "Geppetto"
+          ? BILLY_POWERS.filter((card) => !("health" in card))
+          : BILLY_FINALES
+        : killer === "Hans"
           ? power
-            ? GEPPETTO_POWERS
-            : GEPPETTO_FINALES
-          : killer === "Dr. Fright" ? power ? FRIGHT_POWERS : FRIGHT_FINALES : [];
+            ? HANS_POWERS
+            : HANS_FINALES
+          : killer === "Geppetto"
+            ? power
+              ? GEPPETTO_POWERS
+              : GEPPETTO_FINALES
+            : killer === "Dr. Fright"
+              ? power
+                ? FRIGHT_POWERS
+                : FRIGHT_FINALES
+              : [];
   return cards
     .map((card, index) => ({
       ...card,
@@ -67,14 +78,19 @@ export function illustratedKillerCards(
         ("epic" in card && card.epic === true) ||
         card.effect.startsWith("Epic"),
       art:
-        killer === "Inkanyamba" ? inkanyambaCell(index + (power ? 0 : 4)) : killer === "Dr. Fright" ? atlasCell(frightCards,index+(power?0:4),1254,1254) : killer === "Geppetto"
-          ? atlasCell(geppettoCards, index + (power ? 0 : 4), 1254, 1254)
-          : atlasCell(
-              killer === "Hans" ? hansCards : billyCards,
-              index + (power ? 0 : 4),
-              1254,
-              1254,
-            ),
+        killer === "Inkanyamba"
+          ? inkanyambaCell(index + (power ? 0 : 4))
+          : killer === "Dr. Fright"
+            ? atlasCell(frightCards, index + (power ? 0 : 4), 1254, 1254)
+            : killer === "Geppetto"
+              ? atlasCell(geppettoCards, index + (power ? 0 : 4), 1254, 1254)
+              : atlasCell(
+                  killer === "Hans" ? hansCards : billyCards,
+                  index + (power ? 0 : 4),
+                  1254,
+                  1254,
+                ),
     }))
+    .map((card) => ({ ...card, art: { ...card.art, fit: "meet" as const } }))
     .sort((a, b) => a.name.localeCompare(b.name));
 }

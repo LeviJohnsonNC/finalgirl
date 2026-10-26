@@ -20,7 +20,6 @@ describe("Inkanyamba player controls", () => {
   it("does not write on mount, opening details, or viewing unknown state", () => {
     const onEvent = vi.fn(() => true);
     render(<InkanyambaControls {...props} events={[]} onEvent={onEvent} />);
-    fireEvent.click(screen.getByText("Atonement & corrections"));
     fireEvent.click(screen.getByText("Wrath reference"));
     expect(onEvent).not.toHaveBeenCalled();
     expect(
@@ -57,7 +56,7 @@ describe("Inkanyamba player controls", () => {
       "minor.boiling-anger.health": 3,
     });
   });
-  it("uses saved Wrath for Atonement and never resolves other counters", () => {
+  it("sets observed Wrath without resolving other counters", () => {
     function Harness() {
       const [events, set] = useState<PlayEvent[]>([start(), moduleEvent(5)]);
       return (
@@ -72,12 +71,11 @@ describe("Inkanyamba player controls", () => {
       );
     }
     render(<Harness />);
-    fireEvent.click(screen.getByText("Atonement & corrections"));
-    fireEvent.click(screen.getByRole("button", { name: "2 successes 5 → 2" }));
+    fireEvent.click(screen.getByRole("button", { name: "Set Killer Wrath to 2" }));
     expect(screen.getByLabelText("Current Killer Wrath")).toHaveTextContent(
       "2/10",
     );
-    expect(document.querySelector(".ink-unleash p")).toHaveTextContent(
+    expect(document.querySelector(".wrath-unleash p")).toHaveTextContent(
       "Increase Killer Wrath by 2.",
     );
   });

@@ -35,3 +35,7 @@ All five Setup references share that registry. A–S and directional names ident
 otherwise unnamed board spaces; they are not invented official place names.
 Connection selection has a full-size list control: tiny SVG lines are never the
 only interactive target. Viewing diagrams does not write gameplay.
+
+## Sacred-space state art, 2026-10-26
+
+`sites.webp` is 1448×1086, four columns × three rows of 362px square cells, rendered with a 3px inset and complete-cell clipping. Source: `exec-20510bf0-a24a-4c0a-ad2d-1102c3ee75bd.png`, generated for this request, retained in the image-generation output. Rows are Burial Ground, Sacred Shrine, Holy Groves. Columns are clear, chained Closed gate, bronze Fire-and-Brimstone medallion, ivory/gold Hallowed medallion. These are decorative state interpretations, not official token facsimiles or new rules. Fire is an emblem, not a burning landscape. Multiple tokens use the first token's place illustration plus all live state labels and a count; Adjust tokens exposes independent placements. The optimized atlas is bounded at 750KiB. Existing identity sources and atlases remain unchanged.

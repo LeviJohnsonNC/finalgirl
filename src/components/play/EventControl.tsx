@@ -17,6 +17,7 @@ export function EventControl({
   children,
   className = "",
   tileClassName = "",
+  interaction = "details",
 }: {
   name: string;
   value?: string;
@@ -31,6 +32,8 @@ export function EventControl({
   children?: ReactNode;
   className?: string;
   tileClassName?: string;
+  /** Only independent, reversible presence observations opt into toggling. */
+  interaction?: "details" | "toggle";
 }) {
   const [open, setOpen] = useState(false);
   const active = value === "active";
@@ -46,22 +49,36 @@ export function EventControl({
         title={name}
         status={
           active
-            ? "Active · View details"
+            ? interaction === "toggle"
+              ? "Active · Click to end"
+              : "Active · View details"
             : value
               ? "Ended"
               : "Not recorded · Activate"
         }
-        aria-label={`${active || (value && allowed) ? "View" : allowed ? "Activate" : "Correct linked status for"} ${name}`}
+        aria-label={`${interaction === "toggle" ? (active ? "End effect:" : "Activate") : active || (value && allowed) ? "View" : allowed ? "Activate" : "Correct linked status for"} ${name}`}
         aria-disabled={!active && !allowed}
         aria-pressed={active}
         onClick={() => {
-          if (value !== undefined) setOpen(!open);
+          if (interaction === "toggle") {
+            if (active) onEnd();
+            else if (allowed) onActivate();
+          } else if (value !== undefined) setOpen(!open);
           else if (allowed) onActivate();
         }}
       />
-      {effect && <details className="module-card-rules"><summary>Rules<span className="sr-only">: {name}</span></summary><p>{effect}</p></details>}
-      {active && reminder && <p className="module-active-reminder">{reminder}</p>}
-      {active && (
+      {effect && (
+        <details className="module-card-rules">
+          <summary>
+            Rules<span className="sr-only">: {name}</span>
+          </summary>
+          <p>{effect}</p>
+        </details>
+      )}
+      {active && reminder && (
+        <p className="module-active-reminder">{reminder}</p>
+      )}
+      {active && interaction !== "toggle" && (
         <button
           className="module-end"
           aria-label={`End effect: ${name}`}
@@ -71,7 +88,7 @@ export function EventControl({
         </button>
       )}
       {children}
-      {value !== undefined && (
+      {value !== undefined && interaction !== "toggle" && (
         <details
           className="module-correction"
           open={open}

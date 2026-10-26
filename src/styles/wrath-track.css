@@ -1,0 +1,238 @@
+.wrath-board {
+  --wrath-accent: #df4b39;
+  --wrath-active: #ffe1a1;
+  --wrath-low: #67251f;
+  --wrath-scene: url("../assets/play/inkanyamba/banner.webp");
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(16px, 2.2vw, 26px);
+  border: 1px solid #88604d;
+  border-radius: 15px 11px 14px 10px;
+  background: #090b0c;
+  box-shadow:
+    inset 0 0 30px #000,
+    0 8px 22px #0005;
+  color: #f2e4cc;
+}
+.wrath-board::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(90deg, #08090ce8, #08090c33 70%),
+    linear-gradient(0deg, #08090c 0%, #08090caa 45%, transparent),
+    var(--wrath-scene) right 22% / cover;
+  opacity: 0.8;
+}
+.wrath-board::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 0 100%, #861c1d66, transparent 34%),
+    radial-gradient(ellipse at 100% 100%, #861c1d44, transparent 25%),
+    url("../assets/final-girl/board.webp") center / cover;
+  opacity: 0.25;
+  box-shadow:
+    inset 0 0 0 3px #a27e5033,
+    inset 0 0 35px #000;
+}
+.wrath-board--divine {
+  --wrath-accent: #cfb477;
+  --wrath-low: #45472b;
+  --wrath-active: #e9d3a1;
+  --wrath-scene: url("../assets/locations/ai/sacred-groves.png");
+  border-color: #7b8062;
+  background-color: #0a1510;
+}
+.wrath-board--divine::before {
+  background:
+    linear-gradient(90deg, #09150fea, #09150f40 75%),
+    linear-gradient(0deg, #09150f 0%, #09150faa 45%, transparent),
+    var(--wrath-scene) center / cover;
+}
+.wrath-board--divine::after {
+  opacity: 0.14;
+}
+.wrath-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 94px;
+  margin-bottom: 16px;
+}
+.wrath-eyebrow {
+  color: #e4bf87;
+  font:
+    600 10px/1.5 Arial,
+    sans-serif;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+.wrath-board .wrath-heading h3 {
+  margin: 3px 0 0;
+  color: #f2e5cf;
+  font:
+    400 clamp(28px, 3.4vw, 46px)/1.1 "Narration Fell",
+    Georgia,
+    serif;
+  letter-spacing: -0.03em;
+  text-shadow: 0 3px 4px #000;
+}
+.wrath-heading output {
+  flex-shrink: 0;
+  color: var(--wrath-accent);
+  font:
+    600 76px/0.95 "Dossier Hand",
+    cursive;
+  transform: rotate(-5deg);
+  text-shadow: 1px 3px 2px #000;
+}
+.wrath-heading output small {
+  margin-left: 5px;
+  color: #d4cdbf;
+  font:
+    400 23px/1 Arial,
+    sans-serif;
+}
+.wrath-board .wrath-track {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(44px, 1fr));
+  gap: 6px;
+}
+.wrath-board .wrath-track button {
+  min-height: 49px;
+  border: 1px solid #80715c88;
+  border-radius: 4px;
+  background: linear-gradient(145deg, #3a38332e, #07090ce8);
+  box-shadow:
+    inset 0 2px #eee0bd38,
+    inset 0 -3px #0009,
+    0 3px 5px #0009;
+  color: #e4ddca;
+  font:
+    400 23px/1 Georgia,
+    serif;
+}
+.wrath-board .wrath-track button[data-filled="true"] {
+  background: linear-gradient(150deg, var(--wrath-low), #1b1514);
+  border-color: var(--wrath-accent);
+  color: #ecd9bd;
+}
+.wrath-board .wrath-track button[aria-pressed="true"] {
+  background: linear-gradient(135deg, #fff0c1, var(--wrath-active));
+  color: #251b10;
+  border-color: #fff0bb;
+  outline: 2px solid var(--wrath-accent);
+  outline-offset: 2px;
+  box-shadow:
+    0 0 15px #f4bb6a88,
+    inset 0 0 0 3px #bb604143;
+}
+.wrath-adjust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  margin: 16px 0;
+}
+.wrath-adjust button {
+  width: 48px;
+  min-height: 48px;
+  border-radius: 50%;
+  border: 1px solid #a59378;
+  background: radial-gradient(circle at 30% 20%, #5a5144, #18191b 55%);
+  box-shadow:
+    inset 0 0 0 3px #0007,
+    0 4px 7px #0009;
+  color: #f5e9d3;
+  font:
+    400 34px/1 Georgia,
+    serif;
+}
+.wrath-adjust span {
+  color: #d9cbb7;
+  font:
+    400 15px/1.4 Georgia,
+    serif;
+  min-width: 100px;
+  text-align: center;
+}
+.wrath-unleash {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border: 1px solid #9e88624d;
+  border-left: 4px solid var(--wrath-accent);
+  background: #050807e0;
+  padding: 16px;
+  border-radius: 2px 5px 3px 4px;
+  box-shadow: inset 0 1px #e8cf8c15;
+}
+.wrath-unleash > svg {
+  width: 33px;
+  height: 38px;
+  flex-shrink: 0;
+  color: var(--wrath-accent);
+  fill: color-mix(in srgb, var(--wrath-accent), transparent 65%);
+}
+.wrath-board .wrath-unleash h4 {
+  margin: 0 0 5px;
+  color: #f0dfc4;
+  font:
+    600 15px/1.35 Arial,
+    sans-serif;
+}
+.wrath-board .wrath-unleash p {
+  margin: 0;
+  color: #ddd1be;
+  font:
+    400 14px/1.55 Arial,
+    sans-serif;
+}
+.wrath-board button:focus-visible {
+  outline: 2px dashed #fff0bf;
+  outline-offset: 3px;
+}
+.wrath-board button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+@media (max-width: 750px) {
+  .wrath-board {
+    padding: 14px 10px;
+  }
+  .wrath-board .wrath-track {
+    grid-template-columns: repeat(5, minmax(44px, 1fr));
+    gap: 4px;
+  }
+  .wrath-heading {
+    min-height: 80px;
+    gap: 10px;
+  }
+  .wrath-heading output {
+    font-size: 62px;
+  }
+  .wrath-heading output small {
+    font-size: 18px;
+  }
+  .wrath-eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+  }
+  .wrath-board .wrath-heading h3 {
+    font-size: 29px;
+  }
+  .wrath-adjust {
+    gap: 16px;
+  }
+  .wrath-unleash {
+    padding: 12px;
+    gap: 10px;
+  }
+}

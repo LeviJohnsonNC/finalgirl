@@ -10,7 +10,6 @@ import {
   BUDDIES,
   SPECIAL_VICTIMS,
   BILLY_POWERS,
-  BUDDYLAND_EVENTS,
   moduleState,
 } from "@/lib/play/modules";
 import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
@@ -135,7 +134,6 @@ export function BuddylandControls({
       {killer === "Billy the Bear" && part !== "location" && (
         <section aria-label="Billy tracking">
           {!embedded && <h2>Billy &amp; his Buddies</h2>}
-          <KillerCards killer={killer} events={events} onEvent={onEvent} />
           <div
             className="play-power-sources"
             role="group"
@@ -283,6 +281,7 @@ export function BuddylandControls({
               );
             })}
           </div>
+          <KillerCards killer={killer} events={events} onEvent={onEvent} />
         </section>
       )}
       {location === "Buddyland" && part !== "killer" && (
@@ -311,7 +310,7 @@ export function BuddylandControls({
                     tileClassName="buddyland-portrait"
                     value={typeof value === "string" ? value : undefined}
                     present="on-board"
-                    help={BUDDYLAND_EVENTS.find(event=>event.name===v.event)?.effect}
+                    showRules={false}
                     art={{
                       src: artwork[
                         "../../assets/play/roster/" +

@@ -2,7 +2,6 @@ import { test, expect, activeGame, userId, installTestAudio } from "./fixtures";
 import { openModule, statusPick, openHistory } from "./play-helpers";
 import { newPlayEvent, type PlayEvent } from "../../src/lib/play/events";
 import { deathFacts } from "../../src/lib/play/death";
-import { grovesEdgeId } from "../../supabase/functions/_shared/play/groves";
 import type { Page } from "@playwright/test";
 const selection = {
   ...activeGame.selection,
@@ -43,7 +42,7 @@ for (const [killer, id] of [
   ["Dr. Fright", "fright"],
   ["Poltergeist", ""],
 ]) {
-  test(`Divine Wrath, Atonement and role outcomes remain independent with ${killer}`, async ({
+  test(`Divine Wrath and role outcomes remain independent with ${killer}`, async ({
     page,
     archive,
   }) => {
@@ -64,9 +63,8 @@ for (const [killer, id] of [
     await p
       .getByRole("button", { name: "Set Divine Wrath to 5", exact: true })
       .click();
-    await p.locator(".wrath-atonement > summary").click();
     await p
-      .getByRole("button", { name: "2 successes 5 → 2", exact: true })
+      .getByRole("button", { name: "Set Divine Wrath to 2", exact: true })
       .click();
     await expect(p.getByLabel("Current Divine Wrath")).toHaveText("2/10");
     await p
@@ -113,7 +111,7 @@ for (const [killer, id] of [
     await expect(p.getByLabel("Current Divine Wrath")).toHaveText("2/10");
   });
 }
-test("Holy Man allocation and shared Atonement update both owners with atomic Undo", async ({
+test("Holy Man allocation and independent track corrections update both owners with atomic Undo", async ({
   page,
   archive,
 }) => {
@@ -128,14 +126,8 @@ test("Holy Man allocation and shared Atonement update both owners with atomic Un
   await p
     .getByRole("button", { name: "Set Divine Wrath to 8", exact: true })
     .click();
-  await p.locator(".wrath-atonement > summary").click();
-  await statusPick(
-    page,
-    p.getByRole("combobox", { name: "Atonement target", exact: true }),
-    "Killer Wrath · 7",
-  );
-  await p
-    .getByRole("button", { name: "2 successes 7 → 3", exact: true })
+  await ink
+    .getByRole("button", { name: "Set Killer Wrath to 3", exact: true })
     .click();
   await expect(ink.getByLabel("Current Killer Wrath")).toHaveText("3/10");
   await expect(p.getByLabel("Current Divine Wrath")).toHaveText("8/10");
@@ -215,26 +207,42 @@ test("Holy Man without Inkanyamba uses the approved, clearly provisional Divine-
   await page.getByRole("button", { name: "Undo", exact: true }).click();
   await expect(p.getByLabel("Current Divine Wrath")).toHaveText("2/10");
 });
-test("placed tokens persist separately from Events; signs identify actual connections and viewing references never writes", async ({
+test("image cycling, combined tokens and event-independent placements survive Undo and reload", async ({
   page,
   archive,
 }) => {
   await archive.install(page, { draft });
   await resume(page);
   const p = panel(page);
-  await statusPick(
-    page,
-    p.getByRole("combobox", {
-      name: "Fire and Brimstone token placement",
+  const burial = p.getByRole("button", {
+    name: "Cycle tokens: Burial Ground",
+    exact: true,
+  });
+  await burial.click();
+  await expect(burial).toContainText("Closed");
+  await burial.click();
+  await expect(burial).toContainText("Fire and Brimstone");
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect(burial).toContainText("Closed");
+  const editor = p
+    .locator(".groves-site")
+    .filter({
+      has: page.getByRole("button", {
+        name: "Cycle tokens: Burial Ground",
+        exact: true,
+      }),
+    });
+  await editor.locator("summary").click();
+  await editor
+    .getByRole("button", {
+      name: "Fire and Brimstone at Burial Ground",
       exact: true,
-    }),
-    "Fire and Brimstone token · Holy Groves",
-  );
-  await statusPick(
-    page,
-    p.getByRole("combobox", { name: "Closed token placement", exact: true }),
-    "Closed token · Burial Ground",
-  );
+    })
+    .click();
+  await expect(burial).toContainText("Closed · Fire and Brimstone");
+  const before = (await log(page)).length;
+  await burial.click();
+  expect((await log(page)).length).toBe(before);
   await p.getByText("Events", { exact: true }).click();
   await p
     .getByRole("button", { name: "Activate Fire and Brimstone", exact: true })
@@ -245,55 +253,35 @@ test("placed tokens persist separately from Events; signs identify actual connec
       exact: true,
     })
     .click();
+  await expect(burial).toContainText("Closed · Fire and Brimstone");
+  const terror = p.getByRole("button", {
+    name: "Activate Fickleness of the Gods",
+    exact: true,
+  });
+  await terror.click();
   await expect(
-    p.getByRole("combobox", {
-      name: "Fire and Brimstone token placement",
+    p.getByRole("button", {
+      name: "End effect: Fickleness of the Gods",
       exact: true,
     }),
-  ).toContainText("Holy Groves");
-  await p.getByText("Out of Order connections", { exact: true }).click();
-  await statusPick(
-    page,
-    p.getByRole("combobox", { name: "Out of Order 1 connection", exact: true }),
-    "Sacred Shrine ↔ Southwest trail",
-  );
-  await statusPick(
-    page,
-    p.getByRole("combobox", { name: "Out of Order 2 connection", exact: true }),
-    "Northwest trail ↔ Welcome Center",
-  );
-  expect(
-    (await log(page)).filter(
-      (e) => e.moduleData?.changes["sign.1"] === grovesEdgeId(["sw", "shrine"]),
-    ),
-  ).toHaveLength(1);
-  const before = (await log(page)).length;
-  await p.getByText("Setup reference", { exact: true }).click();
-  await statusPick(
-    page,
-    p.getByRole("combobox", { name: "Sacred Groves Setup", exact: true }),
-    "Mob O' Tourists",
-  );
-  await expect(
-    p.getByRole("img", { name: /Mob O' Tourists setup diagram/ }),
-  ).toBeVisible();
-  expect((await log(page)).length).toBe(before);
+  ).toHaveAttribute("aria-pressed", "true");
   await p
     .getByRole("button", {
-      name: "Activate Fickleness of the Gods",
+      name: "End effect: Fickleness of the Gods",
       exact: true,
     })
     .click();
+  await expect(terror).toHaveAttribute("aria-pressed", "false");
+  await expect(p.getByText("Setup reference", { exact: true })).toHaveCount(0);
   await expect(
-    p
-      .locator(".module-active-reminder")
-      .filter({ hasText: "At the END of Upkeep" }),
-  ).toBeVisible();
+    p.getByText("Out of Order connections", { exact: true }),
+  ).toHaveCount(0);
   await page.reload();
   await resume(page);
-  await expect(
-    p.getByRole("combobox", { name: "Closed token placement", exact: true }),
-  ).toContainText("Burial Ground");
+  await expect(burial).toContainText("Closed · Fire and Brimstone");
+  expect(
+    (await log(page)).filter((e) => e.kind === "killed" || e.kind === "saved"),
+  ).toHaveLength(0);
 });
 test("legacy unknown state, rejected writes and offline recovery remain usable", async ({
   page,
@@ -305,10 +293,14 @@ test("legacy unknown state, rejected writes and offline recovery remain usable",
   await resume(page);
   const p = panel(page);
   await expect(p.getByLabel("Current Divine Wrath")).toHaveText("?/10");
-  await p.getByText("Wrath rules & corrections", { exact: true }).click();
-  await expect(
-    p.getByRole("button", { name: "Clear Divine Wrath record", exact: true }),
-  ).toBeDisabled();
+  const unknownSite = p.getByRole("button", {
+    name: "Cycle tokens: Burial Ground",
+    exact: true,
+  });
+  const before = (await log(page)).length;
+  await unknownSite.click();
+  expect((await log(page)).length).toBe(before);
+  await expect(unknownSite).toContainText("Tokens not fully recorded");
   await page.evaluate(() => {
     const original = Storage.prototype.setItem;
     Storage.prototype.setItem = function (k, v) {
@@ -360,12 +352,12 @@ test("actual art, controls, token references and meaningful role states fit lapt
   for (const [width, height] of sizes) {
     await page.setViewportSize({ width, height });
     await page.evaluate(() => document.fonts.ready);
-    await p.locator(".groves-wrath").screenshot({
+    await p.locator(".wrath-board--divine").screenshot({
       path: info.outputPath(`groves-wrath-${width}.png`),
       animations: "disabled",
     });
     const site = p.getByRole("button", {
-      name: "View tokens: Burial Ground",
+      name: "Cycle tokens: Burial Ground",
       exact: true,
     });
     await expect(site.locator("strong")).toBeVisible();
@@ -445,11 +437,6 @@ test("actual art, controls, token references and meaningful role states fit lapt
   await p
     .locator(".groves-event-grid")
     .screenshot({ path: info.outputPath("groves-events.png") });
-  await p.getByText("Out of Order connections", { exact: true }).click();
-  await p
-    .locator(".groves-board")
-    .first()
-    .screenshot({ path: info.outputPath("groves-connection-reference.png") });
 });
 test("historical linked facts survive JSONB sync, cached death reopening and narration", async ({
   page,

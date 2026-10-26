@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { openModule, statusPick } from "./play-helpers";
+import { openModule } from "./play-helpers";
 import type { PlayEvent } from "../../src/lib/play/events";
 const selection = {
   ...activeGame.selection,
@@ -15,7 +15,7 @@ const draft = {
   grovesSetupVersion: 1,
   inkanyambaSetupVersion: 1,
 };
-test("starting Event activation, Fire and Brimstone doubling and explicit Incense combine in one previewed increase", async ({
+test("starting Event, token placement and observed Wrath remain explicit and independent", async ({
   page,
   archive,
 }) => {
@@ -29,47 +29,25 @@ test("starting Event activation, Fire and Brimstone doubling and explicit Incens
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
   await openModule(page, "groves");
   const p = page.locator('[data-module="groves"]');
-  await expect(p.getByRole("region", { name: "Starting Event" })).toContainText(
-    "Loud and Obnoxious",
-  );
   await p
     .getByRole("button", { name: "Activate starting Event", exact: true })
     .click();
-  await statusPick(
-    page,
-    p.getByRole("combobox", {
-      name: "Fire and Brimstone token placement",
-      exact: true,
-    }),
-    "Fire and Brimstone token · Holy Groves",
-  );
-  await p.getByText("Sacred-space increase", { exact: true }).click();
-  await p.getByLabel("Victims at Burial Ground", { exact: true }).fill("0");
-  await p.getByLabel("Victims at Sacred Shrine", { exact: true }).fill("0");
-  await p.getByLabel("Victims at Holy Groves", { exact: true }).fill("2");
-  await expect(
-    p.getByRole("button", { name: "Apply increase · 2 → 7", exact: true }),
-  ).toBeEnabled();
+  const holy = p.getByRole("button", {
+    name: "Cycle tokens: Holy Groves",
+    exact: true,
+  });
+  await holy.click();
+  await holy.click();
+  await expect(holy).toContainText("Fire and Brimstone");
+  await expect(p.getByLabel("Current Divine Wrath")).toHaveText("2/10");
   await p
-    .getByRole("checkbox", {
-      name: "Incense applies to this increase",
-      exact: true,
-    })
-    .check();
-  await p
-    .getByRole("button", { name: "Apply increase · 2 → 6", exact: true })
+    .getByRole("button", { name: "Set Divine Wrath to 6", exact: true })
     .click();
-  await expect(p.getByLabel("Current Divine Wrath")).toHaveText("6/10");
   await page.getByRole("button", { name: "Undo", exact: true }).click();
   await expect(p.getByLabel("Current Divine Wrath")).toHaveText("2/10");
-  await expect(
-    p.getByRole("combobox", {
-      name: "Fire and Brimstone token placement",
-      exact: true,
-    }),
-  ).toContainText("Holy Groves");
+  await expect(holy).toContainText("Fire and Brimstone");
 });
-test("both Finale entry points enable one recurring location reminder without executing Wrath effects", async ({
+test("both Finale entry points preserve one reveal without executing Wrath effects", async ({
   page,
   archive,
 }) => {
@@ -88,7 +66,9 @@ test("both Finale entry points enable one recurring location reminder without ex
     .click();
   await page.getByRole("button", { name: "Finale", exact: true }).click();
   await page.getByRole("button", { name: "Record", exact: true }).click();
-  await expect(p.getByText("Finale revealed:", { exact: true })).toBeVisible();
+  await expect(p.getByText("Bloodlust & Finale", { exact: true })).toHaveCount(
+    0,
+  );
   await ink.locator(".module-card-section > summary").click();
   await ink
     .getByRole("button", { name: "Choose Violent Tantrum", exact: true })
@@ -108,6 +88,8 @@ test("both Finale entry points enable one recurring location reminder without ex
   await page.reload();
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
   await openModule(page, "groves");
-  await expect(p.getByText("Finale revealed:", { exact: true })).toBeVisible();
+  await expect(p.getByText("Bloodlust & Finale", { exact: true })).toHaveCount(
+    0,
+  );
   await expect(p.getByLabel("Current Divine Wrath")).toHaveText("4/10");
 });

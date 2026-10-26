@@ -75,7 +75,7 @@ export const inkanyambaRules: EntityRuleModule = {
       type: "callout",
       variant: "note",
       title: "Rounding the reduction",
-      text: "At Wrath 5, two successes reduce Wrath by 3, leaving 2. At Wrath 1 it stays at 1. The helper records Killer Wrath only; resolve Time, Horror, card purchases and Divine Wrath physically.",
+      text: "At Wrath 5, two successes reduce Wrath by 3, leaving 2. At Wrath 1 it stays at 1. Resolve the chosen track and other effects physically, then record the observed Wrath level in Play.",
     },
     { type: "heading", level: 3, text: "Bloodlust board" },
     {
