@@ -9,7 +9,6 @@ import { grovesScene, grovesPerson } from "./grovesArt";
 import { newPlayEvent, summarizePlay } from "@/lib/play/events";
 import { moduleState, type ModuleValue } from "@/lib/play/modules";
 import {
-  GROVES_SACRED,
   GROVES_EVENTS,
   GROVES_PEOPLE,
   GROVES_UNLEASH,

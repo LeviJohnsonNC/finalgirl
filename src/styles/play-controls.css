@@ -484,6 +484,7 @@
   text-wrap: balance;
 }
 .module-compact-reveal-grid .module-killer-card .play-tile-state {
+  min-height: 28px;
   font-size: 9px;
   letter-spacing: 0.08em;
 }

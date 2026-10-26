@@ -10,7 +10,9 @@ for (const [killer, id] of [
   test(`${killer} retains compact Power and Finale selections in source order`, async ({
     page,
     archive,
-  }) => {
+  }, info) => {
+    if (info.project.name === "mobile")
+      await page.setViewportSize({ width: 320, height: 568 });
     await archive.install(page, {
       draft: {
         ...activeGame,
@@ -60,11 +62,11 @@ for (const [killer, id] of [
           height: el.getBoundingClientRect().height,
         })),
       );
-        // Clicking scrolls the card into view; module reminders may also grow
-        // above the grid. Compare the layout within the grid, not page position.
-        expect(after.map(card=>({...card,y:card.y-after[0].y}))).toEqual(
-          before.map(card=>({...card,y:card.y-before[0].y})),
-        );
+      // Clicking scrolls the card into view; module reminders may also grow
+      // above the grid. Compare the layout within the grid, not page position.
+      expect(
+        after.map((card) => ({ ...card, y: card.y - after[0].y })),
+      ).toEqual(before.map((card) => ({ ...card, y: card.y - before[0].y })));
       for (const art of await cards.locator("svg").all()) {
         expect((await art.boundingBox())!.height).toBeLessThanOrEqual(150);
       }
