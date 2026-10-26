@@ -63,7 +63,11 @@ test('opening generation uses only a complete photographic plan, without poster 
     assert.equal((await f.handler(request('beginning'))).status, 200);
     assert.match(f.textCalls[0].system, /real camera shot/);
     assert.doesNotMatch(f.textCalls[0].system, /poster art director|"title"|"tagline"/);
-    assert.match(f.imageCalls[0][0], /ultra-photorealistic live-action/);
+    assert.match(f.imageCalls[0][0], /believable live-action photograph/);
+    assert.match(f.imageCalls[0][0], /captured together in a single exposure/);
+    assert.match(f.imageCalls[0][0], /consumer 35mm color-negative film camera/);
+    assert.match(f.imageCalls[0][0], /follow the scene for its historical period/);
+    assert.match(f.textCalls[0].system, /daytime need not become artificially dim/);
     assert.match(f.imageCalls[0][0], /A face seen beside a darkened arcade machine/);
     assert.equal(f.textCalls[0].maxTokens, 4000);
     assert.equal(f.textCalls[0].requireComplete, true);
@@ -74,6 +78,7 @@ test('opening generation uses only a complete photographic plan, without poster 
   assert.equal((await poster.handler(request('ending'))).status, 200);
   assert.match(poster.textCalls[0].system, /painted 1980s one-sheet/);
   assert.match(poster.imageCalls[0][0], /Visibly hand-painted/);
+  assert.doesNotMatch(poster.imageCalls[0][0], /consumer 35mm color-negative film camera/);
   assert.deepEqual(poster.phases, ['compose', 'upload']);
 });
 test('real planning failover reaches one image; exhausted planning never uploads or replaces the opening', async () => {

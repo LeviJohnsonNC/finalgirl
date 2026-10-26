@@ -43,6 +43,9 @@ test('opening identity photos carry named subjects and never inherit painted pos
   await exports.generateImage('Photograph the new opening.', undefined, { aspectRatio: '16:9', references });
   const content = calls[0].messages[0].content;
   assert.match(content[0].text, /cast IDENTITY references/);
+  assert.match(content[0].text, /same exposure|available light, exposure and white balance/);
+  assert.match(content[0].text, /Match identity, not the reference's rendering style/);
+  assert.match(content[0].text, /physically credible forms without changing the identity/);
   assert.doesNotMatch(content[0].text, /painted medium|ending|opening photograph is/);
   assert.deepEqual(content.filter(part => part.type === 'image_url').map(part => part.image_url.url), references.map(ref => ref.url));
   assert(content.some(part => part.text === 'Identity photograph: Rena'));
