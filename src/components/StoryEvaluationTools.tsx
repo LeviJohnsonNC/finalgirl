@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Download, Loader2 } from "lucide-react";
+import { DeleteConfirmModal } from "./DeleteConfirmModal";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +11,7 @@ import {
 
 export function StoryEvaluationTools() {
   const { user, isAuthReady } = useAuth();
+  const [confirmClear, setConfirmClear] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const owner = user?.id;
@@ -18,6 +20,7 @@ export function StoryEvaluationTools() {
   const pending = useRef<AbortController | null>(null);
   useEffect(() => {
     setMessage("");
+    setConfirmClear(false);
     setBusy(false);
     return () => {
       pending.current?.abort();
@@ -27,13 +30,7 @@ export function StoryEvaluationTools() {
   if (!isAuthReady || !owner) return null;
 
   async function run(clear = false) {
-    if (
-      clear &&
-      !window.confirm(
-        "Permanently clear your saved story evaluation data? Your games and stories in game history will remain available.",
-      )
-    )
-      return;
+    if (pending.current) return;
     const controller = new AbortController();
     pending.current = controller;
     const timeout = window.setTimeout(() => controller.abort(), 120000);
@@ -72,6 +69,7 @@ export function StoryEvaluationTools() {
           : "Evaluation export failed. Nothing was downloaded. Check your connection and try again.";
         setMessage(text);
         toast.error(text);
+        if (clear) throw new Error(text);
       }
     } finally {
       window.clearTimeout(timeout);
@@ -83,11 +81,11 @@ export function StoryEvaluationTools() {
   }
 
   return (
-    <details className="border border-muted-foreground/25 bg-muted/10 px-4 py-3">
-      <summary className="cursor-pointer font-title text-lg tracking-wide">
+    <details className="collection-evaluation">
+      <summary className="cursor-pointer text-sm font-medium">
         Story evaluation
       </summary>
-      <div className="mt-3 space-y-3 type-body-sm text-muted-foreground">
+      <div className="mt-2 space-y-2 text-xs leading-relaxed text-muted-foreground">
         <p>
           Export new openings and endings with their full text, prompts, model
           details and game context for review.
@@ -97,7 +95,7 @@ export function StoryEvaluationTools() {
             type="button"
             disabled={busy}
             onClick={() => void run()}
-            className="inline-flex items-center gap-2 border border-primary/40 px-3 py-2 type-label text-primary hover:bg-primary/10 disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 border border-primary/40 px-3 py-2 type-label text-primary hover:bg-primary/10 disabled:opacity-50"
           >
             {busy ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -109,8 +107,8 @@ export function StoryEvaluationTools() {
           <button
             type="button"
             disabled={busy}
-            onClick={() => void run(true)}
-            className="underline underline-offset-4 hover:text-foreground disabled:opacity-50"
+            onClick={() => setConfirmClear(true)}
+            className="inline-flex min-h-[44px] items-center underline underline-offset-4 hover:text-foreground disabled:opacity-50"
           >
             Clear evaluation data
           </button>
@@ -124,6 +122,15 @@ export function StoryEvaluationTools() {
           {message}
         </p>
       </div>
+      <DeleteConfirmModal
+        isOpen={confirmClear}
+        onClose={() => setConfirmClear(false)}
+        confirmationKey={owner}
+        onConfirm={() => run(true)}
+        title="Clear evaluation data?"
+        description="Permanently clear your saved story evaluation data? Your games and stories in game history will remain available. This cannot be undone."
+        confirmLabel="Clear evaluation data"
+      />
     </details>
   );
 }

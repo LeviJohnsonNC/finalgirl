@@ -9,6 +9,12 @@ function visit(directory) {
   }
 }
 visit('src/assets');
+// Collection display faces stay self-hosted and bounded, just like the artwork.
+for (const item of readdirSync('src/assets/fonts/collection')) {
+  if (!item.endsWith('.woff2')) continue;
+  const file = join('src/assets/fonts/collection', item), bytes = readFileSync(file);
+  if (bytes.subarray(0,4).toString() !== 'wOF2' || bytes.length > 80 * 1024) throw new Error('Invalid or oversized Collection font: ' + file);
+}
 if (!images.length) throw new Error('No artwork found. A build with missing artwork is not a release check.');
 for (const file of images) {
   const bytes = readFileSync(file);

@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import type { ActiveGame } from "@/lib/activeGame";
 import "@/styles/discard-game.css";
+import { TypedDeleteField } from "./TypedDeleteField";
 
 export function DiscardGameDialog({
   game,
@@ -18,12 +19,14 @@ export function DiscardGameDialog({
   onClose: () => void;
   onConfirm: (game: ActiveGame) => Promise<void>;
 }) {
+  const [typed, setTyped] = useState("");
   const [busy, setBusy] = useState(false),
     [error, setError] = useState<string | null>(null);
   const pending = useRef(false),
     cancel = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     setError(null);
+    setTyped("");
   }, [game?.id]);
   return (
     <Dialog
@@ -60,6 +63,7 @@ export function DiscardGameDialog({
             cannot be undone.
           </DialogDescription>
         </DialogHeader>
+        <TypedDeleteField value={typed} onChange={setTyped} disabled={busy} />
         {error && (
           <p role="alert" className="discard-game-error">
             {error}
@@ -72,9 +76,9 @@ export function DiscardGameDialog({
           <button
             type="button"
             className="discard-game-confirm"
-            disabled={busy}
+            disabled={busy || typed !== "DELETE"}
             onClick={async () => {
-              if (!game || pending.current) return;
+              if (!game || typed !== "DELETE" || pending.current) return;
               pending.current = true;
               setBusy(true);
               setError(null);

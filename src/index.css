@@ -2036,6 +2036,9 @@
 
 /* ===== Delete Confirm Modal Styling ===== */
 .delete-confirm-modal {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  color: #3d342b;
   background: linear-gradient(135deg, hsl(40 20% 90%) 0%, hsl(35 15% 85%) 100%) !important;
   border: 2px solid hsl(30 25% 70%) !important;
   box-shadow: 
@@ -2043,10 +2046,12 @@
     inset 0 1px 0 rgba(255,255,255,0.3) !important;
 }
 
+.delete-confirm-modal h2,
 .delete-confirm-modal [data-slot="alert-dialog-title"] {
   color: hsl(0 50% 35%);
 }
 
+.delete-confirm-modal .delete-description,
 .delete-confirm-modal [data-slot="alert-dialog-description"] {
   color: hsl(30 20% 30%);
 }
@@ -4644,3 +4649,6 @@
 .app-footer button[aria-current='page'][aria-label='RULES'] { --footer-active: 38 85% 67%; }
 .app-footer button[aria-current='page'][aria-label='STATS'] { --footer-active: 160 65% 64%; }
 .app-footer button[aria-current='page'][aria-label='SCRAPBOOKS'] { --footer-active: var(--blood-red-legible); }
+
+.delete-confirm-modal label { color: #3d342b; }
+.delete-confirm-modal [role="alert"] { color: #8f2724; }

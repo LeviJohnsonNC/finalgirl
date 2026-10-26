@@ -52,3 +52,7 @@ Without a local draft, the most recently updated open cloud game gets **Resume c
 4. On a physical phone, check portrait/landscape scrolling, full-size artwork, and the bottom navigation. Also check reduced-motion settings and keyboard focus on desktop.
 
 Production hosting and physical iPhone Safari are not verified by the local Chromium runs. All automated providers and account records were mocked; no production game records were changed during testing.
+
+## Session-random reel, 2026-10-26
+
+Historical screenings now receive stable random ranks when first encountered during a theater visit. Selection includes the full eligible archive before the existing 24-image/diverse-matchup limit, so the projector can open with older cases. A history refresh does not randomly reorder existing cases or restart the active projection. New visits receive a fresh ordering. Current unfinished games retain their own primary scene; image validation, failure recovery, owner isolation, reduced motion, interaction pauses and one-frame preloading are unchanged. Unit coverage verifies a non-newest initial frame, stable refresh and the next random-ranked scene. Browser composition fixtures pin ranks for deterministic layout tests.

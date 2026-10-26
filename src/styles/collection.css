@@ -1,3 +1,5 @@
+@import "./collection-fonts.css";
+
 @font-face {
   font-family: "Shelf Brush";
   src: url("../assets/fonts/caveat-semibold.ttf") format("truetype");
@@ -39,8 +41,7 @@
   border: 1px solid color-mix(in srgb, var(--shelf-accent) 34%, #181a1c);
   border-radius: 9px;
   background: #0b0b0c;
-  --shelf-ui:
-    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --shelf-ui: "Source Sans 3", system-ui, sans-serif;
   color: #e9dfca;
   font-family: var(--shelf-ui);
   box-shadow: 0 8px 22px #0009;
@@ -236,7 +237,8 @@
   margin: 0 26px 10px -3px;
   color: var(--shelf-paper);
   font:
-    600 40px/0.84 "Shelf Brush",
+    var(--shelf-title-weight, 600) 40px/0.94
+      var(--shelf-title-font, "Shelf Brush"),
     cursive;
   text-transform: uppercase;
   letter-spacing: -0.025em;
@@ -248,29 +250,25 @@
 }
 .collection-film-title > span > span {
   display: block;
-  font-size: calc(clamp(32px, 8.5cqw, 52px) * var(--line-scale));
-  overflow-wrap: anywhere;
+  font-size: calc(
+    clamp(32px, 8.5cqw, 52px) * var(--line-scale) * var(--shelf-title-scale, 1)
+  );
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 .collection-film-title .collection-title-accent {
   color: var(--shelf-accent);
 }
 .collection-lettering-industrial {
-  font-family: "Shelf Condensed", sans-serif;
-  font-weight: 700;
   letter-spacing: 0.025em;
   transform: rotate(-2deg);
   line-height: 0.92;
 }
 .collection-lettering-gothic {
-  font-family: "Shelf Fell", Georgia, serif;
-  font-weight: 400;
   line-height: 0.94;
   letter-spacing: -0.04em;
 }
 .collection-lettering-storybook {
-  font-family: "Shelf Fell", Georgia, serif;
-  font-style: italic;
-  font-weight: 400;
   line-height: 0.98;
   letter-spacing: -0.04em;
 }
@@ -285,7 +283,7 @@
 .collection-pitch p {
   margin-top: 6px;
   color: #eee6d6;
-  font: 500 13px/1.4 var(--shelf-ui);
+  font: 500 14px/1.4 var(--shelf-ui);
   text-shadow: 0 1px 3px #000;
 }
 .collection-cast {
@@ -382,7 +380,7 @@
   object-position: var(--portrait-focus, 50% 42%);
 }
 .collection-girl-name {
-  font: 600 13px/1.2 var(--shelf-ui);
+  font: 500 14px/1.2 var(--shelf-ui);
   overflow-wrap: anywhere;
   text-shadow: 0 1px 3px #000;
 }
@@ -428,10 +426,12 @@
     margin-right: 22px;
   }
   .collection-film-title > span > span {
-    font-size: calc(clamp(27px, 9cqw, 38px) * var(--line-scale));
+    font-size: calc(
+      clamp(27px, 9cqw, 38px) * var(--line-scale) * var(--shelf-title-scale, 1)
+    );
   }
   .collection-pitch p {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.4;
   }
   .collection-ownership {
@@ -484,4 +484,48 @@
 
 .collection-girl-link {
   scroll-margin-block: 24px calc(var(--app-footer-h, 56px) + 64px);
+}
+
+.collection-utilities {
+  max-width: 42rem;
+  margin-left: auto;
+  padding-top: 10px;
+  border-top: 1px solid #ffffff18;
+  color: #a1a1a4;
+  font:
+    400 13px/1.5 "Source Sans 3",
+    system-ui,
+    sans-serif;
+}
+.collection-utilities > summary {
+  min-height: 44px;
+  padding: 12px 4px;
+  cursor: pointer;
+  font-weight: 500;
+  list-style-position: inside;
+}
+.collection-utilities-content {
+  padding: 4px 4px 12px;
+}
+.collection-evaluation > summary {
+  min-height: 44px;
+  padding-block: 12px;
+}
+.collection-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 10px 0;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #a1a1a4;
+}
+.collection-reset:hover {
+  color: #eb7777;
+}
+.collection-utilities summary:focus-visible,
+.collection-reset:focus-visible {
+  outline: 2px solid #b3cbd0;
+  outline-offset: 2px;
 }

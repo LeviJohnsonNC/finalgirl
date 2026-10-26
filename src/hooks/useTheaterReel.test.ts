@@ -16,10 +16,21 @@ class TestImage {
 const lastImage = (id: string) => TestImage.instances.filter(image => image.src === `https://test.invalid/${id}.png`).slice(-1)[0]!;
 const loaded = (id: string) => act(() => lastImage(id).onload?.());
 
-beforeEach(() => { vi.useFakeTimers(); TestImage.instances = []; vi.stubGlobal('Image', TestImage); });
+beforeEach(() => { vi.spyOn(Math, 'random').mockReturnValue(0); vi.useFakeTimers(); TestImage.instances = []; vi.stubGlobal('Image', TestImage); });
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe('projection lifecycle', () => {
+  it('starts from session-random history rather than the newest and preserves its order on refresh', () => {
+    vi.mocked(Math.random).mockReturnValueOnce(.9).mockReturnValueOnce(.1).mockReturnValueOnce(.5);
+    const { result, rerender } = renderHook(({ rows }) => useTheaterReel(rows, false), { initialProps: { rows: games } });
+    loaded('b');
+    expect(result.current.current?.id).toBe('b');
+    rerender({ rows: games.map(game => ({ ...game })) });
+    expect(result.current.current?.id).toBe('b');
+    act(() => vi.advanceTimersByTime(16000));
+    loaded('c');
+    expect(result.current.current?.id).toBe('c');
+  });
   it('rejects a portrait stored as a scene and continues without loading posters', () => {
     const { result } = renderHook(() => useTheaterReel([{ ...games[0], posterImageUrl: 'https://test.invalid/poster.png' }, games[1]], false));
     lastImage('a').naturalWidth = 1000;

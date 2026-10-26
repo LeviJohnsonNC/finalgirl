@@ -1,5 +1,13 @@
+import type { Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { test, expect, activeGame, gameId, userId } from "./fixtures";
+
+async function openEvaluation(page: Page) {
+  const tools = page.locator(".collection-utilities");
+  if (!(await tools.evaluate((el) => (el as HTMLDetailsElement).open)))
+    await tools.locator(":scope > summary").click();
+  await tools.getByText("Story evaluation", { exact: true }).click();
+}
 
 test("private evaluation export is explicit, contains whole attempts and fits both layouts", async ({
   page,
@@ -47,12 +55,10 @@ test("private evaluation export is explicit, contains whole attempts and fits bo
   await page.goto("/");
   await page.getByRole("button", { name: "Collection", exact: true }).click();
   expect(reads).toBe(0);
-  await page.getByText("Story evaluation", { exact: true }).click();
+  await openEvaluation(page);
   expect(reads).toBe(0);
   const downloaded = page.waitForEvent("download");
-  await page
-    .getByRole("button", { name: "EXPORT JSON", exact: true })
-    .click();
+  await page.getByRole("button", { name: "EXPORT JSON", exact: true }).click();
   const file = await downloaded;
   const json = JSON.parse(await readFile((await file.path())!, "utf8"));
   expect(json.attemptCount).toBe(2);
@@ -94,7 +100,7 @@ test("empty and failed export explain missing data without downloading", async (
   );
   await page.goto("/");
   await page.getByRole("button", { name: "Collection", exact: true }).click();
-  await page.getByText("Story evaluation", { exact: true }).click();
+  await openEvaluation(page);
   const button = page.getByRole("button", {
     name: "EXPORT JSON",
     exact: true,
@@ -124,16 +130,28 @@ test("clearing evaluation data requires confirmation", async ({
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Collection", exact: true }).click();
-  await page.getByText("Story evaluation", { exact: true }).click();
-  page.once("dialog", (dialog) => dialog.dismiss());
-  await page
-    .getByRole("button", { name: "Clear evaluation data", exact: true })
-    .click();
+  await openEvaluation(page);
+  const clear = page.getByRole("button", {
+    name: "Clear evaluation data",
+    exact: true,
+  });
+  await clear.click();
+  const confirm = page.getByRole("alertdialog");
+  const action = confirm.getByRole("button", {
+    name: "Clear evaluation data",
+    exact: true,
+  });
+  await expect(action).toBeDisabled();
+  await confirm.getByLabel("Type DELETE to confirm").fill("delete");
+  await expect(action).toBeDisabled();
+  await confirm.getByLabel("Type DELETE to confirm").fill("DELETE");
+  await confirm.getByRole("button", { name: "Keep It", exact: true }).click();
   expect(deletes).toBe(0);
-  page.once("dialog", (dialog) => dialog.accept());
-  await page
-    .getByRole("button", { name: "Clear evaluation data", exact: true })
-    .click();
+  await clear.click();
+  await expect(confirm.getByLabel("Type DELETE to confirm")).toHaveValue("");
+  await expect(action).toBeDisabled();
+  await confirm.getByLabel("Type DELETE to confirm").fill("DELETE");
+  await action.click();
   await expect(
     page.getByRole("status").filter({ hasText: "Evaluation data cleared" }),
   ).toBeVisible();

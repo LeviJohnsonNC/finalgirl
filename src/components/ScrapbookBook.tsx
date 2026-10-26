@@ -94,14 +94,10 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
 
   const handleDeleteConfirm = async () => {
     if (selectedGame) {
-      try {
-        await onDeleteGame(selectedGame.id);
-        setSelectedGame(null);
-        setShowDeleteConfirm(false);
-        toast.success('Record destroyed');
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Could not delete the record.');
-      }
+      await onDeleteGame(selectedGame.id);
+      setSelectedGame(null);
+      setShowDeleteConfirm(false);
+      toast.success('Record destroyed');
     }
   };
 
@@ -380,6 +376,7 @@ export const ScrapbookBook = ({ type, games, initialGameId, onClose, onUpdateGam
       {/* Delete Confirmation Modal */}
       <DeleteConfirmModal
         isOpen={showDeleteConfirm}
+        confirmationKey={selectedGame?.id}
         onClose={() => setShowDeleteConfirm(false)}
         onConfirm={handleDeleteConfirm}
       />

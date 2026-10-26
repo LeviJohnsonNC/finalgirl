@@ -1,0 +1,149 @@
+/* Self-hosted fonts. Copyright notices and licenses: /licenses/collection-fonts.txt */
+@font-face {
+  font-family: "Kalam";
+  src: url("../assets/fonts/collection/kalam.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Rye";
+  src: url("../assets/fonts/collection/rye.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Creepster";
+  src: url("../assets/fonts/collection/creepster.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Permanent Marker";
+  src: url("../assets/fonts/collection/permanentmarker.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Staatliches";
+  src: url("../assets/fonts/collection/staatliches.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Special Elite";
+  src: url("../assets/fonts/collection/specialelite.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pirata One";
+  src: url("../assets/fonts/collection/pirataone.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Sedgwick Ave Display";
+  src: url("../assets/fonts/collection/sedgwickavedisplay.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Eater";
+  src: url("../assets/fonts/collection/eater.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Black Ops One";
+  src: url("../assets/fonts/collection/blackopsone.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Teko";
+  src: url("../assets/fonts/collection/teko.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Metal Mania";
+  src: url("../assets/fonts/collection/metalmania.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Anton";
+  src: url("../assets/fonts/collection/anton.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Oswald";
+  src: url("../assets/fonts/collection/oswald.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Cinzel Decorative";
+  src: url("../assets/fonts/collection/cinzeldecorative.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Rock Salt";
+  src: url("../assets/fonts/collection/rocksalt.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Fugaz One";
+  src: url("../assets/fonts/collection/fugazone.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "New Rocker";
+  src: url("../assets/fonts/collection/newrocker.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "UnifrakturCook";
+  src: url("../assets/fonts/collection/unifrakturcook.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Nosifer";
+  src: url("../assets/fonts/collection/nosifer.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("../assets/fonts/collection/sourcesans3.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}

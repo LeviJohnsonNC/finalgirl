@@ -16,6 +16,9 @@ describe("Collection artwork coverage", () => {
     expect(
       new Set(Object.values(COLLECTION_ART).map((a) => a.scene)).size,
     ).toBe(FEATURE_FILMS.length);
+    expect(
+      new Set(Object.values(COLLECTION_ART).map((a) => a.titleFont)).size,
+    ).toBe(FEATURE_FILMS.length);
     for (const film of FEATURE_FILMS) {
       const art = COLLECTION_ART[film.id];
       expect(getCollectionScene(art.scene), film.name).toMatch(/\.webp$/);

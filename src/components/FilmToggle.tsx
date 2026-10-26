@@ -65,6 +65,9 @@ export const FilmToggle = React.forwardRef<HTMLDivElement, FilmToggleProps>(
     const style = {
       "--shelf-accent": art?.accent ?? "#d85243",
       "--shelf-paper": art?.pale ?? "#eee0c3",
+      "--shelf-title-font": `"${art?.titleFont ?? "Shelf Brush"}"`,
+      "--shelf-title-weight": art?.titleWeight ?? 600,
+      "--shelf-title-scale": art?.titleScale ?? 1,
     } as React.CSSProperties;
     return (
       <div
