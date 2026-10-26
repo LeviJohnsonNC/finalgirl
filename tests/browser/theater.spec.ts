@@ -1,6 +1,9 @@
 import { resolve } from 'node:path';
 import { test, expect, activeGame, gameId, selection, userId } from './fixtures';
 
+// Pin reel ranks for deterministic composition/lifecycle fixtures. Random selection is covered in the hook contract.
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { Math.random = () => 0; }); });
+
 test('the theater keeps the screen and controls inside narrow and wide layouts', async ({ page, archive }, testInfo) => {
   await archive.install(page, { signedIn: false });
   await page.goto('/');

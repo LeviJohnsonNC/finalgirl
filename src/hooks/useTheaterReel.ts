@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type { GameResult } from '@/hooks/useGameHistory';
 import { activeScreenings, buildScreenings } from '@/lib/theater';
 import type { ActiveGame } from '@/lib/activeGame';
@@ -13,7 +13,13 @@ export function useTheaterReel(games: GameResult[], interacting: boolean, active
   const reducedMotion = useReducedMotion();
   const visible = useSyncExternalStore(subscribeVisibility, () => !document.hidden, () => true);
   const [failed, setFailed] = useState<Set<string>>(() => new Set());
-  const screenings = useMemo(() => activeGame ? activeScreenings(activeGame, failed) : buildScreenings(games, failed), [games, failed, activeGame]);
+  // Rank once per case for this theater visit; unrelated refreshes preserve the reel.
+  const ranks = useRef(new Map<string, number>());
+  const screenings = useMemo(() => {
+    if (activeGame) return activeScreenings(activeGame, failed);
+    for (const game of games) if (!ranks.current.has(game.id)) ranks.current.set(game.id, Math.random());
+    return buildScreenings(games, failed, ranks.current);
+  }, [games, failed, activeGame]);
   const [requestedId, setRequestedId] = useState<string | null>(null);
   const target = screenings.find(s => s.id === requestedId) ?? screenings[0];
   const [projection, setProjection] = useState<{ key: string | null; previous: string | null }>({ key: null, previous: null });

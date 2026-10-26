@@ -6,7 +6,7 @@ New, authenticated, validated opening/ending requests write a private evaluation
 
 1. Apply `20261022180000_story_evaluations.sql` before deploying the changed `generate-story` and `generate-ending` functions (their shared dependencies bundle with them).
 2. Deploy the frontend. Older clients still produce captures with `diagnostic_status=not_provided` and no paired game ID. Older functions do not capture anything, even with a new frontend.
-3. Using your own signed-in account, generate an opening and ending for one game, then use **Collection → Story evaluation → Export JSON**. Verify two attempts have the same `game_id`, full text, effective system/user prompts, model context, diagnostic log, actual selected model and terminal status.
+3. Using your own signed-in account, generate an opening and ending for one game, then use **Collection → Collection tools (at the bottom) → Story evaluation → Export JSON**. Verify two attempts have the same `game_id`, full text, effective system/user prompts, model context, diagnostic log, actual selected model and terminal status.
 4. If persistence is unavailable, story generation continues and the new frontend shows an evaluation-save warning. Fix deployment/connectivity before collecting evaluation games. No historical prompt reconstruction or backfill is attempted.
 
 ## Interpretation
@@ -22,7 +22,7 @@ New, authenticated, validated opening/ending requests write a private evaluation
 
 Export is explicit and owner-scoped through RLS, with keyset pagination up to the latest attempt at export start. Rows can finish during export; it is not a transaction snapshot. User IDs and internal pagination sequences are omitted from the downloaded, versioned JSON. The browser keeps no extra local-storage copy. Share this file directly for future grading; it includes private backstories and notes.
 
-Evaluation rows have no foreign key to game history or play sessions: resetting/deleting/discarding a game does not remove evaluation attempts. Collection explains this and offers a separate confirmed **Clear evaluation data** action. An in-flight generation can finish after clearing; wait until generations finish before clearing if you want an empty corpus. Deleting an auth account cascades all evaluation rows. Authenticated users may read/delete only their own rows; inserts and updates require the server service role.
+Evaluation rows have no foreign key to game history or play sessions: resetting/deleting/discarding a game does not remove evaluation attempts. Collection explains this and offers a separate **Clear evaluation data** action inside the bottom Collection tools section. Clearing requires typing the exact word `DELETE`; cancellation, incorrect text and reopening cannot reuse an earlier acknowledgement. An in-flight generation can finish after clearing; wait until generations finish before clearing if you want an empty corpus. Deleting an auth account cascades all evaluation rows. Authenticated users may read/delete only their own rows; inserts and updates require the server service role.
 
 ## Verification
 

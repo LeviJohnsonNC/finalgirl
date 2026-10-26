@@ -46,10 +46,12 @@ async function options(page: Page) {
 }
 const dialog = (page: Page) =>
   page.getByRole("dialog", { name: "Discard this game?", exact: true });
-const confirm = (page: Page) =>
-  dialog(page)
+const confirm = async (page: Page) => {
+  await dialog(page).getByLabel("Type DELETE to confirm").fill("DELETE");
+  await dialog(page)
     .getByRole("button", { name: "Discard game", exact: true })
     .click();
+};
 
 test("discard is hidden, confirms the exact game, cancels safely, and returns to the same setup", async ({
   page,
@@ -68,6 +70,14 @@ test("discard is hidden, confirms the exact game, cancels safely, and returns to
   await expect(
     dialog(page).getByRole("button", { name: "Keep playing", exact: true }),
   ).toBeFocused();
+  await expect(
+    dialog(page).getByRole("button", { name: "Discard game", exact: true }),
+  ).toBeDisabled();
+  await dialog(page).getByLabel("Type DELETE to confirm").fill("delete");
+  await expect(
+    dialog(page).getByRole("button", { name: "Discard game", exact: true }),
+  ).toBeDisabled();
+  await dialog(page).getByLabel("Type DELETE to confirm").clear();
   if (info.project.name === "mobile")
     await page.setViewportSize({ width: 320, height: 568 });
   expect(
@@ -124,22 +134,39 @@ test("discard is hidden, confirms the exact game, cancels safely, and returns to
   expect(next.playEvents).toBeUndefined();
 });
 
-test("discard from outcome removes the already-recorded result from stats and scrapbooks", async ({ page, archive }) => {
+test("discard from outcome removes the already-recorded result from stats and scrapbooks", async ({
+  page,
+  archive,
+}) => {
   archive.films = ["s4-buddyland"];
-  archive.history = [other, { ...result, final_girl: result.finalGirl, victims_saved: 7 }];
-  await archive.install(page, { draft: { ...draft, phase: "outcome", result } });
+  archive.history = [
+    other,
+    { ...result, final_girl: result.finalGirl, victims_saved: 7 },
+  ];
+  await archive.install(page, {
+    draft: { ...draft, phase: "outcome", result },
+  });
   await open(page);
   await page.getByRole("button", { name: "More options", exact: true }).click();
-  await page.getByRole("button", { name: "Discard game…", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Discard game…", exact: true })
+    .click();
   await confirm(page);
   await expect(page.locator(".casting-page")).toBeVisible();
   expect(archive.history.map((g) => g.id)).toEqual([otherId]);
   expect(archive.sessions.some((g) => g.id === gameId)).toBe(false);
   await page.getByRole("button", { name: "STATS", exact: true }).click();
-  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuetext", "0 percent win rate, 0 wins and 1 loss");
-  await expect(page.getByRole("region", { name: "All-time session totals" })).toContainText("2");
+  await expect(page.getByRole("meter")).toHaveAttribute(
+    "aria-valuetext",
+    "0 percent win rate, 0 wins and 1 loss",
+  );
+  await expect(
+    page.getByRole("region", { name: "All-time session totals" }),
+  ).toContainText("2");
   await page.reload();
-  await expect(page.getByRole("button", { name: "RESUME GAME", exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "RESUME GAME", exact: true }),
+  ).toHaveCount(0);
 });
 
 test("failed discard preserves the game and offers a safe retry", async ({

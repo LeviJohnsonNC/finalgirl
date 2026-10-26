@@ -15,14 +15,14 @@ export interface Screening {
   timestamp: number;
 }
 
-/** A small, stable reel: newest first, then a different matchup when possible.
- * Re-evaluating after a history refresh never randomly reshuffles the screen.
+/** A small reel with session-random ordering, then a different matchup when possible.
+ * The hook supplies stable random ranks so refreshes do not reshuffle the screen.
  * Posters belong in the lobby; unavailable stills are skipped. */
-export function buildScreenings(games: GameResult[], failed: ReadonlySet<string> = new Set()): Screening[] {
+export function buildScreenings(games: GameResult[], failed: ReadonlySet<string> = new Set(), ranks?: ReadonlyMap<string, number>): Screening[] {
   const seenIds = new Set<string>();
   const seenImages = new Set<string>();
   const pool: Screening[] = [];
-  const ordered = [...games].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0) || a.id.localeCompare(b.id));
+  const ordered = [...games].sort((a, b) => ((ranks?.get(a.id) ?? 0) - (ranks?.get(b.id) ?? 0)) || (b.timestamp || 0) - (a.timestamp || 0) || a.id.localeCompare(b.id));
   for (const game of ordered) {
     const scene = game.sceneImageUrl && !failed.has(game.sceneImageUrl) ? game.sceneImageUrl : null;
     const imageUrl = scene;

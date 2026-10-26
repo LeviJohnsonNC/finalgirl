@@ -356,3 +356,53 @@ test("both image preferences retain small cover and portrait derivatives", async
   await expect(card.getByRole("switch")).toBeChecked();
   expect(archive.itemReads).toEqual([]);
 });
+
+test("all films load distinct display faces and share one medium sans-serif supporting font", async ({
+  page,
+  archive,
+}) => {
+  await archive.install(page);
+  await page.goto("/");
+  await page.getByRole("button", { name: "Collection", exact: true }).click();
+  await page.evaluate(() => document.fonts.ready);
+  const fonts = await page
+    .locator(".collection-film")
+    .evaluateAll(async (cards) => {
+      const result = [];
+      for (const card of cards) {
+        const title = card.querySelector("h3")!,
+          copy = card.querySelector(".collection-pitch p")!;
+        const t = getComputedStyle(title),
+          b = getComputedStyle(copy);
+        const loaded = await document.fonts.load(
+          `${t.fontWeight} 30px ${t.fontFamily}`,
+          title.getAttribute("aria-label")!,
+        );
+        result.push({
+          title: t.fontFamily,
+          body: b.fontFamily,
+          weight: b.fontWeight,
+          loaded:
+            loaded.length > 0 &&
+            loaded.every((face) => face.status === "loaded"),
+        });
+      }
+      return result;
+    });
+  expect(new Set(fonts.map((f) => f.title)).size).toBe(23);
+  for (const font of fonts) {
+    expect(font.body).toContain("Source Sans 3");
+    expect(font.weight).toBe("500");
+    expect(font.loaded).toBe(true);
+  }
+  for (const width of [320, 390, 1366]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const line of await page
+      .locator(".collection-film-title > span > span")
+      .all()) {
+      expect(
+        await line.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+      ).toBe(true);
+    }
+  }
+});

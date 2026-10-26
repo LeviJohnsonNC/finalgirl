@@ -7,6 +7,9 @@ export interface CollectionArt {
   lettering: "brush" | "gothic" | "industrial" | "storybook";
   lines: { text: string; scale?: number; accent?: boolean }[];
   position?: string;
+  titleFont: string;
+  titleWeight: number;
+  titleScale?: number;
 }
 const line = (text: string, scale = 1, accent = false) => ({
   text,
@@ -15,6 +18,8 @@ const line = (text: string, scale = 1, accent = false) => ({
 });
 export const COLLECTION_ART: Record<string, CollectionArt> = {
   "s1-camp-happy-trails": {
+    titleFont: "Shelf Brush",
+    titleWeight: 600,
     scene: "happy-trails",
     accent: "#ed3534",
     pale: "#f1dbb9",
@@ -26,6 +31,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     ],
   },
   "s1-creech-manor": {
+    titleFont: "Shelf Fell",
+    titleWeight: 400,
     scene: "creech-manor",
     accent: "#8ecab8",
     pale: "#e8e1bd",
@@ -37,6 +44,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     ],
   },
   "s1-sacred-groves": {
+    titleFont: "Kalam",
+    titleWeight: 700,
     scene: "sacred-groves",
     accent: "#dc7138",
     pale: "#e8d3a6",
@@ -48,6 +57,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     ],
   },
   "s1-carnival-of-blood": {
+    titleFont: "Rye",
+    titleWeight: 400,
     scene: "carnival",
     accent: "#e94a51",
     pale: "#f4dbad",
@@ -59,6 +70,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     ],
   },
   "s1-maple-lane": {
+    titleFont: "Creepster",
+    titleWeight: 400,
     scene: "maple-lane",
     accent: "#ac8bd2",
     pale: "#e9dce0",
@@ -66,6 +79,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     lines: [line("Frightmare", 1.04, true), line("on Maple Lane", 0.75)],
   },
   "s1-terror-from-above": {
+    titleFont: "Permanent Marker",
+    titleWeight: 400,
     scene: "birds",
     accent: "#eab561",
     pale: "#ecdfc1",
@@ -73,6 +88,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     lines: [line("Terror", 1.32, true), line("from Above", 0.88)],
   },
   "s2-into-the-void": {
+    titleFont: "Shelf Condensed",
+    titleWeight: 700,
     scene: "void",
     accent: "#9cdebd",
     pale: "#e4e7cd",
@@ -80,6 +97,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     lines: [line("Into the", 0.72), line("Void", 1.65, true)],
   },
   "s2-panic-station-2891": {
+    titleFont: "Staatliches",
+    titleWeight: 400,
     scene: "station",
     accent: "#93c7e5",
     pale: "#eff1de",
@@ -91,6 +110,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     ],
   },
   "s2-madness-in-dark": {
+    titleFont: "Special Elite",
+    titleWeight: 400,
     scene: "asylum",
     accent: "#bed16c",
     pale: "#e5dfbd",
@@ -98,6 +119,9 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     lines: [line("Madness", 1.18, true), line("in the Dark", 0.86)],
   },
   "s2-once-upon-full-moon": {
+    titleScale: 1.25,
+    titleFont: "Pirata One",
+    titleWeight: 400,
     scene: "full-moon",
     accent: "#d7ae70",
     pale: "#eee4bd",
@@ -105,6 +129,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     lines: [line("Once Upon", 0.8), line("a Full Moon", 0.9, true)],
   },
   "s2-knock-at-door": {
+    titleFont: "Sedgwick Ave Display",
+    titleWeight: 400,
     scene: "cottage",
     accent: "#d96a4d",
     pale: "#ead5b9",
@@ -112,6 +138,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     lines: [line("A Knock", 1.15), line("at the Door", 0.94, true)],
   },
   "s2-terror-from-grave": {
+    titleFont: "Eater",
+    titleWeight: 400,
     scene: "grave",
     accent: "#a4b873",
     pale: "#e2dfba",
@@ -123,6 +151,9 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     ],
   },
   "s3-falconwood-files": {
+    titleScale: 0.88,
+    titleFont: "Black Ops One",
+    titleWeight: 400,
     scene: "falconwood",
     accent: "#de645e",
     pale: "#e4ddc7",
@@ -134,6 +165,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     ],
   },
   "s3-killer-from-tomorrow": {
+    titleFont: "Teko",
+    titleWeight: 600,
     scene: "mall",
     accent: "#79cee1",
     pale: "#e1e3d4",
@@ -145,6 +178,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     ],
   },
   "s3-hell-to-pay": {
+    titleFont: "Metal Mania",
+    titleWeight: 400,
     scene: "hellscape",
     accent: "#f47843",
     pale: "#edd9b8",
@@ -152,6 +187,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     lines: [line("Hell", 1.56, true), line("to Pay", 1.02)],
   },
   "s3-marrek-murders": {
+    titleFont: "Anton",
+    titleWeight: 400,
     scene: "warehouse",
     accent: "#d7ad56",
     pale: "#e1d9bb",
@@ -159,6 +196,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     lines: [line("The Marrek", 0.88), line("Murders", 1.18, true)],
   },
   "s3-dont-make-sound": {
+    titleFont: "Oswald",
+    titleWeight: 600,
     scene: "utopia",
     accent: "#9fb9b3",
     pale: "#e5e0cb",
@@ -166,6 +205,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     lines: [line("Don't Make", 0.86), line("a Sound", 1.18, true)],
   },
   "s3-terror-from-destiny": {
+    titleFont: "Cinzel Decorative",
+    titleWeight: 700,
     scene: "destiny",
     accent: "#d95f59",
     pale: "#e5d9c4",
@@ -177,6 +218,9 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     ],
   },
   "s4-shriek": {
+    titleScale: 0.77,
+    titleFont: "Rock Salt",
+    titleWeight: 400,
     scene: "convention",
     accent: "#d889c4",
     pale: "#f1d7bc",
@@ -184,6 +228,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     lines: [line("Shriek", 1.63, true)],
   },
   "s4-buddyland": {
+    titleFont: "Fugaz One",
+    titleWeight: 400,
     scene: "buddyland",
     accent: "#f35d94",
     pale: "#f3dba8",
@@ -195,6 +241,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     ],
   },
   "s4-rotten-harvest": {
+    titleFont: "New Rocker",
+    titleWeight: 400,
     scene: "harvest",
     accent: "#dda34c",
     pale: "#e4d3a1",
@@ -202,6 +250,8 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     lines: [line("A Rotten", 0.92), line("Harvest", 1.17, true)],
   },
   "s4-demon-shadows": {
+    titleFont: "UnifrakturCook",
+    titleWeight: 700,
     scene: "upcoming-shadows",
     accent: "#b490c1",
     pale: "#e4d2c6",
@@ -209,6 +259,9 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     lines: [line("A Demon", 0.95), line("in the Shadows", 0.71, true)],
   },
   "s4-green-terror": {
+    titleScale: 0.79,
+    titleFont: "Nosifer",
+    titleWeight: 400,
     scene: "upcoming-green",
     accent: "#a6c37a",
     pale: "#e2ddbd",
