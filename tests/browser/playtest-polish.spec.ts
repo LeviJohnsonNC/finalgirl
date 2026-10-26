@@ -71,42 +71,89 @@ test('death editing, loading, reading, corrections and errors keep laptop/phone 
  await page.screenshot({path:info.outputPath('death-error.png')});
 });
 
-test('killer selection and Epic borders stay distinct with a read-only revealed panel',async({page,archive},info)=>{
- await archive.install(page,{draft});await resume(page);await openModule(page,'geppetto');
- const panel=page.locator('[data-module="geppetto"]');
- await panel.locator('.module-card-section > summary').click();
- const cards=panel.getByRole('region',{name:'Dark Power selection',exact:true});
- const selected=cards.getByRole('button',{name:'Choose Massive Abominations',exact:true});
- const epic=cards.getByRole('button',{name:'Choose Join the Family',exact:true});
- await selected.click();await expect(selected).toHaveAttribute('aria-pressed','true');
- await expect(epic).toHaveAttribute('data-epic','true');
- const brightness=(tile:typeof selected)=>tile.locator('.play-module-art').evaluate(el=>Number(getComputedStyle(el).filter.match(/brightness\(([.\d]+)\)/)?.[1] ?? 1));
- await expect.poll(()=>brightness(selected)).toBeGreaterThanOrEqual(.6);
- // The compact choice stays distinguishable; the expanded illustration is vivid.
- await selected.hover();await expect.poll(()=>brightness(selected)).toBeGreaterThanOrEqual(.6);
- await selected.focus();await expect.poll(()=>brightness(selected)).toBeGreaterThanOrEqual(.6);
- await cards.getByRole('heading',{name:'Dark Power',exact:true}).hover();
- const dimming=await epic.locator('.play-module-art').evaluate(el=>Number(getComputedStyle(el).filter.match(/brightness\(([.\d]+)\)/)?.[1] ?? 1));
- expect(dimming).toBeLessThanOrEqual(.45);
- await expect(cards.locator('[aria-pressed="true"]')).toHaveCount(1);
- await expect(selected.locator('.module-power-selected')).toBeVisible();
- const before=await log(page);await expect(cards.locator('.module-card-rules')).toHaveCount(0);
- await cards.locator('.module-revealed-hero').click();
- await expect(cards.locator('.module-revealed-hero h4')).toHaveText('Massive Abominations');expect(await log(page)).toEqual(before);
- await epic.click();await expect(epic).toHaveAttribute('aria-pressed','true');
- await expect(epic).toHaveAttribute('data-epic','true');await expect(selected).toHaveAttribute('aria-pressed','false');
- await cards.scrollIntoViewIfNeeded();await page.screenshot({path:info.outputPath('killer-epic-selected.png')});
- await page.getByRole('button',{name:'Dark Power',exact:true}).click();
- const remembered=page.locator('.play-moment-editor');await expect(remembered.getByRole('button',{name:'Choose Join the Family',exact:true})).toHaveAttribute('aria-pressed','true');
- await page.getByRole('button',{name:'Ultimate used',exact:true}).click();
- await expect(page.getByText('Details are optional.',{exact:false})).toHaveCount(0);
- await openModule(page,'carnival');const carnival=page.locator('[data-module="carnival"]');
- await carnival.locator('.carnival-section > summary').filter({hasText:'Item Trap encounters'}).click();
- const cobra=carnival.locator('.carnival-item-traps > article').filter({hasText:'Hidden Cobra Trap'});
- const rule=cobra.getByText('Place beside the Final Girl.',{exact:false});await expect(rule).not.toBeVisible();
- const logBefore=await log(page);await cobra.locator('.module-card-rules > summary').click();await expect(rule).toBeVisible();expect(await log(page)).toEqual(logBefore);
- await expect(carnival).not.toContainText('Record what actually happened');
- if(info.project.name==='mobile') {await page.setViewportSize({width:320,height:568});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}
+test("killer selection and Epic borders stay distinct with a read-only revealed panel", async ({
+  page,
+  archive,
+}, info) => {
+  await archive.install(page, { draft });
+  await resume(page);
+  await openModule(page, "geppetto");
+  const panel = page.locator('[data-module="geppetto"]');
+  await panel.locator(".module-card-section > summary").click();
+  const cards = panel.getByRole("region", {
+    name: "Dark Power selection",
+    exact: true,
+  });
+  const selected = cards.getByRole("button", {
+    name: "Choose Massive Abominations",
+    exact: true,
+  });
+  const epic = cards.getByRole("button", {
+    name: "Choose Join the Family",
+    exact: true,
+  });
+  await expect(epic).toHaveAttribute("data-epic", "true");
+  const dimming = await epic
+    .locator(".play-module-art")
+    .evaluate((el) =>
+      Number(
+        getComputedStyle(el).filter.match(/brightness\(([.\d]+)\)/)?.[1] ?? 1,
+      ),
+    );
+  expect(dimming).toBeLessThanOrEqual(0.45);
+  await selected.click();
+  const hero = cards.locator(".module-revealed-hero");
+  await expect(cards.locator(".module-killer-card")).toHaveCount(0);
+  await expect(hero.locator("h4")).toHaveText("Massive Abominations");
+  const before = await log(page);
+  await expect(cards.locator(".module-card-rules")).toHaveCount(0);
+  await hero.click();
+  expect(await log(page)).toEqual(before);
+  await cards
+    .getByRole("button", { name: "Change Dark Power", exact: true })
+    .click();
+  await epic.click();
+  await expect(hero).toHaveAttribute("data-epic", "true");
+  await expect(hero.locator("h4")).toHaveText("Join the Family");
+  await cards.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: info.outputPath("killer-epic-selected.png") });
+  await page.getByRole("button", { name: "Dark Power", exact: true }).click();
+  const remembered = page.locator(".play-moment-editor");
+  await expect(remembered.locator(".module-revealed-hero h4")).toHaveText(
+    "Join the Family",
+  );
+  await page
+    .getByRole("button", { name: "Ultimate used", exact: true })
+    .click();
+  await expect(
+    page.getByText("Details are optional.", { exact: false }),
+  ).toHaveCount(0);
+  await openModule(page, "carnival");
+  const carnival = page.locator('[data-module="carnival"]');
+  await carnival
+    .locator(".carnival-section > summary")
+    .filter({ hasText: "Item Trap encounters" })
+    .click();
+  const cobra = carnival
+    .locator(".carnival-item-traps > article")
+    .filter({ hasText: "Hidden Cobra Trap" });
+  const rule = cobra.getByText("Place beside the Final Girl.", {
+    exact: false,
+  });
+  await expect(rule).not.toBeVisible();
+  const logBefore = await log(page);
+  await cobra.locator(".module-card-rules > summary").click();
+  await expect(rule).toBeVisible();
+  expect(await log(page)).toEqual(logBefore);
+  await expect(carnival).not.toContainText("Record what actually happened");
+  if (info.project.name === "mobile") {
+    await page.setViewportSize({ width: 320, height: 568 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  }
 });
 
 test('ending poster reclaims image area while the surrounding laptop layout stays fixed',async({page,archive},info)=>{

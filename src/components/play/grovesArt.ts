@@ -1,6 +1,4 @@
-import burial from "@/assets/play/groves/site-burial.webp";
-import shrine from "@/assets/play/groves/site-shrine.webp";
-import holy from "@/assets/play/groves/site-holy.webp";
+import { sacredPhoto } from "./modulePhotos";
 import { sacredTokens, type SacredToken } from "./sacredSpaceTokens";
 import scenes from "@/assets/play/groves/scenes.webp";
 import people from "@/assets/play/groves/people.webp";
@@ -35,26 +33,14 @@ export const grovesPerson = (column: number, status?: string): ModuleArt => ({
   },
 });
 
-/** Three independent 4×2 atlases. Bits: Closed=1, Fire=2, Hallowed=4.
- * Every combination has its own environmental illustration, never a token overlay. */
+/** Each observed token combination has one full-width photographic state. */
 export const grovesSite = (
   row: number,
   tokens: readonly SacredToken[] = [],
 ): ModuleArt => {
-  const index = sacredTokens.reduce(
+  const bits = sacredTokens.reduce(
     (bits, token, bit) => bits | (tokens.includes(token) ? 1 << bit : 0),
     0,
   );
-  return {
-    src: [burial, shrine, holy][row],
-    fit: "meet",
-    atlas: {
-      width: 1536,
-      height: 768,
-      x: (index % 4) * 384 + 3,
-      y: Math.floor(index / 4) * 384 + 3,
-      cellWidth: 378,
-      cellHeight: 378,
-    },
-  };
+  return sacredPhoto(row, bits);
 };

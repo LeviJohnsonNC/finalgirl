@@ -105,7 +105,7 @@ export const inkanyambaRules: EntityRuleModule = {
       type: "callout",
       variant: "note",
       title: "Physical resolution and recorded history",
-      text: "Tracker adjustments record the level you choose; they do not resolve chained effects, rolls, damage, movement or casualties. Use active Power reminders while resolving the board. A named card is evidence of a reveal, not that its immediate or conditional effects occurred. The separate We Need a Miracle action records its Wrath change once; reopening or editing the card never applies it again.",
+      text: "Tracker adjustments record the level you choose; they do not resolve chained effects, rolls, damage, movement or casualties. Use the physical cards and Rules references while resolving the board. A named card is evidence of a reveal, not that its immediate or conditional effects occurred. The separate We Need a Miracle action records its Wrath change once; reopening or editing the card never applies it again.",
     },
   ],
 };

@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { openModule } from "./play-helpers";
+import { showMinorChoices, openModule } from "./play-helpers";
 import { newPlayEvent } from "../../src/lib/play/events";
 
 const selection = {
@@ -39,7 +39,14 @@ test("Minor powers expand independently and depleted health stays editable throu
     has: page.getByRole("heading", { name: "Boiling Anger", exact: true }),
   });
   await expect(active).toHaveAttribute("data-active", "true");
+  await expect(
+    panel.getByRole("complementary", { name: "Power reminders", exact: true }),
+  ).toHaveCount(0);
   expect((await active.boundingBox())!.height).toBeGreaterThan(before * 1.5);
+  await expect(
+    panel.getByRole("button", { name: "Reveal Outrageholic", exact: true }),
+  ).toHaveCount(0);
+  await showMinorChoices(panel);
   await panel
     .getByRole("button", { name: "Reveal Outrageholic", exact: true })
     .click();
@@ -140,8 +147,10 @@ test("Wrath scenery escalates without Unleash text; mixed Sacred states and Terr
   await expect(space).toContainText(
     "Closed · Fire and Brimstone · Hallowed Ground",
   );
-  const cells = await space.locator("svg").getAttribute("viewBox");
-  expect(cells).toBe("1155 387 378 378");
+  await expect(space.locator("img")).toHaveAttribute(
+    "src",
+    /groves-burial.*7|7-.*webp/,
+  );
   const snapshots = await page.evaluate(
     (owner) =>
       JSON.parse(localStorage.getItem("final-girl-active-game-v1:" + owner)!)
@@ -201,9 +210,15 @@ test("Hans keeps two distinct revealed powers in both entry points and reduced m
   await expect(
     panel.locator(".module-second-power .module-revealed-hero h4"),
   ).toHaveText("Feed");
+  await panel
+    .getByRole("button", { name: "Change Dark Power", exact: true })
+    .click();
   await expect(
     panel.getByRole("button", { name: "Choose Feed", exact: true }),
   ).toBeDisabled();
+  await panel
+    .getByRole("button", { name: "Cancel changing Dark Power", exact: true })
+    .click();
   const hero = panel
     .getByRole("region", { name: "Dark Power selection", exact: true })
     .locator(".module-revealed-hero");

@@ -33,6 +33,36 @@ export async function openModule(page: Page, id: string) {
   await expect(page.locator(".play-module-stack")).toBeAttached();
   const panel = page.locator(`.play-module-panel[data-module="${id}"]`);
   if (!(await panel.count())) return;
-  if (!(await panel.evaluate(el => (el as HTMLDetailsElement).open))) await panel.locator(':scope > summary').click();
+  if (!(await panel.evaluate((el) => (el as HTMLDetailsElement).open)))
+    await panel.locator(":scope > summary").click();
   await expect(panel).toHaveAttribute("open", "");
+}
+
+/** Open corrections explicitly now that named reveals hide their unused choices. */
+export async function chooseKillerCard(
+  scope: Locator,
+  type: "Dark Power" | "Finale",
+  name: string,
+) {
+  const section = scope.getByRole("region", {
+    name: `${type} selection`,
+    exact: true,
+  });
+  const choice = section.getByRole("button", {
+    name: `Choose ${name}`,
+    exact: true,
+  });
+  if (!(await choice.isVisible()))
+    await section
+      .getByRole("button", { name: `Change ${type}`, exact: true })
+      .click();
+  await choice.click();
+  await expect(section.locator(".module-revealed-hero h4")).toHaveText(name);
+}
+export async function showMinorChoices(scope: Locator) {
+  const add = scope.getByRole("button", {
+    name: "Add another Minor Power",
+    exact: true,
+  });
+  if (await add.isVisible()) await add.click();
 }

@@ -1,4 +1,6 @@
+import { modulePhoto } from "./modulePhotos";
 import { CharacterControl } from "./CharacterControl";
+import { MinorPowerGroup } from "./MinorPowerGroup";
 import { MinorPowerControl } from "./MinorPowerControl";
 import { EventControl } from "./EventControl";
 import { KillerCards } from "./KillerCards";
@@ -103,7 +105,7 @@ export function CampControls({
         <section aria-label="Hans tracking">
           <h3 className="play-module-subheading">Minor Dark Powers</h3>
 
-          <div className="play-camp-body module-minor-grid">
+          <MinorPowerGroup className="play-camp-body module-minor-grid">
             {HANS_MINOR_POWERS.map((power, row) => {
               const value = hans[`minor.${power.id}.health`];
               return (
@@ -114,6 +116,7 @@ export function CampControls({
                   effect={power.effect}
                   health={typeof value === "number" ? value : undefined}
                   art={(health) => powerCell(row, health)}
+                  heroArt={modulePhoto("Hans", 7 + row)}
                   heartArt={campCell(3, 1)}
                   onChange={(health) =>
                     record("hans", { [`minor.${power.id}.health`]: health })
@@ -121,7 +124,7 @@ export function CampControls({
                 />
               );
             })}
-          </div>
+          </MinorPowerGroup>
           <KillerCards killer={killer} events={events} onEvent={onEvent} />
         </section>
       )}

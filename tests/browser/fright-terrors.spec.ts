@@ -1,3 +1,4 @@
+import { showMinorChoices } from "./play-helpers";
 import { test, expect, installTestAudio } from "./fixtures";
 import {
   draft,
@@ -48,9 +49,11 @@ test("Minor Power artwork, empty/full/removed states and temporary reminders fit
         animations: "disabled",
       });
   }
+  await showMinorChoices(panel(page));
   await panel(page)
     .getByRole("button", { name: "Reveal Endless Sleep", exact: true })
     .click();
+  await showMinorChoices(panel(page));
   await panel(page)
     .getByRole("button", { name: "Reveal Hellish Pursuit", exact: true })
     .click();
@@ -124,13 +127,20 @@ for (const location of [
     });
     await resume(page);
     const before = await log(page);
+    await showMinorChoices(panel(page));
     await panel(page)
       .getByRole("button", { name: "Reveal Hellish Pursuit", exact: true })
       .click();
     // The labelled article remains stable as its compact reveal button becomes
     // an expanded health panel, then a compact removed state.
-    const hellish = panel(page).getByRole("article", { name: "Hellish Pursuit", exact: true });
-    const endless = panel(page).getByRole("article", { name: "Endless Sleep", exact: true });
+    const hellish = panel(page).getByRole("article", {
+      name: "Hellish Pursuit",
+      exact: true,
+    });
+    const endless = panel(page).getByRole("article", {
+      name: "Endless Sleep",
+      exact: true,
+    });
     await expect(
       hellish
         .getByRole("group", { name: "Hellish Pursuit health" })
@@ -144,6 +154,7 @@ for (const location of [
     await expect(
       hellish.getByText("1/2 health", { exact: true }),
     ).toBeVisible();
+    await showMinorChoices(panel(page));
     await endless
       .getByRole("button", { name: "Reveal Endless Sleep", exact: true })
       .click();
@@ -281,6 +292,7 @@ test("Endless Sleep resets completed decks and cannot override a Finale when rem
 }, info) => {
   await archive.install(page, { draft });
   await resume(page);
+  await showMinorChoices(panel(page));
   await panel(page)
     .getByRole("button", { name: "Reveal Endless Sleep", exact: true })
     .click();
@@ -367,6 +379,7 @@ test("failed Minor Power saves are retryable, keep sleep unchanged and do not co
     };
   });
   const before = await log(page);
+  await showMinorChoices(panel(page));
   await panel(page)
     .getByRole("button", { name: "Reveal Endless Sleep", exact: true })
     .click();
@@ -382,6 +395,7 @@ test("failed Minor Power saves are retryable, keep sleep unchanged and do not co
       window as unknown as { restoreFrightStorage: () => void }
     ).restoreFrightStorage(),
   );
+  await showMinorChoices(panel(page));
   await panel(page)
     .getByRole("button", { name: "Reveal Endless Sleep", exact: true })
     .click();
@@ -399,6 +413,7 @@ test("Crucifix Terror scenes use historical Minor context, cache and narrate; ne
   await archive.install(page, { draft });
   await installTestAudio(page);
   await resume(page);
+  await showMinorChoices(panel(page));
   await panel(page)
     .getByRole("button", { name: "Reveal Endless Sleep", exact: true })
     .click();

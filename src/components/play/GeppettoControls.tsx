@@ -1,5 +1,7 @@
+import { modulePhoto } from "./modulePhotos";
 import { useModuleRecord } from "./useModuleRecord";
 import { KillerCards } from "./KillerCards";
+import { MinorPowerGroup } from "./MinorPowerGroup";
 import { MinorPowerControl } from "./MinorPowerControl";
 import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
 import {
@@ -243,7 +245,7 @@ export function GeppettoControls({
           Health. Tap a filled heart to remove one, or an empty heart to restore
           one.
         </p>
-        <div className="geppetto-minors module-minor-grid">
+        <MinorPowerGroup className="geppetto-minors module-minor-grid">
           {GEPPETTO_MINOR_POWERS.map((c, row) => {
             const value = state[`minor.${c.id}.health`],
               health = typeof value === "number" ? value : undefined;
@@ -254,6 +256,7 @@ export function GeppettoControls({
                 effect={c.effect}
                 health={health}
                 art={(health) => minorCell(row, health)}
+                heroArt={modulePhoto("Geppetto", 7 + row)}
                 heartArt={squareCell(cardsAtlas, 7)}
                 onChange={(health) =>
                   change({ [`minor.${c.id}.health`]: health })
@@ -261,7 +264,7 @@ export function GeppettoControls({
               />
             );
           })}
-        </div>
+        </MinorPowerGroup>
       </details>
       <KillerCards killer="Geppetto" events={events} onEvent={onEvent} />
       <details className="geppetto-details">

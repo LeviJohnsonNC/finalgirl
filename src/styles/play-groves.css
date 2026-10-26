@@ -518,3 +518,10 @@
     grid-template-columns: 1fr;
   }
 }
+/* Widescreen photographs fill each Sacred-space card without side matting. */
+.groves-site-grid .groves-site .play-module-art {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+}
