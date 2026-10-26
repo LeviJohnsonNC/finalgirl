@@ -205,17 +205,18 @@ test('long menu names and Mission controls remain contained at laptop and phone 
 });
 
 
-test('laptop casting gives the art the remaining height without page scrolling', async ({ page, archive }, info) => {
-  archive.films = ['s1-camp-happy-trails', 's3-falconwood-files'];
-  await archive.install(page);
-  await page.goto('/');
-  await page.getByRole('button', { name: 'START THE TAPE', exact: true }).click();
-  const sizes = [
-    { width: 1024, height: 600 }, { width: 949, height: 649 }, { width: 1280, height: 720 },
-    { width: 1366, height: 768 }, { width: 1440, height: 900 },
-    { width: 2048, height: 1061 },
-  ];
-  for (const location of ['Camp Happy Trails', 'Falconwood']) {
+// Keep each location within its own timeout, including on 3× mobile devices.
+for (const location of ['Camp Happy Trails', 'Falconwood']) {
+  test(`laptop casting at ${location} gives the art the remaining height without page scrolling`, async ({ page, archive }, info) => {
+    archive.films = ['s1-camp-happy-trails', 's3-falconwood-files'];
+    await archive.install(page);
+    await page.goto('/');
+    await page.getByRole('button', { name: 'START THE TAPE', exact: true }).click();
+    const sizes = [
+      { width: 1024, height: 600 }, { width: 949, height: 649 }, { width: 1280, height: 720 },
+      { width: 1366, height: 768 }, { width: 1440, height: 900 },
+      { width: 2048, height: 1061 },
+    ];
     for (const [slot, name] of ['Hans', location, 'Laurie'].entries()) await choose(page, slot, name);
     if (location === 'Falconwood') {
       await page.getByRole('button', { name: 'Draw a random mission' }).click();
@@ -255,11 +256,11 @@ test('laptop casting gives the art the remaining height without page scrolling',
         if (previous && Math.abs(previous.y - box.y) < 1) expect(box.x).toBeGreaterThanOrEqual(previous.x + previous.width - 1);
         previous = box;
       }
-      if (size.width === 1366 || size.width === 2048) await page.screenshot({ path: info.outputPath(`casting-fit-${location.replaceAll(' ', '-')}-${size.width}.png`) });
+      if (size.width === 1366 || size.width === 2048) await page.screenshot({ path: info.outputPath(`casting-fit-${location.replaceAll(' ', '-')}-${size.width}.png`), scale: 'css' });
     }
-  }
-  const shuffle = page.getByRole('button', { name: 'Shuffle', exact: true }).first();
-  await shuffle.click();
-  await expect(shuffle).toBeDisabled();
-  await expect(shuffle).toBeEnabled();
-});
+    const shuffle = page.getByRole('button', { name: 'Shuffle', exact: true }).first();
+    await shuffle.click();
+    await expect(shuffle).toBeDisabled();
+    await expect(shuffle).toBeEnabled();
+  });
+}

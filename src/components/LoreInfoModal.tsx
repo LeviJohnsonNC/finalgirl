@@ -14,6 +14,8 @@ import { LOCATION_DESCRIPTIONS } from "@/data/locationDescriptions";
 import { FINAL_GIRL_DESCRIPTIONS } from "@/data/finalGirlDescriptions";
 import { FEATURE_FILMS } from "@/types/gameData";
 import { useActiveImages } from "@/hooks/useActiveImages";
+import { getFinalGirlReference } from "@/data/finalGirlReferences";
+import type { ReactNode } from "react";
 import "@/styles/final-girl-dossier.css";
 
 interface LoreInfoModalProps {
@@ -21,6 +23,8 @@ interface LoreInfoModalProps {
   name: string;
   namedTrigger?: boolean;
   ultimate?: boolean;
+  trigger?: ReactNode;
+  triggerClassName?: string;
 }
 
 // Helper to find detailed lore for a character/location
@@ -72,6 +76,8 @@ export const LoreInfoModal = ({
   name,
   namedTrigger = false,
   ultimate = false,
+  trigger,
+  triggerClassName,
 }: LoreInfoModalProps) => {
   const lore = getLoreDetails(type, name);
 
@@ -82,17 +88,22 @@ export const LoreInfoModal = ({
       <DialogTrigger asChild>
         <button
           className={
-            namedTrigger
+            triggerClassName ??
+            (namedTrigger
               ? "girl-reference-link"
-              : "p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-primary/20 transition-colors group"
+              : "p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full hover:bg-primary/20 transition-colors group")
           }
           aria-label={`View ${name} info`}
         >
-          <Info
-            aria-hidden="true"
-            className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors"
-          />
-          {namedTrigger && name}
+          {trigger ?? (
+            <>
+              <Info
+                aria-hidden="true"
+                className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors"
+              />
+              {namedTrigger && name}
+            </>
+          )}
         </button>
       </DialogTrigger>
       <DialogContent
@@ -165,6 +176,15 @@ function LoreInfoContent({
                 {lore.backstory.split(/\n\s*\n/).map((paragraph, index) => (
                   <p key={index}>{paragraph}</p>
                 ))}
+              </section>
+            )}
+            {!lore?.backstory && !getFinalGirlReference(name) && (
+              <section
+                className="girl-backstory"
+                aria-label={`${name} details`}
+              >
+                <h3>Character details</h3>
+                <p>Details aren’t available yet.</p>
               </section>
             )}
             <FinalGirlReference name={name} ultimate={ultimate} />
