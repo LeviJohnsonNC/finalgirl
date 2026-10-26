@@ -1,0 +1,9 @@
+# Drive-in background assets
+
+`src/assets/theater-starlight.webp` (1915 × 821) and `theater-starlight-portrait.webp` (910 × 1729) are the calibrated desktop and phone scenery used by `DriveInScreen.tsx`. The screen aperture and live program box share that photograph's coordinate plane.
+
+On 2026-10-25 Levi supplied `Screenshot 2026-10-25 at 7.07.33 PM.png` (attachment `file_000000000bc48230896ea055f197477b`), showing the old photographic marquee protruding below the new, shorter HTML screening box. Both photographs were edited to remove the entire old marquee and its rectangular border, continuing woodland/ground behind it. The large projection screen and surrounding composition are retained. The live HTML program box is now the sole screening-information frame; do not paint another empty panel into future scenery or hide a photographic panel behind live content.
+
+Edited source images: `exec-be37de1c-d2f7-4743-8be8-5cd1fa78e80f.png` (landscape) and `exec-b4dfeedf-d535-4c53-91f4-486752d9911f.png` (portrait), generated from the original backgrounds with image editing. Exported to the existing dimensions as quality-90 WebP. Preserve `DriveInScreen.tsx`'s measured screen geometry; inspect the actual projection/frame alignment and the single live box at laptop and phone sizes after any future background edit.
+
+Validation for this artwork update: TypeScript, asset validation (289 valid files), production build and 34 existing desktop/mobile theater/casting checks passed. An additional visual audit inspected the loaded backgrounds at 1280×640, 1366×768, 1440×900, 320×568 and 390×844, plus the supplied 1254px Inkanyamba photo in casting and character details. No overflow or duplicate sign border was found. This is a frontend asset/documentation change; no function deployment or SQL migration is required. Merge/publish and production smoke testing remain release steps.
