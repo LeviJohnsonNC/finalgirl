@@ -54,14 +54,15 @@ describe('unfinished screening', () => {
 
 describe('marquee result accuracy', () => {
   it.each([
-    ['won', 2, 'Survived'], ['won', 0, 'Sacrificial victory'], ['won', undefined, 'Victory'],
-    ['lost', 2, 'Alive · Defeat'], ['lost', 0, 'Lost to the night'], ['lost', undefined, 'Lost to the night'],
+    ['won', 2, 'Won'], ['won', 0, 'Won'], ['won', undefined, 'Won'],
+    ['lost', 2, 'Lost'], ['lost', 0, 'Lost'], ['lost', undefined, 'Lost'],
   ] as const)('labels %s with health %s as %s', (outcome, finalGirlHealth, label) => {
     expect(screeningVerdict({ outcome, finalGirlHealth })).toBe(label);
   });
   it('preserves recorded health on the selected scene', () => {
     const [screening] = buildScreenings([game('a', 1, { finalGirlHealth: 0, posterImageUrl: 'https://test.invalid/poster.png' })]);
     expect(screening.kind).toBe('scene');
-    expect(screeningVerdict(screening)).toBe('Sacrificial victory');
+    expect(screening.finalGirlHealth).toBe(0);
+    expect(screeningVerdict(screening)).toBe('Won');
   });
 });

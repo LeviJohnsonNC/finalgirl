@@ -137,7 +137,9 @@ test('automatic screenings identify the game and open its exact case file', asyn
   await expect(page.getByRole('heading', { name: 'Rena vs. Billy the Bear' })).toBeVisible();
   await expect(page.locator('.theater-transport')).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath('personal-screening.png'), fullPage: true });
-  await page.getByRole('button', { name: 'Open case file for Rena vs. Billy the Bear', exact: true }).click();
+  await expect(page.locator('.theater-caption-details')).not.toContainText('Open case');
+  // The card's otherwise empty padding opens the displayed case too.
+  await page.locator('.theater-program').click({ position: { x: 8, y: 8 } });
   await expect(page.locator('.story-page-content').getByText('This is the older Buddyland case file.')).toBeVisible();
   expect(archive.calls).toEqual([]);
 });
@@ -165,7 +167,8 @@ test('the larger verdict and long matchup stay readable without playback control
     await expect(title).toHaveText('Janelle vs. The Tormentor');
     await page.screenshot({ path: testInfo.outputPath(`compact-caption-${viewport.width}.png`), fullPage: true });
   }
-  await page.getByRole('button', { name: 'Open case file for Janelle vs. The Tormentor', exact: true }).click();
+  await page.getByRole('button', { name: 'Open case file for Janelle vs. The Tormentor', exact: true }).focus();
+  await page.keyboard.press('Enter');
   await expect(page.locator('.story-page-content').getByText('The Falconwood case.')).toBeVisible();
   await expect(page.locator('.story-date')).toContainText('September 18, 2026');
   expect(archive.calls).toEqual([]);
@@ -254,6 +257,8 @@ test('an unfinished game owns the main screening while past cases remain availab
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Laurie vs. Hans' })).toBeVisible();
   await expect(page.getByText('Round 4 · 3 saved · 2 killed')).toBeVisible();
+  await expect(page.locator('.theater-verdict')).toHaveText('In progress');
+  expect(await page.locator('.theater-verdict').evaluate(el => parseFloat(getComputedStyle(el).fontSize))).toBeLessThan(23);
   await expect(page.getByRole('button', { name: 'RESUME GAME', exact: true })).toHaveCount(1);
   await expect(page.getByText('Laurie vs. Hans', { exact: true })).toHaveCount(1);
   await expect(page.locator('.theater-transport')).toHaveCount(0);
@@ -262,7 +267,7 @@ test('an unfinished game owns the main screening while past cases remain availab
   await expect(page.getByRole('heading', { name: 'Rena vs. Billy the Bear' })).toBeVisible();
   await page.getByRole('button', { name: 'Now playing', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Laurie vs. Hans' })).toBeVisible();
-  await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
+  await page.getByRole('button', { name: 'Resume case for Laurie vs. Hans', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Save one victim' })).toBeVisible();
   expect(archive.calls).toEqual([]);
 });
@@ -294,7 +299,8 @@ test('a cloud-only game is offered as the primary resume action', async ({ page,
   await page.goto('/');
   await expect(page.getByRole('button', { name: 'RESUME CLOUD GAME', exact: true })).toHaveCount(1);
   await expect(page.getByRole('heading', { name: 'Laurie vs. Hans' })).toBeVisible();
-  await page.getByRole('button', { name: 'RESUME CLOUD GAME', exact: true }).click();
+  await page.getByRole('button', { name: 'Resume case for Laurie vs. Hans', exact: true }).focus();
+  await page.keyboard.press('Space');
   await expect(page.getByRole('button', { name: 'WON', exact: true }).first()).toBeVisible();
   expect(await page.evaluate(id => JSON.parse(localStorage.getItem('final-girl-active-game-v1:' + id)!).id, userId)).toBe(gameId);
 });
@@ -315,14 +321,14 @@ test('signing out removes personal projections and resume details', async ({ pag
   await expect(page.getByRole('button', { name: /RESUME/ })).toHaveCount(0);
 });
 
-test('a long matchup and sacrificial victory remain readable above the footer', async ({ page, archive }) => {
+test('a long matchup and compact result remain readable above the footer', async ({ page, archive }) => {
   archive.history = [{ id: gameId, timestamp: Date.UTC(2026, 8, 18, 18), outcome: 'won', final_girl_health: 0,
     killer: 'The Intruders — Zeke, Baghead and the Twins', location: 'Wingard Cottage', final_girl: 'Adelaide',
     scene_image_url: 'http://127.0.0.1:4173/theater-long.png' }];
   await archive.install(page);
   await page.route('**/theater-long.png', route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/camp-happy-trails.png') }));
   await page.goto('/');
-  await expect(page.locator('.theater-verdict')).toHaveText('Sacrificial victory');
+  await expect(page.locator('.theater-verdict')).toHaveText('Won');
   for (const viewport of [{ width: 320, height: 568 }, { width: 640, height: 900 }, { width: 1674, height: 940 }]) {
     await page.setViewportSize(viewport);
     await expect(page.locator('.theater-screen-wrap')).toHaveAttribute('data-composition', viewport.width < 640 ? 'portrait' : 'landscape');
