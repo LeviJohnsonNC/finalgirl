@@ -21,6 +21,8 @@ function visit(dir) {
     mkdirSync(output.slice(0, output.lastIndexOf("/")), { recursive: true });
     // Remove uniform empty margins around the photographed/rendered box.
     // The source art and every face of the actual box remain unchanged.
+    // 384px supports the larger shelf at 2× density. A small post-resize
+    // unsharp mask restores edge definition without redrawing the artwork.
     execFileSync("magick", [
       input,
       "-auto-orient",
@@ -28,11 +30,15 @@ function visit(dir) {
       "1%",
       "-trim",
       "+repage",
+      "-filter",
+      "Lanczos",
       "-resize",
-      "288x432>",
+      "384x576>",
+      "-unsharp",
+      "0x0.5+0.5+0.02",
       "-strip",
       "-quality",
-      "80",
+      "86",
       output,
     ]);
     before += statSync(input).size;

@@ -36,7 +36,7 @@ const aiBoxArtGlob = import.meta.glob<{ default: string }>(
   { eager: true },
 );
 
-// Responsive Collection covers use a 288px-wide WebP for high-density screens.
+// Responsive Collection covers use a 384px-wide WebP for high-density screens.
 // This avoids downloading the multi-megabyte source PNG on the shelf.
 const thumbnailGlob = import.meta.glob<{ default: string }>(
   '../assets/collection-thumbnails/**/*.webp', { eager: true },

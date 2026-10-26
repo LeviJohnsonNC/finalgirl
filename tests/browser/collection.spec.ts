@@ -119,7 +119,7 @@ test("module cards show the supplied Buddyland cover, blurb and complete cast on
   });
   await expect
     .poll(() => cover.evaluate((image: HTMLImageElement) => image.naturalWidth))
-    .toBeLessThanOrEqual(288);
+    .toBeLessThanOrEqual(384);
   await expect(cover).toHaveAttribute("src", /\.webp$/);
   await expect
     .poll(() =>
