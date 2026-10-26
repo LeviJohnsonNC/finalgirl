@@ -541,7 +541,7 @@ export const generateImage = async (
         { type: "text", text: `${prompt}\nThe attached opening photograph is an IDENTITY reference only: match cast appearance, clothing, architecture and palette. Make a new composition from the ending; translate into the requested painted medium. Do not copy the opening's pose, action or fate.` },
         { type: "image_url", image_url: { url: referenceImageUrl } },
       ] : options?.references?.length ? [
-        { type: "text", text: `${prompt}\nThe attached photographs are cast IDENTITY references: preserve the named person's face, hair and clothing and the named creature's physical construction. Photograph them in the new shot. Do not copy the portraits' poses, backgrounds or framing, or introduce another cast member.` },
+        { type: "text", text: `${prompt}\nThe attached photographs are cast IDENTITY references: preserve the named person's face, hair and clothing and the named creature's physical construction. Photograph them together in the new shot under its available light, exposure and white balance. Match identity, not the reference's rendering style, skin processing, grain, grading or lighting. Translate stylized anatomy and materials into physically credible forms without changing the identity. Do not copy the portraits' poses, backgrounds or framing, or introduce another cast member.` },
         ...options.references.flatMap(reference => [
           { type: "text", text: `Identity photograph: ${reference.name}` },
           { type: "image_url", image_url: { url: reference.url } },

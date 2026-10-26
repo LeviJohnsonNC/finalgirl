@@ -100,7 +100,7 @@ describe('bounded art planning', () => {
         shotBrief: 'A cel-shaded woman at the prize counter, with the bear visible across the arcade.',
       };
       const photo = buildBeginningPrompt(ctx);
-      expect(photo).toContain('ultra-photorealistic live-action');
+      expect(photo).toContain('believable live-action photograph');
       expect(photo).toContain('real adult performers');
       expect(photo).toContain('a real machine, not a person in a costume');
       expect(photo).not.toContain('Use painted gouache textures');
@@ -121,6 +121,41 @@ describe('bounded art planning', () => {
       expect(buildBeginningPrompt({ ...cases[0], story, visualBible: fragment })).not.toContain(fragment);
     }
     expect(buildBeginningPrompt({ ...cases[0], story, visualBible: record })).toContain(record);
+  });
+  it('applies the same physical photographic contract to planning and rendering without importing the example scene', () => {
+    for (const cast of [
+      { killer:'Inkanyamba', finalGirl:'Barbara', location:'Sacred Groves' },
+      { killer:'Billy the Bear', finalGirl:'Rena', location:'Buddyland' },
+      { killer:'Dr. Fright', finalGirl:'Nancy', location:'Camp Happy Trails' },
+    ]) {
+      const ctx = { ...cast, story:'A figure pauses beside the doorway.', sceneType:'beginning' as const, shotBrief:'A figure pauses beside the doorway under an ordinary ceiling lamp.' };
+      for (const prompt of [buildShotBriefSystem(ctx),buildBeginningPrompt(ctx)]) {
+        expect(prompt).toContain('single exposure');
+        expect(prompt).toContain('camera distance, focus and light');
+        expect(prompt).toContain('only where the scene supports them');
+        expect(prompt).toContain('same exposure, white balance');
+        expect(prompt).toContain('consumer 35mm color-negative film camera');
+        expect(prompt).toContain('follow the scene for its historical period');
+        expect(prompt).toContain('No decorative scratches');
+        expect(prompt).toContain('cannot disguise synthetic anatomy or materials');
+        expect(prompt).not.toMatch(/orange juice|Minute Maid|foreground axe|Sacred Groves map/);
+      }
+      const photo = buildBeginningPrompt(ctx);
+      for (const name of Object.values(cast)) expect(photo).toContain(name);
+      expect(photo).toContain(ctx.shotBrief);
+      const poster = buildPosterPrompt({...ctx,sceneType:'ending'});
+      expect(poster).toContain('Visibly hand-painted');
+      expect(poster).not.toContain('consumer 35mm color-negative film camera');
+    }
+  });
+  it('keeps existing identity continuity while overriding inherited photographic processing instructions', () => {
+    const record = JSON.stringify({finalGirl:'Brown curls and a blue rain jacket.',killer:'Carved wooden mask and a feather mantle.',location:'Stone paths and tropical foliage.',palette:'Heavy teal/orange grading with artificial glow.'});
+    const ctx = {killer:'Inkanyamba',finalGirl:'Barbara',location:'Sacred Groves',story,sceneType:'beginning' as const,visualBible:record};
+    const photo = buildBeginningPrompt(ctx);
+    expect(photo).toContain(record);
+    expect(photo).toContain('ignore inherited rendering-style, exposure and color-grading directions');
+    expect(VISUAL_BIBLE_SYSTEM).toContain('not a mandatory global tint or color-grading recipe');
+    expect(photo).toContain('no invented casualties, injuries, rescues, powers, weapons or defeated threat');
   });
   it('keeps full rules with the planner and sends only visual direction to opening image generation', () => {
     const ctx = { ...cases[0], story, sceneType: 'beginning' as const, scenarioRules: 'Deactivating a source costs 1 Time.', shotBrief: 'Rena sees the bear through the dusty arcade cabinets.' };
