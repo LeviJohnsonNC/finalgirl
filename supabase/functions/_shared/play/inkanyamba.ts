@@ -94,7 +94,7 @@ export const INKANYAMBA_BLOODLUST = [
   { attack: 3, move: 5 },
 ] as const;
 export const INKANYAMBA_ATONEMENT =
-  "Include both identical Atonement Action cards in the tableau; each costs 2 Time. Choose Killer Wrath or Divine Wrath: with 3+ successes decrease the chosen track to 1; with 2 successes decrease it by half, rounding the reduction up; with 1 success decrease it by 1. With no successes, increase Horror by 1 and lose 2 Time. Divine Wrath belongs to Sacred Groves; this killer panel only records Killer Wrath.";
+  "Include both identical Atonement Action cards in the tableau; each costs 2 Time. Choose Killer Wrath or Divine Wrath: with 3+ successes decrease the chosen track to 1; with 2 successes decrease it by half, rounding the reduction up; with 1 success decrease it by 1. With no successes, increase Horror by 1 and lose 2 Time. Divine Wrath belongs to Sacred Groves and Killer Wrath belongs to Inkanyamba. Only choose a track used by the selected Killer and Location.";
 const victimAction =
   "Target a Victim, move and attack; if no Victims remain, target the Final Girl instead.";
 export const INKANYAMBA_TERRORS = [

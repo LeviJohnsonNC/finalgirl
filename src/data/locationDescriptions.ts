@@ -1,3 +1,4 @@
+import { GROVES_VISUAL } from "../../supabase/functions/_shared/play/groves";
 import { CARNIVAL_VISUAL } from '../../supabase/functions/_shared/play/carnival';
 import { BUDDYLAND_VISUALS } from './buddyland';
 
@@ -7,6 +8,7 @@ import { BUDDYLAND_VISUALS } from './buddyland';
  */
 
 export const LOCATION_DESCRIPTIONS: Record<string, string> = {
+  "Sacred Groves": GROVES_VISUAL,
   'Buddyland': BUDDYLAND_VISUALS.location,
   // Season 3 - Don't Make a Sound
   'Utopia': `A desolate, sun-scorched desert outpost comprised of weathered, single-story structures huddled together against the encroaching dunes. The town feels like a relic of the mid-20th century, forgotten by time and buried under layers of fine, orange sand. The buildings are modest and functional, built from wood and corrugated metal that has rusted and bleached under an unforgiving sun.

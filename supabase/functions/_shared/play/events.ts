@@ -1,3 +1,4 @@
+import { validGrovesAction, canLinkGrovesAction, type GrovesAction } from "./groves.ts";
 /** Immutable observations, shared by the app and edge runtime. */
 import { parseFright } from "./fright.ts";
 import {
@@ -70,6 +71,10 @@ export interface PlayDetails {
   killerCard?: string;
 }
 export interface PlayEvent extends PlayDetails {
+  grovesReference?: true;
+  /** One explicit location action can also update selected Inkanyamba. */
+  grovesAction?: GrovesAction;
+  linkedModule?: ModuleObservation;
   /** Provenance for newly recorded Inkanyamba card facts; legacy death hashes stay unchanged. */
   inkanyambaReference?: true;
   permanent?: true;
@@ -129,6 +134,9 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if (e.grovesReference !== undefined && (e.grovesReference !== true || e.kind !== "moment" || e.momentType !== "finale")) return false;
+  if (e.grovesAction !== undefined && (e.kind !== "module" || e.moduleData?.module !== "groves" || !validGrovesAction(e.grovesAction))) return false;
+  if (e.linkedModule !== undefined && (e.kind !== "module" || e.moduleData?.module !== "groves" || !e.grovesAction || !canLinkGrovesAction(e.grovesAction) || !validModuleObservation(e.linkedModule) || e.linkedModule.module !== "inkanyamba" || Object.keys(e.linkedModule.changes).join() !== "wrath")) return false;
   if (e.inkanyambaReference !== undefined && (e.inkanyambaReference !== true || e.kind !== "moment" || !["dark-power", "finale"].includes(e.momentType!))) return false;
   if (e.permanent !== undefined && (e.permanent !== true || !isPermanentMoment(e))) return false;
   if (!uuid.test(e.id) || !integer(e.at, Number.MAX_SAFE_INTEGER)) return false;
@@ -369,7 +377,7 @@ export function describeEvent(e: PlayEvent): string {
     case "moment":
       return `${e.text}${e.killerCard ? `: ${e.killerCard}` : ""}${e.detail ? `${e.killerCard ? ". " : ": "}${e.detail}` : ""}`;
     case "module":
-      return e.moduleData ? describeModule(e.moduleData) : "";
+      return e.moduleData ? [describeModule(e.moduleData), e.linkedModule && describeModule(e.linkedModule)].filter(Boolean).join("; ") : "";
     default:
       return "";
   }

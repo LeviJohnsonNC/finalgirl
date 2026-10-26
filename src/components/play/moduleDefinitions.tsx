@@ -1,3 +1,5 @@
+import { GrovesControls } from "./GrovesControls";
+import grovesBanner from "@/assets/locations/ai/sacred-groves.png";
 import { InkanyambaControls } from "./InkanyambaControls";
 import inkanyambaBanner from "@/assets/play/inkanyamba/banner.webp";
 import { MapleControls } from "./MapleControls";
@@ -30,6 +32,8 @@ import frightBanner from "@/assets/play/fright/banner.webp";
 
 export interface ControlsProps {
   blocked?: boolean;
+  setupScenario?: string | null;
+  startingEvent?: string | null;
   killer: string;
   location: string;
   finalGirl: string;
@@ -44,7 +48,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -81,6 +85,7 @@ const peopleSummary = (
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
 export const moduleDefinitions: Definition[] = [
+  {id:"groves",owner:"location",match:"Sacred Groves",title:"Inside Sacred Groves",art:{src:grovesBanner},capabilities:["character","event"],summary:state=>`Divine Wrath ${typeof state.wrath === "number" ? `${state.wrath}/10` : "not recorded"}${state.finaleRevealed ? " · Finale active" : ""}`,Controls:props=><GrovesControls {...props}/>},
   {id:"inkanyamba",owner:"killer",match:"Inkanyamba",title:"Inkanyamba · The Avenger",art:{src:inkanyambaBanner},capabilities:["reveals","minor-power"],summary:state=>`Killer Wrath ${typeof state.wrath === "number" ? `${state.wrath}/10` : "not recorded"}`,Controls:props=><InkanyambaControls {...props}/>},
   { id:"maple", owner:"location", match:"Maple Lane", title:"Inside Maple Lane", art:{src:mapleBanner}, capabilities:["character","event"], summary:state=>{
     const known=MAPLE_HOUSES.filter(h=>typeof state[`house.${h.id}`]==="boolean");

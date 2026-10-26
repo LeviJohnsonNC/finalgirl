@@ -1,3 +1,4 @@
+import { GROVES_EVENTS, GROVES_ITEMS, GROVES_PEOPLE, GROVES_SPACES, GROVES_SOURCE, GROVES_TERRORS } from "./groves.ts";
 import { INKANYAMBA_TERRORS } from "./inkanyamba.ts";
 import { FRIGHT_TERRORS } from "./fright.ts";
 import { MAPLE_TERRORS, MAPLE_EVENTS, MAPLE_ITEMS, MAPLE_PEOPLE, MAPLE_HOUSES, MAPLE_STREETS, MAPLE_SOURCE } from "./maple.ts";
@@ -34,6 +35,8 @@ const station = wiki("Station_2891");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+  ...GROVES_TERRORS.map(c=>({...c,kind:"terror" as const})),
+  ...GROVES_EVENTS.map(c=>({...c,kind:"event" as const,location:"Sacred Groves",source:GROVES_SOURCE})),
   ...INKANYAMBA_TERRORS.map(card => ({...card, kind:"terror" as const})),
   ...FRIGHT_TERRORS.map(card => ({...card, kind: "terror" as const})),
   ...MAPLE_TERRORS.map(card=>({...card,kind:"terror" as const})),
@@ -179,6 +182,7 @@ export function playCardContext(
   });
 }
 export const PLAY_ROOMS: Record<string, readonly string[]> = {
+  "Sacred Groves": GROVES_SPACES.filter(s=>s.type === "sacred" || s.type === "search").map(s=>s.name),
   "Maple Lane": [...MAPLE_HOUSES,...MAPLE_STREETS].map(s=>s.name),
   "Carnival of Blood": CARNIVAL_ROOMS,
   "Station 2891": [
@@ -228,14 +232,14 @@ export function playMechanisms(selection: {
 export function playItems(
   location: string,
 ): readonly { name: string; effect: string }[] {
-  return location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
+  return location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
     ? CAMP_ITEMS
     : location === "Buddyland"
       ? BUDDYLAND_ITEMS
       : [];
 }
 export function playVictims(location: string): readonly { name: string }[] {
-  return location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
+  return location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
     ? CAMP_VICTIMS
     : location === "Buddyland"
       ? SPECIAL_VICTIMS

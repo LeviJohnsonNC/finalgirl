@@ -29,7 +29,9 @@ const carnival = moduleAt("../supabase/functions/_shared/play/carnival.ts", {});
 const maple = moduleAt("../supabase/functions/_shared/play/maple.ts", {});
 const fright = moduleAt("../supabase/functions/_shared/play/fright.ts", {});
 const inkanyamba = moduleAt("../supabase/functions/_shared/play/inkanyamba.ts", {});
+const groves = moduleAt("../supabase/functions/_shared/play/groves.ts", {"./inkanyamba.ts":inkanyamba});
 const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", {
+  "./groves.ts": groves,
   "./inkanyamba.ts": inkanyamba,
   "./maple.ts": maple,
   "./buddyland.ts": buddyland,
@@ -39,11 +41,13 @@ const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", {
   "./fright.ts": fright,
 });
 const events = moduleAt("../supabase/functions/_shared/play/events.ts", {
+  "./groves.ts": groves,
   "./modules.ts": modules,
   "./fright.ts": fright,
 });
 const death = moduleAt("../supabase/functions/_shared/play/death.ts", {
   "./events.ts": events,
+  "./groves.ts": groves,
   "./modules.ts": modules,
   "./fright.ts": fright,
 });
@@ -542,6 +546,18 @@ test('Inkanyamba observations reach the real death handler at historical Wrath w
  const f=fixture({expectedFacts:{killer:'Inkanyamba',cause:'killer',quantity:1,moduleContext:{inkanyamba:{wrath:7,'minor.boiling-anger.health':0}}}});
  f.owned.selection.killer='Inkanyamba';
  f.owned.playEvents=[f.owned.playEvents[0],{id:crypto.randomUUID(),at:1,kind:'module',moduleData:{module:'inkanyamba',changes:{wrath:7,'minor.boiling-anger.health':0}}},{...f.owned.playEvents[1],cause:'killer',quantity:1}, {id:crypto.randomUUID(),at:3,kind:'module',moduleData:{module:'inkanyamba',changes:{wrath:10}}}];
+ const original=structuredClone(f.owned.playEvents);
+ assert.equal((await f.handler(f.request())).status,200);
+ assert.deepEqual(f.owned.playEvents,original);
+ assert.equal(f.calls.filter(c=>c==='AI').length,1);
+});
+
+test('Sacred Groves linked outcomes reach the real death handler with both historical owners',async()=>{
+ const f=fixture({expectedFacts:{killer:'Inkanyamba',location:'Sacred Groves',quantity:1,moduleContext:{groves:{wrath:1,'person.holy-man':'removed','event.holy-man':'ended'},inkanyamba:{wrath:1}}}});
+ f.owned.selection={...f.owned.selection,killer:'Inkanyamba',location:'Sacred Groves'};
+ const before={id:crypto.randomUUID(),at:1,kind:'module',moduleData:{module:'inkanyamba',changes:{wrath:8}}};
+ const linked={id:crypto.randomUUID(),at:2,kind:'module',moduleData:{module:'groves',changes:{'person.holy-man':'removed',wrath:1,'event.holy-man':'ended'}},linkedModule:{module:'inkanyamba',changes:{wrath:1}},grovesAction:{kind:'outcome',parent:before.id,person:'holy-man',outcome:'blessed',incense:false}};
+ f.owned.playEvents=[f.owned.playEvents[0],before,linked,{...f.owned.playEvents[1],quantity:1},{id:crypto.randomUUID(),at:4,kind:'module',moduleData:{module:'groves',changes:{wrath:10}}}];
  const original=structuredClone(f.owned.playEvents);
  assert.equal((await f.handler(f.request())).status,200);
  assert.deepEqual(f.owned.playEvents,original);

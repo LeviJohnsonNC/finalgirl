@@ -19,6 +19,7 @@ const CATEGORY_FILTERS: RuleCategory[] = ['ALL', 'CORE', 'TURN', 'COMBAT', 'KILL
 
 function blockToText(block: RuleBlock): string {
   switch (block.type) {
+    case "groves-setup": return block.setup;
     case 'paragraph':
     case 'heading':
       return block.text;
@@ -30,6 +31,7 @@ function blockToText(block: RuleBlock): string {
       return `${block.title} ${block.text}`;
     case 'table':
       return [...block.headers, ...block.rows.flat()].join(' ');
+    default: { const exhaustive: never = block; return exhaustive; }
   }
 }
 

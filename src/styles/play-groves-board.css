@@ -1,0 +1,54 @@
+.groves-board {
+  margin: 0.7rem 0;
+  min-width: 0;
+}
+.groves-board svg {
+  width: 100%;
+  max-width: 540px;
+  display: block;
+  margin: auto;
+}
+.groves-board figcaption {
+  font-size: 0.83rem;
+  line-height: 1.65;
+  color: #d1c5ae;
+}
+.groves-board figcaption p {
+  margin: 0.4rem 0;
+}
+.groves-board details {
+  margin-top: 0.5rem;
+}
+.groves-board summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #dfc18c;
+}
+.groves-board dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+}
+.groves-board dl div {
+  display: flex;
+  gap: 0.5rem;
+}
+.groves-board dt {
+  font-weight: bold;
+  color: #efcd8a;
+}
+.groves-board dd {
+  margin: 0;
+}
+.groves-board summary:focus-visible {
+  outline: 2px solid #ffd18e;
+  outline-offset: 2px;
+}
+@media (max-width: 420px) {
+  .groves-board dl {
+    grid-template-columns: 1fr;
+  }
+}

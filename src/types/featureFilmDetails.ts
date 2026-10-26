@@ -1,3 +1,4 @@
+import { GROVES_EVENTS, GROVES_SETUPS, grovesSetupDescription } from "../../supabase/functions/_shared/play/groves";
 import { MAPLE_EVENTS, MAPLE_SETUPS } from "../../supabase/functions/_shared/play/maple";
 import { CARNIVAL_EVENTS, CARNIVAL_SETUPS } from '../../supabase/functions/_shared/play/carnival';
 import { CAMP_EVENTS, CAMP_SETUPS } from '../../supabase/functions/_shared/play/camp';
@@ -219,25 +220,8 @@ So, she pulled Dolores aside one day and somehow, inexplicably, magically even, 
     location: {
       name: 'Sacred Groves',
       description: `The gods are furious over the desecration of their sacred places by idiotic obnoxious tourists! They've forged an unholy pact with the Killer, unleashing that wrath upon you and the oblivious victims in an attempt to cleanse the Groves with blood and fire. As you fight to survive against the Killer's onslaught, you'll need to simultaneously contend with the fury of the gods, represented by Divine Wrath.`,
-      setupCards: [
-        { name: 'Dueling Tour Guides', description: 'A setup for Slaughter in the Groves featuring initial victim and token placement.' },
-        { name: 'Family Day', description: 'A setup for Slaughter in the Groves featuring initial victim and token placement.' },
-        { name: 'Mob O\' Tourists', description: 'A setup for Slaughter in the Groves featuring initial victim and token placement.' },
-        { name: 'Swamp Thing', description: 'A setup for Slaughter in the Groves featuring initial victim and token placement.' },
-        { name: 'Worship Service', description: 'A setup for Slaughter in the Groves featuring initial victim and token placement.' }
-      ],
-      events: [
-        { name: 'Closed for Maintenance', description: 'When this card is revealed, you may discard ALL Action cards except Atonement to close a Sacred space. If you do, place the CLOSED token on the Sacred space of your choice. Move any Victims there to adjacent spaces of your choice (evenly distributed) Victims may no longer move into the space for any reason, but you and all Enemies may continue to move to and from the space as normal.' },
-        { name: 'Fire and Brimstone', description: 'Roll a die and place the Fire and Brimstone token on the: 1-2: Burial Grounds 3-4: Sacred Shrine 5-6: Holy Groves' },
-        { name: 'Flash Photography', description: 'Whenever at least 1 Victim in your space panics, discard 1 random Action card.' },
-        { name: 'Hallowed Ground', description: 'Roll a die and place the Hallowed Ground token on the: 1-2: Burial Grounds 3-4: Sacred Shrine 5-6: Holy Groves Anytime you end the Action phase on that space, gain 2 Time.' },
-        { name: 'Loud and Obnoxious', description: 'Whenever Divine Wrath Increases, Increase it by an additional 1.' },
-        { name: 'The Gods Hate Failure', description: 'Whenever you completely fail a Horror roll (after conversions and rerolls), Increase Divine Wrath by 1.' },
-        { name: 'The Holy Man', description: 'The Victim farthest from the Killer is now the Holy Man. The Holy Man will not follow you. Every Upkeep phase, move the Holy Man one space towards the Killer. When the Holy Man is in the same space as the Killer, immediately remove him from the board. If you were in his space, Decrease Killer Wrath and Divine Wrath to 1. If you were not in his space, Increase Killer Wrath and Divine Wrath by a total of 10 (your choice).' },
-        { name: 'The Tour Guide', description: 'The Victim closest to you is the Tour Guide. Once per turn, whenever you move at least 1 space, you may move an additional space as long as the Tour Guide remains with you for your entire movement. If the Tour Guide is killed, Increase Divine Wrath by 6.' },
-        { name: 'The Uber Tourist', description: 'The Victim farthest from the Killer is now the Uber Tourist. Whenever the Killer must choose a Target, the Uber Tourist is chosen instead. If the Uber Tourist is saved, Decrease Divine Wrath or Killer Wrath by 4. If the Uber Tourist is killed, Increase Divine Wrath by 4.' },
-        { name: 'Unholy Bloodshed', description: 'Anytime at least 1 Victim is killed at a Sacred space, Unleash Divine Wrath.' }
-      ]
+      setupCards: GROVES_SETUPS.map(s=>({name:s.name,description:grovesSetupDescription(s)})),
+      events: GROVES_EVENTS.map(e=>({name:e.name,description:e.effect}))
     },
     killer: {
       name: 'Inkanyamba',

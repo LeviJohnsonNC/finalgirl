@@ -29,6 +29,7 @@ export function deathFacts(
       entry.kind === "module" && entry.moduleData
         ? {
             ...entry,
+            ...(entry.linkedModule && {linkedModule:{...entry.linkedModule,changes:Object.fromEntries(Object.entries(entry.linkedModule.changes).sort(([a],[b])=>a.length-b.length || (a<b?-1:a>b?1:0)))}}),
             moduleData: {
               ...entry.moduleData,
               // Match PostgreSQL JSONB's length-then-byte key order per observation.

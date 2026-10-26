@@ -16,6 +16,7 @@ export function CharacterControl({
   present,
   art,
   onChange,
+  onOutcome,
   help,
   reminder,
   className = "",
@@ -28,6 +29,8 @@ export function CharacterControl({
   present: string;
   art: ModuleArt;
   onChange: (value: string | null) => unknown;
+  /** Outcome resolution may collect choices; corrections still use onChange. */
+  onOutcome?: (value: string) => unknown;
   help?: ReactNode;
   reminder?: ReactNode;
   className?: string;
@@ -70,7 +73,7 @@ export function CharacterControl({
               disabled={!active}
               aria-pressed={value === outcome}
               aria-label={`Mark ${name} ${outcome}`}
-              onClick={() => onChange(outcome)}
+              onClick={() => onOutcome ? onOutcome(outcome) : onChange(outcome)}
             >
               {states.find((state) => state.value === outcome)?.label}
             </button>
