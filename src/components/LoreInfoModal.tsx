@@ -1,5 +1,5 @@
 import { FinalGirlReference } from "@/components/FinalGirlReference";
-import { Info } from "lucide-react";
+import { Crown, Info } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,7 @@ import { LOCATION_DESCRIPTIONS } from "@/data/locationDescriptions";
 import { FINAL_GIRL_DESCRIPTIONS } from "@/data/finalGirlDescriptions";
 import { FEATURE_FILMS } from "@/types/gameData";
 import { useActiveImages } from "@/hooks/useActiveImages";
+import "@/styles/final-girl-dossier.css";
 
 interface LoreInfoModalProps {
   type: "killer" | "location" | "finalGirl";
@@ -94,7 +95,13 @@ export const LoreInfoModal = ({
           {namedTrigger && name}
         </button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col w-[calc(100vw-1.5rem)] sm:max-w-2xl bg-background/95 backdrop-blur-sm border-primary/30 max-h-[90dvh] overflow-hidden">
+      <DialogContent
+        className={
+          type === "finalGirl"
+            ? "final-girl-dialog"
+            : "flex flex-col w-[calc(100vw-1.5rem)] sm:max-w-2xl bg-background/95 backdrop-blur-sm border-primary/30 max-h-[90dvh] overflow-hidden"
+        }
+      >
         <LoreInfoContent
           type={type}
           name={name}
@@ -117,18 +124,59 @@ function LoreInfoContent({
   const { characterImages, locationImages } = useActiveImages();
   const image =
     type === "location" ? locationImages[name] : characterImages[name];
+  if (type === "finalGirl") {
+    return (
+      <div className="girl-dossier-layout">
+        <div className="girl-dossier-brand" aria-hidden="true">
+          <Crown size={28} strokeWidth={1.8} />
+          <span>
+            Final
+            <br />
+            Girl
+          </span>
+        </div>
+        <div className="girl-dossier-photo">
+          {image ? (
+            <img src={image} alt={name} decoding="async" />
+          ) : (
+            <div className="girl-dossier-no-photo">Portrait unavailable</div>
+          )}
+        </div>
+        <DialogHeader className="girl-dossier-title">
+          <DialogTitle>{name}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Final Girl backstory, character details and your personal item
+            unlock.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="girl-dossier-paper">
+          <div
+            className="girl-dossier-scroll"
+            role="region"
+            aria-label={`${name} character details`}
+          >
+            {lore?.backstory && (
+              <section
+                className="girl-backstory"
+                aria-label={`${name} backstory`}
+                tabIndex={0}
+              >
+                <h3>Backstory</h3>
+                {lore.backstory.split(/\n\s*\n/).map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+              </section>
+            )}
+            <FinalGirlReference name={name} ultimate={ultimate} />
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <>
       <DialogHeader className="shrink-0 text-left pr-8">
         <div className="flex items-center gap-4">
-          {type === "finalGirl" && image && (
-            <img
-              className="girl-info-portrait"
-              src={image}
-              alt={name}
-              decoding="async"
-            />
-          )}
           <div className="min-w-0 space-y-2">
             <div className="flex items-center gap-2">
               <span className="text-xs uppercase tracking-widest text-muted-foreground font-display">
@@ -149,16 +197,14 @@ function LoreInfoContent({
           </div>
         </div>
         <DialogDescription className="sr-only">
-          {type === "finalGirl"
-            ? "Character details and your personal item unlock."
-            : `${TYPE_LABELS[type]} details.`}
+          {TYPE_LABELS[type]} details.
         </DialogDescription>
       </DialogHeader>
 
       <div className="min-h-0 overflow-y-auto overscroll-contain pr-2">
         <div className="space-y-6">
           {/* Character/Location Image */}
-          {image && type !== "finalGirl" && (
+          {image && (
             <div className="relative w-full aspect-video rounded-sm overflow-hidden">
               <img
                 src={image}
@@ -170,19 +216,7 @@ function LoreInfoContent({
             </div>
           )}
 
-          {lore?.backstory && type === "finalGirl" && (
-            <section
-              className="girl-backstory"
-              aria-label={`${name} backstory`}
-            >
-              <h3>Backstory</h3>
-              <p>{lore.backstory}</p>
-            </section>
-          )}
-          {type === "finalGirl" && (
-            <FinalGirlReference name={name} ultimate={ultimate} />
-          )}
-          {lore?.backstory && type !== "finalGirl" && (
+          {lore?.backstory && (
             <div className="space-y-2">
               <h3 className="font-display text-sm uppercase tracking-widest text-primary">
                 {type === "killer" ? "Legend" : "Description"}

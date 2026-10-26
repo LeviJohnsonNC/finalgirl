@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, LockKeyhole, UnlockKeyhole } from "lucide-react";
+import { Heart, LockKeyhole, UnlockKeyhole, Zap } from "lucide-react";
 import { getFinalGirlReference } from "@/data/finalGirlReferences";
 import {
   usePersonalItem,
@@ -146,7 +146,10 @@ export function FinalGirlReference({
         aria-label={`${name} Ultimate ability`}
       >
         <summary className="girl-item-heading">
-          <h4>Ultimate ability</h4>
+          <h4>
+            <Zap aria-hidden="true" size={16} />
+            Ultimate ability
+          </h4>
           {ultimate && <span>Recorded this game</span>}
         </summary>
         <div className="girl-panel-content">
