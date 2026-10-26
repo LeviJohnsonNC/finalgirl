@@ -31,6 +31,24 @@ test("Play keeps character facts in compact info without card viewers or gamepla
   );
   const backstory = dialog.getByRole("region", { name: "Laurie backstory" });
   await expect(backstory.getByText(/Laurie Carpenter was born/)).toBeVisible();
+  await expect(dialog.locator(".girl-ability > summary")).toBeInViewport();
+  await expect(
+    dialog.locator(".girl-personal-item > summary"),
+  ).toBeInViewport();
+  // A long biography remains readable without displacing the character controls.
+  await backstory.focus();
+  await backstory.press("End");
+  await expect
+    .poll(() =>
+      backstory.evaluate((el) =>
+        Math.abs(el.scrollHeight - el.clientHeight - el.scrollTop),
+      ),
+    )
+    .toBeLessThanOrEqual(1);
+  await expect(backstory.locator("p").last()).toBeInViewport();
+  await backstory.press("Home");
+  await expect.poll(() => backstory.evaluate((el) => el.scrollTop)).toBe(0);
+  await expect(backstory.locator("p").first()).toBeInViewport();
   await expect(dialog.locator(".girl-ability")).not.toHaveAttribute("open", "");
   await expect(dialog.locator(".girl-personal-item")).not.toHaveAttribute(
     "open",
@@ -48,7 +66,7 @@ test("Play keeps character facts in compact info without card viewers or gamepla
     await backstory.evaluate((el) =>
       Boolean(
         el.compareDocumentPosition(document.querySelector(".girl-reference")!) &
-          Node.DOCUMENT_POSITION_FOLLOWING,
+        Node.DOCUMENT_POSITION_FOLLOWING,
       ),
     ),
   ).toBe(true);

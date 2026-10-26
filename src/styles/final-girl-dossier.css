@@ -1,0 +1,402 @@
+@font-face {
+  font-family: "Dossier Hand";
+  src: url("../assets/fonts/caveat-semibold.ttf") format("truetype");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Dossier Serif";
+  src: url("../assets/fonts/crimson-pro.woff2") format("woff2");
+  font-weight: 200 900;
+  font-display: swap;
+}
+
+/* The photograph and every word remain live content, independent of location. */
+[role="dialog"].final-girl-dialog {
+  width: calc(100vw - 40px);
+  max-width: 1040px;
+  height: min(700px, calc(100dvh - 40px));
+  max-height: calc(100dvh - 40px);
+  display: block;
+  padding: 24px 28px 28px;
+  overflow: hidden;
+  border: 1px solid #70635b;
+  border-radius: 12px;
+  background: #171416 url("../assets/final-girl/board.webp") center / cover;
+  box-shadow:
+    0 24px 100px #000e,
+    inset 0 0 0 3px #c0a78c23;
+  color: #28211a;
+}
+.girl-dossier-layout {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  grid-template-rows: 86px minmax(0, 1fr);
+  gap: 18px 26px;
+}
+.girl-dossier-brand {
+  grid-column: 1;
+  grid-row: 1;
+  position: relative;
+  justify-self: start;
+  align-self: center;
+  margin: 8px 0 0 18px;
+  color: #eb352d;
+  transform: rotate(-8deg);
+  font:
+    600 57px/0.68 "Dossier Hand",
+    cursive;
+  text-transform: uppercase;
+  text-shadow: 2px 2px #2f0505;
+}
+.girl-dossier-brand svg {
+  position: absolute;
+  left: -12px;
+  top: -21px;
+  transform: rotate(-12deg);
+}
+.girl-dossier-photo {
+  grid-column: 1;
+  grid-row: 2;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  margin: 4px 10px 8px 8px;
+  padding: 11px 11px 21px;
+  background: #e5d4b6 url("../assets/final-girl/paper.webp") center / 100% 100%;
+  box-shadow: 2px 7px 12px #000b;
+  transform: rotate(-3deg);
+}
+.girl-dossier-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+.girl-dossier-photo::before,
+.girl-dossier-photo::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  width: 40%;
+  height: 29px;
+  background: linear-gradient(105deg, #c7ad7aa3, #dbc397c9 45%, #bfa578b0);
+  box-shadow:
+    inset 0 0 3px #f8e5af70,
+    0 2px 2px #0003;
+  clip-path: polygon(
+    0 8%,
+    4% 0,
+    9% 7%,
+    15% 0,
+    95% 5%,
+    100% 0,
+    98% 90%,
+    93% 100%,
+    7% 96%,
+    0 100%
+  );
+  pointer-events: none;
+}
+.girl-dossier-photo::before {
+  right: -9px;
+  top: -14px;
+  transform: rotate(-15deg);
+}
+.girl-dossier-photo::after {
+  left: -19px;
+  bottom: 21px;
+  transform: rotate(71deg);
+  width: 30%;
+}
+.girl-dossier-no-photo {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  background: #292528;
+  color: #e0d4bc;
+  font:
+    600 22px "Dossier Hand",
+    cursive;
+  text-align: center;
+}
+.girl-dossier-title {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  justify-content: center;
+  align-self: stretch;
+  min-width: 0;
+  margin: 0 36px 0 4px;
+  padding: 10px 24px;
+  background: url("../assets/final-girl/paper.webp") center / 100% 100%;
+  transform: rotate(-2deg);
+  text-align: left;
+  filter: drop-shadow(0 4px 3px #0009);
+}
+.girl-dossier-title h2 {
+  margin: 0;
+  color: #171410;
+  font:
+    600 clamp(44px, 5vw, 64px)/1 "Dossier Hand",
+    cursive;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+}
+.girl-dossier-paper {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  background: url("../assets/final-girl/paper.webp") center / 100% 100%;
+  filter: drop-shadow(0 4px 3px #0009);
+  padding: 19px 9px 17px 14px;
+}
+.girl-dossier-scroll {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 18px 4px 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #876749 transparent;
+}
+.girl-dossier-scroll:focus-visible {
+  outline: 2px solid #923027;
+  outline-offset: -2px;
+}
+.final-girl-dialog .girl-backstory {
+  flex: 1 1 auto;
+  min-height: 96px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #876749 transparent;
+  padding-right: 7px;
+  margin-bottom: 17px;
+}
+.final-girl-dialog .girl-backstory:focus-visible {
+  outline: 2px solid #923027;
+  outline-offset: -2px;
+}
+.final-girl-dialog .girl-backstory h3 {
+  margin: 0 0 10px;
+  color: #a32720;
+  font:
+    600 29px/1 "Dossier Hand",
+    cursive;
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
+}
+.final-girl-dialog .girl-backstory p {
+  margin: 0 0 12px;
+  color: #30261d;
+  font:
+    500 17px/1.38 "Dossier Serif",
+    Georgia,
+    serif;
+  white-space: pre-line;
+}
+.final-girl-dialog .girl-backstory p:last-child {
+  margin-bottom: 0;
+}
+.final-girl-dialog .girl-reference {
+  flex-shrink: 0;
+  gap: 8px;
+  color: #f1e8d8;
+}
+.final-girl-dialog .girl-health {
+  margin: 0 0 4px;
+  color: #a02822;
+  font:
+    700 16px/1.3 "Dossier Serif",
+    Georgia,
+    serif;
+}
+.final-girl-dialog .girl-health svg {
+  fill: currentColor;
+  width: 19px;
+  height: 19px;
+}
+.final-girl-dialog .girl-info-panel {
+  border: 1px solid #6d6458;
+  border-radius: 3px;
+  background: #171717;
+  box-shadow:
+    0 2px 3px #422a222b,
+    inset 0 0 0 1px #d3c5ad18;
+}
+.final-girl-dialog .girl-info-panel > summary {
+  min-height: 46px;
+  padding: 9px 12px;
+  gap: 5px 10px;
+}
+.final-girl-dialog .girl-item-heading h4 {
+  font:
+    600 14px/1.25 "Dossier Serif",
+    Georgia,
+    serif;
+  text-transform: uppercase;
+  letter-spacing: 0.055em;
+}
+.final-girl-dialog .girl-item-heading h4 svg {
+  flex-shrink: 0;
+}
+.final-girl-dialog .girl-item-heading > span {
+  margin-left: auto;
+  color: #c5bcad;
+  font:
+    400 12px/1.3 "Dossier Serif",
+    Georgia,
+    serif;
+}
+.final-girl-dialog .girl-info-panel > summary::after {
+  margin-left: 0;
+  color: #e0d6c3;
+  font-size: 21px;
+  line-height: 1;
+}
+.final-girl-dialog .girl-panel-content {
+  padding: 6px 13px 13px;
+}
+.final-girl-dialog .girl-panel-content p {
+  color: #f0e5d2;
+  font:
+    400 16px/1.45 "Dossier Serif",
+    Georgia,
+    serif;
+}
+.final-girl-dialog .girl-reference .girl-reference-note {
+  color: #c5bcad;
+  font-size: 14px;
+}
+.final-girl-dialog .girl-reference-action {
+  border-color: #c54c42;
+  background: #8f2d26;
+  color: #fff1dc;
+  font:
+    600 16px/1.25 "Dossier Serif",
+    Georgia,
+    serif;
+}
+.final-girl-dialog .girl-reference-link {
+  color: #f0c593;
+  font-family: "Dossier Serif", Georgia, serif;
+}
+.final-girl-dialog .girl-personal-item h5 {
+  color: #fff0d4;
+  font:
+    600 18px/1.3 "Dossier Serif",
+    Georgia,
+    serif;
+}
+.final-girl-dialog .girl-reference button:focus-visible,
+.final-girl-dialog .girl-info-panel > summary:focus-visible {
+  outline: 2px solid #f1c784;
+  outline-offset: -3px;
+}
+.final-girl-dialog > button {
+  z-index: 2;
+  color: #f1e5ce;
+  background: #181516d9;
+  border: 1px solid #dcc3a02e;
+  border-radius: 50%;
+  opacity: 1;
+}
+.final-girl-dialog > button:focus-visible {
+  outline: 2px solid #f1c784;
+  outline-offset: 3px;
+}
+.final-girl-dialog > button svg {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 699px) {
+  [role="dialog"].final-girl-dialog {
+    width: calc(100vw - 20px);
+    height: min(820px, calc(100dvh - 20px));
+    max-height: calc(100dvh - 20px);
+    padding: 20px 12px 12px;
+    border-radius: 8px;
+  }
+  .girl-dossier-layout {
+    grid-template-columns: 108px minmax(0, 1fr);
+    grid-template-rows: 72px 76px minmax(0, 1fr);
+    gap: 12px 14px;
+  }
+  .girl-dossier-photo {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    margin: 10px 0 3px 4px;
+    padding: 6px 6px 12px;
+  }
+  .girl-dossier-photo::before,
+  .girl-dossier-photo::after {
+    height: 18px;
+  }
+  .girl-dossier-brand {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: 39px;
+    margin: 16px 0 0 12px;
+  }
+  .girl-dossier-brand svg {
+    width: 20px;
+    height: 20px;
+    top: -14px;
+    left: -7px;
+  }
+  .girl-dossier-title {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 2px 0 4px -4px;
+    padding: 12px 13px;
+  }
+  .girl-dossier-title h2 {
+    font-size: clamp(32px, 8vw, 44px);
+  }
+  .girl-dossier-paper {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    padding: 16px 5px 12px 8px;
+  }
+  .girl-dossier-scroll {
+    padding: 0 12px 4px 8px;
+  }
+  .final-girl-dialog .girl-backstory p {
+    font-size: 17px;
+    line-height: 1.4;
+  }
+  .final-girl-dialog .girl-item-heading {
+    column-gap: 8px;
+  }
+  .final-girl-dialog .girl-info-panel > summary {
+    padding-inline: 9px;
+  }
+  .final-girl-dialog .girl-item-heading h4 {
+    font-size: 13px;
+  }
+}
+@media (max-height: 480px) and (min-width: 700px) {
+  [role="dialog"].final-girl-dialog {
+    padding: 16px 22px;
+  }
+  .girl-dossier-layout {
+    grid-template-rows: 62px minmax(0, 1fr);
+    gap: 12px 22px;
+  }
+  .girl-dossier-brand {
+    font-size: 42px;
+  }
+  .girl-dossier-title h2 {
+    font-size: 42px;
+  }
+}
