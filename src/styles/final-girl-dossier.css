@@ -219,7 +219,8 @@
   display: flex;
   background: url("../assets/final-girl/paper.webp") center / 100% 100%;
   filter: drop-shadow(1px 4px 2px #0007) drop-shadow(5px 9px 8px #0006);
-  padding: 26px 22px 22px;
+  /* Keep live content clear of the parchment's irregular, darkened edges. */
+  padding: 36px 36px 34px;
 }
 .girl-dossier-scroll {
   display: flex;
@@ -335,8 +336,8 @@
   color: #c0d4ac;
 }
 .final-girl-dialog .girl-info-panel > summary {
-  min-height: 52px;
-  padding: 12px 14px;
+  min-height: 48px;
+  padding: 10px 12px;
   gap: 5px 10px;
 }
 .final-girl-dialog .girl-item-heading h4 {
@@ -468,7 +469,7 @@
   .girl-dossier-paper {
     grid-column: 1 / -1;
     grid-row: 3;
-    padding: 21px 16px 16px;
+    padding: 28px 24px 26px;
   }
   .girl-dossier-scroll {
     padding: 0;
