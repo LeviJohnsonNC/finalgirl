@@ -309,12 +309,14 @@ it('one-Health Minor Powers reveal at one, show one heart, remove and restore ex
     return <MinorPowerControl name="Endless Sleep" effect="Remain Asleep" maxHealth={1} disabled={disabled} health={health} art={()=>art} heartArt={art} onChange={n=>setHealth(n??undefined)}/>;
   }
   const view=render(<OneHeart/>);
+  expect(screen.getByRole('article',{name:'Endless Sleep',exact:true})).toHaveAttribute('data-state','unrecorded');
   fireEvent.click(screen.getByRole('button',{name:'Reveal Endless Sleep'}));
   expect(screen.getByText('1/1 health')).toBeVisible();
   expect(view.container.querySelector('[data-state="full"]')).not.toBeNull();
   expect(screen.getByRole('group',{name:'Endless Sleep health'}).querySelectorAll('button')).toHaveLength(1);
   fireEvent.click(screen.getByRole('button',{name:'Remove one Endless Sleep health, heart 1'}));
   expect(screen.getByText('Removed · 0/1 health',{selector:'p'})).toBeVisible();
+  expect(screen.getByRole('article',{name:'Endless Sleep',exact:true})).toHaveAttribute('data-state','removed');
   fireEvent.click(screen.getByRole('button',{name:'Restore one Endless Sleep health, heart 1'}));
   view.rerender(<OneHeart disabled/>);
   expect(screen.getByRole('button',{name:'Remove one Endless Sleep health, heart 1'})).toBeDisabled();

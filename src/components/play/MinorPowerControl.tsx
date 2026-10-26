@@ -50,6 +50,7 @@ export function MinorPowerControl({
   );
   return (
     <article
+      aria-label={name}
       data-module-control="minor-power"
       className={`module-minor module-cinematic-minor ${className}`}
       data-active={active}

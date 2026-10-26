@@ -69,7 +69,7 @@ Sacred-space imagery cycles clear → Closed → Fire → Hallowed → clear. Ea
 
 ## Cinematic module presentation, 2026-10-26
 
-`cinematic-controls.css` covers equivalent Minor Powers, both reveal entry points and opt-in independent Event toggles. Module-specific life cycles, raw observations, canonical effects, Rules search and historical/narrative context remain unchanged. `RevealedCard` is read-only; interacting with the hero must never submit gameplay. The named/unnamed permanent reveal remains owned by `KillerCards`. Hans's second-power mutation controls also respect the disabled state.
+`cinematic-controls.css` covers equivalent Minor Powers, both reveal entry points and opt-in independent Event toggles. Module-specific life cycles, raw observations, canonical effects, Rules search and historical/narrative context remain unchanged. Each Minor Power article keeps its accessible name across compact, active and removed presentations. `RevealedCard` is read-only; interacting with the hero must never submit gameplay. The named/unnamed permanent reveal remains owned by `KillerCards`. Hans's second-power mutation controls also respect the disabled state.
 
 Fickleness retains its original scene and direct active/ended observation; its visible reminder is removed and the illustration is 195px high (previously 130px). Camp's Deathwish, Star Crossed Lovers and Stubborn Kids share the premium toggle presentation while retaining their own appropriate Rules/reminders. Linked, placement and lasting-effect controls do not acquire toggle behavior.
 
