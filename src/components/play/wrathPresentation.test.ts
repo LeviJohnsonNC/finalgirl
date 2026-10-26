@@ -25,9 +25,9 @@ describe("observed artwork states", () => {
         const tokens = sacredTokens.filter((_, bit) => bits & (1 << bit));
         const art = grovesSite(row, tokens);
         expect(grovesSite(row, [...tokens].reverse())).toEqual(art);
-        expect(art.atlas.x).toBe((bits % 4) * 384 + 3);
-        expect(art.atlas.y).toBe(Math.floor(bits / 4) * 384 + 3);
-        cells.add(`${art.src}:${art.atlas.x}:${art.atlas.y}`);
+        expect(art.src).toBeTruthy();
+        expect(art.fit).toBe("slice");
+        cells.add(art.src);
       }
     }
     expect(cells.size).toBe(24);

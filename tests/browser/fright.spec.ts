@@ -1,5 +1,5 @@
 import { test, expect, installTestAudio } from "./fixtures";
-import { openModule, openHistory } from "./play-helpers";
+import { chooseKillerCard, openModule, openHistory } from "./play-helpers";
 import { parseFright } from "../../supabase/functions/_shared/play/fright";
 import { summarizePlay } from "../../src/lib/play/events";
 import {
@@ -52,12 +52,7 @@ for (const [location, id] of [
     await panel(page)
       .getByRole("button", { name: "Choose Shock Factor", exact: true })
       .click();
-    await expect(
-      panel(page).getByRole("button", {
-        name: "Choose Shock Factor",
-        exact: true,
-      }),
-    ).toHaveAttribute("data-epic", "true");
+    await expect(panel(page).getByRole("region",{name:"Dark Power selection",exact:true}).locator(".module-revealed-hero")).toHaveAttribute("data-epic","true");
     await expect(panel(page)).toContainText("Maximum three per turn");
     await panel(page).screenshot({
       path: info.outputPath("fright-mixed-panel.png"),
@@ -383,9 +378,7 @@ test("Finale correction never reapplies a reveal effect and forced sleep survive
   await archive.install(page, { draft });
   await resume(page);
   await panel(page).locator(".module-card-section > summary").click();
-  await panel(page)
-    .getByRole("button", { name: "Choose Face Your Fright", exact: true })
-    .click();
+  await chooseKillerCard(panel(page), "Finale", "Face Your Fright");
   await expect(
     panel(page).getByRole("button", {
       name: "Record Final Girl Awake",
@@ -422,16 +415,12 @@ test("Finale correction never reapplies a reveal effect and forced sleep survive
     .getByRole("button", { name: "Back to game", exact: true })
     .click();
   const before = await log(page);
-  await panel(page)
-    .getByRole("button", { name: "Choose Face Your Fright", exact: true })
-    .click();
+  await chooseKillerCard(panel(page), "Finale", "Face Your Fright");
   expect(await log(page)).toEqual(before);
   await page.getByRole("button", { name: "Finale", exact: true }).click();
   await expect(
-    page
-      .locator(".play-moment-editor")
-      .getByRole("button", { name: "Choose Face Your Fright", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
+    page.locator(".play-moment-editor").getByRole("region",{name:"Finale selection",exact:true}).locator(".module-revealed-hero h4"),
+  ).toHaveText("Face Your Fright");
   expect(
     (await log(page)).filter(
       (e) => e.kind === "moment" && e.momentType === "finale",

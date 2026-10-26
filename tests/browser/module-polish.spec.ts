@@ -7,7 +7,7 @@ for (const [killer, id] of [
   ["Geppetto", "geppetto"],
   ["Dr. Fright", "fright"],
 ]) {
-  test(`${killer} keeps compact choices and expands the revealed Power and Finale`, async ({
+  test(`${killer} focuses revealed Power and Finale and opens alternatives only for correction`, async ({
     page,
     archive,
   }, info) => {
@@ -41,48 +41,39 @@ for (const [killer, id] of [
       ),
     ).toBe(true);
     for (const type of ["Dark Power", "Finale"]) {
-      const cards = panel
-        .getByRole("region", { name: `${type} selection` })
-        .locator(".module-killer-card");
-      const before = await cards.evaluateAll((els) =>
-        els.map((el) => ({
-          label: el.getAttribute("aria-label"),
-          x: el.getBoundingClientRect().x,
-          y: el.getBoundingClientRect().y,
-          height: el.getBoundingClientRect().height,
-        })),
-      );
+      const region = panel.getByRole("region", {
+        name: `${type} selection`,
+        exact: true,
+      });
+      const cards = region.locator(".module-killer-card");
+      const names = await cards.locator("strong").allTextContents();
+      const name = names.at(-1)!;
+      const height = (await cards.last().boundingBox())!.height;
       await cards.last().click();
-      await expect(cards.last()).toHaveAttribute("aria-pressed", "true");
-      const hero = panel
-        .getByRole("region", { name: `${type} selection` })
-        .locator(".module-revealed-hero");
-      await expect(hero).toBeVisible();
-      expect((await hero.boundingBox())!.height).toBeGreaterThan(
-        (await cards.last().boundingBox())!.height * 1.4,
-      );
-      await expect(hero.locator("h4")).toHaveText(
-        await cards.last().locator("strong").innerText(),
-      );
-      await expect(panel.getByText("Card rules", { exact: true })).toHaveCount(
+      await expect(cards).toHaveCount(0);
+      const hero = region.locator(".module-revealed-hero");
+      await expect(hero.locator("h4")).toHaveText(name);
+      const photo = hero.locator("img");
+      await photo.scrollIntoViewIfNeeded();
+      await expect(photo).toHaveJSProperty("complete", true);
+      expect(
+        await photo.evaluate(
+          (im: HTMLImageElement) => im.naturalWidth / im.naturalHeight,
+        ),
+      ).toBeCloseTo(16 / 9, 1);
+      expect((await hero.boundingBox())!.height).toBeGreaterThan(height * 1.4);
+      await expect(region.getByText("Card rules", { exact: true })).toHaveCount(
         0,
       );
-      const after = await cards.evaluateAll((els) =>
-        els.map((el) => ({
-          label: el.getAttribute("aria-label"),
-          x: el.getBoundingClientRect().x,
-          y: el.getBoundingClientRect().y,
-          height: el.getBoundingClientRect().height,
-        })),
-      );
-      // Clicking scrolls the card into view; module reminders may also grow
-      // above the grid. Compare the layout within the grid, not page position.
-      expect(
-        after.map((card) => ({ ...card, y: card.y - after[0].y })),
-      ).toEqual(before.map((card) => ({ ...card, y: card.y - before[0].y })));
-      for (const art of await cards.locator("svg").all()) {
-        expect((await art.boundingBox())!.height).toBeLessThanOrEqual(150);
-      }
+      await region
+        .getByRole("button", { name: `Change ${type}`, exact: true })
+        .click();
+      expect(await cards.locator("strong").allTextContents()).toEqual(names);
+      await expect(cards.last()).toHaveAttribute("aria-pressed", "true");
+      await region
+        .getByRole("button", { name: `Cancel changing ${type}`, exact: true })
+        .click();
+      await expect(cards).toHaveCount(0);
     }
   });
 }

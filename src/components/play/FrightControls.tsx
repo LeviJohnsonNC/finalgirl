@@ -1,6 +1,8 @@
+import { modulePhoto } from "./modulePhotos";
 import { summarizePlay, newPlayEvent } from "@/lib/play/events";
 import { useRef, useState } from "react";
 import { useModuleRecord } from "./useModuleRecord";
+import { MinorPowerGroup } from "./MinorPowerGroup";
 import { MinorPowerControl } from "./MinorPowerControl";
 import { PlaySearch } from "./PlaySearch";
 import minorArt from "@/assets/play/fright/minors.webp";
@@ -274,7 +276,7 @@ export function FrightControls({
         aria-label="Dr. Fright Minor Dark Powers"
       >
         <h3>Minor Dark Powers</h3>
-        <div className="fright-minor-grid">
+        <MinorPowerGroup className="fright-minor-grid">
           {FRIGHT_MINOR_POWERS.map((power, row) => (
             <MinorPowerControl
               key={power.id}
@@ -293,13 +295,14 @@ export function FrightControls({
               art={(health) =>
                 minorCell(row === 0 ? 2 - health : health > 0 ? 3 : 4)
               }
+              heroArt={modulePhoto("Dr. Fright", 7 + row)}
               heartArt={minorCell(5)}
               onChange={(health) =>
                 act("minor", undefined, undefined, { minor: power.id, health })
               }
             />
           ))}
-        </div>
+        </MinorPowerGroup>
       </section>
       <details className="module-card-rules fright-terrors">
         <summary>Terror cards &amp; temporary effects</summary>

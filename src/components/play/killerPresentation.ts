@@ -1,3 +1,4 @@
+import { modulePhoto } from "./modulePhotos";
 import { inkanyambaHero } from "./inkanyambaHeroes";
 import { inkanyambaCell } from "./inkanyambaArt";
 import {
@@ -80,9 +81,10 @@ export function illustratedKillerCards(
         ("epic" in card && card.epic === true) ||
         card.effect.startsWith("Epic"),
       heroArt:
-        killer === "Inkanyamba"
+        modulePhoto(killer, index + (power ? 0 : 4)) ??
+        (killer === "Inkanyamba"
           ? inkanyambaHero(index + (power ? 0 : 4))
-          : undefined,
+          : undefined),
       art:
         killer === "Inkanyamba"
           ? inkanyambaCell(index + (power ? 0 : 4))
@@ -97,6 +99,9 @@ export function illustratedKillerCards(
                   1254,
                 ),
     }))
-    .map((card) => ({ ...card, art: { ...card.art, fit: "meet" as const } }))
+    .map((card) => ({
+      ...card,
+      art: card.heroArt ?? { ...card.art, fit: "meet" as const },
+    }))
     .sort((a, b) => a.name.localeCompare(b.name));
 }

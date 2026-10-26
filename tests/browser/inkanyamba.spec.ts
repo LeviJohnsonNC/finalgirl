@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId, installTestAudio } from "./fixtures";
-import { openModule, searchPick, openHistory } from "./play-helpers";
+import { chooseKillerCard, showMinorChoices, openModule, searchPick, openHistory } from "./play-helpers";
 import { newPlayEvent, type PlayEvent } from "../../src/lib/play/events";
 import { deathFacts } from "../../src/lib/play/death";
 const selection = {
@@ -60,6 +60,7 @@ for (const [location, id] of [
     await expect(p.getByLabel("Current Killer Wrath")).toHaveText("2/10");
     await page.getByRole("button", { name: "Undo", exact: true }).click();
     await expect(p.getByLabel("Current Killer Wrath")).toHaveText("5/10");
+    await showMinorChoices(p);
     await p
       .getByRole("button", { name: "Reveal Outrageholic", exact: true })
       .click();
@@ -67,9 +68,7 @@ for (const [location, id] of [
       .locator(".module-minor")
       .filter({ hasText: "Outrageholic" });
     await expect(minor).toContainText("3/3 health");
-    const full = await minor
-      .locator(".module-minor-art svg")
-      .getAttribute("viewBox");
+    const full = await minor.locator(".module-minor-art img").getAttribute("src");
     await minor
       .getByRole("button", {
         name: "Remove one Outrageholic health, heart 3",
@@ -77,16 +76,11 @@ for (const [location, id] of [
       })
       .click();
     await expect(minor).toContainText("2/3 health");
-    expect(
-      await minor.locator(".module-minor-art svg").getAttribute("viewBox"),
-    ).not.toBe(full);
+    expect(await minor.locator(".module-minor-art img").getAttribute("src")).toBe(full);
+    await expect(minor).toHaveAttribute("data-state", "weakened");
     await p.locator(".module-card-section > summary").click();
-    await p
-      .getByRole("button", { name: "Choose Dark Lightning", exact: true })
-      .click();
-    await expect(
-      p.getByRole("button", { name: "Choose Dark Lightning", exact: true }),
-    ).toHaveAttribute("aria-pressed", "true");
+    await chooseKillerCard(p, "Dark Power", "Dark Lightning");
+    await expect(p.getByRole("region", {name:"Dark Power selection",exact:true}).locator(".module-revealed-hero")).toHaveAttribute("data-epic","true");
     await page.getByRole("button", { name: "Dark Power", exact: true }).click();
     await expect(
       page.getByRole("combobox", { name: "Dark Power card", exact: true }),
@@ -154,9 +148,7 @@ test("Finale reveal and its one-time recorded Wrath change stay separate", async
   await resume(page);
   const p = panel(page);
   await p.locator(".module-card-section > summary").click();
-  await p
-    .getByRole("button", { name: "Choose We Need a Miracle", exact: true })
-    .click();
+  await chooseKillerCard(p, "Finale", "We Need a Miracle");
   await expect(p.getByLabel("Current Killer Wrath")).toHaveText("2/10");
   await p
     .getByRole("button", { name: "Record Finale Wrath → 10", exact: true })
@@ -176,12 +168,8 @@ test("Finale reveal and its one-time recorded Wrath change stay separate", async
   await p
     .getByRole("button", { name: "Set Killer Wrath to 4", exact: true })
     .click();
-  await p
-    .getByRole("button", { name: "Choose Violent Tantrum", exact: true })
-    .click();
-  await p
-    .getByRole("button", { name: "Choose We Need a Miracle", exact: true })
-    .click();
+  await chooseKillerCard(p, "Finale", "Violent Tantrum");
+  await chooseKillerCard(p, "Finale", "We Need a Miracle");
   await expect(p.getByLabel("Current Killer Wrath")).toHaveText("4/10");
   await expect(
     p.getByRole("button", {
@@ -224,9 +212,7 @@ test("review loaded artwork, selected Epic, health states and reachable controls
       ),
     ).toBe(true);
     await p.locator(".module-card-section > summary").click();
-    await p
-      .getByRole("button", { name: "Choose Dark Lightning", exact: true })
-      .click();
+    await chooseKillerCard(p, "Dark Power", "Dark Lightning");
     await p.locator(".module-card-section").screenshot({
       path: info.outputPath(`inkanyamba-epic-${width}.png`),
       animations: "disabled",
@@ -254,6 +240,7 @@ test("review loaded artwork, selected Epic, health states and reachable controls
   await p
     .getByRole("button", { name: "Reveal Boiling Anger", exact: true })
     .click();
+  await showMinorChoices(p);
   await p
     .getByRole("button", { name: "Reveal Outrageholic", exact: true })
     .click();

@@ -31,3 +31,8 @@ The identity photo `src/assets/characters/ai/inkanyamba.png` now uses Levi's app
 `heroes.webp` is a new native-resolution 1254×1254 3×3 illustrated atlas, generated from the original motifs plus Levi's Boiling Anger UI concept. Source: `exec-98d2fcea-84b4-49af-ab4b-554556fae8b7.png`. Equal 418px cells with 3px inset, row-major: Rising Dread, Volatile Temper, Feast of Anger, Dark Lightning, Violent Tantrum, We Need a Miracle, Savage Whirlwind, Boiling Anger, Outrageholic. The cauldron and idol are decorative metaphor, not added rules or story facts. Full art remains intact via meet fitting; Minor weakened/depleted states still use the original health-state atlas. No upscale was used. Budget: 620KiB.
 
 `wrath-1.webp` through `wrath-5.webp` are five escalating panoramic Inkanyamba backgrounds, cropped from the left column of `exec-29f83d98-2c0b-48b4-9037-aeb3199d46ac.png` (1536×1024, two columns × five rows). Native derivatives approximately 768×205; levels 1–2, 3–4, 5–6, 7–8, 9–10. Backgrounds are thematic, do not resolve effects, and carry no fixed location. Each is bounded at 120KiB. All controls and labels remain HTML.
+
+
+## Wide photographic follow-up, 2026-10-26
+
+The current Play card/Sacred-space views use standalone native 16:9 photographic derivatives in `../photos/`, superseding their earlier illustrated hero/state atlases. See `../photos/README.md` for per-card/state mapping and source provenance. Earlier atlases remain intact for unaffected uses and history. Identity pictures and the five Wrath backgrounds are unchanged.

@@ -40,12 +40,7 @@ export function MinorPowerControl({
         : `${health}/${maxHealth} health`;
   const picture = (
     <ModuleArtwork
-      art={{
-        ...(active && health === maxHealth && heroArt
-          ? heroArt
-          : art(health ?? maxHealth)),
-        fit: "meet",
-      }}
+      art={heroArt ?? { ...art(health ?? maxHealth), fit: "meet" }}
     />
   );
   return (

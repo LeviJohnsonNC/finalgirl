@@ -4,6 +4,7 @@ import { useId } from "react";
 export interface ModuleArt {
   src: string;
   fit?: "meet" | "slice";
+  align?: "right";
   atlas?: {
     width: number;
     height: number;
@@ -26,6 +27,15 @@ export function ModuleArtwork({
       <img
         className={`play-module-art ${className}`}
         src={art.src}
+        style={{
+          objectFit:
+            art.fit === "slice"
+              ? "cover"
+              : art.fit === "meet"
+                ? "contain"
+                : undefined,
+          objectPosition: art.align === "right" ? "right center" : undefined,
+        }}
         alt=""
         loading="lazy"
         decoding="async"
@@ -36,7 +46,7 @@ export function ModuleArtwork({
     <svg
       className={`play-module-art ${className}`}
       viewBox={`${x} ${y} ${cellWidth} ${cellHeight}`}
-      preserveAspectRatio={`xMidYMid ${art.fit ?? "slice"}`}
+      preserveAspectRatio={`${art.align === "right" ? "xMaxYMid" : "xMidYMid"} ${art.fit ?? "slice"}`}
       aria-hidden="true"
       focusable="false"
     >

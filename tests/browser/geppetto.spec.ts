@@ -200,7 +200,7 @@ test("unnamed Finale disables initial spawning; named reveal offers effects with
   ).toHaveLength(1);
 });
 
-test("Minor Dark Power hearts change art and survive reload independently of ordinary health", async ({
+test("Minor Dark Power hearts retain the photograph and survive reload independently of ordinary health", async ({
   page,
   archive,
 }, info) => {
@@ -216,8 +216,8 @@ test("Minor Dark Power hearts change art and survive reload independently of ord
     .click();
   await expect(minor).toHaveAttribute("data-state", "full");
   const original = await minor
-    .locator(".module-minor-art > svg")
-    .getAttribute("viewBox");
+    .locator(".module-minor-art > img")
+    .getAttribute("src");
   await minor
     .getByRole("button", {
       name: "Remove one Am I a Puppet? health, heart 1",
@@ -226,8 +226,8 @@ test("Minor Dark Power hearts change art and survive reload independently of ord
     .click();
   await expect(minor).toHaveAttribute("data-state", "weakened");
   expect(
-    await minor.locator(".module-minor-art > svg").getAttribute("viewBox"),
-  ).not.toBe(original);
+    await minor.locator(".module-minor-art > img").getAttribute("src"),
+  ).toBe(original);
   await minor
     .getByRole("button", {
       name: "Remove one Am I a Puppet? health, heart 1",
@@ -301,7 +301,7 @@ test("illustrated power choices share Remember This and first-hit markers reset 
     page.getByRole("combobox", { name: "Dark Power card", exact: true }),
     "Immortal Master",
   );
-  await expect(p.getByRole("button", { name: "Choose Immortal Master", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(p.getByRole("region",{name:"Dark Power selection",exact:true}).locator(".module-revealed-hero h4")).toHaveText("Immortal Master");
   await expect(p.locator(".module-selected-card")).toHaveCount(0);
   expect(
     (await log(page)).filter(

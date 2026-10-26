@@ -52,3 +52,8 @@ The earlier `sites.webp` token-emblem atlas is superseded in Play by three separ
 Eight row-major cells use the bit pattern Closed=1, Fire=2, Hallowed=4: clear, closed, fire, closed+fire, hallowed, closed+hallowed, fire+hallowed, all three. Each 384px cell has a 3px inset with explicit source clipping. Blocked access, fiery environments and hallowed light replace medallions; combinations visibly retain all their constituent treatments. These are symbolic UI state illustrations; no wildfire, casualty, new terrain rule or narrative fact is inferred. All text stays live HTML, including unknown observations and multi-token labels. Budget: 520KiB per atlas.
 
 `wrath-1.webp` through `wrath-5.webp` come from the right column of shared source `exec-29f83d98-2c0b-48b4-9037-aeb3199d46ac.png`. Five progressive versions of the same tropical lake/standing stones scene, no killer identity. Native derivative size approximately 768×205; 120KiB each. Fickleness's original scene (cell11 in scenes.webp) is unchanged; only its HTML/CSS frame and size are updated.
+
+
+## Wide photographic follow-up, 2026-10-26
+
+The current Play card/Sacred-space views use standalone native 16:9 photographic derivatives in `../photos/`, superseding their earlier illustrated hero/state atlases. See `../photos/README.md` for per-card/state mapping and source provenance. Earlier atlases remain intact for unaffected uses and history. Identity pictures and the five Wrath backgrounds are unchanged.

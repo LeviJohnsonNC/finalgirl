@@ -135,7 +135,7 @@ for (const killer of killers)
         .first();
       const name = await choice.locator("strong").innerText();
       await choice.click();
-      await expect(choice).toHaveAttribute("aria-pressed", "true");
+      await expect(panel.getByRole("region", {name:"Dark Power selection",exact:true}).locator(".module-revealed-hero h4")).toHaveText(name);
       await panel.locator(".module-card-section").screenshot({
         path: info.outputPath(`${killer.id}-${location.id}-cards.png`),
         style: ".app-footer {visibility:hidden}",

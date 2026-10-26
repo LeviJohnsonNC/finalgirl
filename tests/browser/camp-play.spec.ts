@@ -1,3 +1,4 @@
+import { showMinorChoices } from "./play-helpers";
 import { test, expect, activeGame, userId } from "./fixtures";
 import {
   searchPick,
@@ -66,9 +67,13 @@ test("illustrated Camp states and Hans hearts survive reload without changing to
       );
     }
     expect(portraits.size).toBe(4);
-    await statusPick(page,person.getByRole("combobox"),"Saved");
+    await statusPick(page, person.getByRole("combobox"), "Saved");
   }
-  await statusPick(page,page.getByRole("combobox",{name:"Girlfriend status",exact:true}),"Killed");
+  await statusPick(
+    page,
+    page.getByRole("combobox", { name: "Girlfriend status", exact: true }),
+    "Killed",
+  );
   for (const detail of ["Dark Waters", "Secret Tunnel"])
     await page
       .getByRole("button", { name: `Activate ${detail}`, exact: true })
@@ -90,22 +95,25 @@ test("illustrated Camp states and Hans hearts survive reload without changing to
   await page.getByRole("option", { name: "Dock", exact: true }).click();
   await openModule(page, "hans");
   for (const name of ["Unholy Rage", "Unholy Speed"]) {
+    await showMinorChoices(page.locator('[data-module="hans"]'));
     const power = page.locator(".play-minor-power").filter({ hasText: name });
     await expect(power).toHaveAttribute("data-state", "unrecorded");
-    await power.getByRole("button", { name: `Reveal ${name}`, exact: true }).click();
+    await power
+      .getByRole("button", { name: `Reveal ${name}`, exact: true })
+      .click();
     const views = new Set<string>();
     for (const health of [2, 1, 0]) {
       await expect(power).toContainText(`${health}/2 health`);
       await expect(
         power.locator('.play-health-tokens button[aria-pressed="true"]'),
       ).toHaveCount(health);
-      views.add(
-        (await power.locator(".module-minor-art svg").getAttribute("viewBox"))!,
-      );
+      views.add((await power.getAttribute("data-state"))!);
       await power.screenshot({
-        path: info.outputPath(`${name.replaceAll(' ', '-').toLowerCase()}-${health}.png`),
-        animations: 'disabled',
-        style: '.app-footer { visibility: hidden }',
+        path: info.outputPath(
+          `${name.replaceAll(" ", "-").toLowerCase()}-${health}.png`,
+        ),
+        animations: "disabled",
+        style: ".app-footer { visibility: hidden }",
       });
       if (health)
         await power
@@ -220,7 +228,7 @@ test("Camp and Hans corrections preserve immutable history, Undo, restore and tu
   await undone.getByRole("button", { name: /^Restore/ }).click();
   await expect(boyfriend).toHaveAttribute("data-state", "saved");
   await boyfriend.locator(".module-correction > summary").click();
-  await statusPick(page,boyfriend.getByRole("combobox"),"Not recorded");
+  await statusPick(page, boyfriend.getByRole("combobox"), "Not recorded");
   await expect(boyfriend).toHaveAttribute("data-state", "unrecorded");
   await page.getByRole("button", { name: "Undo", exact: true }).click();
   await expect(boyfriend).toHaveAttribute("data-state", "saved");
@@ -228,9 +236,13 @@ test("Camp and Hans corrections preserve immutable history, Undo, restore and tu
   const rage = page
     .locator(".play-minor-power")
     .filter({ hasText: "Unholy Rage" });
-  await rage.getByRole("button", { name: "Reveal Unholy Rage", exact: true }).click();
+  await rage
+    .getByRole("button", { name: "Reveal Unholy Rage", exact: true })
+    .click();
   await rage.locator(".module-correction > summary").click();
-  await rage.getByRole("button",{name:"Clear record: Unholy Rage",exact:true}).click();
+  await rage
+    .getByRole("button", { name: "Clear record: Unholy Rage", exact: true })
+    .click();
   await expect(rage).toHaveAttribute("data-state", "unrecorded");
   await page.getByRole("button", { name: "Undo", exact: true }).click();
   await expect(rage).toHaveAttribute("data-state", "full");
@@ -253,8 +265,14 @@ test("Camp and Hans corrections preserve immutable history, Undo, restore and tu
     }),
     "Dock",
   );
-  await page.locator(".module-event").filter({hasText:"Secret Tunnel"}).locator(".module-correction > summary").click();
-  await page.getByRole("button",{name:"Clear record: Secret Tunnel",exact:true}).click();
+  await page
+    .locator(".module-event")
+    .filter({ hasText: "Secret Tunnel" })
+    .locator(".module-correction > summary")
+    .click();
+  await page
+    .getByRole("button", { name: "Clear record: Secret Tunnel", exact: true })
+    .click();
   await page
     .getByRole("button", { name: "Activate Secret Tunnel", exact: true })
     .click();
@@ -329,7 +347,9 @@ test("art controls reject failed local saves and recover offline observations on
   const rage = page
     .locator(".play-minor-power")
     .filter({ hasText: "Unholy Rage" });
-  await rage.getByRole("button", { name: "Reveal Unholy Rage", exact: true }).click();
+  await rage
+    .getByRole("button", { name: "Reveal Unholy Rage", exact: true })
+    .click();
   await expect(rage).toHaveAttribute("data-state", "unrecorded");
   await expect(
     page.getByText("This change could not be saved. Please try again.", {
@@ -353,7 +373,9 @@ test("art controls reject failed local saves and recover offline observations on
       exact: true,
     })
     .click();
-  await rage.getByRole("button", { name: "Reveal Unholy Rage", exact: true }).click();
+  await rage
+    .getByRole("button", { name: "Reveal Unholy Rage", exact: true })
+    .click();
   await page
     .getByRole("button", {
       name: "Remove one Unholy Rage health, heart 2",
