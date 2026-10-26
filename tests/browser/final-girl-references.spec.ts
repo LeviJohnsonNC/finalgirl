@@ -542,3 +542,102 @@ test("long character and item text stays readable inside a small dialog", async 
   ).toBeFocused();
   expect(archive.calls).toEqual([]);
 });
+
+for (const size of [
+  { width: 1280, height: 640 },
+  { width: 320, height: 568 },
+]) {
+  test(`backstory finishes cleanly without moving health or controls at ${size.width}px`, async ({
+    page,
+    archive,
+  }) => {
+    await page.setViewportSize(size);
+    await archive.install(page);
+    await page.goto("/");
+    await page.getByRole("button", { name: "Collection", exact: true }).click();
+    const dialog = await characterInfo(page, "Alice", false);
+    await expect(dialog).toBeFocused();
+    await page.evaluate(() => document.fonts.ready);
+    await dialog.evaluate((el) =>
+      Promise.all(
+        el
+          .getAnimations({ subtree: true })
+          .map((animation) => animation.finished),
+      ),
+    );
+    const story = dialog.getByRole("region", {
+      name: "Alice backstory",
+      exact: true,
+    });
+    const health = dialog.locator(".girl-health");
+    const ultimate = dialog.locator(".girl-ability > summary");
+    const item = dialog.locator(".girl-personal-item > summary");
+    await expect(ultimate).toBeInViewport();
+    await expect(item).toBeInViewport();
+    await expect
+      .poll(() => story.evaluate((el) => el.scrollHeight > el.clientHeight))
+      .toBe(true);
+    await expect
+      .poll(() => story.evaluate((el) => getComputedStyle(el).maskImage))
+      .not.toBe("none");
+    const before = await health.boundingBox();
+    await story.focus();
+    await story.press("End");
+    await expect
+      .poll(() =>
+        story.evaluate((el) =>
+          Math.abs(el.scrollHeight - el.clientHeight - el.scrollTop),
+        ),
+      )
+      .toBeLessThanOrEqual(1);
+    await expect
+      .poll(() => story.evaluate((el) => getComputedStyle(el).maskImage))
+      .toBe("none");
+    expect(
+      await story.evaluate(
+        (el) =>
+          el.querySelector("p:last-child")!.getBoundingClientRect().bottom <=
+          el.getBoundingClientRect().bottom - 8,
+      ),
+    ).toBe(true);
+    expect((await health.boundingBox())!.y).toBeCloseTo(before!.y, 0);
+    await expect(ultimate).toBeInViewport();
+    await expect(item).toBeInViewport();
+    await story.press("Home");
+    await expect.poll(() => story.evaluate((el) => el.scrollTop)).toBe(0);
+    await page.keyboard.press("Tab");
+    await expect(ultimate).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(dialog.locator(".girl-ability")).toHaveAttribute("open", "");
+    expect(archive.itemReads).toEqual([]);
+    expect(archive.calls).toEqual([]);
+  });
+}
+
+test("dossier respects reduced motion and keeps locked item details concealed", async ({
+  page,
+  archive,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await archive.install(page);
+  await page.goto("/");
+  await page.getByRole("button", { name: "Collection", exact: true }).click();
+  const dialog = await characterInfo(page, "Alice", false);
+  await expect
+    .poll(() =>
+      dialog.evaluate((el) => el.getAnimations({ subtree: true }).length),
+    )
+    .toBe(0);
+  await dialog.locator(".girl-personal-item > summary").click();
+  await expect(dialog.getByText("Locked", { exact: true })).toBeVisible();
+  await expect(
+    dialog.getByRole("button", { name: "Unlock personal item", exact: true }),
+  ).toBeVisible();
+  await expect
+    .poll(() =>
+      dialog.evaluate((el) => el.getAnimations({ subtree: true }).length),
+    )
+    .toBe(0);
+  expect(archive.itemReads).toEqual([]);
+  expect(archive.calls).toEqual([]);
+});

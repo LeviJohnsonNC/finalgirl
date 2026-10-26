@@ -22,7 +22,18 @@
   overflow: hidden;
   border: 1px solid #70635b;
   border-radius: 12px;
-  background: #171416 url("../assets/final-girl/board.webp") center / cover;
+  background-color: #171416;
+  background-image:
+    radial-gradient(
+      ellipse at 51% 45%,
+      #0b0c10e8 5%,
+      #0c0b0dcc 52%,
+      #100b0e22 100%
+    ),
+    url("../assets/final-girl/board.webp");
+  background-position: center;
+  background-size: cover;
+  outline: none;
   box-shadow:
     0 24px 100px #000e,
     inset 0 0 0 3px #c0a78c23;
@@ -65,8 +76,14 @@
   min-height: 0;
   margin: 4px 10px 8px 8px;
   padding: 11px 11px 21px;
-  background: #e5d4b6 url("../assets/final-girl/paper.webp") center / 100% 100%;
-  box-shadow: 2px 7px 12px #000b;
+  border-radius: 2px 3px 1px 2px;
+  background:
+    linear-gradient(102deg, #8a69472b, transparent 12% 83%, #aa754b2b),
+    #e5d4b6 url("../assets/final-girl/paper.webp") center / 100% 100%;
+  box-shadow:
+    2px 4px 4px #0006,
+    10px 18px 24px #000b,
+    inset 1px 1px 2px #fff5e12b;
   transform: rotate(-3deg);
 }
 .girl-dossier-photo img {
@@ -104,11 +121,14 @@
 .girl-dossier-photo::before {
   right: -9px;
   top: -14px;
+  opacity: 0.8;
   transform: rotate(-15deg);
 }
 .girl-dossier-photo::after {
   left: -19px;
   bottom: 21px;
+  opacity: 0.55;
+  background: linear-gradient(97deg, #bca67a85, #e4d1a8cf 60%, #b7a07793);
   transform: rotate(71deg);
   width: 30%;
 }
@@ -130,12 +150,57 @@
   justify-content: center;
   align-self: stretch;
   min-width: 0;
-  margin: 0 36px 0 4px;
+  position: relative;
+  isolation: isolate;
+  width: calc(90% - 36px);
+  margin: 0 0 0 4px;
   padding: 10px 24px;
-  background: url("../assets/final-girl/paper.webp") center / 100% 100%;
-  transform: rotate(-2deg);
+  transform: rotate(-1deg);
   text-align: left;
-  filter: drop-shadow(0 4px 3px #0009);
+  filter: drop-shadow(1px 2px 1px #0007) drop-shadow(4px 7px 5px #0008);
+}
+.girl-dossier-title::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    repeating-linear-gradient(4deg, #aa83510a 0 1px, transparent 1px 4px),
+    url("../assets/final-girl/paper.webp") center / 100% 100%;
+  clip-path: polygon(
+    0 12%,
+    4% 8%,
+    11% 10%,
+    19% 5%,
+    28% 7%,
+    37% 4%,
+    48% 8%,
+    59% 3%,
+    68% 7%,
+    79% 4%,
+    90% 8%,
+    99% 5%,
+    97% 19%,
+    100% 33%,
+    98% 47%,
+    100% 64%,
+    97% 78%,
+    99% 91%,
+    89% 94%,
+    80% 90%,
+    69% 96%,
+    57% 92%,
+    47% 97%,
+    36% 93%,
+    25% 96%,
+    14% 91%,
+    4% 95%,
+    1% 83%,
+    3% 69%,
+    0 54%,
+    2% 39%,
+    0 27%
+  );
 }
 .girl-dossier-title h2 {
   margin: 0;
@@ -153,8 +218,8 @@
   min-height: 0;
   display: flex;
   background: url("../assets/final-girl/paper.webp") center / 100% 100%;
-  filter: drop-shadow(0 4px 3px #0009);
-  padding: 19px 9px 17px 14px;
+  filter: drop-shadow(1px 4px 2px #0007) drop-shadow(5px 9px 8px #0006);
+  padding: 26px 22px 22px;
 }
 .girl-dossier-scroll {
   display: flex;
@@ -162,44 +227,46 @@
   min-width: 0;
   min-height: 0;
   width: 100%;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 0 18px 4px 10px;
-  scrollbar-width: thin;
-  scrollbar-color: #876749 transparent;
+  overflow: hidden;
 }
-.girl-dossier-scroll:focus-visible {
-  outline: 2px solid #923027;
-  outline-offset: -2px;
+.girl-backstory-frame {
+  flex: 1 1 0;
+  min-height: 96px;
+  margin-bottom: 16px;
+  position: relative;
 }
 .final-girl-dialog .girl-backstory {
-  flex: 1 1 auto;
-  min-height: 96px;
+  height: 100%;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: #876749 transparent;
-  padding-right: 7px;
-  margin-bottom: 17px;
+  scrollbar-width: none;
+  padding: 0 4px 14px;
+  outline: none;
+}
+.final-girl-dialog .girl-backstory::-webkit-scrollbar {
+  display: none;
+}
+.final-girl-dialog .girl-backstory[data-more-below="true"] {
+  mask-image: linear-gradient(#000 calc(100% - 32px), transparent);
 }
 .final-girl-dialog .girl-backstory:focus-visible {
-  outline: 2px solid #923027;
-  outline-offset: -2px;
+  box-shadow: inset 3px 0 #8a65404d;
 }
 .final-girl-dialog .girl-backstory h3 {
   margin: 0 0 10px;
   color: #a32720;
   font:
-    600 29px/1 "Dossier Hand",
+    600 25px/1 "Dossier Hand",
     cursive;
   text-transform: uppercase;
   letter-spacing: -0.015em;
 }
 .final-girl-dialog .girl-backstory p {
-  margin: 0 0 12px;
-  color: #30261d;
+  margin: 0 0 17px;
+  color: #34302c;
   font:
-    500 17px/1.38 "Dossier Serif",
+    400 17px/1.6 "Dossier Serif",
     Georgia,
     serif;
   white-space: pre-line;
@@ -208,15 +275,31 @@
   margin-bottom: 0;
 }
 .final-girl-dialog .girl-reference {
-  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  min-height: 0;
+  max-height: calc(100% - 112px);
   gap: 8px;
   color: #f1e8d8;
 }
+.final-girl-dialog .girl-reference-panels {
+  display: grid;
+  gap: 10px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #806f57 transparent;
+  padding: 2px 2px 4px;
+}
 .final-girl-dialog .girl-health {
-  margin: 0 0 4px;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 2px 2px 3px;
   color: #a02822;
   font:
-    700 16px/1.3 "Dossier Serif",
+    600 16px/1.3 "Dossier Serif",
     Georgia,
     serif;
 }
@@ -226,21 +309,39 @@
   height: 19px;
 }
 .final-girl-dialog .girl-info-panel {
-  border: 1px solid #6d6458;
-  border-radius: 3px;
-  background: #171717;
+  border: 1px solid #786b5866;
+  border-radius: 5px 3px 5px 4px;
+  background:
+    radial-gradient(ellipse at 5% 0, #b4a27a0d, transparent 58%),
+    linear-gradient(155deg, #282829, #181a1b 75%);
   box-shadow:
-    0 2px 3px #422a222b,
-    inset 0 0 0 1px #d3c5ad18;
+    0 3px 7px #422a2240,
+    inset 0 1px #f3e4c91f;
+  transition:
+    border-color 180ms,
+    background-color 180ms,
+    box-shadow 180ms;
+}
+.final-girl-dialog .girl-info-panel[open] {
+  border-color: #a7987d99;
+  box-shadow:
+    0 4px 9px #422a2250,
+    inset 0 1px #f3e4c92b;
+}
+.final-girl-dialog .girl-info-panel > summary:hover {
+  background: #ffffff07;
+}
+.final-girl-dialog .girl-personal-item.is-unlocked > summary > span {
+  color: #c0d4ac;
 }
 .final-girl-dialog .girl-info-panel > summary {
-  min-height: 46px;
-  padding: 9px 12px;
+  min-height: 52px;
+  padding: 12px 14px;
   gap: 5px 10px;
 }
 .final-girl-dialog .girl-item-heading h4 {
   font:
-    600 14px/1.25 "Dossier Serif",
+    500 14px/1.25 "Dossier Serif",
     Georgia,
     serif;
   text-transform: uppercase;
@@ -264,12 +365,12 @@
   line-height: 1;
 }
 .final-girl-dialog .girl-panel-content {
-  padding: 6px 13px 13px;
+  padding: 5px 15px 17px;
 }
 .final-girl-dialog .girl-panel-content p {
   color: #f0e5d2;
   font:
-    400 16px/1.45 "Dossier Serif",
+    400 16px/1.55 "Dossier Serif",
     Georgia,
     serif;
 }
@@ -357,6 +458,7 @@
   .girl-dossier-title {
     grid-column: 2;
     grid-row: 2;
+    width: 90%;
     margin: 2px 0 4px -4px;
     padding: 12px 13px;
   }
@@ -366,14 +468,14 @@
   .girl-dossier-paper {
     grid-column: 1 / -1;
     grid-row: 3;
-    padding: 16px 5px 12px 8px;
+    padding: 21px 16px 16px;
   }
   .girl-dossier-scroll {
-    padding: 0 12px 4px 8px;
+    padding: 0;
   }
   .final-girl-dialog .girl-backstory p {
     font-size: 17px;
-    line-height: 1.4;
+    line-height: 1.6;
   }
   .final-girl-dialog .girl-item-heading {
     column-gap: 8px;
@@ -398,5 +500,72 @@
   }
   .girl-dossier-title h2 {
     font-size: 42px;
+  }
+}
+
+@keyframes girl-photo-settle {
+  from {
+    opacity: 0.8;
+    transform: translateY(5px) rotate(-4.4deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(-3deg);
+  }
+}
+@keyframes girl-paper-settle {
+  from {
+    opacity: 0.6;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes girl-panel-reveal {
+  from {
+    opacity: 0.5;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.final-girl-dialog[data-state="open"] .girl-dossier-photo {
+  animation: girl-photo-settle 260ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.final-girl-dialog[data-state="open"] .girl-dossier-paper {
+  animation: girl-paper-settle 240ms ease-out;
+}
+.final-girl-dialog .girl-info-panel[open] .girl-panel-content {
+  animation: girl-panel-reveal 220ms ease-out;
+}
+@supports (interpolate-size: allow-keywords) {
+  .final-girl-dialog .girl-info-panel {
+    interpolate-size: allow-keywords;
+  }
+  .final-girl-dialog .girl-info-panel::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 220ms ease,
+      content-visibility 220ms allow-discrete;
+  }
+  .final-girl-dialog .girl-info-panel[open]::details-content {
+    block-size: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [role="dialog"].final-girl-dialog,
+  .girl-dossier-overlay,
+  .final-girl-dialog .girl-dossier-photo,
+  .final-girl-dialog .girl-dossier-paper,
+  .final-girl-dialog .girl-info-panel,
+  .final-girl-dialog .girl-info-panel::details-content,
+  .final-girl-dialog .girl-panel-content {
+    animation: none !important;
+    transition: none !important;
   }
 }
