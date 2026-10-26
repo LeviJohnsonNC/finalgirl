@@ -36,8 +36,8 @@ const aiBoxArtGlob = import.meta.glob<{ default: string }>(
   { eager: true },
 );
 
-// Collection covers are displayed at 82-96 CSS pixels. A 288px WebP covers
-// high-density screens without downloading the multi-megabyte source PNG.
+// Responsive Collection covers use a 288px-wide WebP for high-density screens.
+// This avoids downloading the multi-megabyte source PNG on the shelf.
 const thumbnailGlob = import.meta.glob<{ default: string }>(
   '../assets/collection-thumbnails/**/*.webp', { eager: true },
 );
@@ -48,6 +48,30 @@ for (const [path, image] of Object.entries({ ...officialBoxArtGlob, ...aiBoxArtG
 }
 export const getBoxArtThumbnail = (url: string | undefined): string | undefined =>
   url ? boxArtThumbnails.get(url) ?? url : undefined;
+
+// Shelf portrait buttons use small derivatives of the selected identity asset.
+// The full portrait is still used when its character dialog opens.
+const portraitThumbnailGlob = import.meta.glob<{ default: string }>(
+  "../assets/collection-portraits/**/*.webp",
+  { eager: true },
+);
+const portraitThumbnails = new Map<string, string>();
+for (const [path, image] of Object.entries({
+  ...officialCharacterGlob,
+  ...aiCharacterGlob,
+})) {
+  const thumbnail =
+    portraitThumbnailGlob[
+      path
+        .replace("/characters/", "/collection-portraits/")
+        .replace(/\.png$/, ".webp")
+    ];
+  if (thumbnail) portraitThumbnails.set(image.default, thumbnail.default);
+}
+export const getCharacterThumbnail = (
+  url: string | undefined,
+): string | undefined =>
+  url ? (portraitThumbnails.get(url) ?? url) : undefined;
 
 // Index each glob by basename once, so building the image maps is a hash
 // lookup per entity instead of a linear scan over every glob entry.

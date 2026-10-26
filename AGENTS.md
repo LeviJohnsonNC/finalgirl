@@ -2,6 +2,7 @@
 - When adding or changing Play modules, read `docs/module-controls.md`. Register applicable shared-control capabilities in `src/components/play/moduleDefinitions.tsx`, reuse the shared controls for equivalent actions, and document legitimate rule-specific exceptions.
 - Preserve immutable observations, unknown legacy states, separate victim totals, mixed killer/location ownership and atomic linked changes. Panel mount/expansion must not write gameplay. Verify relevant module journeys plus shared contracts, then inspect actual laptop/phone artwork and controls before claiming completion.
 - For killer, location, card-photo or rules imports, read `docs/MODULE_IMPORT_PLAYBOOK.md` before planning or editing. Create or update the module's import record from `docs/templates/MODULE_IMPORT_RECORD.md`; reconcile source coverage, Rules, Play, artwork, narrative/death context, compatibility and deployment. Preserve the established UI standards and explicitly report incomplete evidence or integration rather than calling partial support complete.
+- For Collection card artwork or new catalog cards, follow `docs/COLLECTION_CARDS.md` and `src/assets/collection-scenes/README.md`. Extend the per-film art manifest, preserve source covers and selected image preferences, generate small derivatives, and review actual card/portrait crops. Do not ship missing named-film scenery or invent unsupported character details.
 
 ## Generated identity photos
 

@@ -14,7 +14,7 @@
     "test:edge": "node --test scripts/guard.test.mjs scripts/validation.test.mjs scripts/image-attachment.test.mjs scripts/death-scene.test.mjs scripts/narration-canonical.test.mjs scripts/generation.test.mjs scripts/discard-game.test.mjs scripts/story-evaluation.test.mjs",
     "test:database": "bash scripts/test-database.sh",
     "test:browser": "playwright test",
-    "images:collection": "node scripts/collection-thumbnails.mjs",
+    "images:collection": "node scripts/collection-thumbnails.mjs && node scripts/collection-portraits.mjs",
     "check:assets": "node scripts/check-assets.mjs",
     "check": "npm run lint && npm run typecheck && npm test && npm run test:edge"
   },
