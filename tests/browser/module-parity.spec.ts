@@ -34,7 +34,7 @@ test("imported Buddyland and Billy references are searchable in the owned Rulebo
   await page.screenshot({ path: info.outputPath("parity-rulebook.png") });
 });
 
-test("Camp Rules and active reminders remain readable and never record observations", async ({
+test("Camp Event Rules and victim status details never record observations", async ({
   page,
   archive,
 }, info) => {
@@ -70,10 +70,8 @@ test("Camp Rules and active reminders remain readable and never record observati
   const person = camp
     .locator('[data-module-control="character"]')
     .filter({ has: page.locator("strong", { hasText: "Girlfriend" }) });
-  await person.locator(".module-card-rules > summary").click();
-  await expect(person.locator(".module-card-rules")).toContainText(
-    "increase Horror by five",
-  );
+  await person.locator(".module-correction > summary").click();
+  await expect(person.locator(".module-card-rules")).toHaveCount(0);
   expect(await log(page)).toEqual(before);
   for (const [width, height] of [
     [1280, 640],
@@ -95,7 +93,7 @@ test("Camp Rules and active reminders remain readable and never record observati
   }
 });
 
-test("Buddyland character Rules disclose without status changes or victim totals", async ({
+test("Buddyland victim status details open without Rules rows or total changes", async ({
   page,
   archive,
 }, info) => {
@@ -119,9 +117,9 @@ test("Buddyland character Rules disclose without status changes or victim totals
   const nick = venue
     .locator('[data-module-control="character"]')
     .filter({ has: page.locator("strong", { hasText: "Nick the Janitor" }) });
-  await nick.locator(".module-card-rules > summary").click();
+  await nick.getByRole("button",{name:"View Nick the Janitor",exact:true}).click();
   await expect(nick).toHaveAttribute("data-state", "on-board");
-  await expect(nick.locator(".module-card-rules")).toContainText("next Upkeep");
+  await expect(nick.locator(".module-card-rules")).toHaveCount(0);
   expect(await log(page)).toEqual(before);
-  await nick.screenshot({ path: info.outputPath("parity-nick-rules.png") });
+  await nick.screenshot({ path: info.outputPath("parity-nick-status.png") });
 });
