@@ -1,14 +1,56 @@
+import { useId } from "react";
 /** Atlas rectangles are original generated panels, addressed without distorting
  * or repainting their subjects. Ordinary images use the same presentation. */
 export interface ModuleArt {
   src: string;
-  atlas?: { width: number; height: number; x: number; y: number; cellWidth: number; cellHeight: number };
+  fit?: "meet" | "slice";
+  atlas?: {
+    width: number;
+    height: number;
+    x: number;
+    y: number;
+    cellWidth: number;
+    cellHeight: number;
+  };
 }
-export function ModuleArtwork({ art, className = "" }: { art: ModuleArt; className?: string }) {
-  if (!art.atlas) return <img className={`play-module-art ${className}`} src={art.src} alt="" loading="lazy" decoding="async" />;
+export function ModuleArtwork({
+  art,
+  className = "",
+}: {
+  art: ModuleArt;
+  className?: string;
+}) {
+  const clip = useId();
+  if (!art.atlas)
+    return (
+      <img
+        className={`play-module-art ${className}`}
+        src={art.src}
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+    );
   const { width, height, x, y, cellWidth, cellHeight } = art.atlas;
-  return <svg className={`play-module-art ${className}`} viewBox={`${x} ${y} ${cellWidth} ${cellHeight}`}
-    preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
-    <image href={art.src} width={width} height={height} />
-  </svg>;
+  return (
+    <svg
+      className={`play-module-art ${className}`}
+      viewBox={`${x} ${y} ${cellWidth} ${cellHeight}`}
+      preserveAspectRatio={`xMidYMid ${art.fit ?? "slice"}`}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <clipPath id={clip}>
+          <rect x={x} y={y} width={cellWidth} height={cellHeight} />
+        </clipPath>
+      </defs>
+      <image
+        href={art.src}
+        width={width}
+        height={height}
+        clipPath={`url(#${clip})`}
+      />
+    </svg>
+  );
 }

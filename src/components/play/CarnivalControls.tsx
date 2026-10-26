@@ -299,6 +299,10 @@ export function CarnivalControls({
                 art={atlas(peopleArt, actor.index)}
                 tileClassName="carnival-actor-tile"
                 help={actor.help}
+                showRules={!actor.key.startsWith("person.")}
+                reminder={
+                  actor.key.startsWith("person.") && present ? actor.help : undefined
+                }
                 onChange={(value) => setActor(actor.key, value)}
               />
             );

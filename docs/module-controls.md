@@ -13,7 +13,7 @@
 | Operation | Component | Required behavior |
 | --- | --- | --- |
 | Special character/companion | `CharacterControl` | An unknown portrait adds the entity; a recorded portrait opens details. Explicit legal outcome buttons only while present. Restoring or changing an outcome uses Change status. Counts remain separate. |
-| Ongoing Event | `EventControl` | Artwork activates only from unrecorded state. Recorded artwork opens details. End effect is explicit. Re-activation and clearing are deliberate corrections. The module controls whether reactivation is legal. |
+| Ongoing Event | `EventControl` | Default artwork activates only from unrecorded state; recorded artwork opens details. Independent presence effects can explicitly opt into image toggling (Fickleness; Camp Deathwish, Star Crossed Lovers and Stubborn Kids). Linked/placement/lasting effects keep their existing explicit lifecycle. |
 | Dark Power/Finale | `KillerCards` | Same illustrated chooser from the killer panel and Remember This. One durable permanent reveal per type; further choices edit its detail. Card names may stay unspecified. Register original artwork/catalog mapping in `killerPresentation.ts`. |
 | Minor Dark Power | `MinorPowerControl` + `HealthTokens` | Unknown is distinct from 0/2 health. A filled/empty heart removes/restores one, regardless of slot index. Rules and direct 0/1/2/unknown correction stay behind Details & corrections. Preserve earlier reveal evidence without inventing remaining health. |
 | Illustrated presentation | `IllustratedTile` + `ModuleArtwork` | Accessible HTML title/state/action, decorative artwork, no nested buttons. Atlas images stay original; rules/text are never baked into imagery. |
@@ -22,7 +22,7 @@
 
 `data-module-control` is a shared-component capability marker used by registry tests. New modules declare only capabilities they actually implement. A different mechanic does not need to pretend to be one of these capabilities.
 
-Supply verified `effect`/`help` text for Event/character Rules disclosures. The
+Supply verified `effect`/`help` text where Rules disclosures are appropriate. Special-victim cards omit their Rules disclosure; their full effects remain in Rules. Props/companions retain their own disclosures. The
 optional shared `reminder` is visible only while that entity/effect is active;
 use it for consequential ongoing restrictions or penalties. Do not repeat initial
 placement or automatically apply damage, bonuses or casualties from a reminder.
@@ -52,8 +52,16 @@ Controls stay at least 44px tall, keyboard operable with visible focus, stable i
 - Maple Lane House tiles toggle their search mark directly as a tracker correction. Burning Houses permit removing an accidental mark while blocking new searches. Unknown remains a separate explicit correction; no physical Search effects are reversed.
 - Dr. Fright's digital Boiler Room moves the cover and prior cards as one stack. Temporary pointer motion never records gameplay or exposes a new cutout; the existing saved-slide acknowledgment gates settling/reveal. Native cancellation, keyboard alternatives and reduced motion retain the same domain transitions.
 
-- Sacred Groves uses shared character outcomes to collect a Wrath target/allocation and preview one linked observation. Status correction never repeats outcome effects. Divine Wrath, physical Bloodlust/Finale instructions and two reusable connection signs stay location-owned; Atonement is shared with Inkanyamba. Ritual removal is not a casualty.
+- Sacred Groves uses shared character outcomes to collect a Wrath target/allocation and preview one linked observation. Status correction never repeats outcome effects. Divine Wrath and physical token observations stay location-owned. The streamlined Play view omits Atonement/count helpers, connection tracking, setup and Bloodlust/Finale reference sections; Rules retains their facts. Old observations remain readable by the domain and historical context. Ritual removal is not a casualty.
 
 ## Verification evidence
 
 `moduleControls.contract.test.tsx` covers shared behavior, unknown versus depleted health, disclosure without resurrection, duplicate-action protection, failure/retry and registry adoption. `module-consistency.spec.ts` covers all current nine combinations on desktop/mobile. Extend module-specific journeys when adding rules; shared tests do not establish rules accuracy, visual quality or live provider behavior.
+
+## Compact module presentation, 2026-10-26
+
+`WrathTrack` supplies live numbered levels, ± and the current Unleash instruction with separate Killer/Divine material themes. Changes are physical-tracker observations, never automatic resolution. Unknown and 1–10 bounds remain explicit. At 320px, all ten numbered targets must remain completely inside the board, not merely inside a clipped page.
+
+All five illustrated killers use stable compact Power/Finale grids in both entry points, including Hans's second power. Selection never enlarges/reorders cards; Epic, selected and focus treatments remain distinct. Minor Powers precede the reveal section. Complete cell framing uses `ModuleArt.fit: meet`; `ModuleArtwork` explicitly clips the atlas image to its source cell so letterboxing cannot expose neighboring cells. Captions sit below art.
+
+Sacred-space imagery cycles clear → Closed → Fire → Hallowed → clear. Each token exists at one location; relocation/removal is one observation. Mixed-token or partially unknown states open the on-demand Adjust tokens editor instead of erasing observations. Explicit edits change only the chosen token and never activate/end Events or affect victim totals. Combined states list every token and show a count. Fickleness toggles active/ended without executing costs or effects; Undo restores observations.

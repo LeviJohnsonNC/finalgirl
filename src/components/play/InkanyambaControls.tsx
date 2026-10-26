@@ -1,4 +1,4 @@
-import { AtonementControl } from "./AtonementControl";
+import { WrathTrack } from "./WrathTrack";
 import { useModuleRecord } from "./useModuleRecord";
 import { KillerCards } from "./KillerCards";
 import { MinorPowerControl } from "./MinorPowerControl";
@@ -9,8 +9,6 @@ import {
   INKANYAMBA_FINALES,
   INKANYAMBA_MINOR_POWERS,
   INKANYAMBA_UNLEASH,
-  INKANYAMBA_PRE_FINALE,
-  atonementWrath,
 } from "../../../supabase/functions/_shared/play/inkanyamba";
 import { inkanyambaCell } from "./inkanyambaArt";
 import type { ControlsProps } from "./moduleDefinitions";
@@ -18,7 +16,6 @@ import "@/styles/play-inkanyamba.css";
 
 export function InkanyambaControls({
   events,
-  location,
   onEvent,
   blocked,
 }: ControlsProps) {
@@ -40,63 +37,17 @@ export function InkanyambaControls({
   );
   return (
     <section className="play-inkanyamba" aria-label="Inkanyamba tracking">
-      <div className="ink-wrath">
-        <div className="ink-wrath-heading">
-          <div>
-            <span className="ink-eyebrow">THE AVENGER</span>
-            <h3>Killer Wrath</h3>
-          </div>
-          <output aria-live="polite" aria-label="Current Killer Wrath">
-            {wrath ?? "?"}
-            <small>/10</small>
-          </output>
-        </div>
-        <div className="ink-track" role="group" aria-label="Killer Wrath level">
-          {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-            <button
-              key={n}
-              aria-label={`Set Killer Wrath to ${n}`}
-              aria-pressed={wrath === n}
-              disabled={blocked}
-              data-filled={wrath !== undefined && n <= wrath}
-              onClick={() => {
-                if (wrath !== n) change({ wrath: n });
-              }}
-            >
-              {n}
-            </button>
-          ))}
-        </div>
-        <div className="ink-adjust">
-          <button
-            aria-label="Decrease Killer Wrath"
-            disabled={blocked || wrath === undefined || wrath <= 1}
-            onClick={() => change({ wrath: wrath! - 1 })}
-          >
-            −
-          </button>
-          <span>{wrath === undefined ? "Not recorded" : "Killer Wrath"}</span>
-          <button
-            aria-label="Increase Killer Wrath"
-            disabled={blocked || wrath === undefined || wrath >= 10}
-            onClick={() => change({ wrath: wrath! + 1 })}
-          >
-            +
-          </button>
-        </div>
-        <div className="ink-unleash">
-          <span className="ink-bolt" aria-hidden="true">
-            ϟ
-          </span>
-          <div>
-            <h4>Unleash{wrath !== undefined ? ` · Level ${wrath}` : ""}</h4>
-            <p>
-              {wrath === undefined
-                ? "Set the current level to see its Unleash effects."
-                : INKANYAMBA_UNLEASH[wrath - 1]}
-            </p>
-          </div>
-        </div>
+      <WrathTrack
+        kind="killer"
+        value={wrath}
+        disabled={blocked}
+        onChange={(wrath) => change({ wrath })}
+        effect={
+          wrath === undefined
+            ? "Set the current level to see its Unleash effects."
+            : INKANYAMBA_UNLEASH[wrath - 1]
+        }
+      >
         {(power || activeMinors.length > 0) && (
           <aside className="ink-reminders" aria-label="Power reminders">
             {power && (
@@ -111,48 +62,7 @@ export function InkanyambaControls({
             ))}
           </aside>
         )}
-        {location !== "Sacred Groves" ? <AtonementControl title="Atonement & corrections" targets={[{id:"killer",label:"Killer Wrath",wrath}]} disabled={blocked} onResolve={(_target,successes)=>change({wrath:atonementWrath(wrath!,successes)})}>
-          <button disabled={blocked || wrath === undefined} onClick={()=>change({wrath:null})}>Clear Wrath record</button>
-        </AtonementControl> : <details className="ink-details"><summary>Wrath corrections</summary>
-          <p>Atonement in the Sacred Groves panel lets you choose either Wrath track.</p>
-          <button disabled={blocked || wrath === undefined} onClick={()=>change({wrath:null})}>Clear Wrath record</button>
-        </details>}
-      </div>
-      <div className="ink-action">
-        <h4>
-          {state.finaleRevealed
-            ? (finale?.name ?? "Finale name not recorded")
-            : "Pre-Finale action"}
-        </h4>
-        <p>
-          {state.finaleRevealed
-            ? (finale?.effect ??
-              "Name the revealed Finale to see its instructions.")
-            : INKANYAMBA_PRE_FINALE}
-        </p>
-        {finale?.id === "we-need-a-miracle" && (
-          <div className="ink-miracle">
-            <p>
-              When revealed: take up to 6 Time worth of Action cards into your
-              hand.
-            </p>
-            <button
-              disabled={blocked || state.miracleResolved === true}
-              onClick={() => change({ wrath: 10, miracleResolved: true })}
-            >
-              {state.miracleResolved === true
-                ? "Finale Wrath change recorded"
-                : "Record Finale Wrath → 10"}
-            </button>
-          </div>
-        )}
-      </div>
-      <KillerCards
-        killer="Inkanyamba"
-        events={events}
-        onEvent={onEvent}
-        disabled={blocked}
-      />
+      </WrathTrack>
       <div className="ink-minors">
         <h3>Minor Dark Powers</h3>
         <div className="ink-minor-grid">
@@ -179,6 +89,24 @@ export function InkanyambaControls({
           ))}
         </div>
       </div>
+      <KillerCards
+        killer="Inkanyamba"
+        events={events}
+        onEvent={onEvent}
+        disabled={blocked}
+      />
+      {finale?.id === "we-need-a-miracle" && (
+        <div className="ink-miracle">
+          <button
+            disabled={blocked || state.miracleResolved === true}
+            onClick={() => change({ wrath: 10, miracleResolved: true })}
+          >
+            {state.miracleResolved === true
+              ? "Finale Wrath change recorded"
+              : "Record Finale Wrath → 10"}
+          </button>
+        </div>
+      )}
       <details className="ink-details">
         <summary>Wrath reference</summary>
         <ol>

@@ -229,7 +229,6 @@ export function GeppettoControls({
           </>
         )}
       </div>
-      <KillerCards killer="Geppetto" events={events} onEvent={onEvent} />
       {power?.id === "immortal-master" && (
         <p className="geppetto-quiet">
           {counts.recorded && counts.onBoard === 3
@@ -264,6 +263,7 @@ export function GeppettoControls({
           })}
         </div>
       </details>
+      <KillerCards killer="Geppetto" events={events} onEvent={onEvent} />
       <details className="geppetto-details">
         <summary>Card effects &amp; quick rules</summary>
         <p>

@@ -266,7 +266,7 @@ export function MapleControls({
                 ]}
                 outcomes={["saved", "killed"]}
                 onChange={(v) => record(maplePersonChange(state, p.id, v))}
-                help={effect(p.event)}
+                showRules={false}
               />
             );
           })}

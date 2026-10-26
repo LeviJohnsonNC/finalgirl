@@ -16,8 +16,6 @@ import {
 } from "../../../supabase/functions/_shared/play/buddyland";
 import {
   CAMP_ONGOING_EVENTS,
-  CAMP_EVENTS,
-  CAMP_VICTIMS,
 } from "../../../supabase/functions/_shared/play/camp";
 
 afterEach(cleanup);
@@ -126,7 +124,7 @@ it("keeps all six Camp Event effects available without disclosure writing gamepl
   expect(onEvent).not.toHaveBeenCalled();
 });
 
-it("shows the appropriate Camp and Buddyland character rules without mixing Boyfriend effects", () => {
+it("keeps special-victim cards free of Rules disclosures without mixing location effects", () => {
   const onEvent = vi.fn(() => true);
   const { container, unmount } = render(
     <CampControls
@@ -140,13 +138,7 @@ it("shows the appropriate Camp and Buddyland character rules without mixing Boyf
     ...container.querySelectorAll('[data-module-control="character"]'),
   ];
   expect(cards).toHaveLength(3);
-  for (const card of cards) {
-    const name = card.querySelector("strong")!.textContent;
-    const person = CAMP_VICTIMS.find((v) => v.name === name)!;
-    expect(card.querySelector(".module-card-rules")).toHaveTextContent(
-      CAMP_EVENTS.find((e) => e.name === person.event)!.effect,
-    );
-  }
+  for (const card of cards) expect(card.querySelector(".module-card-rules")).toBeNull();
   expect(container).not.toHaveTextContent("lose two Time");
   unmount();
   const venue = render(
@@ -161,14 +153,12 @@ it("shows the appropriate Camp and Buddyland character rules without mixing Boyf
   const nick = [
     ...venue.container.querySelectorAll('[data-module-control="character"]'),
   ].find((c) => c.querySelector("strong")!.textContent === "Nick the Janitor")!;
-  expect(nick.querySelector(".module-card-rules")).toHaveTextContent(
-    "next Upkeep",
-  );
+  expect(nick.querySelector(".module-card-rules")).toBeNull();
   expect(
     venue.container.querySelectorAll(
       '[data-module-control="character"] .module-card-rules',
     ),
-  ).toHaveLength(3);
+  ).toHaveLength(0);
   expect(onEvent).not.toHaveBeenCalled();
 });
 

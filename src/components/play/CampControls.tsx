@@ -7,7 +7,6 @@ import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
 import { moduleState, type ModuleValue } from "@/lib/play/modules";
 import {
   CAMP_ONGOING_EVENTS,
-  CAMP_EVENTS,
   CAMP_TUNNEL_ROOMS,
   CAMP_VICTIMS,
   HANS_MINOR_POWERS,
@@ -102,7 +101,6 @@ export function CampControls({
     <div className="play-camp-modules">
       {killer === "Hans" && part !== "location" && (
         <section aria-label="Hans tracking">
-          <KillerCards killer={killer} events={events} onEvent={onEvent} />
           <h3 className="play-module-subheading">Minor Dark Powers</h3>
 
           <div className="play-camp-body module-minor-grid">
@@ -124,6 +122,7 @@ export function CampControls({
               );
             })}
           </div>
+          <KillerCards killer={killer} events={events} onEvent={onEvent} />
         </section>
       )}
       {location === "Camp Happy Trails" && part !== "killer" && (
@@ -152,7 +151,7 @@ export function CampControls({
                       name={victim.name}
                       value={value === "untracked" ? undefined : value}
                       present="in-play"
-                      help={CAMP_EVENTS.find(event=>event.name===victim.event)?.effect}
+                      showRules={false}
                       reminder={campReminders[victim.id]}
                       art={portrait}
                       states={[
@@ -183,6 +182,11 @@ export function CampControls({
                       tileClassName="play-camp-effect-toggle"
                       name={effect.name}
                       value={typeof value === "string" ? value : undefined}
+                      interaction={
+                        ["deathwish", "star-crossed-lovers", "stubborn-kids"].includes(effect.id)
+                          ? "toggle"
+                          : "details"
+                      }
                       ended="resolved"
                       art={effectArt[effect.id]}
                       effect={effect.effect}

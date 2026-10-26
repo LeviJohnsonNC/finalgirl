@@ -33,7 +33,7 @@ for (const [location, id] of [
   ["Carnival of Blood", "carnival"],
   ["Maple Lane", "maple"],
 ]) {
-  test(`Wrath, Atonement, Minor Powers and shared reveals work at ${location}`, async ({
+  test(`Wrath, Minor Powers and shared reveals work at ${location}`, async ({
     page,
     archive,
   }) => {
@@ -54,9 +54,8 @@ for (const [location, id] of [
     await p
       .getByRole("button", { name: "Set Killer Wrath to 5", exact: true })
       .click();
-    await p.getByText("Atonement & corrections", { exact: true }).click();
     await p
-      .getByRole("button", { name: "2 successes 5 → 2", exact: true })
+      .getByRole("button", { name: "Set Killer Wrath to 2", exact: true })
       .click();
     await expect(p.getByLabel("Current Killer Wrath")).toHaveText("2/10");
     await page.getByRole("button", { name: "Undo", exact: true }).click();

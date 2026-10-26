@@ -4,7 +4,6 @@ import { IllustratedTile } from "./IllustratedTile";
 import { PlaySelect } from "./PlaySelect";
 import { illustratedKillerCards } from "./killerPresentation";
 import { useModuleRecord } from "./useModuleRecord";
-import type { CSSProperties } from "react";
 import "@/styles/play-controls.css";
 
 export function KillerCards({
@@ -68,11 +67,14 @@ export function KillerCards({
               aria-label={`${type === "dark-power" ? "Dark Power" : "Finale"} selection`}
             >
               <h3>{type === "dark-power" ? "Dark Power" : "Finale"}</h3>
-              {reveal && !selected && <p className="module-control-help">{reveal.killerCard || "Card name not specified"}</p>}
+              {reveal && !selected && (
+                <p className="module-control-help">
+                  {reveal.killerCard || "Card name not specified"}
+                </p>
+              )}
               <div
-                className={`module-card-grid${type === "dark-power" ? " module-dark-power-grid" : ""}`}
+                className="module-card-grid module-compact-reveal-grid"
                 data-has-selection={Boolean(selected)}
-                style={type === "dark-power" ? { "--power-alternatives": Math.max(1, cards.length - 1) } as CSSProperties : undefined}
               >
                 {cards.map((card) => (
                   <IllustratedTile
@@ -85,20 +87,25 @@ export function KillerCards({
                     aria-label={`Choose ${card.name}`}
                     aria-pressed={selected?.id === card.id}
                     disabled={
-                      disabled || (killer === "Hans" &&
-                      type === "dark-power" &&
-                      hans.secondPower === card.name)
+                      disabled ||
+                      (killer === "Hans" &&
+                        type === "dark-power" &&
+                        hans.secondPower === card.name)
                     }
                     onClick={() => choose(type, card.name)}
                   >
-                    {type === "dark-power" && selected?.id === card.id && <span className="module-power-selected">Selected</span>}
+                    {selected?.id === card.id && (
+                      <span className="module-power-selected">Selected</span>
+                    )}
                   </IllustratedTile>
                 ))}
               </div>
-              {selected && <details className="module-card-rules">
-                <summary>Card rules</summary>
-                <p>{selected.effect}</p>
-              </details>}
+              {selected && (
+                <details className="module-card-rules">
+                  <summary>Card rules</summary>
+                  <p>{selected.effect}</p>
+                </details>
+              )}
               <button
                 className="module-unnamed"
                 disabled={disabled}
@@ -114,14 +121,14 @@ export function KillerCards({
       {killer === "Hans" && hans.finale === "Dark, Darker, Darkest" && (
         <div className="module-second-power">
           <h3>Second Dark Power</h3>
-          <div className="module-card-grid">
+          <div className="module-card-grid module-compact-reveal-grid">
             {illustratedKillerCards(killer, "dark-power")
               .filter((card) => card.name !== hans.power)
               .map((card) => (
                 <IllustratedTile
                   key={card.id}
                   className="module-control-tile module-killer-card"
-                    data-epic={card.epic || undefined}
+                  data-epic={card.epic || undefined}
                   art={card.art}
                   title={card.name}
                   status={`${hans.secondPower === card.name ? "Revealed" : "Choose second power"}${card.epic ? " · Epic" : ""}`}

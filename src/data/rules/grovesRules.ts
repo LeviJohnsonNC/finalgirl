@@ -86,7 +86,7 @@ export const grovesRules: EntityRuleModule = {
     { type: "paragraph", text: INKANYAMBA_ATONEMENT },
     {
       type: "paragraph",
-      text: "Use one chosen track per Atonement. In the helper enter final successes after Prayer Book, rerolls and conversions; do not count the same bonus twice. Divine Wrath follows this Location and Killer Wrath follows Inkanyamba. Failed Atonement costs are resolved physically.",
+      text: "Use one chosen track per Atonement. Count final successes after Prayer Book, rerolls and conversions; do not count the same bonus twice. Divine Wrath follows this Location and Killer Wrath follows Inkanyamba. Failed Atonement costs are resolved physically.",
     },
     { type: "heading", level: 3, text: "Events and Special Victims" },
     { type: "list", items: cards(GROVES_EVENTS) },

@@ -18,6 +18,7 @@ export function CharacterControl({
   onChange,
   onOutcome,
   help,
+  showRules = true,
   reminder,
   className = "",
   tileClassName = "",
@@ -32,6 +33,7 @@ export function CharacterControl({
   /** Outcome resolution may collect choices; corrections still use onChange. */
   onOutcome?: (value: string) => unknown;
   help?: ReactNode;
+  showRules?: boolean;
   reminder?: ReactNode;
   className?: string;
   tileClassName?: string;
@@ -73,14 +75,18 @@ export function CharacterControl({
               disabled={!active}
               aria-pressed={value === outcome}
               aria-label={`Mark ${name} ${outcome}`}
-              onClick={() => onOutcome ? onOutcome(outcome) : onChange(outcome)}
+              onClick={() =>
+                onOutcome ? onOutcome(outcome) : onChange(outcome)
+              }
             >
               {states.find((state) => state.value === outcome)?.label}
             </button>
           ))}
         </div>
       )}
-      {active && reminder && <p className="module-active-reminder">{reminder}</p>}
+      {active && reminder && (
+        <p className="module-active-reminder">{reminder}</p>
+      )}
       <details
         className="module-correction"
         open={open}
@@ -104,7 +110,14 @@ export function CharacterControl({
           </PlaySelect>
         </div>
       </details>
-      {help && <details className="module-card-rules"><summary>Rules<span className="sr-only">: {name}</span></summary><div>{help}</div></details>}
+      {showRules && help && (
+        <details className="module-card-rules">
+          <summary>
+            Rules<span className="sr-only">: {name}</span>
+          </summary>
+          <div>{help}</div>
+        </details>
+      )}
     </article>
   );
 }
