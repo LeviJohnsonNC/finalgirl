@@ -60,8 +60,7 @@ export function activeScreenings(game: ActiveGame, failed: ReadonlySet<string>):
   return scene ? [{ ...game.selection, id: game.id, key: `${game.id}:${scene}`, imageUrl: scene, kind: 'scene', timestamp: 0 }] : [];
 }
 
-/** A result alone cannot establish survival (simultaneous deaths can win). */
+/** Show the recorded result; it does not imply whether the Final Girl survived. */
 export function screeningVerdict(game: Pick<Screening, 'outcome' | 'finalGirlHealth'>): string {
-  if (game.outcome === 'won') return game.finalGirlHealth === 0 ? 'Sacrificial victory' : game.finalGirlHealth !== undefined && game.finalGirlHealth > 0 ? 'Survived' : 'Victory';
-  return game.finalGirlHealth !== undefined && game.finalGirlHealth > 0 ? 'Alive · Defeat' : 'Lost to the night';
+  return game.outcome === 'won' ? 'Won' : 'Lost';
 }

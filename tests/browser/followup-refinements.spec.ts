@@ -55,20 +55,15 @@ test('the shared footer stays fixed on Stats and highlights every selected desti
 });
 
 for (const outcome of ['won', 'lost'] as const) {
-  test(`the ${outcome} theater verdict keeps its intended word grouping`, async ({ page, archive }, info) => {
+  test(`the ${outcome} theater verdict uses one compact word`, async ({ page, archive }, info) => {
     archive.history = [{ id: gameId, timestamp: 1, outcome, final_girl_health: outcome === 'won' ? 2 : 0,
       killer: 'Hans', location: 'Camp Happy Trails', final_girl: 'Laurie', scene_image_url: 'http://127.0.0.1:4173/theater-a.png' }];
     await archive.install(page);
     await page.route('**/theater-a.png', route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/camp-happy-trails.png') }));
     await page.goto('/');
-    await expect(page.locator('.theater-verdict')).toHaveAttribute('aria-label', outcome === 'won' ? 'Survived' : 'Lost to the night');
+    await expect(page.locator('.theater-verdict')).toHaveAttribute('aria-label', outcome === 'won' ? 'Won' : 'Lost');
     await page.evaluate(() => document.fonts.ready);
-    if (outcome === 'lost') {
-      await expect(page.locator('.theater-verdict > span')).toHaveText(['Lost to the', 'night']);
-      for (const phrase of await page.locator('.theater-verdict > span').all()) {
-        expect(await phrase.evaluate(el => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
-      }
-    }
+    await expect(page.locator('.theater-verdict')).toHaveText(outcome === 'won' ? 'Won' : 'Lost');
     await page.screenshot({ path: info.outputPath(`theater-${outcome}-verdict.png`), fullPage: true });
   });
 }

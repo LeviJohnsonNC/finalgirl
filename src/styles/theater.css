@@ -49,24 +49,21 @@
 }
 .theater-program { position: relative; width: 100%; min-height: 100px; padding: 10px 17px 5px; color: #e9e3d6; }
 .theater-program-empty { display: grid; align-items: center; padding-block: 14px; }
-.theater-program-personal { display: grid; grid-template-columns: minmax(0,1fr) auto; grid-template-rows: auto; gap: 0 18px; align-items: center; }
+.theater-program-personal { min-height: 76px; display: grid; grid-template-columns: minmax(0,1fr) auto; grid-template-rows: auto; gap: 0 18px; align-items: center; }
 .theater-caption { grid-column: 1; grid-row: 1; min-width: 0; }
 .theater-caption h2 { margin: 0 0 5px; font-family: var(--font-display); font-size: clamp(18px, 1.45vw, 25px); font-weight: 500; line-height: 1.2; letter-spacing: .045em; text-transform: uppercase; overflow-wrap: anywhere; }
 .theater-caption-details { display: flex; align-items: center; flex-wrap: wrap; gap: 0 8px; min-width: 0; font: 12px/1.6 'Courier New', monospace; letter-spacing: .055em; text-transform: uppercase; color: #b2bac1; }
 .theater-caption-details > span:first-child { overflow-wrap: anywhere; }
 .theater-meta-divider { opacity: .45; }
-.theater-caption-link { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; margin-block: -8px; font: inherit; color: #c9d0d3; text-align: left; }
-.theater-caption-link:hover { color: #fff5df; text-decoration: underline; text-underline-offset: 4px; }
-.theater-caption-link svg { flex-shrink: 0; opacity: .7; }
-.theater-verdict { grid-column: 2; grid-row: 1; display: flex; align-items: center; justify-content: flex-end; align-self: stretch; margin: 0; max-width: 190px; padding-left: 20px; border-left: 1px solid #a8b6b74d; font: 400 clamp(23px, 1.65vw, 28px)/1.15 'Starlight Display', Georgia, serif; letter-spacing: .075em; text-transform: uppercase; text-align: right; }
+.theater-case-target { position: absolute; inset: -6px; z-index: 1; cursor: pointer; }
+.theater-case-target:hover { box-shadow: inset 0 0 0 1px #a8b6b74d; }
+.theater-verdict { white-space: nowrap; grid-column: 2; grid-row: 1; display: flex; align-items: center; justify-content: flex-end; align-self: stretch; margin: 0; max-width: 190px; padding-left: 20px; border-left: 1px solid #a8b6b74d; font: 400 clamp(23px, 1.65vw, 28px)/1.15 'Starlight Display', Georgia, serif; letter-spacing: .075em; text-transform: uppercase; text-align: right; }
 .theater-verdict-long { font-size: clamp(18px, 1.25vw, 22px); }
-.theater-verdict--night { flex-direction: column; align-items: flex-end; justify-content: center; gap: 2px; }
-.theater-verdict--night > span { white-space: nowrap; }
 .theater-survived { color: #9ad5ce; text-shadow: 0 1px 3px #000, 0 0 14px #59aaa329; white-space: nowrap; }
 .theater-lost { color: #e48679; }
 .theater-in-progress { color: #d0bd8d; }
 .theater-progress-line { margin-top: 6px; font: 11px/1.5 'Courier New', monospace; color: #acb8bc; }
-.theater-mode-switch { grid-column: 1 / -1; grid-row: 1; display: flex; justify-content: center; gap: 22px; border-bottom: 1px solid #a8b6b733; margin: -8px 0 12px; }
+.theater-mode-switch { position: relative; z-index: 2; grid-column: 1 / -1; grid-row: 1; display: flex; justify-content: center; gap: 22px; border-bottom: 1px solid #a8b6b733; margin: -8px 0 12px; }
 .theater-program-active .theater-caption { grid-row: 2; }
 .theater-program-active .theater-verdict { grid-row: 2; }
 .theater-mode-switch button { min-height: 44px; padding: 4px 0; font: 11px/1.4 'Courier New', monospace; text-transform: uppercase; letter-spacing: .08em; color: #b7c1c6; border-bottom: 1px solid transparent; }
@@ -144,13 +141,12 @@
   .theater-account-text { display: none; }
   .theater-program { padding: 8px 9px 3px; min-height: 116px; }
   .theater-program-empty { padding-block: 14px; }
-  .theater-program-personal { grid-template-columns: minmax(0,1fr); grid-template-rows: auto auto; gap: 5px; }
+  .theater-program-personal { min-height: 92px; grid-template-columns: minmax(0,1fr); grid-template-rows: auto auto; gap: 5px; }
   .theater-caption { grid-column: 1; grid-row: 1; }
   .theater-caption h2 { font-size: 17px; line-height: 1.18; }
   .theater-caption-details { font-size: 10px; gap: 0 6px; }
   .theater-verdict { grid-column: 1; grid-row: 2; justify-content: flex-start; max-width: none; padding: 10px 0 2px; border-left: 0; border-top: 1px solid #9ea9aa33; font-size: 24px; text-align: left; }
   .theater-verdict-long { font-size: 18px; }
-  .theater-verdict--night { flex-direction: row; align-items: center; justify-content: flex-start; gap: .3em; }
   .theater-mode-switch { gap: 18px; margin-bottom: 7px; }
   .theater-program-active .theater-caption { grid-row: 2; }
   .theater-program-active .theater-verdict { grid-row: 3; }

@@ -46,7 +46,7 @@ export const Marquee = ({ onStart, onArchive, onNavigateHome, onScrapbooks, onSt
 
         <main className="theater-main" aria-label="The drive-in theater">
           <TheaterReel key={user?.id ?? 'guest'} games={authLoading ? [] : gameHistory} loading={authLoading || isLoading}
-            historyError={loadError} onRetryHistory={retryLoadHistory} onOpenCaseFile={user ? onOpenCaseFile : undefined} activeGame={resumeGame}
+            historyError={loadError} onRetryHistory={retryLoadHistory} onOpenCaseFile={user ? onOpenCaseFile : undefined} onResume={onStart} activeGame={resumeGame}
             actions={<>
               <div className="theater-recovery">{recoveryNotice}</div>
               <TheaterActions game={resumeGame} cloud={resumeFromCloud} onStart={onStart} onStartAnother={onStartAnother} />
