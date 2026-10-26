@@ -16,12 +16,6 @@
   font-weight: 400;
   font-display: swap;
 }
-@font-face {
-  font-family: "Shelf Text";
-  src: url("../assets/fonts/crimson-pro.woff2") format("woff2");
-  font-weight: 200 900;
-  font-display: swap;
-}
 .collection-title {
   color: hsl(var(--blood-red-legible));
 }
@@ -42,13 +36,14 @@
   flex-direction: column;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid #705044;
+  border: 1px solid color-mix(in srgb, var(--shelf-accent) 34%, #181a1c);
   border-radius: 9px;
   background: #0b0b0c;
+  --shelf-ui:
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #e9dfca;
-  box-shadow:
-    0 6px 20px #0006,
-    inset 0 0 0 3px #d5b08c15;
+  font-family: var(--shelf-ui);
+  box-shadow: 0 8px 22px #0009;
   transition:
     border-color 0.18s,
     box-shadow 0.18s;
@@ -58,19 +53,15 @@
   position: absolute;
   inset: 0;
   z-index: 3;
-  border: 5px solid transparent;
-  border-image: url("../assets/theater-weathered-rim.svg") 16 / 5px stretch;
   pointer-events: none;
-  opacity: 0.6;
+  border-radius: inherit;
+  box-shadow: inset 0 0 30px #0009;
 }
 .collection-film-owned {
-  border-color: var(--shelf-accent);
-  box-shadow:
-    0 6px 24px #0008,
-    inset 0 0 0 1px var(--shelf-accent);
+  border-color: color-mix(in srgb, var(--shelf-accent) 48%, #181a1c);
 }
 .collection-film:hover {
-  border-color: var(--shelf-paper);
+  border-color: color-mix(in srgb, var(--shelf-accent) 65%, #232527);
 }
 .collection-scene {
   position: absolute;
@@ -80,31 +71,74 @@
   height: 100%;
   object-fit: cover;
   object-position: right 38%;
-  opacity: 0.74;
-  transition: opacity 0.18s;
-}
-.collection-film-owned .collection-scene {
   opacity: 1;
+  filter: contrast(1.14) brightness(0.85) saturate(0.88);
+  transition: filter 0.18s;
 }
+
 .collection-print-wash {
   position: absolute;
   z-index: -1;
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, #05050680, transparent 75%),
+    radial-gradient(
+      ellipse at 85% 25%,
+      transparent 15%,
+      #02030560 78%,
+      #020305ad
+    ),
+    linear-gradient(90deg, #020305b5, #02030555 48%, transparent 83%),
     linear-gradient(
       0deg,
-      #08080b 15%,
-      #08080bce 38%,
-      #08080b70 60%,
-      transparent 85%
+      #040507 3%,
+      #040507f5 17%,
+      #040507bd 32%,
+      #04050740 61%,
+      transparent 88%
     );
+}
+/* Foreground mist and sparse film scratches sit above the directional wash. */
+.collection-print-texture {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 94% 52%, #a5b9be0c, transparent 38%),
+    repeating-linear-gradient(
+      112deg,
+      transparent 0 73px,
+      #d4cbb608 73.3px 73.8px,
+      transparent 74px 187px
+    ),
+    linear-gradient(0deg, #0008, transparent 30%);
+  mask-image:
+    linear-gradient(90deg, #000, transparent 12% 87%, #000),
+    linear-gradient(0deg, #000, transparent 28% 91%, #000);
+}
+/* An unowned release stays unmistakably dark, including its text and portraits.
+   The small ownership control remains readable and every action stays usable. */
+.collection-film:not(.collection-film-owned) {
+  border-color: #28292b;
+}
+.collection-film:not(.collection-film-owned) .collection-scene {
+  filter: brightness(0.2) saturate(0.12);
+}
+.collection-film:not(.collection-film-owned) .collection-feature,
+.collection-film:not(.collection-film-owned) .collection-cast,
+.collection-film:not(.collection-film-owned) .collection-girl-link,
+.collection-film:not(.collection-film-owned) .collection-teaser-note {
+  filter: brightness(0.3) saturate(0.18);
+}
+.collection-film:not(.collection-film-owned)
+  .collection-girl-link:focus-visible {
+  filter: brightness(0.6) saturate(0.25);
 }
 .collection-ownership {
   position: absolute;
   top: 3px;
-  right: 10px;
+  right: 6px;
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -123,8 +157,8 @@
 .collection-ownership button::before {
   content: "";
   position: absolute;
-  inset: 11px 0;
-  border: 1px solid #ead9b175;
+  inset: 14px 6px;
+  border: 1px solid #d5dadd65;
   border-radius: 20px;
   background: #080808c9;
 }
@@ -134,16 +168,16 @@
 }
 .collection-ownership button > span {
   position: absolute;
-  width: 16px;
-  height: 16px;
-  top: 14px;
-  left: 4px;
+  width: 12px;
+  height: 12px;
+  top: 16px;
+  left: 8px;
   background: #efe1bf;
   box-shadow: 0 1px 3px #000b;
   transform: translateX(0);
 }
 .collection-ownership button[data-state="checked"] > span {
-  transform: translateX(20px);
+  transform: translateX(16px);
   background: #17100e;
 }
 .collection-ownership button:disabled {
@@ -151,10 +185,8 @@
   cursor: not-allowed;
 }
 .collection-ownership > span {
-  margin-top: -3px;
-  font:
-    700 10px/1.1 "Shelf Condensed",
-    sans-serif;
+  margin-top: -4px;
+  font: 500 9px/1.1 var(--shelf-ui);
   text-transform: uppercase;
   letter-spacing: 0.13em;
   text-shadow: 0 1px 3px #000;
@@ -162,11 +194,11 @@
 .collection-feature {
   position: relative;
   display: grid;
-  grid-template-columns: 28% minmax(0, 1fr);
+  grid-template-columns: 30% minmax(0, 1fr);
   align-items: center;
-  gap: 18px;
-  min-height: 230px;
-  padding: 22px 18px 12px;
+  gap: 16px;
+  min-height: 216px;
+  padding: 10px 16px 0;
   flex: 1;
 }
 .collection-cover {
@@ -174,7 +206,8 @@
   min-width: 0;
   aspect-ratio: 2/3;
   transform: rotate(-4deg);
-  filter: drop-shadow(5px 7px 4px #000b);
+  filter: drop-shadow(-0.6px -0.5px 0.4px #e2e8e54d)
+    drop-shadow(7px 12px 7px #000e);
 }
 .collection-cover img {
   width: 100%;
@@ -192,9 +225,7 @@
   background: #151313;
   border: 1px solid #b8a98755;
   color: #d6c5a5;
-  font:
-    600 16px/1.2 "Shelf Condensed",
-    sans-serif;
+  font: 500 13px/1.3 var(--shelf-ui);
   text-align: center;
 }
 .collection-pitch {
@@ -202,7 +233,7 @@
   padding-top: 5px;
 }
 .collection-film-title {
-  margin: 0 26px 14px -3px;
+  margin: 0 26px 10px -3px;
   color: var(--shelf-paper);
   font:
     600 40px/0.84 "Shelf Brush",
@@ -246,9 +277,7 @@
 .collection-format {
   display: block;
   margin-top: 5px;
-  font:
-    700 10px/1.3 "Shelf Condensed",
-    sans-serif;
+  font: 500 9px/1.3 var(--shelf-ui);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #e0d8c9;
@@ -256,13 +285,8 @@
 .collection-pitch p {
   margin-top: 6px;
   color: #eee6d6;
-  font:
-    500 14px/1.32 "Shelf Text",
-    Georgia,
-    serif;
-  text-shadow:
-    0 1px 3px #000,
-    0 0 5px #000;
+  font: 500 13px/1.4 var(--shelf-ui);
+  text-shadow: 0 1px 3px #000;
 }
 .collection-cast {
   position: relative;
@@ -270,10 +294,8 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
   gap: 12px;
   margin: 0 14px;
-  padding: 10px 8px;
-  border-top: 1px solid #c4af852e;
-  border-bottom: 1px solid #c4af852e;
-  background: #08080b9c;
+  padding: 5px 4px;
+  background: linear-gradient(90deg, #02030580, #02030545 75%, transparent);
 }
 .collection-cast > div {
   min-width: 0;
@@ -282,40 +304,34 @@
   gap: 9px;
 }
 .collection-cast > div + div {
-  border-left: 1px solid #b2a08938;
-  padding-left: 12px;
+  padding-left: 10px;
 }
 .collection-cast svg {
   flex-shrink: 0;
-  color: var(--shelf-accent);
+  color: #e65058;
 }
 .collection-cast > div:nth-child(2) svg {
   color: #5fbdcb;
 }
 .collection-cast dt {
-  font:
-    600 10px/1.2 "Shelf Condensed",
-    sans-serif;
+  font: 500 9px/1.2 var(--shelf-ui);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #c6bcaa;
 }
 .collection-cast dd {
-  margin-top: 2px;
-  font:
-    600 14px/1.15 "Shelf Text",
-    Georgia,
-    serif;
+  margin-top: 1px;
+  font: 500 12px/1.2 var(--shelf-ui);
   color: #f4ead5;
   overflow-wrap: anywhere;
 }
 .collection-film .collection-girl-references {
   position: relative;
   display: flex;
-  gap: 10px;
+  gap: 8px;
   border: 0;
   margin: 0;
-  padding: 10px 14px 12px;
+  padding: 4px 14px 6px;
 }
 .collection-girl-link {
   position: relative;
@@ -326,14 +342,13 @@
   gap: 5px;
   flex: 1;
   min-width: 0;
-  min-height: 54px;
-  padding: 8px 9px 8px 19cqw;
-  background: #101113;
-  color: #f0dfbb;
-  border: 1px solid #bd986b80;
-  border-radius: 1px;
+  min-height: 44px;
+  padding: 5px 8px 5px 19cqw;
+  background: #101215c9;
+  color: #e8e8e5;
+  border: 1px solid #ffffff26;
+  border-radius: 5px;
   text-align: left;
-  box-shadow: inset 0 0 0 2px #baa17a12;
   transition:
     background-color 0.15s,
     border-color 0.15s;
@@ -342,7 +357,7 @@
   padding-left: 19cqw;
 }
 .collection-film-owned .collection-girl-link:first-child {
-  background: color-mix(in srgb, var(--shelf-accent) 38%, #100b0c);
+  background: color-mix(in srgb, var(--shelf-accent) 22%, #100d10);
 }
 .collection-girl-link:hover {
   background: #302325;
@@ -367,9 +382,7 @@
   object-position: var(--portrait-focus, 50% 42%);
 }
 .collection-girl-name {
-  font:
-    700 17px/1.1 "Shelf Condensed",
-    sans-serif;
+  font: 600 13px/1.2 var(--shelf-ui);
   overflow-wrap: anywhere;
   text-shadow: 0 1px 3px #000;
 }
@@ -377,9 +390,7 @@
   display: grid;
   place-items: center;
   height: 100%;
-  font:
-    600 30px "Shelf Brush",
-    cursive;
+  font: 500 25px var(--shelf-ui);
   color: var(--shelf-accent);
 }
 .collection-girl-link:only-child {
@@ -395,27 +406,23 @@
   box-shadow: 0 0 0 2px #08080b;
 }
 .collection-teaser-note {
-  margin: 0 18px 18px;
-  border-top: 1px solid #c4af8540;
-  padding-top: 12px;
+  margin: 0 16px 12px;
+  padding-top: 6px;
   color: var(--shelf-paper);
-  font:
-    500 15px "Shelf Text",
-    Georgia,
-    serif;
+  font: 500 12px/1.4 var(--shelf-ui);
 }
 .collection-upcoming .collection-feature {
-  min-height: 240px;
+  min-height: 210px;
 }
 @media (max-width: 639px) {
   .collection-grid {
     gap: 18px;
   }
   .collection-feature {
-    grid-template-columns: 26% minmax(0, 1fr);
-    gap: 13px;
-    padding: 27px 13px 12px;
-    min-height: 215px;
+    grid-template-columns: 28% minmax(0, 1fr);
+    gap: 12px;
+    padding: 18px 12px 2px;
+    min-height: 198px;
   }
   .collection-film-title {
     margin-right: 22px;
@@ -424,11 +431,11 @@
     font-size: calc(clamp(27px, 9cqw, 38px) * var(--line-scale));
   }
   .collection-pitch p {
-    font-size: 14px;
-    line-height: 1.32;
+    font-size: 13px;
+    line-height: 1.4;
   }
   .collection-ownership {
-    right: 8px;
+    right: 4px;
     top: 0;
   }
   .collection-cast {
@@ -443,14 +450,14 @@
     padding-left: 8px;
   }
   .collection-cast dd {
-    font-size: 13px;
+    font-size: 12px;
   }
   .collection-film .collection-girl-references {
-    padding: 9px 10px 11px;
+    padding: 4px 10px 6px;
     gap: 7px;
   }
   .collection-girl-link {
-    min-height: 48px;
+    min-height: 44px;
     padding-right: 6px;
     padding-left: 18cqw;
   }
@@ -458,7 +465,7 @@
     padding-left: 18cqw;
   }
   .collection-girl-name {
-    font-size: 16px;
+    font-size: 12px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

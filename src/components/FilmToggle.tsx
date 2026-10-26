@@ -82,6 +82,7 @@ export const FilmToggle = React.forwardRef<HTMLDivElement, FilmToggleProps>(
           height={640}
         />
         <div className="collection-print-wash" aria-hidden="true" />
+        <div className="collection-print-texture" aria-hidden="true" />
         <label className="collection-ownership" htmlFor={id}>
           <Switch
             id={id}
@@ -99,8 +100,8 @@ export const FilmToggle = React.forwardRef<HTMLDivElement, FilmToggleProps>(
             <ShelfImage
               src={boxArt}
               alt={`${film.name} box art`}
-              width={288}
-              height={432}
+              width={384}
+              height={576}
               fallback={
                 <div
                   className="collection-cover-fallback"
