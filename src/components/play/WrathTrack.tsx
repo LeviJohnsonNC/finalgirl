@@ -1,31 +1,36 @@
 import type { ReactNode } from "react";
-import { Zap, Sun } from "lucide-react";
+import { wrathBackground } from "./wrathPresentation";
 import "@/styles/wrath-track.css";
 
 /** Presentation only: setting a physical level never resolves an Unleash. */
 export function WrathTrack({
   kind,
   value,
-  effect,
   disabled,
   onChange,
   children,
 }: {
   kind: "killer" | "divine";
   value?: number;
-  effect: string;
   disabled?: boolean;
   onChange: (value: number) => unknown;
   children?: ReactNode;
 }) {
   const name = kind === "killer" ? "Killer Wrath" : "Divine Wrath";
   const prefix = kind === "killer" ? "ink" : "groves";
-  const Icon = kind === "killer" ? Zap : Sun;
+  const backdrop = wrathBackground(kind, value);
   return (
     <section
       className={`wrath-board wrath-board--${kind}`}
       aria-label={`${name} tracker`}
+      data-wrath-stage={backdrop.stage ?? "unknown"}
     >
+      <img
+        className="wrath-background"
+        src={backdrop.src}
+        alt=""
+        decoding="async"
+      />
       <header className="wrath-heading">
         <div>
           <span className="wrath-eyebrow">
@@ -74,13 +79,6 @@ export function WrathTrack({
         >
           +
         </button>
-      </div>
-      <div className="wrath-unleash">
-        <Icon aria-hidden="true" />
-        <div>
-          <h4>Unleash{value !== undefined ? ` · Level ${value}` : ""}</h4>
-          <p>{effect}</p>
-        </div>
       </div>
       {children}
     </section>

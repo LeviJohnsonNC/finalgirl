@@ -127,19 +127,10 @@ for (const location of [
     await panel(page)
       .getByRole("button", { name: "Reveal Hellish Pursuit", exact: true })
       .click();
-    const hellish = panel(page)
-      .locator(".module-minor")
-      .filter({
-        has: page.getByRole("heading", {
-          name: "Hellish Pursuit",
-          exact: true,
-        }),
-      });
-    const endless = panel(page)
-      .locator(".module-minor")
-      .filter({
-        has: page.getByRole("heading", { name: "Endless Sleep", exact: true }),
-      });
+    // The labelled article remains stable as its compact reveal button becomes
+    // an expanded health panel, then a compact removed state.
+    const hellish = panel(page).getByRole("article", { name: "Hellish Pursuit", exact: true });
+    const endless = panel(page).getByRole("article", { name: "Endless Sleep", exact: true });
     await expect(
       hellish
         .getByRole("group", { name: "Hellish Pursuit health" })

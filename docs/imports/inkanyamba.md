@@ -94,3 +94,10 @@ User-approved simplification replaces the Wrath presentation with the shared `Wr
 Play removes the requested reference/correction panels. The dedicated Rules page retains mechanics and source attribution; obsolete references to retired UI helpers are corrected. Existing observations from hidden controls remain compatible and are not migrated or erased. Special-victim Rules disclosures are omitted while outcome actions and consequential reminders remain. Holy Man allocation remains provisional as previously approved. Sacred-space image cycling, explicit combined/unknown editing and Fickleness presence toggling use existing fields only. These UI conveniences never execute physical board effects, alter totals or infer Event/token state from one another.
 
 Release: frontend/artwork only; no new SQL or edge deployment. Current-head CI and the final PR record verification results separately from production publication.
+
+
+### Cinematic Play follow-up, 2026-10-26
+
+Approved visual-only follow-up: compact muted choices with large revealed Power/Finale panels across all applicable killers; independent active Minor panels with original health limits; Rules disclosures removed from Power/Finale chooser. Five Wrath background bands per owner replace static backgrounds; Play Unleash text and Inkanyamba Wrath reference removed. Sacred spaces use transformed environment images for all eight combinations, preserving actual placement/unknown/correction logic. Fickleness keeps its original artwork, loses reminder text and becomes 195px high. Shared presentation applies only to equivalent controls; linked Events and other owner mechanics retain their workflows.
+
+Source/art mappings and symbolic interpretation are recorded in the owner artwork READMEs. Raw rules, canonical validation, historical observations, narrative context, token limits, separate victim totals and provisional Holy Man allocation remain unchanged. No backfill or migration. Release: frontend/artwork only; CI/merge/publication are tracked on the PR separately.

@@ -71,7 +71,7 @@ test('death editing, loading, reading, corrections and errors keep laptop/phone 
  await page.screenshot({path:info.outputPath('death-error.png')});
 });
 
-test('killer selection, Epic borders and rules disclosure stay distinct and never write gameplay',async({page,archive},info)=>{
+test('killer selection and Epic borders stay distinct with a read-only revealed panel',async({page,archive},info)=>{
  await archive.install(page,{draft});await resume(page);await openModule(page,'geppetto');
  const panel=page.locator('[data-module="geppetto"]');
  await panel.locator('.module-card-section > summary').click();
@@ -81,17 +81,18 @@ test('killer selection, Epic borders and rules disclosure stay distinct and neve
  await selected.click();await expect(selected).toHaveAttribute('aria-pressed','true');
  await expect(epic).toHaveAttribute('data-epic','true');
  const brightness=(tile:typeof selected)=>tile.locator('.play-module-art').evaluate(el=>Number(getComputedStyle(el).filter.match(/brightness\(([.\d]+)\)/)?.[1] ?? 1));
- await expect.poll(()=>brightness(selected)).toBeGreaterThanOrEqual(1);
- // Selection stays vivid while hovered, focused, or under a phone's sticky hover.
- await selected.hover();await expect.poll(()=>brightness(selected)).toBeGreaterThanOrEqual(1);
- await selected.focus();await expect.poll(()=>brightness(selected)).toBeGreaterThanOrEqual(1);
+ await expect.poll(()=>brightness(selected)).toBeGreaterThanOrEqual(.6);
+ // The compact choice stays distinguishable; the expanded illustration is vivid.
+ await selected.hover();await expect.poll(()=>brightness(selected)).toBeGreaterThanOrEqual(.6);
+ await selected.focus();await expect.poll(()=>brightness(selected)).toBeGreaterThanOrEqual(.6);
  await cards.getByRole('heading',{name:'Dark Power',exact:true}).hover();
  const dimming=await epic.locator('.play-module-art').evaluate(el=>Number(getComputedStyle(el).filter.match(/brightness\(([.\d]+)\)/)?.[1] ?? 1));
  expect(dimming).toBeLessThanOrEqual(.45);
  await expect(cards.locator('[aria-pressed="true"]')).toHaveCount(1);
  await expect(selected.locator('.module-power-selected')).toBeVisible();
- const before=await log(page);await cards.locator('.module-card-rules > summary').click();
- await expect(cards.locator('.module-card-rules')).toContainText('first damage');expect(await log(page)).toEqual(before);
+ const before=await log(page);await expect(cards.locator('.module-card-rules')).toHaveCount(0);
+ await cards.locator('.module-revealed-hero').click();
+ await expect(cards.locator('.module-revealed-hero h4')).toHaveText('Massive Abominations');expect(await log(page)).toEqual(before);
  await epic.click();await expect(epic).toHaveAttribute('aria-pressed','true');
  await expect(epic).toHaveAttribute('data-epic','true');await expect(selected).toHaveAttribute('aria-pressed','false');
  await cards.scrollIntoViewIfNeeded();await page.screenshot({path:info.outputPath('killer-epic-selected.png')});
@@ -116,6 +117,8 @@ test('ending poster reclaims image area while the surrounding laptop layout stay
  await resume(page);const poster=page.getByRole('img',{name:'Movie poster',exact:true});await poster.evaluate((img:HTMLImageElement)=>img.decode());
  for(const size of [{width:1280,height:640},{width:1366,height:768},{width:1440,height:900}]) {
  await page.setViewportSize(size);await page.evaluate(()=>document.fonts.ready);
+ // Let responsive measurement observers settle before comparing the two fits.
+ await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));
  const image=(await poster.boundingBox())!;const reader=await page.locator('.narration-reader').boundingBox();const header=await page.locator('.ending-header').boundingBox();
  // Recreate only the former internal mat/fit, keeping this same layout and image.
  const old=await page.addStyleTag({content:`.narration-layout--ending .ending-poster-window{display:block;flex:0 1 auto;height:calc(100cqw * 1.5 + 20px)}.narration-layout--ending .ending-poster-window > .narration-photo-mount{width:min(100cqw,calc((100cqh - 20px) * 2 / 3));padding:20px 20px 16px}.narration-layout--ending .narration-photo--poster .narration-photo-edge{border-width:30px}`});

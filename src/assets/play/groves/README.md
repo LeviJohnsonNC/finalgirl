@@ -39,3 +39,16 @@ only interactive target. Viewing diagrams does not write gameplay.
 ## Sacred-space state art, 2026-10-26
 
 `sites.webp` is 1448×1086, four columns × three rows of 362px square cells, rendered with a 3px inset and complete-cell clipping. Source: `exec-20510bf0-a24a-4c0a-ad2d-1102c3ee75bd.png`, generated for this request, retained in the image-generation output. Rows are Burial Ground, Sacred Shrine, Holy Groves. Columns are clear, chained Closed gate, bronze Fire-and-Brimstone medallion, ivory/gold Hallowed medallion. These are decorative state interpretations, not official token facsimiles or new rules. Fire is an emblem, not a burning landscape. Multiple tokens use the first token's place illustration plus all live state labels and a count; Adjust tokens exposes independent placements. The optimized atlas is bounded at 750KiB. Existing identity sources and atlases remain unchanged.
+
+
+## Environmental state replacements, 2026-10-26
+
+The earlier `sites.webp` token-emblem atlas is superseded in Play by three separately loaded 1536×768 4×2 WebP atlases. Sources were generated using the original named-site views, with a fixed camera/landmarks within each series:
+
+- `site-burial.webp`: `exec-4c7b5aca-17a8-4bac-b5db-f296ac819806.png`.
+- `site-shrine.webp`: `exec-313e1f6b-3a56-4c2c-87fb-29b093a9a648.png`.
+- `site-holy.webp`: `exec-7d6197c1-2f6c-4e05-8c37-ddb8a16349b9.png`.
+
+Eight row-major cells use the bit pattern Closed=1, Fire=2, Hallowed=4: clear, closed, fire, closed+fire, hallowed, closed+hallowed, fire+hallowed, all three. Each 384px cell has a 3px inset with explicit source clipping. Blocked access, fiery environments and hallowed light replace medallions; combinations visibly retain all their constituent treatments. These are symbolic UI state illustrations; no wildfire, casualty, new terrain rule or narrative fact is inferred. All text stays live HTML, including unknown observations and multi-token labels. Budget: 520KiB per atlas.
+
+`wrath-1.webp` through `wrath-5.webp` come from the right column of shared source `exec-29f83d98-2c0b-48b4-9037-aeb3199d46ac.png`. Five progressive versions of the same tropical lake/standing stones scene, no killer identity. Native derivative size approximately 768×205; 120KiB each. Fickleness's original scene (cell11 in scenes.webp) is unchanged; only its HTML/CSS frame and size are updated.

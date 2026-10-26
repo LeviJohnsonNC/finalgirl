@@ -40,7 +40,7 @@ export function EventControl({
   return (
     <article
       data-module-control="event"
-      className={`module-event ${className}`}
+      className={`module-event ${interaction === "toggle" ? "module-cinematic-toggle" : ""} ${className}`}
       data-state={value ?? "unrecorded"}
     >
       <IllustratedTile

@@ -1,0 +1,482 @@
+/* Also loaded when Play is opened before Collection; the same cached font file. */
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("../assets/fonts/collection/sourcesans3.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+/* Shared cinematic presentation: these selectors also cover Remember This. */
+.cinematic-eyebrow {
+  display: block;
+  color: #ce7463;
+  font:
+    600 10px/1.5 "Source Sans 3",
+    Arial,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+.module-card-grid.module-cinematic-chooser {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.module-cinematic-chooser .module-killer-card > .play-module-art {
+  height: 86px;
+  flex-basis: 86px;
+  filter: grayscale(0.8) brightness(0.32);
+}
+.module-cinematic-chooser
+  .module-killer-card[aria-pressed="true"]
+  > .play-module-art {
+  filter: grayscale(0.4) brightness(0.6);
+}
+.module-card-grid.module-cinematic-chooser
+  .module-killer-card
+  > .play-tile-caption {
+  min-height: 70px;
+  padding: 9px 10px;
+  background: #0b1011;
+}
+.module-card-grid.module-cinematic-chooser
+  .module-killer-card
+  .play-tile-caption
+  strong {
+  font:
+    400 17px/1.18 "Narration Fell",
+    Georgia,
+    serif;
+}
+.module-cinematic-chooser .module-killer-card .play-tile-state {
+  font:
+    500 9px/1.4 "Source Sans 3",
+    Arial,
+    sans-serif;
+  letter-spacing: 0.05em;
+}
+.module-cinematic-chooser .module-power-selected {
+  top: 5px;
+  left: 5px;
+  font-size: 8px;
+  padding: 3px 5px;
+}
+.module-revealed-hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 270px;
+  overflow: hidden;
+  border: 1px solid #8e483e;
+  border-radius: 9px 5px 8px 6px;
+  background:
+    radial-gradient(ellipse at 100% 100%, #4b141847, transparent 66%), #080d0f;
+  box-shadow:
+    0 9px 24px #0005,
+    inset 0 0 26px #0008;
+  margin-top: 16px;
+  animation: cinematic-settle 230ms ease-out;
+}
+.module-revealed-hero[data-epic="true"] {
+  border-color: #cf5c43;
+  box-shadow:
+    0 0 22px #9f28152e,
+    0 9px 24px #0005;
+}
+.module-revealed-art {
+  position: relative;
+  min-width: 0;
+  min-height: 270px;
+  background: #070b0d;
+}
+.module-revealed-art > .play-module-art {
+  width: 100%;
+  height: 100%;
+  max-height: 340px;
+  object-fit: contain;
+}
+.module-revealed-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 74%, #080d0f),
+    linear-gradient(0deg, #080d0f88, transparent 26%);
+}
+.module-revealed-copy {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 30px 30px 30px 12px;
+  min-width: 0;
+}
+.module-revealed-stamp {
+  display: inline-block;
+  padding: 6px 11px;
+  margin-bottom: 22px;
+  background: #711e1b;
+  color: #f6e7c9;
+  border: 1px solid #bc5744;
+  transform: rotate(-1deg);
+  font:
+    600 10px/1.4 "Source Sans 3",
+    Arial,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+.module-revealed-copy .cinematic-eyebrow {
+  color: #aaa293;
+  margin-bottom: 5px;
+}
+.module-revealed-copy h4 {
+  color: #f3e7cf;
+  margin: 0;
+  font:
+    400 clamp(30px, 3.4vw, 48px)/1.08 "Narration Fell",
+    Georgia,
+    serif;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+  text-shadow: 0 3px 5px #000;
+}
+.module-revealed-rule {
+  width: min(100%, 200px);
+  height: 1px;
+  margin-top: 22px;
+  background: linear-gradient(90deg, #b89b6d, #b89b6d00);
+}
+/* Equivalent Minor Powers keep their own health limits and observed art states. */
+.play-module-content .module-cinematic-minor {
+  display: block;
+  padding: 0;
+  gap: 0;
+  border: 1px solid #5f51494f;
+  border-radius: 9px 5px 8px 6px;
+  background: #0b1012;
+}
+.play-module-content .module-cinematic-minor[data-active="true"] {
+  grid-column: 1 / -1;
+  border-color: #9e5947;
+  box-shadow: 0 8px 24px #0004;
+  animation: cinematic-settle 230ms ease-out;
+}
+.module-cinematic-minor .module-minor-choice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  width: 100%;
+  min-height: 128px;
+  text-align: left;
+  border: 0;
+  border-radius: 0;
+  background: #0b1012;
+  color: #d8d1c4;
+}
+.module-cinematic-minor .module-minor-choice .module-minor-art {
+  width: 90px;
+  height: 100px;
+  flex: 0 0 90px;
+}
+.module-cinematic-minor .module-minor-choice .play-module-art {
+  height: 100%;
+  filter: grayscale(1) brightness(0.35);
+}
+.module-minor-choice-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.module-minor-choice-copy strong {
+  font:
+    400 22px/1.1 "Narration Fell",
+    Georgia,
+    serif;
+  text-wrap: balance;
+}
+.module-minor-choice .cinematic-eyebrow {
+  color: #9a9388;
+  font-size: 9px;
+}
+.module-minor-action {
+  font:
+    500 11px/1.4 "Source Sans 3",
+    Arial,
+    sans-serif;
+  color: #bd9987;
+}
+.module-cinematic-minor .module-minor-scene {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  position: relative;
+  isolation: isolate;
+  min-height: 300px;
+  background:
+    radial-gradient(ellipse at 0 0, #53201b33, transparent 70%), #090e10;
+}
+.module-cinematic-minor .module-minor-scene > .module-minor-art {
+  grid-column: 2;
+  grid-row: 1;
+  height: 100%;
+  min-height: 300px;
+  background: #090e10;
+  position: relative;
+}
+.module-cinematic-minor
+  .module-minor-scene
+  .module-minor-art
+  > .play-module-art {
+  height: 100%;
+  max-height: 340px;
+  width: 100%;
+  object-fit: contain;
+}
+.module-minor-scene > .module-minor-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, #090e10, transparent 25%),
+    linear-gradient(0deg, #090e1080, transparent 30%);
+  pointer-events: none;
+}
+.module-minor-body {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 28px;
+  min-width: 0;
+  gap: 17px;
+}
+.play-module-content .module-cinematic-minor .module-minor-body h3 {
+  margin: 0;
+  font:
+    400 clamp(28px, 3.2vw, 43px)/1.1 "Narration Fell",
+    Georgia,
+    serif;
+  color: #f2e6d0;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.module-cinematic-minor .module-health-status {
+  font:
+    500 13px/1.4 "Source Sans 3",
+    Arial,
+    sans-serif;
+  color: #d9c7ac;
+  letter-spacing: 0.035em;
+}
+.play-module-content .module-cinematic-minor .play-health-tokens > button {
+  width: 61px;
+  height: 61px;
+  border: 1px solid #98665388;
+  background: #111012;
+  border-radius: 5px;
+  box-shadow:
+    inset 0 1px #e5c5a622,
+    0 4px 9px #0008;
+}
+.play-module-content .module-cinematic-minor .module-correction {
+  padding: 0 20px 8px;
+  border-top: 1px solid #bca58226;
+}
+.play-module-content .module-cinematic-minor .module-correction > summary {
+  font:
+    500 12px/1.4 "Source Sans 3",
+    Arial,
+    sans-serif;
+  color: #beb3a0;
+}
+.module-cinematic-minor[data-state="removed"] .module-minor-scene {
+  min-height: 140px;
+  grid-template-columns: 112px minmax(0, 1fr);
+}
+.module-cinematic-minor[data-state="removed"]
+  .module-minor-scene
+  > .module-minor-art {
+  grid-column: 1;
+  min-height: 140px;
+  filter: grayscale(1) brightness(0.45);
+}
+.module-cinematic-minor[data-state="removed"] .module-minor-body {
+  grid-column: 2;
+  padding: 14px;
+  gap: 8px;
+}
+.play-module-content
+  .module-cinematic-minor[data-state="removed"]
+  .module-minor-body
+  h3 {
+  font-size: 22px;
+}
+.play-module-content
+  .module-cinematic-minor[data-state="removed"]
+  .play-health-tokens
+  > button {
+  width: 44px;
+  height: 44px;
+}
+/* Only opt-in independent presence effects use the cinematic toggle skin. */
+.play-module-content .module-cinematic-toggle {
+  border-radius: 10px;
+  border-color: #6d625144;
+  background: #090c0e;
+  box-shadow: 0 5px 16px #0005;
+}
+.play-module-content .module-cinematic-toggle .module-control-tile {
+  height: 195px;
+  min-height: 195px;
+  aspect-ratio: auto;
+  border-radius: 9px;
+}
+.module-cinematic-toggle .module-control-tile > .play-module-art {
+  object-fit: cover;
+}
+.module-cinematic-toggle
+  .module-control-tile[aria-pressed="false"]
+  .play-module-art {
+  filter: grayscale(0.85) brightness(0.33);
+}
+.module-cinematic-toggle[data-state="active"] {
+  border-color: #cfb36b;
+  box-shadow:
+    0 0 17px #b4903c29,
+    0 5px 16px #0005;
+}
+.play-module-content
+  .module-cinematic-toggle
+  .module-control-tile
+  .play-tile-caption {
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  gap: 9px;
+}
+.play-module-content .module-cinematic-toggle .play-tile-caption strong {
+  font-size: clamp(23px, 2.8vw, 33px);
+  color: #f2e5cd;
+}
+.play-module-content .module-cinematic-toggle .play-tile-state {
+  color: #c5bba8;
+  font:
+    600 10px/1.4 "Source Sans 3",
+    Arial,
+    sans-serif;
+  letter-spacing: 0.13em;
+}
+.play-module-content
+  .module-cinematic-toggle[data-state="active"]
+  .play-tile-state {
+  color: #e5c96e;
+}
+.module-cinematic-toggle .module-control-tile::after {
+  background: linear-gradient(0deg, #060a0d 1%, #060a0dbb 30%, transparent 82%);
+  box-shadow: inset 0 0 0 4px #0004;
+}
+.module-minor-choice:focus-visible {
+  outline: 2px dashed #f1dbad;
+  outline-offset: -4px;
+}
+@keyframes cinematic-settle {
+  from {
+    opacity: 0.6;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 700px) {
+  .module-card-grid.module-cinematic-chooser {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .module-card-grid.module-cinematic-chooser
+    .module-killer-card
+    > .play-module-art {
+    height: 76px;
+    flex-basis: 76px;
+  }
+  .module-revealed-hero {
+    grid-template-columns: 1fr;
+  }
+  .module-revealed-art {
+    height: 245px;
+    min-height: 245px;
+  }
+  .module-revealed-art::after {
+    background: linear-gradient(0deg, #080d0f, transparent 30%);
+  }
+  .module-revealed-copy {
+    padding: 4px 22px 25px;
+  }
+  .module-revealed-stamp {
+    margin-bottom: 14px;
+  }
+  .module-revealed-copy h4 {
+    font-size: 34px;
+  }
+  .module-cinematic-minor .module-minor-scene {
+    grid-template-columns: 1fr;
+  }
+  .module-cinematic-minor .module-minor-scene > .module-minor-art {
+    grid-column: 1;
+    height: 235px;
+    min-height: 235px;
+  }
+  .module-minor-scene > .module-minor-art::after {
+    background: linear-gradient(0deg, #090e10, transparent 30%);
+  }
+  .module-cinematic-minor .module-minor-body {
+    grid-column: 1;
+    grid-row: 2;
+    padding: 5px 20px 24px;
+    gap: 14px;
+  }
+  .play-module-content .module-cinematic-minor[data-state="removed"] {
+    grid-column: 1 / -1;
+  }
+  .module-cinematic-minor[data-state="removed"] .module-minor-body {
+    grid-row: 1;
+    grid-column: 2;
+    padding: 14px 10px;
+  }
+  .module-cinematic-minor[data-state="removed"] .module-minor-scene {
+    grid-template-columns: 65px minmax(0, 1fr);
+  }
+  .module-cinematic-minor[data-state="removed"]
+    .module-minor-scene
+    > .module-minor-art {
+    height: 100%;
+    min-height: 140px;
+  }
+  .module-cinematic-minor .module-minor-choice {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px;
+  }
+  .module-cinematic-minor .module-minor-choice .module-minor-art {
+    width: 100%;
+    height: 75px;
+    flex: 0 0 75px;
+  }
+  .module-minor-choice-copy strong {
+    font-size: 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .module-revealed-hero,
+  .play-module-content .module-cinematic-minor[data-active="true"] {
+    animation: none;
+  }
+}

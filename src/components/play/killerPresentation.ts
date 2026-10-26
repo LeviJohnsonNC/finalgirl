@@ -1,3 +1,4 @@
+import { inkanyambaHero } from "./inkanyambaHeroes";
 import { inkanyambaCell } from "./inkanyambaArt";
 import {
   INKANYAMBA_POWERS,
@@ -25,6 +26,7 @@ export interface IllustratedKillerCard {
   effect: string;
   epic?: boolean;
   art: ModuleArt;
+  heroArt?: ModuleArt;
 }
 export const atlasCell = (
   src: string,
@@ -77,6 +79,10 @@ export function illustratedKillerCards(
       epic:
         ("epic" in card && card.epic === true) ||
         card.effect.startsWith("Epic"),
+      heroArt:
+        killer === "Inkanyamba"
+          ? inkanyambaHero(index + (power ? 0 : 4))
+          : undefined,
       art:
         killer === "Inkanyamba"
           ? inkanyambaCell(index + (power ? 0 : 4))

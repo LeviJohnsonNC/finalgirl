@@ -1,10 +1,12 @@
 import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
 import { moduleState } from "@/lib/play/modules";
 import { IllustratedTile } from "./IllustratedTile";
+import { RevealedCard } from "./RevealedCard";
 import { PlaySelect } from "./PlaySelect";
 import { illustratedKillerCards } from "./killerPresentation";
 import { useModuleRecord } from "./useModuleRecord";
 import "@/styles/play-controls.css";
+import "@/styles/cinematic-controls.css";
 
 export function KillerCards({
   killer,
@@ -73,7 +75,7 @@ export function KillerCards({
                 </p>
               )}
               <div
-                className="module-card-grid module-compact-reveal-grid"
+                className="module-card-grid module-compact-reveal-grid module-cinematic-chooser"
                 data-has-selection={Boolean(selected)}
               >
                 {cards.map((card) => (
@@ -101,10 +103,10 @@ export function KillerCards({
                 ))}
               </div>
               {selected && (
-                <details className="module-card-rules">
-                  <summary>Card rules</summary>
-                  <p>{selected.effect}</p>
-                </details>
+                <RevealedCard
+                  card={selected}
+                  label={type === "dark-power" ? "Dark Power" : "Finale"}
+                />
               )}
               <button
                 className="module-unnamed"
@@ -121,7 +123,7 @@ export function KillerCards({
       {killer === "Hans" && hans.finale === "Dark, Darker, Darkest" && (
         <div className="module-second-power">
           <h3>Second Dark Power</h3>
-          <div className="module-card-grid module-compact-reveal-grid">
+          <div className="module-card-grid module-compact-reveal-grid module-cinematic-chooser">
             {illustratedKillerCards(killer, "dark-power")
               .filter((card) => card.name !== hans.power)
               .map((card) => (
@@ -134,6 +136,7 @@ export function KillerCards({
                   status={`${hans.secondPower === card.name ? "Revealed" : "Choose second power"}${card.epic ? " · Epic" : ""}`}
                   aria-label={`Choose second power ${card.name}`}
                   aria-pressed={hans.secondPower === card.name}
+                  disabled={disabled}
                   onClick={() =>
                     record(
                       newPlayEvent({
@@ -148,7 +151,20 @@ export function KillerCards({
                 />
               ))}
           </div>
+          {illustratedKillerCards(killer, "dark-power")
+            .filter(
+              (card) =>
+                card.name === hans.secondPower && card.name !== hans.power,
+            )
+            .map((card) => (
+              <RevealedCard
+                key={card.id}
+                card={card}
+                label="Second Dark Power"
+              />
+            ))}
           <PlaySelect
+            disabled={disabled}
             aria-label="Change second Dark Power card"
             value={String(hans.secondPower ?? "")}
             onChange={(event) =>

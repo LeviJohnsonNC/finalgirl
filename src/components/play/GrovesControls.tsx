@@ -11,7 +11,6 @@ import { moduleState, type ModuleValue } from "@/lib/play/modules";
 import {
   GROVES_EVENTS,
   GROVES_PEOPLE,
-  GROVES_UNLEASH,
   HOLY_MAN_PROVISIONAL,
   grovesLabel,
   grovesValue,
@@ -185,11 +184,6 @@ export function GrovesControls({
         value={wrath}
         disabled={blocked}
         onChange={(wrath) => record({ wrath })}
-        effect={
-          wrath === undefined
-            ? "Set the current level to see its Unleash effects."
-            : GROVES_UNLEASH[wrath - 1]
-        }
       >
         {s["event.loud"] === "active" && (
           <p className="groves-consequence">
@@ -401,7 +395,6 @@ export function GrovesControls({
           art={grovesScene(11)}
           interaction="toggle"
           className="groves-ongoing-terror"
-          reminder="At the END of Upkeep: Horror roll — 2+ successes reduce a chosen Wrath by 1; 1 has no effect; 0 Unleashes Divine Wrath, then increases it by Sacred-space Victims. Action phase: spend 3 Time to discard."
           onActivate={() => record({ fickleness: "active" })}
           onEnd={() => record({ fickleness: "ended" })}
           onClear={() => record({ fickleness: null })}
