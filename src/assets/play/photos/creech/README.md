@@ -15,3 +15,15 @@ Sources remain in generation output, never bundled. Each 1536×1024 source is a 
 Nineteen runtime images: eighteen here and `../../banners/creech.webp`. Existing cast/Collection/location identity images are retained; the new header is thematic. The roof helicopter photograph depicts availability, never an inferred rescue. Ladder state pair retains the same wall/window/ivy landmark. Rope routes have distinct washroom/ceiling/window landmarks. The Skull photo establishes no deaths. Active photos remain vivid; unknown/ended choices are dimmed. Environmental states and labels remain distinct at narrow width. Ending posters retain their established medium. No trusted opening-reference manifest or Storage object changes are made.
 
 Actual initial laptop/phone workflows were inspected before remaining generation; final loaded-state review is recorded in the owner import record.
+
+
+## Native wide heroes
+
+The four full-panel scenes replace the initial sheet derivatives with standalone native 1536×1024 photos, preserving their reviewed composition. WebP compression stays within 160KiB. Their width covers the rendered laptop panel without enlargement; smaller token/Event/portrait controls retain native sheet cells.
+
+| Asset | Standalone source |
+| --- | --- |
+| hunters | exec-59484ec6-61ff-4219-9343-269907717605 |
+| helicopter | exec-01aa6e42-86db-44c3-9c7d-ba1c016bdf1d |
+| restriction | exec-627bb046-d992-4c39-ab8d-9132724610f1 |
+| banner | exec-1ff074be-0fa9-4da1-b74c-1a82243fae4a |
