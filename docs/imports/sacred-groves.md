@@ -1,5 +1,15 @@
 # Sacred Groves import record
 
+## Current accepted presentation, 2026-10-27
+
+The current baseline is [the approved module standard](../MODULE_STANDARD.md), with [actual UI references](../reference/module-standard/README.md) pinned to `dad911e034e332a23882de7c8304dc9d0db198cb`. It supersedes earlier UI and release statements in the implementation chronology below; verified rules/source evidence remain valid unless explicitly corrected.
+
+Sacred Groves has a photographic owner header, its distinct retained Divine Wrath artwork, and all eight environmental-state combinations for each of three Sacred spaces. Simple legal states cycle on the picture; combined/unknown placements retain an explicit editor and atomic token relocation. Known empty omits the redundant caption. Special Victims retain legal outcome/allocation previews without card Rules blocks. Fickleness and equivalent independent ongoing effects toggle from their picture alone; linked/placement workflows and necessary active modifiers remain. Removed Atonement, connection/count and setup/reference UI stays out of Play. Canonical Rules and legacy observations remain intact. The Holy Man allocation without Inkanyamba remains explicitly provisional and owner-specific.
+
+For future work, update the current standard and this owner record in place; do not restore an older layout from the chronological notes. This preservation change is documentation/reference tooling only and requires no frontend, SQL, function or Storage deployment. Earlier implementation releases have their own PR evidence; a past “frontend only” statement does not apply to future shared-prompt/domain changes.
+
+## Implementation chronology and source evidence
+
 ## Scope and current status
 
 - Location: Sacred Groves; existing film ID `s1-sacred-groves`, module ID `groves`.

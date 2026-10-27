@@ -1,0 +1,40 @@
+# Playtest presentation refinements
+
+> Historical record, archived 2026-10-27. Superseded by the [approved module standard](../MODULE_STANDARD.md) and its current linked guides. Do not restore retired UI or deployment strategies from this chronology.
+
+The shared Dark Power/Finale chooser uses small muted options and a large read-only illustrated panel for the named revealed card. Epic, selection and keyboard focus stay distinct. Both entry points and Hans's second power share the treatment; unnamed and historical names stay visible. Card rules are omitted from this chooser and remain in Rules. Active Minor Powers expand independently; zero and unknown health retain their separate compact controls.
+
+Gruesome Death now uses a height-bounded illustrated frame with a compact header and a fixed action footer. Editing scrolls the form; reading scrolls prose. Generated or reopened matching scenes default to reading, with Edit death details to restore fields. Changing the cause restores editing and clears incompatible draft fields through the existing domain helper. On narrow phones, reading keeps only the selected cause tile; editing restores all six. Existing drafts, Cancel, takes, signature checks, save failures, narration and event identity are preserved.
+
+Removed normal-view filler: the Item Trap availability/repeat paragraph, the People & props procedural paragraph, tap-to-activate/portrait/heart instructions, generic correction guidance, reveal-only/resolve-on-board reminders, and visible routine moment confirmations. Moment success is announced to assistive technology. Full Event, companion and trap effects are under Rules; lasting penalties, spawn previews, health/status labels and errors remain visible. The rule catalogs and prompt data are unchanged.
+
+Ending posters reclaim the former internal mat allowance. The fit accounts for actual caption height and preserves a complete 2:3 poster, the existing art column, story reader, header and tools. Phone layout is unchanged.
+
+Frontend deployment only. No migrations, edge-function updates, model changes or gameplay backfill.
+
+Verification: `playtest-polish.spec.ts` exercises short-laptop and 320px layouts, fixed death actions through editing/loading/reading/errors, narration, draft cancellation, cause changes, Epic selection, read-only rule disclosure, and a measured image-area comparison against the former poster fit. Existing reliability tests retain the module, cache, ending and narration journeys. Browser screenshots are included in the CI artifacts.
+
+## Compact shared controls and Wrath boards, 2026-10-26
+
+The earlier compact follow-up replaced the selected Dark Power spotlight with a compact stable grid shared by Power, Finale and Hans's second power, in both entry points. All five illustrated killers show Minor Powers before reveals. Complete-cell art fitting and explicit atlas clipping preserve motifs without neighboring-cell bleed. Only Sacred Groves and Inkanyamba receive the new, distinct Wrath boards. Requested Groves reference/helpers are removed from Play while Rules retains the facts; no gameplay automation or historical data removal is introduced. Special-victim Rules rows are removed across applicable locations; non-victim props keep theirs. Fickleness and three independent Camp presence effects opt into direct toggles. Placement/linked/lasting effects retain their dedicated workflows. See `module-controls.md` for current interaction boundaries and `docs/imports/sacred-groves.md` for token interpretation.
+
+Local verification for this follow-up: full checks pass (453 unit tests, 104 edge/handler tests; 11 existing lint warnings). Asset checks validate 375 images and existing font budgets, including the new bounded state atlas. Eighty-one applicable module/regression browser journeys pass (one pre-existing desktop-only ending test is skipped on mobile), plus fourteen new desktop/mobile compact-selection, 320px containment and independent-toggle journeys. Eighteen shared matrix journeys were repeated after the narrow-title fix. Seven visual inspection journeys exercise all five supported killers, both reveal types and Minor art at 1366/390/320px; both Wrath themes and Groves controls at all five agreed viewport sizes; and each of twelve site/state renderings. Production build passes. Current-head CI, merge and production publication are recorded on the PR separately.
+
+
+## Cinematic revealed states, 2026-10-26
+
+Supersedes the compact-only presentation above: small, deeply muted choices remain stable, with a large read-only hero for the selected Power/Finale in both entry points and Hans's second-power slot. Card rules are removed from this chooser. Positive-health Minor Powers expand independently into wide art/health panels; unrecorded and zero-health states stay distinct and compact, with correction/restore controls retained. Original art cells are explicitly clipped and fully fitted. A new native-resolution Inkanyamba hero atlas preserves original card identities, with Boiling Anger's cauldron treatment guided by the supplied UI concept; other killers retain their existing motifs at supported display sizes.
+
+Ten separate Wrath backgrounds supply five progressive intensities for each owner. Remove Unleash boxes and Inkanyamba's Wrath reference from Play. Three new 4×2 Sacred-space atlases replace medallions with environment changes and cover every combined placement. Fickleness keeps its original image, loses the reminder and grows from 130px to 195px. Equivalent independent Camp toggles share the visual skin; their own consequences and linked Event workflows remain intact.
+
+References: Boiling Anger: Horror UI Concepts (`libfile_c70782adbe9081919f1019dc0b4a7f49`), Dark Powers UI Concept Board (`libfile_97a82baaed1881919137d088d2188c64`), Stormy Horror UI Card Variations (`libfile_37a48326a12081918ee23003919ee4a9`) and supplied individual Power concept renders. Reference layouts inform live HTML/CSS rather than baking their text or controls into images. Canonical gameplay and photographic generation are unchanged. Frontend/artwork release only; no backend function deployment or migration.
+
+
+Verification for the cinematic follow-up: full checks pass (455 unit tests, 104 edge/handler tests; 11 existing lint warnings), asset validation covers 389 images with new per-atlas/background budgets, and production build passes. One hundred thirteen distinct applicable desktop/mobile module, reveal, health, mixed-owner, legacy, rejected-write, Undo/reload, cached death/narration and ending journeys pass; one existing ending fit test is intentionally desktop-only. Six additional visual journeys capture all five killers, both reveal types, active/removed/unknown Minor states, both Wrath themes at all five intensities, all 24 environmental combinations and both Terror states across 1280×640, 1366×768, 1440×900, 320×568 and 390×844. Actual images were inspected. The existing ending-fit test now waits for responsive measurement observers before comparing geometry; its strict layout and image-area assertions remain. Current-head CI and publication status are tracked separately on the PR.
+
+Minor Power articles retain an accessible name across compact, active and removed states. Dr. Fright journeys address that stable card identity instead of requiring a heading inside an unrevealed button; all eighteen dedicated Terror/Minor/sleep journeys pass.
+
+
+## Quiet corrections and real photographic headers, 2026-10-26
+
+All ten registered killer/location module headers use candid photographic banners with per-owner focal crops. Named Dark Power uses only Clear card name to reopen options; the permanent reveal remains. Minor Powers show Clear record instead of the former disclosure/dropdown/rules block, with live hearts unchanged. Sacred-space known-empty captions omit No tokens while unknown/token labels remain. See `module-controls.md` and the banner asset README for current behavior and source mapping. Frontend/artwork deployment only.
