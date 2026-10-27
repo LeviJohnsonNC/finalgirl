@@ -68,7 +68,10 @@ for (const name of ['Dark Waters', 'Secret Tunnel'])
     await page.getByRole('button', { name: 'RESUME GAME' }).click();
     await openModule(page, 'camp');
     await expect(
-      page.getByRole('button', { name: 'View ' + name, exact: true }),
+      page.getByRole('button', {
+        name: (name === 'Dark Waters' ? 'End effect: ' : 'View ') + name,
+        exact: true,
+      }),
     ).toHaveAttribute('aria-pressed', 'true');
     if (name === 'Secret Tunnel') {
       await expect(
@@ -83,6 +86,27 @@ for (const name of ['Dark Waters', 'Secret Tunnel'])
           exact: true,
         }),
       ).toContainText('Not recorded');
+    } else {
+      await page
+        .getByRole('button', { name: 'End effect: Dark Waters', exact: true })
+        .click();
+      await page.reload();
+      await page.getByRole('button', { name: 'RESUME GAME' }).click();
+      await openModule(page, 'camp');
+      await expect(
+        page.getByRole('button', { name: 'Activate Dark Waters', exact: true }),
+      ).toHaveAttribute('aria-pressed', 'false');
+      const observations = await page.evaluate(
+        (owner) => JSON.parse(localStorage.getItem('final-girl-active-game-v1:' + owner)!).playEvents,
+        userId,
+      );
+      expect(observations.filter(
+        (event: { moduleData?: { changes: Record<string, unknown> } }) =>
+          event.moduleData?.changes['event.dark-waters'] === 'active',
+      )).toHaveLength(1);
+      expect(observations.some(
+        (event: { kind: string }) => event.kind === 'killed' || event.kind === 'state',
+      )).toBe(false);
     }
   });
 

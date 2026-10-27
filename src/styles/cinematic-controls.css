@@ -326,6 +326,7 @@
 }
 /* Only opt-in independent presence effects use the cinematic toggle skin. */
 .play-module-content .module-cinematic-toggle {
+  align-self: start;
   border-radius: 10px;
   border-color: #6d625144;
   background: #090c0e;

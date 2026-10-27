@@ -67,7 +67,7 @@ export function EventControl({
           else if (allowed) onActivate();
         }}
       />
-      {effect && (
+      {interaction !== "toggle" && effect && (
         <details className="module-card-rules">
           <summary>
             Rules<span className="sr-only">: {name}</span>
@@ -75,7 +75,7 @@ export function EventControl({
           <p>{effect}</p>
         </details>
       )}
-      {active && reminder && (
+      {interaction !== "toggle" && active && reminder && (
         <p className="module-active-reminder">{reminder}</p>
       )}
       {active && interaction !== "toggle" && (

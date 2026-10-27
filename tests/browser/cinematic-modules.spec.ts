@@ -187,6 +187,107 @@ test("Wrath scenery escalates without Unleash text; mixed Sacred states and Terr
   await expect(terror).toHaveAttribute("data-state", "ended");
 });
 
+test("independent Groves events toggle from their pictures without auxiliary controls and survive Undo and reload", async ({
+  page,
+  archive,
+}, info) => {
+  await archive.install(page, { draft });
+  await page.goto("/");
+  await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
+  await openModule(page, "groves");
+  const panel = page.locator('[data-module="groves"]');
+  await panel.locator(".groves-details > summary").click();
+  const before = await page.evaluate(
+    (owner) =>
+      JSON.parse(localStorage.getItem("final-girl-active-game-v1:" + owner)!)
+        .playEvents.length,
+    userId,
+  );
+  const names = [
+    "Loud and Obnoxious",
+    "Flash Photography",
+    "Unholy Bloodshed",
+    "The Gods Hate Failure",
+  ];
+  for (const name of names) {
+    const activate = panel.getByRole("button", {
+      name: `Activate ${name}`,
+      exact: true,
+    });
+    await activate.focus();
+    await page.keyboard.press("Enter");
+    const button = panel.getByRole("button", {
+      name: `End effect: ${name}`,
+      exact: true,
+    });
+    await expect(button).toHaveAttribute("aria-pressed", "true");
+    const card = panel
+      .locator('[data-module-control="event"]')
+      .filter({
+        has: page.getByRole("button", {
+          name: `End effect: ${name}`,
+          exact: true,
+        }),
+      });
+    await expect(card.getByRole("button")).toHaveCount(1);
+    await expect(card.locator("details, .module-active-reminder")).toHaveCount(
+      0,
+    );
+    await button.click();
+    await expect(activate).toHaveAttribute("aria-pressed", "false");
+  }
+  const raw = await page.evaluate(
+    (owner) =>
+      JSON.parse(localStorage.getItem("final-girl-active-game-v1:" + owner)!)
+        .playEvents,
+    userId,
+  );
+  const added = raw.slice(before);
+  expect(added).toHaveLength(8);
+  expect(
+    added.every(
+      (event: {
+        kind: string;
+        moduleData: { module: string; changes: Record<string, unknown> };
+      }) =>
+        event.kind === "module" &&
+        event.moduleData.module === "groves" &&
+        Object.keys(event.moduleData.changes).length === 1,
+    ),
+  ).toBe(true);
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect(
+    panel.getByRole("button", {
+      name: "End effect: The Gods Hate Failure",
+      exact: true,
+    }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page.reload();
+  await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
+  await openModule(page, "groves");
+  await panel.locator(".groves-details > summary").click();
+  await expect(
+    panel.getByRole("button", {
+      name: "End effect: The Gods Hate Failure",
+      exact: true,
+    }),
+  ).toHaveAttribute("aria-pressed", "true");
+  for (const width of [1366, 390, 320]) {
+    await page.setViewportSize({ width, height: width === 1366 ? 768 : 844 });
+    await panel
+      .locator(".groves-event-grid")
+      .screenshot({
+        path: info.outputPath(`ongoing-events-${width}.png`),
+        style: ".app-footer{visibility:hidden}",
+      });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  }
+});
+
 test("Hans keeps two distinct revealed powers in both entry points and reduced motion disables entrance effects", async ({
   page,
   archive,

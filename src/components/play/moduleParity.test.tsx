@@ -14,9 +14,7 @@ import {
   BUDDYLAND_ITEMS,
   BUDDYLAND_TERRORS,
 } from "../../../supabase/functions/_shared/play/buddyland";
-import {
-  CAMP_ONGOING_EVENTS,
-} from "../../../supabase/functions/_shared/play/camp";
+import { CAMP_ONGOING_EVENTS } from "../../../supabase/functions/_shared/play/camp";
 
 afterEach(cleanup);
 const start = () =>
@@ -60,7 +58,7 @@ it("exposes every imported Billy/Buddyland card name and effect to Rulebook sear
   expect(JSON.stringify(billyRules.rules)).not.toContain("Sing-A-Long");
 });
 
-it("keeps all six Camp Event effects available without disclosure writing gameplay", () => {
+it("keeps Camp ongoing picture toggles quiet while Secret Tunnel retains its disclosure", () => {
   const onEvent = vi.fn(() => true);
   const { container, rerender } = render(
     <CampControls
@@ -77,9 +75,14 @@ it("keeps all six Camp Event effects available without disclosure writing gamepl
   for (const card of cards) {
     const name = card.querySelector("strong")!.textContent;
     const reference = CAMP_ONGOING_EVENTS.find((e) => e.name === name)!;
-    const rules = card.querySelector(".module-card-rules")!;
-    expect(rules.textContent).toContain(reference.effect);
-    fireEvent.click(rules.querySelector("summary")!);
+    const rules = card.querySelector(".module-card-rules");
+    if (reference.id === "secret-tunnel") {
+      expect(rules).toHaveTextContent(reference.effect);
+      fireEvent.click(rules!.querySelector("summary")!);
+    } else {
+      expect(rules).toBeNull();
+      expect(card.querySelectorAll("button")).toHaveLength(1);
+    }
   }
   expect(onEvent).not.toHaveBeenCalled();
   const events = [
@@ -100,9 +103,7 @@ it("keeps all six Camp Event effects available without disclosure writing gamepl
       onEvent={onEvent}
     />,
   );
-  expect(container.querySelector(".module-active-reminder")).toHaveTextContent(
-    "lose 1 Health per additional save",
-  );
+  expect(container.querySelector(".module-active-reminder")).toBeNull();
   rerender(
     <CampControls
       {...props}
@@ -138,7 +139,8 @@ it("keeps special-victim cards free of Rules disclosures without mixing location
     ...container.querySelectorAll('[data-module-control="character"]'),
   ];
   expect(cards).toHaveLength(3);
-  for (const card of cards) expect(card.querySelector(".module-card-rules")).toBeNull();
+  for (const card of cards)
+    expect(card.querySelector(".module-card-rules")).toBeNull();
   expect(container).not.toHaveTextContent("lose two Time");
   unmount();
   const venue = render(
