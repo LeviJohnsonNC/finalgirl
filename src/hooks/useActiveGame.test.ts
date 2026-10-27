@@ -416,3 +416,21 @@ describe('Creech durable boundary',()=>{
   expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'creech')).toEqual({});
  });
 });
+it('Creech linked rescue survives failed persistence and retry with one Undo across both owners',async()=>{
+ const {resolveCreechAction}=await import('../../supabase/functions/_shared/play/creech');const {result}=renderHook(useActiveGame);
+ const initial=[newPlayEvent({kind:'start',saved:0,killed:0,round:1}),newPlayEvent({kind:'module',moduleData:{module:'poltergeist',changes:{carolyn:'with-you'}},poltergeistAction:{parent:'root',command:'correct',key:'carolyn',value:'with-you'}})];
+ act(()=>result.current.save({...game,selection:{...game.selection,killer:'Poltergeist',location:'Creech Manor'},playEvents:initial}));
+ const a={parent:initial[initial.length-1].id,kind:'helicopter' as const,victims:2,carolyn:true,floppy:null,confirmed:true as const};
+ const r=resolveCreechAction(a,{'event.helicopter':'active'},{carolyn:'with-you'},'Poltergeist')!;
+ // First establish the roof token through the same durable boundary.
+ const available=newPlayEvent({kind:'module',moduleData:{module:'creech',changes:{'event.helicopter':'active'}},creechAction:{parent:a.parent,kind:'event',id:'helicopter',active:true}});
+ act(()=>expect(result.current.appendPlayEvent(game.id,available)).toBe(true));
+ const rescue=newPlayEvent({kind:'module',moduleData:{module:'creech',changes:r.changes},linkedModule:r.linkedModule,creechAction:{...a,parent:available.id}});
+ const spy=vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('quota');});
+ act(()=>expect(result.current.appendPlayEvent(game.id,rescue)).toBe(false));spy.mockRestore();
+ expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'poltergeist').carolyn).toBe('with-you');
+ act(()=>{expect(result.current.appendPlayEvent(game.id,rescue)).toBe(true);expect(result.current.appendPlayEvent(game.id,{...rescue,id:crypto.randomUUID()})).toBe(false);});
+ expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'poltergeist').carolyn).toBe('rescued');
+ act(()=>expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'undo',target:rescue.id}))).toBe(true));
+ expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'poltergeist').carolyn).toBe('with-you');expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'creech')['helicopter.used']).toBeUndefined();
+});
