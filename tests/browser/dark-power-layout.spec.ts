@@ -48,12 +48,12 @@ test("Dark Power focuses one photograph across both entry points, explicit corre
     style: ".app-footer{visibility:hidden}",
   });
   await chooser
-    .getByRole("button", { name: "Change Dark Power", exact: true })
+    .getByRole("button", { name: "Clear Dark Power card name", exact: true })
     .click();
   expect(await cards.locator("strong").allTextContents()).toEqual(order);
   await expect(
     chooser.getByRole("button", { name: "Choose Shock Factor", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
+  ).toHaveAttribute("aria-pressed", "false");
   const other = chooser.getByRole("button", {
     name: "Choose Never Really Dead",
     exact: true,

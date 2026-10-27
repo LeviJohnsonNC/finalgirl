@@ -17,7 +17,6 @@ it("focuses recorded powers without imposing a single-power limit or losing zero
           <MinorPowerControl
             key={name}
             name={name}
-            effect="Rule"
             health={health[name]}
             art={() => art}
             heartArt={art}
@@ -64,14 +63,12 @@ it("keeps alternatives available after a rejected reveal and preserves legacy un
       <MinorPowerControl
         name="Old"
         previouslyRevealed
-        effect="Rule"
         art={() => art}
         heartArt={art}
         onChange={change}
       />
       <MinorPowerControl
         name="New"
-        effect="Rule"
         art={() => art}
         heartArt={art}
         onChange={change}

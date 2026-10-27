@@ -364,6 +364,8 @@ test("all films load distinct display faces and share one medium sans-serif supp
   await archive.install(page);
   await page.goto("/");
   await page.getByRole("button", { name: "Collection", exact: true }).click();
+  // Navigation can finish before the mocked collection response is rendered.
+  await expect(page.locator(".collection-film")).toHaveCount(23);
   await page.evaluate(() => document.fonts.ready);
   const fonts = await page
     .locator(".collection-film")

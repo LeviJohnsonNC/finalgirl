@@ -65,14 +65,35 @@ for (const [killer, id] of [
       await expect(region.getByText("Card rules", { exact: true })).toHaveCount(
         0,
       );
-      await region
-        .getByRole("button", { name: `Change ${type}`, exact: true })
-        .click();
-      expect(await cards.locator("strong").allTextContents()).toEqual(names);
-      await expect(cards.last()).toHaveAttribute("aria-pressed", "true");
-      await region
-        .getByRole("button", { name: `Cancel changing ${type}`, exact: true })
-        .click();
+      if (type === "Dark Power") {
+        await expect(
+          region.getByRole("button", {
+            name: "Change Dark Power",
+            exact: true,
+          }),
+        ).toHaveCount(0);
+        const clear = region.getByRole("button", {
+          name: "Clear Dark Power card name",
+          exact: true,
+        });
+        expect((await clear.boundingBox())!.x).toBeCloseTo(
+          (await hero.boundingBox())!.x,
+          0,
+        );
+        await clear.click();
+        expect(await cards.locator("strong").allTextContents()).toEqual(names);
+        await expect(cards.last()).toHaveAttribute("aria-pressed", "false");
+        await cards.last().click();
+      } else {
+        await region
+          .getByRole("button", { name: "Change Finale", exact: true })
+          .click();
+        expect(await cards.locator("strong").allTextContents()).toEqual(names);
+        await expect(cards.last()).toHaveAttribute("aria-pressed", "true");
+        await region
+          .getByRole("button", { name: "Cancel changing Finale", exact: true })
+          .click();
+      }
       await expect(cards).toHaveCount(0);
     }
   });

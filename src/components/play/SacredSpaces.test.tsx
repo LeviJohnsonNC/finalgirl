@@ -9,6 +9,7 @@ it("opening unknown placements never writes; explicit editing changes only the c
     screen.getByRole("button", { name: "Cycle tokens: Burial Ground" }),
   );
   expect(change).not.toHaveBeenCalled();
+  expect(screen.getAllByText("Tokens not fully recorded").length).toBeGreaterThan(0);
   fireEvent.click(
     screen.getByRole("button", { name: "Closed at Burial Ground" }),
   );
@@ -23,6 +24,8 @@ it("disabled cycling and token editing cannot submit observations", () => {
       onChange={change}
     />,
   );
+  expect(screen.queryByText("No tokens")).toBeNull();
+  expect(screen.queryByText("Tokens not fully recorded")).toBeNull();
   fireEvent.click(
     screen.getByRole("button", { name: "Cycle tokens: Burial Ground" }),
   );

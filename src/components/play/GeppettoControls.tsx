@@ -253,7 +253,6 @@ export function GeppettoControls({
               <MinorPowerControl
                 key={c.id}
                 name={c.name}
-                effect={c.effect}
                 health={health}
                 art={(health) => minorCell(row, health)}
                 heroArt={modulePhoto("Geppetto", 7 + row)}

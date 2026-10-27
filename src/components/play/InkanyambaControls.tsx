@@ -46,7 +46,6 @@ export function InkanyambaControls({
             <MinorPowerControl
               key={p.id}
               name={p.name}
-              effect={p.effect}
               health={state[`minor.${p.id}.health`] as number | undefined}
               maxHealth={p.health}
               disabled={blocked}

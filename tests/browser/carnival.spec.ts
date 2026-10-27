@@ -424,7 +424,7 @@ test("module ownership, keyboard, artwork and laptop/narrow-phone layouts remain
     expect((await button.boundingBox())!.width).toBeGreaterThanOrEqual(44);
     await expect(p.locator(":scope > summary img")).toHaveJSProperty(
       "naturalWidth",
-      1536,
+      1873,
     );
     await page.screenshot({
       path: info.outputPath(`carnival-${width}.png`),
