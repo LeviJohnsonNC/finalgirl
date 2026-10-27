@@ -7,6 +7,8 @@ const compile = path => ts.transpileModule(readFileSync(new URL(path, import.met
 const fiction = {};
 new Function('exports', compile('../supabase/functions/_shared/fictionBoundary.ts'))(fiction);
 const storyFacts = {}, prompts = {}, narrativeStyle = {};
+const finalGirlIdentity = {};
+new Function('exports', compile('../supabase/functions/_shared/finalGirlIdentity.ts'))(finalGirlIdentity);
 const manifest = {}, opening = {};
 new Function('exports', compile('../supabase/functions/_shared/openingReferenceManifest.ts'))(manifest);
 const REFERENCE_MANIFEST = manifest.OPENING_REFERENCE_MANIFEST;
@@ -24,6 +26,7 @@ new Function('require', 'exports', compile('../supabase/functions/_shared/openin
 new Function('exports', compile('../supabase/functions/_shared/storyFacts.ts'))(storyFacts);
 new Function('exports', compile('../supabase/functions/_shared/narrativeStyle.ts'))(narrativeStyle);
 new Function('require', 'exports', compile('../supabase/functions/_shared/prompts.ts'))(name => {
+  if (name === './finalGirlIdentity.ts') return finalGirlIdentity;
   if (name === './fictionBoundary.ts') return fiction;
   if (name === './narrativeStyle.ts') return narrativeStyle;
   assert.equal(name, './storyFacts.ts'); return storyFacts;
@@ -76,6 +79,21 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
   return { handler, filters, removed, phases, imageCalls, textCalls, openingCalls, identityReferences };
 }
 const request = (sceneType = 'ending') => new Request('https://example.test', { method: 'POST', body: JSON.stringify({ sceneType, killer: 'Billy the Bear', finalGirl: 'Rena', location: 'Buddyland', story: 'Rena held her flashlight toward the empty prize counter. Across the arcade, the bear began to move.', gameId: 'record', previousImageUrl: 'https://example.test/storage/v1/object/public/posters/game-posters/owner-A/old.png' }) });
+test('scene planning and rendering correct crossed caller identity for openings and posters', async () => {
+  for (const [finalGirl, anchor] of [['Cassie', 'purple hoodie'], ['Mandy', 'black mesh athletic top'], ['Alice', 'copper-red hair'], ['Selena', 'high round bun']]) {
+    for (const sceneType of ['beginning', 'ending']) {
+      const f = imageHandler();
+      const body = { ...await request(sceneType).json(), finalGirl, finalGirlDescription: 'OBSOLETE_CALLER_IDENTITY', visualBible: JSON.stringify({finalGirl:'OBSOLETE_CONTINUITY: a different woman.',killer:'A bear with exposed mechanical joints.',location:'An arcade with old machines.',palette:'Amber lamps and dark painted walls.'}) };
+      assert.equal((await f.handler(new Request('https://example.test', {method:'POST',body:JSON.stringify(body)}))).status, 200);
+      for (const prompt of [f.textCalls[0].user, f.imageCalls[0][0]]) {
+        assert(prompt.includes(anchor));
+        assert(!prompt.includes('OBSOLETE_CALLER_IDENTITY'));
+        assert(!prompt.includes('OBSOLETE_CONTINUITY'));
+      }
+      if (sceneType === 'beginning') assert.deepEqual(f.openingCalls, [[finalGirl, 'Billy the Bear']]);
+    }
+  }
+});
 test('opening generation uses only a complete photographic plan, without poster copy', async () => {
     const f = imageHandler();
     assert.equal((await f.handler(request('beginning'))).status, 200);

@@ -195,6 +195,33 @@ describe('bounded art planning', () => {
 });
 
 describe('physical fiction and selected heroine identity',()=>{
+ for (const [finalGirl, anchor] of [['Cassie', 'purple hoodie'], ['Mandy', 'black athletic hand wraps'], ['Alice', 'wavy copper-red hair'], ['Selena', 'high round bun']]) {
+  it(`uses ${finalGirl}'s reviewed identity despite stale client text and continuity`, () => {
+   const visualBible = JSON.stringify({ finalGirl: 'STALE_IDENTITY: a generic pale fighter in a mesh shirt.', killer: 'A masked figure in heavy work clothes.', location: 'A warehouse with steel doors and concrete floors.', palette: 'Grey concrete and amber practical lamps.' });
+   const ctx = { finalGirl, killer: 'Hans', location: 'Marrek Warehouse', story: 'A woman stopped at the locked warehouse door.', finalGirlDescription: 'CROSSED_CALLER_DESCRIPTION', visualBible };
+   expect(buildVisualBiblePrompt(ctx)).toContain(anchor);
+   expect(buildVisualBiblePrompt(ctx)).not.toContain('CROSSED_CALLER_DESCRIPTION');
+   for (const sceneType of ['beginning', 'ending'] as const) {
+    const context = { ...ctx, sceneType, outcome: 'won' as const, finalGirlHealth: 2 };
+    for (const prompt of [buildShotBriefPrompt(context), sceneType === 'beginning' ? buildBeginningPrompt(context) : buildPosterPrompt(context)]) {
+     expect(prompt).toContain(getFinalGirlDescription(finalGirl)!);
+     expect(prompt).toContain('CAST IDENTITY LOCK: The selected Final Girl is ' + finalGirl);
+     expect(prompt).toContain('override contradictory old continuity');
+     expect(prompt).not.toMatch(/CROSSED_CALLER_DESCRIPTION|STALE_IDENTITY/);
+     expect(prompt).toContain('Grey concrete and amber practical lamps.');
+    }
+   }
+   expect(ctx.visualBible).toBe(visualBible);
+   expect(parseVisualBible(visualBible)).toBe(visualBible);
+   const input = { finalGirl: { name: finalGirl, backstory: 'An older biography describes different hair. She trains after work.' }, killer: { name: 'Hans' }, location: { name: 'Marrek Warehouse' } };
+   for (const prompt of [buildOpeningUser(input), buildEndingUser({ ...input, introStory: 'A pale fighter waited at the door.', outcome: 'won', finalGirlHealth: 2 })]) {
+    expect(prompt).toContain('CURRENT SELECTED FINAL GIRL IDENTITY: ' + finalGirl);
+    expect(prompt).toContain(anchor);
+    expect(prompt).toContain('overrides conflicting appearance in biography');
+    expect(prompt).toContain('She trains after work.');
+   }
+  });
+ }
  it('separates game procedures from physical cast facts without discarding the rules',()=>{const input={killer:{name:'Inkanyamba',specialRules:'Wrath 2'},location:{name:'Sacred Groves',specialRules:'Victim modifier'},finalGirl:{name:'Barbara'},startingEvent:{name:'Fire and Brimstone',description:'Roll a die and place its token'}};const user=buildOpeningUser(input);const [world,constraints]=user.split('NON-DEPICTABLE GAME CONTEXT');expect(world).not.toContain('Roll a die');expect(constraints).toContain('Roll a die');expect(world).toContain('Barbara');expect(OPENING_SYSTEM).toContain(FICTION_BOUNDARY);expect(ENDING_SYSTEM).toContain(FICTION_BOUNDARY);});
  it('rejects the observed die bowl and card-name placard while allowing independently grounded games and signs',()=>{expect(hasMechanicalShotLeak('She rolls a die into a bowl to determine the token location.','Sacred Groves')).toBe(true);expect(hasMechanicalShotLeak('A note reads Fire and Brimstone.','Sacred Groves')).toBe(true);expect(hasMechanicalShotLeak('She rolls a die into a bowl beside a real gaming table.','MegaBoardGameCon')).toBe(false);expect(hasMechanicalShotLeak('She passes a Welcome Center sign.','Sacred Groves')).toBe(false);});
  it('restores Barbara and Adelaide identity over contaminated legacy prose and continuity on Reshoot',()=>{for(const girl of ['Barbara','Adelaide']){const ctx={killer:'Inkanyamba',finalGirl:girl,location:'Sacred Groves',story:'A generic blonde heroine rolls a die.',finalGirlDescription:getFinalGirlDescription(girl),visualBible:JSON.stringify({finalGirl:'A generic blonde woman in a white blouse.',killer:'A masked figure by trees.',location:'A dice bowl and a Fire and Brimstone placard.',palette:'Natural daylight across stone.'}),shotBrief:'A generic blonde survivor sits by the dice bowl.'};const image=buildBeginningPrompt(ctx);expect(image).toContain('CAST IDENTITY LOCK: The selected Final Girl is '+girl);expect(image).toContain(getFinalGirlDescription(girl)!);expect(image).toContain(FICTION_BOUNDARY);expect(image).toContain('override contradictory old continuity');expect(openingReferenceNames(girl,'Inkanyamba')).toEqual([girl,'Inkanyamba']);}});

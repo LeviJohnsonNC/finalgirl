@@ -1,4 +1,5 @@
 import { BUDDYLAND_VISUALS } from './buddyland';
+import { REVIEWED_FINAL_GIRL_IDENTITIES } from '../../supabase/functions/_shared/finalGirlIdentity';
 
 /**
  * Visual descriptions for Final Girl characters
@@ -6,6 +7,7 @@ import { BUDDYLAND_VISUALS } from './buddyland';
  */
 
 export const FINAL_GIRL_DESCRIPTIONS: Record<string, string> = {
+  ...REVIEWED_FINAL_GIRL_IDENTITIES,
   Adelaide: 'A young adult Black woman with deep brown skin, dark brown eyes, a softly oval face and tightly braided black hair pulled back from her face. She wears a plain white sleeveless tank top. Preserve the selected Adelaide portrait identity; its incidental bruises and cuts do not establish injuries in a new scene.',
   Barbara: 'A young adult woman with fair lightly freckled skin, pale green eyes, a rounded oval face and abundant copper-red tight curls falling around her shoulders. She wears a plain grey scoop-neck T-shirt. Preserve the selected Barbara portrait identity; its incidental bruises and cuts do not establish injuries in a new scene.',
 
@@ -30,19 +32,6 @@ She appears battered but unbroken, a survivor caught in the immediate wake of a 
 Her hair is bleach-blonde and styled into a high, voluminous textured mohawk with closely shaved sides. She has multiple small silver stud and hoop piercings along the outer rim of her ears. Her expression is stone-faced and guarded, conveying a sense of hardened independence.
 
 She wears a heavily distressed, mustard-yellow leather biker jacket with visible wear and tear over a faded, off-white graphic t-shirt.`,
-
-  // Season 3 - The Marrek Murders
-  'Mandy': `A woman in her late 20s to early 30s with a haunting and shell-shocked presence. She has medium-brown skin heavily marked with fresh, dark-red blood splatters and smears across her forehead, cheeks, and chin, suggesting a recent violent encounter. Her face has soft but defined features, a rounded jawline, and a prominent nose with a thin silver hoop in the nostril and a small septum ring. Her large, dark brown eyes are wide and glassy, gazing upward with a look of haunting realization and trauma.
-
-Her hair is deep black, thick, and wavy, falling past her shoulders in a slightly disheveled manner. She wears no visible makeup; the focus is entirely on the raw, visceral bloodstains and her wide-eyed, hyper-vigilant expression. Her mouth is slightly agape, and her facial muscles are tense.
-
-She embodies a gritty, cinematic survivor aesthetic—exhausted and bloodied but still standing. She wears a simple, functional purple hoodie that is also stained with blood.`,
-
-  'Cassie': `A woman in her late 20s to early 30s with a lean, athletic build and a fierce, battle-hardened presence. She has pale skin heavily splattered with visceral, dark blood and smudges of grime that suggest an immediate and violent struggle. Her face is angular with a sharp jawline, high cheekbones, and a straight nose. She has intense, piercing blue eyes with a sharp, unwavering stare and slightly furrowed brows that convey lethal focus and a primal survival instinct.
-
-Her hair is dark, chin-length, and messy, appearing slightly damp and unstyled. She wears chipped black nail polish on her fingertips. Her expression is cold, serious, and utterly defiant, showing no sign of fear.
-
-She appears dangerous and capable, a combatant rather than a victim. She wears a practical black mesh athletic top and her hands are bound in thick, black athletic wraps, both of which are stained with blood.`,
 
   // Season 3 - Hell to Pay
   'Kenzie': `A woman in her late 20s with a shell-shocked yet resilient presence. Her pale skin is streaked with fresh, dark blood running from her hairline down her cheeks and mouth, suggesting a recent and violent struggle. Her face features wide, dark eyes that hold a haunted, fixed stare, framed by slightly furrowed brows that convey a mix of trauma and determination.

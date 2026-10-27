@@ -29,6 +29,7 @@ test('the image gateway passes a real identity reference alongside the prompt',a
   assert.equal((await exports.generateImage('paint the ending',own)).mimeType,'image/png');
   assert.equal(calls[0].messages[0].content[1].image_url.url,own);
   assert.match(calls[0].messages[0].content[0].text,/IDENTITY reference only/);
+  assert.match(calls[0].messages[0].content[0].text,/current named cast identity overrides a contradictory person/);
 });
 test('opening stills explicitly request widescreen dimensions without changing default poster requests',async()=>{
   const {calls,exports}=gateway();
