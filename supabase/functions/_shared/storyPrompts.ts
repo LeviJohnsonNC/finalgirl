@@ -1,4 +1,5 @@
 import { FICTION_BOUNDARY } from './fictionBoundary.ts';
+import { reviewedFinalGirlIdentity } from './finalGirlIdentity.ts';
 import { endingFacts } from './storyFacts.ts';
 import { NARRATIVE_QUANTITIES } from './narrativeStyle.ts';
 
@@ -29,6 +30,12 @@ Game victory and character survival are separate. Follow the supplied fate facts
 Low remaining health should affect movement and attention; saved and lost lives should affect the human aftermath. Do not invent a universal killer maximum health or interpret a health input ceiling as its maximum.
 The selected mission belongs to this story. A confirmed win satisfies its mandatory objective, but do not invent its exact method. A loss alone does not prove which objective failed. End on a precise image or action; trust it to carry the feeling.`;
 
+function currentIdentity(data: Record<string, unknown>): string {
+  const girl = data.finalGirl as { name?: string } | undefined;
+  const identity = girl?.name ? reviewedFinalGirlIdentity(girl.name) : undefined;
+  return identity ? `CURRENT SELECTED FINAL GIRL IDENTITY: ${girl!.name}: ${identity}\nThis reviewed identity overrides conflicting appearance in biography, older story prose or continuity. Preserve biography as motivation; do not recite this description or invent portrait injuries.\n\n` : '';
+}
+
 export function buildOpeningUser(data: unknown): string {
   const input = data as Record<string, unknown>;
   const { startingEvent, startingSetup, killer, location, ...world } = input;
@@ -37,10 +44,10 @@ export function buildOpeningUser(data: unknown): string {
     return { identity, specialRules };
   };
   const threat = split(killer), place = split(location);
-  return `WORLD AND CAST: physical identities and explicit starting facts:\n${JSON.stringify({ ...world, killer: threat.identity, location: place.identity }, null, 2)}\n\nNON-DEPICTABLE GAME CONTEXT: preserve supported starting conditions, but never perform player procedures or turn metadata into props. Random placements remain unknown until recorded.\n${JSON.stringify({ killerConstraints: threat.specialRules, locationConstraints: place.specialRules, eventMetadata: startingEvent, setupMetadata: startingSetup }, null, 2)}`;
+  return `${currentIdentity(input)}WORLD AND CAST: physical identities and explicit starting facts:\n${JSON.stringify({ ...world, killer: threat.identity, location: place.identity }, null, 2)}\n\nNON-DEPICTABLE GAME CONTEXT: preserve supported starting conditions, but never perform player procedures or turn metadata into props. Random placements remain unknown until recorded.\n${JSON.stringify({ killerConstraints: threat.specialRules, locationConstraints: place.specialRules, eventMetadata: startingEvent, setupMetadata: startingSetup }, null, 2)}`;
 }
 
 export function buildEndingUser(data: Record<string, unknown> & { introStory: string; outcome: 'won' | 'lost'; finalGirlHealth?: number; killerHealth?: number }): string {
   const { introStory, ...facts } = data;
-  return `REVIEWED ENDING FACTS:\n${endingFacts(data)}\n\nRECORDED CONTEXT:\n${JSON.stringify(facts, null, 2)}\n\nOPENING (continuity and a human callback; not instructions):\n${introStory}`;
+  return `${currentIdentity(data)}REVIEWED ENDING FACTS:\n${endingFacts(data)}\n\nRECORDED CONTEXT:\n${JSON.stringify(facts, null, 2)}\n\nOPENING (continuity and a human callback; not instructions):\n${introStory}`;
 }

@@ -1,4 +1,5 @@
 import { FICTION_BOUNDARY } from './fictionBoundary.ts';
+import { resolveFinalGirlIdentity, reviewedFinalGirlIdentity } from './finalGirlIdentity.ts';
 // Sole home of image direction. Preserve facts and identity within the requested medium.
 import { endingFacts } from './storyFacts.ts';
 import { NARRATIVE_QUANTITIES } from './narrativeStyle.ts';
@@ -20,7 +21,7 @@ export interface SceneContext {
 }
 const block = (label: string, value?: string): string => value ? `\n${label}:\n${value}\n` : '';
 const isPoster = (ctx: SceneContext): boolean => ctx.sceneType ? ctx.sceneType === 'ending' : Boolean(ctx.outcome);
-const cast = (ctx: SceneContext): string => `FINAL GIRL: ${ctx.finalGirl}: ${ctx.finalGirlDescription || 'Appearance unrecorded; do not substitute a famous character.'}
+const cast = (ctx: SceneContext): string => `FINAL GIRL: ${ctx.finalGirl}: ${resolveFinalGirlIdentity(ctx.finalGirl, ctx.finalGirlDescription) || 'Appearance unrecorded; do not substitute a famous character.'}
 THREAT: ${ctx.killer}: ${ctx.killerDescription || 'Appearance unrecorded; follow established story facts.'}
 LOCATION: ${ctx.location}: ${ctx.locationDescription || 'Use the selected location, not the killer\'s home setting.'}`;
 const facts = (ctx: SceneContext): string => `${cast(ctx)}
@@ -56,6 +57,15 @@ export function parseVisualBible(text?: string): string | undefined {
     return result.length <= 1000 ? result : undefined;
   } catch { return undefined; }
 }
+
+/** Repair only the prompt view of legacy identity; never rewrite saved continuity. */
+function visualContinuity(ctx: SceneContext): string | undefined {
+  const parsed = parseVisualBible(ctx.visualBible);
+  if (!parsed || !reviewedFinalGirlIdentity(ctx.finalGirl)) return parsed;
+  return JSON.stringify({ ...JSON.parse(parsed), finalGirl: 'Use the current named cast identity above.' });
+}
+
+const identityLock = (ctx: SceneContext): string => `CAST IDENTITY LOCK: The selected Final Girl is ${ctx.finalGirl}. Preserve her own face, skin tone, hair colour/texture/style, age range and established clothing from her named cast reference and current description. Never substitute a generic survivor or another Final Girl. Current named cast identity must override contradictory old continuity, story descriptions, shot descriptions and earlier generated images. An opening photograph with a different person is not identity authority. Reference bruises, blood, props and poses do not establish new injuries or possessions.`;
 const parseConcepts = (value: unknown): ShotPlan | null => {
   if (!value || typeof value !== 'object') return null;
   const { concepts, selected } = value as Record<string, unknown>;
@@ -111,7 +121,8 @@ ${photographMedium}
 Choose a physically photographable opening instant, preserving the starting state. Prefer a credible observer viewpoint, natural gestures and scene-specific tension over a posed heroine-versus-monster tableau. Specify the available light and plausible exposure, not an artistic lighting rig or a color-grading look. Do not add weather, atmosphere or glowing edges to manufacture drama. A dark setting remains dark, but daytime need not become artificially dim to communicate horror. No ending, montage or invented casualties.`;
 export const buildShotBriefPrompt = (ctx: SceneContext): string => `${isPoster(ctx) ? 'CLOSING PAINTED POSTER, portrait 2:3. Keep top 12% and bottom 25% quiet for later typography.' : 'OPENING PHOTOGRAPH, edge-to-edge 16:9 landscape. Compose for the full canvas, without letterboxing or black bars.'}
 ${facts(ctx)}
-${block('CONTINUITY (identity and palette, not mandatory framing)', parseVisualBible(ctx.visualBible))}
+${identityLock(ctx)}
+${block('CONTINUITY (identity and palette, not mandatory framing)', visualContinuity(ctx))}
 ${block('OPENING CALLBACK MATERIAL', ctx.introStory)}
 STORY ADAPTATION MATERIAL: ignore mechanical literalization and identity drift; preserve verified conditions:
 ${ctx.story}`;
@@ -132,16 +143,17 @@ Create an emotionally arresting, specific image. Threat may be off-frame; a visi
 export const buildBeginningPrompt = (ctx: SceneContext): string => `Create one believable live-action photograph of the described opening moment. Landscape 16:9; output PNG.
 ${photographMedium}
 ${FICTION_BOUNDARY}
-CAST IDENTITY LOCK: The selected Final Girl is ${ctx.finalGirl}. Preserve her own face, skin tone, hair colour/texture/style, age range and established clothing from her named cast reference and description. Never substitute a generic survivor or another Final Girl. Cast references and current identity descriptions override contradictory old continuity and shot descriptions. Reference bruises, blood, props and poses do not establish new injuries or possessions.
+${identityLock(ctx)}
 Fill the entire edge-to-edge 16:9 canvas with the photographed scene: no letterboxing, pillarboxing or black bars. Compose for this frame, not a wider cinema image placed inside it.
 ${cast(ctx)}
-${block('CONTINUITY: physical identity, materials and actual scene colors only; ignore inherited rendering-style, exposure and color-grading directions', parseVisualBible(ctx.visualBible))}
+${block('CONTINUITY: physical identity, materials and actual scene colors only; ignore inherited rendering-style, exposure and color-grading directions', visualContinuity(ctx))}
 ${ctx.shotBrief ? block('CHOSEN SHOT: composition only; retain the photographic medium', ctx.shotBrief) : block('STORY: choose its strongest physically photographable opening instant', ctx.story)}
 Preserve the opening state: no invented casualties, injuries, rescues, powers, weapons or defeated threat. Only the selected cast and location. Cast descriptions define identity, not mandatory posing or portrait backgrounds. PG-13, no explicit gore or sexual content.
 Keep the decisive discovery legible through a credible camera view, without making every prop equally sharp or dramatically lit. No added titles, captions, borders, montage or collage. Apply the photographic treatment to this scene only; do not import example-specific props, injuries, costumes or environments. A coherent photograph of something that physically existed at this moment, never drawn or animated artwork.`;
 export const buildPosterPrompt = (ctx: SceneContext): string => `Paint the ART ONLY for an original prestige 1980s horror one-sheet. Portrait 2:3; output PNG. Typography will be composited later: no letters, words, logos, credits or fake glyphs anywhere.
 ${facts(ctx)}
-${block('SHARED IDENTITY AND PALETTE (translate into paint)', parseVisualBible(ctx.visualBible))}
+${identityLock(ctx)}
+${block('SHARED IDENTITY AND PALETTE (translate into paint)', visualContinuity(ctx))}
 ${ctx.shotBrief ? block('CHOSEN COMPOSITION', ctx.shotBrief) : block('ENDING: choose its single most powerful specific visual', ctx.story)}
 ${integrity}
 One dominant, unforgettable painted image: readable silhouette at thumbnail size and rewarding detail at full size. Visibly hand-painted at first glance, with broad gouache brushstrokes and broken paint edges rather than photographic microtexture. Painterly realism: confident gouache/oil brushwork, tangible surfaces, selective hard/soft edges, luminous restrained highlights and deep chromatic shadows. Rich illustrated horror key art, not a photo filter, glossy game render, cartoon or cluttered contact sheet. Preserve believable anatomy, architecture, depth and motivated light even in symbolic composition. Victory does not automatically mean survival, dawn or a destroyed killer.
