@@ -60,6 +60,19 @@ serve(async (req) => {
     const isPoster = body.sceneType === "ending";
     const context: SceneContext = { ...body };
 
+    // The opening is conditioned on the cast's reviewed photographs, so they must be
+    // present before anything is planned or generated. A portrait that cannot be served
+    // exactly as stored refuses the shot instead of producing a generic picture.
+    let references: Array<{ name: string; url: string }> = [];
+    if (!isPoster) {
+      try {
+        references = await openingReferences(body.finalGirl, body.killer);
+      } catch (err) {
+        console.error("Opening identity references unavailable:", err);
+        return json({ error: "The cast references could not be loaded. Please try again." }, 503);
+      }
+    }
+
     // Compare three story-specific compositions in one utility call, then generate
     // only the selected image. Never spend an opening image call on a broken plan.
     let briefModel: string | undefined;
