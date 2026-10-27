@@ -40,4 +40,3 @@ Billy's full board remains an existing source gap in `docs/module-reference-gaps
 ## Verification and release
 
 Tests cover distinct images for every verified position, generic/unknown/legacy fallback, loaded native derivatives, plus/minus, Undo, reload and rejected local saves. Actual Bloodlust cards and all five replacement Inkanyamba Wrath stages are inspected on laptop and 390px/320px phones. CI status and publication are reported on the PR. Frontend/artwork deployment only; no SQL, edge-function, provider-prompt, identity-photo, Divine Wrath or narrative changes.
-
