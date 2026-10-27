@@ -6,6 +6,7 @@ import { useAuth } from './useAuth';
 import { readStoredValue, useLocalStorage } from './useLocalStorage';
 import { canChangeDeathCount, isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
 import { ActiveGame, isActiveGame } from '@/lib/activeGame';
+import { resolveCreechAction } from '../../supabase/functions/_shared/play/creech';
 import { mapleLinkedChange } from '../../supabase/functions/_shared/play/maple';
 import { initialModuleObservations, moduleState } from '@/lib/play/modules';
 import { frightState, parseFright, initialFright, validFrightSuccessor } from '../../supabase/functions/_shared/play/fright';
@@ -51,7 +52,8 @@ export function useActiveGame() {
       let accepted = event;
       if(previous.selection.killer==='Poltergeist' && ((event.kind==='state'&&event.field==='killerHealth') || (event.kind==='moment'&&event.momentType==='killer-revived'))) return previous;
       if (event.moduleData?.module === 'groves' && previous.selection.location !== 'Sacred Groves') return previous;
-      if (event.linkedModule && (previous.selection.location !== 'Sacred Groves' || previous.selection.killer !== 'Inkanyamba')) return previous;
+      if (event.linkedModule && !(event.moduleData?.module==='groves'&&previous.selection.location==='Sacred Groves'&&previous.selection.killer==='Inkanyamba') && !(event.moduleData?.module==='creech'&&previous.selection.location==='Creech Manor'&&previous.selection.killer==='Poltergeist')) return previous;
+      if(event.moduleData?.module==='creech'&&(previous.selection.location!=='Creech Manor'||!event.creechAction||event.creechAction.parent!==(log[log.length-1]?.id??'root')))return previous;
       if (event.grovesAction && event.grovesAction.parent !== (log[log.length-1]?.id ?? 'root')) return previous;
       if (previous.selection.location === 'Sacred Groves' && event.kind === 'moment' && event.momentType === 'finale') accepted = {...accepted, grovesReference:true};
       if (previous.selection.killer === "Inkanyamba" && event.kind === "moment" && ["dark-power", "finale"].includes(event.momentType!)) accepted = {...accepted, inkanyambaReference:true};
@@ -73,7 +75,7 @@ export function useActiveGame() {
       // Persist setup and the first tap together. Never backfill an existing log:
       // a player may already have resolved, cleared or undone the starting state.
       const setup = log.length === 0
-        ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1, previous.mapleSetupVersion === 1, previous.inkanyambaSetupVersion === 1, previous.grovesSetupVersion === 1, previous.poltergeistSetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
+        ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1, previous.mapleSetupVersion === 1, previous.inkanyambaSetupVersion === 1, previous.grovesSetupVersion === 1, previous.poltergeistSetupVersion === 1, previous.creechSetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
         : [];
       if (log.length === 0 && previous.frightSetupVersion === 1 && previous.selection.killer === 'Dr. Fright' && event.moduleData?.module !== 'fright') setup.unshift(newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(initialFright())}}}));
       if (event.moduleData?.module === 'maple') {
@@ -95,6 +97,14 @@ export function useActiveGame() {
       if(event.moduleData?.module === 'groves' && !event.grovesAction) {
         const current=moduleState(summarizePlay([...log,...baseline,...setup]).entries,'groves');
         if(Object.entries(event.moduleData.changes).every(([k,v])=>v === null ? current[k] === undefined : current[k] === v)) return previous;
+      }
+      if(event.creechAction) {
+        const entries=summarizePlay([...log,...baseline,...setup]).entries;
+        const result=resolveCreechAction(event.creechAction,moduleState(entries,'creech'),moduleState(entries,'poltergeist'),previous.selection.killer);
+        if(!result)return previous;
+        accepted={...event,moduleData:{module:'creech',changes:result.changes},...(result.linkedModule?{linkedModule:result.linkedModule}:{})};
+        if(!result.linkedModule)delete accepted.linkedModule;
+        if(!isPlayEvent(accepted))return previous;
       }
       if(event.moduleData?.module==='poltergeist') {
         if(previous.selection.killer!=='Poltergeist'||!event.poltergeistAction)return previous;

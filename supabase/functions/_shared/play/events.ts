@@ -1,3 +1,4 @@
+import { validCreechAction, validCreechObservation, type CreechAction } from './creech.ts';
 import { validPoltergeistObservation, validPoltergeistAction, type PoltergeistAction } from './poltergeist.ts';
 import { validGrovesAction, canLinkGrovesAction, type GrovesAction } from "./groves.ts";
 /** Immutable observations, shared by the app and edge runtime. */
@@ -75,6 +76,7 @@ export interface PlayEvent extends PlayDetails {
   grovesReference?: true;
   /** One explicit location action can also update selected Inkanyamba. */
   grovesAction?: GrovesAction;
+  creechAction?: CreechAction;
   poltergeistAction?: PoltergeistAction;
   linkedModule?: ModuleObservation;
   /** Provenance for newly recorded Inkanyamba card facts; legacy death hashes stay unchanged. */
@@ -140,7 +142,15 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
   if(e.poltergeistAction!==undefined && (e.kind!=='module'||e.moduleData?.module!=='poltergeist'||!validPoltergeistAction(e.poltergeistAction)))return false;
   if (e.grovesReference !== undefined && (e.grovesReference !== true || e.kind !== "moment" || e.momentType !== "finale")) return false;
   if (e.grovesAction !== undefined && (e.kind !== "module" || e.moduleData?.module !== "groves" || !validGrovesAction(e.grovesAction))) return false;
-  if (e.linkedModule !== undefined && (e.kind !== "module" || e.moduleData?.module !== "groves" || !e.grovesAction || !canLinkGrovesAction(e.grovesAction) || !validModuleObservation(e.linkedModule) || e.linkedModule.module !== "inkanyamba" || Object.keys(e.linkedModule.changes).join() !== "wrath")) return false;
+  if(e.creechAction!==undefined && (e.kind!=='module'||e.moduleData?.module!=='creech'||!validCreechAction(e.creechAction)))return false;
+  if(e.moduleData?.module==='creech'&&(!validModuleObservation(e.moduleData)||!validCreechObservation(e.creechAction,e.moduleData.changes)))return false;
+  const creechRescue=e.creechAction?.kind==='helicopter'&&e.creechAction.carolyn===true;
+  if(creechRescue && (!e.linkedModule||e.linkedModule.module!=='poltergeist'||JSON.stringify(e.linkedModule.changes)!==JSON.stringify({carolyn:'rescued'})))return false;
+  if(e.linkedModule!==undefined) {
+    if(!validModuleObservation(e.linkedModule))return false;
+    const grovesLink=e.kind==='module'&&e.moduleData?.module==='groves'&&e.grovesAction&&canLinkGrovesAction(e.grovesAction)&&e.linkedModule.module==='inkanyamba'&&Object.keys(e.linkedModule.changes).join()==='wrath';
+    if(!grovesLink&&!creechRescue)return false;
+  }
   if (e.inkanyambaReference !== undefined && (e.inkanyambaReference !== true || e.kind !== "moment" || !["dark-power", "finale"].includes(e.momentType!))) return false;
   if (e.permanent !== undefined && (e.permanent !== true || !isPermanentMoment(e))) return false;
   if (!uuid.test(e.id) || !integer(e.at, Number.MAX_SAFE_INTEGER)) return false;
@@ -306,6 +316,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     if (deltas.has(e.id)) summary.killed = Math.max(0, Math.min(999, summary.killed! + deltas.get(e.id)!));
     if (e.kind === "round")
       summary.round = Math.min(999, (summary.round ?? 0) + 1);
+    if(e.kind==='module'&&e.creechAction?.kind==='hunter'&&e.creechAction.bloodlust!==undefined)summary.bloodlust=e.creechAction.bloodlust;
     if (e.kind === "state") {
       if (e.value === null) delete summary[e.field!];
       else summary[e.field!] = e.value!;

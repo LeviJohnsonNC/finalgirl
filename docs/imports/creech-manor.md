@@ -3,11 +3,11 @@
 ## Scope and current status
 
 - Owner: Creech Manor / location; film `s1-creech-manor`; proposed module ID `creech`.
-- Stage: source inventory, code audit and plan only. No application implementation or new artwork generation authorized yet.
+- Stage: implemented under approval; local verification passed; final PR CI and release status recorded below.
 - Reviewed 2026-10-27 against the approved Groves standard, actual UI reference pack, import playbook and control contracts.
 - Base: completed Poltergeist work in PR #140 (`896444be7db10026c2e7642f4e5754428fbdee90`). Keep killer and location ownership independent. Alice/Selena abilities and personal Items remain outside this location import.
 - All six uploaded photographs were opened visually at full available resolution. Some source photos are sideways; rotated inspection copies were used. OCR alone was insufficient, especially for the setup diagrams and icons.
-- Critical review: inventory completeness is verified; full per-card icon/attribute and setup-placement transcription is still pending. Standard-mode location content only; no Extreme Horror, scenario, Final Girl ability or personal-Item expansion.
+- Inventory, per-card icon/attribute and setup-placement transcription are complete in the canonical domain. Standard-mode location content only; no Extreme Horror, scenario, Final Girl ability or personal-Item expansion.
 - Existing app support includes film/casting IDs, selected images, location description, five setup names with placeholder descriptions and ten Event descriptions in `featureFilmDetails.ts`. There is no dedicated Creech Rules module, Play module, canonical location Item/Terror catalog or location controls. Preserve the existing identities, collection artwork and image preferences.
 
 ## Evidence ledger
@@ -122,4 +122,19 @@ Expected: frontend/assets plus **generate-death-scene**, **narrate-story** and *
 
 New location UI photos do not automatically become trusted opening identity references. Audit any actual manifest change separately; upload and digest-check exact objects only when required and authorized. Keep PR #140's existing portrait/release requirements separate from this plan.
 
-Completion means source-backed, implemented, tested, visually reviewed and ready for PR review. Merge, deployment, reference upload and paid live smoke tests remain separate actions. Current work stops at this plan; there are no application or artwork implementation changes.
+Completion means source-backed, implemented, tested, visually reviewed and ready for PR review. Merge, deployment, reference upload and paid live smoke tests remain separate actions. Implementation was subsequently authorized; current evidence follows.
+
+
+## Implementation and verification handoff · 2026-10-27
+
+- Poltergeist PR #140 is merged at upstream `716d7ae`; this branch was rebased onto that main. No stacked killer dependency remains. Its deployment/Storage requirements remain separate.
+- Canonical `creech.ts` accounts for all 41 faces, 21 board spaces and all five ten-Victim setup placements. Source photos remain private. Rules, casting descriptions, location-filtered Items/Terrors/Events, mechanisms and hunter roles reuse it.
+- Registered independent location panel: external ladder; unique Rope Ladder placement/repair; Padlock placement/reported block; five lasting Event toggles including Skull hazard; explicit hunter allocation/outcomes and optional final observed Bloodlust; one-use Helicopter linked atomically to Carolyn; manually ended temporary restriction. No movement/combat/inventory engine, automatic casualties, totals or wins.
+- Creech actions resolve at the durable append boundary using the latest log parent. Corrections, setup provenance, linked-state validators/projections, historical death context and bounded owner facts are integrated. A targeted test caught and fixed linked Carolyn rescue being omitted from narrative context. Unknown historical Creech state preserves absent context/cache shape.
+- Ending review carries optional Exit/Helicopter/unknown route through its strict server schema, form checkpoint and evaluation archive; ordinary passenger facts remain in the immutable Play log and ending summary. Known Floppy at helicopter rescue is distinguished from current carried status. Legacy route remains unknown. The Epic interaction remains explicitly unresolved; recording a physically confirmed rescue does not decide victory.
+- Nineteen original runtime photographs, stable named mappings and source/crop/budget README. Native 752×496 cells use 8px safety insets to exclude sheet gutters; no upscaling. New banner is under the existing banner contract. Existing Collection/cast identities, trusted reference manifest and painted ending medium retained.
+- Local `NODE_OPTIONS=--no-experimental-webstorage npm run check`: 66 files / 500 unit tests and 110 edge/handler tests passed; 11 pre-existing lint warnings, zero errors. `npm run check:assets`: 511 valid assets. Production build passed.
+- Creech browser journeys: 22 passed across desktop/mobile, including seven killer pairings, all five target viewport sizes for the group workflow, route/token/lasting-effect combinations, explicit helicopter rescue and reload, searchable Rules and reviewed ending request. The earlier paired Poltergeist/starting-Event regression run passed its 38 existing journeys; initial Creech failures were selectors using native-select operations on the shared Radix selector and a Rules section not yet selected, corrected without relaxing product assertions.
+- Actual loaded laptop/phone controls and photographs were inspected, including combined token/Event state, dim unknown states, broken ladder, hunter death and helicopter preview. The initial temporary single-hunter Event header was replaced with the group photo; captions are left-aligned and inactive scenes strongly dimmed. Screenshots settle offscreen images before capture. Browser services are mocked, not live-provider/production evidence.
+- Required backend rollout: **generate-ending**, **generate-death-scene**, **narrate-story** before frontend/assets. `generate-scene-image` shares changed story-fact code and should be redeployed with these for bundle consistency; its current request fields remain unchanged. `generate-story`/`generate-visual-bible` receive new location direction through existing bounded fields. No SQL migration, dependency, secret, new bucket or reference upload is required for this location import.
+- Merge, deployment and signed-in/paid live-provider smoke tests remain pending and are not claimed by these checks. Final PR-head required CI is a completion gate; its status is tracked on the implementation PR.

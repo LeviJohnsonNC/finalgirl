@@ -1,3 +1,4 @@
+import { CREECH_ITEMS, CREECH_EVENTS, CREECH_TERRORS, CREECH_SPACES, CREECH_PEOPLE, CREECH_SOURCE } from './creech.ts';
 import { POLTERGEIST_ITEMS, POLTERGEIST_TERRORS } from './poltergeist.ts';
 import { GROVES_EVENTS, GROVES_ITEMS, GROVES_PEOPLE, GROVES_SPACES, GROVES_SOURCE, GROVES_TERRORS } from "./groves.ts";
 import { INKANYAMBA_TERRORS } from "./inkanyamba.ts";
@@ -36,6 +37,8 @@ const station = wiki("Station_2891");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+  ...CREECH_TERRORS.map(c=>({...c,kind:"terror" as const})),
+  ...CREECH_EVENTS.map(c=>({...c,kind:"event" as const,location:"Creech Manor",source:CREECH_SOURCE})),
   ...POLTERGEIST_TERRORS.map(card=>({...card,kind:"terror" as const})),
   ...GROVES_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...GROVES_EVENTS.map(c=>({...c,kind:"event" as const,location:"Sacred Groves",source:GROVES_SOURCE})),
@@ -200,6 +203,7 @@ export const PLAY_ROOMS: Record<string, readonly string[]> = {
     "Helipad",
     "Outside",
   ],
+  "Creech Manor": CREECH_SPACES.map(s=>s.name),
   "Camp Happy Trails": CAMP_ROOMS,
   Buddyland: [...BUDDYLAND_ROOMS],
 };
@@ -226,6 +230,7 @@ export function playMechanisms(selection: {
       : []),
     ...(selection.location === "Carnival of Blood" ? [...CARNIVAL_TRAPS, ...CARNIVAL_ITEM_TRAPS].map(t=>t.name) : []),
     ...(selection.location === "Maple Lane" ? ["Fire", "Booby Trap", "Street traffic"] : []),
+    ...(selection.location==='Creech Manor'?['Attic Skull','Window fall','Living trees']:[]),
     "Location hazard",
     "Other",
   ];
@@ -235,14 +240,14 @@ export function playMechanisms(selection: {
 export function playItems(
   location: string,
 ): readonly { name: string; effect: string }[] {
-  return location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
+  return location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
     ? CAMP_ITEMS
     : location === "Buddyland"
       ? BUDDYLAND_ITEMS
       : [];
 }
 export function playVictims(location: string): readonly { name: string }[] {
-  return location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
+  return location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
     ? CAMP_VICTIMS
     : location === "Buddyland"
       ? SPECIAL_VICTIMS

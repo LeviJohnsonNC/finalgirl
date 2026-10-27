@@ -19,6 +19,8 @@ export function deathFacts(
   events: PlayEvent[],
   eventId: string,
 ) {
+  if(!validPlayLog(events))return null;
+  if(events.some(e=>(e.moduleData?.module==='creech'&&selection.location!=='Creech Manor')||(e.linkedModule?.module==='poltergeist'&&selection.killer!=='Poltergeist')))return null;
   if (!validPlayLog(events) || (selection.killer!=='Poltergeist' && events.some(e=>e.moduleData?.module==='poltergeist'))) return null;
   const entries = summarizePlay(events).entries;
   const e = entries.find((e) => e.id === eventId && e.kind === "killed");

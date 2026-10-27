@@ -1,3 +1,4 @@
+import { validCreechField, creechFacts, creechStartingObservations, CREECH_EVENTS, CREECH_ITEMS, CREECH_PEOPLE } from './creech.ts';
 import { POLTERGEIST_ITEMS, POLTERGEIST_POWERS, POLTERGEIST_FINALES, POLTERGEIST_MINORS, validPoltergeistField, poltergeistFacts, poltergeistPower } from './poltergeist.ts';
 import { validGrovesField, grovesLabel, grovesValue, grovesFacts, GROVES_EVENTS, GROVES_ITEMS, GROVES_VISUAL, GROVES_PEOPLE } from "./groves.ts";
 import { INKANYAMBA_POWERS, INKANYAMBA_FINALES, INKANYAMBA_MINOR_POWERS, validInkanyambaField, inkanyambaFacts } from "./inkanyamba.ts";
@@ -47,7 +48,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -150,6 +151,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === "creech") return validCreechField(key,value);
   if (module === "poltergeist") return validPoltergeistField(key,value);
   if (module === "groves") return validGrovesField(key, value);
   if (module === "inkanyamba") return validInkanyambaField(key, value);
@@ -265,7 +267,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    !["creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -329,7 +331,7 @@ export function moduleState(
         if (power) state[`power.${power.id}.revealed`] = true;
       }
     }
-    const observation = e.moduleData?.module === module ? e.moduleData : e.moduleData?.module === "groves" && e.linkedModule?.module === module ? e.linkedModule : undefined;
+    const observation = e.moduleData?.module === module ? e.moduleData : ["groves","creech"].includes(e.moduleData?.module ?? "") && e.linkedModule?.module === module ? e.linkedModule : undefined;
     if (e.kind !== "module" || !validModuleObservation(observation)) continue;
     for (const [key, value] of Object.entries(observation.changes)) {
       if (value === null) delete state[key];
@@ -339,6 +341,7 @@ export function moduleState(
   return state;
 }
 function fieldLabel(module: ModuleObservation["module"], key: string) {
+  if (module === "creech") return key.replace(/\./g," ");
   if (module === "poltergeist") return key === "carolyn" ? "Carolyn" : key === "floppy" ? "Mr. Floppy" : POLTERGEIST_MINORS.find(p=>key===`minor.${p.id}`)?.name ?? key;
   if (module === "groves") return grovesLabel(key);
   if (module === "inkanyamba") return key === "wrath" ? "Killer Wrath" : key === "miracleResolved" ? "We Need a Miracle Wrath recorded" : `${INKANYAMBA_MINOR_POWERS.find(p => key === `minor.${p.id}.health`)?.name ?? key} Health`;
@@ -432,6 +435,7 @@ function valueLabel(key: string, value: ModuleValue) {
   return String(value);
 }
 export function describeModule(observation: ModuleObservation) {
+  if(observation.module==='creech')return creechFacts(observation.changes).join(' ') || Object.entries(observation.changes).filter(([k])=>k!=='initialized').map(([k,v])=>`${k.replace(/\./g,' ')}: ${v??'not recorded'}`).join('; ');
   if(observation.module==='poltergeist')return Object.entries(observation.changes).filter(([k])=>!['initialized','minorsRemoved'].includes(k)).map(([k,v])=>`${fieldLabel('poltergeist',k)}: ${v===null?'not recorded':String(v).replace(/-/g,' ')}`).join('; ');
   if (observation.module === "groves") return Object.entries(observation.changes).map(([key,value])=>`${grovesLabel(key)}: ${grovesValue(key,value)}`).join("; ");
   if (observation.module === "maple") return Object.entries(observation.changes).map(([key,value])=>`${mapleLabel(key)}: ${mapleValue(key,value)}`).join("; ");
@@ -450,6 +454,7 @@ export function moduleContext(
   const context: Record<string, ModuleState> = {};
   if (selection.killer === "Dr. Fright") { const facts=frightPublic(entries); if(facts) context.fright=facts; }
   for (const module of [
+    "creech",
     "poltergeist",
     "groves",
     "inkanyamba",
@@ -462,7 +467,7 @@ export function moduleContext(
     "maple",
   ] as const) {
     const applies =
-      module === "poltergeist" ? selection.killer === "Poltergeist" : module === "groves" ? selection.location === "Sacred Groves" : module === "inkanyamba" ? selection.killer === "Inkanyamba" : module === "maple" ? selection.location === "Maple Lane" : module === "carnival"
+      module === "creech" ? selection.location === "Creech Manor" : module === "poltergeist" ? selection.killer === "Poltergeist" : module === "groves" ? selection.location === "Sacred Groves" : module === "inkanyamba" ? selection.killer === "Inkanyamba" : module === "maple" ? selection.location === "Maple Lane" : module === "carnival"
         ? selection.location === "Carnival of Blood"
         : module === "geppetto"
           ? selection.killer === "Geppetto"
@@ -478,8 +483,10 @@ export function moduleContext(
     // historical death fingerprints until an explicit owner observation exists.
     if (module === "inkanyamba" && !entries.some(e => (e.kind === "module" && (e.moduleData?.module === "inkanyamba" || e.linkedModule?.module === "inkanyamba")) || e.inkanyambaReference === true)) continue;
     if (module === "groves" && !entries.some(e => (e.kind === "module" && e.moduleData?.module === "groves") || e.grovesReference === true)) continue;
-    if (module === "poltergeist" && !entries.some(e=>e.kind==='module'&&e.moduleData?.module==='poltergeist')) continue;
+    if (module === "creech" && !entries.some(e=>e.kind==="module"&&e.moduleData?.module==="creech")) continue;
+    if (module === "poltergeist" && !entries.some(e=>e.kind==='module'&&(e.moduleData?.module==='poltergeist'||e.linkedModule?.module==='poltergeist'))) continue;
     const state = moduleState(entries, module);
+    if (module === 'creech') delete state.initialized;
     if (module === 'poltergeist') { delete state.initialized; const power=poltergeistPower(entries);state.powerKnown=power.known;state.epicRequired=power.known?power.epic:null; }
     if (module === "groves") { delete state.holyManProvisional; }
     // A UI initialization marker is not a game fact or part of a death fingerprint.
@@ -513,6 +520,16 @@ export function moduleStoryBeats(
   if (!context) return "";
   // Preserve the established output for every other location. Each owner gets
   // room inside the existing 900-character module budget for Carnival mixes.
+  if (context.creech) {
+    const killer = moduleStoryBeats({...selection,location:""},entries);
+    const budget = killer ? 535 : 880;
+    let location = "";
+    for(const fact of creechFacts(context.creech)) if(location.length+fact.length+1<=budget)location+=fact+" ";
+    // Objective comes first in the existing Poltergeist facts; whole sentences only.
+    let killerFacts="";
+    for(const fact of killer.split(/(?<=\.)\s+/))if(killerFacts.length+fact.length+1<=340)killerFacts+=fact+" ";
+    return [location&&`Creech Manor: ${location.trim()}`,killerFacts&&`Killer: ${killerFacts.trim()}`].filter(Boolean).join("\n");
+  }
   if (context.groves) {
     const killer = moduleStoryBeats({ ...selection, location: "" }, entries);
     const facts = grovesFacts(context.groves);
@@ -704,6 +721,12 @@ export function buddylandReferences(
       if (context?.buddyland?.[`event.${event.id}`] === "active")
         refs.push({ name: event.name, effect: event.effect });
   }
+  if(selection.location==='Creech Manor') {
+    const state=context?.creech??{};
+    for(const e of CREECH_EVENTS)if(state[`event.${e.id}`]==='active')refs.push({name:e.name,effect:e.effect+' Activation establishes no additional casualties.'});
+    for(const h of CREECH_PEOPLE)if(state[`hunter.${h.id}`])refs.push({name:h.name,effect:`Recorded hunter status: ${state[`hunter.${h.id}`]??'unknown'}. Only an explicit death-specific victim field identifies the victim of this death. No additional casualty is implied.`});
+    for(const fact of creechFacts(state))refs.push({name:'Creech Manor observation',effect:fact});
+  }
   return refs;
 }
 
@@ -857,6 +880,12 @@ export function moduleReferences(
         effect: `${hazard.effect} The explicitly recorded mechanism applies to this death only, not proof of an ongoing hazard or extra casualties.`,
       });
   }
+  if(selection.location==='Creech Manor') {
+    const state=context?.creech??{};
+    for(const e of CREECH_EVENTS)if(state[`event.${e.id}`]==='active')refs.push({name:e.name,effect:e.effect+' Activation establishes no additional casualties.'});
+    for(const h of CREECH_PEOPLE)if(state[`hunter.${h.id}`]||h.name===victim)refs.push({name:h.name,effect:`Recorded hunter status: ${state[`hunter.${h.id}`]??'unknown'}. Only an explicit death-specific victim field identifies the victim of this death. No additional casualty is implied.`});
+    for(const fact of creechFacts(state))refs.push({name:'Creech Manor observation',effect:fact});
+  }
   return refs;
 }
 
@@ -866,7 +895,7 @@ export function moduleItemBeats(
   entries: readonly ObservedEvent[],
 ) {
   const locationCatalog =
-    selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
+    selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
       ? CAMP_ITEMS
       : selection.location === "Carnival of Blood"
         ? CARNIVAL_ITEMS
@@ -906,8 +935,10 @@ export function initialModuleObservations(
   initializeInkanyamba = false,
   initializeGroves = false,
   initializePoltergeist = false,
+  initializeCreech = false,
 ): ModuleObservation[] {
   return [
+    ...(initializeCreech && selection.location==='Creech Manor' ? [{module:'creech' as const,changes:creechStartingObservations(selection.startingEvent)}] : []),
     ...(initializePoltergeist && selection.killer==='Poltergeist' ? [{module:'poltergeist' as const,changes:{initialized:true,carolyn:'hidden',floppy:'hidden','minor.psychic-confusion':'inactive','minor.unseen-forces':'inactive',minorsRemoved:false}}] : []),
     ...(initializeGroves && selection.location === "Sacred Groves" ? [{module:"groves" as const,changes:{wrath:2,closed:"none",fire:"none",hallowed:"none","sign.1":"none","sign.2":"none"}}] : []),
     ...(initializeInkanyamba && selection.killer === "Inkanyamba" ? [{module:"inkanyamba" as const,changes:{wrath:2}}] : []),

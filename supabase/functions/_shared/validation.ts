@@ -108,7 +108,7 @@ export const EndingRequestSchema = z.object({
   gameHighlights: z.string().max(2000).optional(),
   roundsPlayed:z.number().int().min(1).max(999).optional(),
   playSummary:z.string().max(1800).optional(),
-  poltergeistReview:z.object({carolynRescued:z.literal(true).nullable(),floppyAtEscape:z.literal(true).nullable(),epicRequired:z.boolean().nullable()}).strict().optional()
+  poltergeistReview:z.object({carolynRescued:z.literal(true).nullable(),floppyAtEscape:z.literal(true).nullable(),epicRequired:z.boolean().nullable(),escapeRoute:z.enum(['exit','helicopter']).nullable().optional()}).strict().optional()
 }).refine(value=>!value.poltergeistReview||value.killer.name==='Poltergeist',{message:'Rescue review belongs to Poltergeist',path:['poltergeistReview']});
 
 export type StoryRequest = z.infer<typeof StoryRequestSchema>;

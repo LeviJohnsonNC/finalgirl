@@ -70,6 +70,7 @@ export const GameOutcomeForm = ({
   const isPoltergeist = result.killer === 'Poltergeist';
   const polterEntries=summarizePlay(result.playEvents).entries;
   const polterState=moduleState(polterEntries,'poltergeist');
+  const creechState=moduleState(polterEntries,'creech');
   const polterPower=poltergeistPower(polterEntries);
   const isOrganism = result.killer === 'The Organism';
   const isEvomorph = result.killer === 'Evomorph';
@@ -150,10 +151,11 @@ export const GameOutcomeForm = ({
   );
   const [foundMrFloppy, setFoundMrFloppy] = useDraftField(
     'escapedWithMrFloppy',
-    polterState.carolyn==='rescued'&&polterState.floppy==='carried',
+    polterState.carolyn==='rescued'&&(creechState['helicopter.carolyn']===true?creechState['helicopter.floppy']===true:polterState.floppy==='carried'),
     initialDraft,
     onDraftChange,
   );
+  const [escapeRoute,setEscapeRoute]=useDraftField('rescueRoute',creechState['helicopter.carolyn']===true?'helicopter':'',initialDraft,onDraftChange);
   // Organism-specific loss type
   const [organismLossType, setOrganismLossType] = useDraftField<
     'caught' | 'assimilated'
@@ -268,7 +270,7 @@ export const GameOutcomeForm = ({
       const parts = [];
       if(initialDraft?.foundCarolyn===true&&!foundCarolyn)parts.push('Found Carolyn earlier; escape not confirmed');
       if(initialDraft?.foundMrFloppy===true&&!foundMrFloppy)parts.push('Found Mr. Floppy earlier; possession at escape not confirmed');
-      if (foundCarolyn) parts.push('Carolyn rescued and escaped with the Final Girl');
+      if (foundCarolyn) parts.push('Carolyn rescued and escaped with the Final Girl'+(escapeRoute?` via ${escapeRoute}`:'; route unrecorded'));
       if(polterPower.epic)parts.push('Epic Power: escape also requires Mr. Floppy');
       if(polterPower.revealed&&!polterPower.known)parts.push('Revealed Power name/extra escape requirement unrecorded');
       if (foundMrFloppy) parts.push('Recovered Mr. Floppy');
@@ -379,7 +381,7 @@ export const GameOutcomeForm = ({
       roundsPlayed,
       endingSubLocation: endingSubLocation || '',
       gameHighlights: highlights,
-      ...(isPoltergeist&&{poltergeistReview:{carolynRescued:foundCarolyn?true:null,floppyAtEscape:foundMrFloppy?true:null,epicRequired:polterPower.known?polterPower.epic:null}}),
+      ...(isPoltergeist&&{poltergeistReview:{carolynRescued:foundCarolyn?true:null,floppyAtEscape:foundMrFloppy?true:null,epicRequired:polterPower.known?polterPower.epic:null,...(result.location==='Creech Manor'?{escapeRoute:!foundCarolyn?null:escapeRoute==='helicopter'?'helicopter' as const:escapeRoute==='exit'?'exit' as const:null}:{})}}),
     };
     return formData;
   };
@@ -485,6 +487,7 @@ export const GameOutcomeForm = ({
                 Poltergeist rescue review
               </h3>
               {isPoltergeist&&<p className="text-sm text-muted-foreground">Confirm the physical escape. {polterPower.epic?'The Epic Power requires Mr. Floppy too.':polterPower.revealed&&!polterPower.known?'The revealed Power name is unknown.':''}</p>}
+              {result.location==='Creech Manor'&&<label>Carolyn rescue route<select className="w-full min-h-11 bg-background border border-border rounded p-2" aria-label="Carolyn rescue route" value={escapeRoute} onChange={e=>setEscapeRoute(e.target.value)}><option value="">Not recorded</option><option value="exit">Exit</option><option value="helicopter">Helicopter</option></select><span className="text-sm">Helicopter is not an Exit; confirm your physical outcome.</span></label>}
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input

@@ -396,3 +396,23 @@ it('Poltergeist failed joins remain retryable and legacy inapplicable observatio
  expect(summarizePlay(result.current.activeGame!.playEvents).killerHealth).toBe(4);
  act(()=>{expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'state',field:'killerHealth',value:0}))).toBe(false);expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'moment',momentType:'killer-revived',text:'Killer returns'}))).toBe(false);});
 });
+
+describe('Creech durable boundary',()=>{
+ it('seeds only fresh setup and atomically reports hunter state/Bloodlust; stale saves cannot overwrite a later adjustment',async()=>{
+  const {resolveCreechAction}=await import('../../supabase/functions/_shared/play/creech');
+  const {result}=renderHook(useActiveGame);const fresh:ActiveGame={...game,creechSetupVersion:1,selection:{...game.selection,location:'Creech Manor',startingEvent:'Ghost Hunters'}};
+  act(()=>{result.current.save(fresh);result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));});
+  const record=(a:import('../../supabase/functions/_shared/play/creech').CreechAction)=>{const entries=summarizePlay(result.current.activeGame!.playEvents).entries;const r=resolveCreechAction(a,moduleState(entries,'creech'),{},'Hans')!;return newPlayEvent({kind:'module',moduleData:{module:'creech',changes:r.changes},creechAction:a});};
+  const parent=()=>result.current.activeGame!.playEvents!.slice(-1)[0].id;
+  act(()=>{expect(result.current.appendPlayEvent(game.id,record({parent:parent(),kind:'hunters',colors:['orange']}))).toBe(true);});
+  const stale=record({parent:parent(),kind:'hunter',color:'orange',outcome:'killed',bloodlust:5});
+  act(()=>{result.current.appendPlayEvent(game.id,newPlayEvent({kind:'state',field:'bloodlust',value:6}));expect(result.current.appendPlayEvent(game.id,stale)).toBe(false);});
+  const outcome=record({parent:parent(),kind:'hunter',color:'orange',outcome:'killed',bloodlust:7});
+  act(()=>{expect(result.current.appendPlayEvent(game.id,outcome)).toBe(true);});
+  expect(summarizePlay(result.current.activeGame!.playEvents)).toMatchObject({bloodlust:7,killed:0});
+  act(()=>{result.current.appendPlayEvent(game.id,newPlayEvent({kind:'undo',target:outcome.id}));});
+  expect(summarizePlay(result.current.activeGame!.playEvents).bloodlust).toBe(6);expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'creech')['hunter.orange']).toBe('in-play');
+  act(()=>{result.current.save({...fresh,creechSetupVersion:undefined,playEvents:[]});result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));});
+  expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'creech')).toEqual({});
+ });
+});
