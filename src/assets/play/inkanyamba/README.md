@@ -36,3 +36,19 @@ The identity photo `src/assets/characters/ai/inkanyamba.png` now uses Levi's app
 ## Wide photographic follow-up, 2026-10-26
 
 The current Play card/Sacred-space views use standalone native 16:9 photographic derivatives in `../photos/`, superseding their earlier illustrated hero/state atlases. See `../photos/README.md` for per-card/state mapping and source provenance. Earlier atlases remain intact for unaffected uses and history. Identity pictures and the five Wrath backgrounds are unchanged.
+
+## Photographic Killer Wrath replacement, 2026-10-27
+
+Levi explicitly requested that the five cartoon/painted Killer Wrath backgrounds be replaced in the approved candid photographic style. The following sources supersede the earlier two-column Wrath generation for these five files only. Each is a separate native panoramic photograph conditioned on the approved `src/assets/characters/ai/inkanyamba.png`, preserving the real performer's mask, crest, fur, skin, bones and paired blades. Escalation is quiet watchfulness → alertness → braced readiness → forward movement → close looming fury. No fire, lightning, magical powers, victims or injuries are introduced.
+
+| Stage | Wrath levels | Generated original PNG |
+| --- | --- | --- |
+| 1 | 1–2 | `exec-d5ce73e3-d3ba-4490-821d-6f66a5fd0ce0.png` |
+| 2 | 3–4 | `exec-16c5424e-3594-4a7a-a350-09ba3f2ec62a.png` |
+| 3 | 5–6 | `exec-f2f3d781-b85f-4ccb-b294-de40d418fcfe.png` |
+| 4 | 7–8 | `exec-d1b6fa2e-9ecb-4981-b52c-573e65b66302.png` |
+| 5 | 9–10 | `exec-0f6f189f-4ef9-4c4a-911f-ee82b3df357c.png` |
+
+Derivatives preserve full source framing, resized down to 1600px wide, WebP quality 82 with metadata stripped; no upscaling or semantic edits. Four are 1600×533 and stage 4 is 1600×538. Original PNGs remain in generated-image history and the generating workspace. Budget: 200KiB per image, reflecting the higher-resolution photographic material detail; Divine Wrath retains its separate existing 120KiB budget. The phone crop uses 72% horizontal positioning, reviewed with actual controls. Five two-level bands, unknown handling, level bounds, Undo and observations remain unchanged. These scenes are decorative tracker artwork and do not bind mixed casting to a jungle setting. All labels and controls remain HTML.
+
+Verification: original/derivative sequences and actual laptop/390px/320px tracker crops are reviewed, with tests for native image loading at all five bands and unchanged Divine Wrath artwork. This replacement needs only frontend/artwork publication; no SQL, edge-function deployment, identity-image replacement or provider-prompt change.

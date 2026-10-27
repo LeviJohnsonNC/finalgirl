@@ -22,7 +22,9 @@ for (const file of images) {
   const jpeg = bytes[0] === 255 && bytes[1] === 216;
   const webp = bytes.subarray(0, 4).toString() === 'RIFF' && bytes.subarray(8, 12).toString() === 'WEBP';
   if (bytes.length < 32 || !(png || jpeg || webp)) throw new Error('Invalid or stubbed artwork: ' + file);
-  if (/\/(?:groves|inkanyamba)\/wrath-[1-5]\.webp$/.test(file) && bytes.length > 120 * 1024) throw new Error('Wrath background exceeds 120KiB: ' + file);
+  if (/\/groves\/wrath-[1-5]\.webp$/.test(file) && bytes.length > 120 * 1024) throw new Error('Divine Wrath background exceeds 120KiB: ' + file);
+  if (/\/inkanyamba\/wrath-[1-5]\.webp$/.test(file) && bytes.length > 200 * 1024) throw new Error('Photographic Killer Wrath background exceeds 200KiB: ' + file);
+  if (/\/bloodlust\/level-(?:[0-9]|10)\.webp$/.test(file) && bytes.length > 160 * 1024) throw new Error('Bloodlust photograph exceeds 160KiB: ' + file);
   if (/\/groves\/site-(?:burial|shrine|holy)\.webp$/.test(file) && bytes.length > 520 * 1024) throw new Error('Sacred-space atlas exceeds 520KiB: ' + file);
   if (file.endsWith('/inkanyamba/heroes.webp') && bytes.length > 620 * 1024) throw new Error('Inkanyamba hero atlas exceeds 620KiB: ' + file);
   if (file.endsWith('/groves/sites.webp') && bytes.length > 750 * 1024) throw new Error('Sacred-space state atlas exceeds 750KiB: ' + file);
