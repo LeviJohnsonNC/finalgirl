@@ -30,8 +30,10 @@ const maple = moduleAt("../supabase/functions/_shared/play/maple.ts", {});
 const fright = moduleAt("../supabase/functions/_shared/play/fright.ts", {});
 const inkanyamba = moduleAt("../supabase/functions/_shared/play/inkanyamba.ts", {});
 const groves = moduleAt("../supabase/functions/_shared/play/groves.ts", {"./inkanyamba.ts":inkanyamba});
+const creech = moduleAt("../supabase/functions/_shared/play/creech.ts", {});
 const poltergeist = moduleAt("../supabase/functions/_shared/play/poltergeist.ts", {});
 const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", {
+  "./creech.ts": creech,
   "./poltergeist.ts": poltergeist,
   "./groves.ts": groves,
   "./inkanyamba.ts": inkanyamba,
@@ -43,6 +45,7 @@ const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", {
   "./fright.ts": fright,
 });
 const events = moduleAt("../supabase/functions/_shared/play/events.ts", {
+  "./creech.ts": creech,
   "./poltergeist.ts": poltergeist,
   "./groves.ts": groves,
   "./modules.ts": modules,

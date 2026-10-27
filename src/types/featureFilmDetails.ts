@@ -1,3 +1,4 @@
+import { CREECH_SETUPS,CREECH_EVENTS,creechSetupDescription } from '../../supabase/functions/_shared/play/creech';
 import { GROVES_EVENTS, GROVES_SETUPS, grovesSetupDescription } from "../../supabase/functions/_shared/play/groves";
 import { MAPLE_EVENTS, MAPLE_SETUPS } from "../../supabase/functions/_shared/play/maple";
 import { CARNIVAL_EVENTS, CARNIVAL_SETUPS } from '../../supabase/functions/_shared/play/carnival';
@@ -170,25 +171,8 @@ Little did she know that she would have to survive Creech Manor first!`
     location: {
       name: 'Creech Manor',
       description: `Creech Manor is over 100 years old with the kind of character and historic charm that people love. It is the kind of home where every step, every new room, can call to one's imagination a story from the past. But the stories of Creech Manor are filled with horrifying events, macabre happenings, and supernatural powers beyond human understanding. Go away, for evil reigns within...`,
-      setupCards: [
-        { name: 'Creepshow', description: 'A setup for The Haunting of Creech Manor featuring initial victim and token placement.' },
-        { name: 'Dancing Queen', description: 'A setup for The Haunting of Creech Manor featuring initial victim and token placement.' },
-        { name: 'Strange Trophies', description: 'A setup for The Haunting of Creech Manor featuring initial victim and token placement.' },
-        { name: 'The Dead Zone', description: 'A setup for The Haunting of Creech Manor featuring initial victim and token placement.' },
-        { name: 'The Ladder', description: 'A setup for The Haunting of Creech Manor featuring initial victim and token placement.' }
-      ],
-      events: [
-        { name: 'Clingy Victims', description: 'You must have at least 1 Victim follow you if able.' },
-        { name: 'Curiosity Killed the People', description: 'Place 3 new Victims in the Foyer and panic them immediately.' },
-        { name: 'Frozen in Fear', description: 'Victims will no longer panic during the Panic phase.' },
-        { name: 'Ghost Hunters', description: 'Replace the 3 Victims closest to you (or as many as able) with the Special Victim meeples. These Victims will not follow you until one of them has been killed. Each time one of these Victims is killed, increase Bloodlust by 1 more.' },
-        { name: 'Helicopter Rescue', description: 'Place the Helicopter token on the roof of the house. Once during the game, you may move from the Attic to the Helicopter as though they are adjacent. Any Victims (or Carolyn) with you may be saved. Unless you have saved Carolyn, you must return to the Attic and the token must be removed. The Helicopter is not considered an exit space.' },
-        { name: "I Ain't Afraid of No Ghost", description: 'Move each Victim 1 space towards the Attic.' },
-        { name: "Light's Out", description: 'Roll 1 fewer dice (minimum of 1) when resolving an Action card that allows movement. Ignore this effect if you have a Flashlight or Candle.' },
-        { name: 'Liquid Courage', description: "Victims will follow you into the Killer's space." },
-        { name: 'No One Comes Back', description: 'Place the Skull token in the Attic. All Victims in the Attic are killed. Whenever a Victim enters the Attic, they are killed immediately.' },
-        { name: 'Pushed to the Edge', description: 'Roll a die for each Victim in a Window Space. If the roll is a 1-4, that Victim jumps and is killed.' }
-      ]
+      setupCards:CREECH_SETUPS.map(s=>({name:s.name,description:creechSetupDescription(s)})),
+      events:CREECH_EVENTS.map(e=>({name:e.name,description:e.effect}))
     },
     killer: {
       name: 'Poltergeist',

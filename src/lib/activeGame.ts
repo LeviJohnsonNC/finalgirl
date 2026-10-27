@@ -8,13 +8,14 @@ export interface GameSelection {
   finalGirlStartingHealth?: number;
 }
 export interface EndingFormData {
-  poltergeistReview?: {carolynRescued:true|null;floppyAtEscape:true|null;epicRequired:boolean|null};
+  poltergeistReview?: {carolynRescued:true|null;floppyAtEscape:true|null;epicRequired:boolean|null;escapeRoute?:'exit'|'helicopter'|null};
   finalHorrorLevel?: number; finalGirlHealth?: number; killerHealth?: number;
   weaponUsed: string; victimsSaved: number | null; victimsKilled: number | null;
   roundsPlayed?: number | null;
   endingSubLocation: string; gameHighlights: string;
 }
 export interface ActiveGame {
+  creechSetupVersion?: 1;
   poltergeistSetupVersion?: 1;
   grovesSetupVersion?: 1;
   inkanyambaSetupVersion?: 1;
@@ -41,6 +42,7 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if(game.creechSetupVersion!==undefined&&game.creechSetupVersion!==1)return false;
   if(game.poltergeistSetupVersion!==undefined && game.poltergeistSetupVersion!==1)return false;
   if (game.grovesSetupVersion !== undefined && game.grovesSetupVersion !== 1) return false;
   if (game.inkanyambaSetupVersion !== undefined && game.inkanyambaSetupVersion !== 1) return false;

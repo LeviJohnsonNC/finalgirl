@@ -396,3 +396,41 @@ it('Poltergeist failed joins remain retryable and legacy inapplicable observatio
  expect(summarizePlay(result.current.activeGame!.playEvents).killerHealth).toBe(4);
  act(()=>{expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'state',field:'killerHealth',value:0}))).toBe(false);expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'moment',momentType:'killer-revived',text:'Killer returns'}))).toBe(false);});
 });
+
+describe('Creech durable boundary',()=>{
+ it('seeds only fresh setup and atomically reports hunter state/Bloodlust; stale saves cannot overwrite a later adjustment',async()=>{
+  const {resolveCreechAction}=await import('../../supabase/functions/_shared/play/creech');
+  const {result}=renderHook(useActiveGame);const fresh:ActiveGame={...game,creechSetupVersion:1,selection:{...game.selection,location:'Creech Manor',startingEvent:'Ghost Hunters'}};
+  act(()=>{result.current.save(fresh);result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));});
+  const record=(a:import('../../supabase/functions/_shared/play/creech').CreechAction)=>{const entries=summarizePlay(result.current.activeGame!.playEvents).entries;const r=resolveCreechAction(a,moduleState(entries,'creech'),{},'Hans')!;return newPlayEvent({kind:'module',moduleData:{module:'creech',changes:r.changes},creechAction:a});};
+  const parent=()=>result.current.activeGame!.playEvents!.slice(-1)[0].id;
+  act(()=>{expect(result.current.appendPlayEvent(game.id,record({parent:parent(),kind:'hunters',colors:['orange']}))).toBe(true);});
+  const stale=record({parent:parent(),kind:'hunter',color:'orange',outcome:'killed',bloodlust:5});
+  act(()=>{result.current.appendPlayEvent(game.id,newPlayEvent({kind:'state',field:'bloodlust',value:6}));expect(result.current.appendPlayEvent(game.id,stale)).toBe(false);});
+  const outcome=record({parent:parent(),kind:'hunter',color:'orange',outcome:'killed',bloodlust:7});
+  act(()=>{expect(result.current.appendPlayEvent(game.id,outcome)).toBe(true);});
+  expect(summarizePlay(result.current.activeGame!.playEvents)).toMatchObject({bloodlust:7,killed:0});
+  act(()=>{result.current.appendPlayEvent(game.id,newPlayEvent({kind:'undo',target:outcome.id}));});
+  expect(summarizePlay(result.current.activeGame!.playEvents).bloodlust).toBe(6);expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'creech')['hunter.orange']).toBe('in-play');
+  act(()=>{result.current.save({...fresh,creechSetupVersion:undefined,playEvents:[]});result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));});
+  expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'creech')).toEqual({});
+ });
+});
+it('Creech linked rescue survives failed persistence and retry with one Undo across both owners',async()=>{
+ const {resolveCreechAction}=await import('../../supabase/functions/_shared/play/creech');const {result}=renderHook(useActiveGame);
+ const initial=[newPlayEvent({kind:'start',saved:0,killed:0,round:1}),newPlayEvent({kind:'module',moduleData:{module:'poltergeist',changes:{carolyn:'with-you'}},poltergeistAction:{parent:'root',command:'correct',key:'carolyn',value:'with-you'}})];
+ act(()=>result.current.save({...game,selection:{...game.selection,killer:'Poltergeist',location:'Creech Manor'},playEvents:initial}));
+ const a={parent:initial[initial.length-1].id,kind:'helicopter' as const,victims:2,carolyn:true,floppy:null,confirmed:true as const};
+ const r=resolveCreechAction(a,{'event.helicopter':'active'},{carolyn:'with-you'},'Poltergeist')!;
+ // First establish the roof token through the same durable boundary.
+ const available=newPlayEvent({kind:'module',moduleData:{module:'creech',changes:{'event.helicopter':'active'}},creechAction:{parent:a.parent,kind:'event',id:'helicopter',active:true}});
+ act(()=>expect(result.current.appendPlayEvent(game.id,available)).toBe(true));
+ const rescue=newPlayEvent({kind:'module',moduleData:{module:'creech',changes:r.changes},linkedModule:r.linkedModule,creechAction:{...a,parent:available.id}});
+ const spy=vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('quota');});
+ act(()=>expect(result.current.appendPlayEvent(game.id,rescue)).toBe(false));spy.mockRestore();
+ expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'poltergeist').carolyn).toBe('with-you');
+ act(()=>{expect(result.current.appendPlayEvent(game.id,rescue)).toBe(true);expect(result.current.appendPlayEvent(game.id,{...rescue,id:crypto.randomUUID()})).toBe(false);});
+ expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'poltergeist').carolyn).toBe('rescued');
+ act(()=>expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'undo',target:rescue.id}))).toBe(true));
+ expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'poltergeist').carolyn).toBe('with-you');expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'creech')['helicopter.used']).toBeUndefined();
+});
