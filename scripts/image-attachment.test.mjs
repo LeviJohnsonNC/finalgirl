@@ -3,6 +3,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import ts from 'typescript';
 const compile = path => ts.transpileModule(readFileSync(new URL(path, import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+const fiction = {};
+new Function('exports', compile('../supabase/functions/_shared/fictionBoundary.ts'))(fiction);
 const storyFacts = {}, prompts = {}, narrativeStyle = {};
 const referenceData = {}, opening = {};
 new Function('exports', compile('../supabase/functions/_shared/openingReferenceData.ts'))(referenceData);
@@ -10,11 +12,12 @@ new Function('require', 'exports', compile('../supabase/functions/_shared/openin
 new Function('exports', compile('../supabase/functions/_shared/storyFacts.ts'))(storyFacts);
 new Function('exports', compile('../supabase/functions/_shared/narrativeStyle.ts'))(narrativeStyle);
 new Function('require', 'exports', compile('../supabase/functions/_shared/prompts.ts'))(name => {
+  if (name === './fictionBoundary.ts') return fiction;
   if (name === './narrativeStyle.ts') return narrativeStyle;
   assert.equal(name, './storyFacts.ts'); return storyFacts;
 }, prompts);
 
-function imageHandler({ rowExists = true, attachError = null, composeError = false, invalidPlan = false, incompletePlan = false, planningGateway, discardedBefore = false, discardedDuring = false } = {}) {
+function imageHandler({ rowExists = true, attachError = null, composeError = false, invalidPlan = false, incompletePlan = false, mechanicalPlan = false, planningGateway, discardedBefore = false, discardedDuring = false } = {}) {
   const filters = []; const removed = []; const phases = []; const imageCalls = []; const textCalls = []; let handler;
   let uploaded=false;
   const discardedHelpers={};new Function('require','exports',ts.transpileModule(readFileSync(new URL('../supabase/functions/_shared/discardedGame.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(()=>{},discardedHelpers);
@@ -43,10 +46,11 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
       textCalls.push(opts);
       if (incompletePlan) throw new Error('Generation did not finish: length');
       const copy = opts.system.includes('"title"') ? { title: 'TITLE', tagline: 'TAGLINE' } : {};
-      return { text: invalidPlan ? '{' : JSON.stringify({ concepts: ['A doorway with a small figure at the far end.', 'A face seen beside a darkened arcade machine.', 'An empty chair beneath a practical ceiling lamp.'], selected: 1, ...copy }), model: 'text' };
+      return { text: invalidPlan ? '{' : JSON.stringify({ concepts: ['A doorway with a small figure at the far end.', mechanicalPlan ? 'The woman rolls a die into a bowl beside a sign reading Fire and Brimstone.' : 'A face seen beside a darkened arcade machine.', 'An empty chair beneath a practical ceiling lamp.'], selected: 1, ...copy }), model: 'text' };
     }), GatewayError: planningGateway?.GatewayError ?? Error, generateImage: async (...args) => { imageCalls.push(args); return { base64: 'dGVzdA==', mimeType: 'image/png', model: 'image' }; }, statusFor: planningGateway?.statusFor ?? (() => 500), userFacingMessage: planningGateway?.userFacingMessage ?? (() => 'failed') },
     '../_shared/poster.ts': { composePoster: async (_bytes, copy) => { phases.push('compose'); assert.equal(copy.title, invalidPlan || incompletePlan ? 'BUDDYLAND' : 'TITLE'); if(composeError) throw new Error('composition failed'); return Buffer.from('complete-poster'); } },
     '../_shared/prompts.ts': prompts,
+    '../_shared/fictionBoundary.ts': fiction,
   };
   new Function('require', 'exports', 'Deno', code)(name => {
     if (name.includes('/http/server.ts')) return { serve: fn => { handler = fn; } };
@@ -132,6 +136,7 @@ test('continuity endpoint returns complete structured notes, never clipped or he
         return { text: output, model: 'text' };
       }, statusFor: () => 500, userFacingMessage: () => 'failed' },
       '../_shared/prompts.ts': prompts,
+    '../_shared/fictionBoundary.ts': fiction,
     };
     new Function('require', 'exports', compile('../supabase/functions/generate-visual-bible/index.ts'))(name => {
       if (name.includes('/http/server.ts')) return { serve: fn => { handler = fn; } };
@@ -153,7 +158,7 @@ test('new opening stills use the screen ratio while closing posters retain their
   }
 });
 test('only reviewed selected portraits condition openings, including mixed-film casts', () => {
-  assert.deepEqual(opening.openingReferences('Alice', 'Hans'), []);
+  assert.deepEqual(opening.openingReferences('Alice', 'Hans').map(r=>r.name), ['Alice']);
   for (const girl of ['Rena', 'Gwynn']) {
     const refs = opening.openingReferences(girl, 'Billy the Bear');
     assert.deepEqual(refs.map(ref => ref.name), [girl, 'Billy the Bear']);
@@ -200,3 +205,6 @@ test('discarded games authorize no new image generation and late uploads are rem
  const before=imageHandler({discardedBefore:true});assert.equal((await before.handler(request())).status,410);assert.equal(before.imageCalls.length,0);
  const during=imageHandler({discardedDuring:true});assert.equal((await during.handler(request())).status,410);assert.equal(during.imageCalls.length,1);assert.equal(during.filters.length,0);assert.equal(during.removed.length,1);assert.match(during.removed[0],/^game-posters\/owner-A\/record-poster-/);
 });
+
+test('a literal rules shot never spends on an image or replaces the existing picture',async()=>{const f=imageHandler({mechanicalPlan:true});assert.equal((await f.handler(request('beginning'))).status,500);assert.equal(f.imageCalls.length,0);assert.deepEqual(f.phases,[]);assert.deepEqual(f.removed,[]);});
+test('every catalogued Final Girl has her own reference, independent of killer and film',()=>{const catalog=readFileSync(new URL('../src/types/gameData.ts',import.meta.url),'utf8');const names=new Set([...catalog.matchAll(/finalGirls: *\[([^\]]+)\]/g)].flatMap(([,part])=>[...part.matchAll(/'([^']+)'/g)].map(([,name])=>name)).filter(name=>name!=='TBD'));for(const name of names){const refs=opening.openingReferences(name,'Inkanyamba');assert.deepEqual(refs.map(r=>r.name),[name,'Inkanyamba']);assert(refs[0].url.startsWith('data:image/jpeg;base64,/9j/'));}assert(names.size>30);});

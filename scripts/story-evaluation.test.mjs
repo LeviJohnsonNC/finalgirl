@@ -324,6 +324,7 @@ const schemas = load("../supabase/functions/_shared/validation.ts", {
 const quantities = load("../supabase/functions/_shared/narrativeStyle.ts");
 const facts = load("../supabase/functions/_shared/storyFacts.ts");
 const prompts = load("../supabase/functions/_shared/storyPrompts.ts", {
+  "./fictionBoundary.ts": load("../supabase/functions/_shared/fictionBoundary.ts"),
   "./storyFacts.ts": facts,
   "./narrativeStyle.ts": quantities,
 });

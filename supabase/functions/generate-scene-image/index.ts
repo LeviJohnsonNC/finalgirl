@@ -9,6 +9,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { ownedOpeningReference } from "../_shared/imageReference.ts";
+import { hasMechanicalShotLeak } from "../_shared/fictionBoundary.ts";
 import { openingReferences } from "../_shared/openingReferences.ts";
 import { getCorsHeaders } from "../_shared/auth.ts";
 import { isDiscardedGame } from "../_shared/discardedGame.ts";
@@ -74,7 +75,10 @@ serve(async (req) => {
       const posterPlan = isPoster ? parseArtPlan(brief.text) : null;
       const plan = isPoster ? posterPlan : parseShotPlan(brief.text);
       if (plan) {
-        context.shotBrief = plan.concepts[plan.selected];
+        const selectedShot = plan.concepts[plan.selected];
+        if (!isPoster && hasMechanicalShotLeak(selectedShot, body.location))
+          throw new GatewayError("incomplete_response", "The scene plan included game procedures. Please reshoot.");
+        context.shotBrief = selectedShot;
         if (posterPlan) posterCopy = { title: posterPlan.title, tagline: posterPlan.tagline };
       } else {
         if (!isPoster) throw new GatewayError("incomplete_response", "The opening shot plan was incomplete.");

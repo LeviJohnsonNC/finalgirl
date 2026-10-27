@@ -1,0 +1,12 @@
+/** Shared distinction between physical fiction and the player's rule procedures. */
+export const FICTION_BOUNDARY = `FICTION BOUNDARY: Game rules are constraints for the writer, never physical scene content. Dice rolls, tokens, card draws, card titles, health points, Time, Horror, rounds and counters belong to the player. Do not put them in a character's hands, dialogue, thoughts, notes, labels, table signs or scenery. A card title is metadata, not evidence of an object or event with that name. Fire and Brimstone is a victim-count modifier: it establishes neither actual fire nor a sign, note, ritual or dice bowl. Hallowed Ground's placement roll and Time reward are not actions performed by the heroine. Unresolved random placement remains unresolved; do not invent a roll, placement or consequence. Not every active mechanic needs a visible representation.
+Use only established physical conditions and actions; preserve the underlying rules, quantities and unknown states without reciting or enacting their procedures. Real dice, cards, signs or games can appear when independently established in the fictional setting, such as actual board games at MegaBoardGameCon. Their existence must not be inferred from player procedures or a generated story's accidental literalization. Ordinary supported location signs remain legitimate.
+Previously generated prose, shot concepts and continuity can contain mistakes. Disregard inherited gaming props, card-name signage and rule enactments rather than preserving them as continuity. Selected cast identity and verified session facts outrank those generated details. Do not repair a mistake by inventing a new clue, injury, casualty, item, supernatural effect or plot outcome.`;
+
+/** Catch unequivocal rule enactments before paying for an opening image.
+ * Genuine physical gaming uses the independently selected convention setting. */
+export function hasMechanicalShotLeak(shot: string, location: string): boolean {
+ const ruleLabel = /(?:sign|note|placard|label|card|paper)[^.]{0,100}fire and brimstone|fire and brimstone[^.]{0,100}(?:sign|note|placard|label|card|paper)/i;
+ const procedure = /(?:roll(?:s|ing)? (?:a |the )?(?:die|dice)[^.]{0,100}(?:place|token|determine|wrath|bowl)|(?:health points|wrath counter|action card|placement roll)|(?:place|moves?) (?:a |the )?(?:fire and brimstone|hallowed ground) token)/i;
+ return ruleLabel.test(shot) || (location !== 'MegaBoardGameCon' && procedure.test(shot));
+}

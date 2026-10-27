@@ -2,7 +2,11 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-const portraits = { 'Billy the Bear': 'billy-the-bear', Gwynn: 'gwynn', Rena: 'rena' };
+// Use the same public cast-file registry as casting, including mixed-film selections.
+const catalog = readFileSync('src/types/gameData.ts', 'utf8');
+const finalGirls = new Set([...catalog.matchAll(/finalGirls: *\[([^\]]+)\]/g)].flatMap(([,names])=>[...names.matchAll(/'([^']+)'/g)].map(([,name])=>name)));
+const registry = catalog.split('const CHARACTER_FILES:')[1].split('};')[0];
+const portraits = Object.fromEntries([...registry.matchAll(/'([^']+)': '([^']+)[.]png'/g)].filter(([,name])=>finalGirls.has(name) || ['Billy the Bear','Inkanyamba'].includes(name)).map(([,name,file])=>[name,file]));
 const images = {};
 const hashes = [];
 for (const [name, file] of Object.entries(portraits)) {
