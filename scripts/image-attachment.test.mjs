@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import ts from 'typescript';
@@ -6,9 +7,26 @@ const compile = path => ts.transpileModule(readFileSync(new URL(path, import.met
 const fiction = {};
 new Function('exports', compile('../supabase/functions/_shared/fictionBoundary.ts'))(fiction);
 const storyFacts = {}, prompts = {}, narrativeStyle = {};
-const referenceData = {}, opening = {};
-new Function('exports', compile('../supabase/functions/_shared/openingReferenceData.ts'))(referenceData);
-new Function('require', 'exports', compile('../supabase/functions/_shared/openingReferences.ts'))(() => referenceData, opening);
+const manifest = {}, opening = {};
+new Function('exports', compile('../supabase/functions/_shared/openingReferenceManifest.ts'))(manifest);
+const REFERENCE_MANIFEST = manifest.OPENING_REFERENCE_MANIFEST;
+// The real module is exercised against a synthetic manifest so digests can be checked
+// without touching Storage: tests never read the bucket.
+function openingWith(entries) {
+  const bound = { OPENING_REFERENCE_MANIFEST: entries };
+  const out = {};
+  new Function('require', 'exports', 'Deno', compile('../supabase/functions/_shared/openingReferences.ts'))(name => {
+    if (name === './openingReferenceManifest.ts') return bound;
+    if (name.includes('supabase-js')) return { createClient: () => ({ storage: { from: () => ({ download: async () => ({ error: { message: 'bucket access is not allowed in tests' } }) }) } }) };
+    throw new Error('Unexpected opening import: ' + name);
+  }, out, { env: { get: () => 'configured' } });
+  return out;
+}
+new Function('require', 'exports', 'Deno', compile('../supabase/functions/_shared/openingReferences.ts'))(name => {
+  if (name === './openingReferenceManifest.ts') return manifest;
+  if (name.includes('supabase-js')) return { createClient: () => ({ storage: { from: () => ({ download: async () => ({ error: { message: 'bucket access is not allowed in tests' } }) }) } }) };
+  throw new Error('Unexpected opening import: ' + name);
+}, opening, { env: { get: () => 'configured' } });
 new Function('exports', compile('../supabase/functions/_shared/storyFacts.ts'))(storyFacts);
 new Function('exports', compile('../supabase/functions/_shared/narrativeStyle.ts'))(narrativeStyle);
 new Function('require', 'exports', compile('../supabase/functions/_shared/prompts.ts'))(name => {
