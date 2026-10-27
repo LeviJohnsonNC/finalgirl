@@ -97,7 +97,8 @@ test('photographic cards and healthless Minor states match the baseline at every
     const widths = info.project.name === 'mobile' ? [{ width: 390, height: 844 }, { width: 320, height: 568 }] : [{ width: 1280, height: 640 }, { width: 1366, height: 768 }, { width: 1440, height: 900 }];
     // Full-panel crops include choices below the viewport. Settle those lazy
     // images too, so the review evidence never contains unloaded black cells.
-    await panel.locator('img').evaluateAll(images => Promise.all(images.map(async image => {
+    await panel.locator('img').evaluateAll(images => Promise.all(images.map(async node => {
+        const image = node as HTMLImageElement;
         image.loading = 'eager';
         await image.decode();
         if (!image.naturalWidth) throw new Error('Poltergeist photograph did not load');
