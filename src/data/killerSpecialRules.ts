@@ -25,9 +25,9 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   'Poltergeist': {
     narrativeNote:
-      'A malevolent spirit that cannot be wounded, driven off, or killed by the Final Girl. The only path to safety is finding Carolyn and escaping with her (and optionally recovering Mr. Floppy, her teddy bear). Do NOT write scenes where the Final Girl defeats or destroys the Poltergeist through combat.',
+      'A malevolent spirit that cannot be wounded, driven off, or killed by the Final Girl. The only path to safety is finding Carolyn and escaping with her; the Forgetting Something? Epic Dark Power also requires her pink stuffed rabbit, Mr. Floppy. Do NOT write scenes where the Final Girl defeats or destroys the Poltergeist through combat.',
     unkillable: true,
-    winCondition: 'Find Carolyn and escape with her; optionally recover Mr. Floppy the teddy bear. Do not claim this destroys the spirit or ends the haunting. Defeating the Poltergeist in combat is not possible.',
+    winCondition: 'Find Carolyn and escape with her. If Forgetting Something? is revealed, also escape with Mr. Floppy, her pink stuffed rabbit. Do not claim this destroys the spirit or ends the haunting. Defeating the Poltergeist in combat is not possible.',
   },
 
   'Inkanyamba': {

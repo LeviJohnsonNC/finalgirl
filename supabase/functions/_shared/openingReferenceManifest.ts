@@ -43,6 +43,7 @@
 // adrianne.png SHA-256: 62493fe13d21e57cf0428ff28999ceee27045df062b9f8bcbbafe0958af16531
 // maureen.png SHA-256: 9bd680a9c0e83efc9c9f7bd2756f4e7a1fb1daf85c36c4272f1bc88e00c9f087
 export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: string }> = {
+  "Poltergeist": {"path":"poltergeist.jpg","sha256":"c3dfc0ebaef9ed040b85d59b0f8cfde02b82dd42fd38ae4cb6a4097015045331"},
   "Billy the Bear": {
     "path": "billy-the-bear.jpg",
     "sha256": "b5a3cfee52816d636f35f555fbaca6d10cc1fbeb6f70f3a1a8f1e220868309e8"

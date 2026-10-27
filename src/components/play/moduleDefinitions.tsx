@@ -1,3 +1,4 @@
+import { PoltergeistControls } from './PoltergeistControls';
 import { moduleBanners } from "./moduleBanners";
 import { GrovesControls } from "./GrovesControls";
 import { InkanyambaControls } from "./InkanyambaControls";
@@ -34,13 +35,15 @@ export interface ControlsProps {
 }
 type State = ReturnType<typeof moduleState>;
 export type SharedControlCapability =
+  | "objective"
+  | "minor-effect"
   | "character"
   | "event"
   | "reveals"
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -66,6 +69,7 @@ const peopleSummary = (
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
 export const moduleDefinitions: Definition[] = [
+  {id:'poltergeist',owner:'killer',match:'Poltergeist',title:'The Poltergeist',art:moduleBanners.poltergeist,capabilities:['objective','minor-effect','reveals'],summary:state=>`Carolyn: ${state.carolyn===undefined?'not recorded':String(state.carolyn).replace(/-/g,' ')} · Mr. Floppy: ${state.floppy===undefined?'not recorded':String(state.floppy).replace(/-/g,' ')}`,Controls:props=><PoltergeistControls {...props}/>},
   {id:"groves",owner:"location",match:"Sacred Groves",title:"Inside Sacred Groves",art: moduleBanners.groves,capabilities:["character","event"],summary:state=>`Divine Wrath ${typeof state.wrath === "number" ? `${state.wrath}/10` : "not recorded"}${state.finaleRevealed ? " · Finale active" : ""}`,Controls:props=><GrovesControls {...props}/>},
   {id:"inkanyamba",owner:"killer",match:"Inkanyamba",title:"Inkanyamba · The Avenger",art: moduleBanners.inkanyamba,capabilities:["reveals","minor-power"],summary:state=>`Killer Wrath ${typeof state.wrath === "number" ? `${state.wrath}/10` : "not recorded"}`,Controls:props=><InkanyambaControls {...props}/>},
   { id:"maple", owner:"location", match:"Maple Lane", title:"Inside Maple Lane", art: moduleBanners.maple, capabilities:["character","event"], summary:state=>{

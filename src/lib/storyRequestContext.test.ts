@@ -29,7 +29,7 @@ it('accepts opening and ending rules for every catalog killer/location combinati
 });
 
 it('preserves full owner guidance without duplicating location rules under the killer', () => {
-  for (const killer of ['Hans', 'Billy the Bear', 'Geppetto', 'Dr. Fright']) {
+  for (const killer of ['Hans', 'Billy the Bear', 'Geppetto', 'Dr. Fright','Poltergeist']) {
     for (const location of ['Camp Happy Trails', 'Buddyland', 'Carnival of Blood', 'Maple Lane']) {
       const { killerRules, locationRules } = getStoryRequestRules(killer, location);
       const ownKiller = getEntityPromptContext(killer)!;
@@ -54,10 +54,19 @@ it('covers the previously rejected Dr. Fright payload without weakening server l
 });
 
 it('retains legacy killer guidance and leaves absent module references absent', () => {
-  expect(getStoryRequestRules('Poltergeist', 'Uncatalogued location')).toEqual({
-    killerRules: getKillerNarrativeRules('Poltergeist'), locationRules: undefined,
+  expect(getStoryRequestRules('Evomorph', 'Uncatalogued location')).toEqual({
+    killerRules: getKillerNarrativeRules('Evomorph'), locationRules: undefined,
   });
   expect(getStoryRequestRules('Uncatalogued killer', 'Uncatalogued location')).toEqual({
     killerRules: undefined, locationRules: undefined,
   });
+});
+
+it('accepts a bounded owner-specific rescue review without weakening other request fields',()=>{
+ const review={carolynRescued:true,floppyAtEscape:null,epicRequired:null};
+ const valid={...requestFor('Poltergeist','Sacred Groves'),introStory:opening,outcome:'won',poltergeistReview:review};
+ expect(EndingRequestSchema.safeParse(valid).success).toBe(true);
+ expect(EndingRequestSchema.safeParse({...valid,killer:{name:'Hans'}}).success).toBe(false);
+ expect(EndingRequestSchema.safeParse({...valid,poltergeistReview:{...review,carolynRescued:false}}).success).toBe(false);
+ expect(EndingRequestSchema.safeParse({...valid,playSummary:'x'.repeat(1801)}).success).toBe(false);
 });

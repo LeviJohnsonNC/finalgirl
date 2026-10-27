@@ -1,3 +1,4 @@
+import { validPoltergeistObservation, validPoltergeistAction, type PoltergeistAction } from './poltergeist.ts';
 import { validGrovesAction, canLinkGrovesAction, type GrovesAction } from "./groves.ts";
 /** Immutable observations, shared by the app and edge runtime. */
 import { parseFright } from "./fright.ts";
@@ -74,6 +75,7 @@ export interface PlayEvent extends PlayDetails {
   grovesReference?: true;
   /** One explicit location action can also update selected Inkanyamba. */
   grovesAction?: GrovesAction;
+  poltergeistAction?: PoltergeistAction;
   linkedModule?: ModuleObservation;
   /** Provenance for newly recorded Inkanyamba card facts; legacy death hashes stay unchanged. */
   inkanyambaReference?: true;
@@ -134,6 +136,8 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if(e.moduleData?.module==='poltergeist' && (!validModuleObservation(e.moduleData)||!validPoltergeistObservation(e.poltergeistAction,e.moduleData.changes)))return false;
+  if(e.poltergeistAction!==undefined && (e.kind!=='module'||e.moduleData?.module!=='poltergeist'||!validPoltergeistAction(e.poltergeistAction)))return false;
   if (e.grovesReference !== undefined && (e.grovesReference !== true || e.kind !== "moment" || e.momentType !== "finale")) return false;
   if (e.grovesAction !== undefined && (e.kind !== "module" || e.moduleData?.module !== "groves" || !validGrovesAction(e.grovesAction))) return false;
   if (e.linkedModule !== undefined && (e.kind !== "module" || e.moduleData?.module !== "groves" || !e.grovesAction || !canLinkGrovesAction(e.grovesAction) || !validModuleObservation(e.linkedModule) || e.linkedModule.module !== "inkanyamba" || Object.keys(e.linkedModule.changes).join() !== "wrath")) return false;

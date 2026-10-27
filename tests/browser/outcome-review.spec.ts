@@ -225,7 +225,7 @@ test("a sacrificial rescue victory stays a victory and can be saved without gene
   await page
     .getByRole("button", { name: "Clear Victims Saved", exact: true })
     .click();
-  await page.getByLabel("Found Carolyn", { exact: true }).check();
+  await page.getByLabel("Rescued Carolyn", { exact: true }).check();
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({
     path: info.outputPath("outcome-sacrificial-rescue.png"),

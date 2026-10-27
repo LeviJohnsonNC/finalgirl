@@ -1,3 +1,5 @@
+import { POLTERGEIST_POWERS, POLTERGEIST_FINALES } from '../../../supabase/functions/_shared/play/poltergeist';
+import { poltergeistArt } from './poltergeistArt';
 import { modulePhoto } from "./modulePhotos";
 import { inkanyambaHero } from "./inkanyambaHeroes";
 import { inkanyambaCell } from "./inkanyambaArt";
@@ -53,7 +55,7 @@ export function illustratedKillerCards(
 ): IllustratedKillerCard[] {
   const power = type === "dark-power";
   const cards =
-    killer === "Inkanyamba"
+    killer === 'Poltergeist' ? (power ? POLTERGEIST_POWERS : POLTERGEIST_FINALES) : killer === "Inkanyamba"
       ? power
         ? INKANYAMBA_POWERS
         : INKANYAMBA_FINALES
@@ -81,7 +83,7 @@ export function illustratedKillerCards(
         ("epic" in card && card.epic === true) ||
         card.effect.startsWith("Epic"),
       heroArt:
-        modulePhoto(killer, index + (power ? 0 : 4)) ??
+        (killer==='Poltergeist' ? poltergeistArt(card.id) : undefined) ?? modulePhoto(killer, index + (power ? 0 : 4)) ??
         (killer === "Inkanyamba"
           ? inkanyambaHero(index + (power ? 0 : 4))
           : undefined),

@@ -40,7 +40,7 @@ for (const [killer, id] of [
   ["Billy the Bear", "billy"],
   ["Geppetto", "geppetto"],
   ["Dr. Fright", "fright"],
-  ["Poltergeist", ""],
+  ["Poltergeist", "poltergeist"],
 ]) {
   test(`Divine Wrath and role outcomes remain independent with ${killer}`, async ({
     page,

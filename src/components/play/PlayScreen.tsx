@@ -1,3 +1,4 @@
+import { poltergeistParent, resolvePoltergeistAction } from '../../../supabase/functions/_shared/play/poltergeist';
 import { KillerCards } from "./KillerCards";
 import { illustratedKillerCards } from "./killerPresentation";
 import { playStartingValues } from "@/lib/play/defaults";
@@ -56,7 +57,7 @@ import { SessionOptions } from "@/components/SessionOptions";
 import "@/styles/play.css";
 import "@/styles/play-finish.css";
 import { killerMomentCards, moduleState } from "@/lib/play/modules";
-import { playItems } from "@/lib/play/catalog";
+import { selectionItems } from "@/lib/play/catalog";
 import { PlaySelect } from "./PlaySelect";
 import "@/styles/play-state-art.css";
 
@@ -213,6 +214,12 @@ export function PlayScreen(props: PlayScreenProps) {
   const momentCards = moment?.momentType === "dark-power" || moment?.momentType === "finale" ? illustratedKillerCards(killer, moment.momentType) : [];
   const isReveal =
     moment?.momentType === "dark-power" || moment?.momentType === "finale";
+  const recordObjectiveFromItem = (command:'join'|'find-floppy') => {
+    const request={parent:poltergeistParent(summary.entries),command};
+    const changes=resolvePoltergeistAction(request,moduleState(summary.entries,'poltergeist'),summary.entries);
+    if(!changes)return;
+    if(!onEvent(newPlayEvent({kind:'module',moduleData:{module:'poltergeist',changes},poltergeistAction:request})))setMessage('This change could not be saved. Please try again.');
+  };
   const saveMoment = () => {
     if (
       moment &&
@@ -413,7 +420,7 @@ export function PlayScreen(props: PlayScreenProps) {
       >
         <h2>Track more</h2>
         <div className="play-state-grid">
-          {orderedStateFields.map((field) => {
+          {orderedStateFields.filter(field=>killer!=='Poltergeist'||field!=='killerHealth').map((field) => {
             const value = summary[field];
             const health = field === "finalGirlHealth" || field === "killerHealth";
             const critical = health && value !== undefined && value <= 2;
@@ -481,7 +488,7 @@ export function PlayScreen(props: PlayScreenProps) {
                   <button
                     aria-label={`Track ${stateLabels[field]}`}
                     onClick={() => {
-                      setState(field, startingValues[field]);
+                      setState(field, (startingValues[field] ?? 0));
                     }}
                   >
                     + Track
@@ -534,7 +541,7 @@ export function PlayScreen(props: PlayScreenProps) {
           Remember this <span>The moments that made your night</span>
         </h2>
         <div className="play-moment-choices">
-          {orderedMoments.map((choice) => {
+          {orderedMoments.filter(choice=>killer!=='Poltergeist'||choice.type!=='killer-revived').map((choice) => {
             const active = PERMANENT_MOMENTS.includes(choice.type) && summary.entries.some(e => e.kind === "moment" && e.momentType === choice.type);
             const ultimate = choice.type === "ultimate-unlocked";
             return <button key={choice.type} aria-label={choice.title} disabled={ultimate && active} data-recorded={active || undefined} aria-pressed={PERMANENT_MOMENTS.includes(choice.type) ? active : undefined} onClick={() => pickMoment(choice)}>
@@ -615,7 +622,7 @@ export function PlayScreen(props: PlayScreenProps) {
                 <PlaySearch
                   label="Moment detail"
                   value={momentDetail}
-                  options={[...playItems(location).map(item => item.name), ...(personalItem ? [personalItem.name] : [])]}
+                  options={[...selectionItems({killer,location}).map(item => item.name), ...(personalItem ? [personalItem.name] : [])]}
                   onSearch={(value) =>
                     props.onDraft(moment.id, {
                       ...props.drafts[moment.id],
@@ -645,6 +652,7 @@ export function PlayScreen(props: PlayScreenProps) {
                 />
               )}
             </label>
+            {killer==='Poltergeist' && moment.momentType==='item' && ['Carolyn','Mr. Floppy'].includes(momentDetail.trim()) && <button type="button" onClick={()=>recordObjectiveFromItem(momentDetail.trim()==='Carolyn'?'join':'find-floppy')}>{momentDetail.trim()==='Carolyn'?'Record Carolyn joining you':'Record Mr. Floppy with you'}</button>}
             <button
               onClick={() => {
                 if (saveMoment()) setMomentId(null);

@@ -253,3 +253,16 @@ test('discarded games authorize no new image generation and late uploads are rem
 
 test('a literal rules shot never spends on an image or replaces the existing picture',async()=>{const f=imageHandler({mechanicalPlan:true});assert.equal((await f.handler(request('beginning'))).status,500);assert.equal(f.imageCalls.length,0);assert.deepEqual(f.phases,[]);assert.deepEqual(f.removed,[]);});
 test('every catalogued Final Girl has her own reviewed reference, independent of killer and film',()=>{const catalog=readFileSync(new URL('../src/types/gameData.ts',import.meta.url),'utf8');const names=new Set([...catalog.matchAll(/finalGirls: *\[([^\]]+)\]/g)].flatMap(([,part])=>[...part.matchAll(/'([^']+)'/g)].map(([,name])=>name)).filter(name=>name!=='TBD'));for(const name of names){const entry=REFERENCE_MANIFEST[name];assert(entry,`${name} has no reviewed reference`);assert.match(entry.path,/^[a-z0-9-]+\.jpg$/);assert.match(entry.sha256,/^[0-9a-f]{64}$/);}for(const killer of ['Billy the Bear','Inkanyamba'])assert(REFERENCE_MANIFEST[killer]);assert(names.size>30);assert.equal(new Set(Object.values(REFERENCE_MANIFEST).map(entry=>entry.path)).size,Object.keys(REFERENCE_MANIFEST).length);assert.equal(typeof opening.openingReferences,'function');});
+
+test('Poltergeist uses the exact staged portrait and preserves independent Final Girl references',async()=>{
+ const bytes=new Uint8Array(readFileSync(new URL('../supabase/reference-assets/poltergeist.jpg',import.meta.url)));
+ assert.deepEqual(REFERENCE_MANIFEST.Poltergeist,{path:'poltergeist.jpg',sha256:createHash('sha256').update(bytes).digest('hex')});
+ assert.deepEqual(opening.openingReferenceNames('Alice','Poltergeist'),['Alice','Poltergeist']);
+ const refs=await opening.openingReferences('Unknown','Poltergeist',async path=>{assert.equal(path,'poltergeist.jpg');return bytes;});assert.equal(refs.length,1);assert.equal(refs[0].name,'Poltergeist');
+ const bad=bytes.slice();bad[100]^=1;await assert.rejects(()=>opening.openingReferences('Unknown','Poltergeist',async()=>bad),/digest/);
+});
+test('reviewed rescue uncertainty overrides stale spirit Health and earlier tracker state',()=>{
+ const facts=storyFacts.endingFacts({killer:{name:'Poltergeist'},outcome:'won',killerHealth:0,poltergeistReview:{carolynRescued:null,floppyAtEscape:true,epicRequired:null}});
+ assert.match(facts,/Carolyn escape unconfirmed/);assert.match(facts,/takes precedence over earlier observations/);assert.match(facts,/Unconfirmed means unknown, not failure/);assert.doesNotMatch(facts,/Killer health remaining: 0/);
+ assert.match(storyFacts.endingFacts({killer:{name:'Hans'},killerHealth:0}),/Killer health remaining: 0/);
+});

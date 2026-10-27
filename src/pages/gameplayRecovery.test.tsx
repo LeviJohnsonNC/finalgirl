@@ -141,7 +141,7 @@ describe('gameplay without AI dependencies', () => {
     const save = vi.fn(); const draft = vi.fn().mockReturnValue(true);
     render(<GameOutcomeForm result={{ ...result, killer: 'Poltergeist' }} initialDraft={{ weaponUsed: 'Axe', foundCarolyn: true, victimsSaved: 0 }} onDraftChange={draft} onSaveResult={save} onContinue={vi.fn()} onDiscard={vi.fn()} />);
     expect(screen.getByDisplayValue('Axe')).toBeInTheDocument();
-    expect(screen.getByRole('checkbox', { name: 'Found Carolyn' })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Rescued Carolyn' })).not.toBeChecked();
     fireEvent.change(screen.getByLabelText('Weapon Used'), { target: { value: 'Knife' } });
     expect(draft).toHaveBeenCalledWith({ weaponUsed: 'Knife' });
     saveOnly();

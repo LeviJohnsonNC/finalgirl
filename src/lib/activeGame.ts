@@ -8,12 +8,14 @@ export interface GameSelection {
   finalGirlStartingHealth?: number;
 }
 export interface EndingFormData {
+  poltergeistReview?: {carolynRescued:true|null;floppyAtEscape:true|null;epicRequired:boolean|null};
   finalHorrorLevel?: number; finalGirlHealth?: number; killerHealth?: number;
   weaponUsed: string; victimsSaved: number | null; victimsKilled: number | null;
   roundsPlayed?: number | null;
   endingSubLocation: string; gameHighlights: string;
 }
 export interface ActiveGame {
+  poltergeistSetupVersion?: 1;
   grovesSetupVersion?: 1;
   inkanyambaSetupVersion?: 1;
   mapleSetupVersion?: 1;
@@ -39,6 +41,7 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if(game.poltergeistSetupVersion!==undefined && game.poltergeistSetupVersion!==1)return false;
   if (game.grovesSetupVersion !== undefined && game.grovesSetupVersion !== 1) return false;
   if (game.inkanyambaSetupVersion !== undefined && game.inkanyambaSetupVersion !== 1) return false;
   if (game.mapleSetupVersion !== undefined && game.mapleSetupVersion !== 1) return false;

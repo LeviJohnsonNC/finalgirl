@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { OutcomeNumberField } from './outcome/OutcomeNumberField';
+import { poltergeistPower } from '../../supabase/functions/_shared/play/poltergeist';
 import { OutcomeSelect } from './outcome/OutcomeSelect';
 import { SuggestionInput } from './ui/suggestion-input';
 import { BUDDYLAND_ITEMS, BUDDYLAND_ROOMS } from '@/lib/play/modules';
@@ -67,6 +68,9 @@ export const GameOutcomeForm = ({
     [result.killer],
   );
   const isPoltergeist = result.killer === 'Poltergeist';
+  const polterEntries=summarizePlay(result.playEvents).entries;
+  const polterState=moduleState(polterEntries,'poltergeist');
+  const polterPower=poltergeistPower(polterEntries);
   const isOrganism = result.killer === 'The Organism';
   const isEvomorph = result.killer === 'Evomorph';
   const isRatchetLady = result.killer === 'Ratchet Lady';
@@ -139,14 +143,14 @@ export const GameOutcomeForm = ({
   );
   // Poltergeist-specific win condition fields
   const [foundCarolyn, setFoundCarolyn] = useDraftField(
-    'foundCarolyn',
-    false,
+    'rescuedCarolyn',
+    polterState.carolyn==='rescued',
     initialDraft,
     onDraftChange,
   );
   const [foundMrFloppy, setFoundMrFloppy] = useDraftField(
-    'foundMrFloppy',
-    false,
+    'escapedWithMrFloppy',
+    polterState.carolyn==='rescued'&&polterState.floppy==='carried',
     initialDraft,
     onDraftChange,
   );
@@ -262,7 +266,11 @@ export const GameOutcomeForm = ({
     let highlights = gameHighlights || '';
     if (isPoltergeist && isWin) {
       const parts = [];
-      if (foundCarolyn) parts.push('Found Carolyn');
+      if(initialDraft?.foundCarolyn===true&&!foundCarolyn)parts.push('Found Carolyn earlier; escape not confirmed');
+      if(initialDraft?.foundMrFloppy===true&&!foundMrFloppy)parts.push('Found Mr. Floppy earlier; possession at escape not confirmed');
+      if (foundCarolyn) parts.push('Carolyn rescued and escaped with the Final Girl');
+      if(polterPower.epic)parts.push('Epic Power: escape also requires Mr. Floppy');
+      if(polterPower.revealed&&!polterPower.known)parts.push('Revealed Power name/extra escape requirement unrecorded');
       if (foundMrFloppy) parts.push('Recovered Mr. Floppy');
       if (parts.length > 0) {
         highlights = highlights
@@ -371,6 +379,7 @@ export const GameOutcomeForm = ({
       roundsPlayed,
       endingSubLocation: endingSubLocation || '',
       gameHighlights: highlights,
+      ...(isPoltergeist&&{poltergeistReview:{carolynRescued:foundCarolyn?true:null,floppyAtEscape:foundMrFloppy?true:null,epicRequired:polterPower.known?polterPower.epic:null}}),
     };
     return formData;
   };
@@ -473,8 +482,9 @@ export const GameOutcomeForm = ({
           {isPoltergeist && isWin && (
             <div className="outcome-panel outcome-module space-y-3">
               <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
-                Poltergeist Win Condition
+                Poltergeist rescue review
               </h3>
+              {isPoltergeist&&<p className="text-sm text-muted-foreground">Confirm the physical escape. {polterPower.epic?'The Epic Power requires Mr. Floppy too.':polterPower.revealed&&!polterPower.known?'The revealed Power name is unknown.':''}</p>}
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -484,7 +494,7 @@ export const GameOutcomeForm = ({
                     className="w-4 h-4 accent-secondary"
                   />
                   <span className="type-label text-foreground">
-                    Found Carolyn
+                    Rescued Carolyn
                   </span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -495,7 +505,7 @@ export const GameOutcomeForm = ({
                     className="w-4 h-4 accent-secondary"
                   />
                   <span className="type-label text-foreground">
-                    Found Mr. Floppy
+                    Escaped with Mr. Floppy
                   </span>
                 </label>
               </div>
