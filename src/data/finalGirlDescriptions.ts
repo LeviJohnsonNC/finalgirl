@@ -6,6 +6,9 @@ import { BUDDYLAND_VISUALS } from './buddyland';
  */
 
 export const FINAL_GIRL_DESCRIPTIONS: Record<string, string> = {
+  Adelaide: 'A young adult Black woman with deep brown skin, dark brown eyes, a softly oval face and tightly braided black hair pulled back from her face. She wears a plain white sleeveless tank top. Preserve the selected Adelaide portrait identity; its incidental bruises and cuts do not establish injuries in a new scene.',
+  Barbara: 'A young adult woman with fair lightly freckled skin, pale green eyes, a rounded oval face and abundant copper-red tight curls falling around her shoulders. She wears a plain grey scoop-neck T-shirt. Preserve the selected Barbara portrait identity; its incidental bruises and cuts do not establish injuries in a new scene.',
+
   Rena: BUDDYLAND_VISUALS.rena,
   Gwynn: BUDDYLAND_VISUALS.gwynn,
   // Season 2 - Terror From the Grave (Vignette)
