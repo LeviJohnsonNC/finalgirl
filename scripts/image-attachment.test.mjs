@@ -172,19 +172,50 @@ test('new opening stills use the screen ratio while closing posters retain their
   for(const sceneType of ['beginning','ending']) {
     const f=imageHandler();
     assert.equal((await f.handler(request(sceneType))).status,200);
-    assert.deepEqual(f.imageCalls[0][2],sceneType==='beginning'?{aspectRatio:'16:9',references:opening.openingReferences('Rena','Billy the Bear')}:undefined);
+    assert.deepEqual(f.imageCalls[0][2],sceneType==='beginning'?{aspectRatio:'16:9',references:f.identityReferences}:undefined);
+    assert.deepEqual(f.openingCalls,sceneType==='beginning'?[['Rena','Billy the Bear']]:[]);
     assert.deepEqual(f.phases,sceneType==='beginning'?['upload']:['compose','upload']);
   }
 });
-test('only reviewed selected portraits condition openings, including mixed-film casts', () => {
-  assert.deepEqual(opening.openingReferences('Alice', 'Hans').map(r=>r.name), ['Alice']);
+test('an unloadable cast reference refuses the opening without spending a planning or image call', async () => {
+  const f = imageHandler({ referenceError: true });
+  const response = await f.handler(request('beginning'));
+  assert.equal(response.status, 503);
+  assert.match((await response.json()).error, /cast references could not be loaded/i);
+  assert.equal(f.textCalls.length, 0);
+  assert.equal(f.imageCalls.length, 0);
+  assert.deepEqual(f.phases, []);
+  assert.deepEqual(f.removed, []);
+});
+test('only reviewed selected portraits condition openings, including mixed-film casts', async () => {
+  const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01]);
+  const sha256 = createHash('sha256').update(jpeg).digest('hex');
+  const entries = {
+    Alice: { path: 'alice.jpg', sha256 },
+    Rena: { path: 'rena.jpg', sha256 },
+    Gwynn: { path: 'gwynn.jpg', sha256 },
+    'Billy the Bear': { path: 'billy-the-bear.jpg', sha256 },
+  };
+  const loaded = [];
+  const loader = async path => { loaded.push(path); return jpeg; };
+  const subject = openingWith(entries);
+  assert.deepEqual((await subject.openingReferences('Alice', 'Hans', loader)).map(r=>r.name), ['Alice']);
   for (const girl of ['Rena', 'Gwynn']) {
-    const refs = opening.openingReferences(girl, 'Billy the Bear');
+    const refs = await subject.openingReferences(girl, 'Billy the Bear', loader);
     assert.deepEqual(refs.map(ref => ref.name), [girl, 'Billy the Bear']);
-    assert(refs.every(ref => ref.url.startsWith('data:image/jpeg;base64,/9j/')));
+    assert(refs.every(ref => ref.url.startsWith('data:image/jpeg;base64,')));
   }
-  assert.deepEqual(opening.openingReferences('Rena', 'Hans').map(ref => ref.name), ['Rena']);
-  assert.deepEqual(opening.openingReferences('__proto__', 'constructor'), []);
+  assert.deepEqual((await subject.openingReferences('Rena', 'Hans', loader)).map(ref => ref.name), ['Rena']);
+  assert.deepEqual(await subject.openingReferences('__proto__', 'constructor', loader), []);
+  assert(loaded.every(path => Object.values(entries).some(entry => entry.path === path)));
+});
+test('a reviewed portrait that cannot be served exactly refuses the shot instead of substituting', async () => {
+  const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]);
+  const entries = { Rena: { path: 'rena.jpg', sha256: createHash('sha256').update(jpeg).digest('hex') } };
+  const subject = openingWith(entries);
+  await assert.rejects(() => subject.openingReferences('Rena', 'Nobody', async () => { throw new Error('object missing'); }), /object missing/);
+  await assert.rejects(() => subject.openingReferences('Rena', 'Nobody', async () => Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d])), /not a JPEG/);
+  await assert.rejects(() => subject.openingReferences('Rena', 'Nobody', async () => Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x11])), /does not match its reviewed digest/);
 });
 test('late images attach only to the supplied record and authenticated owner', async () => {
   const { handler, filters, removed } = imageHandler();
