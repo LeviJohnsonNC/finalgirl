@@ -11,6 +11,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { ownedOpeningReference } from "../_shared/imageReference.ts";
 import { hasMechanicalShotLeak } from "../_shared/fictionBoundary.ts";
 import { openingReferences } from "../_shared/openingReferences.ts";
+import { downloadReference } from "./referenceLoader.ts";
 import { getCorsHeaders } from "../_shared/auth.ts";
 import { isDiscardedGame } from "../_shared/discardedGame.ts";
 import { requireUser } from "../_shared/guard.ts";
@@ -60,6 +61,19 @@ serve(async (req) => {
     const isPoster = body.sceneType === "ending";
     const context: SceneContext = { ...body };
 
+    // The opening is conditioned on the cast's reviewed photographs, so they must be
+    // present before anything is planned or generated. A portrait that cannot be served
+    // exactly as stored refuses the shot instead of producing a generic picture.
+    let references: Array<{ name: string; url: string }> = [];
+    if (!isPoster) {
+      try {
+        references = await openingReferences(body.finalGirl, body.killer, downloadReference);
+      } catch (err) {
+        console.error("Opening identity references unavailable:", err);
+        return json({ error: "The cast references could not be loaded. Please try again." }, 503);
+      }
+    }
+
     // Compare three story-specific compositions in one utility call, then generate
     // only the selected image. Never spend an opening image call on a broken plan.
     let briefModel: string | undefined;
@@ -93,7 +107,7 @@ serve(async (req) => {
     const prompt = isPoster ? buildPosterPrompt(context) : buildBeginningPrompt(context);
     const reference = isPoster ? ownedOpeningReference(body.referenceImageUrl, Deno.env.get("SUPABASE_URL") ?? '', user.id, body.gameId) : undefined;
     const image = await generateImage(prompt, reference, isPoster ? undefined : {
-      aspectRatio: "16:9", references: openingReferences(body.finalGirl, body.killer),
+      aspectRatio: "16:9", references,
     });
 
     // --- Persist to storage; never hand back a data: URI ---

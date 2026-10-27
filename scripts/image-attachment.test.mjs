@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import ts from 'typescript';
@@ -6,9 +7,20 @@ const compile = path => ts.transpileModule(readFileSync(new URL(path, import.met
 const fiction = {};
 new Function('exports', compile('../supabase/functions/_shared/fictionBoundary.ts'))(fiction);
 const storyFacts = {}, prompts = {}, narrativeStyle = {};
-const referenceData = {}, opening = {};
-new Function('exports', compile('../supabase/functions/_shared/openingReferenceData.ts'))(referenceData);
-new Function('require', 'exports', compile('../supabase/functions/_shared/openingReferences.ts'))(() => referenceData, opening);
+const manifest = {}, opening = {};
+new Function('exports', compile('../supabase/functions/_shared/openingReferenceManifest.ts'))(manifest);
+const REFERENCE_MANIFEST = manifest.OPENING_REFERENCE_MANIFEST;
+// The real module is exercised against a synthetic manifest so digests can be checked
+// without touching Storage: tests never read the bucket.
+function openingWith(entries) {
+  const bound = { OPENING_REFERENCE_MANIFEST: entries };
+  const out = {};
+  new Function('require', 'exports', compile('../supabase/functions/_shared/openingReferences.ts'))(
+    name => { if (name === './openingReferenceManifest.ts') return bound; throw new Error('Unexpected opening import: ' + name); }, out);
+  return out;
+}
+new Function('require', 'exports', compile('../supabase/functions/_shared/openingReferences.ts'))(
+  name => { if (name === './openingReferenceManifest.ts') return manifest; throw new Error('Unexpected opening import: ' + name); }, opening);
 new Function('exports', compile('../supabase/functions/_shared/storyFacts.ts'))(storyFacts);
 new Function('exports', compile('../supabase/functions/_shared/narrativeStyle.ts'))(narrativeStyle);
 new Function('require', 'exports', compile('../supabase/functions/_shared/prompts.ts'))(name => {
@@ -17,8 +29,9 @@ new Function('require', 'exports', compile('../supabase/functions/_shared/prompt
   assert.equal(name, './storyFacts.ts'); return storyFacts;
 }, prompts);
 
-function imageHandler({ rowExists = true, attachError = null, composeError = false, invalidPlan = false, incompletePlan = false, mechanicalPlan = false, planningGateway, discardedBefore = false, discardedDuring = false } = {}) {
-  const filters = []; const removed = []; const phases = []; const imageCalls = []; const textCalls = []; let handler;
+function imageHandler({ rowExists = true, attachError = null, composeError = false, invalidPlan = false, incompletePlan = false, mechanicalPlan = false, planningGateway, discardedBefore = false, discardedDuring = false, referenceError = false } = {}) {
+  const filters = []; const removed = []; const phases = []; const imageCalls = []; const textCalls = []; const openingCalls = []; let handler;
+  const identityReferences = [{ name: 'Rena', url: 'data:image/jpeg;base64,RENA' }, { name: 'Billy the Bear', url: 'data:image/jpeg;base64,BEAR' }];
   let uploaded=false;
   const discardedHelpers={};new Function('require','exports',ts.transpileModule(readFileSync(new URL('../supabase/functions/_shared/discardedGame.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(()=>{},discardedHelpers);
   const client = {
@@ -38,7 +51,8 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
   const modules = {
     '../_shared/discardedGame.ts':discardedHelpers,
     '../_shared/imageReference.ts': { ownedOpeningReference: () => undefined },
-    '../_shared/openingReferences.ts': opening,
+    '../_shared/openingReferences.ts': { OpeningReferenceError: Error, openingReferences: async (girl, killer) => { openingCalls.push([girl, killer]); if (referenceError) throw new Error('the stored reference does not match its reviewed digest'); return identityReferences; } },
+    './referenceLoader.ts': { downloadReference: async () => new Uint8Array() },
     '../_shared/auth.ts': { getCorsHeaders: () => ({ 'Access-Control-Allow-Origin': 'https://example.test' }) },
     '../_shared/guard.ts': { requireUser: async () => ({ ok: true, adminClient:client, user: { id: 'owner-A' }, logUsage: async () => {} }) },
     '../_shared/validation.ts': { validateRequest: (_schema, data) => ({ success: true, data }) },
@@ -59,7 +73,7 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
     if (modules[name]) return modules[name];
     throw new Error('Unexpected image handler import: ' + name);
   }, {}, { env: { get: () => 'configured' } });
-  return { handler, filters, removed, phases, imageCalls, textCalls };
+  return { handler, filters, removed, phases, imageCalls, textCalls, openingCalls, identityReferences };
 }
 const request = (sceneType = 'ending') => new Request('https://example.test', { method: 'POST', body: JSON.stringify({ sceneType, killer: 'Billy the Bear', finalGirl: 'Rena', location: 'Buddyland', story: 'Rena held her flashlight toward the empty prize counter. Across the arcade, the bear began to move.', gameId: 'record', previousImageUrl: 'https://example.test/storage/v1/object/public/posters/game-posters/owner-A/old.png' }) });
 test('opening generation uses only a complete photographic plan, without poster copy', async () => {
@@ -153,19 +167,50 @@ test('new opening stills use the screen ratio while closing posters retain their
   for(const sceneType of ['beginning','ending']) {
     const f=imageHandler();
     assert.equal((await f.handler(request(sceneType))).status,200);
-    assert.deepEqual(f.imageCalls[0][2],sceneType==='beginning'?{aspectRatio:'16:9',references:opening.openingReferences('Rena','Billy the Bear')}:undefined);
+    assert.deepEqual(f.imageCalls[0][2],sceneType==='beginning'?{aspectRatio:'16:9',references:f.identityReferences}:undefined);
+    assert.deepEqual(f.openingCalls,sceneType==='beginning'?[['Rena','Billy the Bear']]:[]);
     assert.deepEqual(f.phases,sceneType==='beginning'?['upload']:['compose','upload']);
   }
 });
-test('only reviewed selected portraits condition openings, including mixed-film casts', () => {
-  assert.deepEqual(opening.openingReferences('Alice', 'Hans').map(r=>r.name), ['Alice']);
+test('an unloadable cast reference refuses the opening without spending a planning or image call', async () => {
+  const f = imageHandler({ referenceError: true });
+  const response = await f.handler(request('beginning'));
+  assert.equal(response.status, 503);
+  assert.match((await response.json()).error, /cast references could not be loaded/i);
+  assert.equal(f.textCalls.length, 0);
+  assert.equal(f.imageCalls.length, 0);
+  assert.deepEqual(f.phases, []);
+  assert.deepEqual(f.removed, []);
+});
+test('only reviewed selected portraits condition openings, including mixed-film casts', async () => {
+  const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01]);
+  const sha256 = createHash('sha256').update(jpeg).digest('hex');
+  const entries = {
+    Alice: { path: 'alice.jpg', sha256 },
+    Rena: { path: 'rena.jpg', sha256 },
+    Gwynn: { path: 'gwynn.jpg', sha256 },
+    'Billy the Bear': { path: 'billy-the-bear.jpg', sha256 },
+  };
+  const loaded = [];
+  const loader = async path => { loaded.push(path); return jpeg; };
+  const subject = openingWith(entries);
+  assert.deepEqual((await subject.openingReferences('Alice', 'Hans', loader)).map(r=>r.name), ['Alice']);
   for (const girl of ['Rena', 'Gwynn']) {
-    const refs = opening.openingReferences(girl, 'Billy the Bear');
+    const refs = await subject.openingReferences(girl, 'Billy the Bear', loader);
     assert.deepEqual(refs.map(ref => ref.name), [girl, 'Billy the Bear']);
-    assert(refs.every(ref => ref.url.startsWith('data:image/jpeg;base64,/9j/')));
+    assert(refs.every(ref => ref.url.startsWith('data:image/jpeg;base64,')));
   }
-  assert.deepEqual(opening.openingReferences('Rena', 'Hans').map(ref => ref.name), ['Rena']);
-  assert.deepEqual(opening.openingReferences('__proto__', 'constructor'), []);
+  assert.deepEqual((await subject.openingReferences('Rena', 'Hans', loader)).map(ref => ref.name), ['Rena']);
+  assert.deepEqual(await subject.openingReferences('__proto__', 'constructor', loader), []);
+  assert(loaded.every(path => Object.values(entries).some(entry => entry.path === path)));
+});
+test('a reviewed portrait that cannot be served exactly refuses the shot instead of substituting', async () => {
+  const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]);
+  const entries = { Rena: { path: 'rena.jpg', sha256: createHash('sha256').update(jpeg).digest('hex') } };
+  const subject = openingWith(entries);
+  await assert.rejects(() => subject.openingReferences('Rena', 'Nobody', async () => { throw new Error('object missing'); }), /object missing/);
+  await assert.rejects(() => subject.openingReferences('Rena', 'Nobody', async () => Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d])), /not a JPEG/);
+  await assert.rejects(() => subject.openingReferences('Rena', 'Nobody', async () => Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x11])), /does not match its reviewed digest/);
 });
 test('late images attach only to the supplied record and authenticated owner', async () => {
   const { handler, filters, removed } = imageHandler();
@@ -207,4 +252,4 @@ test('discarded games authorize no new image generation and late uploads are rem
 });
 
 test('a literal rules shot never spends on an image or replaces the existing picture',async()=>{const f=imageHandler({mechanicalPlan:true});assert.equal((await f.handler(request('beginning'))).status,500);assert.equal(f.imageCalls.length,0);assert.deepEqual(f.phases,[]);assert.deepEqual(f.removed,[]);});
-test('every catalogued Final Girl has her own reference, independent of killer and film',()=>{const catalog=readFileSync(new URL('../src/types/gameData.ts',import.meta.url),'utf8');const names=new Set([...catalog.matchAll(/finalGirls: *\[([^\]]+)\]/g)].flatMap(([,part])=>[...part.matchAll(/'([^']+)'/g)].map(([,name])=>name)).filter(name=>name!=='TBD'));for(const name of names){const refs=opening.openingReferences(name,'Inkanyamba');assert.deepEqual(refs.map(r=>r.name),[name,'Inkanyamba']);assert(refs[0].url.startsWith('data:image/jpeg;base64,/9j/'));}assert(names.size>30);});
+test('every catalogued Final Girl has her own reviewed reference, independent of killer and film',()=>{const catalog=readFileSync(new URL('../src/types/gameData.ts',import.meta.url),'utf8');const names=new Set([...catalog.matchAll(/finalGirls: *\[([^\]]+)\]/g)].flatMap(([,part])=>[...part.matchAll(/'([^']+)'/g)].map(([,name])=>name)).filter(name=>name!=='TBD'));for(const name of names){const entry=REFERENCE_MANIFEST[name];assert(entry,`${name} has no reviewed reference`);assert.match(entry.path,/^[a-z0-9-]+\.jpg$/);assert.match(entry.sha256,/^[0-9a-f]{64}$/);}for(const killer of ['Billy the Bear','Inkanyamba'])assert(REFERENCE_MANIFEST[killer]);assert(names.size>30);assert.equal(new Set(Object.values(REFERENCE_MANIFEST).map(entry=>entry.path)).size,Object.keys(REFERENCE_MANIFEST).length);assert.equal(typeof opening.openingReferences,'function');});
