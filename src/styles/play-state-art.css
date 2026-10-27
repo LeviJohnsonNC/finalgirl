@@ -100,6 +100,12 @@
   object-position: center 28%;
 }
 .play-workspace .play-state .play-stat-art { object-position: center 45%; }
+.play-workspace .play-state--bloodlust::after {
+  background: linear-gradient(0deg, #060c0bf2, transparent 75%), linear-gradient(180deg, #070d0cc4, transparent 38%), linear-gradient(90deg, #070d0c55, transparent 85%);
+}
+.play-state--bloodlust[data-bloodlust-stage='unknown'] .play-stat-art {
+  filter: grayscale(.8) brightness(.65);
+}
 .play-workspace .play-state > span {
   margin: 0;
   color: #fff0d9;

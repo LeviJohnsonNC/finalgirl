@@ -212,6 +212,8 @@
 
 @media (max-width: 750px) {
   .wrath-board--killer .wrath-background {
-    object-position: 88% center;
+    top: -40px;
+    height: calc(100% + 40px);
+    object-position: 72% center;
   }
 }

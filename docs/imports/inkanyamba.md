@@ -1,5 +1,11 @@
 # Inkanyamba import record
 
+## Tracker artwork follow-up, 2026-10-27
+
+Levi approved five photographic Killer Wrath backgrounds to replace the earlier illustrations, conditioned on the approved Inkanyamba identity photograph. Native source identifiers, 1600px-wide WebP derivatives, two-level mapping and visual review are recorded in `src/assets/play/inkanyamba/README.md`. Mask/costume identity is preserved; stance/proximity supply escalation without adding powers, weather effects or casualties. Divine Wrath, identity images, card art and canonical rules remain unchanged.
+
+Reinspection of owner board IMG_9363 confirms nine Bloodlust positions, counting the separate bottom space as 0: observed range 0–8. The overflow instruction is not another position. Frontend-only Bloodlust artwork metadata maps those nine positions to distinct images in the shared eleven-stage photographic set, reaching the strongest picture at 8. It never changes or caps stored observations, including older higher values. Cross-killer evidence and fallback coverage are documented in `src/assets/play/bloodlust/README.md`. This artwork follow-up needs frontend publication only, with no SQL or edge-function redeployment.
+
 ## Scope and current status
 
 - Killer: Inkanyamba the Avenger; existing film ID `s1-sacred-groves`; module ID `inkanyamba`.

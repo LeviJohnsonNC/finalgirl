@@ -5,7 +5,7 @@ import horrorLow from "@/assets/play/states/horror-low.webp";
 import horrorMid from "@/assets/play/states/horror-mid.webp";
 import horrorHigh from "@/assets/play/states/horror-high.webp";
 import criticalHealth from "@/assets/play/states/critical-health.webp";
-import bloodlustImage from "@/assets/play/bloodlust-stain.webp";
+import { bloodlustBackground } from "./bloodlustPresentation";
 import momentItem from "@/assets/play/moment-item.webp";
 import momentLocked from "@/assets/play/states/ultimate-locked.webp";
 import momentUnlocked from "@/assets/play/states/ultimate-unlocked.webp";
@@ -419,8 +419,9 @@ export function PlayScreen(props: PlayScreenProps) {
             const critical = health && value !== undefined && value <= 2;
             const horror = value ?? startingValues.finalHorrorLevel;
             const horrorBand = horror <= 1 ? "low" : horror === 7 ? "high" : "mid";
+            const bloodlust = field === "bloodlust" ? bloodlustBackground(killer, value) : undefined;
             return (
-              <div key={field} className={`play-state play-state--${field}`} data-critical={critical || undefined} data-horror={field === "finalHorrorLevel" ? horrorBand : undefined}>
+              <div key={field} className={`play-state play-state--${field}`} data-critical={critical || undefined} data-horror={field === "finalHorrorLevel" ? horrorBand : undefined} data-bloodlust-stage={bloodlust ? bloodlust.stage ?? "unknown" : undefined}>
                 {(field === "finalGirlHealth" || field === "killerHealth") &&
                   characterImages[
                     field === "finalGirlHealth" ? finalGirl : killer
@@ -445,7 +446,7 @@ export function PlayScreen(props: PlayScreenProps) {
                 {field === "bloodlust" && (
                   <img
                     className="play-stat-portrait play-stat-art"
-                    src={bloodlustImage}
+                    src={bloodlust!.src}
                     alt=""
                   />
                 )}
