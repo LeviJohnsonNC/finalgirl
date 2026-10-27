@@ -10,6 +10,7 @@ describe("photographic Bloodlust progression", () => {
     ["Dr. Fright", 9],
     ["Inkanyamba", 8],
     ["Geppetto", 8],
+    ["Poltergeist", 8],
   ] as const)(
     "%s has a distinct photograph for every printed position and reaches the full-intensity image",
     (killer, maximum) => {

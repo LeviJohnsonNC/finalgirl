@@ -24,6 +24,7 @@ for (const [killer, maximum] of [
   ["Dr. Fright", 9],
   ["Inkanyamba", 8],
   ["Geppetto", 8],
+  ["Poltergeist", 8],
   ["Billy the Bear", 10],
 ] as const) {
   test(`${killer}: every Bloodlust position has a loaded photograph; lowering, Undo and reload preserve the observed value`, async ({
@@ -48,6 +49,14 @@ for (const [killer, maximum] of [
         await image.evaluate((el: HTMLImageElement) => el.naturalWidth),
       ).toBe(768);
       sources.push((await image.getAttribute("src"))!);
+      if(killer==='Hans'&&[0,5,10].includes(value)){
+        for(const [width,height] of [[1280,640],[1366,768],[1440,900],[390,844],[320,568]]){
+          await page.setViewportSize({width,height});
+          expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+          await image.evaluate(async (node:HTMLImageElement)=>{await node.decode();});
+          await card.screenshot({path:info.outputPath(`bloodlust-${value}-${width}.png`),style:'.app-footer{visibility:hidden}'});
+        }
+      }
     }
     expect(new Set(sources).size).toBe(maximum + 1);
     await expect(card).toHaveAttribute("data-bloodlust-stage", "10");
