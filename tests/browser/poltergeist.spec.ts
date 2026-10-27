@@ -95,6 +95,13 @@ test('photographic cards and healthless Minor states match the baseline at every
     const panel = page.locator('[data-module="poltergeist"]');
     await panel.getByText('Dark Power & Finale', { exact: true }).click();
     const widths = info.project.name === 'mobile' ? [{ width: 390, height: 844 }, { width: 320, height: 568 }] : [{ width: 1280, height: 640 }, { width: 1366, height: 768 }, { width: 1440, height: 900 }];
+    // Full-panel crops include choices below the viewport. Settle those lazy
+    // images too, so the review evidence never contains unloaded black cells.
+    await panel.locator('img').evaluateAll(images => Promise.all(images.map(async image => {
+        image.loading = 'eager';
+        await image.decode();
+        if (!image.naturalWidth) throw new Error('Poltergeist photograph did not load');
+    })));
     for (const size of widths) {
         await page.setViewportSize(size);
         await panel.screenshot({ path: info.outputPath(`choices-${size.width}.png`), animations: 'disabled', style: '.app-footer{visibility:hidden}' });
