@@ -52,6 +52,7 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
     '../_shared/discardedGame.ts':discardedHelpers,
     '../_shared/imageReference.ts': { ownedOpeningReference: () => undefined },
     '../_shared/openingReferences.ts': { OpeningReferenceError: Error, openingReferences: async (girl, killer) => { openingCalls.push([girl, killer]); if (referenceError) throw new Error('the stored reference does not match its reviewed digest'); return identityReferences; } },
+    './referenceLoader.ts': { downloadReference: async () => new Uint8Array() },
     '../_shared/auth.ts': { getCorsHeaders: () => ({ 'Access-Control-Allow-Origin': 'https://example.test' }) },
     '../_shared/guard.ts': { requireUser: async () => ({ ok: true, adminClient:client, user: { id: 'owner-A' }, logUsage: async () => {} }) },
     '../_shared/validation.ts': { validateRequest: (_schema, data) => ({ success: true, data }) },
