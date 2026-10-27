@@ -1,5 +1,15 @@
 # Inkanyamba import record
 
+## Current accepted presentation, 2026-10-27
+
+The current baseline is [the approved module standard](../MODULE_STANDARD.md), with [actual UI references](../reference/module-standard/README.md) pinned to `dad911e034e332a23882de7c8304dc9d0db198cb`. It supersedes earlier UI and release statements in the implementation chronology below; verified rules/source evidence remain valid unless explicitly corrected.
+
+Inkanyamba now uses a photographic owner header, five photographic Killer Wrath bands, small dim photographic reveal choices and one wide named hero. Primary Dark Power has Clear card name, Finale retains Change Finale, and unused choices hide after naming. Minor Powers precede reveals, support multiple records and retain live three-health controls, compact Removed/unknown states and quiet Clear record. Play omits Wrath/Unleash references, the duplicate Power reminder, card-rules blocks and retired helpers. Shared Bloodlust art uses the verified 0–8 range without clamping saved values. Canonical Rules, explicit required actions, mixed ownership, setup provenance, immutable history and narrative truth boundaries remain intact.
+
+For future work, update the current standard and this owner record in place; do not restore an older layout from the chronological notes. This preservation change is documentation/reference tooling only and requires no frontend, SQL, function or Storage deployment. Earlier implementation releases have their own PR evidence; a past “frontend only” statement does not apply to future shared-prompt/domain changes.
+
+## Implementation chronology and source evidence
+
 ## Tracker artwork follow-up, 2026-10-27
 
 Levi approved five photographic Killer Wrath backgrounds to replace the earlier illustrations, conditioned on the approved Inkanyamba identity photograph. Native source identifiers, 1600px-wide WebP derivatives, two-level mapping and visual review are recorded in `src/assets/play/inkanyamba/README.md`. Mask/costume identity is preserved; stance/proximity supply escalation without adding powers, weather effects or casualties. Divine Wrath, identity images, card art and canonical rules remain unchanged.

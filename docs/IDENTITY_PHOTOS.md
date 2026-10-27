@@ -4,6 +4,8 @@ Levi's direction, 2026-10-25: when a new generated identity image is needed for 
 
 Reference: the approved Inkanyamba jungle photo at `src/assets/characters/ai/inkanyamba.png`, supplied as `image(20261026-010847).png` (attachment `file_000000003ce881fdb87259361374372b`). Inspect that actual image before generating. Preserve good existing images unless the current task requests replacement; prefer a supplied approved replacement over generating another interpretation.
 
+For current import scope and deliberately retained artwork, read the [approved module standard](MODULE_STANDARD.md). Its defaults incorporate the later approved card, environment, header and tracker extensions below.
+
 ## Direction
 
 - Depict a physically believable person or place caught in an unposed moment. A masked killer should look like a real performer wearing a tangible practical costume: visible cloth, wood, feathers, leather, wear and human proportions, faithful to the verified identity. Final Girls should look like real people with period-appropriate clothing, hair and expressions. Locations should look like actual places photographed from an ordinary human viewpoint.
@@ -20,7 +22,7 @@ Adapt the following to the verified subject and setting; use image references wh
 
 ## Scope and review
 
-This direction governs newly generated killer, location and Final Girl **identity images**. It does not globally restyle module cards, state atlases, tokens, diagrams, UI backgrounds or painted ending posters. Opening photographs have their own provider contract, documented in [PHOTOGRAPHIC_OPENINGS.md](PHOTOGRAPHIC_OPENINGS.md). The 2026-10-26 opening follow-up applies the same physical-material and well-cared-for film direction to opening/Reshoot generation. Death vignettes are prose; painted ending posters keep their established medium.
+This direction governs newly generated killer, location and Final Girl **identity images**, and was explicitly extended to new owner headers, Power/Finale/Minor photos, Sacred-space environmental states and the approved photographic trackers. The [module standard](MODULE_STANDARD.md) defines current defaults for new imports. This is not a request to replace every existing UI image: intentionally retained Divine Wrath/Fickleness artwork, tokens/diagrams and painted ending posters keep their approved treatment unless the task requests otherwise. Opening photographs have their own provider contract, documented in [PHOTOGRAPHIC_OPENINGS.md](PHOTOGRAPHIC_OPENINGS.md). The 2026-10-26 opening follow-up applies the same physical-material and well-cared-for film direction to opening/Reshoot generation. Death vignettes are prose; painted ending posters keep their established medium.
 
 Review the full image and actual casting/detail crops on laptop and phone before shipping. Keep the essential face/mask and silhouette visible; never stretch the picture. Preserve the existing AI-art setting, official-art fallback and user-custom-image precedence. Record approved source provenance alongside affected artwork. Keep all labels and interactive state in HTML.
 

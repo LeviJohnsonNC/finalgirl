@@ -1,98 +1,51 @@
-# Play module interaction standard
+# Play module control contracts
 
-## Adding a module
+Read the [approved module standard](MODULE_STANDARD.md) and [actual UI references](reference/module-standard/README.md) first. This page describes current reusable components and necessary exceptions. Earlier migration notes are [historical](history/module-controls_2026-10-27.md).
 
-1. Verify the owner's rules and card references before adding state or actions. Separate location and killer ownership; mixed films must work without borrowing another module's rules or artwork.
-2. Register the owner, match name, banner, summary, capabilities and Controls in `src/components/play/moduleDefinitions.tsx`. The registry contract tests automatically inspect every registration and reject missing declared shared controls, duplicate owner/match pairs and incomplete illustrated reveal catalogs.
-3. Use the shared control for an equivalent operation. Supply the module's legal states and atomic observation callback; keep rule-specific transitions in the shared play domain, not in the presentation component.
-4. For a genuinely different operation, retain the common artwork/caption, focus, touch and error conventions. Document why its lifecycle differs. Do not add generic save/kill actions to an enemy, consume permanent terrain, or turn reusable tokens into casualties merely to match another panel.
-5. Add real module journeys covering setup, older saves, correction, Undo, reload, failed writes, linked state, mixed ownership and rule-specific exceptions. Inspect actual screenshots at 1366×768, 390px and 320px. Run existing Reliability CI; it already discovers the shared contract tests and browser specs.
+## Shared capabilities
 
-## Shared components
+| Component / operation                                    | Contract                                                                                                                                                                                                                                                           |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ModulePanel`                                            | Owner-specific photographic header, compact summary, killer before location. Expansion preferences never create Play events.                                                                                                                                       |
+| `KillerCards` / `RevealedCard`                           | Both reveal entry points use small dim photographic choices and a single wide selected hero; hide unused choices after naming. One permanent reveal per kind; changing/clearing a name does not undo the reveal. No card-rules block.                              |
+| Primary Dark Power correction                            | Left-aligned **Clear card name**; no Change Dark Power button. Finale retains **Change Finale**. Hans's second Power has its own rule-specific workflow.                                                                                                           |
+| `MinorPowerGroup` / `MinorPowerControl` / `HealthTokens` | Before Power/Finale. Unrecorded choices are small and muted; positive health shows a wide photo and live hearts. Zero means Removed, with restore hearts. Unknown is explicit. Quiet **Clear record** replaces Details/Corrections. Each heart changes one health. |
+| Multiple Minor Powers                                    | Retain every recorded power, including zero/unknown records. Hide unused alternatives; **Add another Minor Power** exposes them without writing gameplay. Do not impose a one-power limit.                                                                         |
+| `EventControl` independent toggle                        | Clicking the picture toggles presence. Show title/state and clear inactive dimming, without auxiliary Rules, reminders or End/Change controls. Placement, linked or multi-step Events retain required workflows.                                                   |
+| `CharacterControl`                                       | Unknown portrait offers Add; a present character offers legal outcomes. Correction is separate from outcome resolution and must not repeat effects. Special-victim portraits do not need a Rules block; preserve genuine character-specific actions.               |
+| `IllustratedTile` / `ModuleArtwork`                      | Component names do not dictate art medium. Current photo defaults are in the standard. Keep labels/state/actions in HTML, valid keyboard semantics and real crop metadata; no nested interactive elements.                                                         |
+| `useModuleRecord`                                        | Save linked observations atomically; prevent stale/double transitions. A rejected durable write leaves the displayed state unchanged and retryable. Undo restores the whole linked observation.                                                                    |
 
-| Operation | Component | Required behavior |
-| --- | --- | --- |
-| Special character/companion | `CharacterControl` | An unknown portrait adds the entity; a recorded portrait opens details. Explicit legal outcome buttons only while present. Restoring or changing an outcome uses Change status. Counts remain separate. |
-| Ongoing Event | `EventControl` | Independent presence effects toggle from their artwork with no Rules, reminder, End effect or Change status controls beneath it. This covers Fickleness; Groves Loud, Flash, Bloodshed and Failure; Camp ongoing effects except Secret Tunnel; Maple Friendly Neighbors. Linked/placement/lasting effects keep their existing explicit lifecycle. |
-| Dark Power/Finale | `KillerCards` | Same illustrated chooser from the killer panel and Remember This. One durable permanent reveal per type; further choices edit its detail. Card names may stay unspecified. Register original artwork/catalog mapping in `killerPresentation.ts`. |
-| Minor Dark Power | `MinorPowerControl` + `HealthTokens` | Unknown is distinct from 0/2 health. A filled/empty heart removes/restores one, regardless of slot index. Rules remain in Rules; hearts correct known health directly and a quiet Clear record link resets the observation. Preserve earlier reveal evidence without inventing remaining health. |
-| Illustrated presentation | `IllustratedTile` + `ModuleArtwork` | Accessible HTML title/state/action, decorative artwork, no nested buttons. Atlas images stay original; rules/text are never baked into imagery. |
-| Observation write | `useModuleRecord` | Same stale-render payload is recorded once, unrelated actions remain possible, failed writes are retryable, and UI follows saved observations. Domain helpers bundle linked changes into one event for Undo. |
-| Outer section | `ModulePanel` | Banner and compact current-state summary, local expansion preference only. Mounting or expanding never records gameplay. |
+## Existing mechanic-specific exceptions
 
-`data-module-control` is a shared-component capability marker used by registry tests. New modules declare only capabilities they actually implement. A different mechanic does not need to pretend to be one of these capabilities.
+Reuse operations only where their semantics match. Audit the owner domain and Rules before adapting any example below.
 
-Supply verified `effect`/`help` text where Rules disclosures are appropriate. Special-victim cards omit their Rules disclosure; their full effects remain in Rules. Props/companions retain their own disclosures. The
-optional shared `reminder` is visible only while that entity/effect is active;
-use it for consequential ongoing restrictions or penalties. Do not repeat initial
-placement or automatically apply damage, bonuses or casualties from a reminder.
+- Independent picture toggles include Groves' ongoing Fickleness and applicable ongoing effects, Camp's ordinary ongoing Events and Maple's Friendly Neighbors. Secret Tunnel needs endpoints; Groves' placement/allocation actions and Carnival's linked/lasting effects retain their specific workflows.
+- Billy's buddy sources are independent; optional five-source setup is explicit. Buddies have their own states and do not imply victim casualties. Puppets are reusable ready/on-board/exhausted pieces, not Victims.
+- Carnival traps remain placed; repeatable Item-trap records are not inferred inventory. Werewolf outcomes are not generic saved/killed actions. Zappo/Golf Cart are linked workflows; lasting Junk is not erased simply because its Event ends.
+- Hans's second Power exists only for the verified Dark, Darker, Darkest condition; do not duplicate the first Power or permit a blocked second choice.
+- Maple house search corrections preserve unknown states. A burning house blocks a new search, without preventing correction of an existing observation. Fright's saved-slide gating and manual reset, and the Final Girl-only Awake status, keep their own rules.
+- Groves' special-Victim outcome preview retains required linked Wrath choices. The Holy Man allocation without Inkanyamba is a **provisional owner-specific interpretation**, not an official or shared rule; see the [Groves import record](imports/sacred-groves.md).
 
-## State and history
+## Groves reference mechanics
 
-- Use **Not recorded** for unknown observations. Reserve **unrevealed** for affirmative card-reveal information; absent data alone cannot prove a card was never revealed.
-- Distinguish ending an effect from clearing its record and from correcting its physical presence. Document lasting penalties separately; clearing/ending an Event must not silently erase them.
-- Preserve existing field names, validation, raw log history, Undo/restore and historical death/story context. Never infer victim totals, damage, adjacency, item possession or completed physical board actions from a UI convenience.
-- Seed verified setup once at the durable active-game boundary, gated by fresh-session provenance where required. Do not initialize through a component effect or backfill existing logs. Unknown legacy state must remain editable.
-- Power/Finale entry points share one permanent reveal; two controls racing cannot create two permanent observations. Hans's second-power capability remains a separate field and cannot duplicate the first.
+These are visual examples, not a specification for Creech Manor or other owners.
 
-## Styling and artwork
+- Killer and Divine Wrath have ten physical levels and five two-level backgrounds with distinct themes. Killer Wrath uses the approved photographs; Divine Wrath retains its approved artwork. Preserve unknown state and required active modifiers. Wrath reference/Unleash tables are omitted from Play; changing the track does not resolve an effect.
+- Sacred spaces normally cycle clear → Closed → Fire & Brimstone → Hallowed → clear. Token uniqueness moves positions atomically. Unknown and combined states keep the explicit editor so a click cannot silently discard information. The eight sites have state-specific environmental images with retained landmarks. Known empty omits “no tokens”; unknown remains visible.
+- Removed Atonement/count/connection/setup and duplicate Bloodlust/Finale reference UI must not return merely because it exists in older documentation. Verified rules and legacy observations remain available in their proper surfaces.
+- Shared Bloodlust art follows the [audited board ranges and mapping](../src/assets/play/bloodlust/README.md). An unverified maximum uses the documented fallback; the application's numeric cap is not a physical board maximum. Preserve saved high values.
 
-`illustrated-tile.css` owns the basic caption structure. `play-controls.css` owns shared cards, outcomes, hearts, corrections and state treatment. Module CSS owns board-specific layout, unique mechanics and art positioning. Scope custom button/article rules to their custom sections; broad module selectors must not override shared controls.
+## Registration and styling
 
-Keep art, status and the primary action together. Put secondary rules/corrections behind details. Retain module-specific motifs and good existing images; generate only missing art. Validate atlas order before alphabetical display sorting, thumbnail crops, long names, filled/depleted/unknown states, actual image loads and contrast. Text and state labels must remain readable without relying on color.
+Register owner ID, match name, banner, summary, capabilities and Controls in `src/components/play/moduleDefinitions.tsx`. `data-module-control` markers represent actual shared capabilities; declare only implemented operations. Registry tests reject duplicate owners/matches, missing declared controls and incomplete reveal-art catalogs. Map card art before display sorting.
 
-Controls stay at least 44px tall, keyboard operable with visible focus, stable in ordering and free of horizontal overflow. Expanded Play content may grow vertically; never clip content or shrink targets to force every open section into one viewport. Respect reduced motion.
+`illustrated-tile.css` owns caption structure; `play-controls.css` owns shared outcomes/hearts/corrections; `cinematic-controls.css` owns cinematic reveals/Minors/opt-in picture toggles. Owner CSS handles unique mechanics and positioning. Scope custom selectors so they cannot override shared controls. Keep stable ordering, accessible names, visible focus, readable contrast and at least 44px targets; respect reduced motion and 320px bounds.
 
-## Current legitimate exceptions
+## Persistent state and verification
 
-- Billy's power sources are on/off, with an optional fifth; Buddies retain their streamlined token lifecycle and state-specific portraits.
-- Geppetto's Puppets are reusable Ready/on-board/Exhausted tokens with a rule-specific spawning helper and explicit protection reset.
-- Carnival's Terror Traps remain placed; Item Trap encounters can recur and are not inventory. Werewolf has no saved/killed outcomes. Zappo and the Golf Cart have their own legal outcomes and linked Event consequences.
-- Hans's additional Dark Power appears only for Dark, Darker, Darkest.
-- Maple Lane House tiles toggle their search mark directly as a tracker correction. Burning Houses permit removing an accidental mark while blocking new searches. Unknown remains a separate explicit correction; no physical Search effects are reversed.
-- Dr. Fright's digital Boiler Room moves the cover and prior cards as one stack. Temporary pointer motion never records gameplay or exposes a new cutout; the existing saved-slide acknowledgment gates settling/reveal. Native cancellation, keyboard alternatives and reduced motion retain the same domain transitions.
+Preserve immutable event IDs, explicit fresh-session provenance, mixed killer/location ownership and separate victim totals. Render/expand/catalog access never writes gameplay. Unknown is not zero, absent, depleted or unrevealed. Decorative art does not record damage, movement, victims, costs, inventory or outcomes.
 
-- Sacred Groves uses shared character outcomes to collect a Wrath target/allocation and preview one linked observation. Status correction never repeats outcome effects. Divine Wrath and physical token observations stay location-owned. The streamlined Play view omits Atonement/count helpers, connection tracking, setup and Bloodlust/Finale reference sections; Rules retains their facts. Old observations remain readable by the domain and historical context. Ritual removal is not a casualty.
+Domain code shared with edge functions lives in `supabase/functions/_shared/play/`; frontend `src/lib/play/` modules re-export it. Validate new observations on both sides. Death facts use the historical log at that event; keep unaffected cache signatures compatible and both owners represented within narrative budgets.
 
-## Verification evidence
-
-`moduleControls.contract.test.tsx` covers shared behavior, unknown versus depleted health, disclosure without resurrection, duplicate-action protection, failure/retry and registry adoption. `module-consistency.spec.ts` covers all current nine combinations on desktop/mobile. Extend module-specific journeys when adding rules; shared tests do not establish rules accuracy, visual quality or live provider behavior.
-
-## Compact module presentation, 2026-10-26
-
-`WrathTrack` supplies live numbered levels and ± with separate Killer/Divine material themes. Five original backgrounds per owner represent levels 1–2, 3–4, 5–6, 7–8 and 9–10; unknown is explicitly labelled and uses a desaturated quiet background. Play omits Unleash text and the Inkanyamba Wrath reference; Rules retains the source-backed instructions. Changes are physical-tracker observations, never automatic resolution. Unknown and 1–10 bounds remain explicit. At 320px, all ten numbered targets must remain completely inside the board, not merely inside a clipped page.
-
-All five supported killers use small muted photographic Power/Finale choices in both entry points, including Hans's second power. Selecting a named card replaces its alternatives with one wide read-only photographic hero. Dark Power uses the left-aligned Clear card name link to restore choices; it edits only the name and preserves the permanent reveal. Finale retains Change Finale; opening/cancelling that chooser records nothing. Corrections update the existing permanent reveal. Clearing a name preserves that reveal and restores choices. Card rules remain in Rules.
-
-`MinorPowerGroup` hides unused Minor Powers after one is recorded, without enforcing a one-power limit. Add another Minor Power reopens unused choices without writes; recording an additional power closes the choices and preserves all recorded powers. Previously revealed/unknown and zero-health powers count as recorded. Positive health uses a large photographic panel; zero uses a compact Removed state with reachable restore hearts. The photograph stays stable through health changes; live hearts and labels carry the state. Minor Powers precede Power/Finale. Photos use native 16:9 derivatives; original atlases retain explicit source clipping where still used.
-
-Sacred-space imagery cycles clear → Closed → Fire → Hallowed → clear. Each token exists at one location; relocation/removal is one observation. Mixed-token or partially unknown states open the on-demand Adjust tokens editor instead of erasing observations. Explicit edits change only the chosen token and never activate/end Events or affect victim totals. Combined states list every token and show a count. All eight combinations at each of the three sites have environmental artwork: blocked access, fiery surroundings and/or hallowed light; no overlaid medallions. This is decorative interpretation and does not add facts to the game or narrative. Fickleness toggles active/ended without executing costs or effects; Undo restores observations.
-
-
-## Cinematic module presentation, 2026-10-26
-
-`cinematic-controls.css` covers equivalent Minor Powers, both reveal entry points and opt-in independent Event toggles. Module-specific life cycles, raw observations, canonical effects, Rules search and historical/narrative context remain unchanged. Each Minor Power article keeps its accessible name across compact, active and removed presentations. `RevealedCard` is read-only; interacting with the hero must never submit gameplay. The named/unnamed permanent reveal remains owned by `KillerCards`. Hans's second-power mutation controls also respect the disabled state.
-
-Fickleness retains its original scene and direct active/ended observation; its visible reminder is removed and the illustration is 195px high (previously 130px). Independent ongoing effects share the premium picture toggle presentation with a title and state, but no auxiliary Rules/reminder/correction UI. Their canonical rules remain in Rules. Linked, placement and lasting-effect controls do not acquire toggle behavior. Secret Tunnel retains endpoint selection; Groves placement and special-character events and Carnival linked/lasting events retain their existing workflows. Toggling records presence only, without automatic damage, Wrath changes, casualties or token placement; Undo and reload preserve those observations.
-
-Wrath artwork is thematic, never an effect resolver. Only Inkanyamba and Sacred Groves currently own Wrath tracks. Sacred state combinations are bit-addressed (Closed=1, Fire=2, Hallowed=4) as eight native widescreen photographs per site; actual token limits, atomic relocation and unknown/mixed-state correction remain in the existing domain/presentation helper. Identity photographs, Collection scenes, ending posters and generation prompts are outside this visual change.
-
-
-## Photographic card follow-up, 2026-10-26
-
-The user explicitly requested photorealistic wide card and Sacred-space images, overriding the earlier illustration-medium restriction for these views. `modulePhotos.ts` maps 46 killer photographs and 24 Sacred-space photographs before display sorting. Provenance and exact row-major mapping live in `src/assets/play/photos/README.md`. Photos are thematic UI motifs, never new identity facts, injury/death observations or rule evidence. The Inkanyamba duplicate Power/Minor reminder beneath Wrath is removed; canonical Rules and relevant controls remain. Wrath backgrounds, other Events, identity pictures, Collection and generated-story prompts are unchanged. This follow-up requires only the frontend/artwork build, with no SQL or function redeployment.
-
-
-## Quiet corrections and photographic headers, 2026-10-26
-
-The user explicitly replaced Minor Powers' Details & corrections disclosures with one underlined Clear record button. It records the existing nullable health observation and remains disabled for blocked games; it does not delete history or reverse physical board damage. Live hearts retain one-at-a-time remove/restore, including zero health. Unknown/legacy evidence remains explicit; full effects remain searchable in Rules. Clear record and Undo retain existing owner-specific semantics, including Fright's separate sleep observations.
-
-The primary named Dark Power view omits Change Dark Power; Clear card name is left-aligned and restores the chooser while preserving its single permanent reveal. Finale and Hans's separate second-power controls keep their appropriate workflows. Sacred spaces omit the No tokens caption only when all placements are known and empty; unknown and live token labels remain.
-
-All ten registered Play module headers use owner-specific photographic banners from `src/assets/play/banners/`, with documented native crops/focal points. No global identity, Collection, card/state, Wrath or narrative image changes. Source/provenance: banner README. Frontend/artwork deployment only.
-
-## Photographic tracker states, 2026-10-27
-
-Bloodlust uses eleven individual photographic stages, from clean stone to saturated red liquid. Presentation-only metadata maps every verified killer-board position to a distinct stage and reaches the strongest image at each verified maximum: Hans 0–10, Dr. Fright 0–9, Inkanyamba and Geppetto 0–8. Count the separate bottom space as 0 and exclude the overflow instruction. Owner-board evidence and the unverified Billy/generic fallback are recorded in `src/assets/play/bloodlust/README.md`. Unknown remains untracked, and high legacy observations keep their exact visible value. Never use the artwork mapping to clamp a saved number, resolve a Bloodlust effect, infer a casualty or alter a narrative.
-
-Inkanyamba's five two-level Wrath backgrounds now use photographs conditioned on Levi's approved identity picture. The five-stage band mapping and all tracker controls remain; Divine Wrath keeps its existing images. Candid physical costume/material detail and progressive stance/proximity replace the earlier painted spectacle. Native 1600px-wide derivatives retain dark space behind HTML controls and a dedicated phone focal point. Source provenance is in the Inkanyamba artwork README. These generated UI photographs are an explicitly approved extension of the identity-photo style, not a change to other artwork, Collection or provider generation prompts. Frontend/artwork deployment only; no SQL or function redeployment.
+For a control change, run applicable domain and `moduleControls.contract.test.tsx` tests, actual browser journeys (including starting Events and both reveal entry points), mixed-owner isolation, failure/retry, Undo and reload checks. Inspect the loaded UI in selected/unselected, active/depleted/unknown and combined states on laptop and phone. The [import playbook](MODULE_IMPORT_PLAYBOOK.md) defines completion and release checks. Never describe mocked screenshots as live provider or production verification.

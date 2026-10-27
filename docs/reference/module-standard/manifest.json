@@ -1,0 +1,235 @@
+{
+  "sourceRevision": "dad911e034e332a23882de7c8304dc9d0db198cb",
+  "synthetic": true,
+  "viewports": {
+    "desktop": [1366, 768],
+    "phone": [390, 844],
+    "narrowValidation": [320, 568]
+  },
+  "images": [
+    {
+      "file": "bloodlust-high-desktop.jpg",
+      "bytes": 10476,
+      "sha256": "3131a820c9f6a4e1fe0626fdc533448fd9e842c5b331dc8fcab6512daaadd7a3",
+      "width": 261,
+      "height": 188
+    },
+    {
+      "file": "bloodlust-high-phone.jpg",
+      "bytes": 6944,
+      "sha256": "1fbf0b12eeaeadd2699abcc3eb6c6723be4b5b25a9bab850541fd51145a08cda",
+      "width": 161,
+      "height": 174
+    },
+    {
+      "file": "bloodlust-quiet-desktop.jpg",
+      "bytes": 8167,
+      "sha256": "bf6723ee8014bcc109d2eb4472ed683ae8af3e54a87da12602bd2843a40b10e5",
+      "width": 261,
+      "height": 188
+    },
+    {
+      "file": "bloodlust-quiet-phone.jpg",
+      "bytes": 5252,
+      "sha256": "bbfccf28caf88ab5cd4dadf0e337f783f4513cd1535f9d8fd7d3952cf5852e0a",
+      "width": 161,
+      "height": 174
+    },
+    {
+      "file": "divine-wrath-high-desktop.jpg",
+      "bytes": 46273,
+      "sha256": "6b97730ff04493a4a9828f90f976b0428c38c24ed1ae3d79fe6a27d80258f8db",
+      "width": 1074,
+      "height": 294
+    },
+    {
+      "file": "divine-wrath-high-phone.jpg",
+      "bytes": 20753,
+      "sha256": "e4c8e9636bdb2b105482cccaf7cc5ff2d3bf62e183e7d9dfecffd7ed7be7e4e3",
+      "width": 336,
+      "height": 309
+    },
+    {
+      "file": "headers-desktop.jpg",
+      "bytes": 62667,
+      "sha256": "ada187754a6b23eb739f2994ff77e8d815c35cbcdf036123bf213cbd30907b6f",
+      "width": 1120,
+      "height": 313
+    },
+    {
+      "file": "headers-phone.jpg",
+      "bytes": 23997,
+      "sha256": "ff1b0197370a50029bda04fd98952d8aaf2c28c5f5fb86259465488caf99603d",
+      "width": 366,
+      "height": 301
+    },
+    {
+      "file": "killer-wrath-high-desktop.jpg",
+      "bytes": 45128,
+      "sha256": "28d5e61a61ac4db09bef1344557c0d0a0d0d477ace6f6ca2b5a1c45ada2a969f",
+      "width": 1074,
+      "height": 294
+    },
+    {
+      "file": "killer-wrath-high-phone.jpg",
+      "bytes": 21597,
+      "sha256": "0d94571e25637c5ab590ba8c9c525d45fa28e46c5e8a013c8dececd5a23cfdae",
+      "width": 336,
+      "height": 309
+    },
+    {
+      "file": "killer-wrath-low-desktop.jpg",
+      "bytes": 51058,
+      "sha256": "cba004723bede32da5b8988ea6ff360cae8cdc2125a61082c8e5a994d7d0169c",
+      "width": 1074,
+      "height": 294
+    },
+    {
+      "file": "killer-wrath-low-phone.jpg",
+      "bytes": 22981,
+      "sha256": "d6f4648709f5e8f3afc15c709b5a862fcd1b28de6e31cb4937bb464dde9d37b6",
+      "width": 336,
+      "height": 309
+    },
+    {
+      "file": "minor-active-desktop.jpg",
+      "bytes": 60342,
+      "sha256": "10b8488b88268b5249564ce6465c53c8766c863b7e1ccd616b3cbd0bcb98cd69",
+      "width": 1074,
+      "height": 470
+    },
+    {
+      "file": "minor-active-phone.jpg",
+      "bytes": 31505,
+      "sha256": "6eb9a004ad0d60829dc8bddf03388fb8b486ce077648bf75a55ff0e0b4c8b29e",
+      "width": 336,
+      "height": 549
+    },
+    {
+      "file": "minor-removed-desktop.jpg",
+      "bytes": 17563,
+      "sha256": "45310e3ce10906f0dac3c0567cec27abd134b340d8c2046c7b073facca6cb853",
+      "width": 1074,
+      "height": 311
+    },
+    {
+      "file": "minor-removed-phone.jpg",
+      "bytes": 13256,
+      "sha256": "98465da90182f4e3b2dc88e254b7371c170817de74499d115ac671d2432f4899",
+      "width": 336,
+      "height": 311
+    },
+    {
+      "file": "minor-unknown-desktop.jpg",
+      "bytes": 19207,
+      "sha256": "8749e382fcee0d33731a48397d35ff02b5bd5aa8bf93fd0294dc65fe77668ebe",
+      "width": 1074,
+      "height": 211
+    },
+    {
+      "file": "minor-unknown-phone.jpg",
+      "bytes": 14323,
+      "sha256": "6126829ed9ea82d4f8e8badcd1c9ca679db5eded6c00ee6ef610850d1257de2d",
+      "width": 336,
+      "height": 398
+    },
+    {
+      "file": "reveal-choices-desktop.jpg",
+      "bytes": 51766,
+      "sha256": "27afaa4f498c56a75ca97746f6912232822920411c3a3bd44d437fc3cba80423",
+      "width": 1074,
+      "height": 616
+    },
+    {
+      "file": "reveal-choices-phone.jpg",
+      "bytes": 37831,
+      "sha256": "ee3b1d2a4bc69d0b61d6684387fec2b625eb23deb169324594fa7b888c26caaf",
+      "width": 336,
+      "height": 904
+    },
+    {
+      "file": "revealed-cards-desktop.jpg",
+      "bytes": 105420,
+      "sha256": "e32af0994b22c6b1421a6d8f1e8111d1277c9f78be6efc45a79f4d4b675fa41b",
+      "width": 1074,
+      "height": 953
+    },
+    {
+      "file": "revealed-cards-phone.jpg",
+      "bytes": 55293,
+      "sha256": "b3ea7db5d20cc5ca350829f2319e6cb9ea6dc92fbb6b272bba6d92d6a488fa46",
+      "width": 336,
+      "height": 1013
+    },
+    {
+      "file": "sacred-clear-desktop.jpg",
+      "bytes": 63372,
+      "sha256": "09b3de76c7f6eab53cd530c7fbadf132f61620545b0696626e8161353a4e41f6",
+      "width": 1074,
+      "height": 325
+    },
+    {
+      "file": "sacred-clear-phone.jpg",
+      "bytes": 58778,
+      "sha256": "3e54656d7fefa529ac7e2138f9c6a5eaaddded4fc52695a77c789c556287ccc6",
+      "width": 336,
+      "height": 971
+    },
+    {
+      "file": "sacred-combined-desktop.jpg",
+      "bytes": 65029,
+      "sha256": "dd8f9fe3e6f5f41dcc62feddbf8000642e275a4119d1c4016cb21541e8b85947",
+      "width": 1074,
+      "height": 325
+    },
+    {
+      "file": "sacred-combined-phone.jpg",
+      "bytes": 60280,
+      "sha256": "1fa2caff00ff21e36f6777cf7f2575899bca5c91eb40c8239b2f21e877e73246",
+      "width": 336,
+      "height": 971
+    },
+    {
+      "file": "sacred-placed-desktop.jpg",
+      "bytes": 61750,
+      "sha256": "fb0676bf9a14a6cb5ed7835438a2941b4a7700091205f9e843e46b03c0b1cfe1",
+      "width": 1074,
+      "height": 325
+    },
+    {
+      "file": "sacred-placed-phone.jpg",
+      "bytes": 57421,
+      "sha256": "69c1256718c0f5c09bf37494ac0ecbeea82b1ac5f297b19bb3fa522f43806baf",
+      "width": 336,
+      "height": 971
+    },
+    {
+      "file": "terror-off-desktop.jpg",
+      "bytes": 9984,
+      "sha256": "7052d1012c4423e664a90494231ba6013f36034fc2335cda3a234527da5d1c8f",
+      "width": 390,
+      "height": 198
+    },
+    {
+      "file": "terror-off-phone.jpg",
+      "bytes": 8004,
+      "sha256": "e878ee2488e50543d16085d067c00b4eacbad473c22fcc9f25022b2455cd2bfe",
+      "width": 336,
+      "height": 198
+    },
+    {
+      "file": "terror-on-desktop.jpg",
+      "bytes": 15206,
+      "sha256": "df8930023b4fc1bd72721daf2b14447c8c85c7a8b4f34ab12bf8b933ab8ff88a",
+      "width": 390,
+      "height": 198
+    },
+    {
+      "file": "terror-on-phone.jpg",
+      "bytes": 13132,
+      "sha256": "cb115b9e7d6ef2946feba6f6d414b71ac34e1321dfbacc4ffab738ad47fd95d4",
+      "width": 336,
+      "height": 198
+    }
+  ]
+}
