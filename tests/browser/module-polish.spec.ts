@@ -162,10 +162,26 @@ test("simple Camp effects toggle independently while Secret Tunnel retains its e
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
   await openModule(page, "camp");
   const p = page.locator('[data-module="camp"]');
-  for (const name of ["Deathwish", "Star Crossed Lovers", "Stubborn Kids"]) {
+  for (const name of [
+    "Clingy Campers",
+    "Dark Waters",
+    "Deathwish",
+    "Star Crossed Lovers",
+    "Stubborn Kids",
+  ]) {
     await p
       .getByRole("button", { name: `Activate ${name}`, exact: true })
       .click();
+    const card = p.locator('[data-module-control="event"]').filter({
+      has: page.getByRole("button", {
+        name: `End effect: ${name}`,
+        exact: true,
+      }),
+    });
+    await expect(card.getByRole("button")).toHaveCount(1);
+    await expect(card.locator("details, .module-active-reminder")).toHaveCount(
+      0,
+    );
     await expect(
       p.getByRole("button", { name: `End effect: ${name}`, exact: true }),
     ).toHaveAttribute("aria-pressed", "true");

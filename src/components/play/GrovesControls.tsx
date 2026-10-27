@@ -338,6 +338,11 @@ export function GrovesControls({
                 <EventControl
                   key={e.id}
                   name={e.name}
+                  interaction={
+                    ["loud", "flash", "bloodshed", "failure"].includes(e.id)
+                      ? "toggle"
+                      : "details"
+                  }
                   value={string(s[`event.${e.id}`])}
                   ended={
                     s[`event.${e.id}`] === "declined" ? "declined" : "ended"

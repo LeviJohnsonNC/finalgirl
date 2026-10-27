@@ -65,15 +65,21 @@ const statusLabels = {
 };
 
 // Consequential ongoing facts only; initial placement/resolution stays in Rules.
-const campReminders: Record<string,string> = {
-  boyfriend: "If he dies in your space: start the next Action phase with 12 Time.",
-  girlfriend: "Together: +1 die to Horror Rolls. Her death in your space: +5 Horror.",
-  "the-damned": "Killer targets The Damned. Save only as the last Victim alive. Death: +2 Bloodlust.",
-  "clingy-campers": "After the first Victim saved this Action phase, lose 1 Health per additional save.",
+const campReminders: Record<string, string> = {
+  boyfriend:
+    "If he dies in your space: start the next Action phase with 12 Time.",
+  girlfriend:
+    "Together: +1 die to Horror Rolls. Her death in your space: +5 Horror.",
+  "the-damned":
+    "Killer targets The Damned. Save only as the last Victim alive. Death: +2 Bloodlust.",
+  "clingy-campers":
+    "After the first Victim saved this Action phase, lose 1 Health per additional save.",
   "dark-waters": "Victims at or entering the Lake are killed.",
-  deathwish: "Upkeep: move the Victim closest to the Killer 1 space toward it, unless already together.",
+  deathwish:
+    "Upkeep: move the Victim closest to the Killer 1 space toward it, unless already together.",
   "secret-tunnel": "Only you may use the tunnel; Enemies cannot.",
-  "star-crossed-lovers": "Exactly 2 Victims together: if one is killed, the other dies too.",
+  "star-crossed-lovers":
+    "Exactly 2 Victims together: if one is killed, the other dies too.",
   "stubborn-kids": "One fewer Victim follows you.",
 };
 
@@ -136,8 +142,7 @@ export function CampControls({
               <div className="play-camp-victims">
                 {CAMP_VICTIMS.map((victim, index) => {
                   const value = camp[`victim.${victim.id}`] as
-                    | keyof typeof statusLabels
-                    | undefined;
+                    keyof typeof statusLabels | undefined;
                   const state = value ?? "untracked";
                   const portrait =
                     state === "saved"
@@ -185,9 +190,7 @@ export function CampControls({
                       name={effect.name}
                       value={typeof value === "string" ? value : undefined}
                       interaction={
-                        ["deathwish", "star-crossed-lovers", "stubborn-kids"].includes(effect.id)
-                          ? "toggle"
-                          : "details"
+                        effect.id === "secret-tunnel" ? "details" : "toggle"
                       }
                       ended="resolved"
                       art={effectArt[effect.id]}

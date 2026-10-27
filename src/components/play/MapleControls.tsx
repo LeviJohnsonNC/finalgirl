@@ -533,19 +533,14 @@ export function MapleControls({
           </article>
           <EventControl
             name="Friendly Neighbors"
+            interaction="toggle"
             value={string(state["event.neighbors"])}
             art={scene(2)}
             effect={effect("neighbors")}
             onActivate={() => record({ "event.neighbors": "active" })}
             onEnd={() => record({ "event.neighbors": "ended" })}
             onClear={() => record({ "event.neighbors": null })}
-          >
-            {state["event.neighbors"] === "active" && (
-              <p className="maple-consequence">
-                Convince: roll 1 additional die.
-              </p>
-            )}
-          </EventControl>
+          />
         </div>
       </section>
 

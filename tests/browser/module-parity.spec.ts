@@ -34,7 +34,7 @@ test("imported Buddyland and Billy references are searchable in the owned Rulebo
   await page.screenshot({ path: info.outputPath("parity-rulebook.png") });
 });
 
-test("Camp Event Rules and victim status details never record observations", async ({
+test("Camp ongoing pictures stay uncluttered and victim status details never record observations", async ({
   page,
   archive,
 }, info) => {
@@ -58,15 +58,18 @@ test("Camp Event Rules and victim status details never record observations", asy
   await expect(billy.locator(":scope > summary")).toContainText(
     "Buddies not recorded",
   );
-  await expect(camp.locator(".module-active-reminder")).toContainText(
-    "lose 1 Health per additional save",
-  );
   const before = await log(page);
   const event = camp
     .locator('[data-module-control="event"]')
     .filter({ has: page.locator("strong", { hasText: "Clingy Campers" }) });
-  await event.locator(".module-card-rules > summary").click();
-  await expect(event.locator(".module-card-rules")).toContainText("one Health");
+  await expect(event.locator("details, .module-active-reminder")).toHaveCount(
+    0,
+  );
+  await expect(event.getByRole("button")).toHaveCount(1);
+  await expect(event.getByRole("button")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   const person = camp
     .locator('[data-module-control="character"]')
     .filter({ has: page.locator("strong", { hasText: "Girlfriend" }) });
@@ -117,7 +120,9 @@ test("Buddyland victim status details open without Rules rows or total changes",
   const nick = venue
     .locator('[data-module-control="character"]')
     .filter({ has: page.locator("strong", { hasText: "Nick the Janitor" }) });
-  await nick.getByRole("button",{name:"View Nick the Janitor",exact:true}).click();
+  await nick
+    .getByRole("button", { name: "View Nick the Janitor", exact: true })
+    .click();
   await expect(nick).toHaveAttribute("data-state", "on-board");
   await expect(nick.locator(".module-card-rules")).toHaveCount(0);
   expect(await log(page)).toEqual(before);
