@@ -15,18 +15,12 @@ const REFERENCE_MANIFEST = manifest.OPENING_REFERENCE_MANIFEST;
 function openingWith(entries) {
   const bound = { OPENING_REFERENCE_MANIFEST: entries };
   const out = {};
-  new Function('require', 'exports', 'Deno', compile('../supabase/functions/_shared/openingReferences.ts'))(name => {
-    if (name === './openingReferenceManifest.ts') return bound;
-    if (name.includes('supabase-js')) return { createClient: () => ({ storage: { from: () => ({ download: async () => ({ error: { message: 'bucket access is not allowed in tests' } }) }) } }) };
-    throw new Error('Unexpected opening import: ' + name);
-  }, out, { env: { get: () => 'configured' } });
+  new Function('require', 'exports', compile('../supabase/functions/_shared/openingReferences.ts'))(
+    name => { if (name === './openingReferenceManifest.ts') return bound; throw new Error('Unexpected opening import: ' + name); }, out);
   return out;
 }
-new Function('require', 'exports', 'Deno', compile('../supabase/functions/_shared/openingReferences.ts'))(name => {
-  if (name === './openingReferenceManifest.ts') return manifest;
-  if (name.includes('supabase-js')) return { createClient: () => ({ storage: { from: () => ({ download: async () => ({ error: { message: 'bucket access is not allowed in tests' } }) }) } }) };
-  throw new Error('Unexpected opening import: ' + name);
-}, opening, { env: { get: () => 'configured' } });
+new Function('require', 'exports', compile('../supabase/functions/_shared/openingReferences.ts'))(
+  name => { if (name === './openingReferenceManifest.ts') return manifest; throw new Error('Unexpected opening import: ' + name); }, opening);
 new Function('exports', compile('../supabase/functions/_shared/storyFacts.ts'))(storyFacts);
 new Function('exports', compile('../supabase/functions/_shared/narrativeStyle.ts'))(narrativeStyle);
 new Function('require', 'exports', compile('../supabase/functions/_shared/prompts.ts'))(name => {

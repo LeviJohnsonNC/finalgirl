@@ -11,6 +11,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { ownedOpeningReference } from "../_shared/imageReference.ts";
 import { hasMechanicalShotLeak } from "../_shared/fictionBoundary.ts";
 import { openingReferences } from "../_shared/openingReferences.ts";
+import { downloadReference } from "./referenceLoader.ts";
 import { getCorsHeaders } from "../_shared/auth.ts";
 import { isDiscardedGame } from "../_shared/discardedGame.ts";
 import { requireUser } from "../_shared/guard.ts";
@@ -66,7 +67,7 @@ serve(async (req) => {
     let references: Array<{ name: string; url: string }> = [];
     if (!isPoster) {
       try {
-        references = await openingReferences(body.finalGirl, body.killer);
+        references = await openingReferences(body.finalGirl, body.killer, downloadReference);
       } catch (err) {
         console.error("Opening identity references unavailable:", err);
         return json({ error: "The cast references could not be loaded. Please try again." }, 503);
