@@ -19,7 +19,7 @@ Actual initial laptop/phone workflows were inspected before remaining generation
 
 ## Native wide heroes
 
-The four full-panel scenes replace the initial sheet derivatives with standalone native 1536×1024 photos, preserving their reviewed composition. WebP compression stays within 160KiB. Their width covers the rendered laptop panel without enlargement; smaller token/Event/portrait controls retain native sheet cells.
+The four full-panel scenes replace the initial sheet derivatives with standalone native 1536×1024 photos (banner and restriction downsampled to 1280px wide), preserving their reviewed composition. WebP compression stays within 160KiB. Their width covers the rendered laptop panel without enlargement; smaller token/Event/portrait controls retain native sheet cells.
 
 | Asset | Standalone source |
 | --- | --- |
