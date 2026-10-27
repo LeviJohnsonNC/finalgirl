@@ -1,0 +1,117 @@
+
+.play-poltergeist {
+  display: grid;
+  gap: 1rem;
+  color: hsl(var(--foreground));
+  min-width: 0
+}
+.polter-objective-heading h3 {
+  font-family: var(--font-display,Georgia,serif);
+  font-size: clamp(1.3rem,3vw,1.9rem);
+  margin: 0 0 .4rem
+}
+.polter-objective-heading p {
+  font-size: .85rem;
+  color: #c6cfce;
+  margin: 0;
+  line-height: 1.5
+}
+.polter-objectives,.polter-minors {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 1rem;
+  min-width: 0
+}
+.polter-objectives article {
+  min-width: 0;
+  border: 1px solid #45626b66;
+  background: #0b1419;
+  border-radius: 8px;
+  overflow: hidden
+}
+.polter-objectives .play-illustrated-tile {
+  width: 100%
+}
+.play-module-content .play-poltergeist .polter-objective-photo {
+  aspect-ratio: 16/9;
+  min-height: 180px
+}
+.polter-objectives article[data-state=hidden] .play-module-art,.polter-objectives article[data-state=in-deck] .play-module-art,.polter-objectives article[data-state=unknown] .play-module-art {
+  filter: brightness(.34) saturate(.4)
+}
+.polter-actions {
+  display: grid;
+  gap: .65rem;
+  padding: 1rem
+}
+.polter-actions button {
+  min-height: 44px;
+  border: 1px solid #8bafba75;
+  background: #13282f;
+  border-radius: 4px;
+  padding: .6rem .8rem;
+  text-align: left;
+  color: #e3ece9;
+  font-weight: 600
+}
+.polter-actions button:disabled {
+  opacity: .4
+}
+.polter-actions p {
+  font-size: .78rem;
+  line-height: 1.5;
+  color: #b6c7cb;
+  margin: 0
+}
+.play-poltergeist .module-correction {
+  padding: .4rem .65rem;
+  font-size: .75rem
+}
+.polter-minors article[data-state=removed] .module-control-tile {
+  filter: brightness(.45) saturate(.25)
+}
+.polter-minors .module-control-tile[aria-disabled=true] {
+  cursor: default
+}
+.play-poltergeist h3 {
+  margin-bottom: 0
+}
+.polter-minors .module-control-tile {
+  min-height: 140px
+}
+.polter-minors .module-control-tile:focus-visible,.polter-objectives button:focus-visible {
+  outline: 2px solid #c5e9eb;
+  outline-offset: 3px
+}
+@media(max-width:560px) {
+  .polter-objectives,.polter-minors {
+  grid-template-columns: 1fr
+}
+  .polter-objective-photo {
+  min-height: 160px
+}
+  .polter-actions {
+  padding: .8rem
+}
+}
+.play-module-content .polter-healthless-minor .module-control-tile {
+  aspect-ratio: 16/5;
+  min-height: 250px
+}
+.polter-healthless-minor .module-control-tile .play-tile-caption strong {
+  font-size: clamp(25px,3vw,42px)
+}
+.polter-healthless-minor .module-control-tile .play-module-art {
+  width: 100%;
+  height: 100%
+}
+.polter-healthless-minor[data-state=removed] .module-minor-choice {
+  opacity: .58
+}
+@media(max-width:560px) {
+  .play-module-content .polter-healthless-minor .module-control-tile {
+  aspect-ratio: 16/9;
+  min-height: 200px
+}
+}
+

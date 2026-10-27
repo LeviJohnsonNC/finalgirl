@@ -19,7 +19,7 @@ export function deathFacts(
   events: PlayEvent[],
   eventId: string,
 ) {
-  if (!validPlayLog(events)) return null;
+  if (!validPlayLog(events) || (selection.killer!=='Poltergeist' && events.some(e=>e.moduleData?.module==='poltergeist'))) return null;
   const entries = summarizePlay(events).entries;
   const e = entries.find((e) => e.id === eventId && e.kind === "killed");
   if (!e) return null;

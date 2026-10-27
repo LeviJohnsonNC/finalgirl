@@ -185,6 +185,7 @@ const TheEnd = ({
         ...(formData.victimsKilled != null && { victimsKilled: formData.victimsKilled }),
         ...(formData.roundsPlayed != null && {roundsPlayed:formData.roundsPlayed}),
         ...(result.playEvents?.length && {playSummary:playStoryBeats(result.playEvents, result)}),
+        ...(result.killer==='Poltergeist'&&formData.poltergeistReview&&{poltergeistReview:formData.poltergeistReview}),
         ...(formData.endingSubLocation && { endingSubLocation: formData.endingSubLocation }),
         ...(formData.gameHighlights && { gameHighlights: formData.gameHighlights }),
       };

@@ -370,3 +370,29 @@ describe('Sacred Groves durable linked actions',()=>{
     expect(moduleState(summarizePlay(result.current.activeGame.playEvents).entries,'groves')).toMatchObject({wrath:2,finaleRevealed:true});
   });
 });
+
+it('Poltergeist joins and Minor cleanup save atomically from the latest durable state, including early taps',()=>{
+ const {result}=renderHook(useActiveGame);
+ const fresh={...game,poltergeistSetupVersion:1 as const,selection:{...game.selection,killer:'Poltergeist'}};
+ const join=()=>newPlayEvent({kind:'module',moduleData:{module:'poltergeist',changes:{carolyn:'with-you',minorsRemoved:true,'minor.psychic-confusion':'removed','minor.unseen-forces':'removed'}},poltergeistAction:{parent:'root',command:'join'}});
+ act(()=>{result.current.save(fresh);expect(result.current.appendPlayEvent(game.id,join())).toBe(true);expect(result.current.appendPlayEvent(game.id,join())).toBe(false);});
+ const log=result.current.activeGame!.playEvents!;expect(log.filter(e=>e.poltergeistAction?.command==='join')).toHaveLength(1);
+ expect(moduleState(summarizePlay(log).entries,'poltergeist')).toMatchObject({carolyn:'with-you',minorsRemoved:true,'minor.psychic-confusion':'removed','minor.unseen-forces':'removed'});
+ const joined=log.find(e=>e.poltergeistAction?.command==='join')!;
+ act(()=>expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'undo',target:joined.id}))).toBe(true));
+ expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'poltergeist')).toMatchObject({carolyn:'hidden','minor.psychic-confusion':'inactive'});
+ act(()=>result.current.save(game));
+ act(()=>expect(result.current.appendPlayEvent(game.id,join())).toBe(false));
+});
+it('Poltergeist failed joins remain retryable and legacy inapplicable observations remain readable',()=>{
+ const {result}=renderHook(useActiveGame);
+ const legacy={...game,selection:{...game.selection,killer:'Poltergeist'},playEvents:[newPlayEvent({kind:'start',saved:0,killed:0,round:5}),newPlayEvent({kind:'state',field:'killerHealth',value:4})]};
+ act(()=>result.current.save(legacy));
+ const join=newPlayEvent({kind:'module',moduleData:{module:'poltergeist',changes:{carolyn:'with-you',minorsRemoved:true,'minor.psychic-confusion':'removed','minor.unseen-forces':'removed'}},poltergeistAction:{parent:'root',command:'join'}});
+ const spy=vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('quota');});
+ act(()=>expect(result.current.appendPlayEvent(game.id,join)).toBe(false));
+ expect(result.current.activeGame!.playEvents).toHaveLength(2);spy.mockRestore();
+ act(()=>expect(result.current.appendPlayEvent(game.id,join)).toBe(true));
+ expect(summarizePlay(result.current.activeGame!.playEvents).killerHealth).toBe(4);
+ act(()=>{expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'state',field:'killerHealth',value:0}))).toBe(false);expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'moment',momentType:'killer-revived',text:'Killer returns'}))).toBe(false);});
+});

@@ -34,6 +34,7 @@ export const verifiedBloodlustMaximum: Readonly<Record<string, number>> = {
   "Dr. Fright": 9,
   Inkanyamba: 8,
   Geppetto: 8,
+  Poltergeist: 8,
 };
 
 export function bloodlustBackground(killer: string, value?: number) {

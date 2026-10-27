@@ -1,24 +1,18 @@
 # Poltergeist import record
 
-## Scope and current status
+## Scope and status
 
-- Owner/type: Poltergeist / killer; film `s1-creech-manor`; proposed module ID `poltergeist`.
-- Standard mode plus the supplied Epic Dark Power. The wiki-only Epic Finale is outside the supplied/requested scope.
-- Scope: killer import first. Creech Manor location mechanics and Alice/Selena character imports await their own sources and plan.
-- Stage: source review and implementation proposal, awaiting Levi's approval. No application implementation, generation, migration, deployment or live-provider verification performed.
-- Last reviewed: 2026-10-27. Baseline: `docs/MODULE_STANDARD.md`, approved Groves UI references and current import playbook/control contracts.
-- Existing support audited on main: selection/film IDs and portraits already exist; GameOutcomeForm already hides unkillable-killer Health and has draft-backed Carolyn/Mr. Floppy checkboxes. No dedicated Poltergeist Play panel/canonical catalog/Rules module exists. Integrate the existing outcome fields rather than introducing another independent result record. Keep existing cast/Collection identity and preferences.
-- Critical default mismatch: playStartingValues currently falls back to 10 killer Health and Horror 4 for Poltergeist. The supplied board shows no killer Health and starting Horror 3. Apply owner-specific eligible fields/defaults rather than altering defaults for unrelated killers.
-- Existing opening-reference manifest contains Alice and Selena but no Poltergeist. Audit the existing killer portrait; stage/register its reviewed derivative through the trusted loader and verify the exact stored object before claiming killer image continuity.
-- Existing narrative defect: killerSpecialRules calls Mr. Floppy a teddy bear and always optional; replace with the supplied pink stuffed rabbit and the Epic-dependent requirement.
-- Original and re-uploaded photos are duplicates of the same source batch, not additional physical cards.
-- Count correction: polter5 contains 16 physical card faces (rows of 5, 6 and 5). Earlier chat claims of 15 cards and an Inescapable Fate card were reading/count errors, not source defects. The actual card is Unstoppable Evil. No missing Terror face is currently identified.
+Implemented the Poltergeist killer module for `s1-creech-manor`, using the approved [module standard](../MODULE_STANDARD.md) and Groves UI references. Standard mode and the supplied Epic Dark Power are covered. Creech Manor location mechanics, Alice/Selena abilities/items and the wiki-only Epic Finale remain outside this killer-first scope. Existing Collection/casting identities and selected-image preferences are retained.
+
+Sources reviewed 2026-10-27: five owner photographs, including the native-resolution originals. The re-uploaded batch contains the same components. All 16 Terror faces are present (rows 5/6/5); the earlier 15-card count and “Inescapable Fate” reading were corrected to 16 and **Unstoppable Evil**. No missing Terror card is currently identified.
+
+Implementation is prepared for PR review; merge, production Storage upload, backend/frontend deployment and live provider smoke testing have not occurred. Final-head CI status is reported on the implementation PR.
 
 ## Evidence ledger
 
 | Component | Expected | Supplied | Source | Status/destination |
 | --- | --- | --- | --- | --- |
-| Killer board | 1 | 1 | polter1(1).jpeg; libfile_9f7a13816e9081918f66bfb82a6bff16; original libfile_073a23c5b8908191a1f57922bba5f4bf | Verified identity/board present; transcribe all numeric/icon rows at native resolution before coding |
+| Killer board | 1 | 1 | polter1(1).jpeg; libfile_9f7a13816e9081918f66bfb82a6bff16; original libfile_073a23c5b8908191a1f57922bba5f4bf | Verified at native resolution; starting Horror 3 and nine Bloodlust positions transcribed |
 | Component sheet | 1 face | 1 | polter2(1).jpeg; libfile_9a47c394bd8c8191b9247169144573a2; original libfile_f6ba156530a0819190f2d0ddc850e997 | Establishes 3 regular Powers, 1 Epic Power, 3 Finales, 2 Items, 16 Terrors, 2 Final Girl cards |
 | Setup / special rules | 1 face | 1 | polter3(1).jpeg; libfile_b94e29e18d0c8191bdef7d6e80d89aa1; original libfile_5c6f3e32ae208191b1ca99ebde7002c2 | Killer-owned Item setup, immunity, rescue victory, Carolyn protection, Mr. Floppy restrictions |
 | Dark Powers | 3 regular + 1 Epic | 4 | polter4(1).jpeg; libfile_2166388e7cb481919ed359b84bd8fb2d; original libfile_ddaf85ac44a08191a8b19fccc94dc567 | Stiff Wind, Eternal Despair, Invisible Barrier, Forgetting Something? |
@@ -44,105 +38,60 @@ Persistent source links use https://chatgpt.com/library?file_id=<exact-library-i
 - Unstoppable Evil ×1
 - Where the hell did this storm come from? ×1
 
-Levi supplied https://finalgirl.fandom.com/wiki/Poltergeist#Terror_Cards as a supplemental source. Its list matches the reconciled names/counts. Read the individual Unstoppable Evil page: roll a die, take that much defendable damage or choose that many Victims to die; if insufficient Victims, choose the damage. The wiki's additional Epic Finale is not evidence it is part of this supplied standard deck. User photos govern their printing. Native-resolution icon/wording transcription remains implementation preparation, not a completed catalog.
+Levi supplied https://finalgirl.fandom.com/wiki/Poltergeist#Terror_Cards as a supplemental source. Its list matches the reconciled names/counts. Read the individual Unstoppable Evil page: roll a die, take that much defendable damage or choose that many Victims to die; if insufficient Victims, choose the damage. The wiki's additional Epic Finale is not evidence it is part of this supplied standard deck. User photos govern their printing. Native-resolution icon, numeric and wording review is complete for the supplied faces.
 
-## Verified mechanics and corrections
+## Verified facts and source corrections
 
-- The spirit has no Health and cannot be attacked, damaged or killed. Attack-capable Action cards can still matter in specific Terror encounters.
-- Normal victory requires finding Carolyn and saving her through the applicable escape. The supplied Epic Dark Power adds Mr. Floppy to the escape requirement. Finding Carolyn alone is not an automatic win.
-- Carolyn must not be killed, discarded or put in the backpack. She can be shuffled back into an Item deck.
-- Carolyn and Mr. Floppy are included in the selected location's Item decks, never initially faceup. The killer's setup follows the killer in mixed films.
-- Carolyn joining the Final Girl removes the Minor Dark Powers as directed by her card. Record the linked removal with the finding observation atomically. Later separation must not silently reactivate them or erase their history.
-- Psychic Confusion and Unseen Forces are ongoing Minor effects rather than ordinary damageable two-heart powers. Use presence/removal observations; do not invent Health for them.
-- Mr. Floppy's protective use and discard restrictions depend on revealed Power state, including the Epic exception. Use only the printed legal action; preserve the permanent Power reveal when suppressing its effect.
-- Corporeal Form / Clown Doll are temporary card encounters. Do not turn them into persistent Minion rosters or Victims merely to reuse a widget.
-- Bloodlust remains valid. Count and transcribe the board's physical positions and overflow instruction before adding its per-killer artwork mapping; no range inferred from the app's 0–99 input.
+- No killer Health: the Poltergeist cannot be attacked, damaged or killed. Certain Terror encounters still permit damage-inflicting Action cards against temporary attackers. New Health/revival controls and writes are unavailable; legacy numerical observations remain loadable and are omitted from new Poltergeist narrative facts.
+- Starting Horror **3**, Bloodlust **0**. The board has nine positions **0–8**. Attack/Movement by position: 1/2, 1/2, 1/2, 1/2, 2/2, 2/3, 2/3, 2/4, 3/4. Horror increases occur at 1 (+1), 4 (+2), 7 (+1); position 2 reveals the Dark Power. Overflow: take 1 damage, discard the next Terror. The top instruction is not another position or an inferred pre-Finale action.
+- Killer setup uses 10 selected-Location Items plus Carolyn/Mr. Floppy; neither begins faceup. These rules and Items follow the killer in mixed films.
+- Win by escaping with Carolyn; **Forgetting Something?** requires both Carolyn and Mr. Floppy. **Invisible Barrier** requires full Final Girl Health to enter an Exit with Carolyn. Finding Carolyn is not an automatic victory.
+- Carolyn cannot be killed, discarded, removed by an effect or put in the backpack. She may be shuffled back into an Item deck. Joining removes both Minor Powers from the game atomically; later separation does not restore them.
+- Psychic Confusion and Unseen Forces are healthless ongoing effects. Psychic Confusion reduces Search dice by 1, with an optional **3 Time** payment before playing Search to ignore its penalty. Unseen Forces makes the first space moved in each Action phase panicked.
+- Mr. Floppy is a **pink stuffed rabbit**, with long ears, dark button eyes and a grey-blue cloth body. His protective use removes him to cancel the **Carolyn Terror**, never a Dark Power. The printed game-effect discard restrictions apply before Power reveal and while the Epic Power is in play. Play conservatively offers protective removal/discard only after a known ordinary Power; clearing its name restores uncertainty. The permanent reveal remains recorded.
+- Corporeal Form's 2-Health Behemoth and the 1-Health Clown Doll are temporary encounters, not persistent Minions/Victims. Lightning causes Health loss, distinct from defendable attack damage. Full timing, quantities and effects live in the shared catalog and searchable Rules.
 
-## Integration coverage and proposal
+## Integration coverage
 
-| Surface | Current/proposed implementation |
+| Surface | Implemented result |
 | --- | --- |
-| Selection and ownership | Reuse existing film/name/portraits; register killer-only module independent of Creech Manor |
-| Rules and catalogs | Add shared poltergeist domain/catalog and Rules module; faithful effects, duplicate quantities, icon/timing audit and attribution |
-| Play | Dedicated photographic panel: rescue objective first, ongoing Minor effects, shared Power/Finale controls; no spirit Health or resurrection affordances |
-| Shared entry points | Same reveal log and catalog in panel and Remember This; quiet Clear card name / Change Finale semantics |
-| Items | Add a selection-aware item lookup while keeping the current location-only API behavior for existing callers. Audit PlayScreen, moduleItemBeats and death/story references, not just the suggestion list. Exact named objective actions route to the same durable resolver; legacy/free-text finds remain historical, never proof of current possession. |
-| New-session / legacy | Explicit setup provenance; known fresh starting facts only; resumed legacy values unknown, no mount writes/backfill |
-| Narrative/deaths | Add historical rescue, Minor and Item facts, owner-filtered Terrors and correct temporary attackers; preserve unaffected signatures/cache |
-| Opening/ending | Fix combat-victory and teddy-bear/always-optional language across callers; preserve selected Final Girl and selected location |
-| Results/archive/stats | Reconcile existing Carolyn/Mr. Floppy outcome fields with the reduced Play state and reviewed drafts. Support games without Play tracking. Finding versus possession versus rescue remain distinct; unknown tracking does not block a manually reviewed outcome. Hide inapplicable new Health/resurrection actions without invalidating/deleting old logs; exclude old spirit-Health values from new narrative facts. |
-| Artwork | One banner, 4 Power heroes, 3 Finale heroes, 2 ongoing-effect images, Carolyn and Mr. Floppy controls as the initial asset set; additional justified states/encounter motifs only where surfaced |
-| Mixed films | Poltergeist with Buddyland, Camp, Carnival, Maple and Groves; eventual Creech location added separately |
-| Checks | Domain/shared contracts, actual UI and narrative/persistence journeys, existing build/asset/check suites and final-head required CI |
-| Release | Frontend + changed shared-domain/prompt consumers; exact function list and reference uploads identified from the final diff before handoff |
+| Selection/Collection | Reuses existing IDs, casting, ownership and retained Poltergeist portrait; no duplicate film or identity replacement |
+| Canonical data/Rules | Shared Powers (4), Finales (3), Minors (2), Items (2), Terrors (12 names/16 cards), all board positions/overflow; independent killer setup, attribution and searchable effects |
+| Play | Registered photographic killer panel before Location; Carolyn/Mr. Floppy objective controls; healthless ongoing Minors; shared Power/Finale reveals and quiet name corrections |
+| Durable state | Explicit action resolver at latest durable append; stale/duplicate/foreign-owner rejection; Carolyn joining plus both Minor removals in one immutable event and one Undo |
+| Fresh/legacy | `poltergeistSetupVersion: 1` only for new casts; first save seeds known setup atomically. Existing logs stay unknown without provenance; expanding a panel writes nothing |
+| Item entry | Selection-aware suggestions include both killer Items in every Location. Exact named objective actions share the same resolver. Historical/free-text Item moments do not infer current possession |
+| Outcome/archive | Existing outcome review now distinguishes **Rescued Carolyn** and **Escaped with Mr. Floppy** from old finding-only draft fields. Drafts persist; reviewed ending snapshot overrides earlier tracking. Manual/no-Play results remain possible; unknown is not failure |
+| Story/death/narration | Rescue-first bounded owner context, protected Carolyn, rabbit identity, healthless spirit and temporary attackers. Context freezes at each death; unaffected historical signatures/cache remain compatible. Both owners retained in mixed summaries |
+| Opening imagery | Retained approved spirit identity has a staged, digest-pinned private reference derivative. Existing Final Girl references and ending poster medium unchanged |
+| Artwork | Twelve individual photographs: banner, four Powers, three Finales, two Minors and two objective images. [Asset manifest](../../src/assets/play/photos/poltergeist/README.md) records sources, mappings, crops and budgets |
+| Bloodlust | Verified max 8 maps nine physical positions to distinct existing track photographs; no number/effect automation |
+| Backend/storage | Bounded review validation and canonical Play facts updated; no SQL migration or new bucket required. Exact release requirements below |
 
-### Interaction/state map
+## Interaction and compatibility decisions
 
-| Operation | State/actions | Shared control or justified exception |
-| --- | --- | --- |
-| Carolyn objective | Unknown / not with you / with you / rescued; return-to-deck observation where applicable | Character-like photographic control with source-backed actions; no killed outcome, backpack or ordinary victim counter |
-| Finding Carolyn | Explicit joining action plus required Minor removal; finding-only prose is not automatically joining/rescue | One Poltergeist module event, resolved against the latest durable state, with legal successor/owner checks; one atomic Undo. Do not broaden the Groves-only linkedModule contract. Corrections do not repeat consequences. |
-| Mr. Floppy | Unknown / not held / held / legally used or returned as the printed card allows | Source-check exact use/discard/Epic conditions before implementing. Preserve a permanent reveal separately from effect suppression and consumption; link protection to the actual reveal. Unnamed/cleared card names keep requirement/eligibility uncertain, not automatically optional; corrections never spend Floppy again. |
-| Minor effects | Honest unknown, inactive/active/removed-from-game states and quiet correction; preserve each reveal independently | Reuse the visual frame/styles; use a dedicated healthless Minor control/group because MinorPowerControl and MinorPowerGroup both assume health. Never weaken other killers' health rules. |
-| Power / Finale | Dim choices → one selected wide hero; one reveal through both entry points | KillerCards / RevealedCard with registered photographic mappings |
-| End result | Explicit player escape/rescue/outcome confirmation | Never auto-win on finding alone or auto-kill the spirit; uncertain past tracking must not invent certainty |
+- The objective precedes Minors, then shared reveals. Carolyn/Mr. Floppy each open explicit legal actions; one objective disclosure is open at a time. Required linked cleanup and unknown/conditional eligibility stay visible. Routine rules remain in Rules.
+- New `objective` and `minor-effect` capabilities describe genuine mechanics. `HealthlessMinorControl` reuses Minor frames/dimming/wide active photographs, without fabricated hearts. Multiple recorded effects are retained; Add another only exposes alternatives. Active picture ends the effect; explicit corrections change observations without replaying cleanup or spending Items.
+- Carolyn rescue does not change ordinary saved/killed totals. Play does not shuffle decks, resolve attacks, apply movement/Time, auto-win, or auto-kill the spirit. The player confirms physical escape conditions.
+- Power reveal/name, Epic escape requirement and Floppy consumption are distinct facts. Name corrections preserve permanent reveal and consumed Item history. An unnamed Power does not imply an ordinary Power.
+- New reviewed ending keys are `rescuedCarolyn` and `escapedWithMrFloppy`; old `foundCarolyn`/`foundMrFloppy` remain historical, without silently asserting escape. The bounded `poltergeistReview` request uses true/null for confirmations and a nullable Epic condition, preserving uncertain no-Play results.
+- Old Poltergeist deaths without explicit module observations do not acquire a new context object or changed cache signature. New death facts use observations at the death, not later rescue.
 
-Keep Play concise: no setup dump, routine rules block, turn simulator, deck shuffler or inferred damage/movement/casualties. Full printed information remains searchable in Rules. Necessary linked previews and unknown/error states stay visible.
+## Verification evidence
 
-After approval, build the Carolyn/rescue/Minor transaction first and compare its actual laptop/phone UI to the approved baseline before completing the remaining art. Routine implementation then continues within approved scope without another mandatory design approval gate.
+- Local complete `npm run check`: 65 unit files / 485 tests and 110 edge/handler tests passed; lint has 11 existing warnings, no errors. Node 25 locally required `NODE_OPTIONS=--no-experimental-webstorage`; CI uses the repository's Node 22.
+- Asset validation: 492 images passed, including all 12 new loaded derivatives. Production build passed.
+- Domain/hook coverage includes all physical counts, starting values, selection-aware Items, explicit setup versus legacy unknown, legal/stale/duplicate actions, linked cleanup, atomic Undo/restore, wrong-owner rejection, failed local persistence/retry, Epic gates, name corrections, historical cache stability and bounded mixed-owner context.
+- Browser verification covers all six location pairings (Camp, Buddyland, Carnival, Maple, Groves, Creech), both reveal entry points, all seven named selected heroes, both active Minors, unknown state, failed save/reload/retry/Undo, outcome draft compatibility and separate victim totals. Additional Rules, contextual death/cache/narration and ending request journeys are included.
+- Actual compiled-app crops inspected at 1280×640, 1366×768, 1440×900, 390×844 and 320×568. Loaded selected/unselected/Epic/Minor/objective/error states are captured by `tests/browser/poltergeist.spec.ts`. The shallow header initially cropped the spirit's face; the derivative/focal crop was corrected. Artwork scenes are decorative and never establish actual injuries, victims, props or inventory.
+- Local edge bundle estimates (esbuild with external runtime packages): generate-ending 35,037 bytes; generate-scene-image 189,115; generate-death-scene 182,203; narrate-story 120,343. New shared domain source is 14,032 bytes; no image collection is embedded. These estimates are not deployed-bundle measurements. Native Deno checking is delegated to required CI because Deno is unavailable locally.
+- Browser services and audio are mocked. These checks do not establish live AI generation/audio quality, production sync or deployed compatibility. Final CI checks must pass on the implementation PR's final head.
 
-### Artwork manifest preparation
+## Release requirements and remaining live checks
 
-- Preserve approved existing identities and user-supplied replacements. Audit the existing Poltergeist identity against board silhouette before deciding if any replacement is needed.
-- New art uses the physically believable 1980s photographic direction. A spectral subject keeps her verified identity; do not replace her with a generic human costume. Mr. Floppy is the supplied pink rabbit.
-- Plan wide native crops, quiet dark text space and mobile focal points before generation. Reuse the same identity references across assets; no illustrated contact-sheet enlargement.
-- Power/Finale art is wide; unselected choices heavily dim; active ongoing controls vivid; removed/unknown states legible. Labels/actions stay HTML and targets >=44px.
-- Document exact source IDs, ratios, dimensions, derivative budgets, stable state mapping and crop review in the owner artwork README.
-- Preserve the painted ending-poster medium, existing surrounding app layouts and decorative-art/game-fact boundary.
+1. Upload the exact reviewed `supabase/reference-assets/poltergeist.jpg` to the existing private `opening-references` bucket at key `poltergeist.jpg`. Download and verify SHA-256 **c3dfc0ebaef9ed040b85d59b0f8cfde02b82dd42fd38ae4cb6a4097015045331** against `openingReferenceManifest.ts` before releasing the changed image function. Staged bytes are 59,368 bytes. Do not regenerate unrelated references or upload raw owner photos.
+2. Deploy **generate-ending**, **generate-scene-image**, **generate-death-scene**, and **narrate-story** before the new frontend. They consume the changed rescue review, trusted manifest or canonical Play/death facts. `generate-story` and `generate-visual-bible` were assessed: new killer direction travels through their existing bounded request fields; their implementation contract is unchanged.
+3. Release the frontend/assets. No SQL migration is needed; observations and setup provenance use existing JSON state.
+4. After authorized deployment, smoke-test signed-in mixed casting, save/reload, Carolyn joining/removal, one contextual death/cached narration, reviewed rescue ending, and an opening with the Poltergeist/selected Final Girl references. Verify exact Storage bytes and deployed function revisions; a merged PR alone proves neither.
 
-## Critical plan review and revised execution order
-
-Material changes after inspecting current code:
-
-1. **One objective across existing surfaces.** GameOutcomeForm already has foundCarolyn/foundMrFloppy with false defaults and draft storage; PlayScreen currently has unconditional Health/resurrection choices; playStartingValues falls back to 10 Health / Horror 4. A second independent objective form would lose/conflict with recorded progress. Reconcile these existing paths with one Poltergeist reducer and reviewed final snapshot. No-Play results and existing drafts continue to work; a historical find is not present possession or rescue.
-2. **Healthless Minor lifecycle needs its own semantics.** Both MinorPowerControl and MinorPowerGroup inspect Health. Reuse art/frame styles, not fabricated Health/zero mappings or a broad rewrite of all Minor controls. Keep unknown, active and removed-from-game distinct, multiple powers supported and historical reveals intact.
-3. **Atomic means durable, not just one click.** useModuleRecord suppresses stale-render duplicate payloads but does not validate domain successors. Resolve Carolyn joining and Minor cleanup together at the durable append boundary using latest state; validate ownership and prerequisites in the shared domain consumed by backend checks. Use one module event; preserve the narrow Groves linkedModule rules. Route named objective entry points consistently; never replay effects from text edits.
-4. **Reveal, requirement and suppression are different facts.** Mr. Floppy's exact conditions need faithful transcription before the state model is finalized. Unnamed/cleared Power names must not become proof the Epic requirement is absent. Correcting a name does not undo a permanent reveal, repeat an Item use or invent continued possession.
-5. **Image and context integration must be demonstrated.** Poltergeist is absent from the trusted opening-reference manifest. Register a reviewed existing-identity derivative where appropriate; verify exact Storage bytes/digest. Endings reserve roughly 340 killer characters in some mixed contexts: prioritize rescue/Floppy/Power eligibility facts ahead of optional flavor so truncation cannot silently remove the objective. Keep both owners represented.
-
-Uncertainties still open: full native-resolution icon/numeric transcription (including Bloodlust range/overflow and exact Floppy conditions), final portrait quality/crops, and the exact backend deploy list from implementation imports. Resolve each before the dependent code/art/deploy claim. The wiki corroborates the 16-card inventory; it does not establish the user's omitted variant content. Do not request another whole batch; ask only for a consequential genuinely unreadable region if available sources cannot resolve it.
-
-Execution after approval:
-
-1. Complete a faithful, source-linked fact/state table, including initial Horror 3, no killer Health, all printed card conditions, and board range/overflow. Confirm provenance and current standard/reference UI. Preserve killer-only scope.
-2. Implement shared Poltergeist domain/actions and one durable objective transaction; add explicit new-session provenance without backfilling existing logs. Use simple existing module changes plus necessary action validation rather than a general rules engine.
-3. Build and inspect the hardest Carolyn/Minor interaction using the approved photographic panel language. Add healthless Minors and shared Power/Finale controls; keep corrections quiet and rules out of routine Play UI.
-4. Reconcile Track more, Remember This/Item entry, existing outcome review/drafts, no-Play reporting, Rules/search, owner-specific suggestions, historical death context and bounded opening/ending facts. Add objective facts at the new observation boundary so historical hashes for unmodified old games stay compatible.
-5. Produce/review the required photographic assets and trusted portrait reference. Preserve existing selected images/Final Girl identities; keep ending posters in their current medium. Record source/state mappings and actual mobile/laptop crop findings.
-6. Run the acceptance matrix below, fix meaningful failures, create implementation PR and wait for final-head required CI. Determine deployment set from transitive imports; backend/reference objects precede the new frontend where applicable. Report merge/deployment/live-provider status separately.
-
-## Verification evidence and acceptance plan
-
-No implementation tests or live-generation quality claims yet.
-
-- Source: 16 Terror faces / 12 named types, 4 Powers, 3 Finales and 2 Items reconciled; detailed transcriptions verified before committed rule data.
-- Domain: no spirit Health or combat victory; true new setup versus unknown legacy; owner isolation and no writes from mount/expansion.
-- Rescue: distinguish found/held/rescued; shuffle back; known normal/Epic/unnamed/cleared Power; legal Floppy use and name correction without duplicate consumption. Multiple active Minors clear atomically; later separation does not resurrect them. Reject stale/conflicting actions from either entry point; Undo/failure/reload/retry/rapid taps preserve the whole transaction.
-- Shared reveals: both entry points, unnamed/unknown reveals, clear-name corrections, effect suppression without erasing permanent history.
-- Narrative: death uses state at the event, cast/location identity preserved, no invented kill or ordinary Carolyn casualty, temporary enemies only with supported cause. Test a death before finding Carolyn after the current state has changed. Preserve untouched legacy hashes and saved scene/audio access. Test saturated mixed-owner summaries at existing request limits: rescue and known Epic/Floppy facts survive alongside location facts.
-- Mixed owners: all currently supported alternative locations and applicable linked outcomes; preserve independent location rules.
-- Outcome/compatibility: finish from Play and without Play, existing result checkboxes/reviewed drafts, cancel/reopen/reload, lost games and positive-Health losses; do not infer death, rescue or objective failure from missing tracking. Old Poltergeist Health entries remain loadable but cannot become new combat-victory facts. Other killers retain normal Health and revival controls.
-- References: exact reviewed Poltergeist portrait object/digest loads through the trusted loader, failure is explicit, and selected Final Girl identity is retained. No live-quality claim from prompt assertions or mocks.
-- UI: actual loaded images at 1280×640, 1366×768, 1440×900, 390×844 and 320×568; unselected/active/removed/unknown, long labels, keyboard, reduced motion and overflow.
-- Gates: appropriate domain/shared/browser checks plus npm run check, npm run check:assets and npm run build; required CI on final PR head.
-- Mocked browser tests do not establish live narration/image/audio quality or deployment.
-
-## Release and next steps
-
-1. Await Levi's implementation approval of the proposal.
-2. Follow the revised execution order above; resolve the listed source uncertainties before dependent implementation.
-3. Implement the durable rescue transaction first, then healthless controls, existing-flow reconciliation, photographic assets and reference integration.
-4. Verify and fix all in-scope surfaces, create implementation PR and wait for required final-head CI.
-5. Report exact migrations/functions/frontend/reference-object release requirements and deployment status. The audited play_sessions storage uses JSON rather than an owner-specific SQL enum; no SQL migration is currently established as necessary.
-6. Shared validator/narrative changes require checking at least generate-death-scene and narrate-story plus opening/ending/image/visual-bible callers. Deploy compatible backend before new frontend observations when deployment is authorized.
-7. Keep merge, publish and authorized live-provider verification separate from code/CI completion. No current authorization to merge or publish.
+Production upload, merge, deployment and paid live generation were not authorized as part of this implementation handoff and remain pending. Native Deno checks, database tests and complete sharded browser regressions run in the PR's required Reliability workflow. No card-source gap blocks this killer scope; Creech Manor's own location module is a separate next import.

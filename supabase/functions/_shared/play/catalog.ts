@@ -1,3 +1,4 @@
+import { POLTERGEIST_ITEMS, POLTERGEIST_TERRORS } from './poltergeist.ts';
 import { GROVES_EVENTS, GROVES_ITEMS, GROVES_PEOPLE, GROVES_SPACES, GROVES_SOURCE, GROVES_TERRORS } from "./groves.ts";
 import { INKANYAMBA_TERRORS } from "./inkanyamba.ts";
 import { FRIGHT_TERRORS } from "./fright.ts";
@@ -35,6 +36,7 @@ const station = wiki("Station_2891");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+  ...POLTERGEIST_TERRORS.map(card=>({...card,kind:"terror" as const})),
   ...GROVES_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...GROVES_EVENTS.map(c=>({...c,kind:"event" as const,location:"Sacred Groves",source:GROVES_SOURCE})),
   ...INKANYAMBA_TERRORS.map(card => ({...card, kind:"terror" as const})),
@@ -208,6 +210,7 @@ export function playMechanisms(selection: {
 }) {
   return [
     "Killer attack",
+    ...(selection.killer==='Poltergeist'?['Clown Doll','Behemoth','Flying objects','Lightning']:[]),
     ...(selection.killer === "Inkanyamba" ? ["Killer Wrath", "Dark Lightning"] : []),
     "Minion attack",
     ...(selection.killer === "Billy the Bear"
@@ -244,4 +247,9 @@ export function playVictims(location: string): readonly { name: string }[] {
     : location === "Buddyland"
       ? SPECIAL_VICTIMS
       : [];
+}
+
+/** Location-only callers keep their existing catalogs. Killer Items follow the killer. */
+export function selectionItems(selection:{killer:string;location:string}) {
+  return [...playItems(selection.location),...(selection.killer==='Poltergeist'?POLTERGEIST_ITEMS:[])];
 }

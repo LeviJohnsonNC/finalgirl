@@ -321,7 +321,7 @@ export function DeathSceneDialog({
                     options={
                       selection.killer === "Billy the Bear"
                         ? BUDDIES.map((b) => b.name)
-                        : selection.killer === "Geppetto" ? ["Puppet", "Puppet 1", "Puppet 2", "Puppet 3"] : []
+                        : selection.killer === "Geppetto" ? ["Puppet", "Puppet 1", "Puppet 2", "Puppet 3"] : selection.killer === "Poltergeist" ? ["Behemoth","Clown Doll"] : []
                     }
                     placeholder={selection.killer === "Geppetto" ? "Choose a Puppet or enter a minion" : "Choose a Buddy or enter a minion"}
                   />

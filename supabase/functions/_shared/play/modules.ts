@@ -1,3 +1,4 @@
+import { POLTERGEIST_ITEMS, POLTERGEIST_POWERS, POLTERGEIST_FINALES, POLTERGEIST_MINORS, validPoltergeistField, poltergeistFacts, poltergeistPower } from './poltergeist.ts';
 import { validGrovesField, grovesLabel, grovesValue, grovesFacts, GROVES_EVENTS, GROVES_ITEMS, GROVES_VISUAL, GROVES_PEOPLE } from "./groves.ts";
 import { INKANYAMBA_POWERS, INKANYAMBA_FINALES, INKANYAMBA_MINOR_POWERS, validInkanyambaField, inkanyambaFacts } from "./inkanyamba.ts";
 export { INKANYAMBA_POWERS, INKANYAMBA_FINALES, INKANYAMBA_MINOR_POWERS } from "./inkanyamba.ts";
@@ -46,7 +47,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -63,6 +64,7 @@ type ObservedEvent = {
 
 /** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
 export function killerMomentCards(killer: string, type: string) {
+  if (killer === "Poltergeist") return [...(type === "dark-power" ? POLTERGEIST_POWERS : type === "finale" ? POLTERGEIST_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Inkanyamba") return [...(type === "dark-power" ? INKANYAMBA_POWERS : type === "finale" ? INKANYAMBA_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Dr. Fright") return [...(type === "dark-power" ? FRIGHT_POWERS : type === "finale" ? FRIGHT_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Geppetto")
@@ -148,6 +150,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === "poltergeist") return validPoltergeistField(key,value);
   if (module === "groves") return validGrovesField(key, value);
   if (module === "inkanyamba") return validInkanyambaField(key, value);
   if (module === "maple") return validMapleField(key, value);
@@ -262,7 +265,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    !["poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -336,6 +339,7 @@ export function moduleState(
   return state;
 }
 function fieldLabel(module: ModuleObservation["module"], key: string) {
+  if (module === "poltergeist") return key === "carolyn" ? "Carolyn" : key === "floppy" ? "Mr. Floppy" : POLTERGEIST_MINORS.find(p=>key===`minor.${p.id}`)?.name ?? key;
   if (module === "groves") return grovesLabel(key);
   if (module === "inkanyamba") return key === "wrath" ? "Killer Wrath" : key === "miracleResolved" ? "We Need a Miracle Wrath recorded" : `${INKANYAMBA_MINOR_POWERS.find(p => key === `minor.${p.id}.health`)?.name ?? key} Health`;
   if (module === "maple") return mapleLabel(key);
@@ -428,6 +432,7 @@ function valueLabel(key: string, value: ModuleValue) {
   return String(value);
 }
 export function describeModule(observation: ModuleObservation) {
+  if(observation.module==='poltergeist')return Object.entries(observation.changes).filter(([k])=>!['initialized','minorsRemoved'].includes(k)).map(([k,v])=>`${fieldLabel('poltergeist',k)}: ${v===null?'not recorded':String(v).replace(/-/g,' ')}`).join('; ');
   if (observation.module === "groves") return Object.entries(observation.changes).map(([key,value])=>`${grovesLabel(key)}: ${grovesValue(key,value)}`).join("; ");
   if (observation.module === "maple") return Object.entries(observation.changes).map(([key,value])=>`${mapleLabel(key)}: ${mapleValue(key,value)}`).join("; ");
   if (observation.module === "fright") { const s=parseFright(observation.changes.snapshot); return s ? describeFright(s) : "Dr. Fright observation"; }
@@ -445,6 +450,7 @@ export function moduleContext(
   const context: Record<string, ModuleState> = {};
   if (selection.killer === "Dr. Fright") { const facts=frightPublic(entries); if(facts) context.fright=facts; }
   for (const module of [
+    "poltergeist",
     "groves",
     "inkanyamba",
     "billy",
@@ -456,7 +462,7 @@ export function moduleContext(
     "maple",
   ] as const) {
     const applies =
-      module === "groves" ? selection.location === "Sacred Groves" : module === "inkanyamba" ? selection.killer === "Inkanyamba" : module === "maple" ? selection.location === "Maple Lane" : module === "carnival"
+      module === "poltergeist" ? selection.killer === "Poltergeist" : module === "groves" ? selection.location === "Sacred Groves" : module === "inkanyamba" ? selection.killer === "Inkanyamba" : module === "maple" ? selection.location === "Maple Lane" : module === "carnival"
         ? selection.location === "Carnival of Blood"
         : module === "geppetto"
           ? selection.killer === "Geppetto"
@@ -472,7 +478,9 @@ export function moduleContext(
     // historical death fingerprints until an explicit owner observation exists.
     if (module === "inkanyamba" && !entries.some(e => (e.kind === "module" && (e.moduleData?.module === "inkanyamba" || e.linkedModule?.module === "inkanyamba")) || e.inkanyambaReference === true)) continue;
     if (module === "groves" && !entries.some(e => (e.kind === "module" && e.moduleData?.module === "groves") || e.grovesReference === true)) continue;
+    if (module === "poltergeist" && !entries.some(e=>e.kind==='module'&&e.moduleData?.module==='poltergeist')) continue;
     const state = moduleState(entries, module);
+    if (module === 'poltergeist') { delete state.initialized; const power=poltergeistPower(entries);state.powerKnown=power.known;state.epicRequired=power.known?power.epic:null; }
     if (module === "groves") { delete state.holyManProvisional; }
     // A UI initialization marker is not a game fact or part of a death fingerprint.
     delete state.powerSourcesReady;
@@ -530,6 +538,7 @@ export function moduleStoryBeats(
       .join("\n");
   }
   const lines: string[] = [];
+  if(context.poltergeist) lines.push(poltergeistFacts(context.poltergeist,poltergeistPower(entries)));
   if (context.inkanyamba) lines.push(...inkanyambaFacts(context.inkanyamba));
   if (context.fright) {
     const s=context.fright;
@@ -656,6 +665,12 @@ export function buddylandReferences(
   if (selection.location === "Sacred Groves") {
     refs.push({name:"Sacred Groves",effect:GROVES_VISUAL});
     for(const e of GROVES_EVENTS) if(context?.groves?.[`event.${e.id}`] === "active") refs.push({name:e.name,effect:`${e.effect} Activation alone does not prove any conditional effect occurred.`});
+  }
+  if (selection.killer === "Poltergeist" && context?.poltergeist) {
+    const state=context.poltergeist;
+    if(attacker==='Clown Doll'||attacker==='Behemoth') refs.push({name:attacker,effect:'A temporary Terror-card apparition. It disappears after the encounter. It is not an ordinary Victim or a permanent Minion. Its presence alone establishes no killing.'});
+    refs.push({name:'Poltergeist objective',effect:poltergeistFacts(state)+' The spirit cannot be attacked, damaged or killed. Finding is not escape; only recorded outcomes happened.'});
+    for(const p of POLTERGEIST_MINORS) if(state[`minor.${p.id}`]==='active') refs.push({name:p.name,effect:p.effect});
   }
   if (selection.killer === "Inkanyamba") {
     const state = context?.inkanyamba ?? {};
@@ -850,7 +865,7 @@ export function moduleItemBeats(
   selection: ModuleSelection,
   entries: readonly ObservedEvent[],
 ) {
-  const catalog =
+  const locationCatalog =
     selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
       ? CAMP_ITEMS
       : selection.location === "Carnival of Blood"
@@ -858,6 +873,7 @@ export function moduleItemBeats(
         : selection.location === "Buddyland"
           ? BUDDYLAND_ITEMS
         : [];
+  const catalog=[...locationCatalog,...(selection.killer==='Poltergeist'?POLTERGEIST_ITEMS:[])];
   return entries
     .filter((e) => e.kind === "moment" && e.momentType === "item" && e.detail)
     .slice(-2)
@@ -889,8 +905,10 @@ export function initialModuleObservations(
   initializeMaple = false,
   initializeInkanyamba = false,
   initializeGroves = false,
+  initializePoltergeist = false,
 ): ModuleObservation[] {
   return [
+    ...(initializePoltergeist && selection.killer==='Poltergeist' ? [{module:'poltergeist' as const,changes:{initialized:true,carolyn:'hidden',floppy:'hidden','minor.psychic-confusion':'inactive','minor.unseen-forces':'inactive',minorsRemoved:false}}] : []),
     ...(initializeGroves && selection.location === "Sacred Groves" ? [{module:"groves" as const,changes:{wrath:2,closed:"none",fire:"none",hallowed:"none","sign.1":"none","sign.2":"none"}}] : []),
     ...(initializeInkanyamba && selection.killer === "Inkanyamba" ? [{module:"inkanyamba" as const,changes:{wrath:2}}] : []),
     ...(initializeBilly && selection.killer === "Billy the Bear" ? [{ module:"billy" as const, changes:{

@@ -27,6 +27,8 @@ Reuse operations only where their semantics match. Audit the owner domain and Ru
 - Maple house search corrections preserve unknown states. A burning house blocks a new search, without preventing correction of an existing observation. Fright's saved-slide gating and manual reset, and the Final Girl-only Awake status, keep their own rules.
 - Groves' special-Victim outcome preview retains required linked Wrath choices. The Holy Man allocation without Inkanyamba is a **provisional owner-specific interpretation**, not an official or shared rule; see the [Groves import record](imports/sacred-groves.md).
 
+- Poltergeist has healthless ongoing Minor effects: reuse the Minor frame, muted choices and wide active photo, but no hearts or zero-health mapping. An active picture ends an effect; explicit correction preserves unknown/removed states. Its Carolyn/Mr. Floppy objective uses explicit source-backed actions; Carolyn joining plus permanent Minor removal is one durable observation and one Undo. No ordinary Victim totals or inferred win. See the [Poltergeist import record](imports/poltergeist.md).
+
 ## Groves reference mechanics
 
 These are visual examples, not a specification for Creech Manor or other owners.

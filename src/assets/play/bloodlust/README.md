@@ -32,8 +32,9 @@ Positions count the separate bottom/start space as 0; the repeat/overflow instru
 | Dr. Fright | 10 | 0–9 | IMG_9347.jpg; Library `libfile_7524afb178f48191a1ce9972a995eef4` |
 | Inkanyamba | 9 | 0–8 | IMG_9363.jpg; Library `libfile_8e8b602c07488191b3ba7af113e2166e` |
 | Geppetto | 9 | 0–8 | IMG_9333.jpg; Library `libfile_a3d2efc6bcbc8191b67d408cfc32f477` |
+| Poltergeist | 9 | 0–8 | polter1(1).jpeg; Library `libfile_9f7a13816e9081918f66bfb82a6bff16`; native board inspected rotated |
 
-`bloodlustPresentation.ts` maps each verified range across art stages 0–10. Every printed position has a distinct image, and all four maximum positions reach stage 10. This is display metadata only: existing 0–99 validation, saved numbers, manual corrections, game rules, overflow effects and observations remain unchanged.
+`bloodlustPresentation.ts` maps each verified range across art stages 0–10. Every printed position has a distinct image, and all five maximum positions reach stage 10. This is display metadata only: existing 0–99 validation, saved numbers, manual corrections, game rules, overflow effects and observations remain unchanged.
 
 Billy's full board remains an existing source gap in `docs/module-reference-gaps.md`. Billy and other unverified killers use the generic stage matching their observed integer (0–10), with higher observations showing stage 10. This does not establish a physical maximum for them. Add verified per-killer metadata only after inspecting the actual board. Unknown observations keep an undefined art stage and a dimmed clean picture; they are not recorded as 0. High legacy values retain their exact visible number.
 

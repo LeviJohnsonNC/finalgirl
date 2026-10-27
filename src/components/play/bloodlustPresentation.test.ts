@@ -42,7 +42,6 @@ describe("photographic Bloodlust progression", () => {
     expect(verifiedBloodlustMaximum["Billy the Bear"]).toBeUndefined();
     for (const killer of [
       "Billy the Bear",
-      "Poltergeist",
       "constructor",
       "toString",
     ]) {

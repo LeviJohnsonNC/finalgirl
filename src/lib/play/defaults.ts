@@ -10,7 +10,7 @@ import type { StateField } from "./events";
 export function playStartingValues(
   killer: string,
   finalGirl: string,
-): Record<StateField, number> {
+): Record<Exclude<StateField,'killerHealth'>, number> & {killerHealth?:number} {
   const killerHealth: Record<string, number> = {
     Inkanyamba: 9,
     "Billy the Bear": 8,
@@ -20,8 +20,8 @@ export function playStartingValues(
   };
   return {
     finalGirlHealth: getFinalGirlHealth(finalGirl),
-    killerHealth: killerHealth[killer] ?? 10,
-    finalHorrorLevel: 4,
+    ...(killer!=='Poltergeist'&&{killerHealth:killerHealth[killer]??10}),
+    finalHorrorLevel: killer === 'Poltergeist' ? 3 : 4,
     bloodlust: 0,
   };
 }

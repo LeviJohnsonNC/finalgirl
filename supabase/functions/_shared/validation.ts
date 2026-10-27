@@ -107,8 +107,9 @@ export const EndingRequestSchema = z.object({
   endingSubLocation: z.string().max(200).optional(),
   gameHighlights: z.string().max(2000).optional(),
   roundsPlayed:z.number().int().min(1).max(999).optional(),
-  playSummary:z.string().max(1800).optional()
-});
+  playSummary:z.string().max(1800).optional(),
+  poltergeistReview:z.object({carolynRescued:z.literal(true).nullable(),floppyAtEscape:z.literal(true).nullable(),epicRequired:z.boolean().nullable()}).strict().optional()
+}).refine(value=>!value.poltergeistReview||value.killer.name==='Poltergeist',{message:'Rescue review belongs to Poltergeist',path:['poltergeistReview']});
 
 export type StoryRequest = z.infer<typeof StoryRequestSchema>;
 export type SceneImageRequest = z.infer<typeof SceneImageRequestSchema>;
