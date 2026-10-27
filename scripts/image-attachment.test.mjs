@@ -35,8 +35,9 @@ new Function('require', 'exports', compile('../supabase/functions/_shared/prompt
   assert.equal(name, './storyFacts.ts'); return storyFacts;
 }, prompts);
 
-function imageHandler({ rowExists = true, attachError = null, composeError = false, invalidPlan = false, incompletePlan = false, mechanicalPlan = false, planningGateway, discardedBefore = false, discardedDuring = false } = {}) {
-  const filters = []; const removed = []; const phases = []; const imageCalls = []; const textCalls = []; let handler;
+function imageHandler({ rowExists = true, attachError = null, composeError = false, invalidPlan = false, incompletePlan = false, mechanicalPlan = false, planningGateway, discardedBefore = false, discardedDuring = false, referenceError = false } = {}) {
+  const filters = []; const removed = []; const phases = []; const imageCalls = []; const textCalls = []; const openingCalls = []; let handler;
+  const identityReferences = [{ name: 'Rena', url: 'data:image/jpeg;base64,RENA' }, { name: 'Billy the Bear', url: 'data:image/jpeg;base64,BEAR' }];
   let uploaded=false;
   const discardedHelpers={};new Function('require','exports',ts.transpileModule(readFileSync(new URL('../supabase/functions/_shared/discardedGame.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(()=>{},discardedHelpers);
   const client = {
@@ -56,7 +57,7 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
   const modules = {
     '../_shared/discardedGame.ts':discardedHelpers,
     '../_shared/imageReference.ts': { ownedOpeningReference: () => undefined },
-    '../_shared/openingReferences.ts': opening,
+    '../_shared/openingReferences.ts': { OpeningReferenceError: Error, openingReferences: async (girl, killer) => { openingCalls.push([girl, killer]); if (referenceError) throw new Error('the stored reference does not match its reviewed digest'); return identityReferences; } },
     '../_shared/auth.ts': { getCorsHeaders: () => ({ 'Access-Control-Allow-Origin': 'https://example.test' }) },
     '../_shared/guard.ts': { requireUser: async () => ({ ok: true, adminClient:client, user: { id: 'owner-A' }, logUsage: async () => {} }) },
     '../_shared/validation.ts': { validateRequest: (_schema, data) => ({ success: true, data }) },
@@ -77,7 +78,7 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
     if (modules[name]) return modules[name];
     throw new Error('Unexpected image handler import: ' + name);
   }, {}, { env: { get: () => 'configured' } });
-  return { handler, filters, removed, phases, imageCalls, textCalls };
+  return { handler, filters, removed, phases, imageCalls, textCalls, openingCalls, identityReferences };
 }
 const request = (sceneType = 'ending') => new Request('https://example.test', { method: 'POST', body: JSON.stringify({ sceneType, killer: 'Billy the Bear', finalGirl: 'Rena', location: 'Buddyland', story: 'Rena held her flashlight toward the empty prize counter. Across the arcade, the bear began to move.', gameId: 'record', previousImageUrl: 'https://example.test/storage/v1/object/public/posters/game-posters/owner-A/old.png' }) });
 test('opening generation uses only a complete photographic plan, without poster copy', async () => {
