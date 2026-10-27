@@ -1,29 +1,17 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { OPENING_REFERENCE_MANIFEST } from './openingReferenceManifest.ts';
-
-/** Private bucket holding the reviewed portraits. Only this module's fixed manifest names objects. */
-const REFERENCE_BUCKET = 'opening-references';
 
 /** A reviewed portrait that cannot be served exactly as stored. The shot is refused, never replaced. */
 export class OpeningReferenceError extends Error {}
 
-let client: ReturnType<typeof createClient> | undefined;
-
-function referenceBucket() {
-  if (!client) {
-    client = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
-  }
-  return client.storage.from(REFERENCE_BUCKET);
-}
-
-async function downloadReference(path: string): Promise<Uint8Array> {
-  const { data, error } = await referenceBucket().download(path);
-  if (error || !data) throw new OpeningReferenceError(`${path} could not be loaded`);
-  return new Uint8Array(await data.arrayBuffer());
+/** Casts that have a reviewed portrait, in the order the model should receive them. */
+export function openingReferenceNames(finalGirl: string, killer: string): string[] {
+  return [...new Set([finalGirl, killer])].filter((name) =>
+    Object.prototype.hasOwnProperty.call(OPENING_REFERENCE_MANIFEST, name)
+  );
 }
 
 async function sha256Hex(bytes: Uint8Array): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  const digest = await crypto.subtle.digest('SHA-256', new Uint8Array(bytes).buffer);
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
@@ -43,12 +31,9 @@ function toDataUri(bytes: Uint8Array): string {
 export async function openingReferences(
   finalGirl: string,
   killer: string,
-  load: (path: string) => Promise<Uint8Array> = downloadReference,
+  load: (path: string) => Promise<Uint8Array>,
 ): Promise<Array<{ name: string; url: string }>> {
-  const names = [...new Set([finalGirl, killer])].filter((name) =>
-    Object.prototype.hasOwnProperty.call(OPENING_REFERENCE_MANIFEST, name)
-  );
-  return Promise.all(names.map(async (name) => {
+  return Promise.all(openingReferenceNames(finalGirl, killer).map(async (name) => {
     const { path, sha256 } = OPENING_REFERENCE_MANIFEST[name];
     let bytes: Uint8Array;
     try {
