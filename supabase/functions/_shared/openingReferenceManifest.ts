@@ -14,6 +14,7 @@
 // selena.png SHA-256: 3fce63c23313147a90aba7709937c9fe57d91ae7fd62d067d96da6d48e9dd28c
 // adelaide.png SHA-256: 0e121acab45d334ba1ad95bcfe1c2898b5ec905ffc51c748487e95d8aab24e69
 // barbara.png SHA-256: 231e3d0614bfc6a793bc64dacb7f409826b9d221a77cefb7f7b3abecfa468682
+// poltergeist.png SHA-256: 0b473aad048c96105f5135fef50bc62e33e89748acf1c6fd996dd156c43bb4fd
 // inkanyamba.png SHA-256: de9a8b6bc12580b7e99787028748989bfba64b86ab47217f59c1b47ef486a318
 // heather.png SHA-256: 245b0193fecc6e6801cdbb259e7892d67ef85eb0879c3e1a5af28f1bc758472b
 // veronica.png SHA-256: e76034a656ca09b3cb1e72f34fa36af056dc6ee066ea60851293b0a907811b38
@@ -43,7 +44,6 @@
 // adrianne.png SHA-256: 62493fe13d21e57cf0428ff28999ceee27045df062b9f8bcbbafe0958af16531
 // maureen.png SHA-256: 9bd680a9c0e83efc9c9f7bd2756f4e7a1fb1daf85c36c4272f1bc88e00c9f087
 export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: string }> = {
-  "Poltergeist": {"path":"poltergeist.jpg","sha256":"c3dfc0ebaef9ed040b85d59b0f8cfde02b82dd42fd38ae4cb6a4097015045331"},
   "Billy the Bear": {
     "path": "billy-the-bear.jpg",
     "sha256": "b5a3cfee52816d636f35f555fbaca6d10cc1fbeb6f70f3a1a8f1e220868309e8"
@@ -95,6 +95,10 @@ export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: 
   "Barbara": {
     "path": "barbara.jpg",
     "sha256": "9ae44bb0c07ded4f6525183b8560579eb1cc609c64913f951702a33bb8622f48"
+  },
+  "Poltergeist": {
+    "path": "poltergeist.jpg",
+    "sha256": "c3dfc0ebaef9ed040b85d59b0f8cfde02b82dd42fd38ae4cb6a4097015045331"
   },
   "Inkanyamba": {
     "path": "inkanyamba.jpg",
