@@ -42,7 +42,7 @@ describe("registered modules use their declared shared interactions", () => {
         ).not.toBeNull();
       expect(onEvent).not.toHaveBeenCalled();
       expect(module.art.src).toMatch(/banners\//);
-      expect(module.art.position).toMatch(/% center$/);
+      expect(module.art.position).toMatch(/^\d+% (?:center|top|\d+%)$/);
       if (module.capabilities.includes("reveals"))
         for (const type of ["dark-power", "finale"] as const) {
           const cards = illustratedKillerCards(module.match, type);

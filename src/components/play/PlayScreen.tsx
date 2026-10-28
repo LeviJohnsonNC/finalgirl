@@ -417,6 +417,7 @@ export function PlayScreen(props: PlayScreenProps) {
       <section
         className="play-panel play-track-more"
         aria-label="Optional trackers"
+        data-healthless={killer === 'Poltergeist' || undefined}
       >
         <h2>Track more</h2>
         <div className="play-state-grid">

@@ -64,9 +64,7 @@ export function KillerCards({
   const entries = summarizePlay(events).entries;
   const hans = moduleState(entries, "hans");
   const { record, message } = useModuleRecord(events, onEvent);
-  const [editing, setEditing] = useState<
-    Partial<Record<CardType | "second", boolean>>
-  >({});
+  const [editingSecond, setEditingSecond] = useState(false);
   const choose = (type: CardType, name: string) => {
     if (
       disabled ||
@@ -80,11 +78,9 @@ export function KillerCards({
       (event) => event.kind === "moment" && event.momentType === type,
     );
     if (existing?.killerCard === name) {
-      setEditing((e) => ({ ...e, [type]: false }));
       return;
     }
-    if (
-      record(
+    record(
         newPlayEvent(
           existing
             ? { kind: "details", target: existing.id, killerCard: name }
@@ -99,9 +95,7 @@ export function KillerCards({
                     : "Finale revealed",
               },
         ),
-      )
-    )
-      setEditing((e) => ({ ...e, [type]: false }));
+      );
   };
   const secondCards = illustratedKillerCards(killer, "dark-power").filter(
     (card) => card.name !== hans.power,
@@ -132,7 +126,7 @@ export function KillerCards({
                 </p>
               )}
               {selected && <RevealedCard card={selected} label={label} />}
-              {(!selected || editing[type]) && (
+              {!selected && (
                 <Chooser
                   cards={cards}
                   selected={selected}
@@ -144,21 +138,6 @@ export function KillerCards({
                   }
                   choose={(name) => choose(type, name)}
                 />
-              )}
-              {selected && type === "finale" && (
-                <button
-                  type="button"
-                  className="module-change-choice"
-                  disabled={disabled}
-                  aria-expanded={Boolean(editing[type])}
-                  onClick={() =>
-                    setEditing((e) => ({ ...e, [type]: !e[type] }))
-                  }
-                >
-                  {editing[type]
-                    ? `Cancel changing ${label}`
-                    : `Change ${label}`}
-                </button>
               )}
               <button
                 className="module-unnamed"
@@ -176,7 +155,7 @@ export function KillerCards({
         <section className="module-second-power">
           <h3>Second Dark Power</h3>
           {second && <RevealedCard card={second} label="Second Dark Power" />}
-          {(!second || editing.second) && (
+          {(!second || editingSecond) && (
             <Chooser
               cards={secondCards}
               selected={second}
@@ -195,7 +174,7 @@ export function KillerCards({
                     }),
                   )
                 )
-                  setEditing((e) => ({ ...e, second: false }));
+                  setEditingSecond(false);
               }}
             />
           )}
@@ -204,10 +183,10 @@ export function KillerCards({
               type="button"
               className="module-change-choice"
               disabled={disabled}
-              aria-expanded={Boolean(editing.second)}
-              onClick={() => setEditing((e) => ({ ...e, second: !e.second }))}
+              aria-expanded={Boolean(editingSecond)}
+              onClick={() => setEditingSecond(value => !value)}
             >
-              {editing.second
+              {editingSecond
                 ? "Cancel changing second Dark Power"
                 : "Change second Dark Power"}
             </button>

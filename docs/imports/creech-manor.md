@@ -140,3 +140,15 @@ Completion means source-backed, implemented, tested, visually reviewed and ready
 - Merge, deployment and signed-in/paid live-provider smoke tests remain pending and are not claimed by these checks. Final PR-head required CI is a completion gate; its status is tracked on the implementation PR.
 
 - Final contract hardening verifies failed linked-rescue persistence/retry/double-tap and atomic two-owner Undo explicitly; the ending schema rejects a Helicopter route under a different Location.
+
+## Playtest refinement, 2026-10-27
+
+Levi's four screenshots (6:36:16, 6:36:31, 6:37:31 and 6:38:50 PM) requested a compact healthless tracker panel, a truly photographic Poltergeist banner, quiet Finale correction, direct Rope Ladder cycling, a simpler Ghost Hunter flow and removal of Windows & doors from Play.
+
+- Rope Ladder now cycles directly through unplaced → upper-left/washroom → upper-right Window/outside → lower-right Window/outside → unplaced. An unknown legacy observation first becomes explicitly unplaced on click; mount/disclosure never records it. The editor, route dropdown and auxiliary buttons are removed. External ladder usable/broken remains a separate picture toggle; no Item consumption or repair is inferred by changing the rope route. Undo and failed-write retry retain existing observation contracts.
+- Ghost Hunters retains the explicit 0–3 participant choice, then replaces the large banner/actions/corrections with one compact summary and three portraits. One selected hunter discloses Saved/Killed; either explicit action records immediately. Optional final Bloodlust is behind a closed disclosure and still saves atomically with a reported death. Group/individual corrections are quiet disclosures; corrections and visibility never repeat outcomes or alter ordinary victim totals. Existing unknown, inactive, dead/saved and omitted participants remain distinct.
+- Windows & doors is removed from Play. The physical Terror remains in Rules/catalogs and existing historical observations remain readable by the domain/context; no saved history is deleted or rewritten.
+- Shared Finale correction now matches primary Dark Power: left-aligned Clear card name, preserving the permanent reveal. No Change Finale button. Hans's separate second-Power workflow remains.
+- These are frontend/assets changes only. No new server action, schema, migration, function redeployment or reference upload is needed. The new header is decorative UI art; it does not replace the trusted Poltergeist identity object.
+
+Verification: updated hunter outcome/atomic Bloodlust, actual Undo, quiet disclosure, mixed-owner routes, legacy unknown state, keyboard cycle, rejected local writes/retry/reload and no casualty inference journeys. The initial focused run passed all 64 Creech/Poltergeist/shared-polish desktop/phone journeys. Actual loaded controls/banner/trackers were inspected at 1280×640, 1366×768, 1440×900, 390×844 and 320×568. Final build/unit/edge/asset checks and final-head Reliability CI are recorded in the delivery PR; production release is separate.
