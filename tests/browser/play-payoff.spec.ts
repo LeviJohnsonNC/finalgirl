@@ -33,9 +33,9 @@ test("opt-in defaults, compact adjustments and the two comeback moments survive 
     await expect(
       page.getByRole("button", { name: `Set ${label}`, exact: true }),
     ).toHaveText(value);
-    await expect(
-      page.getByRole("button", { name: `Increase ${label}`, exact: true }),
-    ).toBeEnabled();
+    const increase = page.getByRole("button", { name: `Increase ${label}`, exact: true });
+    if (label === "Final Girl health") await expect(increase).toBeDisabled();
+    else await expect(increase).toBeEnabled();
   }
   await page
     .getByRole("button", { name: "Increase Horror", exact: true })
