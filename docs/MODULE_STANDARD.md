@@ -25,12 +25,15 @@ The app is a cinematic companion to the physical game. Play foregrounds useful c
 | Characters and linked effects | Explicit legal outcomes and necessary placement/allocation choices. A known victim portrait opens its actions; saved/killed is not a presence toggle. Status correction must not repeat outcome effects.                                |
 | Environmental state           | Where applicable, change the environment itself for meaningful states, retaining landmarks/camera. A simple legal cycle may use the picture; combined/unknown states keep a quiet explicit editor when cycling would erase information. |
 | Empty versus unknown          | Known empty can omit a redundant caption, as Sacred spaces do. Unknown stays explicit; it must not silently become zero, absent, depleted or unrevealed.                                                                                |
+| Four optional trackers        | Health, Killer Health, Bloodlust and Horror keep clear artwork above a dark distressed bottom strip. Each strip contains its title, − / editable value / + and an unboxed × after a quiet divider. Status and numeric editing also stay in the strip; × retains Stop tracking semantics. |
 
 Use [shared controls](module-controls.md) rather than reimplementing these patterns. Clearing an observation/card name is not deletion of immutable history. Preserve existing safeguards for genuinely destructive session/case deletion.
 
 ## Composition and photography
 
 Use deliberate internal padding, restrained framing, readable type hierarchy and dark text scrims. Titles dominate; supporting text stays subordinate. Names/status/actions remain HTML, with keyboard focus and touch targets at least 44px. The normal laptop dashboard stays compact; expanded modules may scroll. Do not clip content or shrink controls to force every expanded panel onto one screen. Respect reduced motion; prevent 320px horizontal overflow.
+
+The four optional tracker strips follow Levi's 2026-10-28 reference in [tracker control-bar verification](verification/tracker-control-bars.md). Keep title/status/control text outside the image area. Narrow screens can stack cards to preserve one control row and 44px targets. This does not change other module tracks or their controls.
 
 New identity, module-header, Power/Finale/Minor and meaningful environmental/tracker artwork defaults to the approved physically believable photographic treatment. Follow [photo direction](IDENTITY_PHOTOS.md): tangible materials, coherent available light/exposure, natural perspective and restrained 1980s consumer 35mm reproduction. Camera-era treatment does not override verified wardrobe, technology or setting. Grain/blur must not hide illustration or CGI. Supplied approved replacements take precedence. Preserve face, mask, hair, skin, costume, silhouette and canonical props, using approved references where available.
 

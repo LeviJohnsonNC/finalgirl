@@ -17,8 +17,7 @@
   gap: 8px;
   margin-left: auto;
 }
-.play-workspace .play-heading nav > button,
-.play-workspace .play-state > button:not(.play-text-button) {
+.play-workspace .play-heading nav > button {
   border: 10px solid transparent;
   border-image: url('../assets/play/states/frame-neutral.webp') 40 fill / 12px stretch;
   background: none;
@@ -53,8 +52,7 @@
   width: 40px;
   padding: 4px;
 }
-.play-workspace .play-heading button:hover:not(:disabled),
-.play-workspace .play-state > button:hover:not(:disabled) { filter: brightness(1.16); }
+.play-workspace .play-heading button:hover:not(:disabled) { filter: brightness(1.16); }
 .play-workspace button:focus-visible {
   outline: 2px solid #e4cca0;
   outline-offset: 3px;
@@ -74,8 +72,12 @@
 
 .play-workspace .play-state-grid { align-items: stretch; }
 .play-workspace .play-state {
-  min-height: 188px;
-  padding: 16px 12px 10px;
+  --tracker-button-top: #3d503a;
+  --tracker-button-bottom: #19291b;
+  --tracker-button-border: #83957366;
+  --tracker-strip: #0b110bf7;
+  min-height: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -84,13 +86,26 @@
   border-color: #ada17b65;
   box-shadow: 0 5px 14px #0005;
 }
-.play-workspace .play-state::after {
-  position: absolute;
-  content: '';
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(0deg, #060c0bed, #060c0b08 80%), linear-gradient(90deg, #070d0c8c, transparent 85%);
-  pointer-events: none;
+.play-workspace .play-state--killerHealth,
+.play-workspace .play-state--bloodlust {
+  --tracker-button-top: #682c22;
+  --tracker-button-bottom: #29120e;
+  --tracker-button-border: #ac665666;
+  --tracker-strip: #140a08fa;
+}
+.play-workspace .play-state--finalHorrorLevel {
+  --tracker-button-top: #334f5b;
+  --tracker-button-bottom: #14232c;
+  --tracker-button-border: #7e9aa966;
+  --tracker-strip: #080e13fa;
+}
+.play-workspace .play-state::after { content: none; }
+.play-workspace .play-state-picture {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: 172px;
+  flex-shrink: 0;
 }
 .play-workspace .play-state .play-stat-portrait {
   width: 100%;
@@ -100,39 +115,123 @@
   object-position: center 28%;
 }
 .play-workspace .play-state .play-stat-art { object-position: center 45%; }
-.play-workspace .play-state--bloodlust::after {
-  background: linear-gradient(0deg, #060c0bf2, transparent 75%), linear-gradient(180deg, #070d0cc4, transparent 38%), linear-gradient(90deg, #070d0c55, transparent 85%);
-}
 .play-state--bloodlust[data-bloodlust-stage='unknown'] .play-stat-art {
   filter: grayscale(.8) brightness(.65);
 }
-.play-workspace .play-state > span {
+.play-workspace .play-state-control-bar {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 132px 44px;
+  align-items: center;
+  min-height: 60px;
+  flex: 1 0 auto;
+  padding: 4px 4px 4px 8px;
+  background: var(--tracker-strip);
+  box-shadow: 0 -1px 0 #a99e7355, inset 0 1px 12px #0008;
+}
+/* Reuse the worn film-frame edge without putting texture over the photograph. */
+.play-workspace .play-state-control-bar::before {
+  content: '';
+  position: absolute;
+  inset: -2px 0 0;
+  border: 4px solid transparent;
+  border-image: url('../assets/play/states/frame-neutral.webp') 40 / 4px stretch;
+  opacity: .42;
+  pointer-events: none;
+  z-index: -1;
+}
+.play-workspace .play-state-control-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(173deg, #fff2 0 1px, transparent 1px 7px), repeating-linear-gradient(83deg, #0008 0 1px, transparent 1px 11px);
+  opacity: .1;
+  pointer-events: none;
+  z-index: -1;
+}
+.play-workspace .play-state-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding-right: 2px;
+}
+.play-workspace .play-state-title {
   margin: 0;
   color: #fff0d9;
-  font: 400 18px/1.15 'IM Fell English', Georgia, serif;
+  font: 400 16px/1.1 'IM Fell English', Georgia, serif;
   text-shadow: 0 2px 6px #000;
 }
-.play-workspace .play-state > button:not(.play-text-button) {
-  margin: auto 0 0;
-  min-height: 44px;
-  padding: 2px 10px;
-  font: 400 18px/1.1 'IM Fell English', Georgia, serif;
-}
 .play-workspace .play-state .play-state-stepper {
-  margin-top: auto;
+  margin: 0;
   width: 100%;
-  flex-shrink: 0;
+  grid-template-columns: repeat(3, 44px);
+  background: none;
+  border: 0;
+  border-radius: 0;
 }
-.play-workspace .play-state .play-text-button {
-  position: relative;
-  z-index: 1;
-  align-self: flex-end;
-  color: #d0c7b6;
-  min-height: 28px;
-  padding: 5px 0;
+.play-workspace .play-state-stepper button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+}
+.play-workspace .play-state .play-state-stepper button:not(:nth-child(2))::before {
+  inset: 5px 3px;
+  border-radius: 5px;
+  background: linear-gradient(var(--tracker-button-top), var(--tracker-button-bottom));
+  border: 1px solid var(--tracker-button-border);
+  box-shadow: inset 0 1px #ffffff12, 0 2px 4px #0008;
+}
+.play-workspace .play-state .play-state-stepper button:nth-child(2) {
+  font: 400 28px/1 Georgia, serif;
+}
+.play-workspace .play-state .play-state-stepper button:first-child::before { filter: brightness(.7) saturate(.7); }
+.play-workspace .play-state-close {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid #b8ae8b40;
+  border-radius: 0;
+  background: none;
+  color: #d6d0bb;
+  font: 22px/1 Arial, sans-serif;
+}
+.play-workspace .play-state-control-bar button:hover:not(:disabled) { filter: brightness(1.25); }
+.play-workspace .play-state-close:hover { color: #fff5dc; }
+.play-workspace .play-state-enable {
+  grid-column: 2 / -1;
+  justify-self: end;
+  min-width: 88px;
+  min-height: 44px;
+  padding: 4px 12px;
+  border: 1px solid var(--tracker-button-border);
+  border-radius: 4px;
+  background: linear-gradient(var(--tracker-button-top), var(--tracker-button-bottom));
+  color: #f4ecd4;
+  font: 400 16px/1.1 'IM Fell English', Georgia, serif;
+}
+.play-workspace .play-state form {
+  grid-column: 2 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px 56px;
+  gap: 2px;
+  align-items: center;
   margin: 0;
 }
-.play-workspace .play-state form { margin-top: auto; }
+.play-workspace .play-state form input,
+.play-workspace .play-state form button {
+  min-width: 0;
+  min-height: 44px;
+  width: 100%;
+  padding: 4px;
+  font-size: 12px;
+}
 .play-workspace .play-critical-art {
   position: absolute;
   inset: 0;
@@ -154,14 +253,6 @@
   filter: none;
   transform: none;
 }
-@media (max-width: 380px) {
-  /* One readable line leaves the photographed eyes clear of the status label. */
-  .play-workspace .play-state.play-state--finalGirlHealth > span {
-    font-size: 14px;
-    line-height: 1.2;
-    white-space: nowrap;
-  }
-}
 .play-workspace .play-state--killerHealth[data-critical] .play-stat-portrait {
   filter: contrast(1.3) saturate(.68) sepia(.2);
   object-position: 47% 20%;
@@ -178,7 +269,8 @@
   font: 700 10px/1.2 Arial, sans-serif;
   text-transform: uppercase;
   letter-spacing: .05em;
-  margin-top: 6px;
+  margin: 0;
+  font-size: 9px;
   text-shadow: 0 1px 4px #000;
 }
 
@@ -293,13 +385,19 @@
 .play-power-add > span { font: 26px/1 Georgia, serif; }
 .play-power-heading .play-power-remove { color: #beb9a5; font-size: 11px; min-height: 44px; padding: 0 4px; border: 0; background: none; }
 .play-power-token:hover, .play-power-add:hover { filter: brightness(1.16); }
+@media (max-width: 1099px) {
+  .play-workspace .play-track-more[data-healthless=true] { width: 100%; }
+  .play-workspace .play-state-grid,
+  .play-workspace .play-track-more[data-healthless=true] .play-state-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 639px) {
   .play-workspace .play-heading nav { width: 100%; margin-top: 16px; gap: 4px; justify-content: flex-start; flex-wrap: wrap; }
   .play-workspace .play-heading nav > button { font-size: 15px; min-height: 44px; padding: 2px; gap: 4px; border-width: 5px; border-image-width: 7px; }
   .play-workspace .play-heading nav > .session-options-trigger { width: 44px; flex-basis: 44px; }
-  .play-workspace .play-state-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-  .play-workspace .play-state { min-height: 174px; padding: 13px 10px 8px; }
-  .play-workspace .play-state > span { font-size: 17px; }
+  .play-workspace .play-state-grid,
+  .play-workspace .play-track-more[data-healthless=true] .play-state-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .play-workspace .play-state { min-height: 0; padding: 0; }
+  .play-workspace .play-state-picture { height: 188px; }
   .play-workspace .play-moment-choices { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
   .play-workspace .play-moment-choices button { min-height: 116px; padding: 12px 10px; }
   .play-workspace .play-moment-choices strong { font-size: 17px; }
@@ -311,8 +409,6 @@
   /* Leave room for wider fallback glyphs and platform font metrics at 320px. */
   .play-workspace .play-heading nav > button { font-size: 14px; gap: 3px; padding-inline: 0; border-width: 4px; border-image-width: 6px; }
   .play-workspace .play-heading nav > button svg { width: 14px; height: 14px; }
-  .play-workspace .play-state .play-state-stepper { margin-left: -6px; width: calc(100% + 12px); }
-  .play-workspace .play-state .play-state-stepper button:nth-child(2) { font-size: 22px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .play-workspace .play-moment-choices button > img { transition: none; }
