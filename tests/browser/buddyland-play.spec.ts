@@ -57,9 +57,9 @@ test("streamlined portraits and reveals survive reload and reach deaths and endi
     "Victims saved",
     "Victims killed",
   ]);
-  await expect(page.locator(".play-state > span")).toHaveText([
-    "Final Girl health",
-    "Killer health",
+  await expect(page.locator(".play-state-title")).toHaveText([
+    "Health",
+    "Killer Health",
     "Bloodlust",
     "Horror",
   ]);
