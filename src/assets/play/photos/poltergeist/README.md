@@ -6,7 +6,7 @@ These are decorative UI scenes, not observed encounters, items, injuries or casu
 
 ## Stable mapping and provenance
 
-Each generated source is an independent PNG retained in generation history. Cards are native 1672×941 and downsampled to **1599×900** WebP; no upscaling, atlas enlargement or neighboring-cell bleed. The header is native 2172×724; the top 38% is cropped, then downsampled to **1600×203**, retaining the spirit's face in the actual shallow header. Runtime images use compressed WebP derivatives without embedded source photographs. Per-image runtime budget is 160KiB; all twelve assets total 888,942 bytes. No image bytes are embedded in edge-function source.
+Each generated source is an independent PNG retained in generation history. Cards are native 1672×941 and downsampled to **1599×900** WebP; no upscaling, atlas enlargement or neighboring-cell bleed. The replacement header source is native 2172×724; the photographed band at 2172×423+0+213 is cropped to remove generated white margins, then downsampled to **1600×312**. Its top-aligned 75% horizontal focal point preserves the physical figure in the shallow header. Runtime images use compressed WebP derivatives without embedded source photographs. Per-image runtime budget is 160KiB; all twelve assets total 905,084 bytes. No image bytes are embedded in edge-function source.
 
 | Runtime file/state | Immutable generated source | Runtime bytes | Focal position |
 | --- | --- | ---: | --- |
@@ -21,7 +21,7 @@ Each generated source is an independent PNG retained in generation history. Card
 | `she-will-soon-be-lost.webp` · Finale | `exec-8aa48adb-cf8a-488f-98e9-1c5ed6586844.png` | 102,062 | 65% center |
 | `psychic-confusion.webp` · healthless Minor | `exec-f739e02a-6595-4e50-bfbf-49ecfbd72287.png` | 72,476 | 65% center |
 | `unseen-forces.webp` · healthless Minor | `exec-6b722663-318c-4649-981f-cf19627a054a.png` | 86,752 | 65% center |
-| `../../banners/poltergeist.webp` · header | `exec-6d41f869-5ab3-4835-b8fe-3557ef929286.png` | 13,940 | 70% center |
+| `../../banners/poltergeist.webp` · header | `exec-004077db-0f03-4372-b393-0291686c0c94.png` | 30,082 | 75% top |
 
 `poltergeistArt.ts` binds explicit stable IDs before alphabetical display sorting and throws for missing mappings. No generic/foreign-killer fallback is used for these cards. Headers use `moduleBanners.ts`.
 
@@ -32,3 +32,5 @@ Objective cards use 16:9, dim while unrecorded/hidden/back in a deck, vivid when
 The actual compiled UI is captured at 1280×640, 1366×768, 1440×900, 390×844 and 320×568 by `tests/browser/poltergeist.spec.ts`. Review covers all seven selected heroes, unselected choices, both active Minors, objective disclosures, removed/unknown states and failed-save feedback. The initial header crop clipped the spirit's face; the final top crop fixes that at laptop/phone sizes. Loaded-image and overflow assertions supplement visual inspection; generated source review alone is not UI verification.
 
 The trusted opening portrait is a separate retained-identity derivative at `supabase/reference-assets/poltergeist.jpg`, pinned by digest and awaiting authorized private Storage upload. It is not a UI-photo fallback and these twelve scene photographs do not become opening identity references.
+
+2026-10-27 playtest refresh: the former header figure read as a render and failed Levi’s photographic bar. Its replacement uses a tangible adult performer, naturally irregular dark hair, pale practical makeup and worn off-white cloth under ordinary attic window light. No black eye sockets, glowing eyes or magical particles. The existing banner and approved identity guided the scene; the approved Inkanyamba photo guided physical photographic quality only. No identity portrait, reference object or digest changed. Final laptop/phone crops must be visually inspected.

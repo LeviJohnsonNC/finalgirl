@@ -85,14 +85,13 @@ for (const [killer, id] of [
         await expect(cards.last()).toHaveAttribute("aria-pressed", "false");
         await cards.last().click();
       } else {
-        await region
-          .getByRole("button", { name: "Change Finale", exact: true })
-          .click();
+        await expect(region.getByRole("button", { name: "Change Finale", exact: true })).toHaveCount(0);
+        const clear = region.getByRole("button", { name: "Clear Finale card name", exact: true });
+        expect((await clear.boundingBox())!.x).toBeCloseTo((await hero.boundingBox())!.x, 0);
+        await clear.click();
         expect(await cards.locator("strong").allTextContents()).toEqual(names);
-        await expect(cards.last()).toHaveAttribute("aria-pressed", "true");
-        await region
-          .getByRole("button", { name: "Cancel changing Finale", exact: true })
-          .click();
+        await expect(cards.last()).toHaveAttribute("aria-pressed", "false");
+        await cards.last().click();
       }
       await expect(cards).toHaveCount(0);
     }

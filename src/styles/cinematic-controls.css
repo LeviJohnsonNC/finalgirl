@@ -641,6 +641,9 @@
   outline-offset: -3px;
 }
 .module-reveals .module-unnamed {
+  display: block;
+  margin-left: 0;
+  justify-self: start;
   padding-inline: 0;
   text-align: left;
 }

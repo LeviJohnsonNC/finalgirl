@@ -639,6 +639,15 @@ body:has(.play-workspace) .app-shell {
   font-size: 20px;
   margin-bottom: 12px;
 }
+@media (min-width: 640px) {
+  .play-track-more[data-healthless=true] {
+    width: calc(75% + 3px);
+    max-width: 100%;
+  }
+  .play-track-more[data-healthless=true] .play-state-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
 .play-state-grid {
   gap: 12px;
 }

@@ -48,17 +48,18 @@ export async function chooseKillerCard(
     name: `${type} selection`,
     exact: true,
   });
+  await expect(section).toBeVisible();
   const choice = section.getByRole("button", {
     name: `Choose ${name}`,
     exact: true,
   });
+  // Asking for the current card is a no-op, not a clear/reselect observation.
+  const current = section.locator('.module-revealed-hero h4');
+  if (await current.count() && (await current.textContent())?.trim() === name) return;
   if (!(await choice.isVisible()))
     await section
       .getByRole("button", {
-        name:
-          type === "Dark Power"
-            ? "Clear Dark Power card name"
-            : `Change ${type}`,
+        name: `Clear ${type} card name`,
         exact: true,
       })
       .click();

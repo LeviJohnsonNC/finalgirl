@@ -25,7 +25,7 @@ Captures use the repository's real compiled frontend with synthetic `ArchiveMock
 | Bloodlust: quiet        | [View](images/bloodlust-quiet-desktop.jpg)   | [View](images/bloodlust-quiet-phone.jpg)   | Tame generic starting photograph, legible overlaid state.                        |
 | Bloodlust: high         | [View](images/bloodlust-high-desktop.jpg)    | [View](images/bloodlust-high-phone.jpg)    | Strongest stage at the verified Inkanyamba maximum; art does not change numbers. |
 
-Reusable: proportions, photo quality/crops, dimming, hierarchy, padding, state visibility, quiet actions and equivalent shared interactions. **Not automatically reusable:** Wrath, token cycles, special-Victim outcomes, Holy Man interpretation, or any other owner's mechanics. Primary Dark Power uses Clear card name; Finale retains Change Finale. Minor Powers permit multiple records. Unknown is distinct from zero/empty. Required linked choices/errors remain available even though routine rules/reminders are omitted.
+Reusable: proportions, photo quality/crops, dimming, hierarchy, padding, state visibility, quiet actions and equivalent shared interactions. **Not automatically reusable:** Wrath, token cycles, special-Victim outcomes, Holy Man interpretation, or any other owner's mechanics. Primary Dark Power uses Clear card name; Finale now uses the same left-aligned Clear card name action (2026-10-27 playtest refinement); no Change Finale button. The older captures retain the former button as historical visual evidence. Minor Powers permit multiple records. Unknown is distinct from zero/empty. Required linked choices/errors remain available even though routine rules/reminders are omitted.
 
 ## Capture and update procedure
 
