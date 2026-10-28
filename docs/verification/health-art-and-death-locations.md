@@ -21,3 +21,9 @@ Approved scope: 39 existing Final Girls, two reference-edited variants each (78 
 ## Release boundary
 
 Frontend/assets plus redeploy `generate-death-scene` with the updated shared prompt dependency. No SQL migrations, secrets or private cast-reference uploads. Existing cached scene text intentionally stays unchanged; only an uncached take uses the new prompt. Merge, deployment, signed-in smoke verification and mocked tests are separate evidence. Live function deployment/provider-output verification is not established by local tests.
+
+## Health input cap follow-up
+
+The Play tracker now uses the session's effective maximum for both increment controls and typed values, including observed Ultimate changes. Legacy sessions use the catalog to bound new input without backfilling their maximum or rewriting health. Existing above-maximum observations remain readable and undoable; an explicit decrease returns them to the allowed range. Re-enabling tracking also respects the cap. Other tracker limits are unchanged.
+
+Local verification: 18 laptop/phone health/reveal browser journeys passed, including rejected over-maximum entry with an unchanged log, recovery to full health, reload, Kate's 4→7 limit, legacy correction/Undo and official-image preference. Inspected loaded maximum-health controls on both devices. The 537 unit tests, 111 edge tests and production build passed. This follow-up changes only frontend behavior and requires no function deployment or migration; final-head CI is recorded on its PR.

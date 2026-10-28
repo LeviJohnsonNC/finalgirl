@@ -174,6 +174,10 @@ export function PlayScreen(props: PlayScreenProps) {
   const startingValues = playStartingValues(killer, finalGirl);
   const { characterImages, aiEnabled } = useActiveImages();
   const finalGirlMaxHealth = observedFinalGirlMaxHealth(finalGirl, events, props.finalGirlStartingHealth);
+  // Legacy sessions can use the catalog to bound new input without backfilling observations.
+  const trackerLimits = { ...stateLimits, finalGirlHealth: observedFinalGirlMaxHealth(
+    finalGirl, events, props.finalGirlStartingHealth ?? startingValues.finalGirlHealth,
+  ) ?? stateLimits.finalGirlHealth };
   const [message, setMessage] = useState("");
   const [announcement, setAnnouncement] = useState("");
   const [finishOpen, setFinishOpen] = useState(false);
@@ -264,9 +268,9 @@ export function PlayScreen(props: PlayScreenProps) {
   const setState = (field: StateField, value: number | null) => {
     if (
       value !== null &&
-      (!Number.isInteger(value) || value < 0 || value > stateLimits[field])
+      (!Number.isInteger(value) || value < 0 || value > trackerLimits[field])
     ) {
-      setMessage(`Use a whole number from 0 to ${stateLimits[field]}.`);
+      setMessage(`Use a whole number from 0 to ${trackerLimits[field]}.`);
       return;
     }
     if (commit({ kind: "state", field, value })) setEditingState(null);
@@ -489,7 +493,7 @@ export function PlayScreen(props: PlayScreenProps) {
                   <button
                     aria-label={`Track ${stateLabels[field]}`}
                     onClick={() => {
-                      setState(field, (startingValues[field] ?? 0));
+                      setState(field, Math.min(startingValues[field] ?? 0, trackerLimits[field]));
                     }}
                   >
                     + Track
@@ -500,7 +504,7 @@ export function PlayScreen(props: PlayScreenProps) {
                       <button
                         aria-label={`Decrease ${stateLabels[field]}`}
                         disabled={value <= 0}
-                        onClick={() => setState(field, value - 1)}
+                        onClick={() => setState(field, field === 'finalGirlHealth' ? Math.min(value - 1, trackerLimits[field]) : value - 1)}
                       >
                         <Minus size={16} />
                       </button>
@@ -515,7 +519,7 @@ export function PlayScreen(props: PlayScreenProps) {
                       </button>
                       <button
                         aria-label={`Increase ${stateLabels[field]}`}
-                        disabled={value >= stateLimits[field]}
+                        disabled={value >= trackerLimits[field]}
                         onClick={() => setState(field, value + 1)}
                       >
                         <Plus size={16} />
