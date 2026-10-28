@@ -54,22 +54,55 @@ test('health photos follow damage, recovery, Undo and reload with stable crops a
   expect(log.filter((e: {kind: string}) => e.kind === 'killed' || e.kind === 'moment')).toHaveLength(0);
 });
 
+test('health input stops at the observed maximum through buttons and manual entry', async ({ page, archive }, info) => {
+  archive.aiCastingArt = true;
+  await archive.install(page, { draft: { ...activeGame, playMode: true,
+    selection: { ...activeGame.selection, finalGirl: 'Cassie', finalGirlStartingHealth: 5 }, playEvents: [start(), state(5)] } });
+  await resume(page);
+  const card = page.locator('.play-state--finalGirlHealth'), photo = card.locator('.play-stat-portrait');
+  const increase = card.getByRole('button', { name: 'Increase Final Girl health', exact: true });
+  const log = () => page.evaluate(owner => JSON.parse(localStorage.getItem('final-girl-active-game-v1:' + owner)!).playEvents, userId);
+  await expect(increase).toBeDisabled();
+  const before = await log();
+  await setHealth(page, 6);
+  await expect(page.locator('.play-screen > .play-feedback')).toContainText('Use a whole number from 0 to 5.');
+  expect(await log()).toEqual(before);
+  await card.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await card.getByRole('button', { name: 'Decrease Final Girl health', exact: true }).click();
+  await expect(increase).toBeEnabled();
+  await expect(photo).not.toHaveAttribute('data-health-portrait');
+  await increase.click();
+  await expect(increase).toBeDisabled();
+  await expect(photo).toHaveAttribute('data-health-portrait', 'healthy');
+  await photo.evaluate(async (node: HTMLImageElement) => node.decode());
+  await card.screenshot({ path: info.outputPath('health-at-maximum.png'), style: '.app-footer{visibility:hidden}' });
+  await page.reload();
+  await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
+  await expect(increase).toBeDisabled();
+  await expect(card.getByRole('button', { name: 'Set Final Girl health', exact: true })).toHaveText('5');
+});
+
 test('Kate changes portrait maximum after Ultimate without automatically healing', async ({ page, archive }) => {
   archive.aiCastingArt = true;
   await archive.install(page, { draft: { ...activeGame, playMode: true,
     selection: { ...activeGame.selection, finalGirl: 'Kate', finalGirlStartingHealth: 4 }, playEvents: [start(), state(4)] } });
   await resume(page);
   const card = page.locator('.play-state--finalGirlHealth'), photo = card.locator('.play-stat-portrait');
+  const increase = card.getByRole('button', { name: 'Increase Final Girl health', exact: true });
   await expect(photo).toHaveAttribute('data-health-portrait', 'healthy');
+  await expect(increase).toBeDisabled();
   await page.getByRole('button', { name: 'Ultimate unlocked', exact: true }).click();
   await expect(photo).not.toHaveAttribute('data-health-portrait');
+  await expect(increase).toBeEnabled();
   await expect(card.getByRole('button', { name: 'Set Final Girl health', exact: true })).toHaveText('4');
   await page.getByRole('button', { name: 'Record', exact: true }).click();
   await setHealth(page, 7);
   await expect(photo).toHaveAttribute('data-health-portrait', 'healthy');
+  await expect(increase).toBeDisabled();
   await page.reload();
   await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
   await expect(photo).toHaveAttribute('data-health-portrait', 'healthy');
+  await expect(increase).toBeDisabled();
 });
 
 test('missing variants fall back and rejected health writes leave the observed portrait unchanged', async ({ page, archive }) => {
@@ -109,6 +142,13 @@ for (const [maximum, health, ai, expected] of [[undefined,5,true,undefined],[5,5
     if (expected) await expect(photo).toHaveAttribute('data-health-portrait', expected);
     else await expect(photo).not.toHaveAttribute('data-health-portrait');
     await expect(page.getByRole('button', { name: 'Set Final Girl health', exact: true })).toHaveText(String(health));
+    if (health >= (maximum ?? 5)) await expect(page.getByRole('button', { name: 'Increase Final Girl health', exact: true })).toBeDisabled();
+    if (maximum !== undefined && health > maximum) {
+      await page.getByRole('button', { name: 'Decrease Final Girl health', exact: true }).click();
+      await expect(page.getByRole('button', { name: 'Set Final Girl health', exact: true })).toHaveText(String(maximum));
+      await page.getByRole('button', { name: 'Undo', exact: true }).click();
+      await expect(page.getByRole('button', { name: 'Set Final Girl health', exact: true })).toHaveText(String(health));
+    }
   });
 }
 
