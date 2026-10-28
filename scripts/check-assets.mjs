@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { createHash } from 'node:crypto';
 const images = [];
 function visit(directory) {
   for (const item of readdirSync(directory, { withFileTypes: true })) {
@@ -30,8 +31,26 @@ for (const file of images) {
   if (file.endsWith('/groves/sites.webp') && bytes.length > 750 * 1024) throw new Error('Sacred-space state atlas exceeds 750KiB: ' + file);
   if (file.includes('/play/banners/') && bytes.length > 160 * 1024) throw new Error('Play banner exceeds 160KiB: ' + file);
   if (file.includes('/play/photos/') && bytes.length > 160 * 1024) throw new Error('Play photograph exceeds 160KiB: ' + file);
+  if (file.includes('/play/final-girl-health/') && bytes.length > 160 * 1024) throw new Error('Health photograph exceeds 160KiB: ' + file);
   if (file.includes('/collection-scenes/') && bytes.length > 200 * 1024) throw new Error('Collection background exceeds 200KiB: ' + file);
   if (file.includes('/collection-thumbnails/') && bytes.length > 96 * 1024) throw new Error('Collection cover exceeds 96KiB: ' + file);
   if (file.includes('/collection-portraits/') && bytes.length > 30 * 1024) throw new Error('Collection portrait exceeds 30KiB: ' + file);
 }
+const healthDirectory = 'src/assets/play/final-girl-health';
+const healthManifest = JSON.parse(readFileSync(join(healthDirectory, 'manifest.json'), 'utf8'));
+const healthPaths = new Set();
+for (const entry of healthManifest) {
+  const sourceHash = createHash('sha256').update(readFileSync(entry.original)).digest('hex');
+  if (sourceHash !== entry.originalSha256) throw new Error('Original portrait changed: ' + entry.name);
+  for (const state of ['healthy', 'critical']) {
+    const file = join(healthDirectory, `${entry.slug}-${state}.webp`), metadata = entry[state];
+    if (!metadata?.source || !/^exec-[a-f0-9-]+\.png$/.test(metadata.source)) throw new Error('Missing health-photo provenance: ' + file);
+    const bytes = readFileSync(file);
+    if (metadata.sha256 !== createHash('sha256').update(bytes).digest('hex')) throw new Error('Health-photo manifest mismatch: ' + file);
+    if (Math.max(metadata.width, metadata.height) !== 768 || Math.min(metadata.width, metadata.height) < 500) throw new Error('Invalid health-photo resolution: ' + file);
+    if (healthPaths.has(file)) throw new Error('Duplicate health photograph: ' + file);
+    healthPaths.add(file);
+  }
+}
+if (images.filter(file => file.startsWith(healthDirectory + '/')).length !== healthPaths.size) throw new Error('Unmapped health photograph');
 console.log(`Verified ${images.length} original artwork files.`);
