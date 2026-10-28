@@ -278,6 +278,7 @@ const IndexContent = () => {
         if (gameSelection) {
           return (
             <NowPlaying
+              finalGirlStartingHealth={activeGame.selection.finalGirlStartingHealth}
               killer={gameSelection.killer}
               location={gameSelection.location}
               finalGirl={gameSelection.finalGirl}

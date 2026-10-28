@@ -23,6 +23,7 @@ function jsonbRoundTrip(value: unknown): unknown {
 }
 
 export class ArchiveMock {
+  aiCastingArt = false;
   unlocks: Record<string,boolean> = {};
   itemReads: string[] = [];
   failUnlocks = false;
@@ -156,7 +157,7 @@ export class ArchiveMock {
         this.films = [...new Set([...this.films.filter(id => !body.p_remove.includes(id)), ...body.p_add])];
         return json(this.films);
       }
-      if (path.endsWith('/user_image_settings')) return json(request.headers().accept?.includes('vnd.pgrst.object') ? { auto_generate_images: this.autoImages, use_ai_casting_art: false } : [{ auto_generate_images: this.autoImages, use_ai_casting_art: false }]);
+      if (path.endsWith('/user_image_settings')) return json(request.headers().accept?.includes('vnd.pgrst.object') ? { auto_generate_images: this.autoImages, use_ai_casting_art: this.aiCastingArt } : [{ auto_generate_images: this.autoImages, use_ai_casting_art: this.aiCastingArt }]);
       if (path.endsWith('/user_settings')) {if(this.holdCollection && request.method()==='GET')await new Promise<void>(done=>this.collectionWaiters.push(done));return json({ owned_films: this.films });}
       if (path.endsWith('/game_history')) {
         const id = url.searchParams.get('id')?.replace(/^eq\./, '');

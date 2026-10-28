@@ -49,6 +49,7 @@ interface NowPlayingProps {
   killer: string;
   location: string;
   finalGirl: string;
+  finalGirlStartingHealth?: number;
   setupScenario: string | null;
   startingEvent: string | null;
   /** Falconwood only: the Mission that must be completed to win. */
@@ -64,6 +65,7 @@ const NowPlaying = ({
   killer,
   location,
   finalGirl,
+  finalGirlStartingHealth,
   setupScenario,
   startingEvent,
   mission,
@@ -300,7 +302,7 @@ const NowPlaying = ({
     }
     onGameEnd(outcome, !isGenerating && !error ? story || undefined : undefined, sceneImageUrl || undefined, visualBible);
   };
-  if (playMode && onPlayEvent) return <PlayScreen killer={killer} location={location} finalGirl={finalGirl}
+  if (playMode && onPlayEvent) return <PlayScreen killer={killer} location={location} finalGirl={finalGirl} finalGirlStartingHealth={finalGirlStartingHealth}
     imageUrl={sceneImageUrl || bgImage} events={playEvents} onEvent={recordPlayEvent}
     onExit={() => onCheckpoint({ playMode: false })}
     onFinish={finishPlay}

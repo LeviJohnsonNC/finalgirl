@@ -149,6 +149,19 @@
   object-position: 53% 20%;
   transform: scale(1.08);
 }
+/* The photographed variant carries the condition. Keep its face/camera stable. */
+.play-workspace .play-state--finalGirlHealth[data-critical] .play-stat-portrait[data-health-portrait] {
+  filter: none;
+  transform: none;
+}
+@media (max-width: 380px) {
+  /* One readable line leaves the photographed eyes clear of the status label. */
+  .play-workspace .play-state.play-state--finalGirlHealth > span {
+    font-size: 14px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+}
 .play-workspace .play-state--killerHealth[data-critical] .play-stat-portrait {
   filter: contrast(1.3) saturate(.68) sepia(.2);
   object-position: 47% 20%;
@@ -178,9 +191,18 @@
   border-color: #9e96776e;
   box-shadow: 0 5px 13px #0006, inset 0 0 0 2px #0005;
 }
-.play-workspace .play-moment-choices button > img {
+.play-workspace .play-moment-choices button > img,
+.play-workspace .play-moment-choices button > svg {
   opacity: 1;
   object-position: center 38%;
+}
+.play-workspace .play-moment-choices button > .play-module-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  pointer-events: none;
 }
 .play-workspace .play-moment-choices button::before {
   background: linear-gradient(0deg, #030807ed, #03080721 60%, transparent);

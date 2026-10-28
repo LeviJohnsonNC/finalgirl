@@ -1,6 +1,9 @@
 import { poltergeistParent, resolvePoltergeistAction } from '../../../supabase/functions/_shared/play/poltergeist';
 import { KillerCards } from "./KillerCards";
 import { illustratedKillerCards } from "./killerPresentation";
+import { ModuleArtwork } from './ModuleArtwork';
+import { FinalGirlHealthPortrait } from './FinalGirlHealthPortrait';
+import { observedFinalGirlMaxHealth } from '@/data/finalGirlReferences';
 import { playStartingValues } from "@/lib/play/defaults";
 import horrorLow from "@/assets/play/states/horror-low.webp";
 import horrorMid from "@/assets/play/states/horror-mid.webp";
@@ -65,6 +68,7 @@ export interface PlayScreenProps {
   killer: string;
   location: string;
   finalGirl: string;
+  finalGirlStartingHealth?: number;
   imageUrl: string;
   events: PlayEvent[];
   onEvent: (event: PlayEvent) => boolean;
@@ -168,7 +172,8 @@ export function PlayScreen(props: PlayScreenProps) {
   const summary = summarizePlay(events);
   const { item: personalItem } = usePersonalItem(finalGirl);
   const startingValues = playStartingValues(killer, finalGirl);
-  const { characterImages } = useActiveImages();
+  const { characterImages, aiEnabled } = useActiveImages();
+  const finalGirlMaxHealth = observedFinalGirlMaxHealth(finalGirl, events, props.finalGirlStartingHealth);
   const [message, setMessage] = useState("");
   const [announcement, setAnnouncement] = useState("");
   const [finishOpen, setFinishOpen] = useState(false);
@@ -430,18 +435,13 @@ export function PlayScreen(props: PlayScreenProps) {
             const bloodlust = field === "bloodlust" ? bloodlustBackground(killer, value) : undefined;
             return (
               <div key={field} className={`play-state play-state--${field}`} data-critical={critical || undefined} data-horror={field === "finalHorrorLevel" ? horrorBand : undefined} data-bloodlust-stage={bloodlust ? bloodlust.stage ?? "unknown" : undefined}>
-                {(field === "finalGirlHealth" || field === "killerHealth") &&
-                  characterImages[
-                    field === "finalGirlHealth" ? finalGirl : killer
-                  ] && (
+                {field === 'finalGirlHealth' && <FinalGirlHealthPortrait name={finalGirl}
+                  health={value} maximum={finalGirlMaxHealth} original={characterImages[finalGirl]} aiEnabled={aiEnabled} />}
+                {field === "killerHealth" && characterImages[killer] && (
                     <img
                       className="play-stat-portrait"
                       alt=""
-                      src={
-                        characterImages[
-                          field === "finalGirlHealth" ? finalGirl : killer
-                        ]
-                      }
+                      src={characterImages[killer]}
                     />
                   )}
                 {field === "finalHorrorLevel" && (
@@ -458,7 +458,7 @@ export function PlayScreen(props: PlayScreenProps) {
                     alt=""
                   />
                 )}
-                {critical && <img className="play-critical-art" src={criticalHealth} alt="" />}
+                {critical && field !== 'finalGirlHealth' && <img className="play-critical-art" src={criticalHealth} alt="" />}
                 <span>{stateLabels[field]}</span>
                 {critical && <small className="play-critical-label">{value === 0 ? "No health remaining" : "Low health"}</small>}
                 {editingState === field ? (
@@ -543,10 +543,13 @@ export function PlayScreen(props: PlayScreenProps) {
         </h2>
         <div className="play-moment-choices">
           {orderedMoments.filter(choice=>killer!=='Poltergeist'||choice.type!=='killer-revived').map((choice) => {
-            const active = PERMANENT_MOMENTS.includes(choice.type) && summary.entries.some(e => e.kind === "moment" && e.momentType === choice.type);
+            const revealed = summary.entries.find(e => e.kind === "moment" && e.momentType === choice.type);
+            const active = PERMANENT_MOMENTS.includes(choice.type) && !!revealed;
+            const selectedArt = active && (choice.type === 'dark-power' || choice.type === 'finale')
+              ? illustratedKillerCards(killer, choice.type).find(card => card.name === revealed?.killerCard)?.art : undefined;
             const ultimate = choice.type === "ultimate-unlocked";
             return <button key={choice.type} aria-label={choice.title} disabled={ultimate && active} data-recorded={active || undefined} aria-pressed={PERMANENT_MOMENTS.includes(choice.type) ? active : undefined} onClick={() => pickMoment(choice)}>
-              <img src={active ? choice.activeImage ?? choice.image : choice.image} alt="" loading="lazy" />
+              {selectedArt ? <ModuleArtwork art={selectedArt} /> : <img src={active ? choice.activeImage ?? choice.image : choice.image} alt="" loading="lazy" />}
               {(active || ultimate) && <small className="play-moment-seal">{ultimate ? active ? "Unlocked" : "Locked" : choice.type === "dark-power" || choice.type === "finale" ? "Revealed" : "Returned"}</small>}
               <span><strong>{ultimate ? "Ultimate" : choice.title}</strong>{choice.subtitle && <small>{choice.subtitle}</small>}</span>
             </button>;
