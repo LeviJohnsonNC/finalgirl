@@ -94,6 +94,9 @@ const stateLabels: Record<StateField, string> = {
   finalHorrorLevel: "Horror",
   bloodlust: "Bloodlust",
 };
+const trackerTitles: Record<StateField, string> = {
+  finalGirlHealth: 'Health', killerHealth: 'Killer Health', finalHorrorLevel: 'Horror', bloodlust: 'Bloodlust',
+};
 const orderedStateFields: StateField[] = ["finalGirlHealth", "killerHealth", "bloodlust", "finalHorrorLevel"];
 const stateLimits: Record<StateField, number> = {
   finalGirlHealth: 10,
@@ -438,7 +441,8 @@ export function PlayScreen(props: PlayScreenProps) {
             const horrorBand = horror <= 1 ? "low" : horror === 7 ? "high" : "mid";
             const bloodlust = field === "bloodlust" ? bloodlustBackground(killer, value) : undefined;
             return (
-              <div key={field} className={`play-state play-state--${field}`} data-critical={critical || undefined} data-horror={field === "finalHorrorLevel" ? horrorBand : undefined} data-bloodlust-stage={bloodlust ? bloodlust.stage ?? "unknown" : undefined}>
+              <div key={field} className={`play-state play-state--${field}`} role="group" aria-label={`${trackerTitles[field]} tracker`} data-critical={critical || undefined} data-horror={field === "finalHorrorLevel" ? horrorBand : undefined} data-bloodlust-stage={bloodlust ? bloodlust.stage ?? "unknown" : undefined}>
+                <div className="play-state-picture" aria-hidden="true">
                 {field === 'finalGirlHealth' && <FinalGirlHealthPortrait name={finalGirl}
                   health={value} maximum={finalGirlMaxHealth} original={characterImages[finalGirl]} aiEnabled={aiEnabled} />}
                 {field === "killerHealth" && characterImages[killer] && (
@@ -463,8 +467,12 @@ export function PlayScreen(props: PlayScreenProps) {
                   />
                 )}
                 {critical && field !== 'finalGirlHealth' && <img className="play-critical-art" src={criticalHealth} alt="" />}
-                <span>{stateLabels[field]}</span>
-                {critical && <small className="play-critical-label">{value === 0 ? "No health remaining" : "Low health"}</small>}
+                </div>
+                <div className="play-state-control-bar">
+                  <div className="play-state-caption">
+                    <span className="play-state-title">{trackerTitles[field]}</span>
+                    {critical && <small className="play-critical-label">{value === 0 ? "No health remaining" : "Low health"}</small>}
+                  </div>
                 {editingState === field ? (
                   <form
                     onSubmit={(e) => {
@@ -491,6 +499,7 @@ export function PlayScreen(props: PlayScreenProps) {
                   </form>
                 ) : value === undefined ? (
                   <button
+                    className="play-state-enable"
                     aria-label={`Track ${stateLabels[field]}`}
                     onClick={() => {
                       setState(field, Math.min(startingValues[field] ?? 0, trackerLimits[field]));
@@ -526,14 +535,16 @@ export function PlayScreen(props: PlayScreenProps) {
                       </button>
                     </div>
                     <button
-                      className="play-text-button"
+                      className="play-state-close"
                       aria-label={`Stop tracking ${stateLabels[field]}`}
+                      title={`Stop tracking ${stateLabels[field]}`}
                       onClick={() => setState(field, null)}
                     >
-                      Stop tracking
+                      <span aria-hidden="true">×</span>
                     </button>
                   </>
                 )}
+                </div>
               </div>
             );
           })}

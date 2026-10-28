@@ -36,7 +36,7 @@ test('health photos follow damage, recovery, Undo and reload with stable crops a
       await page.setViewportSize({ width, height });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       if (width === 320) {
-        expect(await card.locator(':scope > span').first().evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
+        expect(await card.locator('.play-state-title').evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
       }
       await card.screenshot({ path: info.outputPath(`health-${health}-${width}.png`), style: '.app-footer{visibility:hidden}' });
     }
