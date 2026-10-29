@@ -3,6 +3,18 @@ export const KONRAD_SOURCE = 'Owner photographs konrad1.jpeg–konrad7.jpeg (K1�
 export const KONRAD_SPACES = ['Hangar','Trash Compactor','Mess Hall','Bridge','Storage','Furnace','Armory','Junction','Upper-right Escape Pod','Lower-left Escape Pod','Lower-right Escape Pod','Upper-left corridor','Corridor left of Junction','Corridor right of Junction','Corridor below Junction','Bottom-center corridor'] as const;
 export const KONRAD_EXITS: readonly string[] = KONRAD_SPACES.slice(8,11);
 export const KONRAD_SHAFTS = ['upper-left','upper-right','lower-left','lower-right'] as const;
+/** [space A index, space B index, Panic rolls leaving A, Panic rolls leaving B]. K7.
+ * Reference only: this is not used to calculate movement or closest targets. */
+export const KONRAD_PATHS = [
+ [11,1,'1–6','4'],[1,2,'6','1–5'],[2,8,'6','1–6'],[1,7,'5','1–2'],
+ [0,12,'4–5','3–6'],[12,7,'1–2','3–4'],[7,13,'6','1–4'],[13,3,'5–6','1–6'],
+ [0,9,'6','1–6'],[7,14,'5','1–3'],[14,15,'4–5','4–5'],[6,15,'1–6','6'],
+ [15,5,'1–3','4'],[4,5,'1–5','5'],[4,10,'6','5–6'],[5,10,'6','1–4'],
+] as const;
+export const KONRAD_SHAFT_CONNECTIONS = [
+ {id:'upper-left',a:11,b:0},{id:'upper-right',a:2,b:3},
+ {id:'lower-left',a:0,b:6},{id:'lower-right',a:4,b:3},
+] as const;
 export const KONRAD_FUNCTIONS = [
  {id:'crusher',name:'Crusher',cost:1,station:'Trash Compactor',effect:'An Enemy or Victim ending movement here receives 1 damage. Final Girl and her following Victims are unaffected.'},
  {id:'incinerator',name:'Incinerator',cost:2,station:'Furnace',effect:'When an Enemy or Victim enters, roll: 1 deals 3 damage; 2–3 deals 2; 4–5 deals 1; 6 none. Final Girl and her following Victims are unaffected.'},

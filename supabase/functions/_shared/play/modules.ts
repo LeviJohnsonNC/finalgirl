@@ -1,6 +1,6 @@
 import { validKonradField, initialKonrad, konradFacts } from './konrad.ts';
 import { KONRAD_ITEMS } from './konradCatalog.ts';
-import { EVOMORPH_POWERS, EVOMORPH_FINALES, validEvomorphField, initialEvomorph, evomorphFacts } from './evomorph.ts';
+import { EVOMORPH_POWERS, EVOMORPH_FINALES, EVOMORPH_AMBUSH, validEvomorphField, initialEvomorph, evomorphFacts } from './evomorph.ts';
 import { validCreechField, creechFacts, creechStartingObservations, CREECH_EVENTS, CREECH_ITEMS, CREECH_PEOPLE } from './creech.ts';
 import { POLTERGEIST_ITEMS, POLTERGEIST_POWERS, POLTERGEIST_FINALES, POLTERGEIST_MINORS, validPoltergeistField, poltergeistFacts, poltergeistPower } from './poltergeist.ts';
 import { validGrovesField, grovesLabel, grovesValue, grovesFacts, GROVES_EVENTS, GROVES_ITEMS, GROVES_VISUAL, GROVES_PEOPLE } from "./groves.ts";
@@ -534,7 +534,9 @@ export function moduleStoryBeats(
   if(context.konrad) {
     const killer=moduleStoryBeats({...selection,location:""},entries);
     let location="";for(const fact of konradFacts(context.konrad))if(location.length+fact.length+1<=(killer?535:880))location+=fact+" ";
-    let k="";for(const fact of killer.split(/(?<=\.)\s+/))if(k.length+fact.length+1<=340)k+=fact+" ";
+    let priority=killer;
+    if(selection.killer==='Evomorph'&&context.evomorph){const e=context.evomorph,card=EVOMORPH_AMBUSH.find(c=>c.id===e.ambushId);priority=`Evomorph stage: ${e.stage??'unknown'}; presence: ${e.presence??'unknown'}. ${card&&(e.ambushFace==='youngling'||e.ambushFace==='adult')?`Recorded Ambush face ${e.ambushFace}, Danger ${card[e.ambushFace]}; preserve drawn face across evolution. `:''}${e.stage==='hatchling'?'Only Hatchling-kill Bloodlust; other increases become Time. ':''}`;}
+    let k="";for(const fact of priority.split(/(?<=\.)\s+/))if(k.length+fact.length+1<=340)k+=fact+" ";
     return [location&&`USS Konrad: ${location.trim()}`,k&&`Killer: ${k.trim()}`].filter(Boolean).join("\n");
   }
   if (context.creech) {

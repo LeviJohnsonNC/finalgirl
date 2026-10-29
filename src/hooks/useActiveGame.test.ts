@@ -472,3 +472,22 @@ it('Evomorph does not backfill legacy setup or accept foreign observations',asyn
  const {initialEvomorph}=await import('../../supabase/functions/_shared/play/evomorph');
  act(()=>{result.current.save(game);expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'module',moduleData:{module:'evomorph',changes:initialEvomorph()}}))).toBe(false);});
 });
+
+it('Konrad setup, atomic linked cancellation, failed-write retry, stale taps, Undo and reload preserve observed quantities',async()=>{
+ const {konradState,konradParent,resolveKonradAction}=await import('@/lib/play/konrad');
+ const first=renderHook(useActiveGame);
+ const fresh:ActiveGame={...game,konradSetupVersion:1,selection:{...game.selection,location:'USS Konrad',setupScenario:'Bloody Feast',startingEvent:'The Captain'}};
+ act(()=>{first.result.current.save(fresh);first.result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));});
+ const request=()=>{const entries=summarizePlay(first.result.current.getCurrentGame()!.playEvents).entries;return {entries,state:moduleState(entries,'konrad')};};
+ let q=request();expect(konradState(q.state)).toMatchObject({held:1,captainSpace:'Bridge',loader:'parked'});
+ const a={parent:konradParent(q.entries),command:'token' as const,destination:'shaft:upper-left',count:2};
+ const e=newPlayEvent({kind:'module',konradAction:a,moduleData:{module:'konrad',changes:resolveKonradAction(a,q.state,q.entries)!}});
+ const spy=vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('quota');});
+ act(()=>expect(first.result.current.appendPlayEvent(game.id,e)).toBe(false));expect(konradState(request().state).tokens['shaft:upper-left']).toBe(0);spy.mockRestore();
+ act(()=>{expect(first.result.current.appendPlayEvent(game.id,e)).toBe(true);expect(first.result.current.appendPlayEvent(game.id,{...e,id:crypto.randomUUID()})).toBe(false);});
+ q=request();const reboot={parent:konradParent(q.entries),command:'reboot' as const};const reset=newPlayEvent({kind:'module',konradAction:reboot,moduleData:{module:'konrad',changes:resolveKonradAction(reboot,q.state,q.entries)!}});
+ act(()=>expect(first.result.current.appendPlayEvent(game.id,reset)).toBe(true));expect(konradState(request().state).tokens['shaft:upper-left']).toBe(0);
+ act(()=>expect(first.result.current.appendPlayEvent(game.id,newPlayEvent({kind:'undo',target:reset.id}))).toBe(true));expect(konradState(request().state).tokens['shaft:upper-left']).toBe(2);
+ first.unmount();const second=renderHook(useActiveGame);expect(konradState(moduleState(summarizePlay(second.result.current.activeGame!.playEvents).entries,'konrad')).tokens['shaft:upper-left']).toBe(2);
+ act(()=>second.result.current.save({...game,id:'foreign'}));act(()=>expect(second.result.current.appendPlayEvent('foreign',{...e,id:crypto.randomUUID()})).toBe(false));
+});

@@ -1,4 +1,4 @@
-import {KONRAD_SETUPS} from '../../supabase/functions/_shared/play/konradCatalog';
+import {KONRAD_SETUPS,KONRAD_EVENTS} from '../../supabase/functions/_shared/play/konradCatalog';
 import {konradSetupDescription} from '@/data/rules/konradRules';
 import { CREECH_SETUPS,CREECH_EVENTS,creechSetupDescription } from '../../supabase/functions/_shared/play/creech';
 import { GROVES_EVENTS, GROVES_SETUPS, grovesSetupDescription } from "../../supabase/functions/_shared/play/groves";
@@ -374,18 +374,7 @@ A true badass, Jenette has never backed down from a fight.`
       name: 'USS Konrad',
       description: `United Star Ship Konrad, M-Class freight vessel, model 9791-Bison, commissioned in 2122 by the Noguchi Masaki Mining Corporation, built by the Lockheed Martin Corporation at a cost of $4.2 billion, with a mass of 63,000 metric tons. Current whereabouts: unknown.`,
       setupCards: KONRAD_SETUPS.map(s=>({name:s.name,description:konradSetupDescription(s)})),
-      events: [
-        { name: 'Cluttered Shafts', description: 'While moving, you may move through an inactive Maintenance Shaft at the cost of 1 Health. Victims cannot follow you if you move in this manner.' },
-        { name: 'Cramped Escape Pods', description: 'If there is more than 1 Victim in an Exit space, you cannot save Victims in that space.' },
-        { name: 'Emergency Override', description: 'The Incinerator, Airlock, and Self Destruct all require one less Keycard to activate.' },
-        { name: 'Faulty Wiring', description: 'During the Upkeep phase, roll one die for the Furnace and one for the Trash Compactor. 1-2: Everyone at that space loses 1 Health. 3-6: No effect.' },
-        { name: 'Good Cookin\'', description: 'Whenever you end the Action phase in the Mess Hall, recover 1 Health.' },
-        { name: 'Jonas the Cat', description: 'Place the Special Victim meeple with the Victim that is farthest from you. This is Jonas. Jonas will not follow you. During the Upkeep phase, panic Jonas three times. If you end the Action phase in the same space as Jonas, you may choose one of the following: Lose 1 Horror or Gain 3 Time.' },
-        { name: 'Master Access', description: 'If any of the top cards of each Item deck are facedown, flip them faceup. Take any Keycard Item cards that are showing.' },
-        { name: 'Orphan Girl', description: 'The Victim closest to you is now the Orphan Girl. While the Orphan Girl is in your space, +1 Victims will follow you and you may freely move through inactive Maintenance Shafts. If the Orphan Girl dies, gain 3 Horror.' },
-        { name: 'The Captain', description: 'Place the Special Victim meeple on the Bridge. This is the Captain. While he is at the Bridge, it costs one less Keycard to activate the Self Destruct. If the Captain dies, +2 Bloodlust.' },
-        { name: 'Weapons Locker', description: 'Look through the unused Item cards and place any weapons in the Armory\'s Item deck, either faceup on top of facedown underneath.' }
-      ]
+      events: KONRAD_EVENTS.map(e=>({name:e.name,description:e.effect}))
     },
     killer: {
       name: 'Evomorph',
