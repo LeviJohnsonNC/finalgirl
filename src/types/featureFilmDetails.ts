@@ -1,3 +1,5 @@
+import {KONRAD_SETUPS} from '../../supabase/functions/_shared/play/konradCatalog';
+import {konradSetupDescription} from '@/data/rules/konradRules';
 import { CREECH_SETUPS,CREECH_EVENTS,creechSetupDescription } from '../../supabase/functions/_shared/play/creech';
 import { GROVES_EVENTS, GROVES_SETUPS, grovesSetupDescription } from "../../supabase/functions/_shared/play/groves";
 import { MAPLE_EVENTS, MAPLE_SETUPS } from "../../supabase/functions/_shared/play/maple";
@@ -370,29 +372,8 @@ A true badass, Jenette has never backed down from a fight.`
     ],
     location: {
       name: 'USS Konrad',
-      description: `United Star Ship Konrad, M-Class freight vessel, model 9791-Bision, commissioned in 2122 by the Weygar-Yustarry Mining Corporation, built by the Lockheed Martin Corporation at a cost of $4.2 billion, with a mass of 63,000 metric tons. Current whereabouts: unknown.`,
-      setupCards: [
-        {
-          name: 'Bloody Feast',
-          description: 'A tense scenario involving the crew during a meal when the Evomorph strikes.'
-        },
-        {
-          name: 'Born in Flames',
-          description: 'A high-intensity scenario where fire plays a key role in the encounter.'
-        },
-        {
-          name: 'Junction Danger',
-          description: 'A scenario centered around the ship\'s junction points where movement becomes critical.'
-        },
-        {
-          name: 'Showdown',
-          description: 'A climactic face-to-face confrontation with the Evomorph.'
-        },
-        {
-          name: 'Space Rave',
-          description: 'A scenario set during a recreational event aboard the ship when chaos erupts.'
-        }
-      ],
+      description: `United Star Ship Konrad, M-Class freight vessel, model 9791-Bison, commissioned in 2122 by the Noguchi Masaki Mining Corporation, built by the Lockheed Martin Corporation at a cost of $4.2 billion, with a mass of 63,000 metric tons. Current whereabouts: unknown.`,
+      setupCards: KONRAD_SETUPS.map(s=>({name:s.name,description:konradSetupDescription(s)})),
       events: [
         { name: 'Cluttered Shafts', description: 'While moving, you may move through an inactive Maintenance Shaft at the cost of 1 Health. Victims cannot follow you if you move in this manner.' },
         { name: 'Cramped Escape Pods', description: 'If there is more than 1 Victim in an Exit space, you cannot save Victims in that space.' },

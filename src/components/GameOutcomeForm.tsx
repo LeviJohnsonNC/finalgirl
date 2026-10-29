@@ -1,3 +1,4 @@
+import {konradState,type KonradFate} from '@/lib/play/konrad';
 import { useState, useMemo } from 'react';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { OutcomeNumberField } from './outcome/OutcomeNumberField';
@@ -50,7 +51,10 @@ export const GameOutcomeForm = ({
   onDiscard,
 }: GameOutcomeFormProps) => {
   const [optionsOpen, setOptionsOpen] = useState(false);
-  const isWin = result.outcome === 'won';
+  const [shipFate,setShipFate]=useDraftField<KonradFate>('konradFate',konradState(moduleState(summarizePlay(result.playEvents).entries,'konrad')).fate,initialDraft,onDraftChange);
+  const [reviewedOutcome,setReviewedOutcome]=useDraftField<'won'|'lost'>('reviewedOutcome',result.outcome,initialDraft,onDraftChange);
+  const fatalShip=result.location==='USS Konrad'&&['airlock-loss','explosion-loss'].includes(shipFate);
+  const isWin = (result.location==='USS Konrad'?fatalShip?'lost':reviewedOutcome:result.outcome) === 'won';
   const billyState = moduleState(summarizePlay(result.playEvents).entries, 'billy');
 
   // Session snapshots include observed Ultimate changes; old games keep their denominator.
@@ -372,6 +376,7 @@ export const GameOutcomeForm = ({
     }
 
     const formData: EndingFormData = {
+      ...(result.location==='USS Konrad'&&{konradReview:{fate:shipFate},outcome:fatalShip?'lost' as const:reviewedOutcome}),
       finalHorrorLevel: finalHorrorLevel ?? undefined,
       finalGirlHealth: finalGirlHealth ?? undefined,
       killerHealth: killerIsUnkillable ? undefined : killerHealth ?? undefined,
@@ -432,6 +437,7 @@ export const GameOutcomeForm = ({
           prominent
         />
       </div>
+      {result.location==='USS Konrad'&&<section className="outcome-panel" aria-label="USS Konrad ending review"><h2>Ship ending</h2><OutcomeSelect label="Reviewed ship fate" value={shipFate} onValueChange={v=>setShipFate(v as KonradFate)}><option value="unknown">Fate not recorded</option><option value="survived">Survived ship hazard</option><option value="airlock-loss">Lost to Airlock · no Final Health reveal</option><option value="explosion-loss">Lost outside Exit · Self Destruct</option></OutcomeSelect><OutcomeSelect label="Reviewed game result" value={fatalShip?'lost':reviewedOutcome} onValueChange={v=>setReviewedOutcome(v as 'won'|'lost')}><option value="won">Won</option><option value="lost">Lost</option></OutcomeSelect>{fatalShip&&<p role="status">This ship ending is a loss regardless of recorded Health or Killer death. Health is preserved as observed.</p>}<p>Surviving a ship hazard alone does not establish victory or Killer death.</p></section>}
       <div className="outcome-detail-grid">
         <section
           className="outcome-panel outcome-final-totals"

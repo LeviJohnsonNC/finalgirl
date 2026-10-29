@@ -6,7 +6,7 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 import { readStoredValue, useLocalStorage } from './useLocalStorage';
-import { canUndoKonrad, canUndoEvomorph, canChangeDeathCount, isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
+import { validPlayLog, canUndoKonrad, canUndoEvomorph, canChangeDeathCount, isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
 import { ActiveGame, isActiveGame } from '@/lib/activeGame';
 import { resolveCreechAction } from '../../supabase/functions/_shared/play/creech';
 import { mapleLinkedChange } from '../../supabase/functions/_shared/play/maple';
@@ -138,6 +138,7 @@ export function useActiveGame() {
       }
       const additions = event.kind === 'start' ? [accepted, ...setup] : [...baseline, ...setup, ...reveal, accepted];
       if (log.length + additions.length > 1000) return previous;
+      if((event.konradAction||event.kind==='undo'||event.kind==='restore')&&[...log,...additions].some(e=>e.moduleData?.module==='konrad')&&!validPlayLog([...log,...additions]))return previous;
       applied = true;
       return { ...previous, playEvents: [...log, ...additions] };
     });

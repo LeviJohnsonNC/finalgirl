@@ -12,6 +12,7 @@ export interface KonradSnapshot {
  events: Record<string,'active'|'ended'>;
  people: Record<string,'in-play'|'saved'|'killed'|'left'>;
  captainSpace: string|null;
+ jonasSpace: string|null;
  orphanTogether: boolean|null;
  slippery: number|null;
  temporaryShafts: boolean|null;
@@ -26,6 +27,7 @@ type Primitive = string|number|boolean|null;
 export type KonradAction = {parent:string} & (
  | {command:'token';destination:string;count:number|null}
  | {command:'held';count:number|null}
+ | {command:'pickup';source:string}
  | {command:'place';destination:string}
  | {command:'remote';from:string;to:string}
  | {command:'activate';system:string;atStation:true;override:boolean;captainBridge:boolean;useHeld:boolean}
@@ -36,7 +38,7 @@ export type KonradAction = {parent:string} & (
  | {command:'upkeep';atExit:boolean|null}
  | {command:'event';id:string;active:boolean}
  | {command:'person';id:string;status:'in-play'|'saved'|'killed'|'left'|null}
- | {command:'observe';key:'captainSpace'|'orphanTogether'|'slippery'|'temporaryShafts'|'loader'|'loaderSpace'|'beaconSpace'|'beacon'|'breach'|'fate'|'airlock'|'countdown';value:Primitive}
+ | {command:'observe';key:'jonasSpace'|'captainSpace'|'orphanTogether'|'slippery'|'temporaryShafts'|'loader'|'loaderSpace'|'beaconSpace'|'beacon'|'breach'|'fate'|'airlock'|'countdown';value:Primitive}
 );
 const object=(x:unknown):x is Record<string,unknown>=>!!x&&typeof x==='object'&&!Array.isArray(x);
 const count=(x:unknown):x is number=>typeof x==='number'&&Number.isSafeInteger(x)&&x>=0&&x<=99;
@@ -44,7 +46,7 @@ const space=(x:unknown)=>x===null||KONRAD_SPACES.includes(x as typeof KONRAD_SPA
 const one=(x:unknown,list:readonly unknown[])=>list.includes(x);
 const same=(a:unknown,b:unknown):boolean=>JSON.stringify(sort(a))===JSON.stringify(sort(b));
 function sort(x:unknown):unknown {return Array.isArray(x)?x.map(sort):object(x)?Object.fromEntries(Object.keys(x).sort().map(k=>[k,sort(x[k])])):x;}
-export function emptyKonrad():KonradSnapshot {return {tokens:{},held:null,systems:{},airlock:'unknown',countdown:'unknown',events:{},people:{},captainSpace:null,orphanTogether:null,slippery:null,temporaryShafts:null,loader:'unknown',loaderSpace:null,beaconSpace:null,beacon:'unknown',breach:null,fate:'unknown'};}
+export function emptyKonrad():KonradSnapshot {return {tokens:{},held:null,systems:{},airlock:'unknown',countdown:'unknown',events:{},people:{},captainSpace:null,jonasSpace:null,orphanTogether:null,slippery:null,temporaryShafts:null,loader:'unknown',loaderSpace:null,beaconSpace:null,beacon:'unknown',breach:null,fate:'unknown'};}
 export function initialKonrad(setup?:string|null,startingEvent?:string|null):Record<string,ModuleValue> {
  const s=emptyKonrad();s.tokens=Object.fromEntries(KONRAD_DESTINATIONS.map(k=>[k,0]));s.held=1;s.airlock='inactive';s.countdown='inactive';s.loader='parked';s.loaderSpace='Hangar';s.beacon='absent';s.temporaryShafts=false;
  const diagram=KONRAD_SETUPS.find(x=>x.name===setup);
@@ -65,7 +67,7 @@ export function parseKonrad(value:unknown):KonradSnapshot|null {
  if(!one(s.airlock,['unknown','inactive','armed','released'])||!one(s.countdown,['unknown','inactive','start','middle','explosion']))return null;
  if(!object(s.events)||!Object.entries(s.events).every(([k,v])=>KONRAD_EVENTS.some(e=>e.id===k&&e.kind!=='instant')&&one(v,['active','ended'])))return null;
  if(!object(s.people)||!Object.entries(s.people).every(([k,v])=>['captain','jonas','orphan'].includes(k)&&one(v,['in-play','saved','killed','left'])))return null;
- if(!space(s.captainSpace)||!space(s.loaderSpace)||!space(s.beaconSpace)||!(s.breach===null||KONRAD_EXITS.includes(s.breach as string)))return null;
+ if(!space(s.jonasSpace)||!space(s.captainSpace)||!space(s.loaderSpace)||!space(s.beaconSpace)||!(s.breach===null||KONRAD_EXITS.includes(s.breach as string)))return null;
  if(!(s.orphanTogether===null||typeof s.orphanTogether==='boolean')||!(s.temporaryShafts===null||typeof s.temporaryShafts==='boolean')||!(s.slippery===null||count(s.slippery)&&s.slippery<=2))return null;
  if(!one(s.loader,['unknown','parked','powered','equipped','lost'])||!one(s.beacon,['unknown','absent','placed'])||!one(s.fate,['unknown','survived','airlock-loss','explosion-loss']))return null;
  return s as unknown as KonradSnapshot;
@@ -77,12 +79,13 @@ type Entry={id?:string;kind:string;moduleData?:{module:string;changes:Record<str
 export function konradParent(entries:readonly Entry[]){return [...entries].reverse().find(e=>e.moduleData?.module==='konrad')?.id??'root';}
 export function validKonradAction(value:unknown):value is KonradAction {
  if(!object(value)||typeof value.parent!=='string'||!(/^(root|[0-9a-f-]{36})$/i.test(value.parent))||typeof value.command!=='string')return false;
- const a=value;const shapes:Record<string,string[]>={token:['destination','count'],held:['count'],place:['destination'],remote:['from','to'],activate:['system','atStation','override','captainBridge','useHeld'],cancel:['system'],reboot:[],solar:['counts','complete'],airlock:['position','fate','loaderInHangar'],upkeep:['atExit'],event:['id','active'],person:['id','status'],observe:['key','value']};
+ const a=value;const shapes:Record<string,string[]>={token:['destination','count'],held:['count'],pickup:['source'],place:['destination'],remote:['from','to'],activate:['system','atStation','override','captainBridge','useHeld'],cancel:['system'],reboot:[],solar:['counts','complete'],airlock:['position','fate','loaderInHangar'],upkeep:['atExit'],event:['id','active'],person:['id','status'],observe:['key','value']};
  if(!shapes[a.command as string]||!same(Object.keys(a).sort(),['parent','command',...shapes[a.command as string]].sort()))return false;
  const s=emptyKonrad();
  switch(a.command){
  case 'token':return KONRAD_DESTINATIONS.includes(a.destination as string)&&(a.count===null||count(a.count));
  case 'held':return a.count===null||count(a.count);
+ case 'pickup':return typeof a.source==='string'&&KONRAD_DESTINATIONS.includes(a.source)&&a.source.startsWith('space:');
  case 'place':return KONRAD_DESTINATIONS.includes(a.destination as string)&&!(a.destination as string).startsWith('space:');
  case 'remote':return typeof a.from==='string'&&KONRAD_DESTINATIONS.includes(a.from)&&!a.from.startsWith('function:')&&typeof a.to==='string'&&KONRAD_DESTINATIONS.includes(a.to)&&!a.to.startsWith('space:')&&a.to!==a.from;
  case 'activate':return KONRAD_FUNCTIONS.some(f=>f.id===a.system)&&a.atStation===true&&['override','captainBridge','useHeld'].every(k=>typeof a[k]==='boolean');
@@ -93,7 +96,7 @@ export function validKonradAction(value:unknown):value is KonradAction {
  case 'upkeep':return a.atExit===null||typeof a.atExit==='boolean';
  case 'event':return KONRAD_EVENTS.some(e=>e.id===a.id&&e.kind==='ongoing')&&typeof a.active==='boolean';
  case 'person':return one(a.id,['captain','jonas','orphan'])&&one(a.status,[null,'in-play','saved','killed','left']);
- case 'observe':if(typeof a.key!=='string'||!['captainSpace','orphanTogether','slippery','temporaryShafts','loader','loaderSpace','beaconSpace','beacon','breach','fate','airlock','countdown'].includes(a.key))return false;return !!parseKonrad(JSON.stringify({...s,[a.key]:a.value}));
+ case 'observe':if(typeof a.key!=='string'||!['jonasSpace','captainSpace','orphanTogether','slippery','temporaryShafts','loader','loaderSpace','beaconSpace','beacon','breach','fate','airlock','countdown'].includes(a.key))return false;return !!parseKonrad(JSON.stringify({...s,[a.key]:a.value}));
  default:return false;
  }
 }
@@ -106,6 +109,7 @@ export function resolveKonradAction(a:KonradAction,state:ModuleState,entries:rea
  switch(a.command){
  case 'token':{const old=s.tokens[a.destination];if(a.count===null){remove(s,a.destination);delete s.tokens[a.destination];}else{if(old===undefined||a.count<old)remove(s,a.destination);s.tokens[a.destination]=a.count;}break;}
  case 'held':s.held=a.count;break;
+ case 'pickup':if(!s.tokens[a.source]||s.held===99)return null;s.tokens[a.source]--;if(s.held!==null)s.held++;break;
  case 'place':if(s.held===null||s.held<1||s.tokens[a.destination]===undefined)return null;s.held--;s.tokens[a.destination]++;break;
  case 'remote':if(!s.tokens[a.from]||s.tokens[a.to]===undefined)return null;s.tokens[a.from]--;s.tokens[a.to]++;break;
  case 'activate':{
@@ -124,7 +128,7 @@ export function resolveKonradAction(a:KonradAction,state:ModuleState,entries:rea
  case 'airlock':if(s.airlock!=='armed')return null;s.airlock='released';if(a.loaderInHangar){s.loader='lost';s.loaderSpace=null;}s.fate=a.fate;break;
  case 'upkeep':if(s.countdown==='start')s.countdown='middle';else if(s.countdown==='middle'){s.countdown='explosion';s.fate=a.atExit===false?'explosion-loss':a.atExit===true?'survived':'unknown';}else return null;break;
  case 'event':s.events[a.id]=a.active?'active':'ended';break;
- case 'person':if(a.status===null){delete s.people[a.id];delete s.events[a.id];}else{s.people[a.id]=a.status;s.events[a.id]=a.status==='in-play'?'active':'ended';}if(a.id==='captain')s.captainSpace=a.status==='in-play'?'Bridge':null;if(a.id==='orphan')s.orphanTogether=null;break;
+ case 'person':if(a.status===null){delete s.people[a.id];delete s.events[a.id];}else{s.people[a.id]=a.status;s.events[a.id]=a.status==='in-play'?'active':'ended';}if(a.id==='captain')s.captainSpace=a.status==='in-play'?'Bridge':null;if(a.id==='orphan')s.orphanTogether=null;if(a.id==='jonas')s.jonasSpace=null;break;
  case 'observe':Object.assign(s,{[a.key]:a.value});if(a.key==='airlock'&&a.value==='inactive')delete s.systems.airlock;if(a.key==='countdown'&&a.value==='inactive')delete s.systems['self-destruct'];if(a.key==='loader'&&a.value==='lost')s.loaderSpace=null;if(a.key==='beacon'&&a.value==='absent')s.beaconSpace=null;break;
  }
  return JSON.stringify(s)===before?null:{snapshot:JSON.stringify(s)};

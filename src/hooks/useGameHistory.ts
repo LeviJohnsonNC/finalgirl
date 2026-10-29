@@ -180,6 +180,7 @@ type GameWrite =
   | { kind: 'update'; id: string; updates: Partial<GameResult> };
 
 const updateColumns: Partial<Record<keyof GameResult, string>> = {
+  outcome: 'outcome',
   introStory: 'intro_story', endingNarration: 'ending_narration', gameHighlights: 'game_highlights',
   finalHorrorLevel: 'final_horror_level', finalGirlHealth: 'final_girl_health', killerHealth: 'killer_health',
   weaponUsed: 'weapon_used', endingSubLocation: 'ending_sub_location', victimsSaved: 'victims_saved',

@@ -8,6 +8,8 @@ export interface GameSelection {
   finalGirlStartingHealth?: number;
 }
 export interface EndingFormData {
+  outcome?: "won"|"lost";
+  konradReview?: {fate: import("../../supabase/functions/_shared/play/konrad").KonradFate};
   poltergeistReview?: {carolynRescued:true|null;floppyAtEscape:true|null;epicRequired:boolean|null;escapeRoute?:'exit'|'helicopter'|null};
   finalHorrorLevel?: number; finalGirlHealth?: number; killerHealth?: number;
   weaponUsed: string; victimsSaved: number | null; victimsKilled: number | null;

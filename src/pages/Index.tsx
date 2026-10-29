@@ -1,3 +1,6 @@
+import {konradFatal,konradParent,konradState,resolveKonradAction} from '@/lib/play/konrad';
+import {moduleState} from '@/lib/play/modules';
+import {summarizePlay,newPlayEvent} from '@/lib/play/events';
 import { getFinalGirlHealth } from '@/data/finalGirlHealth';
 import { observedFinalGirlMaxHealth } from '@/data/finalGirlReferences';
 import {trackedOutcome} from '@/lib/play/outcome';
@@ -163,7 +166,8 @@ const IndexContent = () => {
     const game = getCurrentGame();
     if (!game || game.id !== activeGame?.id) return;
     try {
-      const result = game.result ?? recordGame({ outcome, ...game.selection, ...trackedOutcome(game.playEvents),
+      const resolvedOutcome=game.selection.location==='USS Konrad'&&konradFatal(moduleState(summarizePlay(game.playEvents).entries,'konrad'))?'lost':outcome;
+      const result = game.result ?? recordGame({ outcome:resolvedOutcome, ...game.selection, ...trackedOutcome(game.playEvents),
         introStory: story, sceneImageUrl, visualBible: bible, finalGirlMaxHealth: observedFinalGirlMaxHealth(game.selection.finalGirl,game.playEvents,game.selection.finalGirlStartingHealth) }, game.id);
       recordedIds.current.add(game.id);
       if (checkpoint(game.id, { phase: 'outcome', result, introStory: story, sceneImageUrl, visualBible: bible })) {
@@ -182,11 +186,33 @@ const IndexContent = () => {
     return true;
   };
 
+  // Each durable boundary remains retryable; use one case ID across retries.
+  const saveReviewedResult = (formData: EndingFormData) => {
+    let game=getCurrentGame();
+    if(!game?.result)throw new Error('The current result is unavailable. Keep this page open and retry.');
+    if(game.selection.location==='USS Konrad'&&formData.konradReview) {
+      const entries=summarizePlay(game.playEvents).entries,state=moduleState(entries,'konrad');
+      if(konradState(state).fate!==formData.konradReview.fate) {
+        const action={parent:konradParent(entries),command:'observe' as const,key:'fate' as const,value:formData.konradReview.fate};
+        const changes=resolveKonradAction(action,state,entries);
+        if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',konradAction:action,moduleData:{module:'konrad',changes}})))throw new Error('Ship review could not be saved. Please retry.');
+        game=getCurrentGame();
+        if(!game?.result)throw new Error('The saved ship review could not be read. Please retry.');
+      }
+    }
+    const {konradReview:_review,...fields}=formData;
+    const outcome=game.selection.location==='USS Konrad'?(konradFatal(moduleState(summarizePlay(game.playEvents).entries,'konrad'))?'lost':formData.outcome??game.result.outcome):game.result.outcome;
+    const updates={...fields,outcome,playEvents:game.playEvents};
+    updateGame(game.result.id,updates);
+    const result={...game.result,...updates};
+    if(!checkpoint(game.id,{result,formData}))throw new Error('The reviewed result is saved, but this game could not advance. Keep it open and retry.');
+    return result;
+  };
   const handleContinueToEnding = (formData: EndingFormData) => {
     if (!activeGame?.result) return;
     try {
-      updateGame(activeGame.result.id, formData);
-      if (checkpoint(activeGame.id, { phase: 'ending', formData })) setCurrentPage('ending');
+      const reviewed=saveReviewedResult(formData);
+      if (checkpoint(activeGame.id, { phase: 'ending', formData, result:reviewed })) setCurrentPage('ending');
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save your result.'); }
   };
 
@@ -202,7 +228,7 @@ const IndexContent = () => {
   const handleSaveResult = (formData: EndingFormData) => {
     if (!lastGameResult) return;
     try {
-      updateGame(lastGameResult.id, formData);
+      saveReviewedResult(formData);
       if (!cloudPlay.close()) { toast.error('Resolve the cloud version before closing this game.'); return; }
       if (saveActiveGame(null)) setCurrentPage('stats');
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save your result.'); }

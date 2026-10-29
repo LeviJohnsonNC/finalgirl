@@ -1,3 +1,4 @@
+import {konradState} from '@/lib/play/konrad';
 import { evomorphOpeningGuidance } from '../../supabase/functions/_shared/play/evomorph';
 import { moduleState as endingModuleState } from '@/lib/play/modules';
 import { summarizePlay as endingSummary } from '@/lib/play/events';
@@ -20,7 +21,7 @@ import { getFilmDetails } from '@/types/featureFilmDetails';
 import { getKillerDescription } from '@/data/killerDescriptions';
 import { getFinalGirlDescription } from '@/data/finalGirlDescriptions';
 import { getLocationDescription } from '@/data/locationDescriptions';
-import { characterFate } from '../../supabase/functions/_shared/storyFacts';
+import { reviewedCharacterFate } from '../../supabase/functions/_shared/storyFacts';
 import { getMissionByName } from '@/data/falconwoodMissions';
 import { isKillerUnkillable } from '@/data/killerHealth';
 import { getLegacyFinalGirlHealth } from '@/data/finalGirlHealth';
@@ -77,7 +78,8 @@ const TheEnd = ({
   const evomorphGuidance=result.killer==='Evomorph'?evomorphOpeningGuidance(endingModuleState(endingSummary(result.playEvents).entries,'evomorph').stage,false):undefined;
   const endingVisualGuidance=[evomorphGuidance,moduleContext?.visualGuidance].filter(Boolean).join('\n');
   const isWin = result.outcome === 'won';
-  const fate = characterFate(formData.finalGirlHealth);
+  const shipReview=result.location==='USS Konrad'?{fate:konradState(endingModuleState(endingSummary(result.playEvents).entries,'konrad')).fate}:undefined;
+  const fate = reviewedCharacterFate(formData.finalGirlHealth,shipReview);
   const endingKillerHealth = isKillerUnkillable(result.killer) ? undefined : formData.killerHealth;
   const { locationImages } = useActiveImages();
   const background = locationImages[result.location] ?? nowPlayingBg;
@@ -112,12 +114,12 @@ const TheEnd = ({
       finalGirlHealth: formData.finalGirlHealth,
       killerHealth: endingKillerHealth,
       mission: getMissionByName(result.mission),
-      scenarioRules: [result.killer==='Evomorph'?playStoryBeats(result.playEvents,result):undefined, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
+      scenarioRules: [result.killer==='Evomorph'||result.location==='USS Konrad'?playStoryBeats(result.playEvents,result):undefined, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
       gameId: result.id,
       previousImageUrl,
     });
     if (url) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
-  }, [endingStory, result.killer, result.finalGirl, result.location, result.outcome, result.id, moduleContext?.visualGuidance, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, result.sceneImageUrl, result.mission, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
+  }, [endingStory, result, result.killer, result.finalGirl, result.location, result.outcome, result.id, moduleContext?.visualGuidance, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, result.sceneImageUrl, result.mission, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
 
   // The poster develops on its own once the ending narration lands.
   //
@@ -190,6 +192,7 @@ const TheEnd = ({
         ...(formData.victimsKilled != null && { victimsKilled: formData.victimsKilled }),
         ...(formData.roundsPlayed != null && {roundsPlayed:formData.roundsPlayed}),
         ...(result.playEvents?.length && {playSummary:playStoryBeats(result.playEvents, result)}),
+        ...(shipReview&&{konradReview:shipReview}),
         ...(result.killer==='Poltergeist'&&formData.poltergeistReview&&{poltergeistReview:formData.poltergeistReview}),
         ...(formData.endingSubLocation && { endingSubLocation: formData.endingSubLocation }),
         ...(formData.gameHighlights && { gameHighlights: formData.gameHighlights }),

@@ -19,3 +19,8 @@
 @media(min-width:1100px){.konrad-shafts{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:600px){.konrad-grid{grid-template-columns:minmax(0,1fr)}.play-konrad .play-illustrated-tile{min-height:175px}}
 @media(prefers-reduced-motion:reduce){.play-konrad *{transition:none!important;animation:none!important}}
+/* Environmental tiles use the same anchored photograph/caption contract. */
+.play-konrad .play-illustrated-tile{position:relative;display:block;overflow:hidden;aspect-ratio:16/9;text-align:left;border:1px solid hsl(var(--border));border-radius:4px;background:#101715;isolation:isolate}
+.play-konrad .play-illustrated-tile>.play-module-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.play-konrad .play-illustrated-tile:after{content:'';position:absolute;inset:35% 0 0;background:linear-gradient(transparent,rgba(5,12,13,.94));z-index:-1;pointer-events:none}
+.play-konrad .play-tile-caption{position:absolute;inset:auto 16px 17px;align-items:flex-start;text-align:left;z-index:1}
