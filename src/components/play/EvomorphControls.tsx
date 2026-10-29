@@ -37,7 +37,7 @@ export function EvomorphControls({events,onEvent,blocked}:ControlsProps) {
   const togglePresence=()=>hidden||!visible?correct('presence','on-board'):act('vanish');
   return <section className="play-evomorph" aria-label="Evomorph tracking">
     <div className="evo-evolution">
-      <IllustratedTile art={visible?evomorphStageArt(stage):evomorphArt('vanished')} title={stage?title(stage):'Evolution not recorded'} status={`${visibility}${canToggle?hidden?' · Click to show':visible?' · Click to hide':' · Click to mark visible':''}`} aria-label="Evomorph visibility" aria-pressed={hidden||visible?hidden:undefined} disabled={blocked||!canToggle} onClick={togglePresence} data-presence={hidden?'hidden':visible?'visible':'unknown'}/>
+      <IllustratedTile art={visible?evomorphStageArt(stage):evomorphArt('vanished')} title={visibility} status={`${stage?title(stage):'Evolution not recorded'}${canToggle?hidden?' · Click to show':visible?' · Click to hide':' · Click to mark visible':''}`} aria-label="Evomorph visibility" aria-pressed={hidden||visible?hidden:undefined} disabled={blocked||!canToggle} onClick={togglePresence} data-presence={hidden?'hidden':visible?'visible':'unknown'}/>
       <div className="evo-stage-actions">
         {(stage==='hatchling'||stage==='youngling')&&<button disabled={blocked} onClick={()=>act('evolve')}>Evolve to {stage==='hatchling'?'Youngling':'Adult'}</button>}
         <button type="button" className="evo-quiet" aria-expanded={correctingStage} aria-controls="evomorph-stage-correction" onClick={()=>setCorrectingStage(!correctingStage)}>Correct stage</button>
