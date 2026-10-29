@@ -20,6 +20,7 @@ export function deathFacts(
   eventId: string,
 ) {
   if(!validPlayLog(events))return null;
+  if(selection.location!=='USS Konrad'&&events.some(e=>e.moduleData?.module==='konrad'))return null;
   if(selection.killer!=='Evomorph'&&events.some(e=>e.moduleData?.module==='evomorph'))return null;
   if(events.some(e=>(e.moduleData?.module==='creech'&&selection.location!=='Creech Manor')||(e.linkedModule?.module==='poltergeist'&&selection.killer!=='Poltergeist')))return null;
   if (!validPlayLog(events) || (selection.killer!=='Poltergeist' && events.some(e=>e.moduleData?.module==='poltergeist'))) return null;

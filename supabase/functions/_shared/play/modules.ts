@@ -1,3 +1,5 @@
+import { validKonradField, initialKonrad, konradFacts } from './konrad.ts';
+import { KONRAD_ITEMS } from './konradCatalog.ts';
 import { EVOMORPH_POWERS, EVOMORPH_FINALES, validEvomorphField, initialEvomorph, evomorphFacts } from './evomorph.ts';
 import { validCreechField, creechFacts, creechStartingObservations, CREECH_EVENTS, CREECH_ITEMS, CREECH_PEOPLE } from './creech.ts';
 import { POLTERGEIST_ITEMS, POLTERGEIST_POWERS, POLTERGEIST_FINALES, POLTERGEIST_MINORS, validPoltergeistField, poltergeistFacts, poltergeistPower } from './poltergeist.ts';
@@ -49,7 +51,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -153,6 +155,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === "konrad") return validKonradField(key,value);
   if (module === "evomorph") return validEvomorphField(key,value);
   if (module === "creech") return validCreechField(key,value);
   if (module === "poltergeist") return validPoltergeistField(key,value);
@@ -270,7 +273,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    !["konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -439,6 +442,7 @@ function valueLabel(key: string, value: ModuleValue) {
   return String(value);
 }
 export function describeModule(observation: ModuleObservation) {
+  if(observation.module === "konrad") return konradFacts(observation.changes).join(" ") || "USS Konrad state recorded";
   if(observation.module === "evomorph") return evomorphFacts(observation.changes);
   if(observation.module==='creech')return creechFacts(observation.changes).join(' ') || Object.entries(observation.changes).filter(([k])=>k!=='initialized').map(([k,v])=>`${k.replace(/\./g,' ')}: ${v??'not recorded'}`).join('; ');
   if(observation.module==='poltergeist')return Object.entries(observation.changes).filter(([k])=>!['initialized','minorsRemoved'].includes(k)).map(([k,v])=>`${fieldLabel('poltergeist',k)}: ${v===null?'not recorded':String(v).replace(/-/g,' ')}`).join('; ');
@@ -457,6 +461,7 @@ export function moduleContext(
   entries: readonly ObservedEvent[],
 ) {
   const context: Record<string, ModuleState> = {};
+  if(selection.location === "USS Konrad" && entries.some(e=>e.moduleData?.module === "konrad")) context.konrad=moduleState(entries,"konrad");
   if(selection.killer === "Evomorph" && entries.some(e=>e.moduleData?.module === "evomorph")) {const s=moduleState(entries,"evomorph");delete s.initialized;context.evomorph=s;}
   if (selection.killer === "Dr. Fright") { const facts=frightPublic(entries); if(facts) context.fright=facts; }
   for (const module of [
@@ -526,6 +531,12 @@ export function moduleStoryBeats(
   if (!context) return "";
   // Preserve the established output for every other location. Each owner gets
   // room inside the existing 900-character module budget for Carnival mixes.
+  if(context.konrad) {
+    const killer=moduleStoryBeats({...selection,location:""},entries);
+    let location="";for(const fact of konradFacts(context.konrad))if(location.length+fact.length+1<=(killer?535:880))location+=fact+" ";
+    let k="";for(const fact of killer.split(/(?<=\.)\s+/))if(k.length+fact.length+1<=340)k+=fact+" ";
+    return [location&&`USS Konrad: ${location.trim()}`,k&&`Killer: ${k.trim()}`].filter(Boolean).join("\n");
+  }
   if (context.creech) {
     const killer = moduleStoryBeats({...selection,location:""},entries);
     const budget = killer ? 535 : 880;
@@ -747,6 +758,7 @@ export function moduleReferences(
   mechanism?: string,
 ) {
   const refs = buddylandReferences(selection, context, attacker);
+  if(selection.location === "USS Konrad" && context?.konrad) for(const effect of konradFacts(context.konrad)) refs.push({name:"USS Konrad observation",effect});
   if (selection.location === "Sacred Groves") {
     const state=context?.groves ?? {};
     for(const person of GROVES_PEOPLE) if(state[`person.${person.id}`] || victim === person.name) refs.push({name:person.name,effect:`${victim === person.name ? "Explicit scene victim." : "Not established as this scene's victim."} Recorded role status: ${state[`person.${person.id}`] ?? "unknown"}. The role identifies an existing Victim; the Holy Man's ritual removal is not a kill.`});
@@ -903,7 +915,7 @@ export function moduleItemBeats(
   entries: readonly ObservedEvent[],
 ) {
   const locationCatalog =
-    selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
+    selection.location === "USS Konrad" ? KONRAD_ITEMS : selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
       ? CAMP_ITEMS
       : selection.location === "Carnival of Blood"
         ? CARNIVAL_ITEMS
@@ -935,6 +947,7 @@ export function initialModuleObservations(
     killer: string;
     location: string;
     startingEvent?: string | null;
+    setupScenario?: string | null;
   },
   initializeKiller: boolean,
   initializeCarnival = false,
@@ -945,8 +958,10 @@ export function initialModuleObservations(
   initializePoltergeist = false,
   initializeCreech = false,
   initializeEvomorph = false,
+  initializeKonrad = false,
 ): ModuleObservation[] {
   return [
+    ...(initializeKonrad && selection.location === "USS Konrad" ? [{module:"konrad" as const,changes:initialKonrad(selection.setupScenario,selection.startingEvent)}] : []),
     ...(initializeEvomorph && selection.killer==='Evomorph' ? [{module:'evomorph' as const,changes:initialEvomorph()}] : []),
     ...(initializeCreech && selection.location==='Creech Manor' ? [{module:'creech' as const,changes:creechStartingObservations(selection.startingEvent)}] : []),
     ...(initializePoltergeist && selection.killer==='Poltergeist' ? [{module:'poltergeist' as const,changes:{initialized:true,carolyn:'hidden',floppy:'hidden','minor.psychic-confusion':'inactive','minor.unseen-forces':'inactive',minorsRemoved:false}}] : []),

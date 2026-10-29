@@ -143,6 +143,7 @@ const IndexContent = () => {
       return;
     }
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
+      ...(selection.location === 'USS Konrad' && {konradSetupVersion:1 as const}),
       ...(selection.killer === 'Evomorph' && {evomorphSetupVersion:1 as const}),
       ...(selection.location === 'Creech Manor' && {creechSetupVersion:1 as const}),
       ...(selection.location === 'Sacred Groves' && {grovesSetupVersion: 1 as const}),

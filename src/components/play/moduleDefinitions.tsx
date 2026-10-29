@@ -1,3 +1,6 @@
+import { KonradControls } from './KonradControls';
+import { konradArt } from './konradArt';
+import { konradState } from '@/lib/play/konrad';
 import { EvomorphControls } from './EvomorphControls';
 import evomorphBanner from '@/assets/play/banners/evomorph.webp';
 import { CreechControls } from './CreechControls';
@@ -47,7 +50,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -73,6 +76,7 @@ const peopleSummary = (
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
 export const moduleDefinitions: Definition[] = [
+ {id:"konrad",owner:"location",match:"USS Konrad",title:"Aboard USS Konrad",art:konradArt("header"),capabilities:["character","event","minor-power"],summary:state=>{const s=konradState(state);return `${Object.keys(s.systems).length} systems active · ${s.held===null?"Held Keycards not recorded":`${s.held} charged Keycards`}${s.countdown!=="unknown"&&s.countdown!=="inactive"?` · Countdown ${s.countdown}`:""}`;},Controls:props=><KonradControls {...props}/>},
  {id:'evomorph',owner:'killer',match:'Evomorph',title:'The Evomorph',art:{src:evomorphBanner,fit:'slice',position:'65% center'},capabilities:['reveals','minor-power'],summary:state=>`${state.stage?String(state.stage).replace(/^./,s=>s.toUpperCase()):'Stage not recorded'} · ${state.presence==='vanished'?'Vanished':state.presence==='on-board'?'On the board':'Presence not recorded'}`,Controls:props=><EvomorphControls {...props}/>},
  {id:'creech',owner:'location',match:'Creech Manor',title:'Inside Creech Manor',art:{src:creechBanner,fit:'slice',position:'70% center'},capabilities:['character','event'],summary:state=>`Ladder: ${state.ladder??'not recorded'} · Helicopter: ${state['helicopter.used']===true?'used':state['event.helicopter']==='active'?'available':'not recorded'}`,Controls:props=><CreechControls {...props}/>},
   {id:'poltergeist',owner:'killer',match:'Poltergeist',title:'The Poltergeist',art:moduleBanners.poltergeist,capabilities:['objective','minor-effect','reveals'],summary:state=>`Carolyn: ${state.carolyn===undefined?'not recorded':String(state.carolyn).replace(/-/g,' ')} · Mr. Floppy: ${state.floppy===undefined?'not recorded':String(state.floppy).replace(/-/g,' ')}`,Controls:props=><PoltergeistControls {...props}/>},
