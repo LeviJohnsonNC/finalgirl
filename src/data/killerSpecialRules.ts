@@ -57,7 +57,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   'Evomorph': {
     narrativeNote:
-      'An alien predator that evolves and grows stronger each time it kills a victim. Every fallen NPC makes the Evomorph faster and more dangerous. It is an escalating threat — at the start of the game it is manageable; by the end it may be almost unstoppable.',
+      'An alien predator with Hatchling, Youngling and Adult stages. Evolution follows printed Bloodlust Evolve effects, not every casualty. Hatchling is slow but extremely deadly; only its own Victim kills increase Bloodlust, while other increases become Time. Youngling Vanishes; Adult evolution recovers Health to 10 and reveals Dark Power. Preserve the reported stage, vanished presence and selected Location; do not infer kills or evolution from a card name.',
   },
 
   'The Organism': {

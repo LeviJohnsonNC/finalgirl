@@ -1,3 +1,4 @@
+import { EVOMORPH_TERRORS } from './evomorph.ts';
 import { CREECH_ITEMS, CREECH_EVENTS, CREECH_TERRORS, CREECH_SPACES, CREECH_PEOPLE, CREECH_SOURCE } from './creech.ts';
 import { POLTERGEIST_ITEMS, POLTERGEIST_TERRORS } from './poltergeist.ts';
 import { GROVES_EVENTS, GROVES_ITEMS, GROVES_PEOPLE, GROVES_SPACES, GROVES_SOURCE, GROVES_TERRORS } from "./groves.ts";
@@ -37,6 +38,7 @@ const station = wiki("Station_2891");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+  ...EVOMORPH_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...CREECH_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...CREECH_EVENTS.map(c=>({...c,kind:"event" as const,location:"Creech Manor",source:CREECH_SOURCE})),
   ...POLTERGEIST_TERRORS.map(card=>({...card,kind:"terror" as const})),
@@ -214,6 +216,7 @@ export function playMechanisms(selection: {
 }) {
   return [
     "Killer attack",
+    ...(selection.killer === "Evomorph" ? ["Ambush", "Acid Blood", "Razor Tail"] : []),
     ...(selection.killer==='Poltergeist'?['Clown Doll','Behemoth','Flying objects','Lightning']:[]),
     ...(selection.killer === "Inkanyamba" ? ["Killer Wrath", "Dark Lightning"] : []),
     "Minion attack",

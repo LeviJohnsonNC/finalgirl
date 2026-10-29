@@ -434,7 +434,7 @@ export function PlayScreen(props: PlayScreenProps) {
         <h2>Track more</h2>
         <div className="play-state-grid">
           {orderedStateFields.filter(field=>killer!=='Poltergeist'||field!=='killerHealth').map((field) => {
-            const value = summary[field];
+            const value = field === "killerHealth" && summary.killerHealthTracking === false ? undefined : summary[field];
             const health = field === "finalGirlHealth" || field === "killerHealth";
             const critical = health && value !== undefined && value <= 2;
             const horror = value ?? startingValues.finalHorrorLevel;
@@ -502,7 +502,7 @@ export function PlayScreen(props: PlayScreenProps) {
                     className="play-state-enable"
                     aria-label={`Track ${stateLabels[field]}`}
                     onClick={() => {
-                      setState(field, Math.min(startingValues[field] ?? 0, trackerLimits[field]));
+                      setState(field, Math.min(summary[field] ?? startingValues[field] ?? 0, trackerLimits[field]));
                     }}
                   >
                     + Track

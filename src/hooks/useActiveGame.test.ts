@@ -434,3 +434,41 @@ it('Creech linked rescue survives failed persistence and retry with one Undo acr
  act(()=>expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'undo',target:rescue.id}))).toBe(true));
  expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'poltergeist').carolyn).toBe('with-you');expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'creech')['helicopter.used']).toBeUndefined();
 });
+
+it('Evomorph commits Adult recovery and first reveal together, rejects stale actions, and keeps the reveal after effect Undo', async()=>{
+ const {evomorphParent,resolveEvomorphAction}=await import('../../supabase/functions/_shared/play/evomorph');
+ const {result}=renderHook(useActiveGame);
+ const fresh:ActiveGame={...game,evomorphSetupVersion:1,selection:{...game.selection,killer:'Evomorph'}};
+ act(()=>{result.current.save(fresh);result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));});
+ const action=()=>{
+  const entries=summarizePlay(result.current.activeGame!.playEvents).entries;
+  const request={parent:evomorphParent(entries),command:'evolve' as const};
+  return newPlayEvent({kind:'module',evomorphAction:request,moduleData:{module:'evomorph',changes:resolveEvomorphAction(request,moduleState(entries,'evomorph'),entries)!}});
+ };
+ act(()=>expect(result.current.appendPlayEvent(game.id,action())).toBe(true));
+ const adult=action();
+ const setItem=Storage.prototype.setItem;
+ vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('full');});
+ act(()=>expect(result.current.appendPlayEvent(game.id,adult)).toBe(false));
+ expect(result.current.activeGame!.playEvents!.some(e=>e.momentType==='dark-power')).toBe(false);
+ Storage.prototype.setItem=setItem;
+ act(()=>{
+  expect(result.current.appendPlayEvent(game.id,adult)).toBe(true);
+  expect(result.current.appendPlayEvent(game.id,{...adult,id:crypto.randomUUID()})).toBe(false);
+ });
+ let log=result.current.activeGame!.playEvents!;
+ expect(log.filter(e=>e.momentType==='dark-power')).toHaveLength(1);
+ expect(summarizePlay(log)).toMatchObject({killerHealth:10,killerHealthTracking:false});
+ act(()=>expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'undo',target:adult.id}))).toBe(true));
+ log=result.current.activeGame!.playEvents!;
+ expect(moduleState(summarizePlay(log).entries,'evomorph').stage).toBe('youngling');
+ expect(summarizePlay(log).entries.filter(e=>e.momentType==='dark-power')).toHaveLength(1);
+ expect(summarizePlay(log).killerHealth).toBe(4);
+});
+it('Evomorph does not backfill legacy setup or accept foreign observations',async()=>{
+ const {result}=renderHook(useActiveGame);
+ act(()=>{result.current.save({...game,selection:{...game.selection,killer:'Evomorph'}});result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));});
+ expect(moduleState(summarizePlay(result.current.activeGame!.playEvents).entries,'evomorph')).toEqual({});
+ const {initialEvomorph}=await import('../../supabase/functions/_shared/play/evomorph');
+ act(()=>{result.current.save(game);expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'module',moduleData:{module:'evomorph',changes:initialEvomorph()}}))).toBe(false);});
+});

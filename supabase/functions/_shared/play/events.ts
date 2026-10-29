@@ -1,9 +1,11 @@
+import { resolveEvomorphAction, validEvomorphAction, validEvomorphObservation, type EvomorphAction } from './evomorph.ts';
 import { validCreechAction, validCreechObservation, type CreechAction } from './creech.ts';
 import { validPoltergeistObservation, validPoltergeistAction, type PoltergeistAction } from './poltergeist.ts';
 import { validGrovesAction, canLinkGrovesAction, type GrovesAction } from "./groves.ts";
 /** Immutable observations, shared by the app and edge runtime. */
 import { parseFright } from "./fright.ts";
 import {
+  moduleState,
   validModuleObservation,
   describeModule,
   moduleStoryBeats,
@@ -76,6 +78,7 @@ export interface PlayEvent extends PlayDetails {
   grovesReference?: true;
   /** One explicit location action can also update selected Inkanyamba. */
   grovesAction?: GrovesAction;
+  evomorphAction?: EvomorphAction;
   creechAction?: CreechAction;
   poltergeistAction?: PoltergeistAction;
   linkedModule?: ModuleObservation;
@@ -103,6 +106,8 @@ export interface PlaySummary {
   round: number | null;
   finalGirlHealth?: number;
   killerHealth?: number;
+  /** Module observations can establish Health without enabling an optional tracker. */
+  killerHealthTracking?: boolean;
   finalHorrorLevel?: number;
   bloodlust?: number;
   entries: Array<PlayEvent & { currentRound: number | null }>;
@@ -138,6 +143,8 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if(e.evomorphAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='evomorph'||!validEvomorphAction(e.evomorphAction)))return false;
+  if(e.moduleData?.module==='evomorph'&&(e.kind!=='module'||!validEvomorphObservation(e.evomorphAction,e.moduleData.changes)))return false;
   if(e.moduleData?.module==='poltergeist' && (!validModuleObservation(e.moduleData)||!validPoltergeistObservation(e.poltergeistAction,e.moduleData.changes)))return false;
   if(e.poltergeistAction!==undefined && (e.kind!=='module'||e.moduleData?.module!=='poltergeist'||!validPoltergeistAction(e.poltergeistAction)))return false;
   if (e.grovesReference !== undefined && (e.grovesReference !== true || e.kind !== "moment" || e.momentType !== "finale")) return false;
@@ -211,8 +218,30 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
+    validEvomorphHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
+}
+/** Validate only the added owner contract; legacy/non-Evomorph shapes remain stable. */
+function validEvomorphHistory(log: readonly PlayEvent[]): boolean {
+  if(!log.some(e=>e.moduleData?.module==='evomorph'))return true;
+  for(let i=0;i<log.length;i++) {
+    const e=log[i];
+    if(e.kind==='undo'&&!canUndoEvomorph(log.slice(0,i),e.target!))return false;
+    if(e.kind==='restore') {const original=log.slice(0,i).find(o=>o.id===e.target);if(original?.moduleData?.module==='evomorph') {const entries=summarizePlay(log.slice(0,i)).entries;const last=[...entries].reverse().find(o=>o.moduleData?.module==='evomorph')?.id??'root';if(last!==(original.evomorphAction?.parent??'root'))return false;}}
+    if(e.moduleData?.module==='evomorph'&&!e.evomorphAction&&log.slice(0,i).some(o=>o.moduleData?.module==='evomorph'))return false;
+    if(e.moduleData?.module!=='evomorph'||!e.evomorphAction)continue;
+    const entries=summarizePlay(log.slice(0,i)).entries;
+    const changes=resolveEvomorphAction(e.evomorphAction,moduleState(entries,'evomorph'),entries);
+    if(!changes||JSON.stringify(Object.entries(changes).sort())!==JSON.stringify(Object.entries(e.moduleData.changes).sort()))return false;
+  }
+  return true;
+}
+export function canUndoEvomorph(log:readonly PlayEvent[],target:string):boolean {
+  const entries=summarizePlay(log).entries;
+  const item=entries.find(e=>e.id===target);
+  if(item?.moduleData?.module!=='evomorph')return true;
+  return [...entries].reverse().find(e=>e.moduleData?.module==='evomorph')?.id===target;
 }
 export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
   const inactive = new Set<string>();
@@ -271,6 +300,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       if (!snapshot || snapshot.parent !== frightParent) { summary.inactive.add(original.id); continue; }
       frightParent = original.id;
     }
+    if(original.moduleData?.module==='evomorph'&&original.evomorphAction&&!resolveEvomorphAction(original.evomorphAction,moduleState(summary.entries,'evomorph'),summary.entries)){summary.inactive.add(original.id);continue;}
     const e = { ...original };
     if (e.kind === "killed" || e.kind === "saved") {
       e.quantity = quantities.get(e.id) ?? e.quantity!;
@@ -317,7 +347,13 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     if (e.kind === "round")
       summary.round = Math.min(999, (summary.round ?? 0) + 1);
     if(e.kind==='module'&&e.creechAction?.kind==='hunter'&&e.creechAction.bloodlust!==undefined)summary.bloodlust=e.creechAction.bloodlust;
+    if(e.kind==='module' && e.moduleData?.module==='evomorph' && (e.moduleData.changes.initialized===true || (e.evomorphAction?.command==='evolve'&&e.moduleData.changes.stage==='adult'))) {
+      const visible=summary.killerHealthTracking ?? summary.killerHealth!==undefined;
+      summary.killerHealth=e.moduleData.changes.initialized===true?4:10;
+      summary.killerHealthTracking=visible;
+    }
     if (e.kind === "state") {
+      if(e.field==='killerHealth'&&summary.killerHealthTracking!==undefined)summary.killerHealthTracking=e.value!==null;
       if (e.value === null) delete summary[e.field!];
       else summary[e.field!] = e.value!;
     }

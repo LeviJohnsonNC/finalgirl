@@ -1,3 +1,6 @@
+import { evomorphOpeningGuidance } from '../../supabase/functions/_shared/play/evomorph';
+import { moduleState as endingModuleState } from '@/lib/play/modules';
+import { summarizePlay as endingSummary } from '@/lib/play/events';
 import {playStoryBeats} from '@/lib/play/events';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Volume2, VolumeX, Loader2 } from 'lucide-react';
@@ -71,6 +74,8 @@ const TheEnd = ({
   const streamAbortRef = useRef<AbortController | null>(null);
   const moduleContext = getModulePromptContext(result.killer, result.location);
 
+  const evomorphGuidance=result.killer==='Evomorph'?evomorphOpeningGuidance(endingModuleState(endingSummary(result.playEvents).entries,'evomorph').stage,false):undefined;
+  const endingVisualGuidance=[evomorphGuidance,moduleContext?.visualGuidance].filter(Boolean).join('\n');
   const isWin = result.outcome === 'won';
   const fate = characterFate(formData.finalGirlHealth);
   const endingKillerHealth = isKillerUnkillable(result.killer) ? undefined : formData.killerHealth;
@@ -92,12 +97,12 @@ const TheEnd = ({
     const url = await generateImage({
       story: endingStory,
       killer: result.killer,
-      killerDescription: getKillerDescription(result.killer),
+      killerDescription: evomorphGuidance ?? getKillerDescription(result.killer),
       finalGirl: result.finalGirl,
       finalGirlDescription: getFinalGirlDescription(result.finalGirl),
       location: result.location,
       locationDescription: getLocationDescription(result.location),
-      moduleVisualGuidance: moduleContext?.visualGuidance,
+      moduleVisualGuidance: endingVisualGuidance,
       // Carried over from Now Playing so the poster matches the opening still.
       visualBible,
       sceneType: 'ending',
@@ -107,12 +112,12 @@ const TheEnd = ({
       finalGirlHealth: formData.finalGirlHealth,
       killerHealth: endingKillerHealth,
       mission: getMissionByName(result.mission),
-      scenarioRules: [getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
+      scenarioRules: [result.killer==='Evomorph'?playStoryBeats(result.playEvents,result):undefined, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
       gameId: result.id,
       previousImageUrl,
     });
     if (url) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
-  }, [endingStory, result.killer, result.finalGirl, result.location, result.outcome, result.id, moduleContext?.visualGuidance, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, result.sceneImageUrl, result.mission, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage]);
+  }, [endingStory, result.killer, result.finalGirl, result.location, result.outcome, result.id, moduleContext?.visualGuidance, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, result.sceneImageUrl, result.mission, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
 
   // The poster develops on its own once the ending narration lands.
   //
@@ -147,7 +152,7 @@ const TheEnd = ({
 
     try {
       // Look up character descriptions
-      const killerDescription = getKillerDescription(result.killer);
+      const killerDescription = evomorphGuidance ?? getKillerDescription(result.killer);
       const finalGirlFilmId = getFilmIdByFinalGirl(result.finalGirl);
       const finalGirlBackstory = (finalGirlFilmId
         ? getFilmDetails(finalGirlFilmId)?.finalGirls.find(girl => girl.name === result.finalGirl)?.backstory

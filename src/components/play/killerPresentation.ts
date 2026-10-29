@@ -1,3 +1,5 @@
+import { EVOMORPH_POWERS, EVOMORPH_FINALES } from '../../../supabase/functions/_shared/play/evomorph';
+import { evomorphArt } from './evomorphArt';
 import { POLTERGEIST_POWERS, POLTERGEIST_FINALES } from '../../../supabase/functions/_shared/play/poltergeist';
 import { poltergeistArt } from './poltergeistArt';
 import { modulePhoto } from "./modulePhotos";
@@ -55,7 +57,7 @@ export function illustratedKillerCards(
 ): IllustratedKillerCard[] {
   const power = type === "dark-power";
   const cards =
-    killer === 'Poltergeist' ? (power ? POLTERGEIST_POWERS : POLTERGEIST_FINALES) : killer === "Inkanyamba"
+    killer === 'Evomorph' ? (power ? EVOMORPH_POWERS : EVOMORPH_FINALES) : killer === 'Poltergeist' ? (power ? POLTERGEIST_POWERS : POLTERGEIST_FINALES) : killer === "Inkanyamba"
       ? power
         ? INKANYAMBA_POWERS
         : INKANYAMBA_FINALES
@@ -83,7 +85,7 @@ export function illustratedKillerCards(
         ("epic" in card && card.epic === true) ||
         card.effect.startsWith("Epic"),
       heroArt:
-        (killer==='Poltergeist' ? poltergeistArt(card.id) : undefined) ?? modulePhoto(killer, index + (power ? 0 : 4)) ??
+        (killer==='Evomorph' ? evomorphArt(card.id) : undefined) ?? (killer==='Poltergeist' ? poltergeistArt(card.id) : undefined) ?? modulePhoto(killer, index + (power ? 0 : 4)) ??
         (killer === "Inkanyamba"
           ? inkanyambaHero(index + (power ? 0 : 4))
           : undefined),

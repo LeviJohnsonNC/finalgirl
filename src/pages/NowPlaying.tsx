@@ -1,3 +1,6 @@
+import { evomorphOpeningGuidance } from '../../supabase/functions/_shared/play/evomorph';
+import { moduleState as openingModuleState } from '@/lib/play/modules';
+import { summarizePlay as openingSummary } from '@/lib/play/events';
 import {DeathSceneDialog} from '@/components/play/DeathSceneDialog';
 import { PlayScreen } from '@/components/play/PlayScreen';
 import { SessionOptions } from '@/components/SessionOptions';
@@ -32,6 +35,7 @@ import type { ActiveGame } from '@/lib/activeGame';
 import { parseVisualBible } from '../../supabase/functions/_shared/prompts';
 
 interface NowPlayingProps {
+  evomorphFreshSetup?: boolean;
   playSyncBlocked?: boolean;
   onDiscard?: () => void;
   sessionId: string;
@@ -61,6 +65,7 @@ interface NowPlayingProps {
 
 const NowPlaying = ({
   playEvents = [], playDrafts = {}, playMode = false, showDeathPanel = true, syncPlayNow, getPlayEvents, onPlayEvent, playSyncBlocked=false,
+  evomorphFreshSetup=false,
   sessionId, initialStory, initialSceneImageUrl, initialVisualBible, onCheckpoint, onDiscard,
   killer,
   location,
@@ -106,6 +111,8 @@ const NowPlaying = ({
   // reader loop stops and no further setState fires on an unmounted component.
   const streamAbortRef = useRef<AbortController | null>(null);
   const moduleContext = getModulePromptContext(killer, location);
+  const evomorphGuidance=killer==='Evomorph'?evomorphOpeningGuidance(openingModuleState(openingSummary(playEvents).entries,'evomorph').stage,evomorphFreshSetup&&!playEvents.some(e=>e.moduleData?.module==='evomorph')):undefined;
+  const visualGuidance=[evomorphGuidance,moduleContext?.visualGuidance].filter(Boolean).join('\n');
   const missionData = getMissionByName(mission);
   const applicableSpecialRules = getApplicableSpecialRules(killer, location);
   // Reserve the image column as soon as there is something to show there —
@@ -129,11 +136,11 @@ const NowPlaying = ({
     (async () => {
       const bible = await generateVisualBible({
         killer,
-        killerDescription: getKillerDescription(killer),
+        killerDescription: evomorphGuidance ?? getKillerDescription(killer),
         finalGirl,
         finalGirlDescription: getFinalGirlDescription(finalGirl),
         location,
-        moduleVisualGuidance: getModulePromptContext(killer, location)?.visualGuidance,
+        moduleVisualGuidance: visualGuidance,
         locationDescription: getLocationDescription(location),
       });
       if (cancelled) return;
@@ -145,28 +152,28 @@ const NowPlaying = ({
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, autoGenerate, settingsReady, initialVisualBible, killer, finalGirl, location, generateVisualBible]);
+  }, [isAuthenticated, autoGenerate, settingsReady, initialVisualBible, killer, finalGirl, location, generateVisualBible, evomorphGuidance, visualGuidance]);
 
   const developScene = useCallback(async (previousImageUrl?: string) => {
     if (!story) return;
     const url = await generateImage({
       story,
       killer,
-      killerDescription: getKillerDescription(killer),
+      killerDescription: evomorphGuidance ?? getKillerDescription(killer),
       finalGirl,
       finalGirlDescription: getFinalGirlDescription(finalGirl),
       location,
       locationDescription: getLocationDescription(location),
-      moduleVisualGuidance: moduleContext?.visualGuidance,
+      moduleVisualGuidance: visualGuidance,
       visualBible,
       sceneType: 'beginning',
       mission: getMissionByName(mission),
-      scenarioRules: [getKillerNarrativeRules(killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
+      scenarioRules: [evomorphGuidance, getKillerNarrativeRules(killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
       gameId: sessionImageId.current,
       previousImageUrl,
     });
     if (url) { setSceneImageUrl(url); checkpointRef.current({ sceneImageUrl: url }); }
-  }, [story, killer, finalGirl, location, moduleContext?.visualGuidance, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, mission, visualBible, generateImage]);
+  }, [story, killer, finalGirl, location, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, mission, visualBible, generateImage, evomorphGuidance, visualGuidance]);
 
   // Images generate on their own now — no API key, no button to find.
   //
@@ -216,7 +223,7 @@ const NowPlaying = ({
         killer: {
           name: killer,
           description: killerDetails?.description || `A terrifying killer known as ${killer}.`,
-          ...(killerRules && { specialRules: killerRules }),
+          ...((killerRules||evomorphGuidance) && { specialRules: [evomorphGuidance,killerRules].filter(Boolean).join('\n') }),
         },
         location: {
           name: location,

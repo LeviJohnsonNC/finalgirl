@@ -1,3 +1,5 @@
+import { EvomorphControls } from './EvomorphControls';
+import evomorphBanner from '@/assets/play/banners/evomorph.webp';
 import { CreechControls } from './CreechControls';
 import creechBanner from '@/assets/play/banners/creech.webp';
 import { PoltergeistControls } from './PoltergeistControls';
@@ -45,7 +47,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -71,6 +73,7 @@ const peopleSummary = (
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
 export const moduleDefinitions: Definition[] = [
+ {id:'evomorph',owner:'killer',match:'Evomorph',title:'The Evomorph',art:{src:evomorphBanner,fit:'slice',position:'65% center'},capabilities:['reveals','minor-power'],summary:state=>`${state.stage?String(state.stage).replace(/^./,s=>s.toUpperCase()):'Stage not recorded'} · ${state.presence==='vanished'?'Vanished':state.presence==='on-board'?'On the board':'Presence not recorded'}`,Controls:props=><EvomorphControls {...props}/>},
  {id:'creech',owner:'location',match:'Creech Manor',title:'Inside Creech Manor',art:{src:creechBanner,fit:'slice',position:'70% center'},capabilities:['character','event'],summary:state=>`Ladder: ${state.ladder??'not recorded'} · Helicopter: ${state['helicopter.used']===true?'used':state['event.helicopter']==='active'?'available':'not recorded'}`,Controls:props=><CreechControls {...props}/>},
   {id:'poltergeist',owner:'killer',match:'Poltergeist',title:'The Poltergeist',art:moduleBanners.poltergeist,capabilities:['objective','minor-effect','reveals'],summary:state=>`Carolyn: ${state.carolyn===undefined?'not recorded':String(state.carolyn).replace(/-/g,' ')} · Mr. Floppy: ${state.floppy===undefined?'not recorded':String(state.floppy).replace(/-/g,' ')}`,Controls:props=><PoltergeistControls {...props}/>},
   {id:"groves",owner:"location",match:"Sacred Groves",title:"Inside Sacred Groves",art: moduleBanners.groves,capabilities:["character","event"],summary:state=>`Divine Wrath ${typeof state.wrath === "number" ? `${state.wrath}/10` : "not recorded"}${state.finaleRevealed ? " · Finale active" : ""}`,Controls:props=><GrovesControls {...props}/>},
