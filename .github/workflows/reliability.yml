@@ -80,8 +80,6 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run build
       - run: npm run test:browser -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}/4 --reporter=list,blob
-        env:
-          KONRAD_REVIEW_LOGS: 1
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:

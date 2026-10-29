@@ -1,25 +1,42 @@
-# USS Konrad — source inventory and implementation plan
+# USS Konrad — source inventory and implementation record
 
 ## Scope and status
 
-- Owner: **location**, canonical name **USS Konrad**. Existing film ID: `s2-into-the-void`. Proposed shared module ID: `konrad`.
-- Stage: **implementation and verification in progress**, approved by Levi on 2026-10-29. Draft [PR #151](https://github.com/LeviJohnsonNC/finalgirl/pull/151) preserves the location scope. No merge or deployment.
+- Owner: **location**, canonical name **USS Konrad**. Existing film ID: `s2-into-the-void`. Shared module ID: `konrad`.
+- Stage: **implemented; final CI gate in progress**, approved by Levi on 2026-10-29. [PR #151](https://github.com/LeviJohnsonNC/finalgirl/pull/151) preserves the location scope. No merge or deployment.
 - Standard: `docs/MODULE_STANDARD.md`, `docs/MODULE_IMPORT_PLAYBOOK.md`, `docs/module-controls.md`, `docs/PLAYTEST_POLISH.md` and `docs/templates/MODULE_IMPORT_RECORD.md`. Groves source reference: `dad911e034e332a23882de7c8304dc9d0db198cb`.
 - Reviewed 2026-10-29, America/Regina. Current GitHub default-branch source was read directly, including its merged Evomorph registration. PR #150 is merged. This plan does not certify its unfinished photographic work or silently absorb that separate killer work.
 - Extend the existing film; do not duplicate Collection or cast choices. USS Konrad works independently with every supported killer.
 - In scope: board spaces and Setup diagrams; special rules; Keycards and Maintenance systems; Super Loader and Beacon observations; location Terror/Minor, Events, Items, special characters; Rules/search, Play, death/narration, opening/ending, artwork and verification.
 - Ellen/Jenette personal cards, secret Items, unrelated variants, scenario books and a digital combat/movement/deck engine are outside scope. A character illustration on a rule sheet does not establish new Final Girl facts.
-- After implementation approval, copy/update this owner record at `docs/imports/uss-konrad.md` and cross-link `evomorph.md`. Keep the records separate.
+- This is the location owner record; [Evomorph](evomorph.md) remains a separate killer import.
 
-## Implementation checkpoint · 2026-10-29
+## Implementation and verification · 2026-10-29
 
-- Clean isolated baseline matches current main tree `5058df4ea5a77834cfe67a50443e90c29cad40b3`; earlier uncommitted Evomorph work remains separate.
-- Canonical catalog, count/coverage ledger, linked cancellation, explicit activation/Upkeep/Airlock, characters/Events/Slippery, Rules, corrected Setups/ship identity, historical death context and durable reviewed ending are implemented.
-- Initial self-inflicted fatal outcomes are guarded before recording a win. Later review persists in the same case's play_events/outcome, including offline retry and cloud rehydration; Health remains separately observed. Ending prose and painted poster requests receive validated owner-specific fate.
-- First actual CI captures were retrieved through decoded GitHub job logs because local server/Chromium access is restricted. The initial caption anchoring defect was fixed. Real Airlock controls were inspected at all five target sizes; Solar/reboot with repeated destinations and armed Airlock/running countdown was inspected on laptop/phone before bulk art. Count preview, aligned form rows, explicit role correction semantics and atomic Loader/Beacon forms are follow-up refinements.
-- CI checkpoint `6380c5a1df66eafb0ececc20ee8aabae09a1ac0f`, Reliability run `40895261241`: all 14 jobs passed. Focused rendered review run `40895261237`: desktop and mobile passed. These are checkpoints, not final-head certification.
-- Local checkpoint: npm run check passed (564 frontend tests and 115 edge adapter tests). Additional asset/state and release checks remain pending.
-- Full photographic states are being generated; the preflight image map remains temporary until manifest coverage is completed. No placeholder map is approved for handoff.
+- Isolated baseline matches main tree `5058df4ea5a77834cfe67a50443e90c29cad40b3` (merged PR #150). Earlier uncommitted killer work remains separate.
+- Implemented canonical source catalogs, count/knowledge ledger, linked cancellation, explicit activation/Upkeep/Airlock, characters/Events/Slippery, Rules, Setups/ship identity, historical death context and durable reviewed endings.
+- Known fatal self-inflicted outcomes are guarded before initial case recording. Later explicit review updates the same case's play_events/outcome, including offline retry, cloud rehydration and statistics; Health remains separately observed. Both ending prose and painted poster receive validated location-owned fate.
+- Hardest interaction reviewed before bulk art: actual CI-rendered Airlock controls at five target sizes, Solar/reboot with repeated quantities on laptop/phone. Fixed caption positioning and aligned quantity inputs. Final refinements preserve role correction semantics, atomic Loader/Beacon states, canonical death fingerprints and cancellation of independently observed markers.
+- Completed 34 independent native photographic Play frames, 44 exact runtime IDs including ten documented neutral/equipment aliases; no missing-photo fallback. Corrected exterior branding while preserving the ship's geometry. See [asset provenance](../../src/assets/play/photos/konrad/README.md).
+- Local release checks: `npm run check` passed 570 frontend tests across 73 files and 115 edge adapter tests; type checks pass, zero lint errors and 11 existing fast-refresh warnings. `npm run check:assets` verifies 624 artwork files, including all 34 Konrad photographs/ten aliases. Production build passes (existing bundle-size warning).
+- [Visual evidence](../verification/uss-konrad/README.md) records exact capture commits, viewport sizes, reviewed states and findings. CI renders use mocked network/provider responses, never production generation. Required final-head Reliability checks are linked from PR #151; handoff waits for all 14 jobs.
+- No merge, deployment, paid provider generation or live production verification performed.
+
+## Integration coverage
+
+| Surface | Implementation and evidence |
+| --- | --- |
+| Selection/casting/IDs | Existing Into the Void film and USS Konrad ID preserved; independent location registration and seven-Killer browser matrix. Official/custom image precedence retained. |
+| Rules/setup/search/catalogs | Complete source-backed rules and canonical 16-space/four-shaft catalog, eight Terrors, ten Events, five exact 12-Victim Setups, twenty Item cards/fifteen unique names. Search and Setup browser journeys pass. |
+| Illustrated Play/Remember This | Shared ModulePanel, IllustratedTile, EventControl, CharacterControl, MinorPowerControl and live HealthTokens; narrow count/operation forms. Source-backed Item and death suggestions reuse existing flows. No generic inventory/map engine. |
+| New sessions/legacy/ownership | Provenance-only fresh setup, legacy unknowns, owner validation, stale/duplicate action rejection, atomic Undo/dependent Restore, failed write/retry and reload in domain/hooks/native/browser tests. |
+| Death/cache/narration | Canonical historical snapshots, JSONB ordering stability, natural prose room labels, mixed-owner bounded facts and wrong-location rejection. Browser death generation/cache reopening records one casualty and one mocked request. |
+| Opening/ending/visuals | Corrected setting context; fatal review outranks stale Health, persists same case/outcome and reaches validated prose/poster payloads. Existing painted 2:3 poster medium preserved. |
+| Case/archive/statistics | History update mapping includes outcome; offline WAL retry/cloud fromDbRow rehydration plus loss statistics tested; reviewed death never fabricates zero Health. Browser covers Save without narration and cloud reload. |
+| Artwork | All meaningful physical state variants independent, native 1536×1024, runtime ≤150786 bytes; exact manifest, aliases, hashes and decoded real UI crops reviewed. No raw card photos added to Git. |
+| Mixed combinations | Hans, Billy, Geppetto, Dr. Fright, Inkanyamba, Poltergeist and Evomorph; Slippery stays location-owned and healthless Killer remains healthless. Captain does not auto-write Bloodlust; Evomorph stage/Ambush face survive bounded context. |
+| Automated/visual verification | Unit/hook/edge adapters, native Deno, isolated rollback SQL, eight browser shards, production build/assets; actual desktop/phone screenshots and 44px controls/reduced motion/focus/no overflow. See evidence below and PR checks. |
+| Deployment/live smoke | Pending authorization and release; exact six edge bundles listed below. No SQL or Storage migration. Mock success is not live model/audio/production certification. |
 
 ## Access and evidence
 
@@ -322,20 +339,19 @@ Keep the dashboard compact while allowing expanded module scrolling. Target 44px
 
 Completion means all in-scope applicable surfaces are implemented, source-backed, tested and visually inspected, with no placeholder art or undisclosed gaps. Mock browser checks do not establish live model/audio quality or a production deployment.
 
-## Planned rollout assessment
+## Release and handoff
 
-- Frontend release required for canonical content, Rules, panel, setup, context and artwork.
-- At minimum assess/redeploy `generate-death-scene` and `narrate-story` when their shared Play contracts change.
-- Ending review changes make generate-ending and its storyFacts/validation callers explicit deployment dependencies. Trace generate-story, generate-visual-bible and generate-scene-image for bundled shared validation/prompt changes as well. Give the final exact list from the actual dependency graph, not the previous PR's two-function list.
-- Prefer existing play_events for durable Konrad state/review and existing outcome for the case result. Wire both snake_case history conversions and the update-column map; a new form field is not persistence. This design does not currently require a new SQL column/migration. Confirm against the final diff and prove a database/cloud roundtrip rather than assuming the session JSONB path covers archive writes.
-- No new identity-reference Storage manifest is assumed. If the actual trusted reference manifest changes, stage/review/upload the exact fixed-key objects and digests and verify source/bundle budgets before releasing dependent callers.
-- Neither this plan nor successful CI grants standing permission to merge, publish, deploy or spend on paid provider tests.
-- Current status: **implementation in progress; final artwork, final-head checks and release evidence pending. No deployment/live provider verification.**
+- Release the compatible backend bundles before the dependent frontend: **generate-story, generate-visual-bible, generate-scene-image, generate-ending, generate-death-scene, narrate-story**. Their transitive shared catalog/Play, validation, prompt or storyFacts imports include the changed contracts. This is the exact affected edge-function list, not a database-function redeployment list.
+- Frontend release includes Rules, canonical Setups/content, Play controls, result/history integration and bundled photographs.
+- **No SQL migration or database-function redeploy.** Durable state uses existing play_events JSONB and outcome columns and existing RPC contracts. The added SQL is a uniquely identified, transaction-rollback test fixture; native database CI verifies session/archive roundtrip and user isolation.
+- **No private reference Storage manifest/object upload.** The existing frontend location identity path was corrected; opening cast-reference precedence/manifest stays intact.
+- Required final-head Reliability CI must pass before handoff. Final run/head are recorded in the PR validation section because a commit cannot embed its own hash. Temporary screenshot-log instrumentation is removed after evidence retrieval; regular browser regression tests remain.
+- Implementation approval does not authorize merge, publish, deploy or paid generation. None performed. Signed-in production/model/audio smoke remains pending release authorization; mock browser tests do not certify it.
 
-## Remaining uncertainty and execution evidence
+## Remaining uncertainty and limitations
 
-- **Documented, not a gate:** the sixth Keycard face is unpictured; K5 establishes its count and generic rules. All five Setups are now tabulated, with 12 Victims each. No further photo/owner confirmation is presently required.
-- **Rule interpretation remains explicit:** effect-driven reactivation/shaft adjacency and unusual cross-film endings are not silently adjudicated. Obtain primary clarification only before adding automation that depends on it; retain the planned physical-resolution observation path.
-- **Physical supply:** eleven total tokens are printed, but loose per-type counts are not independently photographed. Do not impose a guessed supply cap; preserve quantities/conservation for reported operations.
-- **Verification access:** local preview binding was rechecked and is restricted. Establish an actual capture/retrieval/viewing route at the first UI milestone; if it fails, finish independent work and identify that concrete verification blocker. Do not substitute a green test or generated mockup for visual inspection.
-- **Not yet performed:** implementation, final images, browser/native CI and live deployment/provider checks. Do not mark completed based on the plan or another owner's earlier tests.
+- **Source coverage:** sixth Keycard face unpictured; K5 establishes six cards and their generic rules. All supplied photographs were inspected. No new source or owner decision needed for implemented behavior.
+- **Physical supply:** eleven total tokens printed; loose per-type subcounts not separately photographed. No guessed supply cap imposed.
+- **Physical adjudication:** effect-driven automatic reactivation, shaft adjacency/ties, random rolls, combat/movement/decks and unusual cross-film victory interactions remain explicit table resolutions. The app preserves unknowns and records observations rather than inventing publisher rulings.
+- **Execution environment:** local preview/socket/Chromium restrictions were handled through approved CI execution and decoded job-log image retrieval. Actual final screenshots were opened and inspected, not inferred from green tests. No physical-device testing claimed.
+- **Live status:** backend/frontend deployment and production/provider/audio smoke pending. The implementation and automated/visual evidence are reviewable in PR #151.
