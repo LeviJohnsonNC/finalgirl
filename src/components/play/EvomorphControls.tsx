@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { moduleState, type ModuleValue } from '@/lib/play/modules';
 import { newPlayEvent, summarizePlay } from '@/lib/play/events';
 import { EVOMORPH_STAGES, EVOMORPH_MINORS, EVOMORPH_AMBUSH, evomorphParent, evomorphPower, evomorphScans, resolveEvomorphAction, type EvomorphAction } from '../../../supabase/functions/_shared/play/evomorph';
-import { evomorphArt } from './evomorphArt';
+import { evomorphArt, evomorphStageArt } from './evomorphArt';
 import { IllustratedTile } from './IllustratedTile';
 import { KillerCards } from './KillerCards';
 import { MinorPowerGroup } from './MinorPowerGroup';
@@ -10,7 +10,6 @@ import { MinorPowerControl } from './MinorPowerControl';
 import { PlaySelect } from './PlaySelect';
 import { useModuleRecord } from './useModuleRecord';
 import type { ControlsProps } from './moduleDefinitions';
-import { inkanyambaCell } from './inkanyambaArt';
 import '@/styles/play-evomorph.css';
 const title=(v:string)=>v[0].toUpperCase()+v.slice(1);
 export function EvomorphControls({events,onEvent,blocked,location}:ControlsProps) {
@@ -18,6 +17,7 @@ export function EvomorphControls({events,onEvent,blocked,location}:ControlsProps
   const {record,message}=useModuleRecord(events,onEvent);
   const [open,setOpen]=useState(false),[space,setSpace]=useState(''),[slot,setSlot]=useState(''),[clear,setClear]=useState(false),[entryConfirmed,setEntryConfirmed]=useState(false);
   const [localError,setLocalError]=useState('');
+  const [correctingStage,setCorrectingStage]=useState(false);
   const power=evomorphPower(entries), scans=evomorphScans(state);
   const stage=typeof state.stage==='string'?state.stage:undefined;
   const act=(command:EvomorphAction['command'],fields:Partial<EvomorphAction>={})=>{
@@ -35,10 +35,11 @@ export function EvomorphControls({events,onEvent,blocked,location}:ControlsProps
   const freshSlot=Array.from({length:6},(_,i)=>i+1).find(n=>!scans.some(s=>s.slot===n));
   return <section className="play-evomorph" aria-label="Evomorph tracking">
     <div className="evo-evolution">
-      <IllustratedTile art={evomorphArt(stage??'vanished')} title={stage?title(stage):'Evolution not recorded'} status={state.presence==='vanished'?'Vanished':state.presence==='on-board'?'On the board':'Presence not recorded'} aria-label="View evolution and presence actions" aria-expanded={open} onClick={()=>setOpen(!open)}/>
+      <IllustratedTile art={evomorphStageArt(stage)} title={stage?title(stage):'Evolution not recorded'} status={state.presence==='vanished'?'Vanished':state.presence==='on-board'?'On the board':'Presence not recorded'} aria-label="View evolution and presence actions" aria-expanded={open} onClick={()=>setOpen(!open)}/>
       <div className="evo-stage-actions">
-        {(stage==='hatchling'||stage==='youngling')&&<><button disabled={blocked} onClick={()=>act('evolve')}>Evolve to {stage==='hatchling'?'Youngling':'Adult'}</button><p className="module-linked-preview">{stage==='hatchling'?'Records Youngling and Vanish. Resolve any Sideswipe attack at the table.':'Records Adult recovery to 10 Health and the permanent Dark Power reveal. Entry effects are recorded separately.'}</p></>}
-        <label className="evo-quiet-label">Correct stage<PlaySelect aria-label="Correct Evomorph stage" value={stage??''} disabled={blocked} onChange={e=>correct('stage',e.target.value||null)}><option value="">Not recorded</option>{EVOMORPH_STAGES.map(s=><option key={s} value={s}>{title(s)}</option>)}</PlaySelect></label>
+        {(stage==='hatchling'||stage==='youngling')&&<><button disabled={blocked} onClick={()=>act('evolve')}>Evolve to {stage==='hatchling'?'Youngling':'Adult'}</button>{stage==='hatchling'&&<p className="module-linked-preview">Records Youngling and Vanish. Resolve any Sideswipe attack at the table.</p>}</>}
+        <button type="button" className="evo-quiet" aria-expanded={correctingStage} aria-controls="evomorph-stage-correction" onClick={()=>setCorrectingStage(!correctingStage)}>Correct stage</button>
+        {correctingStage&&<div id="evomorph-stage-correction"><label className="evo-quiet-label">Stage<PlaySelect aria-label="Correct Evomorph stage" value={stage??''} disabled={blocked} onChange={e=>{if(e.target.value===(stage??'')||correct('stage',e.target.value||null))setCorrectingStage(false);}}><option value="">Not recorded</option>{EVOMORPH_STAGES.map(s=><option key={s} value={s}>{title(s)}</option>)}</PlaySelect></label></div>}
         {open&&<div className="evo-presence-actions">
           {stage!=='hatchling'&&state.presence!=='vanished'&&<button disabled={blocked||!stage} onClick={()=>act('vanish')}>Record Vanish</button>}
           <label className="evo-quiet-label">Correct presence<PlaySelect aria-label="Correct Evomorph presence" value={String(state.presence??'')} disabled={blocked} onChange={e=>correct('presence',e.target.value||null)}><option value="">Not recorded</option><option value="on-board">On the board</option><option value="vanished">Vanished</option></PlaySelect></label>
@@ -80,9 +81,8 @@ export function EvomorphControls({events,onEvent,blocked,location}:ControlsProps
         <label className="evo-quiet-label">Correct phase skip<PlaySelect aria-label="Correct skipped Killer phase" value={state.skipPhase===undefined?'':String(state.skipPhase)} disabled={blocked} onChange={e=>correct('skipPhase',e.target.value===''?null:e.target.value==='true')}><option value="">Not recorded</option><option value="true">Next Killer phase skipped</option><option value="false">No pending skip</option></PlaySelect></label>
       </div>
     </details>
-    <section aria-label="Evomorph Minor Dark Powers"><h3>Minor Dark Powers</h3><MinorPowerGroup className="evo-minors">{EVOMORPH_MINORS.map(p=><MinorPowerControl key={p.id} name={p.name} maxHealth={p.health} health={state[`minor.${p.id}.health`] as number|undefined} previouslyRevealed={entries.some(e=>e.moduleData?.module==='evomorph'&&typeof e.moduleData.changes[`minor.${p.id}.health`]==='number')} disabled={blocked} art={()=>evomorphArt(p.id)} heroArt={evomorphArt(p.id)} heartArt={inkanyambaCell(7)} onChange={health=>act('minor',{key:p.id,value:health})}/>)}</MinorPowerGroup></section>
+    <section aria-label="Evomorph Minor Dark Powers"><h3>Minor Dark Powers</h3><MinorPowerGroup className="evo-minors">{EVOMORPH_MINORS.map(p=><MinorPowerControl key={p.id} name={p.name} maxHealth={p.health} health={state[`minor.${p.id}.health`] as number|undefined} previouslyRevealed={entries.some(e=>e.moduleData?.module==='evomorph'&&typeof e.moduleData.changes[`minor.${p.id}.health`]==='number')} disabled={blocked} art={()=>evomorphArt(p.id)} heroArt={evomorphArt(p.id)} heartArt={evomorphArt(p.id)} onChange={health=>act('minor',{key:p.id,value:health})}/>)}</MinorPowerGroup></section>
     <KillerCards killer="Evomorph" events={events} onEvent={onEvent} disabled={blocked}/>
-    {power.revealed&&<label className="evo-quiet-label">Correct Power entry record<PlaySelect aria-label="Correct Power entry record" value={state.powerResolved===undefined?'':String(state.powerResolved)} disabled={blocked} onChange={e=>correct('powerResolved',e.target.value===''?null:e.target.value==='true')}><option value="">Not confirmed</option><option value="true">Already resolved at the table</option><option value="false">Entry not yet resolved</option></PlaySelect></label>}
     {(message||localError)&&<p role="alert">{message||localError}</p>}
   </section>;
 }

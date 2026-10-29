@@ -1,3 +1,4 @@
+import { evomorphStageArt } from './evomorphArt';
 import { poltergeistParent, resolvePoltergeistAction } from '../../../supabase/functions/_shared/play/poltergeist';
 import { KillerCards } from "./KillerCards";
 import { illustratedKillerCards } from "./killerPresentation";
@@ -173,6 +174,7 @@ export function PlayScreen(props: PlayScreenProps) {
   const { item: personalItem } = usePersonalItem(finalGirl);
   const startingValues = playStartingValues(killer, finalGirl);
   const { characterImages, aiEnabled } = useActiveImages();
+  const killerPortrait = killer === "Evomorph" ? evomorphStageArt(moduleState(summary.entries, "evomorph").stage) : {src: characterImages[killer], position: undefined};
   const finalGirlMaxHealth = observedFinalGirlMaxHealth(finalGirl, events, props.finalGirlStartingHealth);
   // Legacy sessions can use the catalog to bound new input without backfilling observations.
   const trackerLimits = { ...stateLimits, finalGirlHealth: observedFinalGirlMaxHealth(
@@ -434,11 +436,13 @@ export function PlayScreen(props: PlayScreenProps) {
                 <div className="play-state-picture" aria-hidden="true">
                 {field === 'finalGirlHealth' && <FinalGirlHealthPortrait name={finalGirl}
                   health={value} maximum={finalGirlMaxHealth} original={characterImages[finalGirl]} aiEnabled={aiEnabled} />}
-                {field === "killerHealth" && characterImages[killer] && (
+                {field === "killerHealth" && killerPortrait.src && (
                     <img
                       className="play-stat-portrait"
                       alt=""
-                      src={characterImages[killer]}
+                      src={killerPortrait.src}
+                      style={{objectPosition: killerPortrait.position}}
+                      data-evomorph-stage={killer === "Evomorph" ? String(moduleState(summary.entries, "evomorph").stage ?? "unknown") : undefined}
                     />
                   )}
                 {field === "finalHorrorLevel" && (

@@ -4,7 +4,7 @@
 
 - Owner: killer. Canonical app name: Evomorph; printed title: The Evomorph.
 - Film ID: `s2-into-the-void`. Proposed module ID: `evomorph`.
-- Stage: critically reviewed, revised implementation plan only. No application changes, generation, merge or deployment performed.
+- Stage: the killer module is implemented on main. The original source audit and implementation plan below remain historical planning evidence; the 2026-10-29 Play update is described here.
 - Scan equivalence: Levi confirmed on 2026-10-28 that all three Scan cards are identical. This is owner confirmation supplementing E2's readable face; no additional Scan photo is required.
 - Reviewed: 2026-10-28, America/Regina.
 - Scope: killer board, rules/setup, Evolution, Ambush, Scan, Terror, Powers, Finales, relevant Play/narrative/death integration and artwork.
@@ -13,6 +13,15 @@
 - Six accessible uploads inspected visually at original resolution. This reconciles the current batch; no assumption that additional batches are finished.
 - Presentation authority: current main-branch AGENTS.md, docs/MODULE_STANDARD.md, docs/module-controls.md, docs/MODULE_IMPORT_PLAYBOOK.md and docs/PLAYTEST_POLISH.md. Actual reference images inspected: reveal choices desktop, selected cards desktop, active Minor phone. The old Change Finale control visible in a reference image is superseded by current written Clear card name guidance.
 - This file follows docs/templates/MODULE_IMPORT_RECORD.md and is intended for docs/imports/evomorph.md during implementation.
+
+## Play presentation update — 2026-10-29
+
+- Added independently generated Hatchling/Youngling portraits plus ten unique Minor/Power/Finale photographs; kept the existing Adult portrait. See [art mapping and provenance](../../src/assets/play/photos/evomorph/README.md).
+- Live stage pictures now agree across evolution, module header and Killer Health. Death cause pictures use the historical death's stage. Unknown stage shows a creature-free environment; reload/Undo read existing observations.
+- Removed the Adult recovery/reveal reminder and Correct Power entry record. Correct stage now discloses its selector only after an explicit click, without writing gameplay. A failed correction keeps the selector open for retry.
+- Existing evolution recovery, permanent reveal, explicit Power-entry resolution, Scan, card selection and narrative/death cache semantics are retained. No server, migration or private opening-reference change.
+- Verification: dedicated browser journeys cover stage synchronization, historical deaths, correction disclosure/failure/retry/Undo/reload, unknown state, ten distinct card photos, both reveal surfaces and all five required viewport sizes. Final PR CI and rendered screenshot review are recorded in the PR.
+- This update does not re-certify every earlier source-audit or full-import completion row below. It changes presentation only; merge/deployment remain separate.
 
 ## Source ledger
 

@@ -1,3 +1,4 @@
+import { evomorphStageArt } from './evomorphArt';
 import geppettoPuppets from '@/assets/play/geppetto/puppets.webp';
 import { ModuleArtwork } from './ModuleArtwork';
 import causeKiller from "@/assets/play/cause-killer.webp";
@@ -303,7 +304,9 @@ export function DeathSceneDialog({
                 >
                   {cause === 'minion' && selection.killer === 'Geppetto'
                     ? <ModuleArtwork className="geppetto-cause-art" art={{src:geppettoPuppets,atlas:{width:1254,height:1254,x:421,y:3,cellWidth:412,cellHeight:412}}}/>
-                    : <img src={art} alt="" />}
+                    : cause === 'killer' && selection.killer === 'Evomorph'
+                      ? <ModuleArtwork art={evomorphStageArt(facts?.moduleContext?.evomorph?.stage)} />
+                      : <img src={art} alt="" />}
                   <span>{cause === 'minion' && selection.killer === 'Geppetto' ? 'Puppet / minion' : deathCauseLabels[cause]}</span>
                 </button>
               ))}
