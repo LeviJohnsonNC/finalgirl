@@ -4,6 +4,7 @@ import {
   statusPick,
   searchPick,
   openHistory,
+  undoLatestObservation,
 } from "./play-helpers";
 import { summarizePlay, type PlayEvent } from "../../src/lib/play/events";
 import { moduleState } from "../../src/lib/play/modules";
@@ -106,7 +107,7 @@ for (const [killer, id] of [
       killed: 0,
     });
     await openHistory(page);
-    await page.getByRole("button", { name: "Undo", exact: true }).click();
+    await undoLatestObservation(page);
     expect(await state(page)).toMatchObject({
       "person.smalley-2": "in-play",
       "event.smalleys": "active",
@@ -269,7 +270,7 @@ test("House corrections retain unknown, fire and Undo semantics and Roadblocks u
   });
   await expect(mark()).toBeDisabled();
   await openHistory(page);
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   expect(await state(page)).toMatchObject({
     "house.ne-boyfriend": true,
     fire: "ne-boyfriend",

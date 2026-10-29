@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId, installTestAudio } from "./fixtures";
-import { chooseKillerCard, showMinorChoices, openModule, searchPick, openHistory } from "./play-helpers";
+import { chooseKillerCard, showMinorChoices, openModule, searchPick, openHistory, undoLatestObservation } from "./play-helpers";
 import { newPlayEvent, type PlayEvent } from "../../src/lib/play/events";
 import { deathFacts } from "../../src/lib/play/death";
 const selection = {
@@ -58,7 +58,7 @@ for (const [location, id] of [
       .getByRole("button", { name: "Set Killer Wrath to 2", exact: true })
       .click();
     await expect(p.getByLabel("Current Killer Wrath")).toHaveText("2/10");
-    await page.getByRole("button", { name: "Undo", exact: true }).click();
+    await undoLatestObservation(page);
     await expect(p.getByLabel("Current Killer Wrath")).toHaveText("5/10");
     await showMinorChoices(p);
     await p
@@ -160,7 +160,7 @@ test("Finale reveal and its one-time recorded Wrath change stay separate", async
       exact: true,
     }),
   ).toBeDisabled();
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   await expect(p.getByLabel("Current Killer Wrath")).toHaveText("2/10");
   await p
     .getByRole("button", { name: "Record Finale Wrath → 10", exact: true })

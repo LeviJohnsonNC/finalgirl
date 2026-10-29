@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId, installTestAudio } from './fixtures';
-import { openModule, searchPick } from './play-helpers';
+import { openModule, searchPick, undoLatestObservation } from './play-helpers';
 import { deathFacts } from '../../src/lib/play/death';
 import type { PlayEvent } from '../../src/lib/play/events';
 const key = `final-girl-active-game-v1:${userId}`;
@@ -146,7 +146,7 @@ test('unknown legacy state and failed durable writes remain honest and retryable
  await panel.screenshot({path:info.outputPath('failed-join-unknown.png'),animations:'disabled',style:'.app-footer{visibility:hidden}'});
  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'poltergeist');
  await panel.getByRole('button',{name:'View Carolyn actions'}).click();await panel.getByRole('button',{name:'Carolyn joins you',exact:true}).click();
- await page.getByRole('button',{name:'Undo',exact:true}).click();await expect(panel.getByRole('button',{name:'End effect: Psychic Confusion',exact:true})).toHaveAttribute('aria-pressed','true');
+ await undoLatestObservation(page);await expect(panel.getByRole('button',{name:'End effect: Psychic Confusion',exact:true})).toHaveAttribute('aria-pressed','true');
  await expect(page.getByRole('button',{name:'Save one victim',exact:true})).toContainText('2');await expect(page.getByRole('button',{name:'Record one victim killed',exact:true})).toContainText('3');
 });
 

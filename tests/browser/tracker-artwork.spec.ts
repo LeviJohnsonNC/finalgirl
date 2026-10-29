@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { openModule } from "./play-helpers";
+import { openModule, undoLatestObservation } from "./play-helpers";
 import { newPlayEvent } from "../../src/lib/play/events";
 import type { Page } from "@playwright/test";
 
@@ -83,7 +83,7 @@ for (const [killer, maximum] of [
       .getByRole("button", { name: "Decrease Bloodlust", exact: true })
       .click();
     await expect(image).toHaveAttribute("src", sources[maximum - 1]);
-    await page.getByRole("button", { name: "Undo", exact: true }).click();
+    await undoLatestObservation(page);
     await expect(image).toHaveAttribute("src", sources[maximum]);
     await page.reload();
     await page

@@ -1,4 +1,4 @@
-import { showMinorChoices } from "./play-helpers";
+import { showMinorChoices, undoLatestObservation } from "./play-helpers";
 import { test, expect, activeGame, userId } from "./fixtures";
 import {
   searchPick,
@@ -215,7 +215,7 @@ test("Camp and Hans corrections preserve immutable history, Undo, restore and tu
   await page
     .getByRole("button", { name: "Mark Boyfriend saved", exact: true })
     .click();
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   const boyfriend = page
     .locator(".play-camp-person")
     .filter({ hasText: "Boyfriend" });
@@ -230,7 +230,7 @@ test("Camp and Hans corrections preserve immutable history, Undo, restore and tu
   await boyfriend.locator(".module-correction > summary").click();
   await statusPick(page, boyfriend.getByRole("combobox"), "Not recorded");
   await expect(boyfriend).toHaveAttribute("data-state", "unrecorded");
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   await expect(boyfriend).toHaveAttribute("data-state", "saved");
   await openModule(page, "hans");
   const rage = page
@@ -243,7 +243,7 @@ test("Camp and Hans corrections preserve immutable history, Undo, restore and tu
     .getByRole("button", { name: "Clear record: Unholy Rage", exact: true })
     .click();
   await expect(rage).toHaveAttribute("data-state", "unrecorded");
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   await expect(rage).toHaveAttribute("data-state", "full");
   await page
     .getByRole("button", { name: "Activate Secret Tunnel", exact: true })

@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { openModule } from "./play-helpers";
+import { openModule, undoLatestObservation } from "./play-helpers";
 import type { PlayEvent } from "../../src/lib/play/events";
 const selection = {
   ...activeGame.selection,
@@ -43,7 +43,7 @@ test("starting Event, token placement and observed Wrath remain explicit and ind
   await p
     .getByRole("button", { name: "Set Divine Wrath to 6", exact: true })
     .click();
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   await expect(p.getByLabel("Current Divine Wrath")).toHaveText("2/10");
   await expect(holy).toContainText("Fire and Brimstone");
 });

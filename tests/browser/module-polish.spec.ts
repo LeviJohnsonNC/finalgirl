@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { openModule } from "./play-helpers";
+import { openModule, undoLatestObservation } from "./play-helpers";
 for (const [killer, id] of [
   ["Inkanyamba", "inkanyamba"],
   ["Hans", "hans"],
@@ -138,7 +138,7 @@ test("both Wrath tracks stay fully inside a 320px panel and changes remain owner
   await expect(
     page.getByRole("button", { name: "Increase Killer Wrath", exact: true }),
   ).toBeDisabled();
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   await expect(page.getByLabel("Current Killer Wrath")).toHaveText("2/10");
   const raw = await page.evaluate(
     (owner) =>

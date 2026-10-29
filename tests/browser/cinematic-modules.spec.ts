@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { showMinorChoices, openModule } from "./play-helpers";
+import { showMinorChoices, openModule, undoLatestObservation } from "./play-helpers";
 import { newPlayEvent } from "../../src/lib/play/events";
 
 const selection = {
@@ -60,7 +60,7 @@ test("Minor powers expand independently and depleted health stays editable throu
       .click();
   await expect(active).toHaveAttribute("data-state", "removed");
   await expect(active).toContainText("Removed · 0/3 health");
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   await expect(active).toHaveAttribute("data-active", "true");
   await expect(active).toContainText("1/3 health");
   await page.reload();
@@ -255,7 +255,7 @@ test("independent Groves events toggle from their pictures without auxiliary con
         Object.keys(event.moduleData.changes).length === 1,
     ),
   ).toBe(true);
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   await expect(
     panel.getByRole("button", {
       name: "End effect: The Gods Hate Failure",

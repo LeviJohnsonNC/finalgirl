@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { openModule } from "./play-helpers";
+import { openModule, openHistory } from "./play-helpers";
 
 test("Dark Power focuses one photograph across both entry points, explicit corrections and reload", async ({
   page,
@@ -76,9 +76,11 @@ test("Dark Power focuses one photograph across both entry points, explicit corre
     .getByRole("button", { name: "Clear Dark Power card name", exact: true })
     .click();
   await expect(panel.locator(".module-revealed-hero")).toHaveCount(0);
+  await openHistory(page);
   await expect(
-    page.getByRole("button", { name: "Undo", exact: true }),
-  ).toBeDisabled();
+    page.getByRole("region", { name: "Game timeline" }).getByRole("button", { name: /^Undo / }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: /^The night so far/ }).click();
   await panel
     .getByRole("button", { name: "Choose Never Really Dead", exact: true })
     .click();
