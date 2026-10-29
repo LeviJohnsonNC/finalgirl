@@ -115,6 +115,8 @@
   object-position: center 28%;
 }
 .play-workspace .play-state .play-stat-art { object-position: center 45%; }
+/* The late Bloodlust moon faces sit high in the locked landscape composition. */
+.play-workspace .play-state--bloodlust .play-stat-art { object-position: center top; }
 .play-state--bloodlust[data-bloodlust-stage='unknown'] .play-stat-art {
   filter: grayscale(.8) brightness(.65);
 }

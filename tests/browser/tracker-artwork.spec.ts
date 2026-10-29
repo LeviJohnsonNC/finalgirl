@@ -31,6 +31,7 @@ for (const [killer, maximum] of [
     page,
     archive,
   }, info) => {
+    if (killer === 'Hans') test.setTimeout(90000);
     await archive.install(page, { draft: draft(killer) });
     await resume(page);
     const card = page.locator(".play-state--bloodlust");
@@ -49,11 +50,29 @@ for (const [killer, maximum] of [
         await image.evaluate((el: HTMLImageElement) => el.naturalWidth),
       ).toBe(768);
       sources.push((await image.getAttribute("src"))!);
-      if(killer==='Hans'&&[0,5,10].includes(value)){
-        for(const [width,height] of [[1280,640],[1366,768],[1440,900],[390,844],[320,568]]){
+      if(killer==='Hans'){
+        for(const [width,height] of [[1280,640],[1366,768],[1440,900],[1024,768],[390,844],[320,568]]){
           await page.setViewportSize({width,height});
           expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
           await image.evaluate(async (node:HTMLImageElement)=>{await node.decode();});
+          expect(await image.evaluate((node:HTMLImageElement)=>node.naturalHeight)).toBe(512);
+          if (value >= 9) {
+            // Reviewed lunar-face bounds in the source: preserve the entire face,
+            // including its forehead, in narrow cards and wide two-column layouts.
+            const visible = await image.evaluate((node:HTMLImageElement) => {
+              const frame = node.parentElement!.getBoundingClientRect();
+              const scale = Math.max(frame.width/node.naturalWidth, frame.height/node.naturalHeight);
+              const left = (frame.width-node.naturalWidth*scale)/2;
+              return { left:left+.55*node.naturalWidth*scale, right:left+.78*node.naturalWidth*scale,
+                top:.02*node.naturalHeight*scale, bottom:.36*node.naturalHeight*scale,
+                width:frame.width, height:frame.height, position:getComputedStyle(node).objectPosition };
+            });
+            expect(visible.position).toBe('50% 0%');
+            expect(visible.left).toBeGreaterThanOrEqual(0);
+            expect(visible.right).toBeLessThanOrEqual(visible.width);
+            expect(visible.top).toBeGreaterThanOrEqual(0);
+            expect(visible.bottom).toBeLessThanOrEqual(visible.height);
+          }
           await card.screenshot({path:info.outputPath(`bloodlust-${value}-${width}.png`),style:'.app-footer{visibility:hidden}'});
         }
       }
