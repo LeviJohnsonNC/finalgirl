@@ -1,3 +1,4 @@
+import { evomorphStageArt } from './evomorphArt';
 import { useAuth } from "@/hooks/useAuth";
 import { summarizePlay } from "@/lib/play/events";
 import { moduleState } from "@/lib/play/modules";
@@ -23,7 +24,7 @@ export function ModuleControls({
               id={module.id}
               title={module.title}
               kind={module.owner === "killer" ? "Killer" : "Location"}
-              art={module.art}
+              art={module.id === 'evomorph' ? evomorphStageArt(moduleState(entries, 'evomorph').stage) : module.art}
               summary={module.summary(moduleState(entries, module.id))}
               preferenceKey={key}
             >

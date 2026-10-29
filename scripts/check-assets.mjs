@@ -95,3 +95,19 @@ for(const p of konradPhotos){
 if(Object.keys(konradAliases).length!==10||Object.entries(konradAliases).some(([id,target])=>konradExpected.includes(id)||!konradExpected.includes(target)))throw new Error('Invalid USS Konrad aliases');
 if(images.filter(p=>p.startsWith(konradDirectory+'/')).length!==33)throw new Error('Unmapped USS Konrad runtime image');
 console.log('Verified 34 native USS Konrad photographs and 10 explicit neutral/equipment aliases.');
+
+/** Evomorph has twelve independent landscapes, never a shared portrait fallback. */
+const evomorphDirectory='src/assets/play/photos/evomorph';
+const evomorphManifest=JSON.parse(readFileSync(join(evomorphDirectory,'manifest.json'),'utf8'));
+const evomorphExpected=['hatchling','youngling','sideswipe','shadow-dread','dead-silence','symbiotic-camouflage','acid-blood','razor-claws','razor-tail','perfect-organism','blitz-of-death','death-in-the-dark'];
+const evomorphHashes=new Set(), evomorphSources=new Set();
+if(evomorphManifest.length!==evomorphExpected.length)throw new Error('Incomplete Evomorph photography');
+for(const id of evomorphExpected){
+ const photo=evomorphManifest.find(p=>p.id===id);
+ if(!photo||photo.file!==id+'.webp'||!/^exec-[a-f0-9-]+\.png$/.test(photo.source))throw new Error('Missing Evomorph source: '+id);
+ const bytes=readFileSync(join(evomorphDirectory,photo.file)),hash=createHash('sha256').update(bytes).digest('hex');
+ if(bytes.length!==photo.bytes||bytes.length>160*1024||hash!==photo.sha256||photo.width!==1280||photo.height!==720||photo.sourceWidth<photo.width||photo.sourceHeight<photo.height)throw new Error('Invalid Evomorph photograph: '+id);
+ if(evomorphHashes.has(hash)||evomorphSources.has(photo.source))throw new Error('Reused Evomorph photograph: '+id);
+ evomorphHashes.add(hash);evomorphSources.add(photo.source);
+}
+if(images.filter(file=>file.startsWith(evomorphDirectory+'/')).length!==evomorphExpected.length)throw new Error('Unmapped Evomorph photograph');
