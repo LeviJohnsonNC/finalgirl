@@ -79,6 +79,8 @@ test('all Evomorph cards have distinct custom photographs in choices, reveals an
   const src=(await card.locator('.module-minor-art img').getAttribute('src'))!;expect(src).toMatch(/\.webp$/);sources.add(src);
   await card.getByRole('button',{name:`Reveal ${name}`,exact:true}).click();
   await expect(card.locator('.module-minor-art img')).toHaveAttribute('src',src);
+  await card.locator('.module-minor-art img').evaluate(async image=>{await(image as HTMLImageElement).decode();});
+  await card.screenshot({path:info.outputPath(`minor-${name.replaceAll(' ','-')}.png`),animations:'disabled',style:'.app-footer{visibility:hidden}'});
   const add=panel.getByRole('button',{name:'Add another Minor Power',exact:true});if(await add.isVisible())await add.click();
  }
  for(const [type,names]of [['Dark Power',['Acid Blood','Razor Claws','Razor Tail','Symbiotic Camouflage']],['Finale',['Blitz of Death','Death in the Dark','The Perfect Organism']]] as const){
@@ -89,6 +91,7 @@ test('all Evomorph cards have distinct custom photographs in choices, reveals an
    await choice.click();
    await expect(region.locator('.module-revealed-hero img')).toHaveAttribute('src',src);
    await expect(page.getByRole('button',{name:type,exact:true}).locator('img')).toHaveAttribute('src',src);
+   await region.locator('.module-revealed-hero img').evaluate(async image=>{await(image as HTMLImageElement).decode();});
    await region.screenshot({path:info.outputPath(`card-${name.replaceAll(' ','-')}.png`),animations:'disabled',style:'.app-footer{visibility:hidden}'});
    await region.getByRole('button',{name:`Clear ${type} card name`,exact:true}).click();
   }
