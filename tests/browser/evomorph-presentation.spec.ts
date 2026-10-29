@@ -61,7 +61,7 @@ test('Evomorph portraits follow evolution, quiet correction, Undo and reload acr
   await statusPick(page,panel.getByRole('combobox',{name:'Correct Evomorph stage',exact:true}),stage);
   for(const [width,height]of sizes){
    await page.setViewportSize({width,height});
-   await panel.locator('img').evaluateAll(async images=>{await Promise.all(images.map(im=>(im as HTMLImageElement).decode()));});
+   await evolution.locator('img').evaluateAll(async images=>{await Promise.all(images.map(im=>(im as HTMLImageElement).decode()));});
    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
    await panel.locator('.evo-evolution').screenshot({path:info.outputPath(`stage-${stage}-${width}.png`),animations:'disabled',style:'.app-footer{visibility:hidden}'});
    await panel.locator(':scope > summary').screenshot({path:info.outputPath(`header-${stage}-${width}.png`),animations:'disabled',style:'.app-footer{visibility:hidden}'});
