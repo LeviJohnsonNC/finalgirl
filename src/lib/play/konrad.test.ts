@@ -3,7 +3,7 @@ import {initialEvomorph,evomorphParent,resolveEvomorphAction,type EvomorphAction
 import {describe,it,expect} from 'vitest';
 import {newPlayEvent as event,summarizePlay,validPlayLog,type PlayEvent} from './events';
 import {moduleState,moduleContext,moduleStoryBeats} from './modules';
-import {initialKonrad,konradState,konradParent,resolveKonradAction,konradCost,KONRAD_SETUPS,KONRAD_ITEMS,KONRAD_EVENTS,KONRAD_TERRORS,type KonradAction} from './konrad';
+import {initialKonrad,konradState,konradParent,konradToggle,parseKonrad,emptyKonrad,validKonradAction,konradFacts,resolveKonradAction,konradCost,KONRAD_SETUPS,KONRAD_ITEMS,KONRAD_EVENTS,KONRAD_TERRORS,type KonradAction} from './konrad';
 type Command=KonradAction extends infer A?A extends KonradAction?Omit<A,'parent'>:never:never;
 function table(fresh=true){const log:PlayEvent[]=[event({kind:'start',saved:0,killed:0,round:1}),...(fresh?[event({kind:'module',moduleData:{module:'konrad',changes:initialKonrad('Bloody Feast')}})]:[])];const entries=()=>summarizePlay(log).entries;const state=()=>moduleState(entries(),'konrad');const act=(c:Command)=>{const action={...c,parent:konradParent(entries())} as KonradAction;const changes=resolveKonradAction(action,state(),entries());expect(changes).not.toBeNull();const e=event({kind:'module',konradAction:action,moduleData:{module:'konrad',changes:changes!}});log.push(e);return e;};return {log,entries,state,act,s:()=>konradState(state())};}
 describe('USS Konrad verified source and durable system contract',()=>{
@@ -39,4 +39,63 @@ it('Konrad historical death fingerprints normalize snapshot key order and keep t
 
 it('Konrad funding removal clears independently observed armed/countdown markers even with unknown activation payment',()=>{
  const t=table(false);t.act({command:'observe',key:'airlock',value:'armed'});t.act({command:'token',destination:'function:airlock',count:0});expect(t.s().airlock).toBe('inactive');t.act({command:'observe',key:'countdown',value:'middle'});t.act({command:'token',destination:'function:self-destruct',count:null});expect(t.s().countdown).toBe('inactive');
+});
+
+describe('Konrad simplified observations',()=>{
+ it('records every switch without inventing payment, token counts, placement or outcomes',()=>{
+  const t=table(false);
+  const targets=['system:crusher','system:incinerator','system:airlock','system:self-destruct','shaft:upper-left','shaft:upper-right','shaft:lower-left','shaft:lower-right','breach','loader'];
+  for(const target of targets){
+   expect(konradToggle(t.s(),target)).toBeUndefined();
+   for(const active of [true,false]){
+    t.act({command:'toggle',target,active});expect(konradToggle(t.s(),target)).toBe(active);
+    expect(t.s().held).toBeNull();expect(t.s().tokens).toEqual({});expect(t.s().systems).toEqual({});
+    expect(t.s().fate).toBe('unknown');expect(t.s().people).toEqual({});
+   }
+  }
+  expect(summarizePlay(t.log).killed).toBe(0);expect(summarizePlay(t.log).saved).toBe(0);
+  expect(validPlayLog(t.log)).toBe(true);
+ });
+ it('keeps old paid/countdown/token observations intact until an explicit edit, and Undo restores them atomically',()=>{
+  const t=table();t.act({command:'held',count:8});t.act({command:'activate',system:'self-destruct',atStation:true,override:false,captainBridge:false,useHeld:true});
+  t.act({command:'upkeep',atExit:null});t.act({command:'token',destination:'shaft:upper-left',count:2});
+  const original=t.s();expect(original.toggles).toBeUndefined();expect(konradToggle(original,'system:self-destruct')).toBe(true);
+  const e=t.act({command:'toggle',target:'system:self-destruct',active:false});
+  expect(t.s().countdown).toBe('inactive');expect(t.s().systems['self-destruct']).toBeUndefined();
+  expect(t.s().held).toBe(original.held);expect(t.s().tokens['shaft:upper-left']).toBe(2);
+  t.log.push(event({kind:'undo',target:e.id}));expect(t.s()).toEqual(original);
+  t.log.push(event({kind:'restore',target:e.id}));expect(konradToggle(t.s(),'system:self-destruct')).toBe(false);
+  const shaft=t.act({command:'toggle',target:'shaft:upper-left',active:true});
+  expect(t.s().tokens['shaft:upper-left']).toBeUndefined();expect(konradToggle(t.s(),'shaft:upper-left')).toBe(true);
+  t.log.push(event({kind:'undo',target:shaft.id}));expect(t.s().tokens['shaft:upper-left']).toBe(2);
+  expect(validPlayLog(t.log)).toBe(true);
+ });
+ it('rejects stale, forged, unrecognized and non-boolean switches in both actions and snapshots',()=>{
+  const t=table(),e=t.act({command:'toggle',target:'system:airlock',active:true});
+  expect(resolveKonradAction({command:'toggle',target:'breach',active:true,parent:e.konradAction!.parent},t.state(),t.entries())).toBeNull();
+  for(const action of [{target:'system:invented',active:true},{target:'breach',active:'yes'},{target:'loader',active:true,space:'Hangar'}])expect(validKonradAction({parent:'root',command:'toggle',...action})).toBe(false);
+  for(const toggles of [{bogus:true},{breach:'yes'},null])expect(parseKonrad(JSON.stringify({...emptyKonrad(),toggles}))).toBeNull();
+  const forged=structuredClone(t.log);const snapshot=JSON.parse(String(forged[forged.length-1].moduleData!.changes.snapshot));snapshot.toggles['system:airlock']=false;forged[forged.length-1].moduleData!.changes.snapshot=JSON.stringify(snapshot);expect(validPlayLog(forged)).toBe(false);
+ });
+ it('records Beacon and unlocated breach presence, and Loader tracking without assuming equipment or a location',()=>{
+  const t=table(false);t.act({command:'toggle',target:'breach',active:true});expect(t.s().breach).toBeNull();
+  expect(konradFacts(t.state()).join(' ')).toContain('Hull breach on; location unrecorded');
+  t.act({command:'beacon',status:'placed',space:null});expect(t.s().beaconSpace).toBeNull();
+  t.act({command:'toggle',target:'loader',active:true});expect(t.s().loader).toBe('unknown');
+  t.act({command:'loader',status:'equipped',space:null});expect(konradFacts(t.state()).join(' ')).toContain('Super Loader equipped');
+  t.act({command:'toggle',target:'loader',active:false});expect(konradFacts(t.state()).join(' ')).not.toContain('Super Loader equipped');
+  expect(validPlayLog(t.log)).toBe(true);
+ });
+ it('preserves historical death snapshots, fatal outcomes and both selected owners after new toggles',async()=>{
+  const t=table();t.act({command:'observe',key:'fate',value:'explosion-loss'});
+  const death=event({kind:'killed',quantity:1,cause:'hazard',mechanism:'Airlock'});t.log.push(death);
+  const cast={killer:'Hans',location:'USS Konrad',finalGirl:'Laurie'};
+  const before=await deathSignature(deathFacts(cast,t.log,death.id)!);
+  for(const target of ['system:crusher','system:incinerator','system:airlock','system:self-destruct'])t.act({command:'toggle',target,active:true});
+  expect(t.s().fate).toBe('explosion-loss');expect(await deathSignature(deathFacts(cast,t.log,death.id)!)).toBe(before);
+  const facts=konradFacts(t.state()).join(' ');expect(facts).toContain('Observed systems:');expect(facts).not.toContain('paid ');
+  expect(facts).not.toContain('Self Destruct start');expect(facts).not.toContain('Airlock released');
+  expect(moduleContext({killer:'Hans',location:'USS Konrad'},t.entries())?.konrad).toBeDefined();
+  expect(moduleContext({killer:'Hans',location:'Maple Lane'},t.entries())?.konrad).toBeUndefined();
+ });
 });

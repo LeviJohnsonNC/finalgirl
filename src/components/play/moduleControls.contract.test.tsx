@@ -346,3 +346,20 @@ it('Evomorph legacy visibility stays unknown until explicitly observed, without 
  expect(onEvent).toHaveBeenCalledTimes(1);
  expect(onEvent.mock.calls[0][0].moduleData).toEqual({module:'evomorph',changes:{presence:'on-board'}});
 });
+
+it('compact character pictures activate and reactivate Left play, preserve terminal outcomes, and omit status editors',()=>{
+ const observe=vi.fn();
+ const states=[{value:'in-play',label:'In play'},{value:'saved',label:'Saved'},{value:'killed',label:'Killed'},{value:'left',label:'Not in play'}];
+ const props={name:'Crew',present:'in-play',states,art,onChange:observe,outcomes:['saved','killed','left'],showRules:false,showStatusEditor:false,reactivateFrom:['left']};
+ const view=render(<CharacterControl {...props}/>);
+ fireEvent.click(screen.getByRole('button',{name:'Add Crew'}));expect(observe).toHaveBeenLastCalledWith('in-play');
+ for(const value of ['saved','killed']){
+  view.rerender(<CharacterControl {...props} value={value}/>);
+  expect(screen.getByRole('button',{name:'Crew'})).toBeDisabled();
+  fireEvent.click(screen.getByRole('button',{name:'Crew'}));
+ }
+ expect(observe).toHaveBeenCalledTimes(1);
+ view.rerender(<CharacterControl {...props} value="left"/>);
+ fireEvent.click(screen.getByRole('button',{name:'Add Crew'}));expect(observe).toHaveBeenCalledTimes(2);
+ expect(screen.queryByText('Change status')).toBeNull();expect(screen.queryByRole('combobox')).toBeNull();
+});

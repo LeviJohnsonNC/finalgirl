@@ -33,6 +33,13 @@ import photo30 from '@/assets/play/photos/konrad/airlock-inactive.webp';
 import photo31 from '@/assets/play/photos/konrad/airlock-released.webp';
 import photo32 from '@/assets/play/photos/konrad/loader-powered.webp';
 import photo33 from '@/assets/play/photos/konrad/loader-lost.webp';
+import photo34 from '@/assets/play/photos/konrad/captain-saved.webp';
+import photo35 from '@/assets/play/photos/konrad/captain-killed.webp';
+import photo36 from '@/assets/play/photos/konrad/jonas-saved.webp';
+import photo37 from '@/assets/play/photos/konrad/jonas-killed.webp';
+import photo38 from '@/assets/play/photos/konrad/orphan-saved.webp';
+import photo39 from '@/assets/play/photos/konrad/orphan-killed.webp';
+import photo40 from '@/assets/play/photos/konrad/loader-equipped.webp';
 /** Explicit owner photographs. Unknown aliases are dim neutral motifs, never observed states. */
 export const KONRAD_ART:Record<string,ModuleArt>={
  "airlock-armed":{src:photo0,fit:'slice',position:'50% center'},
@@ -78,6 +85,12 @@ export const KONRAD_ART:Record<string,ModuleArt>={
  "airlock-unknown":{src:photo30,fit:'slice',position:'50% center'},
  "self-destruct-unknown":{src:photo4,fit:'slice',position:'50% center'},
  "loader-unknown":{src:photo20,fit:'slice',position:'50% center'},
- "loader-equipped":{src:photo32,fit:'slice',position:'50% center'},
+ "loader-equipped":{src:photo40,fit:'slice',position:'50% center'},
+ "captain-saved":{src:photo34,fit:'slice',position:'35% center'},
+ "captain-killed":{src:photo35,fit:'slice',position:'35% center'},
+ "jonas-saved":{src:photo36,fit:'slice',position:'35% center'},
+ "jonas-killed":{src:photo37,fit:'slice',position:'35% center'},
+ "orphan-saved":{src:photo38,fit:'slice',position:'35% center'},
+ "orphan-killed":{src:photo39,fit:'slice',position:'35% center'},
 };
 export function konradArt(id:string):ModuleArt {const art=KONRAD_ART[id];if(!art)throw new Error(`Missing USS Konrad photograph: ${id}`);return art;}

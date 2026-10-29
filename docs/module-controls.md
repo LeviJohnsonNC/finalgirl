@@ -53,3 +53,10 @@ Preserve immutable event IDs, explicit fresh-session provenance, mixed killer/lo
 Domain code shared with edge functions lives in `supabase/functions/_shared/play/`; frontend `src/lib/play/` modules re-export it. Validate new observations on both sides. Death facts use the historical log at that event; keep unaffected cache signatures compatible and both owners represented within narrative budgets.
 
 For a control change, run applicable domain and `moduleControls.contract.test.tsx` tests, actual browser journeys (including starting Events and both reveal entry points), mixed-owner isolation, failure/retry, Undo and reload checks. Inspect the loaded UI in selected/unselected, active/depleted/unknown and combined states on laptop and phone. The [import playbook](MODULE_IMPORT_PLAYBOOK.md) defines completion and release checks. Never describe mocked screenshots as live provider or production verification.
+
+
+### USS Konrad picture controls
+
+The current Konrad Play surface records maintenance systems, shafts, Remote Beacon and Hull breach with one dim-off/vivid-on picture button each. Unknown legacy observations remain visibly unrecorded until clicked. A switch records presence/state only: no Keycard payment, token quantity, movement, decompression, countdown advance, casualty or ending is inferred. Detailed earlier observations remain in immutable history; explicitly replacing a system or shaft observation retires only its current detailed funding/quantity knowledge, and Undo restores it atomically.
+
+Crew portraits add people, including from their starting Events. Saved and Killed use separate identity-consistent photographs; Left play dims the original portrait and permits adding that person again. There are no status/location correction forms. The Super Loader portrait activates tracking, then offers Parked, Powered, Equipped, Lost and Not in play, with a distinct photograph for each physical state. Selecting a state does not invent a location. Slippery retains the shared live health graphics. These owner-requested compact controls supersede the older Konrad workbench UI exceptions; verified physical rules remain available under Rules.

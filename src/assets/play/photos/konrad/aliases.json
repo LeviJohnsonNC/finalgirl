@@ -7,6 +7,5 @@
   "incinerator-unknown": "incinerator-inactive",
   "airlock-unknown": "airlock-inactive",
   "self-destruct-unknown": "self-destruct-inactive",
-  "loader-unknown": "loader-parked",
-  "loader-equipped": "loader-powered"
+  "loader-unknown": "loader-parked"
 }

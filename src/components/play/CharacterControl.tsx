@@ -19,6 +19,8 @@ export function CharacterControl({
   onOutcome,
   help,
   showRules = true,
+  showStatusEditor = true,
+  reactivateFrom = [],
   reminder,
   className = "",
   tileClassName = "",
@@ -34,6 +36,9 @@ export function CharacterControl({
   onOutcome?: (value: string) => unknown;
   help?: ReactNode;
   showRules?: boolean;
+  /** Compact special characters can expose only their explicit outcomes. */
+  showStatusEditor?: boolean;
+  reactivateFrom?: readonly string[];
   reminder?: ReactNode;
   className?: string;
   tileClassName?: string;
@@ -43,6 +48,8 @@ export function CharacterControl({
   const id = useId();
   const current = states.find((state) => state.value === value);
   const active = value === present;
+  const addable = !value || reactivateFrom.includes(value);
+  const discloses = !addable && showStatusEditor;
   return (
     <article
       data-module-control="character"
@@ -55,12 +62,13 @@ export function CharacterControl({
         title={name}
         data-state={value ?? "unrecorded"}
         status={current?.label ?? "Not recorded · Add"}
-        aria-label={`${value ? "View" : "Add"} ${name}`}
-        aria-expanded={value ? open : undefined}
-        aria-controls={value ? id : undefined}
+        aria-label={addable ? `Add ${name}` : showStatusEditor ? `View ${name}` : name}
+        disabled={!addable && !showStatusEditor}
+        aria-expanded={discloses ? open : undefined}
+        aria-controls={discloses ? id : undefined}
         onClick={() => {
-          if (!value) onChange(present);
-          else setOpen(!open);
+          if (addable) onChange(present);
+          else if (showStatusEditor) setOpen(!open);
         }}
       />
       {outcomes.length > 0 && (
@@ -87,7 +95,7 @@ export function CharacterControl({
       {active && reminder && (
         <p className="module-active-reminder">{reminder}</p>
       )}
-      <details
+      {showStatusEditor && <details
         className="module-correction"
         open={open}
         onToggle={(event) => setOpen(event.currentTarget.open)}
@@ -109,7 +117,7 @@ export function CharacterControl({
             ))}
           </PlaySelect>
         </div>
-      </details>
+      </details>}
       {showRules && help && (
         <details className="module-card-rules">
           <summary>
