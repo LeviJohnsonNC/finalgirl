@@ -256,3 +256,6 @@ An import is ready for review only when every applicable integration above is im
 - No standing permission to merge, publish, deploy or perform paid live provider smoke tests is implied by this plan. Report the actual completed revision, CI and release status separately.
 - Next: after implementation approval, execute the six steps above. This review changes only the planning record.
 
+
+
+Paired location import: [USS Konrad](uss-konrad.md), implemented independently in PR #151. Its source inventory and verification do not certify or replace this Killer record.

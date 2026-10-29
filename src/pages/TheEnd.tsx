@@ -120,7 +120,7 @@ const TheEnd = ({
       previousImageUrl,
     });
     if (url) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
-  }, [endingStory, shipReview, result, result.killer, result.finalGirl, result.location, result.outcome, result.id, moduleContext?.visualGuidance, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, result.sceneImageUrl, result.mission, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
+  }, [endingStory, shipReview, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
 
   // The poster develops on its own once the ending narration lands.
   //

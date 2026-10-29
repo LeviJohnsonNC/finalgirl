@@ -3,13 +3,23 @@
 ## Scope and status
 
 - Owner: **location**, canonical name **USS Konrad**. Existing film ID: `s2-into-the-void`. Proposed shared module ID: `konrad`.
-- Stage: **critically reviewed, revised execution plan**. The inventory, current code and approved references have been rechecked. **Planning only; no location implementation, artwork generation, merge or deployment.**
+- Stage: **implementation and verification in progress**, approved by Levi on 2026-10-29. Draft [PR #151](https://github.com/LeviJohnsonNC/finalgirl/pull/151) preserves the location scope. No merge or deployment.
 - Standard: `docs/MODULE_STANDARD.md`, `docs/MODULE_IMPORT_PLAYBOOK.md`, `docs/module-controls.md`, `docs/PLAYTEST_POLISH.md` and `docs/templates/MODULE_IMPORT_RECORD.md`. Groves source reference: `dad911e034e332a23882de7c8304dc9d0db198cb`.
 - Reviewed 2026-10-29, America/Regina. Current GitHub default-branch source was read directly, including its merged Evomorph registration. PR #150 is merged. This plan does not certify its unfinished photographic work or silently absorb that separate killer work.
 - Extend the existing film; do not duplicate Collection or cast choices. USS Konrad works independently with every supported killer.
 - In scope: board spaces and Setup diagrams; special rules; Keycards and Maintenance systems; Super Loader and Beacon observations; location Terror/Minor, Events, Items, special characters; Rules/search, Play, death/narration, opening/ending, artwork and verification.
 - Ellen/Jenette personal cards, secret Items, unrelated variants, scenario books and a digital combat/movement/deck engine are outside scope. A character illustration on a rule sheet does not establish new Final Girl facts.
 - After implementation approval, copy/update this owner record at `docs/imports/uss-konrad.md` and cross-link `evomorph.md`. Keep the records separate.
+
+## Implementation checkpoint · 2026-10-29
+
+- Clean isolated baseline matches current main tree `5058df4ea5a77834cfe67a50443e90c29cad40b3`; earlier uncommitted Evomorph work remains separate.
+- Canonical catalog, count/coverage ledger, linked cancellation, explicit activation/Upkeep/Airlock, characters/Events/Slippery, Rules, corrected Setups/ship identity, historical death context and durable reviewed ending are implemented.
+- Initial self-inflicted fatal outcomes are guarded before recording a win. Later review persists in the same case's play_events/outcome, including offline retry and cloud rehydration; Health remains separately observed. Ending prose and painted poster requests receive validated owner-specific fate.
+- First actual CI captures were retrieved through decoded GitHub job logs because local server/Chromium access is restricted. The initial caption anchoring defect was fixed. Real Airlock controls were inspected at all five target sizes; Solar/reboot with repeated destinations and armed Airlock/running countdown was inspected on laptop/phone before bulk art. Count preview, aligned form rows, explicit role correction semantics and atomic Loader/Beacon forms are follow-up refinements.
+- CI checkpoint `6380c5a1df66eafb0ececc20ee8aabae09a1ac0f`, Reliability run `40895261241`: all 14 jobs passed. Focused rendered review run `40895261237`: desktop and mobile passed. These are checkpoints, not final-head certification.
+- Local checkpoint: npm run check passed (564 frontend tests and 115 edge adapter tests). Additional asset/state and release checks remain pending.
+- Full photographic states are being generated; the preflight image map remains temporary until manifest coverage is completed. No placeholder map is approved for handoff.
 
 ## Access and evidence
 
@@ -320,7 +330,7 @@ Completion means all in-scope applicable surfaces are implemented, source-backed
 - Prefer existing play_events for durable Konrad state/review and existing outcome for the case result. Wire both snake_case history conversions and the update-column map; a new form field is not persistence. This design does not currently require a new SQL column/migration. Confirm against the final diff and prove a database/cloud roundtrip rather than assuming the session JSONB path covers archive writes.
 - No new identity-reference Storage manifest is assumed. If the actual trusted reference manifest changes, stage/review/upload the exact fixed-key objects and digests and verify source/bundle budgets before releasing dependent callers.
 - Neither this plan nor successful CI grants standing permission to merge, publish, deploy or spend on paid provider tests.
-- Current status: **inventory and critically reviewed execution plan prepared; location implementation and all implementation/live verification pending.**
+- Current status: **implementation in progress; final artwork, final-head checks and release evidence pending. No deployment/live provider verification.**
 
 ## Remaining uncertainty and execution evidence
 

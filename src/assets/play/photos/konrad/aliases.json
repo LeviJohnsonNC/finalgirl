@@ -1,0 +1,12 @@
+{
+  "shaft-upper-left-unknown": "shaft-upper-left-inactive",
+  "shaft-upper-right-unknown": "shaft-upper-right-inactive",
+  "shaft-lower-left-unknown": "shaft-lower-left-inactive",
+  "shaft-lower-right-unknown": "shaft-lower-right-inactive",
+  "crusher-unknown": "crusher-inactive",
+  "incinerator-unknown": "incinerator-inactive",
+  "airlock-unknown": "airlock-inactive",
+  "self-destruct-unknown": "self-destruct-inactive",
+  "loader-unknown": "loader-parked",
+  "loader-equipped": "loader-powered"
+}

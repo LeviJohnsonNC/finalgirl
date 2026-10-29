@@ -37,6 +37,9 @@ export type KonradAction = {parent:string} & (
  | {command:'airlock';position:'inside'|'adjacent';fate:'unknown'|'survived'|'airlock-loss';loaderInHangar:boolean}
  | {command:'upkeep';atExit:boolean|null}
  | {command:'event';id:string;active:boolean}
+ | {command:'add-person';id:string}
+ | {command:'loader';status:KonradSnapshot['loader'];space:string|null}
+ | {command:'beacon';status:KonradSnapshot['beacon'];space:string|null}
  | {command:'person';id:string;status:'in-play'|'saved'|'killed'|'left'|null}
  | {command:'observe';key:'jonasSpace'|'captainSpace'|'orphanTogether'|'slippery'|'temporaryShafts'|'loader'|'loaderSpace'|'beaconSpace'|'beacon'|'breach'|'fate'|'airlock'|'countdown';value:Primitive}
 );
@@ -79,7 +82,7 @@ type Entry={id?:string;kind:string;moduleData?:{module:string;changes:Record<str
 export function konradParent(entries:readonly Entry[]){return [...entries].reverse().find(e=>e.moduleData?.module==='konrad')?.id??'root';}
 export function validKonradAction(value:unknown):value is KonradAction {
  if(!object(value)||typeof value.parent!=='string'||!(/^(root|[0-9a-f-]{36})$/i.test(value.parent))||typeof value.command!=='string')return false;
- const a=value;const shapes:Record<string,string[]>={token:['destination','count'],held:['count'],pickup:['source'],place:['destination'],remote:['from','to'],activate:['system','atStation','override','captainBridge','useHeld'],cancel:['system'],reboot:[],solar:['counts','complete'],airlock:['position','fate','loaderInHangar'],upkeep:['atExit'],event:['id','active'],person:['id','status'],observe:['key','value']};
+ const a=value;const shapes:Record<string,string[]>={token:['destination','count'],held:['count'],pickup:['source'],place:['destination'],remote:['from','to'],activate:['system','atStation','override','captainBridge','useHeld'],cancel:['system'],reboot:[],solar:['counts','complete'],airlock:['position','fate','loaderInHangar'],upkeep:['atExit'],event:['id','active'],person:['id','status'],'add-person':['id'],loader:['status','space'],beacon:['status','space'],observe:['key','value']};
  if(!shapes[a.command as string]||!same(Object.keys(a).sort(),['parent','command',...shapes[a.command as string]].sort()))return false;
  const s=emptyKonrad();
  switch(a.command){
@@ -95,6 +98,9 @@ export function validKonradAction(value:unknown):value is KonradAction {
  case 'airlock':return one(a.position,['inside','adjacent'])&&one(a.fate,['unknown','survived','airlock-loss'])&&typeof a.loaderInHangar==='boolean'&&(a.position==='inside'||a.fate==='survived');
  case 'upkeep':return a.atExit===null||typeof a.atExit==='boolean';
  case 'event':return KONRAD_EVENTS.some(e=>e.id===a.id&&e.kind==='ongoing')&&typeof a.active==='boolean';
+ case 'add-person':return one(a.id,['captain','jonas','orphan']);
+ case 'loader':return one(a.status,['unknown','parked','powered','equipped','lost'])&&space(a.space);
+ case 'beacon':return one(a.status,['unknown','absent','placed'])&&space(a.space);
  case 'person':return one(a.id,['captain','jonas','orphan'])&&one(a.status,[null,'in-play','saved','killed','left']);
  case 'observe':if(typeof a.key!=='string'||!['jonasSpace','captainSpace','orphanTogether','slippery','temporaryShafts','loader','loaderSpace','beaconSpace','beacon','breach','fate','airlock','countdown'].includes(a.key))return false;return !!parseKonrad(JSON.stringify({...s,[a.key]:a.value}));
  default:return false;
@@ -128,7 +134,10 @@ export function resolveKonradAction(a:KonradAction,state:ModuleState,entries:rea
  case 'airlock':if(s.airlock!=='armed')return null;s.airlock='released';if(a.loaderInHangar){s.loader='lost';s.loaderSpace=null;}s.fate=a.fate;break;
  case 'upkeep':if(s.countdown==='start')s.countdown='middle';else if(s.countdown==='middle'){s.countdown='explosion';s.fate=a.atExit===false?'explosion-loss':a.atExit===true?'survived':'unknown';}else return null;break;
  case 'event':s.events[a.id]=a.active?'active':'ended';break;
- case 'person':if(a.status===null){delete s.people[a.id];delete s.events[a.id];}else{s.people[a.id]=a.status;s.events[a.id]=a.status==='in-play'?'active':'ended';}if(a.id==='captain')s.captainSpace=a.status==='in-play'?'Bridge':null;if(a.id==='orphan')s.orphanTogether=null;if(a.id==='jonas')s.jonasSpace=null;break;
+ case 'add-person':if(s.people[a.id]==='in-play')return null;s.people[a.id]='in-play';s.events[a.id]='active';if(a.id==='captain')s.captainSpace='Bridge';break;
+ case 'loader':s.loader=a.status;s.loaderSpace=a.status==='lost'?null:a.space;break;
+ case 'beacon':s.beacon=a.status;s.beaconSpace=a.status==='placed'?a.space:null;break;
+ case 'person':if(a.status===null){delete s.people[a.id];delete s.events[a.id];}else{s.people[a.id]=a.status;s.events[a.id]=a.status==='in-play'?'active':'ended';}if(a.id==='captain'&&a.status!=='in-play')s.captainSpace=null;if(a.id==='orphan')s.orphanTogether=null;if(a.id==='jonas')s.jonasSpace=null;break;
  case 'observe':Object.assign(s,{[a.key]:a.value});if(a.key==='airlock'&&a.value==='inactive')delete s.systems.airlock;if(a.key==='countdown'&&a.value==='inactive')delete s.systems['self-destruct'];if(a.key==='loader'&&a.value==='lost')s.loaderSpace=null;if(a.key==='beacon'&&a.value==='absent')s.beaconSpace=null;break;
  }
  return JSON.stringify(s)===before?null:{snapshot:JSON.stringify(s)};

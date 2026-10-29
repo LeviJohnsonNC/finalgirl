@@ -24,3 +24,6 @@ Both sources are 1879×837. Native derivatives are 1873px wide. Subject referenc
 All headings, status, focus, expanded state and controls remain live HTML. Existing dark text scrims are retained. Review collapsed/expanded laptop and phone crops before release. This is a frontend/artwork release with no SQL, Edge Function or new secret changes.
 
 Poltergeist header refreshed after the 2026-10-27 playtest: standalone source `exec-004077db-0f03-4372-b393-0291686c0c94.png`, 2172×724. Crop the actual 2172×423 photo band at +0+213, remove white margins, downsample to 1600×312 WebP q86 (30,082 bytes). Focal point 75% top. The old rendered-looking figure is replaced by a physically credible photographed performer. See `../photos/poltergeist/README.md`. This does not replace the identity portrait or its Storage reference.
+
+
+USS Konrad: `konrad.webp` uses independent native source `exec-45569636-6db4-47f2-a7aa-fcc222b44372.png`, 1536×1024, centered Hangar/corridor composition with dark left title space. Location-only, no imposed Killer. Exact metadata and provenance are in `../photos/konrad/manifest.json`; all runtime bytes stay within the banner budget.
