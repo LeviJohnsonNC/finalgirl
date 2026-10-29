@@ -1,0 +1,226 @@
+[
+  {
+    "id": "night-shift",
+    "art": "exec-9a7f9906-1f69-4654-a954-6d95249af5b4.png",
+    "title": "NIGHT SHIFT",
+    "tagline": "THE LAST GAME NEVER ENDS.",
+    "design": {
+      "layout": "crown",
+      "face": "slash",
+      "palette": "ember"
+    },
+    "cast": {
+      "finalGirl": "Rena",
+      "killer": "Billy the Bear",
+      "location": "Buddyland"
+    },
+    "context": {
+      "sceneType": "ending",
+      "outcome": "won",
+      "finalGirl": "Rena",
+      "killer": "Billy the Bear",
+      "killerDescription": "An orange-brown animatronic bear with damaged worn fur, pink-purple glowing mechanical eyes and exposed metal joints. A real machine, not a person in costume.",
+      "location": "Buddyland",
+      "locationDescription": "A closed family entertainment arcade with worn prize machines and checkerboard floor.",
+      "finalGirlHealth": 1,
+      "story": "Rena escaped the closing arcade. Through the glass security door she could still see the bear moving among the dead machines. She survived, but the animatronic remained active inside. No weapon was used in the final escape.",
+      "shotBrief": "From outside the arcade glass doorway, Rena stands in profile near the foreground, while the bear remains behind the glass deeper inside among dark prize machines. Keep the important faces in the middle third of the canvas; top and bottom can continue architectural shadow and reflected neon. Painted, not photographic."
+    }
+  },
+  {
+    "id": "what-the-house-keeps",
+    "art": "exec-d43af60a-3a8b-46ed-b7d6-bb9265bcbf42.png",
+    "title": "WHAT THE HOUSE KEEPS",
+    "tagline": "SHE FOUND THE CHILD. THE HOUSE FOUND HER.",
+    "design": {
+      "layout": "inset",
+      "face": "gothic",
+      "palette": "bone"
+    },
+    "cast": {
+      "finalGirl": "Alice",
+      "killer": "Poltergeist",
+      "location": "Creech Manor"
+    },
+    "context": {
+      "sceneType": "ending",
+      "outcome": "won",
+      "finalGirl": "Alice",
+      "killer": "Poltergeist",
+      "killerDescription": "An indistinct translucent female spirit in a long pale gown, an incorporeal haunting rather than a physical opponent.",
+      "location": "Creech Manor",
+      "locationDescription": "A decaying Victorian house with a timber staircase and peeling floral wallpaper.",
+      "story": "Alice found Carolyn and got her outside. The child had already reached safety beyond the front door. Alice looked back once at the staircase; the haunting was still there. The rescue was a victory, not an exorcism or a destroyed ghost.",
+      "shotBrief": "View from just inside a Victorian front door: copper-red-haired Alice in her established green top looks back toward an empty worn staircase with a faint incorporeal pale figure midway up it. The rescued child is already outside and need not appear. Keep Alice's face and the ghost in the middle third, architecture and shadow above and below. No weapon, battle, or defeated ghost."
+    }
+  },
+  {
+    "id": "still-asleep",
+    "art": "exec-0f49338e-7bc9-4d5b-9689-3eeb2f870b66.png",
+    "title": "STILL ASLEEP",
+    "tagline": "THE NEIGHBORHOOD WOKE. SHE NEVER DID.",
+    "design": {
+      "layout": "basement",
+      "face": "brush",
+      "palette": "bone"
+    },
+    "cast": {
+      "finalGirl": "Laurie",
+      "killer": "Dr. Fright",
+      "location": "Maple Lane"
+    },
+    "context": {
+      "sceneType": "ending",
+      "outcome": "lost",
+      "finalGirl": "Laurie",
+      "killer": "Dr. Fright",
+      "killerDescription": "Dr. Fright is a grotesque stocky middle-aged man with scarred pockmarked skin, milky-white eyes, thinning disheveled brown hair, ragged mustard-yellow work clothes and a rusty three-tined pitchfork. He is the supernatural Dream Doctor, not a farmer or masked slasher. Preserve the selected physical Location. The tracked Boiler Room sequence belongs to the Final Girl. Victims remain in the physical Location while experiencing their own private nightmares. Never expose an unresolved Boiler Room card or invent a recorded attack or injury.",
+      "location": "Maple Lane",
+      "locationDescription": "An ordinary suburban neighborhood of modest houses, viewed through a bedroom window.",
+      "finalGirlHealth": 0,
+      "story": "Laurie never woke from the final nightmare. The room was quiet, the morning outside ordinary. In the bedroom window the pale-eyed dream killer appeared as a threatening reflection. No one had defeated him.",
+      "shotBrief": "A quiet suburban bedroom in cold early light. Laurie lies still on the pillow with closed eyes, without gore. In the window behind her is an ambiguous reflection of the stocky milky-eyed Dream Doctor in ragged mustard-yellow work clothes. He is a supernatural nightmare presence, not an ordinary farmer. Keep faces at the middle third, quiet architectural atmosphere above and below. Do not depict an attack or add props."
+    }
+  },
+  {
+    "id": "strings-cut",
+    "art": "exec-966a31f9-ae6f-4fc3-af8e-d8ab261cc5e6.png",
+    "title": "STRINGS CUT",
+    "tagline": "THE CURTAIN FELL ON HIS FINAL ACT.",
+    "design": {
+      "layout": "marquee",
+      "face": "industrial",
+      "palette": "electric"
+    },
+    "cast": {
+      "finalGirl": "Reiko",
+      "killer": "Geppetto",
+      "location": "Carnival of Blood"
+    },
+    "context": {
+      "sceneType": "ending",
+      "outcome": "won",
+      "finalGirl": "Reiko",
+      "killer": "Geppetto",
+      "killerDescription": "Geppetto is a tall, extremely gaunt pale human puppeteer with hollow dark eyes, a sinister narrow grin, a battered tall black top hat with a brass band, a distressed long dark ringmaster coat, red waistcoat and tarnished gold trim. His long bony hands hold wooden marionette crossbars with visible strings. His puppets are shabby sinister humanlike marionettes, never Buddyland animatronics or cute robots. He is theatrical and deliberate. Preserve this identity in the selected location; a carnival backdrop is not required. Do not invent teleportation or depict the Final Girl as a puppet unless recorded.",
+      "location": "Carnival of Blood",
+      "locationDescription": "A deserted traveling carnival with striped tent canvas, a low wooden stage and practical strings of bulbs.",
+      "finalGirlHealth": 2,
+      "killerHealth": 0,
+      "story": "Reiko survived the final confrontation. The puppeteer lay motionless on his low stage, his control bar fallen beside him. The carnival bulbs still burned over the empty walkway. No weapon or puppet casualties were recorded.",
+      "shotBrief": "Reiko, with her short straight black bob and blue-red striped top, leans exhausted beside the low carnival stage. Beyond her, the elderly ringmaster lies motionless on the boards with a dropped wooden control bar. No weapon or gore. Both faces occupy the middle third; leave atmospheric upper canvas and lower walkway, preserving the striped tents and bulb light."
+    }
+  },
+  {
+    "id": "after-the-last-game",
+    "art": "exec-9a7f9906-1f69-4654-a954-6d95249af5b4.png",
+    "title": "AFTER THE LAST GAME",
+    "tagline": "THE PRIZE WAS GETTING OUT.",
+    "design": {
+      "layout": "crown",
+      "face": "industrial",
+      "palette": "ochre"
+    },
+    "cast": {
+      "finalGirl": "Rena",
+      "killer": "Billy the Bear",
+      "location": "Buddyland"
+    },
+    "context": {
+      "sceneType": "ending",
+      "outcome": "won",
+      "finalGirl": "Rena",
+      "killer": "Billy the Bear",
+      "killerDescription": "An orange-brown animatronic bear with damaged worn fur, pink-purple glowing mechanical eyes and exposed metal joints. A real machine, not a person in costume.",
+      "location": "Buddyland",
+      "locationDescription": "A closed family entertainment arcade with worn prize machines and checkerboard floor.",
+      "finalGirlHealth": 1,
+      "story": "Rena escaped the closing arcade. Through the glass security door she could still see the bear moving among the dead machines. She survived, but the animatronic remained active inside. No weapon was used in the final escape.",
+      "shotBrief": "From outside the arcade glass doorway, Rena stands in profile near the foreground, while the bear remains behind the glass deeper inside among dark prize machines. Keep the important faces in the middle third of the canvas; top and bottom can continue architectural shadow and reflected neon. Painted, not photographic."
+    }
+  },
+  {
+    "id": "creech-manor",
+    "art": "exec-d43af60a-3a8b-46ed-b7d6-bb9265bcbf42.png",
+    "title": "CREECH MANOR",
+    "tagline": "SOME THINGS STAY IN THE HOUSE.",
+    "design": {
+      "layout": "inset",
+      "face": "serif",
+      "palette": "electric"
+    },
+    "cast": {
+      "finalGirl": "Alice",
+      "killer": "Poltergeist",
+      "location": "Creech Manor"
+    },
+    "context": {
+      "sceneType": "ending",
+      "outcome": "won",
+      "finalGirl": "Alice",
+      "killer": "Poltergeist",
+      "killerDescription": "An indistinct translucent female spirit in a long pale gown, an incorporeal haunting rather than a physical opponent.",
+      "location": "Creech Manor",
+      "locationDescription": "A decaying Victorian house with a timber staircase and peeling floral wallpaper.",
+      "story": "Alice found Carolyn and got her outside. The child had already reached safety beyond the front door. Alice looked back once at the staircase; the haunting was still there. The rescue was a victory, not an exorcism or a destroyed ghost.",
+      "shotBrief": "View from just inside a Victorian front door: copper-red-haired Alice in her established green top looks back toward an empty worn staircase with a faint incorporeal pale figure midway up it. The rescued child is already outside and need not appear. Keep Alice's face and the ghost in the middle third, architecture and shadow above and below. No weapon, battle, or defeated ghost."
+    }
+  },
+  {
+    "id": "when-the-night-returns",
+    "art": "exec-0f49338e-7bc9-4d5b-9689-3eeb2f870b66.png",
+    "title": "WHEN THE NIGHT RETURNS",
+    "tagline": "MORNING WAS NEVER THE WAY OUT.",
+    "design": {
+      "layout": "basement",
+      "face": "gothic",
+      "palette": "ember"
+    },
+    "cast": {
+      "finalGirl": "Laurie",
+      "killer": "Dr. Fright",
+      "location": "Maple Lane"
+    },
+    "context": {
+      "sceneType": "ending",
+      "outcome": "lost",
+      "finalGirl": "Laurie",
+      "killer": "Dr. Fright",
+      "killerDescription": "Dr. Fright is a grotesque stocky middle-aged man with scarred pockmarked skin, milky-white eyes, thinning disheveled brown hair, ragged mustard-yellow work clothes and a rusty three-tined pitchfork. He is the supernatural Dream Doctor, not a farmer or masked slasher. Preserve the selected physical Location. The tracked Boiler Room sequence belongs to the Final Girl. Victims remain in the physical Location while experiencing their own private nightmares. Never expose an unresolved Boiler Room card or invent a recorded attack or injury.",
+      "location": "Maple Lane",
+      "locationDescription": "An ordinary suburban neighborhood of modest houses, viewed through a bedroom window.",
+      "finalGirlHealth": 0,
+      "story": "Laurie never woke from the final nightmare. The room was quiet, the morning outside ordinary. In the bedroom window the pale-eyed dream killer appeared as a threatening reflection. No one had defeated him.",
+      "shotBrief": "A quiet suburban bedroom in cold early light. Laurie lies still on the pillow with closed eyes, without gore. In the window behind her is an ambiguous reflection of the stocky milky-eyed Dream Doctor in ragged mustard-yellow work clothes. He is a supernatural nightmare presence, not an ordinary farmer. Keep faces at the middle third, quiet architectural atmosphere above and below. Do not depict an attack or add props."
+    }
+  },
+  {
+    "id": "curtain-call",
+    "art": "exec-966a31f9-ae6f-4fc3-af8e-d8ab261cc5e6.png",
+    "title": "CURTAIN CALL",
+    "tagline": "THE FINAL ACT BELONGED TO HER.",
+    "design": {
+      "layout": "marquee",
+      "face": "brush",
+      "palette": "bone"
+    },
+    "cast": {
+      "finalGirl": "Reiko",
+      "killer": "Geppetto",
+      "location": "Carnival of Blood"
+    },
+    "context": {
+      "sceneType": "ending",
+      "outcome": "won",
+      "finalGirl": "Reiko",
+      "killer": "Geppetto",
+      "killerDescription": "Geppetto is a tall, extremely gaunt pale human puppeteer with hollow dark eyes, a sinister narrow grin, a battered tall black top hat with a brass band, a distressed long dark ringmaster coat, red waistcoat and tarnished gold trim. His long bony hands hold wooden marionette crossbars with visible strings. His puppets are shabby sinister humanlike marionettes, never Buddyland animatronics or cute robots. He is theatrical and deliberate. Preserve this identity in the selected location; a carnival backdrop is not required. Do not invent teleportation or depict the Final Girl as a puppet unless recorded.",
+      "location": "Carnival of Blood",
+      "locationDescription": "A deserted traveling carnival with striped tent canvas, a low wooden stage and practical strings of bulbs.",
+      "finalGirlHealth": 2,
+      "killerHealth": 0,
+      "story": "Reiko survived the final confrontation. The puppeteer lay motionless on his low stage, his control bar fallen beside him. The carnival bulbs still burned over the empty walkway. No weapon or puppet casualties were recorded.",
+      "shotBrief": "Reiko, with her short straight black bob and blue-red striped top, leans exhausted beside the low carnival stage. Beyond her, the elderly ringmaster lies motionless on the boards with a dropped wooden control bar. No weapon or gore. Both faces occupy the middle third; leave atmospheric upper canvas and lower walkway, preserving the striped tents and bulb light."
+    }
+  }
+]

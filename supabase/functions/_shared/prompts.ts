@@ -3,6 +3,7 @@ import { resolveFinalGirlIdentity, reviewedFinalGirlIdentity } from './finalGirl
 // Sole home of image direction. Preserve facts and identity within the requested medium.
 import { endingFacts } from './storyFacts.ts';
 import { NARRATIVE_QUANTITIES } from './narrativeStyle.ts';
+import { fallbackPosterDesign, parsePosterDesign, posterArtDirection, POSTER_DESIGN_MENU, type PosterDesign } from './posterDesign.ts';
 
 export interface SceneContext {
   story: string;
@@ -13,6 +14,7 @@ export interface SceneContext {
   moduleVisualGuidance?: string;
   visualBible?: string;
   shotBrief?: string;
+  posterDesign?: PosterDesign;
   outcome?: 'won' | 'lost';
   introStory?: string;
   finalGirlHealth?: number; killerHealth?: number;
@@ -33,6 +35,7 @@ export interface ShotPlan {
 }
 export interface ArtPlan extends ShotPlan {
   title: string; tagline: string;
+  design?: PosterDesign;
 }
 // Local compositor fonts contain printable Latin characters. No markup/control characters.
 export const cleanType = (text: string, max: number): string => text.normalize('NFKD')
@@ -84,10 +87,20 @@ export function parseShotPlan(text: string): ShotPlan | null {
 export function parseArtPlan(text: string): ArtPlan | null {
   try {
     const value = readPlan(text), shot = parseConcepts(value);
-    if (!shot || typeof value.title !== 'string' || typeof value.tagline !== 'string') return null;
+    const copy = parsePosterCopy(text);
+    if (!shot || !copy) return null;
+    return { ...shot, ...copy };
+  } catch { return null; }
+}
+/** Recover good copy even when the optional print direction or shot plan is invalid. */
+export function parsePosterCopy(text: string): { title: string; tagline: string; design?: PosterDesign } | null {
+  try {
+    const value = readPlan(text);
+    if (!value || typeof value.title !== 'string' || typeof value.tagline !== 'string') return null;
     const title = cleanType(value.title, 500), tagline = cleanType(value.tagline, 500);
     if (!title || title.length > 32 || tagline.length > 70 || title.split(/\s+/).length > 4 || !tagline || tagline.split(/\s+/).length > 10) return null;
-    return { ...shot, title, tagline };
+    const design = parsePosterDesign(value.design);
+    return { title, tagline, ...(design ? { design } : {}) };
   } catch { return null; }
 }
 export function fallbackPosterCopy(ctx: SceneContext): { title: string; tagline: string } {
@@ -108,8 +121,10 @@ Each concept specifies the decisive visible detail, camera position/lens, subjec
 Only selected cast, setting, facts and moment may appear. Never invent a kill, monster form, weapon or injury for impact. A selected Final Girl or recorded Ultimate never implies possession of a secret or signature item; do not supply one from game knowledge. Show an item only when this session establishes its presence. Permanent identity comes from cast descriptions; discard incidental posing, expression, lighting, camera, background and rendering-style directions. Do not transplant the killer's home setting. Read module constraints first.`;
 export const buildShotBriefSystem = (ctx: SceneContext): string => isPoster(ctx) ?
 `You are a horror poster art director planning a painted 1980s one-sheet.
-Return only JSON: {"concepts":["composition A","composition B","composition C"],"selected":0,"title":"1-4 word original title","tagline":"up to 10 words"}.
+Return only JSON: {"concepts":["composition A","composition B","composition C"],"selected":0,"title":"1-4 word original title","tagline":"up to 10 words","design":${JSON.stringify(fallbackPosterDesign(`${ctx.finalGirl}|${ctx.killer}|${ctx.location}|${ctx.story}`))}}.
 ${shotPlanning}
+${POSTER_DESIGN_MENU}
+The example design is a stable editorial starting point specific to this story, not a global house template. Develop it coherently or choose a stronger combination for your selected concept. The three concepts should explore different visual hierarchies, not minor reframings of the same poster.
 Plan a painted image earned by the actual result, even if the Final Girl died in a win or escaped alive in a loss. Prioritize thumbnail readability as well as detail at full size.
 Poster title maximum 32 printable Latin characters; tagline maximum 70. Both specific to this story; no famous titles, real credits, stock taglines or unsupported sequel promises.
 For the title and tagline: ${NARRATIVE_QUANTITIES}`
@@ -119,7 +134,7 @@ Return only JSON: {"concepts":["shot A","shot B","shot C"],"selected":0}.
 ${shotPlanning}
 ${photographMedium}
 Choose a physically photographable opening instant, preserving the starting state. Prefer a credible observer viewpoint, natural gestures and scene-specific tension over a posed heroine-versus-monster tableau. Specify the available light and plausible exposure, not an artistic lighting rig or a color-grading look. Do not add weather, atmosphere or glowing edges to manufacture drama. A dark setting remains dark, but daytime need not become artificially dim to communicate horror. No ending, montage or invented casualties.`;
-export const buildShotBriefPrompt = (ctx: SceneContext): string => `${isPoster(ctx) ? 'CLOSING PAINTED POSTER, portrait 2:3. Keep top 12% and bottom 25% quiet for later typography.' : 'OPENING PHOTOGRAPH, edge-to-edge 16:9 landscape. Compose for the full canvas, without letterboxing or black bars.'}
+export const buildShotBriefPrompt = (ctx: SceneContext): string => `${isPoster(ctx) ? 'CLOSING PAINTED POSTER, portrait 2:3. Plan the complete graphic identity and a composition with quiet lettering zones suited to your chosen design. Reserve space intentionally; there is no mandatory upper tagline or lower title.' : 'OPENING PHOTOGRAPH, edge-to-edge 16:9 landscape. Compose for the full canvas, without letterboxing or black bars.'}
 ${facts(ctx)}
 ${identityLock(ctx)}
 ${block('CONTINUITY (identity and palette, not mandatory framing)', visualContinuity(ctx))}
@@ -157,4 +172,4 @@ ${block('SHARED IDENTITY AND PALETTE (translate into paint)', visualContinuity(c
 ${ctx.shotBrief ? block('CHOSEN COMPOSITION', ctx.shotBrief) : block('ENDING: choose its single most powerful specific visual', ctx.story)}
 ${integrity}
 One dominant, unforgettable painted image: readable silhouette at thumbnail size and rewarding detail at full size. Visibly hand-painted at first glance, with broad gouache brushstrokes and broken paint edges rather than photographic microtexture. Painterly realism: confident gouache/oil brushwork, tangible surfaces, selective hard/soft edges, luminous restrained highlights and deep chromatic shadows. Rich illustrated horror key art, not a photo filter, glossy game render, cartoon or cluttered contact sheet. Preserve believable anatomy, architecture, depth and motivated light even in symbolic composition. Victory does not automatically mean survival, dawn or a destroyed killer.
-SAFE AREAS: place decisive subject/detail within the middle 60% of height. Leave atmospheric low-detail space across top 12% for a small tagline and bottom 25% for a large title and minimal credits. Continue image color through these areas. No decorative frame. No text.`;
+${posterArtDirection(ctx.posterDesign ?? fallbackPosterDesign(`${ctx.finalGirl}|${ctx.killer}|${ctx.location}|${ctx.story}`))}`;

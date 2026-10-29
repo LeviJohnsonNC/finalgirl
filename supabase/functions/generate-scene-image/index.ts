@@ -25,8 +25,10 @@ import {
   buildShotBriefSystem,
   parseShotPlan,
   parseArtPlan,
+  parsePosterCopy,
   fallbackPosterCopy,
 } from "../_shared/prompts.ts";
+import { fallbackPosterDesign } from "../_shared/posterDesign.ts";
 
 const EXTENSION: Record<string, string> = {
   "image/png": "png",
@@ -78,6 +80,8 @@ serve(async (req) => {
     // only the selected image. Never spend an opening image call on a broken plan.
     let briefModel: string | undefined;
     let posterCopy = fallbackPosterCopy(context);
+    if (isPoster) context.posterDesign = fallbackPosterDesign(`${context.finalGirl}|${context.killer}|${context.location}|${context.story}`);
+    let posterPlanStatus = 'fallback';
     try {
       const brief = await generateShotPlanText({
         system: buildShotBriefSystem(context),
@@ -87,13 +91,18 @@ serve(async (req) => {
         requireComplete: true,
       });
       const posterPlan = isPoster ? parseArtPlan(brief.text) : null;
+      const recoveredCopy = isPoster ? parsePosterCopy(brief.text) : null;
+      if (recoveredCopy) {
+        posterCopy = recoveredCopy;
+        if (recoveredCopy.design) context.posterDesign = recoveredCopy.design;
+        posterPlanStatus = posterPlan && recoveredCopy.design ? 'complete' : 'recovered-copy';
+      }
       const plan = isPoster ? posterPlan : parseShotPlan(brief.text);
       if (plan) {
         const selectedShot = plan.concepts[plan.selected];
         if (!isPoster && hasMechanicalShotLeak(selectedShot, body.location))
           throw new GatewayError("incomplete_response", "The scene plan included game procedures. Please reshoot.");
         context.shotBrief = selectedShot;
-        if (posterPlan) posterCopy = { title: posterPlan.title, tagline: posterPlan.tagline };
       } else {
         if (!isPoster) throw new GatewayError("incomplete_response", "The opening shot plan was incomplete.");
         console.warn('Invalid art plan; using fact-constrained story fallback.');
@@ -105,6 +114,7 @@ serve(async (req) => {
     }
 
     const prompt = isPoster ? buildPosterPrompt(context) : buildBeginningPrompt(context);
+    if (isPoster) console.info('Poster print plan', { status: posterPlanStatus, ...context.posterDesign });
     const reference = isPoster ? ownedOpeningReference(body.referenceImageUrl, Deno.env.get("SUPABASE_URL") ?? '', user.id, body.gameId) : undefined;
     const image = await generateImage(prompt, reference, isPoster ? undefined : {
       aspectRatio: "16:9", references,
@@ -124,7 +134,7 @@ serve(async (req) => {
     let bytes: Uint8Array = Uint8Array.from(atob(image.base64), (c) => c.charCodeAt(0));
     if (isPoster) {
       const { composePoster } = await import('../_shared/poster.ts');
-      bytes = await composePoster(bytes, posterCopy);
+      bytes = await composePoster(bytes, posterCopy, context.posterDesign, { finalGirl: body.finalGirl, killer: body.killer, location: body.location });
     }
     const { error: uploadError } = await adminClient.storage
       .from("posters")
