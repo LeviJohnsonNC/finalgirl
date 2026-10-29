@@ -28,3 +28,33 @@
 .evo-minors[data-focused=true]{grid-template-columns:1fr}
 .play-evomorph button:focus-visible,.play-evomorph input:focus-visible,.play-evomorph select:focus-visible,.evo-section>summary:focus-visible{outline:2px solid #d2d5a5;outline-offset:3px}
 @media(max-width:650px){.evo-evolution,.evo-scan-layout,.evo-observations,.evo-minors{grid-template-columns:1fr}.play-evomorph .evo-evolution>.play-illustrated-tile{min-height:205px}.evo-resolution{padding:.85rem}.evo-observations .module-linked-preview{grid-column:auto}}
+
+/* Captions belong to their picture, never to the page's history/footer. */
+.play-evomorph .evo-evolution>.play-illustrated-tile,
+.play-evomorph .evo-scan-layout>.play-illustrated-tile {
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+.play-evomorph .evo-evolution>.play-illustrated-tile>.play-module-art,
+.play-evomorph .evo-scan-layout>.play-illustrated-tile>.play-module-art {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.play-evomorph .evo-evolution>.play-illustrated-tile::after,
+.play-evomorph .evo-scan-layout>.play-illustrated-tile::after {
+  content:"";
+  position:absolute;
+  inset:45% 0 0;
+  background:linear-gradient(transparent,#050a0aeb);
+  pointer-events:none;
+}
+.play-evomorph .evo-evolution .play-tile-caption,
+.play-evomorph .evo-scan-layout .play-tile-caption {
+  z-index:1;
+  text-align:left;
+  pointer-events:none;
+}
