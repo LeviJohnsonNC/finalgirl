@@ -122,7 +122,7 @@ body:has(.play-workspace) .app-shell {
 .play-tracking-tools {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin: 0 0 12px;
   font-size: 12px;
 }

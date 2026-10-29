@@ -21,6 +21,19 @@ export async function openHistory(page: Page) {
   await toggle.click();
 }
 
+/** Correct the latest eligible active observation through the visible timeline. */
+export async function undoLatestObservation(page: Page) {
+  const toggle = page.getByRole("button", { name: /^The night so far/ });
+  const wasOpen = (await toggle.getAttribute("aria-expanded")) === "true";
+  if (!wasOpen) await toggle.click();
+  await page
+    .getByRole("region", { name: "Game timeline", exact: true })
+    .getByRole("button", { name: /^Undo / })
+    .first()
+    .click();
+  if (!wasOpen) await toggle.click();
+}
+
 export async function saveResultOnly(page: Page) {
   await page.getByRole("button", { name: "More options", exact: true }).click();
   await page

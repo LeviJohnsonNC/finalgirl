@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { openModule, statusPick } from "./play-helpers";
+import { openModule, statusPick, undoLatestObservation } from "./play-helpers";
 import type { PlayEvent } from "../../src/lib/play/events";
 
 const killers = [
@@ -93,7 +93,7 @@ for (const killer of killers)
           exact: true,
         })
         .click();
-      await page.getByRole("button", { name: "Undo", exact: true }).click();
+      await undoLatestObservation(page);
       await expect(person).toHaveAttribute(
         "data-state",
         location.id === "buddyland" ? "on-board" : "in-play",

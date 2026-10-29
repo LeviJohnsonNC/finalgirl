@@ -1,6 +1,6 @@
 import { test, expect, activeGame, userId } from './fixtures';
 import { newPlayEvent } from '../../src/lib/play/events';
-import { openModule, chooseKillerCard } from './play-helpers';
+import { openModule, chooseKillerCard, undoLatestObservation } from './play-helpers';
 import type { Page } from '@playwright/test';
 
 const start = () => newPlayEvent({ kind: 'start', saved: 0, killed: 0, round: 1 });
@@ -43,7 +43,7 @@ test('health photos follow damage, recovery, Undo and reload with stable crops a
   }
   await setHealth(page, 5);
   await expect(photo).toHaveAttribute('data-health-portrait', 'healthy');
-  await page.getByRole('button', { name: 'Undo', exact: true }).click();
+  await undoLatestObservation(page);
   await expect(card.getByRole('button', { name: 'Set Final Girl health', exact: true })).toHaveText('0');
   await expect(photo).toHaveAttribute('data-health-portrait', 'critical');
   await page.reload();
@@ -146,7 +146,7 @@ for (const [maximum, health, ai, expected] of [[undefined,5,true,undefined],[5,5
     if (maximum !== undefined && health > maximum) {
       await page.getByRole('button', { name: 'Decrease Final Girl health', exact: true }).click();
       await expect(page.getByRole('button', { name: 'Set Final Girl health', exact: true })).toHaveText(String(maximum));
-      await page.getByRole('button', { name: 'Undo', exact: true }).click();
+      await undoLatestObservation(page);
       await expect(page.getByRole('button', { name: 'Set Final Girl health', exact: true })).toHaveText(String(health));
     }
   });

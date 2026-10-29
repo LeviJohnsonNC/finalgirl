@@ -1,4 +1,4 @@
-import { saveResultOnly } from "./play-helpers";
+import { saveResultOnly, undoLatestObservation } from "./play-helpers";
 import { deathFacts, deathSignature } from "../../src/lib/play/death";
 import type { PlayEvent } from "../../src/lib/play/events";
 import { searchPick } from "./play-helpers";
@@ -210,7 +210,7 @@ test("AI failure and a late death response cannot lose or revive a recorded coun
   await page
     .getByRole("button", { name: "Save and exit", exact: true })
     .click();
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   archive.releaseDeath!();
   await expect(
     page.getByRole("button", { name: "Record one victim killed", exact: true }),

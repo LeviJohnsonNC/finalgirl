@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { openModule, statusPick, searchPick } from "./play-helpers";
+import { openModule, statusPick, searchPick, undoLatestObservation } from "./play-helpers";
 import { type PlayEvent } from "../../src/lib/play/events";
 const selection = {
   ...activeGame.selection,
@@ -161,7 +161,7 @@ test("persistent trap placement survives cancellation, rounds, reload and Undo w
     p.getByRole("combobox", { name: "Acid Pitfall Trap status", exact: true }),
     "Not placed",
   );
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   await expect(
     p.getByRole("button", { name: "View Acid Pitfall Trap", exact: true }),
   ).toBeVisible();
@@ -209,7 +209,7 @@ test("Event activation and character outcomes are atomic and never resurrect end
     .evaluate((el) => (el as HTMLButtonElement).click());
   expect((await log(page)).length).toBe(length);
   expect((await log(page)).filter((e) => e.kind === "killed")).toHaveLength(0);
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   await expect(
     p.getByRole("combobox", { name: "Sibling status", exact: true }),
   ).toHaveText("In play");

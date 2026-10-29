@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId, installTestAudio } from "./fixtures";
-import { openModule, statusPick, openHistory } from "./play-helpers";
+import { openModule, statusPick, openHistory, undoLatestObservation } from "./play-helpers";
 import { newPlayEvent, type PlayEvent } from "../../src/lib/play/events";
 import { deathFacts } from "../../src/lib/play/death";
 import type { Page } from "@playwright/test";
@@ -88,7 +88,7 @@ for (const [killer, id] of [
       .getByRole("button", { name: "Record outcome", exact: true })
       .click();
     await expect(p.getByLabel("Current Divine Wrath")).toHaveText("8/10");
-    await page.getByRole("button", { name: "Undo", exact: true }).click();
+    await undoLatestObservation(page);
     await expect(p.getByLabel("Current Divine Wrath")).toHaveText("2/10");
     await p
       .locator(".module-character")
@@ -145,7 +145,7 @@ test("Holy Man allocation and independent track corrections update both owners w
     .click();
   await expect(p.getByLabel("Current Divine Wrath")).toHaveText("1/10");
   await expect(ink.getByLabel("Current Killer Wrath")).toHaveText("1/10");
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   await expect(ink.getByLabel("Current Killer Wrath")).toHaveText("3/10");
   await expect(p.getByLabel("Current Divine Wrath")).toHaveText("8/10");
   await p
@@ -204,7 +204,7 @@ test("Holy Man without Inkanyamba uses the approved, clearly provisional Divine-
     .click();
   await expect(p.getByLabel("Current Divine Wrath")).toHaveText("10/10");
   expect((await log(page)).some((e) => e.linkedModule)).toBe(false);
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   await expect(p.getByLabel("Current Divine Wrath")).toHaveText("2/10");
 });
 test("image cycling, combined tokens and event-independent placements survive Undo and reload", async ({
@@ -222,7 +222,7 @@ test("image cycling, combined tokens and event-independent placements survive Un
   await expect(burial).toContainText("Closed");
   await burial.click();
   await expect(burial).toContainText("Fire and Brimstone");
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   await expect(burial).toContainText("Closed");
   const editor = p
     .locator(".groves-site")

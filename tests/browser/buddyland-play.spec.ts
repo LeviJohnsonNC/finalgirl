@@ -1,4 +1,4 @@
-import { searchPick, statusPick, openHistory, openModule } from "./play-helpers";
+import { searchPick, statusPick, openHistory, openModule, undoLatestObservation } from "./play-helpers";
 import { test, expect, activeGame, userId } from "./fixtures";
 const selection = {
   ...activeGame.selection,
@@ -241,7 +241,7 @@ test("every Buddy portrait cycles distinct artwork, supports keyboard and Undo, 
     expect(sources.size).toBe(3);
     await expect(tile).toHaveAttribute("data-state", "off");
   }
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   await expect(portrait(page, "Toby")).toHaveAttribute(
     "data-state",
     "killed",

@@ -1,7 +1,7 @@
 import {test,expect,activeGame,userId,installTestAudio} from './fixtures';
 import {deathFacts,deathSignature} from '../../src/lib/play/death';
 import {summarizePlay,type PlayEvent} from '../../src/lib/play/events';
-import {openHistory,saveResultOnly} from './play-helpers';
+import {openHistory,saveResultOnly, undoLatestObservation } from './play-helpers';
 const start:PlayEvent={id:'22222222-2222-4222-8222-222222222222',at:1,kind:'start',saved:0,killed:0,round:4};
 const kill:PlayEvent={id:'33333333-3333-4333-8333-333333333333',at:2,kind:'killed',quantity:1,cause:'killer',room:'Cabin'};
 const selection={...activeGame.selection,killer:'Dr. Fright'};
@@ -107,7 +107,7 @@ test('timeline Undo and Restore change the group and tally together without anot
  const dialog=page.getByRole('dialog',{name:'Gruesome Death',exact:true});
  await dialog.getByRole('button',{name:'Add one victim to this death',exact:true}).dblclick();
  await dialog.getByRole('button',{name:'Cancel',exact:true}).click();
- await page.getByRole('button',{name:'Undo',exact:true}).click();
+ await undoLatestObservation(page);
  await expect(page.getByRole('button',{name:'Record one victim killed',exact:true})).toContainText('2');
  await openHistory(page);
  await page.getByRole('button',{name:'Restore Added one victim to a death',exact:true}).click();

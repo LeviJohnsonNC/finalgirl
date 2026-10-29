@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { openModule, statusPick, searchPick } from "./play-helpers";
+import { openModule, statusPick, searchPick, undoLatestObservation } from "./play-helpers";
 import { newPlayEvent, type PlayEvent } from "../../src/lib/play/events";
 const selected = { ...activeGame.selection, killer: "Geppetto" };
 const setup = {
@@ -77,7 +77,7 @@ test("new mixed-module game seeds the tray once, spawns in order, undoes and res
   await expect(p.getByRole("combobox", { name: "Puppet 2 status" })).toHaveText(
     "On board",
   );
-  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  await undoLatestObservation(page);
   await expect(p.getByRole("combobox", { name: "Puppet 1 status" })).toHaveText(
     "Exhausted",
   );

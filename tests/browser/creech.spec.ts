@@ -1,5 +1,5 @@
 import { test,expect,activeGame,userId } from './fixtures';
-import { openModule } from './play-helpers';
+import { openModule, undoLatestObservation } from './play-helpers';
 const key=`final-girl-active-game-v1:${userId}`;
 const draft={...activeGame,creechSetupVersion:1,poltergeistSetupVersion:1,playMode:true,selection:{...activeGame.selection,location:'Creech Manor',killer:'Poltergeist',filmId:'s1-creech-manor'}};
 async function settled(page:import('@playwright/test').Page){await page.locator('img').evaluateAll(async nodes=>{await Promise.all(nodes.map(async node=>{const img=node as HTMLImageElement;img.loading='eager';await img.decode().catch(()=>{});}));});}
@@ -15,7 +15,7 @@ test('hunter group and reported Bloodlust save together, undo and reload',async(
  await panel.getByRole('button',{name:'Mark Orange Ghost Hunter killed',exact:true}).click();
  await expect(panel.getByRole('button',{name:'View Ghost Hunters',exact:true})).toContainText('Survivors can follow');
  await expect.poll(()=>page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents.filter((e:{creechAction?:{kind:string}})=>e.creechAction?.kind==='hunter').length,key)).toBe(1);
- await page.getByRole('button',{name:'Undo',exact:true}).click();await expect(panel.getByRole('button',{name:'View Orange Ghost Hunter',exact:true})).toContainText('In play');await expect(panel.getByRole('button',{name:'View Ghost Hunters',exact:true})).toContainText('Will not follow yet');
+ await undoLatestObservation(page);await expect(panel.getByRole('button',{name:'View Orange Ghost Hunter',exact:true})).toContainText('In play');await expect(panel.getByRole('button',{name:'View Ghost Hunters',exact:true})).toContainText('Will not follow yet');
  await panel.getByRole('button',{name:'View Orange Ghost Hunter',exact:true}).click();await panel.getByText('Bloodlust with death (optional)',{exact:true}).click();await panel.getByLabel('Observed final Bloodlust',{exact:true}).fill('4');await panel.getByRole('button',{name:'Mark Orange Ghost Hunter killed',exact:true}).click();
  for(const size of info.project.name==='mobile'?[{width:390,height:844},{width:320,height:568}]:[{width:1280,height:640},{width:1366,height:768},{width:1440,height:900}]){await page.setViewportSize(size);await settled(page);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await panel.screenshot({path:info.outputPath(`hunters-${size.width}.png`),animations:'disabled',style:'.app-footer{visibility:hidden}'});}
  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'creech');await expect(panel.getByRole('button',{name:'View Orange Ghost Hunter',exact:true})).toContainText('Killed');
@@ -57,7 +57,7 @@ test('Rope Ladder cycles directly with Undo, retry and no editor; Poltergeist tr
  await expect(panel.getByText('Place or correct Rope Ladder',{exact:true})).toHaveCount(0);
  await expect(panel.getByRole('button',{name:'Use Rope Ladder to repair external ladder',exact:true})).toHaveCount(0);
  for(const label of ['Upper-left room ↔ left washroom','Upper-right Window ↔ right outside Exit','Lower-right Window ↔ right outside Exit','Not placed']){await rope.click();await expect(rope).toContainText(label);}
- await page.getByRole('button',{name:'Undo',exact:true}).click();await expect(rope).toContainText('Lower-right Window');
+ await undoLatestObservation(page);await expect(rope).toContainText('Lower-right Window');
  await page.evaluate(()=>{const original=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k.startsWith('final-girl-active-game-v1:'))throw new Error('synthetic quota');return original.call(this,k,v);};});
  await rope.click();await expect(panel.getByRole('alert')).toContainText('could not be saved');await expect(rope).toContainText('Lower-right Window');
  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'creech');await rope.click();await expect(rope).toContainText('Not placed');
@@ -80,5 +80,5 @@ test('legacy Rope Ladder stays unknown until clicked, and hunter disclosure does
  expect(await page.evaluate(k=>localStorage.getItem(k),key)).toBe(before);
  await panel.getByRole('button',{name:'Mark Blue Ghost Hunter saved',exact:true}).click();await expect(panel.getByRole('button',{name:'View Blue Ghost Hunter',exact:true})).toContainText('Saved');
  await expect(page.getByRole('button',{name:'Save one victim',exact:true})).toContainText('2');await expect(page.getByRole('button',{name:'Record one victim killed',exact:true})).toContainText('3');
- await page.getByRole('button',{name:'Undo',exact:true}).click();await expect(panel.getByRole('button',{name:'View Blue Ghost Hunter',exact:true})).toContainText('In play');
+ await undoLatestObservation(page);await expect(panel.getByRole('button',{name:'View Blue Ghost Hunter',exact:true})).toContainText('In play');
 });

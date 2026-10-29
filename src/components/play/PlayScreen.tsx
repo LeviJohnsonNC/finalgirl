@@ -33,7 +33,6 @@ import {
   Flag,
   Minus,
   Plus,
-  Undo2,
   Volume2,
   ChevronDown,
 } from "lucide-react";
@@ -48,8 +47,6 @@ import {
   newPlayEvent,
   summarizePlay,
   PERMANENT_MOMENTS,
-  isPermanentMoment,
-  isLockedPlayEvent,
   type PlayEvent,
   type PlayDetails,
   type StateField,
@@ -211,7 +208,6 @@ export function PlayScreen(props: PlayScreenProps) {
     setMessage("");
     return e;
   };
-  const last = [...summary.entries].reverse().find((e) => e.kind !== "start" && !isPermanentMoment(e) && !isLockedPlayEvent(e));
   const lastDeath = [...summary.entries]
     .reverse()
     .find((e) => e.kind === "killed");
@@ -404,23 +400,16 @@ export function PlayScreen(props: PlayScreenProps) {
             );
           })}
         </div>
-        <div className="play-tracking-tools">
-          <button
-            aria-label="Undo"
-            disabled={!last}
-            onClick={() => last && commit({ kind: "undo", target: last.id })}
-          >
-            <Undo2 size={15} /> Undo last action
-          </button>
-          {lastDeath && (
+        {lastDeath && (
+          <div className="play-tracking-tools">
             <button
               aria-label="Latest death scene"
               onClick={() => props.onDeath?.(lastDeath)}
             >
               Latest death details
             </button>
-          )}
-        </div>
+          </div>
+        )}
         <p className="sr-only" aria-live="polite">
           Victims saved: {summary.saved ?? 0}. Victims killed:{" "}
           {summary.killed ?? 0}. Round: {summary.round ?? "unrecorded"}.

@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from './fixtures';
-import { openHistory, openModule } from './play-helpers';
+import { openHistory, openModule, undoLatestObservation } from './play-helpers';
 const draft = {...activeGame,billySetupVersion:1,playMode:true,selection:{...activeGame.selection,killer:'Billy the Bear',location:'Buddyland',finalGirl:'Rena',filmId:'s4-buddyland'}};
 const key = `final-girl-active-game-v1:${userId}`;
 test('compact session actions fit small phones with the display font and a wider fallback', async ({page,archive}) => {
@@ -41,7 +41,7 @@ test('Ultimate unlocks once, keeps its artwork after reload and still accepts fi
   await page.getByLabel('Moment detail',{exact:true}).fill('The last victim escaped just in time.');
   await page.getByRole('button',{name:'Record',exact:true}).click();
   await page.getByRole('button',{name:'Save one victim',exact:true}).click();
-  await page.getByRole('button',{name:'Undo',exact:true}).click();
+  await undoLatestObservation(page);
   await expect(ultimate).toBeDisabled();
   await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   await expect(ultimate).toBeDisabled();
@@ -81,7 +81,7 @@ test('sources and permanent milestones persist without repeat recording or Undo'
     await expect(entry.getByRole('button',{name:/^Undo/})).toHaveCount(0);
   }
   // Undo skips the protected moments and corrects the last ordinary source observation.
-  await page.getByRole('button',{name:'Undo',exact:true}).click();
+  await undoLatestObservation(page);
   await expect(page.getByRole('button',{name:'Back from the dead',exact:true})).toHaveAttribute('aria-pressed','true');
   await expect(page.getByRole('button',{name:'Power source 5, On. Turn off'})).toBeVisible();
   await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();

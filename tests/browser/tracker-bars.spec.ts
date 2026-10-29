@@ -1,3 +1,4 @@
+import { undoLatestObservation } from "./play-helpers";
 import { test, expect, activeGame, userId } from './fixtures';
 import { newPlayEvent } from '../../src/lib/play/events';
 import type { Page } from '@playwright/test';
@@ -78,7 +79,7 @@ test('close, Undo, reload, rejected writes and opt-in tracking preserve existing
   for (const label of labels) await page.getByRole('button', { name: `Stop tracking ${label}`, exact: true }).click();
   for (const label of labels) await expect(page.getByRole('button', { name: `Track ${label}`, exact: true })).toBeVisible();
   await page.locator('.play-track-more').screenshot({ path: info.outputPath('untracked-320.png'), style: '.app-footer{visibility:hidden}' });
-  await page.getByRole('button', { name: 'Undo', exact: true }).click();
+  await undoLatestObservation(page);
   await expect(page.getByRole('button', { name: 'Set Bloodlust', exact: true })).toHaveText('99');
   await page.reload();
   await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
