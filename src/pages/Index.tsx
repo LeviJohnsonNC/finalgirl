@@ -143,6 +143,7 @@ const IndexContent = () => {
       return;
     }
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
+      ...(selection.killer === 'Evomorph' && {evomorphSetupVersion:1 as const}),
       ...(selection.location === 'Creech Manor' && {creechSetupVersion:1 as const}),
       ...(selection.location === 'Sacred Groves' && {grovesSetupVersion: 1 as const}),
       ...(selection.killer === 'Poltergeist' && {poltergeistSetupVersion: 1 as const}),
@@ -288,6 +289,7 @@ const IndexContent = () => {
               filmId={gameSelection.filmId}
               key={activeGame.id}
               sessionId={activeGame.id}
+              evomorphFreshSetup={activeGame.evomorphSetupVersion === 1}
               playEvents={activeGame.playEvents}
               playDrafts={activeGame.playDrafts}
               playMode={activeGame.playMode}

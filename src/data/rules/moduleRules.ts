@@ -1,3 +1,4 @@
+import { evomorphRules, EVOMORPH_PROMPT_CONTEXT } from './evomorphRules';
 import { creechRules,CREECH_PROMPT_CONTEXT } from './creechRules';
 import { poltergeistRules, POLTERGEIST_PROMPT_CONTEXT } from './poltergeistRules';
 import { grovesRules, GROVES_PROMPT_CONTEXT } from "./grovesRules";
@@ -641,7 +642,7 @@ const marrekWarehouse: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer, marrekWarehouse];
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer, marrekWarehouse];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -650,6 +651,7 @@ export interface ModulePromptContext {
 }
 
 const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
+  Evomorph: EVOMORPH_PROMPT_CONTEXT,
   'Creech Manor':CREECH_PROMPT_CONTEXT,
   Poltergeist:POLTERGEIST_PROMPT_CONTEXT,
   "Sacred Groves": GROVES_PROMPT_CONTEXT,

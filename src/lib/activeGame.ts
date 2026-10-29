@@ -15,6 +15,7 @@ export interface EndingFormData {
   endingSubLocation: string; gameHighlights: string;
 }
 export interface ActiveGame {
+  evomorphSetupVersion?: 1;
   creechSetupVersion?: 1;
   poltergeistSetupVersion?: 1;
   grovesSetupVersion?: 1;
@@ -42,6 +43,7 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if(game.evomorphSetupVersion!==undefined&&game.evomorphSetupVersion!==1)return false;
   if(game.creechSetupVersion!==undefined&&game.creechSetupVersion!==1)return false;
   if(game.poltergeistSetupVersion!==undefined && game.poltergeistSetupVersion!==1)return false;
   if (game.grovesSetupVersion !== undefined && game.grovesSetupVersion !== 1) return false;
@@ -53,6 +55,7 @@ export function isActiveGame(value: unknown): value is ActiveGame {
   if (game.geppettoSetupVersion !== undefined && game.geppettoSetupVersion !== 1) return false;
   if (game.selection?.finalGirlStartingHealth !== undefined && (!Number.isInteger(game.selection.finalGirlStartingHealth) || game.selection.finalGirlStartingHealth < 1 || game.selection.finalGirlStartingHealth > 10)) return false;
   if (game.playEvents !== undefined && !validPlayLog(game.playEvents)) return false;
+  if(game.selection?.killer !== 'Evomorph' && game.playEvents?.some(e=>e.moduleData?.module==='evomorph'))return false;
   if (game.playDrafts !== undefined && (!game.playDrafts || typeof game.playDrafts !== 'object' || Array.isArray(game.playDrafts) || Object.keys(game.playDrafts).length > 1000 || !Object.values(game.playDrafts).every(validPlayDetails))) return false;
   if (game.showDeathPanel !== undefined && typeof game.showDeathPanel !== 'boolean') return false;
   if (game.playMode !== undefined && typeof game.playMode !== 'boolean') return false;

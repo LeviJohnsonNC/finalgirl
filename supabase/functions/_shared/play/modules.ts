@@ -1,3 +1,4 @@
+import { EVOMORPH_POWERS, EVOMORPH_FINALES, validEvomorphField, initialEvomorph, evomorphFacts } from './evomorph.ts';
 import { validCreechField, creechFacts, creechStartingObservations, CREECH_EVENTS, CREECH_ITEMS, CREECH_PEOPLE } from './creech.ts';
 import { POLTERGEIST_ITEMS, POLTERGEIST_POWERS, POLTERGEIST_FINALES, POLTERGEIST_MINORS, validPoltergeistField, poltergeistFacts, poltergeistPower } from './poltergeist.ts';
 import { validGrovesField, grovesLabel, grovesValue, grovesFacts, GROVES_EVENTS, GROVES_ITEMS, GROVES_VISUAL, GROVES_PEOPLE } from "./groves.ts";
@@ -48,7 +49,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -65,6 +66,7 @@ type ObservedEvent = {
 
 /** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
 export function killerMomentCards(killer: string, type: string) {
+  if (killer === "Evomorph") return [...(type === "dark-power" ? EVOMORPH_POWERS : type === "finale" ? EVOMORPH_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Poltergeist") return [...(type === "dark-power" ? POLTERGEIST_POWERS : type === "finale" ? POLTERGEIST_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Inkanyamba") return [...(type === "dark-power" ? INKANYAMBA_POWERS : type === "finale" ? INKANYAMBA_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Dr. Fright") return [...(type === "dark-power" ? FRIGHT_POWERS : type === "finale" ? FRIGHT_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
@@ -151,6 +153,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === "evomorph") return validEvomorphField(key,value);
   if (module === "creech") return validCreechField(key,value);
   if (module === "poltergeist") return validPoltergeistField(key,value);
   if (module === "groves") return validGrovesField(key, value);
@@ -267,7 +270,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    !["evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -291,6 +294,7 @@ export function moduleState(
   if (module === "fright") { const state=frightState(entries); if(!state) return {}; const {eventId:_id,...snapshot}=state; return {snapshot:JSON.stringify(snapshot),sleep:state.sleep,mode:state.mode,progress:state.path.length,...frightPublic(entries)}; }
   const state: ModuleState = {};
   for (const e of entries) {
+    if(module === "evomorph" && e.kind === "moment") {if(e.momentType === "dark-power") {state.powerRevealed=true; state.power=EVOMORPH_POWERS.find(c=>c.name===e.killerCard)?.id??null;}if(e.momentType === "finale") {state.finaleRevealed=true;state.finale=EVOMORPH_FINALES.find(c=>c.name===e.killerCard)?.id??null;}}
     if (module === "groves" && e.kind === "moment" && e.momentType === "finale") state.finaleRevealed = true;
     if (module === "inkanyamba" && e.kind === "moment") {
       if (e.momentType === "dark-power") { state.powerRevealed = true; state.power = INKANYAMBA_POWERS.find(c => c.name === e.killerCard)?.id ?? null; }
@@ -435,6 +439,7 @@ function valueLabel(key: string, value: ModuleValue) {
   return String(value);
 }
 export function describeModule(observation: ModuleObservation) {
+  if(observation.module === "evomorph") return evomorphFacts(observation.changes);
   if(observation.module==='creech')return creechFacts(observation.changes).join(' ') || Object.entries(observation.changes).filter(([k])=>k!=='initialized').map(([k,v])=>`${k.replace(/\./g,' ')}: ${v??'not recorded'}`).join('; ');
   if(observation.module==='poltergeist')return Object.entries(observation.changes).filter(([k])=>!['initialized','minorsRemoved'].includes(k)).map(([k,v])=>`${fieldLabel('poltergeist',k)}: ${v===null?'not recorded':String(v).replace(/-/g,' ')}`).join('; ');
   if (observation.module === "groves") return Object.entries(observation.changes).map(([key,value])=>`${grovesLabel(key)}: ${grovesValue(key,value)}`).join("; ");
@@ -452,6 +457,7 @@ export function moduleContext(
   entries: readonly ObservedEvent[],
 ) {
   const context: Record<string, ModuleState> = {};
+  if(selection.killer === "Evomorph" && entries.some(e=>e.moduleData?.module === "evomorph")) {const s=moduleState(entries,"evomorph");delete s.initialized;context.evomorph=s;}
   if (selection.killer === "Dr. Fright") { const facts=frightPublic(entries); if(facts) context.fright=facts; }
   for (const module of [
     "creech",
@@ -555,6 +561,7 @@ export function moduleStoryBeats(
       .join("\n");
   }
   const lines: string[] = [];
+  if(context.evomorph) {const s=context.evomorph;lines.push(`Evomorph ${s.stage??'stage unknown'}, ${s.presence??'presence unknown'}${s.ambushId?`; Ambush face ${s.ambushFace??'unknown'} / ${s.ambushId}`:''}.`);lines.push(evomorphFacts(s,entries));}
   if(context.poltergeist) lines.push(poltergeistFacts(context.poltergeist,poltergeistPower(entries)));
   if (context.inkanyamba) lines.push(...inkanyambaFacts(context.inkanyamba));
   if (context.fright) {
@@ -683,6 +690,7 @@ export function buddylandReferences(
     refs.push({name:"Sacred Groves",effect:GROVES_VISUAL});
     for(const e of GROVES_EVENTS) if(context?.groves?.[`event.${e.id}`] === "active") refs.push({name:e.name,effect:`${e.effect} Activation alone does not prove any conditional effect occurred.`});
   }
+  if (selection.killer === 'Evomorph' && context?.evomorph) refs.push({name:'Evomorph observations',effect:evomorphFacts(context.evomorph)});
   if (selection.killer === "Poltergeist" && context?.poltergeist) {
     const state=context.poltergeist;
     if(attacker==='Clown Doll'||attacker==='Behemoth') refs.push({name:attacker,effect:'A temporary Terror-card apparition. It disappears after the encounter. It is not an ordinary Victim or a permanent Minion. Its presence alone establishes no killing.'});
@@ -936,8 +944,10 @@ export function initialModuleObservations(
   initializeGroves = false,
   initializePoltergeist = false,
   initializeCreech = false,
+  initializeEvomorph = false,
 ): ModuleObservation[] {
   return [
+    ...(initializeEvomorph && selection.killer==='Evomorph' ? [{module:'evomorph' as const,changes:initialEvomorph()}] : []),
     ...(initializeCreech && selection.location==='Creech Manor' ? [{module:'creech' as const,changes:creechStartingObservations(selection.startingEvent)}] : []),
     ...(initializePoltergeist && selection.killer==='Poltergeist' ? [{module:'poltergeist' as const,changes:{initialized:true,carolyn:'hidden',floppy:'hidden','minor.psychic-confusion':'inactive','minor.unseen-forces':'inactive',minorsRemoved:false}}] : []),
     ...(initializeGroves && selection.location === "Sacred Groves" ? [{module:"groves" as const,changes:{wrath:2,closed:"none",fire:"none",hallowed:"none","sign.1":"none","sign.2":"none"}}] : []),

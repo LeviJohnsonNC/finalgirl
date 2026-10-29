@@ -29,7 +29,7 @@ it('accepts opening and ending rules for every catalog killer/location combinati
 });
 
 it('preserves full owner guidance without duplicating location rules under the killer', () => {
-  for (const killer of ['Hans', 'Billy the Bear', 'Geppetto', 'Dr. Fright','Poltergeist']) {
+  for (const killer of ['Hans', 'Billy the Bear', 'Geppetto', 'Dr. Fright','Poltergeist','Evomorph']) {
     for (const location of ['Camp Happy Trails', 'Buddyland', 'Carnival of Blood', 'Maple Lane']) {
       const { killerRules, locationRules } = getStoryRequestRules(killer, location);
       const ownKiller = getEntityPromptContext(killer)!;
@@ -54,8 +54,8 @@ it('covers the previously rejected Dr. Fright payload without weakening server l
 });
 
 it('retains legacy killer guidance and leaves absent module references absent', () => {
-  expect(getStoryRequestRules('Evomorph', 'Uncatalogued location')).toEqual({
-    killerRules: getKillerNarrativeRules('Evomorph'), locationRules: undefined,
+  expect(getStoryRequestRules('The Organism', 'Uncatalogued location')).toEqual({
+    killerRules: getKillerNarrativeRules('The Organism'), locationRules: undefined,
   });
   expect(getStoryRequestRules('Uncatalogued killer', 'Uncatalogued location')).toEqual({
     killerRules: undefined, locationRules: undefined,
