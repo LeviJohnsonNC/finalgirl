@@ -64,6 +64,7 @@ for(const [killer,location,id]of pairs)test(`shared owner headers and Minor Powe
   expect(await log(page)).toEqual(before);
   if(id!=='poltergeist'){
    const panel=page.locator(`[data-module="${id}"]`);
+   if(id==='geppetto')await panel.getByText('Minor Dark Powers',{exact:true}).click();
    await panel.locator('.module-minor-choice').first().click();
    const hearts=panel.locator('.play-health-tokens').first();
    const source=(await hearts.locator('image').first().getAttribute('href'))!;
