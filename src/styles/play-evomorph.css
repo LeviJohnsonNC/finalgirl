@@ -1,60 +1,24 @@
 .play-evomorph{display:grid;gap:1.1rem;min-width:0;color:#dce3d8}
 .play-evomorph h3{font-family:Georgia,serif;font-size:1.2rem;margin:0 0 .7rem;color:#e1d8be}
-.evo-evolution,.evo-scan-layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:1rem;min-width:0}
-.play-evomorph .evo-evolution>.play-illustrated-tile{min-height:260px;aspect-ratio:16/9;width:100%;border:1px solid #70845b77;border-radius:7px}
+.evo-evolution{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:1rem;min-width:0}
+.play-evomorph .evo-evolution>.play-illustrated-tile{position:relative;isolation:isolate;overflow:hidden;min-height:260px;aspect-ratio:16/9;width:100%;border:1px solid #92736288;border-radius:7px;text-align:left}
+.play-evomorph .evo-evolution>.play-illustrated-tile>.play-module-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:filter 180ms}
+.play-evomorph .evo-evolution>.play-illustrated-tile::after{content:"";position:absolute;inset:40% 0 0;background:linear-gradient(transparent,#080706ed);pointer-events:none}
+.play-evomorph .evo-evolution .play-tile-caption{z-index:1;text-align:left;pointer-events:none}
 .play-evomorph .evo-evolution .play-tile-caption strong{font-size:clamp(26px,3vw,42px)}
-.evo-stage-actions,.evo-presence-actions,.evo-scan-controls,.evo-resolution,.evo-observations{display:grid;align-content:start;gap:.75rem;min-width:0}
+.play-evomorph .evo-evolution>.play-illustrated-tile:disabled{opacity:1;cursor:default}
+.play-evomorph .evo-evolution>.play-illustrated-tile[data-presence="hidden"]>.play-module-art{filter:brightness(.76)}
+.play-evomorph .evo-evolution>.play-illustrated-tile:not(:disabled):hover{border-color:#d6ae92}
+.play-evomorph .evo-evolution>.play-illustrated-tile:not(:disabled):hover>.play-module-art{filter:brightness(1.08)}
+.evo-stage-actions{display:grid;align-content:start;gap:.75rem;min-width:0}
 .play-evomorph label{display:grid;gap:.35rem;font-size:.8rem;line-height:1.5;min-width:0}
-.play-evomorph input:not([type=checkbox]),.play-evomorph select{width:100%;min-width:0;min-height:44px;padding:.55rem .65rem;border:1px solid #6e806477;background:#0b1413;color:#e1e6dc;border-radius:4px}
-.play-evomorph button:not(.play-illustrated-tile):not(.module-minor-choice):not(.module-minor-clear):not(.module-unnamed):not(.module-killer-card):not(.module-change-choice){min-height:44px}
-.evo-stage-actions>button,.evo-presence-actions>button,.evo-resolution>button,.evo-scan-controls>button,.evo-observations>button{background:#24352b;border:1px solid #9aaf7380;border-radius:4px;color:#e1e6d4;padding:.7rem .9rem;text-align:left;font-weight:600;font-size:.85rem}
+.play-evomorph select{width:100%;min-width:0;min-height:44px;padding:.55rem .65rem;border:1px solid #6e806477;background:#0b1413;color:#e1e6dc;border-radius:4px}
+.evo-stage-actions>button{min-height:44px;background:#24352b;border:1px solid #9aaf7380;border-radius:4px;color:#e1e6d4;padding:.7rem .9rem;text-align:left;font-weight:600;font-size:.85rem}
 .play-evomorph button:disabled{opacity:.42;cursor:default}
-.play-evomorph .module-linked-preview{font-size:.77rem;line-height:1.6;color:#aab8aa;margin:0}
-.evo-resolution{border-left:2px solid #a5ad71;padding:1rem 1.1rem;background:#151f19}
-.play-evomorph .evo-check{display:flex;align-items:center;gap:.65rem;min-height:44px}
-.evo-check input{width:20px;height:20px;flex-shrink:0;accent-color:#b8bd83}
 .evo-quiet-label{color:#a4afa1}
-.evo-section{border-top:1px solid #8d9b6a44;padding-top:.6rem}
-.evo-section>summary{min-height:44px;cursor:pointer;font-family:Georgia,serif;font-size:1.15rem;display:list-item;padding:.5rem 0;color:#d9d5ba}
-.evo-section[open]>.evo-scan-layout{margin-top:1rem}
-.evo-scan-layout>.play-illustrated-tile{width:100%;min-height:210px;aspect-ratio:16/9}
-.evo-scan-row{display:flex;align-items:end;gap:.5rem;min-width:0}
-.evo-scan-row label{flex:1}
-.play-evomorph .evo-quiet{background:transparent;border:0;color:#acb6a5;text-decoration:underline;font-size:.75rem;min-height:44px;padding:.4rem;text-align:left}
-.evo-observations{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:1.1rem}
-.evo-observations .module-linked-preview,.evo-observation{grid-column:1/-1}
-.evo-observation{background:#203027;padding:.75rem;font-size:.8rem}
+.play-evomorph .evo-quiet{background:transparent;border:0;color:#bdb4a3;text-decoration:underline;font-size:.75rem;min-height:44px;padding:.4rem;text-align:left}
 .evo-minors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem}
 .evo-minors[data-focused=true]{grid-template-columns:1fr}
-.play-evomorph button:focus-visible,.play-evomorph input:focus-visible,.play-evomorph select:focus-visible,.evo-section>summary:focus-visible{outline:2px solid #d2d5a5;outline-offset:3px}
-@media(max-width:650px){.evo-evolution,.evo-scan-layout,.evo-observations,.evo-minors{grid-template-columns:1fr}.play-evomorph .evo-evolution>.play-illustrated-tile{min-height:205px}.evo-resolution{padding:.85rem}.evo-observations .module-linked-preview{grid-column:auto}}
-
-/* Captions belong to their picture, never to the page's history/footer. */
-.play-evomorph .evo-evolution>.play-illustrated-tile,
-.play-evomorph .evo-scan-layout>.play-illustrated-tile {
-  position:relative;
-  overflow:hidden;
-  isolation:isolate;
-}
-.play-evomorph .evo-evolution>.play-illustrated-tile>.play-module-art,
-.play-evomorph .evo-scan-layout>.play-illustrated-tile>.play-module-art {
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-.play-evomorph .evo-evolution>.play-illustrated-tile::after,
-.play-evomorph .evo-scan-layout>.play-illustrated-tile::after {
-  content:"";
-  position:absolute;
-  inset:45% 0 0;
-  background:linear-gradient(transparent,#050a0aeb);
-  pointer-events:none;
-}
-.play-evomorph .evo-evolution .play-tile-caption,
-.play-evomorph .evo-scan-layout .play-tile-caption {
-  z-index:1;
-  text-align:left;
-  pointer-events:none;
-}
+.play-evomorph button:focus-visible,.play-evomorph select:focus-visible{outline:2px solid #e1b49c;outline-offset:3px}
+@media(max-width:650px){.evo-evolution,.evo-minors{grid-template-columns:1fr}.play-evomorph .evo-evolution>.play-illustrated-tile{min-height:205px}}
+@media(prefers-reduced-motion:reduce){.play-evomorph .evo-evolution>.play-illustrated-tile>.play-module-art{transition:none}}

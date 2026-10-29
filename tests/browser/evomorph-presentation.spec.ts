@@ -9,7 +9,7 @@ test('Evomorph portraits follow evolution, quiet correction, Undo and reload acr
  test.setTimeout(90000);
  await archive.install(page,{draft});await resume(page);
  const panel=page.locator('[data-module="evomorph"]');
- const evolution=panel.getByRole('button',{name:'View evolution and presence actions'});
+ const evolution=panel.getByRole('button',{name:'Evomorph visibility'});
  const banner=panel.locator(':scope > summary img');
  await page.getByRole('button',{name:'Track Killer health',exact:true}).click();
  const health=page.locator('.play-state--killerHealth .play-stat-portrait');
@@ -26,6 +26,8 @@ test('Evomorph portraits follow evolution, quiet correction, Undo and reload acr
  await expect(dialog.locator('.play-cause-tile--killer img')).toHaveAttribute('src',hatchling[0]!);
  await dialog.getByRole('button',{name:'Cancel',exact:true}).click();
  await panel.getByRole('button',{name:'Evolve to Youngling',exact:true}).click();
+ await expect(evolution).toContainText('Hidden');
+ await evolution.click();
  const youngling=await pictures();expect(new Set(youngling).size).toBe(1);expect(youngling[0]).toContain('youngling');expect(youngling[0]).not.toBe(hatchling[0]);
  await expect(panel.getByText('Records Adult recovery to 10 Health and the permanent Dark Power reveal. Entry effects are recorded separately.',{exact:true})).toHaveCount(0);
  await panel.getByRole('button',{name:'Evolve to Adult',exact:true}).click();
@@ -52,6 +54,7 @@ test('Evomorph portraits follow evolution, quiet correction, Undo and reload acr
  await statusPick(page,panel.getByRole('combobox',{name:'Correct Evomorph stage',exact:true}),'Not recorded');
  const unknown=await pictures();expect(new Set(unknown).size).toBe(1);expect(unknown[0]).not.toBe(adult[0]);
  await expect(evolution).toContainText('Evolution not recorded');
+ await expect(evolution).toBeDisabled();
  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'evomorph');
  expect(await pictures()).toEqual(unknown);
  // Capture all live stage crops with the actual shared tracker and module header.

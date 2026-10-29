@@ -205,7 +205,6 @@ describe("shared player interaction contracts", () => {
           name="Nightfall"
           health={health}
           art={() => art}
-          heartArt={art}
           onChange={setHealth}
         />
       );
@@ -250,7 +249,6 @@ describe("shared player interaction contracts", () => {
         name="Old power"
         previouslyRevealed
         art={() => art}
-        heartArt={art}
         onChange={changed}
       />,
     );
@@ -307,7 +305,7 @@ describe("durable module observation contract", () => {
 it('one-Health Minor Powers reveal at one, show one heart, remove and restore exactly one, and disable every mutation', () => {
   function OneHeart({disabled=false}) {
     const [health,setHealth]=useState<number|undefined>();
-    return <MinorPowerControl name="Endless Sleep" maxHealth={1} disabled={disabled} health={health} art={()=>art} heartArt={art} onChange={n=>setHealth(n??undefined)}/>;
+    return <MinorPowerControl name="Endless Sleep" maxHealth={1} disabled={disabled} health={health} art={()=>art} onChange={n=>setHealth(n??undefined)}/>;
   }
   const view=render(<OneHeart/>);
   expect(screen.getByRole('article',{name:'Endless Sleep'})).toHaveAttribute('data-state','unrecorded');

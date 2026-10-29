@@ -40,3 +40,87 @@
 @media (max-width: 639px) {
   .play-module-content .play-portrait-modules > section[aria-label="Buddyland tracking"] .play-character-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Shared owner headers follow Levi's 2026-10-29 reference.
+   Existing photographs and their focal positions remain untouched. */
+.play-module-panel[data-module] {
+  border-color:#6d403b;
+  border-radius:9px;
+}
+.play-module-panel[data-module]>summary {
+  padding:24px 38px;
+  gap:24px;
+}
+.play-module-frame {
+  position:absolute;
+  inset:7px;
+  border:1px solid #9a73604d;
+  border-radius:6px;
+  box-shadow:inset 0 0 0 1px #120b09aa,0 0 0 1px #07050488;
+  pointer-events:none;
+}
+.play-module-heading {
+  position:relative;
+  flex:1;
+  padding-left:4px;
+}
+.play-module-heading::before {
+  content:"";
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:-16px;
+  width:2px;
+  background:linear-gradient(transparent,#853b32aa 25%,#853b3266 80%,transparent);
+}
+.play-module-panel[data-module] .play-module-kind {
+  width:fit-content;
+  padding-bottom:4px;
+  border-bottom:1px solid #ad665b77;
+  color:#c58e79;
+  font:600 10px/1.3 Georgia,serif;
+  letter-spacing:.22em;
+}
+.play-module-panel[data-module]>summary h2 {
+  color:#efe7d8;
+  font:700 clamp(25px,2.8vw,36px)/1.15 Georgia,serif;
+  text-wrap:balance;
+  text-shadow:0 2px 5px #000,0 0 16px #000a;
+}
+.play-module-panel[data-module] .play-module-summary {
+  color:#d2c6b7;
+  font:12px/1.5 Arial,sans-serif;
+  text-shadow:0 1px 4px #000;
+  overflow-wrap:anywhere;
+}
+.play-module-disclosure {
+  display:grid;
+  place-items:center;
+  flex:0 0 44px;
+  height:44px;
+  margin-left:auto;
+  border:1px solid #aa655d88;
+  border-radius:50%;
+  color:#f0d5c5;
+  background:radial-gradient(ellipse at 40% 20%,#57292199,#190c0bcc 75%);
+  box-shadow:inset 0 0 0 3px #190a0866,0 2px 8px #0008;
+}
+.play-module-panel[data-module] .play-module-chevron {
+  width:20px;
+  height:20px;
+  margin:0;
+  color:inherit;
+}
+.play-module-panel[data-module]>summary:hover .play-module-disclosure {
+  border-color:#dfaa92;
+}
+.play-module-panel[data-module]>summary:focus-visible {
+  outline:2px solid #e1b49c;
+  outline-offset:-4px;
+}
+@media(max-width:639px) {
+  .play-module-panel[data-module]>summary {padding:22px 23px;gap:14px}
+  .play-module-panel[data-module]>summary h2 {font-size:25px}
+  .play-module-heading::before {left:-10px}
+  .play-module-panel[data-module] .play-module-summary {font-size:11px}
+}

@@ -8,7 +8,6 @@ export function MinorPowerControl({
   health,
   art,
   heroArt,
-  heartArt,
   onChange,
   className = "",
   previouslyRevealed = false,
@@ -21,7 +20,6 @@ export function MinorPowerControl({
   disabled?: boolean;
   art: (health: number) => ModuleArt;
   heroArt?: ModuleArt;
-  heartArt: ModuleArt;
   onChange: (health: number | null) => unknown;
   className?: string;
   previouslyRevealed?: boolean;
@@ -86,7 +84,6 @@ export function MinorPowerControl({
             <HealthTokens
               name={name}
               health={health}
-              art={heartArt}
               maxHealth={maxHealth}
               disabled={disabled}
               onChange={onChange}

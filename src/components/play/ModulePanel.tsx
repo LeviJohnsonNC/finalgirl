@@ -20,7 +20,8 @@ export function ModulePanel({ id, title, kind, summary, art, preferenceKey, chil
     <summary onClick={event => { event.preventDefault(); toggle(); }}>
       <ModuleArtwork art={art} />
       <span className="play-module-heading"><small className="play-module-kind">{kind}</small><h2>{title}</h2><span className="play-module-summary">{summary}</span></span>
-      <ChevronDown className="play-module-chevron" aria-hidden="true" />
+      <span className="play-module-frame" aria-hidden="true" />
+      <span className="play-module-disclosure" aria-hidden="true"><ChevronDown className="play-module-chevron" /></span>
     </summary>
     <div className="play-module-content">{children}</div>
   </details>;

@@ -6,7 +6,6 @@ import { MinorPowerGroup } from "./MinorPowerGroup";
 import { MinorPowerControl } from "./MinorPowerControl";
 import { atlasCell } from "./killerPresentation";
 import minorArt from "@/assets/play/consistent/billy-minors.webp";
-import heartArt from "@/assets/play/geppetto/cards.webp";
 import { IllustratedTile } from "./IllustratedTile";
 import {
   BUDDIES,
@@ -261,7 +260,6 @@ export function BuddylandControls({
                     atlasCell(minorArt, row * 3 + 2 - health, 1536, 1024, 3, 2)
                   }
                   heroArt={modulePhoto("Billy the Bear", 8 + row)}
-                  heartArt={atlasCell(heartArt, 7, 1254, 1254)}
                   onChange={(health) =>
                     record(
                       newPlayEvent({
