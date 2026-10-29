@@ -75,7 +75,7 @@ describe('Konrad simplified observations',()=>{
   expect(resolveKonradAction({command:'toggle',target:'breach',active:true,parent:e.konradAction!.parent},t.state(),t.entries())).toBeNull();
   for(const action of [{target:'system:invented',active:true},{target:'breach',active:'yes'},{target:'loader',active:true,space:'Hangar'}])expect(validKonradAction({parent:'root',command:'toggle',...action})).toBe(false);
   for(const toggles of [{bogus:true},{breach:'yes'},null])expect(parseKonrad(JSON.stringify({...emptyKonrad(),toggles}))).toBeNull();
-  const forged=structuredClone(t.log);const snapshot=JSON.parse(String(forged.at(-1)!.moduleData!.changes.snapshot));snapshot.toggles['system:airlock']=false;forged.at(-1)!.moduleData!.changes.snapshot=JSON.stringify(snapshot);expect(validPlayLog(forged)).toBe(false);
+  const forged=structuredClone(t.log);const snapshot=JSON.parse(String(forged[forged.length-1].moduleData!.changes.snapshot));snapshot.toggles['system:airlock']=false;forged[forged.length-1].moduleData!.changes.snapshot=JSON.stringify(snapshot);expect(validPlayLog(forged)).toBe(false);
  });
  it('records Beacon and unlocated breach presence, and Loader tracking without assuming equipment or a location',()=>{
   const t=table(false);t.act({command:'toggle',target:'breach',active:true});expect(t.s().breach).toBeNull();

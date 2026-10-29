@@ -355,8 +355,8 @@ it('compact character pictures activate and reactivate Left play, preserve termi
  fireEvent.click(screen.getByRole('button',{name:'Add Crew'}));expect(observe).toHaveBeenLastCalledWith('in-play');
  for(const value of ['saved','killed']){
   view.rerender(<CharacterControl {...props} value={value}/>);
-  expect(screen.getByRole('button',{name:'Crew',exact:true})).toBeDisabled();
-  fireEvent.click(screen.getByRole('button',{name:'Crew',exact:true}));
+  expect(screen.getByRole('button',{name:'Crew'})).toBeDisabled();
+  fireEvent.click(screen.getByRole('button',{name:'Crew'}));
  }
  expect(observe).toHaveBeenCalledTimes(1);
  view.rerender(<CharacterControl {...props} value="left"/>);
