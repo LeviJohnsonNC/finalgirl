@@ -110,13 +110,13 @@ export function resolveKonradAction(a:KonradAction,state:ModuleState,entries:rea
  case 'token':{const old=s.tokens[a.destination];if(a.count===null){remove(s,a.destination);delete s.tokens[a.destination];}else{if(old===undefined||a.count<old)remove(s,a.destination);s.tokens[a.destination]=a.count;}break;}
  case 'held':s.held=a.count;break;
  case 'pickup':if(!s.tokens[a.source]||s.held===99)return null;s.tokens[a.source]--;if(s.held!==null)s.held++;break;
- case 'place':if(s.held===null||s.held<1||s.tokens[a.destination]===undefined)return null;s.held--;s.tokens[a.destination]++;break;
+ case 'place':if(s.held===null||s.held<1||s.tokens[a.destination]===undefined||a.destination.startsWith('shaft:')&&s.tokens[a.destination]>0)return null;s.held--;s.tokens[a.destination]++;break;
  case 'remote':if(!s.tokens[a.from]||s.tokens[a.to]===undefined)return null;s.tokens[a.from]--;s.tokens[a.to]++;break;
  case 'activate':{
  if(s.systems[a.system])return null;
  if(a.override!==(s.events['emergency-override']==='active')||a.captainBridge!==(s.people.captain==='in-play'&&s.captainSpace==='Bridge'))return null;
  const paid=konradCost(a.system,a.override,a.captainBridge),key=`function:${a.system}`;
- if(a.useHeld){if(s.held===null||s.held<paid||s.tokens[key]===undefined)return null;s.held-=paid;s.tokens[key]+=paid;}
+ if(a.useHeld){if(s.tokens[key]===undefined)return null;const needed=Math.max(0,paid-s.tokens[key]);if(s.held===null||s.held<needed)return null;s.held-=needed;s.tokens[key]+=needed;}
  else if(s.tokens[key]===undefined||s.tokens[key]<paid)return null;
  s.systems[a.system]={paid,override:a.override,captainBridge:a.captainBridge};if(a.system==='airlock')s.airlock='armed';if(a.system==='self-destruct')s.countdown='start';break;}
  case 'cancel':cancel(s,a.system);break;

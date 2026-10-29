@@ -15,6 +15,7 @@ const DEFAULT_SETTINGS: ImageSettings = {
 };
 
 export interface GenerateImageContext {
+  konradReview?: {fate:import('../../supabase/functions/_shared/play/konrad').KonradFate};
   story: string;
   killer: string;
   killerDescription?: string;

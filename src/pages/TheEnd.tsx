@@ -3,7 +3,7 @@ import { evomorphOpeningGuidance } from '../../supabase/functions/_shared/play/e
 import { moduleState as endingModuleState } from '@/lib/play/modules';
 import { summarizePlay as endingSummary } from '@/lib/play/events';
 import {playStoryBeats} from '@/lib/play/events';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { streamChatCompletion } from '@/lib/streamChatCompletion';
 
@@ -78,7 +78,7 @@ const TheEnd = ({
   const evomorphGuidance=result.killer==='Evomorph'?evomorphOpeningGuidance(endingModuleState(endingSummary(result.playEvents).entries,'evomorph').stage,false):undefined;
   const endingVisualGuidance=[evomorphGuidance,moduleContext?.visualGuidance].filter(Boolean).join('\n');
   const isWin = result.outcome === 'won';
-  const shipReview=result.location==='USS Konrad'?{fate:konradState(endingModuleState(endingSummary(result.playEvents).entries,'konrad')).fate}:undefined;
+  const shipReview=useMemo(()=>result.location==='USS Konrad'?{fate:konradState(endingModuleState(endingSummary(result.playEvents).entries,'konrad')).fate}:undefined,[result.location,result.playEvents]);
   const fate = reviewedCharacterFate(formData.finalGirlHealth,shipReview);
   const endingKillerHealth = isKillerUnkillable(result.killer) ? undefined : formData.killerHealth;
   const { locationImages } = useActiveImages();
@@ -110,6 +110,7 @@ const TheEnd = ({
       sceneType: 'ending',
       referenceImageUrl: sceneImageUrl ?? result.sceneImageUrl,
       outcome: result.outcome,
+      ...(shipReview&&{konradReview:shipReview}),
       introStory,
       finalGirlHealth: formData.finalGirlHealth,
       killerHealth: endingKillerHealth,
@@ -119,7 +120,7 @@ const TheEnd = ({
       previousImageUrl,
     });
     if (url) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
-  }, [endingStory, result, result.killer, result.finalGirl, result.location, result.outcome, result.id, moduleContext?.visualGuidance, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, result.sceneImageUrl, result.mission, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
+  }, [endingStory, shipReview, result, result.killer, result.finalGirl, result.location, result.outcome, result.id, moduleContext?.visualGuidance, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, result.sceneImageUrl, result.mission, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
 
   // The poster develops on its own once the ending narration lands.
   //

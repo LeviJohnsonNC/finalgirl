@@ -6,6 +6,7 @@ import { NARRATIVE_QUANTITIES } from './narrativeStyle.ts';
 import { fallbackPosterDesign, parsePosterDesign, posterArtDirection, POSTER_DESIGN_MENU, type PosterDesign } from './posterDesign.ts';
 
 export interface SceneContext {
+  konradReview?: {fate:import('./play/konrad.ts').KonradFate};
   story: string;
   sceneType?: 'beginning' | 'ending';
   killer: string; killerDescription?: string;
