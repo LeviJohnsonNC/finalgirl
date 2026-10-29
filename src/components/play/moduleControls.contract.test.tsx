@@ -336,7 +336,7 @@ it('Evomorph legacy visibility stays unknown until explicitly observed, without 
  expect(screen.getByText('Evolution not recorded')).toBeVisible();
  expect(screen.getByText('Visibility not recorded')).toBeVisible();
  expect(onEvent).not.toHaveBeenCalled();
- const events=[newPlayEvent({kind:'module',moduleData:{module:'evomorph',changes:{stage:'youngling'}}})];
+ const events=[newPlayEvent({kind:'module',evomorphAction:{parent:'root',command:'correct',key:'stage',value:'youngling'},moduleData:{module:'evomorph',changes:{stage:'youngling'}}})];
  view.rerender(<EvomorphControls {...props} events={events}/>);
  const picture=screen.getByRole('button',{name:'Evomorph visibility'});
  expect(picture).not.toHaveAttribute('aria-pressed');
