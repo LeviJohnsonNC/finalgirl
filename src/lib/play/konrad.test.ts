@@ -1,3 +1,4 @@
+import {deathFacts,deathSignature} from './death';
 import {initialEvomorph,evomorphParent,resolveEvomorphAction,type EvomorphAction} from '../../../supabase/functions/_shared/play/evomorph';
 import {describe,it,expect} from 'vitest';
 import {newPlayEvent as event,summarizePlay,validPlayLog,type PlayEvent} from './events';
@@ -29,4 +30,13 @@ it('Konrad bounded ending context retains fatal cause and Evomorph stage/capture
  const evo=(fields:Omit<EvomorphAction,'parent'>)=>{const entries=t.entries(),a={...fields,parent:evomorphParent(entries)};const changes=resolveEvomorphAction(a,moduleState(entries,'evomorph'),entries)!;t.log.push(event({kind:'module',evomorphAction:a,moduleData:{module:'evomorph',changes}}));};
  evo({command:'evolve'});evo({command:'ambush',key:'ambush-y10',face:'youngling'});evo({command:'evolve'});evo({command:'correct',key:'room',value:'A'.repeat(120)});const entries=t.entries();
  const text=moduleStoryBeats({killer:'Evomorph',location:'USS Konrad'},entries);expect(text.length).toBeLessThanOrEqual(900);expect(text).toContain('explicitly died');expect(text).toContain('stage: adult');expect(text).toContain('Ambush face youngling, Danger 10');
+});
+
+it('Konrad historical death fingerprints normalize snapshot key order and keep the state at that death',async()=>{
+ const t=table();t.act({command:'token',destination:'shaft:upper-left',count:2});const death=event({kind:'killed',quantity:1,cause:'hazard',mechanism:'Airlock'});t.log.push(death);const selection={killer:'Hans',location:'USS Konrad',finalGirl:'Laurie'};const before=deathFacts(selection,t.log,death.id)!;
+ const reversed=t.log.map(e=>e.moduleData?.module==='konrad'?{...e,moduleData:{...e.moduleData,changes:{snapshot:JSON.stringify(Object.fromEntries(Object.entries(JSON.parse(String(e.moduleData.changes.snapshot))).reverse()))}}}:e);expect(await deathSignature(deathFacts(selection,reversed,death.id)!)).toBe(await deathSignature(before));t.act({command:'reboot'});expect(await deathSignature(deathFacts(selection,t.log,death.id)!)).toBe(await deathSignature(before));
+});
+
+it('Konrad funding removal clears independently observed armed/countdown markers even with unknown activation payment',()=>{
+ const t=table(false);t.act({command:'observe',key:'airlock',value:'armed'});t.act({command:'token',destination:'function:airlock',count:0});expect(t.s().airlock).toBe('inactive');t.act({command:'observe',key:'countdown',value:'middle'});t.act({command:'token',destination:'function:self-destruct',count:null});expect(t.s().countdown).toBe('inactive');
 });

@@ -1,4 +1,4 @@
-import { validKonradField, initialKonrad, konradFacts } from './konrad.ts';
+import { validKonradField, canonicalKonradSnapshot, initialKonrad, konradFacts } from './konrad.ts';
 import { KONRAD_ITEMS } from './konradCatalog.ts';
 import { EVOMORPH_POWERS, EVOMORPH_FINALES, EVOMORPH_AMBUSH, validEvomorphField, initialEvomorph, evomorphFacts } from './evomorph.ts';
 import { validCreechField, creechFacts, creechStartingObservations, CREECH_EVENTS, CREECH_ITEMS, CREECH_PEOPLE } from './creech.ts';
@@ -461,7 +461,7 @@ export function moduleContext(
   entries: readonly ObservedEvent[],
 ) {
   const context: Record<string, ModuleState> = {};
-  if(selection.location === "USS Konrad" && entries.some(e=>e.moduleData?.module === "konrad")) context.konrad=moduleState(entries,"konrad");
+  if(selection.location === "USS Konrad" && entries.some(e=>e.moduleData?.module === "konrad")) context.konrad={snapshot:canonicalKonradSnapshot(moduleState(entries,"konrad").snapshot)!};
   if(selection.killer === "Evomorph" && entries.some(e=>e.moduleData?.module === "evomorph")) {const s=moduleState(entries,"evomorph");delete s.initialized;context.evomorph=s;}
   if (selection.killer === "Dr. Fright") { const facts=frightPublic(entries); if(facts) context.fright=facts; }
   for (const module of [

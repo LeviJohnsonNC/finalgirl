@@ -76,6 +76,7 @@ export function parseKonrad(value:unknown):KonradSnapshot|null {
  return s as unknown as KonradSnapshot;
  }catch{return null;}
 }
+export function canonicalKonradSnapshot(value:unknown):string|null {const s=parseKonrad(value);return s?JSON.stringify(sort(s)):null;}
 export function validKonradField(key:string,value:unknown){return key==='snapshot'&&!!parseKonrad(value);}
 export function konradState(state:ModuleState):KonradSnapshot {return parseKonrad(state.snapshot)??emptyKonrad();}
 type Entry={id?:string;kind:string;moduleData?:{module:string;changes:Record<string,ModuleValue>}};
@@ -107,7 +108,7 @@ export function validKonradAction(value:unknown):value is KonradAction {
  }
 }
 function cancel(s:KonradSnapshot,id:string){delete s.systems[id];if(id==='airlock')s.airlock='inactive';if(id==='self-destruct')s.countdown='inactive';}
-function remove(s:KonradSnapshot,key:string){if(key.startsWith('function:')&&s.systems[key.slice(9)])cancel(s,key.slice(9));}
+function remove(s:KonradSnapshot,key:string){if(!key.startsWith('function:'))return;const id=key.slice(9);if(s.systems[id]||id==='airlock'&&['armed','released'].includes(s.airlock)||id==='self-destruct'&&['start','middle','explosion'].includes(s.countdown))cancel(s,id);}
 export function konradCost(id:string,override:boolean,captainBridge:boolean){const f=KONRAD_FUNCTIONS.find(f=>f.id===id)!;return f.cost-(override&&id!=='crusher'?1:0)-(captainBridge&&id==='self-destruct'?1:0);}
 export function resolveKonradAction(a:KonradAction,state:ModuleState,entries:readonly Entry[]):Record<string,ModuleValue>|null {
  if(!validKonradAction(a)||a.parent!==konradParent(entries))return null;
@@ -131,7 +132,7 @@ export function resolveKonradAction(a:KonradAction,state:ModuleState,entries:rea
  const known=Object.values(s.tokens).reduce((n,v)=>n+v,0),total=Object.values(a.counts).reduce((n,v)=>n+v,0),complete=KONRAD_DESTINATIONS.every(k=>s.tokens[k]!==undefined);
  if(complete&&(!a.complete||total!==known)||!complete&&total<known)return null;
  s.tokens=a.complete?Object.fromEntries(KONRAD_DESTINATIONS.map(k=>[k,0])):{};Object.assign(s.tokens,a.counts);for(const f of KONRAD_FUNCTIONS)cancel(s,f.id);break;}
- case 'airlock':if(s.airlock!=='armed')return null;s.airlock='released';if(a.loaderInHangar){s.loader='lost';s.loaderSpace=null;}s.fate=a.fate;break;
+ case 'airlock':if(s.airlock!=='armed')return null;s.airlock='released';if(a.loaderInHangar){s.loader='lost';s.loaderSpace=null;}else if(s.loaderSpace==='Hangar')s.loaderSpace=null;s.fate=a.fate;break;
  case 'upkeep':if(s.countdown==='start')s.countdown='middle';else if(s.countdown==='middle'){s.countdown='explosion';s.fate=a.atExit===false?'explosion-loss':a.atExit===true?'survived':'unknown';}else return null;break;
  case 'event':s.events[a.id]=a.active?'active':'ended';break;
  case 'add-person':if(s.people[a.id]==='in-play')return null;s.people[a.id]='in-play';s.events[a.id]='active';if(a.id==='captain')s.captainSpace='Bridge';break;
