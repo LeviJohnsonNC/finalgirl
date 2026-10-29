@@ -27,10 +27,10 @@ test('Konrad picture switches record only state with no forms, costs or inferred
  await panel.locator(':scope > summary').click();await openModule(page,'konrad');expect(await log(page)).toEqual(before);
  for(const name of switchNames){
   const button=panel.getByRole('button',{name:`Toggle ${name}`,exact:true});
-  expect(await button.locator('img').evaluate(im=>getComputedStyle(im).filter)).toContain('grayscale(1)');
+  await expect.poll(()=>button.locator('img').evaluate(im=>getComputedStyle(im).filter)).toContain('grayscale(1)');
   const off=await button.locator('img').getAttribute('src');
   await button.click();await expect(button).toHaveAttribute('aria-pressed','true');
-  expect(await button.locator('img').evaluate(im=>getComputedStyle(im).filter)).not.toContain('grayscale(1)');
+  await expect.poll(()=>button.locator('img').evaluate(im=>getComputedStyle(im).filter)).not.toContain('grayscale(1)');
   if(!['Remote Beacon','Hull breach'].includes(name))expect(await button.locator('img').getAttribute('src')).not.toBe(off);
   await button.click();await expect(button).toHaveAttribute('aria-pressed','false');
  }
@@ -59,7 +59,7 @@ for(const name of ['The Captain','Jonas the Cat','Orphan Girl'])test(`Konrad ${n
  const panel=page.locator('[data-module="konrad"]'),card=panel.locator('.konrad-crew .module-character').filter({has:page.getByText(name,{exact:true})});
  const width=info.project.name==='mobile'?390:1366;await page.setViewportSize({width,height:width===390?844:768});
  const original=await card.locator('img').getAttribute('src');
- expect(await card.locator('img').evaluate(im=>getComputedStyle(im).filter)).toContain('grayscale(1)');
+ await expect.poll(()=>card.locator('img').evaluate(im=>getComputedStyle(im).filter)).toContain('grayscale(1)');
  await card.getByRole('button',{name:`Add ${name}`,exact:true}).click();
  await capture(card,info,`crew-${name}-active`);
  await expect(card.getByRole('combobox')).toHaveCount(0);await expect(card.getByText('Change status',{exact:true})).toHaveCount(0);
@@ -74,7 +74,7 @@ for(const name of ['The Captain','Jonas the Cat','Orphan Girl'])test(`Konrad ${n
  }
  expect(pictures.size).toBe(3);
  await card.getByRole('button',{name:`Mark ${name} left`,exact:true}).click();await expect(card).toHaveAttribute('data-state','left');
- await expect(card.locator('img')).toHaveAttribute('src',original!);expect(await card.locator('img').evaluate(im=>getComputedStyle(im).filter)).toContain('grayscale(1)');
+ await expect(card.locator('img')).toHaveAttribute('src',original!);await expect.poll(()=>card.locator('img').evaluate(im=>getComputedStyle(im).filter)).toContain('grayscale(1)');
  await capture(card,info,`crew-${name}-left`);
  await card.getByRole('button',{name:`Add ${name}`,exact:true}).click();await expect(card).toHaveAttribute('data-state','in-play');
  const s=await snapshot(page),id=name==='The Captain'?'captain':name==='Jonas the Cat'?'jonas':'orphan';
@@ -85,7 +85,7 @@ for(const name of ['The Captain','Jonas the Cat','Orphan Girl'])test(`Konrad ${n
 for(const name of ['The Captain','Jonas the Cat','Orphan Girl'])test(`Konrad starting Event automatically lights ${name}`,async({page,archive})=>{
  await archive.install(page,{draft:{...draft,selection:{...draft.selection,startingEvent:name}}});await resume(page);
  const card=page.locator('[data-module="konrad"] .konrad-crew .module-character').filter({has:page.getByText(name,{exact:true})});
- await expect(card).toHaveAttribute('data-state','in-play');expect(await card.locator('img').evaluate(im=>getComputedStyle(im).filter)).not.toContain('grayscale(1)');
+ await expect(card).toHaveAttribute('data-state','in-play');await expect.poll(()=>card.locator('img').evaluate(im=>getComputedStyle(im).filter)).not.toContain('grayscale(1)');
  await expect(card.getByRole('button',{name:`Mark ${name} saved`,exact:true})).toBeEnabled();
 });
 
@@ -93,7 +93,7 @@ test('Konrad Super Loader activates from its picture and has four independent st
  await archive.install(page,{draft:{...draft,playEvents:fixture().events}});await resume(page);
  const panel=page.locator('[data-module="konrad"]'),loader=panel.locator('.konrad-loader');
  const width=info.project.name==='mobile'?390:1366;await page.setViewportSize({width,height:width===390?844:768});
- expect(await loader.locator('img').evaluate(im=>getComputedStyle(im).filter)).toContain('grayscale(1)');
+ await expect.poll(()=>loader.locator('img').evaluate(im=>getComputedStyle(im).filter)).toContain('grayscale(1)');
  await loader.getByRole('button',{name:'Add Super Loader',exact:true}).click();
  await expect(loader.getByRole('group',{name:'Super Loader state',exact:true})).toBeVisible();
  const pictures=new Set<string>();
@@ -104,7 +104,7 @@ test('Konrad Super Loader activates from its picture and has four independent st
   await capture(loader,info,`loader-${state}-${width}`);
  }
  expect(pictures.size).toBe(4);
- await loader.getByRole('button',{name:'Not in play',exact:true}).click();expect(await loader.locator('img').evaluate(im=>getComputedStyle(im).filter)).toContain('grayscale(1)');
+ await loader.getByRole('button',{name:'Not in play',exact:true}).click();await expect.poll(()=>loader.locator('img').evaluate(im=>getComputedStyle(im).filter)).toContain('grayscale(1)');
  await expect(loader.getByRole('group',{name:'Super Loader state',exact:true})).toHaveCount(0);
  await undoLatestObservation(page);await expect(loader.getByRole('button',{name:'Lost',exact:true})).toHaveAttribute('aria-pressed','true');
  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'konrad');await expect(loader.getByRole('button',{name:'Lost',exact:true})).toHaveAttribute('aria-pressed','true');
@@ -147,3 +147,4 @@ test('Konrad legacy unknowns remain explicit and Slippery still has shared live 
  await panel.getByRole('button',{name:'Clear record: Slippery',exact:true}).click();await expect(panel.getByText('Revealed earlier · health not recorded',{exact:true})).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
+

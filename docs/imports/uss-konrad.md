@@ -366,3 +366,6 @@ The optional validated `snapshot.toggles` field and strict `toggle` action recor
 Seven additional native photographs provide six identity-consistent crew outcomes and an independent operator-detail Equipped Loader view. Killed child/cat artwork shows absence and belongings, with harm off-screen. Decorative machinery art never establishes decompression, countdown progress or casualties. Asset provenance and budgets are recorded in the Konrad photo manifest and README.
 
 Release order: deploy the six dependent edge bundles (`generate-story`, `generate-visual-bible`, `generate-scene-image`, `generate-ending`, `generate-death-scene`, `narrate-story`) before publishing the frontend, because the shared Konrad action validator/context accepts a new action and optional field. No SQL or Storage migration is required. This follow-up creates a mergeable PR only; it does not merge, deploy edge functions, publish the frontend or invoke live generation. Earlier workbench screenshots below remain historical evidence, not the current UI reference.
+
+
+Final-head check results and rendered review for the picture-control refresh are recorded on [PR #155](https://github.com/LeviJohnsonNC/finalgirl/pull/155). The PR distinguishes the tested frontend/edge/database changes from the still-required production release and live smoke test.
