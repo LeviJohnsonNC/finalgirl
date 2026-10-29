@@ -16,6 +16,7 @@ import { EventControl } from "./EventControl";
 import { MinorPowerControl } from "./MinorPowerControl";
 import { useModuleRecord } from "./useModuleRecord";
 import { FrightControls } from "./FrightControls";
+import { EvomorphControls } from "./EvomorphControls";
 import { initialFright } from "../../../supabase/functions/_shared/play/fright";
 
 afterEach(cleanup);
@@ -325,4 +326,22 @@ it('one-Health Minor Powers reveal at one, show one heart, remove and restore ex
   expect(screen.getByRole('button',{name:'Remove one Endless Sleep health, heart 1'})).toBeDisabled();
   expect(screen.queryByRole('combobox',{name:'Endless Sleep health correction'})).toBeNull();
   expect(screen.getByRole('button',{name:'Clear record: Endless Sleep'})).toBeDisabled();
+});
+
+it('Evomorph legacy visibility stays unknown until explicitly observed, without adding Scan or entry effects', () => {
+ const onEvent=vi.fn((event:ReturnType<typeof newPlayEvent>)=>event.kind==='module');
+ const props={killer:'Evomorph',location:'Sacred Groves',finalGirl:'Laurie',onEvent};
+ const view=render(<EvomorphControls {...props} events={[]}/>);
+ expect(screen.getByRole('button',{name:'Evomorph visibility'})).toBeDisabled();
+ expect(screen.getByText('Evolution not recorded')).toBeVisible();
+ expect(screen.getByText('Visibility not recorded')).toBeVisible();
+ expect(onEvent).not.toHaveBeenCalled();
+ const events=[newPlayEvent({kind:'module',moduleData:{module:'evomorph',changes:{stage:'youngling'}}})];
+ view.rerender(<EvomorphControls {...props} events={events}/>);
+ const picture=screen.getByRole('button',{name:'Evomorph visibility'});
+ expect(picture).not.toHaveAttribute('aria-pressed');
+ expect(picture).toHaveTextContent('Visibility not recorded');
+ fireEvent.click(picture);
+ expect(onEvent).toHaveBeenCalledTimes(1);
+ expect(onEvent.mock.calls[0][0].moduleData).toEqual({module:'evomorph',changes:{presence:'on-board'}});
 });
