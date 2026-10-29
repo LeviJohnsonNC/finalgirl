@@ -7,6 +7,8 @@ const compile = path => ts.transpileModule(readFileSync(new URL(path, import.met
 const fiction = {};
 new Function('exports', compile('../supabase/functions/_shared/fictionBoundary.ts'))(fiction);
 const storyFacts = {}, prompts = {}, narrativeStyle = {};
+const posterDesign = {};
+new Function('exports', compile('../supabase/functions/_shared/posterDesign.ts'))(posterDesign);
 const finalGirlIdentity = {};
 new Function('exports', compile('../supabase/functions/_shared/finalGirlIdentity.ts'))(finalGirlIdentity);
 const manifest = {}, opening = {};
@@ -26,14 +28,15 @@ new Function('require', 'exports', compile('../supabase/functions/_shared/openin
 new Function('exports', compile('../supabase/functions/_shared/storyFacts.ts'))(storyFacts);
 new Function('exports', compile('../supabase/functions/_shared/narrativeStyle.ts'))(narrativeStyle);
 new Function('require', 'exports', compile('../supabase/functions/_shared/prompts.ts'))(name => {
+  if (name === './posterDesign.ts') return posterDesign;
   if (name === './finalGirlIdentity.ts') return finalGirlIdentity;
   if (name === './fictionBoundary.ts') return fiction;
   if (name === './narrativeStyle.ts') return narrativeStyle;
   assert.equal(name, './storyFacts.ts'); return storyFacts;
 }, prompts);
 
-function imageHandler({ rowExists = true, attachError = null, composeError = false, invalidPlan = false, incompletePlan = false, mechanicalPlan = false, planningGateway, discardedBefore = false, discardedDuring = false, referenceError = false } = {}) {
-  const filters = []; const removed = []; const phases = []; const imageCalls = []; const textCalls = []; const openingCalls = []; let handler;
+function imageHandler({ rowExists = true, attachError = null, composeError = false, invalidPlan = false, incompletePlan = false, mechanicalPlan = false, planningGateway, discardedBefore = false, discardedDuring = false, referenceError = false, printDesign, brokenConcepts = false } = {}) {
+  const filters = []; const removed = []; const phases = []; const imageCalls = []; const textCalls = []; const openingCalls = []; const compositions = []; let handler;
   const identityReferences = [{ name: 'Rena', url: 'data:image/jpeg;base64,RENA' }, { name: 'Billy the Bear', url: 'data:image/jpeg;base64,BEAR' }];
   let uploaded=false;
   const discardedHelpers={};new Function('require','exports',ts.transpileModule(readFileSync(new URL('../supabase/functions/_shared/discardedGame.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(()=>{},discardedHelpers);
@@ -63,10 +66,11 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
       textCalls.push(opts);
       if (incompletePlan) throw new Error('Generation did not finish: length');
       const copy = opts.system.includes('"title"') ? { title: 'TITLE', tagline: 'TAGLINE' } : {};
-      return { text: invalidPlan ? '{' : JSON.stringify({ concepts: ['A doorway with a small figure at the far end.', mechanicalPlan ? 'The woman rolls a die into a bowl beside a sign reading Fire and Brimstone.' : 'A face seen beside a darkened arcade machine.', 'An empty chair beneath a practical ceiling lamp.'], selected: 1, ...copy }), model: 'text' };
+      return { text: invalidPlan ? '{' : JSON.stringify({ concepts: brokenConcepts ? [] : ['A doorway with a small figure at the far end.', mechanicalPlan ? 'The woman rolls a die into a bowl beside a sign reading Fire and Brimstone.' : 'A face seen beside a darkened arcade machine.', 'An empty chair beneath a practical ceiling lamp.'], selected: 1, ...copy, design:printDesign }), model: 'text' };
     }), GatewayError: planningGateway?.GatewayError ?? Error, generateImage: async (...args) => { imageCalls.push(args); return { base64: 'dGVzdA==', mimeType: 'image/png', model: 'image' }; }, statusFor: planningGateway?.statusFor ?? (() => 500), userFacingMessage: planningGateway?.userFacingMessage ?? (() => 'failed') },
-    '../_shared/poster.ts': { composePoster: async (_bytes, copy) => { phases.push('compose'); assert.equal(copy.title, invalidPlan || incompletePlan ? 'BUDDYLAND' : 'TITLE'); if(composeError) throw new Error('composition failed'); return Buffer.from('complete-poster'); } },
+    '../_shared/poster.ts': { composePoster: async (_bytes, copy, design, cast) => { phases.push('compose'); compositions.push({copy,design,cast}); assert.equal(copy.title, invalidPlan || incompletePlan ? 'BUDDYLAND' : 'TITLE'); if(composeError) throw new Error('composition failed'); return Buffer.from('complete-poster'); } },
     '../_shared/prompts.ts': prompts,
+    '../_shared/posterDesign.ts': posterDesign,
     '../_shared/fictionBoundary.ts': fiction,
   };
   new Function('require', 'exports', 'Deno', code)(name => {
@@ -76,7 +80,7 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
     if (modules[name]) return modules[name];
     throw new Error('Unexpected image handler import: ' + name);
   }, {}, { env: { get: () => 'configured' } });
-  return { handler, filters, removed, phases, imageCalls, textCalls, openingCalls, identityReferences };
+  return { handler, filters, removed, phases, imageCalls, textCalls, openingCalls, identityReferences, compositions };
 }
 const request = (sceneType = 'ending') => new Request('https://example.test', { method: 'POST', body: JSON.stringify({ sceneType, killer: 'Billy the Bear', finalGirl: 'Rena', location: 'Buddyland', story: 'Rena held her flashlight toward the empty prize counter. Across the arcade, the bear began to move.', gameId: 'record', previousImageUrl: 'https://example.test/storage/v1/object/public/posters/game-posters/owner-A/old.png' }) });
 test('scene planning and rendering correct crossed caller identity for openings and posters', async () => {
@@ -262,6 +266,27 @@ test('composition failure cannot attach incomplete art or delete the previous po
   assert.deepEqual(f.phases,['compose']);
   assert.deepEqual(f.filters,[]);
   assert.deepEqual(f.removed,[]);
+});
+
+test('painting and complete saved poster receive the same design and selected cast',async()=>{
+ for(const layout of posterDesign.POSTER_LAYOUTS) {
+  const design={layout,face:'slash',palette:'electric'}, f=imageHandler({printDesign:design});
+  assert.equal((await f.handler(request())).status,200);
+  assert.match(f.imageCalls[0][0],new RegExp('PRINT DESIGN: '+layout));
+  assert.deepEqual(f.compositions[0].design,design);
+  assert.deepEqual(f.compositions[0].cast,{finalGirl:'Rena',killer:'Billy the Bear',location:'Buddyland'});
+  assert.deepEqual(f.phases,['compose','upload']);
+ }
+});
+test('broken optional designs and broken concepts preserve valid copy and use a coordinated bounded fallback',async()=>{
+ for(const options of [{printDesign:{layout:'bad'}},{brokenConcepts:true},{invalidPlan:true}]) {
+  const a=imageHandler(options), b=imageHandler(options);
+  assert.equal((await a.handler(request())).status,200);assert.equal((await b.handler(request())).status,200);
+  const design=a.compositions[0].design;
+  assert(posterDesign.parsePosterDesign(design));
+  assert.deepEqual(design,b.compositions[0].design);
+  assert.match(a.imageCalls[0][0],new RegExp('PRINT DESIGN: '+design.layout));
+ }
 });
 
 test('discarded games authorize no new image generation and late uploads are removed without attachment',async()=>{

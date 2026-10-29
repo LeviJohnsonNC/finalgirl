@@ -1,0 +1,42 @@
+[
+  {
+    "key": "slash",
+    "source": "https://raw.githubusercontent.com/google/fonts/9862abc066c9b83bf84c3e8ed1fc2d8d48f9bbf0/ofl/sedgwickavedisplay/SedgwickAveDisplay-Regular.ttf",
+    "sourceSha256": "3b9c295a146bafb93c8a12c1dde38a2fe47512777daf1458825e291752469a38",
+    "sha256": "11b2198effecb298e5be35d668539a7f0b84cedf9deb27afc202e8afa51b452c",
+    "bytes": 29204,
+    "license": "https://raw.githubusercontent.com/google/fonts/9862abc066c9b83bf84c3e8ed1fc2d8d48f9bbf0/ofl/sedgwickavedisplay/OFL.txt",
+    "licenseSha256": "381c3aace294e48febca0c2a4680264c705f5810c8aaa8474297d7073fd71951",
+    "sourceLicenseSha256": "f323edc1e5a6d8fa16120aa15367cdfb15468474cc621f9bda1a2f73c5d08d73"
+  },
+  {
+    "key": "brush",
+    "source": "https://raw.githubusercontent.com/google/fonts/9862abc066c9b83bf84c3e8ed1fc2d8d48f9bbf0/apache/permanentmarker/PermanentMarker-Regular.ttf",
+    "sourceSha256": "28f82c8a7943cb8e9d599f8554da1d4fc75dbcf69b9885ad6c0611d20c6946c5",
+    "sha256": "9dcb883e320f80dbf8811a5df86ceb4d96e0e362e865a6108ff612a7c0037378",
+    "bytes": 35952,
+    "license": "https://raw.githubusercontent.com/google/fonts/9862abc066c9b83bf84c3e8ed1fc2d8d48f9bbf0/apache/permanentmarker/LICENSE.txt",
+    "licenseSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "sourceLicenseSha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+  },
+  {
+    "key": "gothic",
+    "source": "https://raw.githubusercontent.com/google/fonts/9862abc066c9b83bf84c3e8ed1fc2d8d48f9bbf0/ofl/metalmania/MetalMania-Regular.ttf",
+    "sourceSha256": "4b95f0e55b291990c26a7b68818b20c1b728a8be05a34982b7bb4736c46c19ea",
+    "sha256": "27f05ae51eebdd474466693686751deb5f80681901538a186a38dc0554e9b195",
+    "bytes": 116812,
+    "license": "https://raw.githubusercontent.com/google/fonts/9862abc066c9b83bf84c3e8ed1fc2d8d48f9bbf0/ofl/metalmania/OFL.txt",
+    "licenseSha256": "6b30d10fd95f809e80e8565f2d24c03d9bef8762521ba85eb785e3ca3b92b683",
+    "sourceLicenseSha256": "4e66943af352059c059dd658774f25fbc831f1ad478f9f0890c06ecc2dd324c7"
+  },
+  {
+    "key": "industrial",
+    "source": "https://raw.githubusercontent.com/google/fonts/9862abc066c9b83bf84c3e8ed1fc2d8d48f9bbf0/ofl/blackopsone/BlackOpsOne-Regular.ttf",
+    "sourceSha256": "282a825b5f294377387e3969f765408157dbea8da0f5d0aae68c6bc704b145b3",
+    "sha256": "a80cd09d05388b61022abbb3c87f18bbdd864319e8f4d1cccb9a98b09e9ac5ae",
+    "bytes": 24044,
+    "license": "https://raw.githubusercontent.com/google/fonts/9862abc066c9b83bf84c3e8ed1fc2d8d48f9bbf0/ofl/blackopsone/OFL.txt",
+    "licenseSha256": "95d8e44344d4bf7ab6b30cd97d445012dae38b66d3990e252e767c3f7ce6461c",
+    "sourceLicenseSha256": "f67ca4a200424868ee8fcd5464d7b35ac1cbf7723f6bfdbd19a8524689fab9a8"
+  }
+]

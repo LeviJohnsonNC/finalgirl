@@ -53,4 +53,18 @@ for (const entry of healthManifest) {
   }
 }
 if (images.filter(file => file.startsWith(healthDirectory + '/')).length !== healthPaths.size) throw new Error('Unmapped health photograph');
+const posterFontDirectory = 'supabase/functions/_shared/poster-fonts';
+const posterFontSource = readFileSync('supabase/functions/_shared/posterDisplayFonts.ts', 'utf8');
+const posterFontManifest = JSON.parse(readFileSync(join(posterFontDirectory,'manifest.json'),'utf8'));
+let posterFontBytes = 0;
+for (const font of posterFontManifest) {
+  const encoded = posterFontSource.match(new RegExp('"'+font.key+'": "([A-Za-z0-9+/=]+)"'))?.[1];
+  if (!encoded) throw new Error('Missing poster font: '+font.key);
+  const bytes = Buffer.from(encoded,'base64');
+  if (bytes.length !== font.bytes || bytes.length>128*1024 || bytes.readUInt32BE(0)!==0x00010000 || createHash('sha256').update(bytes).digest('hex')!==font.sha256) throw new Error('Invalid poster font: '+font.key);
+  const license = readFileSync(join(posterFontDirectory,font.key+'-LICENSE.txt'));
+  if (createHash('sha256').update(license).digest('hex')!==font.licenseSha256) throw new Error('Poster font license changed: '+font.key);
+  posterFontBytes += bytes.length;
+}
+if (posterFontManifest.length!==4 || new Set(posterFontManifest.map(font=>font.key)).size!==4 || posterFontBytes>256*1024) throw new Error('Invalid poster font collection');
 console.log(`Verified ${images.length} original artwork files.`);

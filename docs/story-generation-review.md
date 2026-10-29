@@ -1,5 +1,9 @@
 # Story and artwork direction
 
+## Ending poster design update (2026-10-28)
+
+New ending posters now use coordinated story-specific lettering, placement, palettes, paper framing and billing instead of the original fixed red-serif template. The same bounded print plan controls painting safe areas and final raster composition; partial design failures preserve good copy. See the [current verification and release record](verification/ending-poster-variety.md) and [eight-poster visual review](reference/ending-posters/README.md). The improved painted medium, complete stored PNG and persistence safeguards remain. The original overhaul notes below describe that earlier implementation, not an instruction to restore its fixed typography.
+
 ## Request compatibility correction (2026-10-24)
 
 The expanded Dr. Fright context exposed a request-size bug in both opening and
