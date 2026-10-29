@@ -122,7 +122,6 @@ export function CampControls({
                   health={typeof value === "number" ? value : undefined}
                   art={(health) => powerCell(row, health)}
                   heroArt={modulePhoto("Hans", 7 + row)}
-                  heartArt={campCell(3, 1)}
                   onChange={(health) =>
                     record("hans", { [`minor.${power.id}.health`]: health })
                   }

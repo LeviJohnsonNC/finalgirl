@@ -23,6 +23,17 @@
 - Verification: dedicated browser journeys cover stage synchronization, historical deaths, correction disclosure/failure/retry/Undo/reload, unknown state, ten distinct card photos, both reveal surfaces and all five required viewport sizes. Final PR CI and rendered screenshot review are recorded in the PR.
 - This update does not re-certify every earlier source-audit or full-import completion row below. It changes presentation only; merge/deployment remain separate.
 
+## Visibility and shared presentation follow-up — 2026-10-29
+
+- User reference 1: [Dark Power entry block](https://chatgpt.com/library?file_id=libfile_f396b16ecc38819190fdc9007b418f39&account_id=personal). Removed that entire block from Play, including return space, confirmation and record button.
+- User reference 2: [header styling](https://chatgpt.com/library?file_id=libfile_2f361bab44408191a28451e28e598d23&account_id=personal). All registered killer and location headers share the warm ivory serif type, muted red label, inset frame and circular chevron; their existing background images/focal positions remain.
+- Replaced presence disclosure, Scan token/deck tracking, Ambush selection and associated phase/Terror bookkeeping controls with one Hidden/Visible picture toggle. It is available for Youngling and Adult; evolution to Youngling still records its required Vanish.
+- Rules check: publisher Series 2 Feature Film Rulebook, printed pp. 8–9, downloaded from [Van Ryder Games](https://vanrydergames.com/collections/final-girl-series-2). Youngling immediately Vanishes on evolution; vanished Ambush resolution explicitly supports Youngling and Adult. The ordinary toggle therefore is not restricted to Adult. The physical cards remain authoritative for effects.
+- Hidden uses the existing creature-free environmental photograph; Visible uses the recorded stage portrait. Headers, health and historical death portraits keep their stage mappings. Unknown presence stays visibly unknown until the player explicitly marks visibility; unknown stage never invents an Adult.
+- A visibility click records only presence (Vanish also discards the stale reported return-space label). It does not infer Scan outcomes/removal, a new return space, skip consumption, Power entry, damage or casualties. Legacy observation fields/history and rule/reference support are retained; this is a deliberate reduction of the Play interface.
+- All health-bearing Minor Powers now use the original jeweled live/spent heart pair through shared HealthTokens, including Evomorph's three Minors and Konrad's Slippery. Poltergeist effects remain healthless.
+- Frontend only; no function, migration, reference Storage or production deployment change. Final-head CI and rendered desktop/phone review are recorded in the PR. This section supersedes the earlier Play-control plan where the requested simplification differs.
+
 ## Source ledger
 
 Persistent source links identify the original photographs. Review crops are temporary aids, not replacement sources or application artwork.

@@ -16,6 +16,7 @@ import { EventControl } from "./EventControl";
 import { MinorPowerControl } from "./MinorPowerControl";
 import { useModuleRecord } from "./useModuleRecord";
 import { FrightControls } from "./FrightControls";
+import { EvomorphControls } from "./EvomorphControls";
 import { initialFright } from "../../../supabase/functions/_shared/play/fright";
 
 afterEach(cleanup);
@@ -205,7 +206,6 @@ describe("shared player interaction contracts", () => {
           name="Nightfall"
           health={health}
           art={() => art}
-          heartArt={art}
           onChange={setHealth}
         />
       );
@@ -250,7 +250,6 @@ describe("shared player interaction contracts", () => {
         name="Old power"
         previouslyRevealed
         art={() => art}
-        heartArt={art}
         onChange={changed}
       />,
     );
@@ -307,7 +306,7 @@ describe("durable module observation contract", () => {
 it('one-Health Minor Powers reveal at one, show one heart, remove and restore exactly one, and disable every mutation', () => {
   function OneHeart({disabled=false}) {
     const [health,setHealth]=useState<number|undefined>();
-    return <MinorPowerControl name="Endless Sleep" maxHealth={1} disabled={disabled} health={health} art={()=>art} heartArt={art} onChange={n=>setHealth(n??undefined)}/>;
+    return <MinorPowerControl name="Endless Sleep" maxHealth={1} disabled={disabled} health={health} art={()=>art} onChange={n=>setHealth(n??undefined)}/>;
   }
   const view=render(<OneHeart/>);
   expect(screen.getByRole('article',{name:'Endless Sleep'})).toHaveAttribute('data-state','unrecorded');
@@ -327,4 +326,23 @@ it('one-Health Minor Powers reveal at one, show one heart, remove and restore ex
   expect(screen.getByRole('button',{name:'Remove one Endless Sleep health, heart 1'})).toBeDisabled();
   expect(screen.queryByRole('combobox',{name:'Endless Sleep health correction'})).toBeNull();
   expect(screen.getByRole('button',{name:'Clear record: Endless Sleep'})).toBeDisabled();
+});
+
+it('Evomorph legacy visibility stays unknown until explicitly observed, without adding Scan or entry effects', () => {
+ const onEvent=vi.fn((event:ReturnType<typeof newPlayEvent>)=>event.kind==='module');
+ const props={killer:'Evomorph',location:'Sacred Groves',finalGirl:'Laurie',onEvent};
+ const view=render(<EvomorphControls {...props} events={[]}/>);
+ expect(screen.getByRole('button',{name:'Evomorph visibility'})).toBeDisabled();
+ expect(screen.getByText('Evolution not recorded')).toBeVisible();
+ expect(screen.getByText('Visibility not recorded')).toBeVisible();
+ expect(onEvent).not.toHaveBeenCalled();
+ const events=[newPlayEvent({kind:'start',saved:0,killed:0,round:1}),newPlayEvent({kind:'module',evomorphAction:{parent:'root',command:'correct',key:'stage',value:'youngling'},moduleData:{module:'evomorph',changes:{stage:'youngling'}}})];
+ view.rerender(<EvomorphControls {...props} events={events}/>);
+ const picture=screen.getByRole('button',{name:'Evomorph visibility'});
+ expect(picture).toBeEnabled();
+ expect(picture).not.toHaveAttribute('aria-pressed');
+ expect(picture).toHaveTextContent('Visibility not recorded');
+ fireEvent.click(picture);
+ expect(onEvent).toHaveBeenCalledTimes(1);
+ expect(onEvent.mock.calls[0][0].moduleData).toEqual({module:'evomorph',changes:{presence:'on-board'}});
 });

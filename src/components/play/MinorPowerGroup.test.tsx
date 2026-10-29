@@ -19,7 +19,6 @@ it("focuses recorded powers without imposing a single-power limit or losing zero
             name={name}
             health={health[name]}
             art={() => art}
-            heartArt={art}
             onChange={(n) => {
               changed(name, n);
               setHealth((v) => ({ ...v, [name]: n ?? undefined }));
@@ -64,13 +63,11 @@ it("keeps alternatives available after a rejected reveal and preserves legacy un
         name="Old"
         previouslyRevealed
         art={() => art}
-        heartArt={art}
         onChange={change}
       />
       <MinorPowerControl
         name="New"
         art={() => art}
-        heartArt={art}
         onChange={change}
       />
     </MinorPowerGroup>,

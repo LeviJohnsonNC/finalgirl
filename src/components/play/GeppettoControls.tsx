@@ -18,7 +18,6 @@ import {
   type PuppetStatus,
 } from "@/lib/play/modules";
 import puppetAtlas from "@/assets/play/geppetto/puppets.webp";
-import cardsAtlas from "@/assets/play/geppetto/cards.webp";
 import minorAtlas from "@/assets/play/geppetto/minors.webp";
 import { IllustratedTile } from "./IllustratedTile";
 import type { ModuleArt } from "./ModuleArtwork";
@@ -256,7 +255,6 @@ export function GeppettoControls({
                 health={health}
                 art={(health) => minorCell(row, health)}
                 heroArt={modulePhoto("Geppetto", 7 + row)}
-                heartArt={squareCell(cardsAtlas, 7)}
                 onChange={(health) =>
                   change({ [`minor.${c.id}.health`]: health })
                 }

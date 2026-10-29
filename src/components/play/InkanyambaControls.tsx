@@ -51,7 +51,6 @@ export function InkanyambaControls({
               disabled={blocked}
               art={(h) => inkanyambaCell(8 + row * 4 + 3 - h)}
               heroArt={modulePhoto("Inkanyamba", 7 + row)}
-              heartArt={inkanyambaCell(7)}
               previouslyRevealed={entries.some(
                 (e) =>
                   e.moduleData?.module === "inkanyamba" &&

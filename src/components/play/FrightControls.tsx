@@ -295,7 +295,6 @@ export function FrightControls({
                 minorCell(row === 0 ? 2 - health : health > 0 ? 3 : 4)
               }
               heroArt={modulePhoto("Dr. Fright", 7 + row)}
-              heartArt={minorCell(5)}
               onChange={(health) =>
                 act("minor", undefined, undefined, { minor: power.id, health })
               }
