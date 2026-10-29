@@ -406,5 +406,89 @@
     "bytes": 97778,
     "sha256": "f28d4dfcbd5ad2877ec6cd4ed64844874237d08044847ae875f9e39d619002db",
     "quality": 60
+  },
+  {
+    "id": "captain-saved",
+    "file": "src/assets/play/photos/konrad/captain-saved.webp",
+    "source": "exec-bf6b5a14-29a2-458e-a026-0f1f3b552185.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "width": 1280,
+    "height": 720,
+    "bytes": 95932,
+    "sha256": "d7aa877dfc9185f1e736dcec8cc7228f0b7c395adede41750df929adfeece409",
+    "quality": 84
+  },
+  {
+    "id": "captain-killed",
+    "file": "src/assets/play/photos/konrad/captain-killed.webp",
+    "source": "exec-fe631bdf-f61a-43a7-a0f2-a0d0fde4e40a.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "width": 1280,
+    "height": 720,
+    "bytes": 92736,
+    "sha256": "cd324c2a5abb60d0dc25cc368409e7b96f7f6dd6e0841926f0adbd5f7f5accf4",
+    "quality": 84
+  },
+  {
+    "id": "jonas-saved",
+    "file": "src/assets/play/photos/konrad/jonas-saved.webp",
+    "source": "exec-e1afbf85-c50c-49c1-b648-e823d5a5a852.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "width": 1280,
+    "height": 720,
+    "bytes": 123498,
+    "sha256": "871d8665bc5bfbf588969a0d0262fc63cb9174fb25bf5e05c5f2c68edf4018a2",
+    "quality": 84
+  },
+  {
+    "id": "jonas-killed",
+    "file": "src/assets/play/photos/konrad/jonas-killed.webp",
+    "source": "exec-404c0247-cb85-4dbb-9653-03de6bd67d2a.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "width": 1280,
+    "height": 720,
+    "bytes": 98618,
+    "sha256": "42ee019077d11e8fd1bd3c3b7486784eace635fce2061197b2d5ba9de672227d",
+    "quality": 84
+  },
+  {
+    "id": "orphan-saved",
+    "file": "src/assets/play/photos/konrad/orphan-saved.webp",
+    "source": "exec-5c040826-9a30-404f-b171-98b60105d516.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "width": 1280,
+    "height": 720,
+    "bytes": 106596,
+    "sha256": "beb75144f6978998a2074021a5bdeae0a21c3c732cbcaa774f711a6c25350d44",
+    "quality": 84
+  },
+  {
+    "id": "orphan-killed",
+    "file": "src/assets/play/photos/konrad/orphan-killed.webp",
+    "source": "exec-95b9c055-99a9-4a78-ad71-93d0df02545c.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "width": 1280,
+    "height": 720,
+    "bytes": 120494,
+    "sha256": "4194ea3af49b4a8534134fc6914a0ccba0c00cba3b26398b3ee121f67ce8888b",
+    "quality": 84
+  },
+  {
+    "id": "loader-equipped",
+    "file": "src/assets/play/photos/konrad/loader-equipped.webp",
+    "source": "exec-621bc76d-4f4c-44f3-8b4c-9ece99e66c18.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "width": 1280,
+    "height": 720,
+    "bytes": 162560,
+    "sha256": "42f41ef276baba48e304fcff8664e7e36ee93b2366612f5626a928940d2fd3a0",
+    "quality": 82
   }
 ]

@@ -2,13 +2,13 @@
 
 Source inventory and gameplay: [owner record](../../../../../docs/imports/uss-konrad.md). Presentation: [approved module standard](../../../../../docs/MODULE_STANDARD.md).
 
-34 independent native landscape frames, all 1536×1024, all runtime files below 160 KiB. No enlarged atlas/contact-sheet cells or generic missing-image fallback. `manifest.json` records source IDs, native/runtime dimensions, compression quality, bytes and SHA-256. `aliases.json` enumerates the ten intentional aliases. `konradArt.ts` resolves exact IDs and throws on missing mappings.
+41 independent native landscape frames (34 at 1536×1024 and seven new frames at 1672×941), all runtime files below 160 KiB. No enlarged atlas/contact-sheet cells or generic missing-image fallback. `manifest.json` records source IDs, native/runtime dimensions, compression quality, bytes and SHA-256. `aliases.json` enumerates the nine intentional aliases. `konradArt.ts` resolves exact IDs and throws on missing mappings.
 
-Each environmental pair retains its camera, pipes/rails and distinct landmarks. Shafts: blue pipes (upper-left), copper conduits/green locker (upper-right), yellow ladder/fan (lower-left), pressure wheel/ducts (lower-right). Powered machinery changes physically; Airlock has closed/unarmed, closed/armed and released; Self Destruct has inactive plus its three printed positions. Loader retains its yellow K2 exoskeleton silhouette without an invented operator, and lost shows its empty parking footprint. Powered/equipped share the same machine photograph; equipment indication remains HTML.
+Each environmental pair retains its camera, pipes/rails and distinct landmarks. Shafts: blue pipes (upper-left), copper conduits/green locker (upper-right), yellow ladder/fan (lower-left), pressure wheel/ducts (lower-right). Powered machinery changes physically; Airlock has closed/unarmed, closed/armed and released; Self Destruct has inactive plus its three printed positions. Loader retains its yellow K2 exoskeleton silhouette, and Lost shows its empty parking footprint. Equipped has an independent close photograph of operator hands and harness; no face overrides the selected Final Girl.
 
-Unknown states use explicitly mapped neutral motifs with strong dimming and **Not recorded** HTML; a depicted hatch or parked machine is not evidence of actual placement, closure or equipment. Events use the shared dim-off/vivid-on picture toggle. All numbers, labels, countdown positions and live hearts are HTML. Slippery uses a killer-agnostic shaft photograph with no creature. Its hearts deliberately reuse the approved shared health token (Inkanyamba atlas cell 7), rather than a vent photo or new character artwork.
+Unknown states use explicitly mapped neutral motifs with strong dimming and **Not recorded** HTML; a depicted hatch or parked machine is not evidence of actual placement, closure or equipment. Events use the shared dim-off/vivid-on picture toggle. All numbers, labels, countdown positions and live hearts are HTML. Slippery uses a killer-agnostic shaft photograph with no creature. Its live hearts use the approved shared red full/empty jeweled tokens.
 
-Captain/Jonas/Orphan photographs are safe fictional role interpretations: supplied Event cards contain no verified actor portraits or fur/clothing identity. Do not promote incidental faces, clothes, background crew, planet views, sparks, food or damage into narrative/session facts. Child harm remains off-screen in generated prose. Ordinary Item/instant Event artwork galleries and a Keycard workbench were not needed: existing Item observations and the narrow numeric ledger carry those actions.
+Captain/Jonas/Orphan photographs are safe fictional role interpretations: supplied Event cards contain no verified actor portraits or fur/clothing identity. Do not promote incidental faces, clothes, background crew, planet views, sparks, food or damage into narrative/session facts. Child harm remains off-screen in generated prose. Ordinary Item/instant Event artwork galleries are not added. The owner-requested picture switches replace the former Keycard workbench. Dramatic Airlock and Self Destruct imagery is atmosphere only: switching On never records release, countdown advancement or casualties.
 
 Crops: environmental cards use centered 16:9 crops; crew focus is 35% horizontally; header is centered with dark title space. Runtime UI must be reviewed on all five target viewports after loading. End posters retain the established painted/composited 2:3 medium.
 
@@ -50,3 +50,18 @@ Crops: environmental cards use centered 16:9 crops; crew focus is 35% horizontal
 | `loader-lost` | `exec-48aa5534-a903-4f8a-9e3f-13d00178329b.png` | 97778 | 1536×1024 |
 
 Exterior identity: final source `exec-54c74caf-b0b1-4200-b6ee-2632237762d8.png`, a faithful branding edit retaining existing ship geometry. The inaccurate company/model/manufacturer markings were corrected to Noguchi Masaki Mining Corporation, 9791-Bison and Lockheed Martin; meaningless inscriptions removed. Existing official/custom image precedence and saved images remain unchanged. The frontend identity is a downsampled 1024×559 PNG at its existing path, not a new public cast-reference Storage manifest.
+
+
+New outcome and equipment sources (each independent native 1672×941; runtime 1280×720):
+
+| Asset ID | Generated source | Runtime bytes |
+| --- | --- | ---: |
+| `captain-saved` | `exec-bf6b5a14-29a2-458e-a026-0f1f3b552185.png` | 95932 |
+| `captain-killed` | `exec-fe631bdf-f61a-43a7-a0f2-a0d0fde4e40a.png` | 92736 |
+| `jonas-saved` | `exec-e1afbf85-c50c-49c1-b648-e823d5a5a852.png` | 123498 |
+| `jonas-killed` | `exec-404c0247-cb85-4dbb-9653-03de6bd67d2a.png` | 98618 |
+| `orphan-saved` | `exec-5c040826-9a30-404f-b171-98b60105d516.png` | 106596 |
+| `orphan-killed` | `exec-95b9c055-99a9-4a78-ad71-93d0df02545c.png` | 120494 |
+| `loader-equipped` | `exec-621bc76d-4f4c-44f3-8b4c-9ece99e66c18.png` | 162560 |
+
+Saved outcomes preserve each role identity. Captain death is non-graphic; cat/child killed states depict empty familiar surroundings and belongings, with harm off-screen. Left play uses the dimmed original portrait. These illustrations are decorative and do not assert unrecorded circumstances.

@@ -18,3 +18,10 @@ The browser suite decodes images before capture, checks 320px overflow, checks v
 Preflight comparison against the approved Groves reference pack found and fixed caption anchoring before bulk art. Subsequent review aligned Solar quantities and preserved explicit unknowns, role correction semantics, and atomic equipment state/space actions. Final UI uses shared picture toggles, characters and Minor health controls. Countdown advances and token/reset/release previews are deliberate mechanic-specific exceptions; they cannot be safely represented as a presence toggle. No new map/combat/deck simulator was introduced.
 
 Temporary base64 log emission and the dedicated capture workflow were removed after retrieval. Regular desktop/mobile regression journeys and CI artifact/report capture remain. Final-head Reliability results are recorded on [PR #151](https://github.com/LeviJohnsonNC/finalgirl/pull/151); the reviewed runtime UI is unchanged by that evidence/logging cleanup.
+
+
+## Picture-control refresh
+
+The current browser journeys in `tests/browser/konrad.spec.ts` capture the simplified maintenance/shaft switches, crew outcomes, Events, hazards, independent Loader states and shared Slippery hearts. Desktop captures cover 1280×640, 1366×768 and 1440×900; mobile covers 390×844 and 320×568. They decode photographs before capture, check overflow and 44px controls, exercise keyboard/reduced motion, reload and Undo, and confirm that viewing does not write observations. Starting-Event activation and all seven selected Killers are covered separately. Capture artifacts on the PR's final Reliability run are the source for this refresh. Earlier tables above describe the superseded workbench UI.
+
+The new observation action also has native/shared domain validation, legacy/history/death-cache checks and an existing JSONB session/archive round-trip test. Release requires all six dependent edge bundles before frontend publication; see the owner record. No production deployment or live-provider verification is claimed.

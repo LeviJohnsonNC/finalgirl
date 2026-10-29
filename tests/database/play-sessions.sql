@@ -55,8 +55,16 @@ DO $$ DECLARE events jsonb; s jsonb; r jsonb; BEGIN
  ASSERT (SELECT final_girl_health FROM public.game_history WHERE id='61616161-6161-4161-8161-616161616161')=5;
  ASSERT (SELECT ((play_events#>>'{3,moduleData,changes,snapshot}')::jsonb)->>'fate' FROM public.game_history WHERE id='61616161-6161-4161-8161-616161616161')='explosion-loss';
  ASSERT (SELECT (((play_events#>>'{2,moduleData,changes,snapshot}')::jsonb)#>>'{tokens,shaft:upper-left}')::int FROM public.game_history WHERE id='61616161-6161-4161-8161-616161616161')=2;
+ -- Binary observations round-trip alongside historical fatal and quantity records.
+ s := (events#>>'{3,moduleData,changes,snapshot}')::jsonb;
+ s := jsonb_set(s,'{toggles}','{"system:crusher":true}'::jsonb);
+ s := jsonb_set(s,'{tokens}',(s->'tokens')-'function:crusher');
+ events := events || jsonb_build_array(jsonb_build_object('kind','module','id','cdd6b7e8-04d4-4c56-87a0-354a41fb8f32','at',1793285545251,'konradAction',jsonb_build_object('command','toggle','target','system:crusher','active',true,'parent','7dba5e2e-a8e9-4aa3-91d1-4a533713a79a'),'moduleData',jsonb_build_object('module','konrad','changes',jsonb_build_object('snapshot',s::text))));
+ UPDATE public.game_history SET play_events=events WHERE id='61616161-6161-4161-8161-616161616161';
+ ASSERT (SELECT (play_events#>>'{4,moduleData,changes,snapshot}')::jsonb#>>'{toggles,system:crusher}' FROM public.game_history WHERE id='61616161-6161-4161-8161-616161616161')='true';
  s:=jsonb_build_object('version',1,'id','61616161-6161-4161-8161-616161616161','phase','nowPlaying','selection',jsonb_build_object('killer','Poltergeist','location','USS Konrad','finalGirl','Laurie'),'playEvents',events);
  r:=public.save_play_session('61616161-6161-4161-8161-616161616161',0,s,false);ASSERT r->>'ok'='true';
+ ASSERT (SELECT (state#>>'{playEvents,4,moduleData,changes,snapshot}')::jsonb#>>'{toggles,system:crusher}' FROM public.play_sessions WHERE id='61616161-6161-4161-8161-616161616161')='true';
 END $$;
 SELECT set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',false);
 DO $$ BEGIN ASSERT NOT EXISTS(SELECT 1 FROM public.game_history WHERE id='61616161-6161-4161-8161-616161616161');ASSERT NOT EXISTS(SELECT 1 FROM public.play_sessions WHERE id='61616161-6161-4161-8161-616161616161');END $$;
