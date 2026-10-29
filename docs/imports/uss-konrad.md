@@ -3,7 +3,7 @@
 ## Scope and status
 
 - Owner: **location**, canonical name **USS Konrad**. Existing film ID: `s2-into-the-void`. Shared module ID: `konrad`.
-- Stage: **implemented; final CI gate in progress**, approved by Levi on 2026-10-29. [PR #151](https://github.com/LeviJohnsonNC/finalgirl/pull/151) preserves the location scope. No merge or deployment.
+- Stage: **implemented; verification evidence recorded**, approved by Levi on 2026-10-29. [PR #151](https://github.com/LeviJohnsonNC/finalgirl/pull/151) preserves the location scope. No merge or deployment.
 - Standard: `docs/MODULE_STANDARD.md`, `docs/MODULE_IMPORT_PLAYBOOK.md`, `docs/module-controls.md`, `docs/PLAYTEST_POLISH.md` and `docs/templates/MODULE_IMPORT_RECORD.md`. Groves source reference: `dad911e034e332a23882de7c8304dc9d0db198cb`.
 - Reviewed 2026-10-29, America/Regina. Current GitHub default-branch source was read directly, including its merged Evomorph registration. PR #150 is merged. This plan does not certify its unfinished photographic work or silently absorb that separate killer work.
 - Extend the existing film; do not duplicate Collection or cast choices. USS Konrad works independently with every supported killer.
