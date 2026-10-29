@@ -1,3 +1,4 @@
+import { resolveKonradAction, validKonradAction, validKonradObservation, isInitialKonrad, konradParent, type KonradAction } from './konrad.ts';
 import { resolveEvomorphAction, validEvomorphAction, validEvomorphObservation, type EvomorphAction } from './evomorph.ts';
 import { validCreechAction, validCreechObservation, type CreechAction } from './creech.ts';
 import { validPoltergeistObservation, validPoltergeistAction, type PoltergeistAction } from './poltergeist.ts';
@@ -79,6 +80,7 @@ export interface PlayEvent extends PlayDetails {
   /** One explicit location action can also update selected Inkanyamba. */
   grovesAction?: GrovesAction;
   evomorphAction?: EvomorphAction;
+  konradAction?: KonradAction;
   creechAction?: CreechAction;
   poltergeistAction?: PoltergeistAction;
   linkedModule?: ModuleObservation;
@@ -143,6 +145,8 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if(e.konradAction!==undefined&&(e.kind!=="module"||e.moduleData?.module!=="konrad"||!validKonradAction(e.konradAction)))return false;
+  if(e.moduleData?.module==="konrad"&&(e.kind!=="module"||!validKonradObservation(e.konradAction,e.moduleData.changes)))return false;
   if(e.evomorphAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='evomorph'||!validEvomorphAction(e.evomorphAction)))return false;
   if(e.moduleData?.module==='evomorph'&&(e.kind!=='module'||!validEvomorphObservation(e.evomorphAction,e.moduleData.changes)))return false;
   if(e.moduleData?.module==='poltergeist' && (!validModuleObservation(e.moduleData)||!validPoltergeistObservation(e.poltergeistAction,e.moduleData.changes)))return false;
@@ -218,9 +222,29 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validEvomorphHistory(log) &&
+    validEvomorphHistory(log) && validKonradHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
+}
+/** Replay canonical linked changes; key order is irrelevant after JSONB roundtrips. */
+export function validKonradHistory(log: readonly PlayEvent[]): boolean {
+  for(let i=0;i<log.length;i++) {
+    const e=log[i],prefix=log.slice(0,i),entries=summarizePlay(prefix).entries;
+    if(e.kind==='undo'&&!canUndoKonrad(prefix,e.target!))return false;
+    if(e.kind==='restore') {const original=prefix.find(x=>x.id===e.target);if(original?.moduleData?.module==='konrad'&&konradParent(entries)!==(original.konradAction?.parent??'root'))return false;}
+    if(e.moduleData?.module!=='konrad')continue;
+    if(!e.konradAction){if(prefix.some(x=>x.moduleData?.module==='konrad')||!isInitialKonrad(e.moduleData.changes))return false;continue;}
+    const changes=resolveKonradAction(e.konradAction,moduleState(entries,'konrad'),entries);
+    if(!changes||JSON.stringify(JSON.parse(String(changes.snapshot)))!==JSON.stringify(JSON.parse(String(e.moduleData.changes.snapshot)))) {
+      const canonical=(x:unknown):unknown=>x&&typeof x==='object'&&!Array.isArray(x)?Object.fromEntries(Object.entries(x).sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>[k,canonical(v)])):x;
+      if(!changes||JSON.stringify(canonical(JSON.parse(String(changes.snapshot))))!==JSON.stringify(canonical(JSON.parse(String(e.moduleData.changes.snapshot)))))return false;
+    }
+  }
+  return true;
+}
+export function canUndoKonrad(log:readonly PlayEvent[],target:string):boolean {
+ const entries=summarizePlay(log).entries,item=entries.find(e=>e.id===target);
+ return item?.moduleData?.module!=='konrad'||[...entries].reverse().find(e=>e.moduleData?.module==='konrad')?.id===target;
 }
 /** Validate only the added owner contract; legacy/non-Evomorph shapes remain stable. */
 function validEvomorphHistory(log: readonly PlayEvent[]): boolean {
@@ -300,6 +324,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       if (!snapshot || snapshot.parent !== frightParent) { summary.inactive.add(original.id); continue; }
       frightParent = original.id;
     }
+    if(original.moduleData?.module==='konrad'&&original.konradAction&&!resolveKonradAction(original.konradAction,moduleState(summary.entries,'konrad'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='evomorph'&&original.evomorphAction&&!resolveEvomorphAction(original.evomorphAction,moduleState(summary.entries,'evomorph'),summary.entries)){summary.inactive.add(original.id);continue;}
     const e = { ...original };
     if (e.kind === "killed" || e.kind === "saved") {

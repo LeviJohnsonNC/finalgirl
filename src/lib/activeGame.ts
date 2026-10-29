@@ -8,6 +8,8 @@ export interface GameSelection {
   finalGirlStartingHealth?: number;
 }
 export interface EndingFormData {
+  outcome?: "won"|"lost";
+  konradReview?: {fate: import("../../supabase/functions/_shared/play/konrad").KonradFate};
   poltergeistReview?: {carolynRescued:true|null;floppyAtEscape:true|null;epicRequired:boolean|null;escapeRoute?:'exit'|'helicopter'|null};
   finalHorrorLevel?: number; finalGirlHealth?: number; killerHealth?: number;
   weaponUsed: string; victimsSaved: number | null; victimsKilled: number | null;
@@ -16,6 +18,7 @@ export interface EndingFormData {
 }
 export interface ActiveGame {
   evomorphSetupVersion?: 1;
+  konradSetupVersion?: 1;
   creechSetupVersion?: 1;
   poltergeistSetupVersion?: 1;
   grovesSetupVersion?: 1;
@@ -43,6 +46,8 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if(game.konradSetupVersion!==undefined&&game.konradSetupVersion!==1)return false;
+  if(game.selection?.location!=="USS Konrad"&&game.playEvents?.some(e=>e.moduleData?.module==="konrad"))return false;
   if(game.evomorphSetupVersion!==undefined&&game.evomorphSetupVersion!==1)return false;
   if(game.creechSetupVersion!==undefined&&game.creechSetupVersion!==1)return false;
   if(game.poltergeistSetupVersion!==undefined && game.poltergeistSetupVersion!==1)return false;

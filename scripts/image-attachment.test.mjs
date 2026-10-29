@@ -309,3 +309,11 @@ test('reviewed rescue uncertainty overrides stale spirit Health and earlier trac
  assert.match(facts,/Carolyn escape unconfirmed/);assert.match(facts,/takes precedence over earlier observations/);assert.match(facts,/Unconfirmed means unknown, not failure/);assert.doesNotMatch(facts,/Killer health remaining: 0/);
  assert.match(storyFacts.endingFacts({killer:{name:'Hans'},killerHealth:0}),/Killer health remaining: 0/);
 });
+
+test('reviewed fatal Konrad fate overrides stale positive Health in ending prose and painted poster planning',()=>{
+ for(const fate of ['airlock-loss','explosion-loss']) {
+  const context={killer:'Poltergeist',location:'USS Konrad',finalGirl:'Laurie',sceneType:'ending',outcome:'lost',story:'The ship fell silent as the recorded disaster consumed its last compartment.',finalGirlHealth:5,konradReview:{fate}};
+  assert.match(storyFacts.endingFacts(context),/Final Girl fate: died/);
+  assert.match(prompts.buildPosterPrompt(context),/Final Girl fate: died/);
+ }
+});

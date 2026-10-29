@@ -1,15 +1,22 @@
+import type {KonradFate} from './play/konrad.ts';
+export function reviewedCharacterFate(health:number|undefined,review?:{fate:KonradFate}):'survived'|'died'|'unknown' {
+ if(review?.fate==='airlock-loss'||review?.fate==='explosion-loss')return 'died';
+ if(review?.fate==='survived')return 'survived';
+ return characterFate(health);
+}
 /** Result and survival are separate facts: a simultaneous death can win. */
 export function characterFate(health?: number): 'survived' | 'died' | 'unknown' {
   return health === undefined ? 'unknown' : health === 0 ? 'died' : 'survived';
 }
 
 export function endingFacts(facts: {
-  outcome?: 'won' | 'lost'; finalGirlHealth?: number; killerHealth?: number; killer?: {name?:string}|string; poltergeistReview?:{carolynRescued:true|null;floppyAtEscape:true|null;epicRequired:boolean|null;escapeRoute?:'exit'|'helicopter'|null};
+  konradReview?: {fate:KonradFate}; outcome?: 'won' | 'lost'; finalGirlHealth?: number; killerHealth?: number; killer?: {name?:string}|string; poltergeistReview?:{carolynRescued:true|null;floppyAtEscape:true|null;epicRequired:boolean|null;escapeRoute?:'exit'|'helicopter'|null};
 }): string {
   const healthless=(typeof facts.killer==='string'?facts.killer:facts.killer?.name)==='Poltergeist';
   return [
+    ...(facts.konradReview?[`Reviewed USS Konrad ship fate: ${facts.konradReview.fate}. Airlock-loss and explosion-loss mean the Final Girl died and lost regardless of stale positive Health or Killer death. Survived means survival of this hazard only, not victory, escape or Killer death. Unknown establishes no ship fate.`]:[]),
     `Game result: ${facts.outcome ?? 'unrecorded'}. This is an objective result, not proof of anyone's survival.`,
-    `Final Girl fate: ${characterFate(facts.finalGirlHealth)} (reviewed health ${facts.finalGirlHealth ?? 'unrecorded'}).`,
+    `Final Girl fate: ${reviewedCharacterFate(facts.finalGirlHealth,facts.konradReview)} (reviewed health ${facts.finalGirlHealth ?? 'unrecorded'}).`,
     healthless?'Poltergeist has no Health and cannot be killed. Historical numerical Health inputs are inapplicable.':`Killer health remaining: ${facts.killerHealth ?? 'unrecorded'}; maximum health is unknown.`,
     'A win at zero Final Girl health is a sacrifice, not a living survivor. A loss with positive health does not mean she died. With unrecorded health, leave her ultimate survival open.',
     'Positive health establishes life at the recorded instant, not escape, safety or freedom from assimilation. An explicitly recorded unique module ending (such as assimilation) takes priority over a generic survival/death inference.',

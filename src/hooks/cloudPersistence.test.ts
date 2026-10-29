@@ -160,3 +160,17 @@ describe('collection migration', () => {
     expect(mock.films).toEqual(['cloud-film', 'one', 'two']);
   });
 });
+
+it('Konrad late fatal review updates the same cloud outcome/play_events and rehydrates after offline retry',async()=>{
+ const {newPlayEvent,summarizePlay}=await import('@/lib/play/events');
+ const {initialKonrad,konradState,resolveKonradAction,konradParent}=await import('@/lib/play/konrad');
+ const {moduleState}=await import('@/lib/play/modules');
+ const log=[newPlayEvent({kind:'start',saved:0,killed:0,round:1}),newPlayEvent({kind:'module',moduleData:{module:'konrad',changes:initialKonrad('Showdown')}})];
+ const first=renderHook(useGameHistory);await waitFor(()=>expect(first.result.current.isLoading).toBe(false));let id='';
+ act(()=>{id=first.result.current.recordGame({...sample,location:'USS Konrad',playEvents:log,finalGirlHealth:5}).id;});await waitFor(()=>expect(mock.history.has(id)).toBe(true));
+ const entries=summarizePlay(log).entries,a={parent:konradParent(entries),command:'observe' as const,key:'fate' as const,value:'explosion-loss'};
+ const review=newPlayEvent({kind:'module',konradAction:a,moduleData:{module:'konrad',changes:resolveKonradAction(a,moduleState(entries,'konrad'),entries)!}});log.push(review);
+ mock.failSave=true;act(()=>first.result.current.updateGame(id,{outcome:'lost',playEvents:log}));await waitFor(()=>expect(first.result.current.saveError).toBeTruthy());first.unmount();mock.failSave=false;
+ const second=renderHook(useGameHistory);await waitFor(()=>expect(second.result.current.pendingSaveCount).toBe(0));expect(mock.history.size).toBe(1);expect(second.result.current.getStats()).toMatchObject({wins:0,losses:1});expect(mock.history.get(id)).toMatchObject({outcome:'lost',final_girl_health:5,play_events:log});second.unmount();localStorage.clear();
+ const third=renderHook(useGameHistory);await waitFor(()=>expect(third.result.current.isLoading).toBe(false));const hydrated=await third.result.current.fetchGameDetails(id);expect(hydrated?.outcome).toBe('lost');expect(konradState(moduleState(summarizePlay(hydrated?.playEvents).entries,'konrad')).fate).toBe('explosion-loss');
+});

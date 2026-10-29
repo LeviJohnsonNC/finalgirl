@@ -262,3 +262,16 @@ Deno.test("EndingRequestSchema - supports photographed 4 and 7 maximum health wi
   for(const health of [4,7]) assertEquals(validateRequest(EndingRequestSchema,{...base,finalGirlMaxHealth:health}).success,true);
   for(const health of [0,11,4.5]) assertEquals(validateRequest(EndingRequestSchema,{...base,finalGirlMaxHealth:health}).success,false);
 });
+
+Deno.test('USS Konrad reviewed fatal ending is owner-specific and reaches prose/poster schemas without falsifying Health',()=>{
+ for(const fate of ['airlock-loss','explosion-loss']) {
+  const image={sceneType:'ending',story:'The ship fell silent as the recorded disaster consumed its last compartment.',killer:'Poltergeist',location:'USS Konrad',finalGirl:'Laurie',outcome:'lost',finalGirlHealth:5,konradReview:{fate}};
+  assertEquals(SceneImageRequestSchema.safeParse(image).success,true);
+  assertEquals(SceneImageRequestSchema.safeParse({...image,location:'Maple Lane'}).success,false);
+  assertEquals(SceneImageRequestSchema.safeParse({...image,outcome:'won'}).success,false);
+  const prose={introStory:image.story,outcome:'lost',killer:{name:'Poltergeist'},location:{name:'USS Konrad'},finalGirl:{name:'Laurie'},finalGirlHealth:5,konradReview:{fate}};
+  assertEquals(EndingRequestSchema.safeParse(prose).success,true);
+  assertEquals(EndingRequestSchema.safeParse({...prose,location:{name:'Maple Lane'}}).success,false);
+  assertEquals(EndingRequestSchema.safeParse({...prose,outcome:'won'}).success,false);
+ }
+});

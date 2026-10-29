@@ -25,7 +25,8 @@ const GameOutcome = ({
   onDraftChange,
   onSaveResult,
 }: GameOutcomeProps) => {
-  const isWin = result.outcome === "won";
+  const reviewedOutcome=result.location==='USS Konrad'&&['airlock-loss','explosion-loss'].includes(String(initialDraft?.konradFate))?'lost':result.location==='USS Konrad'&&['won','lost'].includes(String(initialDraft?.reviewedOutcome))?initialDraft!.reviewedOutcome:result.outcome;
+  const isWin = reviewedOutcome === "won";
   const locationArt =
     result.location === "Buddyland"
       ? buddylandBanner
@@ -34,7 +35,7 @@ const GameOutcome = ({
   return (
     <div
       className="outcome-review"
-      data-outcome={result.outcome}
+      data-outcome={reviewedOutcome}
       data-location={result.location}
       style={
         { "--outcome-location-art": `url("${locationArt}")` } as CSSProperties

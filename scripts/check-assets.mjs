@@ -68,3 +68,30 @@ for (const font of posterFontManifest) {
 }
 if (posterFontManifest.length!==4 || new Set(posterFontManifest.map(font=>font.key)).size!==4 || posterFontBytes>256*1024) throw new Error('Invalid poster font collection');
 console.log(`Verified ${images.length} original artwork files.`);
+
+// USS Konrad uses independent native landscapes, never enlarged contact-sheet cells.
+const konradDirectory='src/assets/play/photos/konrad';
+const konradPhotos=JSON.parse(readFileSync(join(konradDirectory,'manifest.json'),'utf8'));
+const konradAliases=JSON.parse(readFileSync(join(konradDirectory,'aliases.json'),'utf8'));
+const konradExpected=['header',...['upper-left','upper-right','lower-left','lower-right'].flatMap(s=>['inactive','active'].map(v=>`shaft-${s}-${v}`)),'crusher-inactive','crusher-active','incinerator-inactive','incinerator-active','airlock-inactive','airlock-armed','airlock-released','self-destruct-inactive','self-destruct-start','self-destruct-middle','self-destruct-explosion','captain','jonas','orphan','faulty-wiring','good-cookin','cramped-pods','cluttered-shafts','emergency-override','slippery','loader-parked','loader-powered','loader-lost','beacon','breach'];
+function konradWebpDimensions(bytes){
+ for(let offset=12;offset+8<=bytes.length;){
+  const kind=bytes.toString('ascii',offset,offset+4),size=bytes.readUInt32LE(offset+4),start=offset+8;
+  if(kind==='VP8X')return [bytes.readUIntLE(start+4,3)+1,bytes.readUIntLE(start+7,3)+1];
+  if(kind==='VP8 ')return [bytes.readUInt16LE(start+6)&0x3fff,bytes.readUInt16LE(start+8)&0x3fff];
+  if(kind==='VP8L'){const bits=bytes.readUInt32LE(start+1);return [(bits&0x3fff)+1,((bits>>>14)&0x3fff)+1];}
+  offset=start+size+(size%2);
+ }
+ throw new Error('Missing WebP dimensions');
+}
+if(konradPhotos.length!==konradExpected.length||new Set(konradPhotos.map(p=>p.id)).size!==konradExpected.length||konradExpected.some(id=>!konradPhotos.some(p=>p.id===id)))throw new Error('Incomplete USS Konrad photograph manifest');
+const konradFiles=new Set(),konradSources=new Set();
+for(const p of konradPhotos){
+ const b=readFileSync(p.file),[width,height]=konradWebpDimensions(b);
+ if(p.width!==width||p.height!==height||p.nativeWidth<1536||p.nativeHeight<864||width>p.nativeWidth||height>p.nativeHeight||width<1074||height<600||b.length>160*1024||p.bytes!==b.length||p.sha256!==createHash('sha256').update(b).digest('hex'))throw new Error('Invalid USS Konrad landscape: '+p.id);
+ if(!/^exec-[a-f0-9-]+\.png$/.test(p.source)||konradSources.has(p.source)||konradFiles.has(p.file))throw new Error('Non-independent USS Konrad photograph: '+p.id);
+ konradSources.add(p.source);konradFiles.add(p.file);
+}
+if(Object.keys(konradAliases).length!==10||Object.entries(konradAliases).some(([id,target])=>konradExpected.includes(id)||!konradExpected.includes(target)))throw new Error('Invalid USS Konrad aliases');
+if(images.filter(p=>p.startsWith(konradDirectory+'/')).length!==33)throw new Error('Unmapped USS Konrad runtime image');
+console.log('Verified 34 native USS Konrad photographs and 10 explicit neutral/equipment aliases.');

@@ -1,0 +1,30 @@
+.play-konrad{border:0;padding:0;min-width:0;display:grid;gap:1.4rem;color:var(--foreground)}
+.play-konrad h3{font-family:var(--font-display,Georgia,serif);font-size:1.15rem;margin:0 0 .7rem;color:hsl(var(--foreground))}
+.konrad-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;min-width:0}
+.konrad-grid article,.konrad-grid>div{min-width:0}
+.play-konrad .play-illustrated-tile{width:100%;min-width:0;min-height:150px}
+.play-konrad article[data-state="inactive"] .play-module-art{filter:brightness(.5) saturate(.55)}
+.play-konrad article[data-state="unknown"] .play-module-art{filter:brightness(.45) saturate(.3)}
+.play-konrad details{min-width:0;border-top:1px solid hsl(var(--border));padding-top:.5rem}
+.play-konrad summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:hsl(var(--secondary));font-size:.9rem}
+.konrad-editor{padding:.7rem .15rem;display:grid;gap:.65rem;min-width:0;font-size:.85rem}
+.konrad-editor p{line-height:1.5;color:hsl(var(--muted-foreground));margin:.2rem 0}
+.konrad-editor label{display:flex;align-items:center;gap:.6rem;min-height:44px;flex-wrap:wrap}
+.play-konrad input[type="number"]{width:6rem;max-width:100%;min-height:44px;background:hsl(var(--background));border:1px solid hsl(var(--border));padding:.5rem;color:hsl(var(--foreground))}
+.play-konrad input[type="checkbox"]{width:20px;height:20px;flex-shrink:0}
+.play-konrad button:not(.play-illustrated-tile):not(.module-minor-choice){min-height:44px;white-space:normal;overflow-wrap:anywhere}
+.konrad-editor>button{padding:.5rem .8rem;border:1px solid hsl(var(--secondary)/.4);text-align:left;background:hsl(var(--background));color:hsl(var(--foreground))}
+.play-konrad button:disabled{opacity:.4;cursor:not-allowed}
+.play-konrad :focus-visible{outline:2px solid hsl(var(--secondary));outline-offset:3px}
+@media(min-width:1100px){.konrad-shafts{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:600px){.konrad-grid{grid-template-columns:minmax(0,1fr)}.play-konrad .play-illustrated-tile{min-height:175px}}
+@media(prefers-reduced-motion:reduce){.play-konrad *{transition:none!important;animation:none!important}}
+/* Environmental tiles use the same anchored photograph/caption contract. */
+.play-konrad .play-illustrated-tile{position:relative;display:block;overflow:hidden;aspect-ratio:16/9;text-align:left;border:1px solid hsl(var(--border));border-radius:4px;background:#101715;isolation:isolate}
+.play-konrad .play-illustrated-tile>.play-module-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.play-konrad .play-illustrated-tile:after{content:'';position:absolute;inset:35% 0 0;background:linear-gradient(transparent,rgba(5,12,13,.94));z-index:-1;pointer-events:none}
+.play-konrad .play-tile-caption{position:absolute;inset:auto 16px 17px;align-items:flex-start;text-align:left;z-index:1}
+.konrad-editor label:has(input[type="checkbox"]){display:grid;grid-template-columns:20px minmax(0,1fr);align-items:center}
+.play-konrad .konrad-solar>label:not(:has(input[type="checkbox"])){display:grid;grid-template-columns:minmax(0,1fr) 6rem;gap:.8rem;margin:.4rem 0;max-width:32rem}
+.konrad-editor details>button{padding:.5rem .8rem;border:1px solid hsl(var(--secondary)/.4);text-align:left;background:hsl(var(--background));color:hsl(var(--foreground));margin:.5rem 0;width:100%}
+.play-module-content .play-konrad .module-control-tile{aspect-ratio:16/9}
