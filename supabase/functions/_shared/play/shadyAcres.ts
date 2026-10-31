@@ -189,6 +189,6 @@ export function shadyFacts(s:ShadySnapshot):string[] {
  if(s.shadow)facts.push(`Harvest Shadow present${s.shadowSpace?` at ${SHADY_SPACES.find(p=>p.id===s.shadowSpace)!.name}`:'; placement not recorded'}.`);
  if(s.ravens)facts.push(`The Ravens Are Circling active; markers ${s.ravenHealth??'not recorded'}; no unrecorded damage prevention.`);
  if(s.combine)facts.push(`Combine present${s.combineSpace?` at ${SHADY_SPACES.find(p=>p.id===s.combineSpace)!.name}`:'; placement not recorded'}; keys found alone do not prove use.`);
- for(const f of SHADY_TERRAIN){const o=s.fields[f.id];if(o?.harvested===true||o?.added===true)facts.push(`${f.name}: ${o.harvested?'harvested token recorded; ':''}${o.added?'added Field token recorded; ':''}effective Field status ${o.field===null?'not recorded':o.field?'Field':'not Field'}.`);}
+ for(const f of SHADY_TERRAIN){const o=s.fields[f.id];if(o&&(o.harvested===true||o.added===true||o.field!==(f.type==='field')))facts.push(`${f.name}: ${o.harvested?'harvested token recorded; ':''}${o.added?'added Field token recorded; ':''}effective Field status ${o.field===null?'not recorded':o.field?'Field':'not Field'}.`);}
  return facts;
 }

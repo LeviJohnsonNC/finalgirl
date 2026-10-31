@@ -13,6 +13,17 @@ function fixture(fresh=true){
  return {log,act,state:()=>shadyState(moduleState(summarizePlay(log).entries,'shady-acres'))};
 }
 describe('source-backed Shady Acres companion',()=>{
+ it('reports explicit Field on/off observations without inventing harvested or added tokens',()=>{
+  const f=fixture();const west=f.state().fields['field-west'];
+  f.act({command:'terrain',id:'field-west',value:{...west,field:false}});
+  f.act({command:'terrain',id:'hayfield',value:{field:true,harvested:null,added:null}});
+  const facts=shadyFacts(f.state()).join(' ');
+  expect(facts).toContain('West Field: effective Field status not Field.');
+  expect(facts).toContain('Hayfield: effective Field status Field.');
+  expect(facts).not.toContain('harvested token recorded');expect(facts).not.toContain('added Field token recorded');
+  expect(f.state().fields['field-west']).toEqual({field:false,harvested:false,added:false});
+  expect(f.state().fields.hayfield).toEqual({field:true,harvested:null,added:null});expect(validPlayLog(f.log)).toBe(true);
+ });
  it('tracks continuing Festering Rot explicitly without resolving Horror or Victim effects',()=>{
   expect(shadyState(initialShady('Festering Rot')).rot).toBe(true);const f=fixture(false);expect(f.state().rot).toBeUndefined();f.act({command:'rot',active:true});expect(shadyFacts(f.state()).join(' ')).toContain('Festering Rot active');f.act({command:'rot',active:false});expect(validPlayLog(f.log)).toBe(true);expect(summarizePlay(f.log).killed).toBe(0);expect(summarizePlay(f.log).finalHorrorLevel).toBeUndefined();
  });
