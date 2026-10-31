@@ -122,7 +122,7 @@ if(new Set(grimManifest.map(e=>e.sourceSha256)).size!==48)throw Error('Grimlash 
 const likenessIds=new Set(['identity','header','flaming-eyes','burning-sickle','rite-of-the-corrupted','rite-of-the-old-one','fields-of-madness','hunger-of-the-old-gods','ancient-abomination','withered-harbinger','god-of-blood-and-grain','consumes-all','death-followed','bleed-upon-the-earth','bad-moon']);
 const grimReference=grimManifest.find(e=>e.id==='identity');
 for(const entry of grimManifest.filter(e=>likenessIds.has(e.id))){
- if(!['approved-reference','approved-reference-edit'].includes(entry.sourceKind)||entry.identityReference?.sha256!==grimReference.sourceSha256||entry.identityReference?.source!=='Flaming Pumpkin Grimlash in Twilight.png')throw Error('Grimlash likeness reference drift: '+entry.id);
+ if(!['approved-reference','approved-reference-edit','card-concept-edit'].includes(entry.sourceKind)||entry.identityReference?.sha256!==grimReference.sourceSha256||entry.identityReference?.source!=='Flaming Pumpkin Grimlash in Twilight.png')throw Error('Grimlash likeness reference drift: '+entry.id);
 }
 const grimPaths=new Set();
 for(const entry of grimManifest){

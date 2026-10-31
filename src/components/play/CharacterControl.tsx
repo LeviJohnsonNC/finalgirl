@@ -25,6 +25,7 @@ export function CharacterControl({
   className = "",
   tileClassName = "",
   outcomes = [],
+  allowOutcomeCorrections = false,
 }: {
   name: string;
   value?: string;
@@ -43,12 +44,15 @@ export function CharacterControl({
   className?: string;
   tileClassName?: string;
   outcomes?: readonly string[];
+  /** Keep compact outcome actions available to correct an already recorded outcome. */
+  allowOutcomeCorrections?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const id = useId();
   const current = states.find((state) => state.value === value);
   const active = value === present;
   const addable = !value || reactivateFrom.includes(value);
+  const outcomesEnabled = active || (allowOutcomeCorrections && outcomes.includes(value ?? ""));
   const discloses = !addable && showStatusEditor;
   return (
     <article
@@ -80,7 +84,7 @@ export function CharacterControl({
           {outcomes.map((outcome) => (
             <button
               key={outcome}
-              disabled={!active}
+              disabled={!outcomesEnabled}
               aria-pressed={value === outcome}
               aria-label={`Mark ${name} ${outcome}`}
               onClick={() =>

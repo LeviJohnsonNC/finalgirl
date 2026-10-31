@@ -14,6 +14,7 @@ const hash=b=>createHash('sha256').update(b).digest('hex');
 const reference={source:'Flaming Pumpkin Grimlash in Twilight.png',sha256:hash(readFileSync(sources.identity))};
 for(const id of ids){
  const entry=manifest.find(e=>e.id===id),source=sources[id];
+ if(entry.sourceKind==='card-concept-edit')continue;
  const [nativeWidth,nativeHeight]=execFileSync('magick',['identify','-format','%w %h',source],{encoding:'utf8'}).trim().split(' ').map(Number);
  if(nativeWidth<(id==='identity'?768:1280)||nativeHeight<(id==='identity'?768:720))throw Error('Refusing to upscale '+id);
  const targets=id==='identity'?[['identity','src/assets/characters/ai/grimlash.png',768,768,1500],['portrait','src/assets/collection-portraits/ai/grimlash.webp',256,256,30]]:[['scene',id==='header'?'src/assets/play/banners/grimlash.webp':'src/assets/play/photos/grimlash/'+id+'.webp',1280,720,160],...(id==='header'?[]:[['thumbnail','src/assets/play/photos/grimlash/thumbs/'+id+'.webp',320,180,35]])];
@@ -30,4 +31,4 @@ for(const id of ids){
  Object.assign(entry,{source:id==='identity'?reference.source:basename(source),sourceKind:id==='identity'?'approved-reference':'approved-reference-edit',nativeWidth,nativeHeight,sourceSha256:hash(readFileSync(source)),identityReference:reference,position:id==='header'?'75% 20%':'50% 5%',crop:'Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.'});
 }
 writeFileSync(manifestPath,JSON.stringify(manifest,null,2)+'\n');
-console.log('Imported fifteen reference-matched Grimlash originals and their production derivatives');
+console.log('Imported reference-matched Grimlash derivatives; preserved later card-concept overrides');

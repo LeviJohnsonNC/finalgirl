@@ -11,7 +11,7 @@ const sourceDirectory=process.argv[2];if(!sourceDirectory)throw Error('Supply th
 const hash=b=>createHash('sha256').update(b).digest('hex');
 for(const entry of manifest){
  // Supplied backgrounds and approved likeness edits have dedicated import workflows.
- if(['user-supplied','approved-reference','approved-reference-edit'].includes(entry.sourceKind))continue;
+ if(['user-supplied','approved-reference','approved-reference-edit','card-concept-edit'].includes(entry.sourceKind))continue;
  const source=join(sourceDirectory,entry.source),native=execFileSync('magick',['identify','-format','%w %h',source],{encoding:'utf8'}).split(' ').map(Number);
  entry.nativeWidth=native[0];entry.nativeHeight=native[1];entry.sourceSha256=hash(readFileSync(source));
  const targets=entry.id==='identity'?[['identity','src/assets/characters/ai/grimlash.png',768,768],['portrait','src/assets/collection-portraits/ai/grimlash.webp',256,256]]:entry.id==='header'?[['scene','src/assets/play/banners/grimlash.webp',1280,720]]:[['scene',join(folder,entry.id+'.webp'),1280,720],...(!entry.id.startsWith('madness-')?[['thumbnail',join(folder,'thumbs',entry.id+'.webp'),320,180]]:[])];
