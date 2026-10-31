@@ -12,23 +12,23 @@ Deliberate reuse: approved shared Bloodlust scenes and jeweled live/spent hearts
 | --- | --- | --- |
 | all-consuming-energy | exec-266888cd-57ab-4c4e-97e8-8b5a6f91e24d.png | Named card scene + small choice / cause tile |
 | always-here | exec-0a61df9c-35cc-4775-97ce-54e270c8ccad.png | Named card scene + small choice / cause tile |
-| ancient-abomination | exec-2f867483-7a11-478e-bad6-23381bdc1956.png | Named card scene + small choice / cause tile |
+| ancient-abomination | exec-7de626db-4d78-4c56-8a3d-fcc8327ea9ab.png | Named card scene + small choice / cause tile |
 | bad-moon | exec-e32f9abb-1406-4939-850c-068796c2b67a.png | Named card scene + small choice / cause tile |
 | bleed-upon-the-earth | exec-f44a389d-2269-4101-b91d-147c19693f17.png | Named card scene + small choice / cause tile |
 | blood-of-the-reaper | exec-3b23b565-ee2d-413d-9b45-33ee7229a61a.png | Named card scene + small choice / cause tile |
 | blooming-pestilence | exec-9a7a9e8c-ef3a-4ec9-96e9-b17c5d310733.png | Named card scene + small choice / cause tile |
-| burning-sickle | exec-eda0ab0c-91d1-443c-83e5-33de1696b075.png | Named card scene + small choice / cause tile |
+| burning-sickle | exec-389163d8-dd6e-4652-ae41-48d44b7d8b08.png | Named card scene + small choice / cause tile |
 | consumes-all | exec-60cb91e9-7c76-4a20-9f0d-2ce9fe42bb42.png | Named card scene + small choice / cause tile |
 | death-followed | exec-089d0397-711c-4ba0-8d3a-35d7f89fe6b8.png | Named card scene + small choice / cause tile |
 | decaying-humanity | exec-4c506a2f-54cc-49d7-bf1f-c40d3181bb95.png | Named card scene + small choice / cause tile |
 | entangled-fates | exec-9990cbce-7d8c-4cad-b700-8c770d80fb87.png | Named card scene + small choice / cause tile |
-| fields-of-madness | exec-091a64c6-16f5-40ec-84cb-7b015fa20192.png | Named card scene + small choice / cause tile |
+| fields-of-madness | exec-35f0e2ae-b754-4b94-87db-92d6b0463639.png | Named card scene + small choice / cause tile |
 | fiendish-vitality | exec-c350c7b2-9e44-4667-9bb8-6fe765d0501c.png | Named card scene + small choice / cause tile |
-| flaming-eyes | exec-067e2c67-56e6-4741-9669-dd580af7a784.png | Named card scene + small choice / cause tile |
-| god-of-blood-and-grain | exec-1edba169-6bac-40dd-9a97-389a84276fe4.png | Named card scene + small choice / cause tile |
+| flaming-eyes | exec-24a7d6a3-39e1-47aa-abae-15a2d1446744.png | Named card scene + small choice / cause tile |
+| god-of-blood-and-grain | exec-a1289eb4-b4ad-405a-bbbc-6ae5de1dbec3.png | Named card scene + small choice / cause tile |
 | header | exec-4e372175-9e94-4a39-be65-a4be18b6a146.png | Owner header |
 | hollow-soul | exec-55b49ec6-c4d7-449c-9947-776b6e05ef7f.png | Named card scene + small choice / cause tile |
-| hunger-of-the-old-gods | exec-af7eff79-0e8e-4077-a96a-ddcaea5190f1.png | Named card scene + small choice / cause tile |
+| hunger-of-the-old-gods | exec-853e645e-35ae-400b-acb2-3a5a7e95b2ee.png | Named card scene + small choice / cause tile |
 | identity | Flaming Pumpkin Grimlash in Twilight.png | AI identity + Collection portrait + private opening reference |
 | madness-0 | ChatGPT Image Oct 31, 2026, 12_14_12 PM-0.png | Harvest Madness track |
 | madness-1 | ChatGPT Image Oct 31, 2026, 12_14_12 PM-1.png | Harvest Madness track |
@@ -43,8 +43,8 @@ Deliberate reuse: approved shared Bloodlust scenes and jeweled live/spent hearts
 | madness-9 | ChatGPT Image Oct 31, 2026, 12_14_15 PM-9.png | Harvest Madness track |
 | one-with-the-land | exec-fccdbe4e-7483-405d-bbbc-947547b57d8d.png | Named card scene + small choice / cause tile |
 | primal-awareness | exec-c58fc84a-7e5c-4d02-8436-9e9cd8ce95de.png | Named card scene + small choice / cause tile |
-| rite-of-the-corrupted | exec-b08cb3af-a99c-4974-ba43-035e2f8673bb.png | Named card scene + small choice / cause tile |
-| rite-of-the-old-one | exec-6c393393-c59c-46af-bb2e-0bafec72b662.png | Named card scene + small choice / cause tile |
+| rite-of-the-corrupted | exec-463a1476-401b-4195-ae23-27bcb5980e5c.png | Named card scene + small choice / cause tile |
+| rite-of-the-old-one | exec-1d8f722d-3266-43bf-b137-042778a05b9e.png | Named card scene + small choice / cause tile |
 | root-bound-curse | exec-50e685bb-0589-4835-bf5d-33a77e4ab547.png | Named card scene + small choice / cause tile |
 | roots-of-insanity | exec-1f64d806-3ec0-4729-94d9-66ce17668cce.png | Named card scene + small choice / cause tile |
 | scarecrow | exec-f07b2120-7b80-46b3-99f4-7fee65bf3b11.png | Named card scene + small choice / cause tile |
@@ -57,7 +57,7 @@ Deliberate reuse: approved shared Bloodlust scenes and jeweled live/spent hearts
 | visions-of-the-beyond | exec-aa54b300-b9c3-4fe5-8469-e3db5f341441.png | Named card scene + small choice / cause tile |
 | vulgar-regrowth | exec-5616e378-ebb5-4b85-820d-5d079249cfa9.png | Named card scene + small choice / cause tile |
 | water-the-earth | exec-076aa7ae-e4f2-4664-91d1-c56f3dfe42e3.png | Named card scene + small choice / cause tile |
-| withered-harbinger | exec-58c06efc-a27e-4967-9f1e-ca6f6a4aa2b4.png | Named card scene + small choice / cause tile |
+| withered-harbinger | exec-3b47851d-a394-45b5-9b1e-864588764c2c.png | Named card scene + small choice / cause tile |
 
 ## Harvest Madness position marker — October 31, 2026
 
@@ -80,3 +80,21 @@ All 29 display derivatives are rebuilt: identity PNG + Collection portrait, bann
 Audited and retained: all fifteen Harvest ability metaphors (including the tiny anonymous human on the Telluric horizon), Root-Bound Curse, six environmental/ordinary-scarecrow Terror scenes, the eleven newly supplied Madness backgrounds, the already-correct full-pumpkin position marker, all 58 Shady Acres scenes, original physical box covers and the figure-free Collection farm composition. None of those depict the obsolete identifiable Grimlash. Official/custom-image preferences and saved session artwork keep their established behavior.
 
 The exact opening reference is staged and retained as `supabase/reference-assets/grimlash-pumpkin.jpg`. The trusted manifest uses a versioned object key so releasing the new reference does not overwrite the old object while old consumers are still deployed. See that folder’s README and the owner import record for upload/deployment order. Canonical image-planning/rendering guidance now rejects stale caller/bible head descriptions while preserving saved continuity records and the painted ending-poster medium.
+
+## Distinct card concepts — October 31, 2026
+
+Nine of the ten Minor Dark Power, Dark Power and Finale photographs now have independent compositions. Root-Bound Curse retains its already distinct environmental scene. The approved complete flaming-pumpkin identity remains authoritative wherever the head is visible. Tangible props, available/fire light, worn practical materials and restrained 1980s 35mm grain keep these photographic rather than illustrated. Art supplies no gameplay facts.
+
+| Stable ID | Directed subject | Responsive focal point |
+|---|---|---|
+| flaming-eyes | Oblique extreme close-up of burning carved eyes behind cracked window glass. | `50% 50%` |
+| burning-sickle | The complete curved flaming harvest blade and root-claw grip are the foreground subject. | `50% 50%` |
+| rite-of-the-corrupted | Roots creep around an adult wrist and spoiled corn in an ordinary kitchen. | `50% 65%` |
+| rite-of-the-old-one | Low-angle ancient oak offering; Grimlash performs the rite in side/back view. | `50% 30%` |
+| hunger-of-the-old-gods | A ravenous side-profile creature bends into spilling grain; claws and grain dominate. | `50% 10%` |
+| fields-of-madness | A disorienting corn corridor and conflicting shadows; no killer portrait. | `50% 50%` |
+| ancient-abomination | An inhuman low crawling silhouette and root claws force through ancient stonework. | `50% 15%` |
+| withered-harbinger | Rear view in motion leaving a trail of withered stalks. | `50% 0%` |
+| god-of-blood-and-grain | An elongated root claw pours golden grain and a small dark crimson harvest tribute. | `50% 55%` |
+
+Each independent original supplies a 1280×720 scene (≤160 KiB) and 320×180 chooser thumbnail (≤35 KiB), stripped and resized without stretching or upscaling. The manifest pins original and derivative digests, native dimensions, concept, approved reference and crop direction. Rebuild with `node scripts/import-grimlash-card-concepts.mjs /absolute/stable-id-to-original-png.json` using the nine source files above. Both older importers preserve these later overrides. Identity, header, Madness stages, ability cards and Terrors are unchanged by this pass. Review the native originals and actual selected-reveal/minor/chooser crops on desktop and phone; the wide heroes use the listed focal positions.

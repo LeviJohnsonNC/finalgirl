@@ -585,3 +585,9 @@
     12px/1.5 Arial,
     sans-serif;
 }
+
+/* Quiet action links retain a generous hit area without a button box. */
+.play-text-action{display:inline-flex;align-items:center;justify-content:flex-start;min-width:44px;min-height:44px;margin-top:3px;padding:4px 0;border:0;border-radius:0;background:transparent;color:#cfc1aa;font:500 12px/1.4 "Source Sans 3",Arial,sans-serif;text-align:left;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.play-text-action:hover:not(:disabled){color:#ffe5b8}
+.play-text-action:focus-visible{outline:2px dashed #efd9af;outline-offset:3px}
+.play-text-action:disabled{cursor:default;opacity:.45}

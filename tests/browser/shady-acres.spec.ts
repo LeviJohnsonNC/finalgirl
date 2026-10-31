@@ -69,3 +69,32 @@ test('Shady Acres facts reach ending prose and poster with Hans while preserving
  expect(await poster.evaluate(im=>getComputedStyle(im).objectFit)).toBe('contain');
  await page.screenshot({path:info.outputPath('shady-hans-ending.jpg'),type:'jpeg',quality:85,fullPage:true});
 });
+
+test('removed Curses disappear durably and terminal person outcomes stay correctable without changing victim totals',async({page,archive},info)=>{
+ test.setTimeout(90000);const f=fixture();f.act({command:'reveal',id:'visible-curse',card:'dark-fields',reset:false});
+ for(const[id,status]of [['sally','saved'],['ralph','killed'],['cultist','left']] as const)f.act({command:'person',id,status});
+ await archive.install(page,{draft:{...draft,playEvents:f.events}});await resume(page);const panel=page.locator('[data-module="shady-acres"]');
+ const people=panel.getByRole('region',{name:'Shady Acres special characters',exact:true}),curses=panel.getByRole('region',{name:'Recorded Ancient Curses',exact:true});
+ for(const[width,height]of info.project.name==='mobile'?[[390,844],[320,568]]:[[1280,640],[1366,768],[1440,900]]){
+  await page.setViewportSize({width,height});
+  for(const[section,name]of [[people,'people'],[curses,'curses']] as const){await section.locator('img').evaluateAll(imgs=>Promise.all(imgs.map(im=>{(im as HTMLImageElement).loading='eager';return(im as HTMLImageElement).decode();})));await section.screenshot({path:info.outputPath(`shady-corrections-${name}-${width}.jpg`),type:'jpeg',quality:85,animations:'disabled',style:'.app-footer{visibility:hidden}'});}
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
+ for(const p of SHADY_PEOPLE){
+  const card=people.locator('.module-character').filter({has:page.getByText(p.name,{exact:true})});
+  for(const status of ['saved','killed','left','saved']){
+   for(const outcome of ['saved','killed','left'])await expect(card.getByRole('button',{name:`Mark ${p.name} ${outcome}`,exact:true})).toBeEnabled();
+   await card.getByRole('button',{name:`Mark ${p.name} ${status}`,exact:true}).click();await expect(card).toHaveAttribute('data-state',status);
+   if(status!=='left')await expect(card.locator('img')).toHaveAttribute('src',new RegExp('/'+p.id+'-'+status+'-'));
+  }
+ }
+ const before=await logs(page);await people.getByRole('button',{name:'Mark Sally saved',exact:true}).click();expect(await logs(page)).toEqual(before);
+ await page.evaluate(()=>{const original=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k.startsWith('final-girl-active-game-v1:')&&localStorage.getItem('reject-play-write')==='yes')throw Error('synthetic quota');return original.call(this,k,v);};localStorage.setItem('reject-play-write','yes');});
+ await curses.getByRole('button',{name:'Remove Dark Fields',exact:true}).click();await expect(curses.getByRole('button',{name:'Dark Fields In play',exact:true})).toBeVisible();await expect(panel.getByRole('alert')).toContainText('could not be saved');expect(await logs(page)).toEqual(before);
+ await people.getByRole('button',{name:'Mark Sally killed',exact:true}).click();await expect(people.locator('.module-character').first()).toHaveAttribute('data-state','saved');expect(await logs(page)).toEqual(before);
+ await page.evaluate(()=>localStorage.setItem('reject-play-write','no'));await curses.getByRole('button',{name:'Remove Dark Fields',exact:true}).press('Enter');
+ await expect(curses.locator('img')).toHaveCount(0);const s=shadyState(moduleState(summarizePlay(await logs(page)).entries,'shady-acres'));expect(s.curses).toEqual([{id:'visible-curse',card:'dark-fields',status:'removed'}]);
+ await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'shady-acres');await expect(curses.locator('img')).toHaveCount(0);
+ await undoLatestObservation(page);await expect(curses.getByRole('button',{name:'Dark Fields In play',exact:true})).toBeVisible();
+ const summary=summarizePlay(await logs(page));expect(summary.saved).toBe(0);expect(summary.killed).toBe(0);expect(archive.calls).toEqual([]);
+});
