@@ -1,3 +1,4 @@
+import {shadyState,shadyChildrenCount} from '@/lib/play/shadyAcres';
 import {grimlashFatal,harvestLevel,type GrimlashLoss} from '@/lib/play/grimlash';
 import {konradState,type KonradFate} from '@/lib/play/konrad';
 import { useState, useMemo } from 'react';
@@ -216,12 +217,8 @@ export const GameOutcomeForm = ({
     onDraftChange,
   );
   // Grimlash / A Rotten Harvest
-  const [childrenSurvived, setChildrenSurvived] = useDraftField(
-    'childrenSurvived',
-    0,
-    initialDraft,
-    onDraftChange,
-  );
+  const shady=shadyState(moduleState(summarizePlay(result.playEvents).entries,'shady-acres'));
+  const [childrenAtFinish,setChildrenAtFinish]=useDraftField<number|null>('childrenOnBoardAtFinish',shady.finishChildren!==undefined?shady.finishChildren:shadyChildrenCount(shady),initialDraft,onDraftChange);
   const [harvestMadnessPeaked] = useDraftField(
     'harvestMadnessPeaked',
     false,
@@ -329,7 +326,7 @@ export const GameOutcomeForm = ({
           ? `${highlights}. ${buddyParts.join('. ')}`
           : buddyParts.join('. ');
     }
-    if(result.location==='Shady Acres')highlights=[highlights,`Children survived: ${childrenSurvived}`].filter(Boolean).join('. ');
+    if(result.location==='Shady Acres'&&childrenAtFinish!==null)highlights=[highlights,`Children on board at finish: ${childrenAtFinish}`].filter(Boolean).join('. ');
     if(isGrimlash){const facts=[typeof reviewedGrimState.position==='number'?`Harvest Madness position ${reviewedGrimState.position}, ${harvestLevel(reviewedGrimState.position)===4?'Skull':`Level ${harvestLevel(reviewedGrimState.position)}`}`:'',typeof reviewedGrimState.peak==='number'?`Recorded Madness peak position ${reviewedGrimState.peak}`:'',grimLoss==='skull'||grimLoss==='telluric'?`Game lost: ${grimLoss}`:'',harvestMadnessPeaked?'Legacy Madness peaked observation; exact position unknown':''];highlights=[highlights,...facts].filter(Boolean).join('. ');}
     if (isBerith) {
       const demonParts: string[] = [];
@@ -378,6 +375,7 @@ export const GameOutcomeForm = ({
     }
 
     const formData: EndingFormData = {
+      ...(result.location==='Shady Acres'&&{childrenOnBoardAtFinish:childrenAtFinish}),
       ...(isGrimlash&&{grimlashReview:{loss:grimLoss},outcome:fatalEnding?'lost' as const:reviewedOutcome}),
       ...(result.location==='USS Konrad'&&{konradReview:{fate:shipFate},outcome:fatalEnding?'lost' as const:reviewedOutcome}),
       finalHorrorLevel: finalHorrorLevel ?? undefined,
@@ -781,7 +779,7 @@ export const GameOutcomeForm = ({
           )}
 
           {isGrimlash&&<section className="outcome-panel outcome-module" aria-label="Grimlash ending review"><h3>Harvest Madness</h3><p>{typeof reviewedGrimState.position==='number'?`Position ${reviewedGrimState.position} · ${harvestLevel(reviewedGrimState.position)===4?'Skull':`Level ${harvestLevel(reviewedGrimState.position)}`}`:'Position not recorded'}{typeof reviewedGrimState.peak==='number'?` · Recorded peak ${reviewedGrimState.peak}`:''}</p><OutcomeSelect label="Madness loss record" value={grimLoss} onValueChange={v=>setGrimLoss(v as GrimlashLoss)}><option value="unknown">Not recorded</option><option value="none">No Madness loss recorded</option><option value="skull">Reached the skull</option><option value="telluric">Telluric Visions loss</option></OutcomeSelect><OutcomeSelect label="Reviewed game result" value={fatalEnding?'lost':reviewedOutcome} onValueChange={v=>setReviewedOutcome(v as 'won'|'lost')}><option value="won" disabled={fatalEnding}>Won</option><option value="lost">Lost</option></OutcomeSelect>{retractingSkull&&<p>Saving this correction also leaves the earlier skull position and skull peak unrecorded.</p>}{fatalGrim&&<p role="status">This Madness ending is a loss. Health and Victim totals remain as observed.</p>}{harvestMadnessPeaked&&<p>Legacy peaked record: exact level and position unknown.</p>}</section>}
-          {result.location==='Shady Acres'&&<section className="outcome-panel outcome-module"><label>Children survived (0–3)<input aria-label="Children survived" type="number" min="0" max="3" value={childrenSurvived} onChange={e=>setChildrenSurvived(Math.max(0,Math.min(3,Number(e.target.value))))}/></label></section>}
+          {result.location==='Shady Acres'&&<section className="outcome-panel outcome-module"><label>Children on board at finish<select aria-label="Children on board at finish" value={childrenAtFinish??''} onChange={e=>setChildrenAtFinish(e.target.value===''?null:Number(e.target.value))}><option value="">Not recorded</option>{[0,1,2,3].map(n=><option key={n}>{n}</option>)}</select></label></section>}
 
           {/* Section: Berith / A Demon in the Shadows */}
           {isBerith && (

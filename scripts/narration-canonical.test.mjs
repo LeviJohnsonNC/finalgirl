@@ -29,12 +29,13 @@ const inkanyamba = load("../supabase/functions/_shared/play/inkanyamba.ts", {});
 const groves = load("../supabase/functions/_shared/play/groves.ts", {"./inkanyamba.ts":inkanyamba});
 const creech = load("../supabase/functions/_shared/play/creech.ts", {});
 const poltergeist = load("../supabase/functions/_shared/play/poltergeist.ts", {});
+const shady=load('../supabase/functions/_shared/play/shadyAcres.ts',{});
 const grimlash=load('../supabase/functions/_shared/play/grimlash.ts',{});
 const evomorph = load("../supabase/functions/_shared/play/evomorph.ts", {});
 const konradCatalog = load('../supabase/functions/_shared/play/konradCatalog.ts', {});
 const konrad = load('../supabase/functions/_shared/play/konrad.ts', {'./konradCatalog.ts':konradCatalog});
-const modules = load('../supabase/functions/_shared/play/modules.ts', {'./konrad.ts':konrad,'./konradCatalog.ts':konradCatalog,'./grimlash.ts':grimlash,'./evomorph.ts':evomorph,'./creech.ts':creech,'./poltergeist.ts':poltergeist,'./groves.ts':groves,'./inkanyamba.ts':inkanyamba,'./maple.ts':maple,'./buddyland.ts':buddyland,'./camp.ts':camp,'./geppetto.ts':geppetto,'./carnival.ts':carnival,'./fright.ts':fright});
-const events = load('../supabase/functions/_shared/play/events.ts', {'./konrad.ts':konrad,'./konradCatalog.ts':konradCatalog,'./grimlash.ts':grimlash,'./evomorph.ts':evomorph,'./creech.ts':creech,'./poltergeist.ts':poltergeist,'./groves.ts':groves,'./modules.ts':modules,'./fright.ts':fright}),
+const modules = load('../supabase/functions/_shared/play/modules.ts', {'./konrad.ts':konrad,'./konradCatalog.ts':konradCatalog,'./shadyAcres.ts':shady,'./grimlash.ts':grimlash,'./evomorph.ts':evomorph,'./creech.ts':creech,'./poltergeist.ts':poltergeist,'./groves.ts':groves,'./inkanyamba.ts':inkanyamba,'./maple.ts':maple,'./buddyland.ts':buddyland,'./camp.ts':camp,'./geppetto.ts':geppetto,'./carnival.ts':carnival,'./fright.ts':fright});
+const events = load('../supabase/functions/_shared/play/events.ts', {'./konrad.ts':konrad,'./konradCatalog.ts':konradCatalog,'./shadyAcres.ts':shady,'./grimlash.ts':grimlash,'./evomorph.ts':evomorph,'./creech.ts':creech,'./poltergeist.ts':poltergeist,'./groves.ts':groves,'./modules.ts':modules,'./fright.ts':fright}),
   death = load('../supabase/functions/_shared/play/death.ts', { './events.ts': events, './modules.ts':modules });
 const schemas = load('../supabase/functions/_shared/validation.ts', {
   'https://deno.land/x/zod@v3.22.4/mod.ts': require('zod'),

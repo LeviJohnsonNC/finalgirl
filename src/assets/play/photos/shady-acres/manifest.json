@@ -1,0 +1,951 @@
+[
+  {
+    "id": "header",
+    "source": "exec-9933a776-abca-4fd3-b224-420816ca8cba.png",
+    "sourceSha256": "47a133e382b001fd768a9d3519cc0c81f27fa291b06ada678f3d7ed89d07e98c",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A desolate barn and dirt road amid autumn cornfields.",
+    "scene": {
+      "path": "src/assets/play/banners/shady-acres.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 144322,
+      "sha256": "2f339914e34afc872a5e519eb0d86aedaf6449c59b0f4018755c6036ee5834c1"
+    }
+  },
+  {
+    "id": "child-1",
+    "source": "exec-910927f4-08b6-4cbb-a13f-0f4622e6c558.png",
+    "sourceSha256": "d778804bb6f28f564bb1ae4463662d7a2172de4bab939c3222373422fa8d120c",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A small boy around nine, short dark straight hair, dark weathered plain farm shirt, standing unharmed among dry corn at dusk. His face resembles the left child in the supplied Children card: watchful, unnervingly calm, subtly amber reflective eyes. Portrait is an ordinary real child in a fictional horror film. Preserve realistic child anatomy and the supplied illustration's basic hair/clothes silhouette while translating it into a real unposed photograph. No weapons, blood, injuries or distress.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/child-1.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 54094,
+      "sha256": "bd942d5778f1383c8a1d8d8197c59fca226a658633d400f5c822724b08c8f0a7"
+    }
+  },
+  {
+    "id": "child-2",
+    "source": "exec-3d3f9303-9563-43cc-80fc-aade6e864e05.png",
+    "sourceSha256": "e8c6dd49d6b765ca7089bb9c2e256dbeaa9c054dc51b01786b75ad456b48041d",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A girl around ten with chin-length dark hair, modest dark grey farm dress over a worn plain blouse, standing unharmed at an autumn farm fence. Her face resembles the middle child in the supplied Children card, unnervingly calm with subtly amber reflective eyes. Translate the supplied card identity into a real child captured candidly in a fictional horror film. No weapons, blood, injuries or distress.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/child-2.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 112984,
+      "sha256": "d34eadf986b9be0d37743cb6a907032162f47c6b978c1b4349b4dcb839d0174f"
+    }
+  },
+  {
+    "id": "child-3",
+    "source": "exec-3cc1ea87-12c2-4f52-9610-f6bdae2c483b.png",
+    "sourceSha256": "48e573661ba107d44fe6ef1fa3117558743acce195dd316205c2e273f7038393",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A slightly taller girl around twelve, long straight dark hair, modest faded light grey farm blouse/dress and darker skirt, standing unharmed beside dried corn near a farmhouse at dusk. Preserve the right child on the supplied card: eerily calm, subtly amber reflective eyes, natural face and clothing. Real child in a fictional horror film, not an illustration. No weapons, blood, injuries or distress.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/child-3.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 76738,
+      "sha256": "7458253ffe1b838d3cef3805ae3d155946d270ec4d8f1c5f3db07b92a3bd1393"
+    }
+  },
+  {
+    "id": "sacrifice-0",
+    "source": "exec-e5b56f48-012a-44ee-803d-10c1cc2b81ca.png",
+    "sourceSha256": "271d2c0dc55b263b8a67b84905a7419af8ad0b32de5a0f99406d7deb0d29d5b4",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. An empty ancient rural altar clearing: a low rough irregular stone table, gnarled bare tree behind, cornfield edge distant, dead leaves, cold twilight. No people, bodies or blood. Keep exact tree/stones layout to be reused for progress images. Quiet foreboding, credible natural stones.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/sacrifice-0.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 156554,
+      "sha256": "156244ae70a6ab5fff2bf871018b51495aa03b4ac3e91ab877c7e6a1facdbeb6"
+    }
+  },
+  {
+    "id": "sacrifice-1",
+    "source": "exec-c9c89658-0451-4f51-a667-73a107e130fe.png",
+    "sourceSha256": "4d26c6393e586517ed5ef201de9204860b7879781cfc5068dd503153355e6db5",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the exact camera, stone table, gnarled tree and field edge from the reference photograph. Depict the same empty altar clearing at dread stage 1 of 3: dusk deepens, small distant practical lantern glow and a few crows. Nobody present, no bodies, blood, victims, symbols, writing or game tokens. Change atmosphere with photographic materials, no fantasy beams.",
+    "reference": "sacrifice-0",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/sacrifice-1.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 141118,
+      "sha256": "838862de1d7bda822c7fb0a9ba7c056748f9853b11b5771059ecc72c0f968598"
+    }
+  },
+  {
+    "id": "sacrifice-2",
+    "source": "exec-0bdb25a6-83f4-4aac-b768-8bf84066b808.png",
+    "sourceSha256": "1a1d087809cfc260db5b1770a011c4081dc1e9a00337be9cba297fff9c8f5991",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the exact camera, stone table, gnarled tree and field edge from the reference photograph. Depict the same empty altar clearing at dread stage 2 of 3: shadows deepen under thick clouds, a plausible small fire glows by the stones, more ravens in distant branches. Nobody present, no bodies, blood, victims, symbols, writing or game tokens. Change atmosphere with photographic materials, no fantasy beams.",
+    "reference": "sacrifice-0",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/sacrifice-2.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 157488,
+      "sha256": "0b21cdf37d6e4c1256cdfa46fd797b9bc61d59afc685278aa40da5d62057c8df"
+    }
+  },
+  {
+    "id": "sacrifice-3",
+    "source": "exec-e95e3459-83d2-4b52-aaa4-4c997602dd09.png",
+    "sourceSha256": "ced8688e1452aad7d55e7383c091b4280dad59ddeb2d7133c99881e9e12b9678",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the exact camera, stone table, gnarled tree and field edge from the reference photograph. Depict the same empty altar clearing at dread stage 3 of 3: oppressive cold night and low mist, strong but physically plausible small firelight on stone and a menacing mass of distant ravens. Nobody present, no bodies, blood, victims, symbols, writing or game tokens. Change atmosphere with photographic materials, no fantasy beams.",
+    "reference": "sacrifice-0",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/sacrifice-3.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 151560,
+      "sha256": "5caa41e23c210bf9cfea407a6e6144557b10bcce798264fe14c0b9592c20efab"
+    }
+  },
+  {
+    "id": "omen-of-plague",
+    "source": "exec-62433469-277d-4787-a4ce-7fd978e536a1.png",
+    "sourceSha256": "f2f60fc1a1d6be5711deafe5df9aaf65964acd3db782a84d97bee3a686ef3654",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Close farm corn stalks with rotting ears and diseased husks, dead leaves in moist dirt, a distant barn in soft natural focus. Physical blight and desolation, no gore or literal magical symbols.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/omen-of-plague.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 152588,
+      "sha256": "2a358a26fa9e90f98a0d6c393536dce81f045aadc8db6c814327e41ee01b7900"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/shady-acres/thumbs/omen-of-plague.webp",
+      "width": 320,
+      "height": 180,
+      "bytes": 19988,
+      "sha256": "a052f8e5aea0b1908e8ba0ad0dd3428c126e302131b100ab0b7dcb8559632acf"
+    }
+  },
+  {
+    "id": "decaying-earth",
+    "source": "exec-07220e76-b7e1-47d5-8847-f79c9b7f08a6.png",
+    "sourceSha256": "372b8054ee7f212d55b6382b4d051aa3c2d37a32ba63b1df3bacab414f5dd56f",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A deep fresh footprint at a cornfield edge sinking into soft collapsing black earth. Unsettling cracks and tangled roots, ordinary light, no person or body part shown.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/decaying-earth.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 156062,
+      "sha256": "9d84424523aff3943264bb10df8371fe1cdca13fe25037ee256664d525dc69aa"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/shady-acres/thumbs/decaying-earth.webp",
+      "width": 320,
+      "height": 180,
+      "bytes": 22298,
+      "sha256": "f4ffb1a5434b021c05427c6c16f186a9756c6b2687521eaa67b861ad4a6d7a5a"
+    }
+  },
+  {
+    "id": "dark-fields",
+    "source": "exec-fc52ea25-cbb3-4205-b041-951510786703.png",
+    "sourceSha256": "2923def0592a11852b04b473c971f11fcbae176a74e31bf71432be93e99a5dbe",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A narrow junction between looming dry corn rows, the branches and converging paths confusing the eye, realistic ground mist at dusk. Dark rural labyrinth, no artificial infinity effect.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/dark-fields.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 131694,
+      "sha256": "d2d919a1b669aef3311bd6af69a187c99b489aaed29bc6fe5026defae1016682"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/shady-acres/thumbs/dark-fields.webp",
+      "width": 320,
+      "height": 180,
+      "bytes": 12388,
+      "sha256": "018d15d535da7aa2b5ca18aec484571cd5be37c1a1eec359208004aa71fff1ec"
+    }
+  },
+  {
+    "id": "omen-of-death",
+    "source": "exec-309447eb-d9ce-4d20-807e-b8046af87f72.png",
+    "sourceSha256": "8b6dcf955d9e30c22ad276379e553adfe782eb29dee2631972f1b31b94ee8db0",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Several real black ravens perched along a weathered barbed-wire farm fence, one bird turning towards camera, distant farmhouse out of focus. Natural late autumn twilight, palpable quiet omen.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/omen-of-death.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 99422,
+      "sha256": "7992f0ff3d896bbc2b007a3d1dfcf8a3c6526457bebcbd5832c3eb12d0802891"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/shady-acres/thumbs/omen-of-death.webp",
+      "width": 320,
+      "height": 180,
+      "bytes": 12344,
+      "sha256": "0520819092ae816bbba2a7312e6c64b883e1ab248bb671a12c5eb468cd40e0dd"
+    }
+  },
+  {
+    "id": "malevolent-aura",
+    "source": "exec-f7e67614-30fb-4686-9da2-52abbf7215c0.png",
+    "sourceSha256": "9a7e4be0ed3f5ecc647359b009ef1dfb5747284ac26a89ec2369ca8cbef3719f",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Three distant unharmed children standing still at a real cornfield edge beneath overcast evening light, their silhouettes source-faithful to the supplied Children card: short-haired boy, bob-haired girl, taller long-haired girl, modest grey farm clothes. Their tiny eyes have a subtle amber reflective glint. Frightening through stillness, no action, weapons, injuries or harm.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/malevolent-aura.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 103542,
+      "sha256": "cd494397d90a6094bb0441bbf61e65be515e84016a26e7f412ea13b09ccb7b3f"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/shady-acres/thumbs/malevolent-aura.webp",
+      "width": 320,
+      "height": 180,
+      "bytes": 11240,
+      "sha256": "337720d96abfad78254180f8564dfc39fdcddaa4c74a5be375932cfd22863aa4"
+    }
+  },
+  {
+    "id": "chthonic-possession",
+    "source": "exec-753cbb89-9c94-4bfb-b736-0d4ea83bae9f.png",
+    "sourceSha256": "00479e8efc456c6dd2e7a2e24db11dca5d4c87e8bb518b9bb6ae8a50e57e61b8",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Low natural-camera view of an unharmed child's dusty farm boots standing by unusually tangled surface roots in dark tilled earth. The roots twist nearby without touching or restraining the child. Subtle amber light from a distant window, no graphic content, believable physical roots.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/chthonic-possession.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 82940,
+      "sha256": "226cdda79a4d1312eda4f891988f46b34c44f3fe2877814132ea3b89a916e37a"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/shady-acres/thumbs/chthonic-possession.webp",
+      "width": 320,
+      "height": 180,
+      "bytes": 10970,
+      "sha256": "0456162590012840e9a80c8e22cfa88db6fe943e1f04eee149b0505a63563ed9"
+    }
+  },
+  {
+    "id": "omen-of-blood",
+    "source": "exec-cd7bf9b1-e449-4bac-893a-47201062173d.png",
+    "sourceSha256": "21faa911b0351abead581a5d28e38e8a7ae1f2a9d12f9d229a879a61d88da218",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Dried corn tassels and dark soil beaded with unsettling rust-red moisture catching low warm dusk light, a lone raven on a fence beyond. Restrained realistic horror metaphor, no wounds, bodies or gore.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/omen-of-blood.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 148628,
+      "sha256": "c4c90b8d6b8fb949d6f9556fcb5ef6888e3ef98b6b1be313a338fe0c83fa0e3c"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/shady-acres/thumbs/omen-of-blood.webp",
+      "width": 320,
+      "height": 180,
+      "bytes": 17934,
+      "sha256": "c4d3fa25fb0fedf8fbf1f5353560d5095e646ba5597343e76e7d86b983d3b12b"
+    }
+  },
+  {
+    "id": "gnarled-stalks",
+    "source": "exec-e5780a00-3765-40f7-a893-d0ba2e5552de.png",
+    "sourceSha256": "eb231f1381c477a1c92cbb2acbefd3807d2a0de2ab391ac366f118cd8eae8a5c",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A real farm footpath choked by tightly twisted dry corn stalks leaning into each other like hooked fingers, close tangible husks and muddy bootprints. Natural ominous dusk, not a fantasy forest.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/gnarled-stalks.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 138218,
+      "sha256": "3d7666940b4cb50909a009e78f98552146b21de66ed70a18a5c8e2c7483fd6c8"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/shady-acres/thumbs/gnarled-stalks.webp",
+      "width": 320,
+      "height": 180,
+      "bytes": 15692,
+      "sha256": "8290a6125b6ebd3073ccd31dd90bb94222c875b9bb7ad438eb1acabbb57e068d"
+    }
+  },
+  {
+    "id": "sally",
+    "source": "exec-0faa8c17-1313-484c-935c-6ab923cc9ab6.png",
+    "sourceSha256": "1fcec93459122037073bdbd33403de54d827e888312c0c41744657ee61c9bc55",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A clearly adult grandmother around sixty, practical grey hair tied back, faded cream blouse and forest-green cardigan, weathered kind face, caught looking anxiously out from a modest farmhouse doorway in autumn dusk. Natural skin, credible worn cloth, no weapons or injuries.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/sally.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 86654,
+      "sha256": "670b23518fb0a3b47d5870e225f6cb69cbc7d57ac616825cf70a3ee9fe73bd7d"
+    }
+  },
+  {
+    "id": "sally-saved",
+    "source": "exec-e6b1084c-c0ee-43e2-9e1a-fb5b66de20d5.png",
+    "sourceSha256": "c622eadf448aa88688bc49009e6d5cddff88b510f6848d98a7565d6e16e86a24",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the EXACT adult person's face, age, hair, identity, clothing and camera realism from the reference. A separate candid photograph of the same person safely beyond the farm fence on the roadside, relieved and exhausted but uninjured, warm distant farmhouse light. Keep clearly recognisable identity and a believable quiet rescued posture. No police insignia, text or logos.",
+    "reference": "sally",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/sally-saved.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 95566,
+      "sha256": "e2bdad181ce634e5efabb38cfc166378e42351097c316ab7d08d8bec4715b3ae"
+    }
+  },
+  {
+    "id": "sally-killed",
+    "source": "exec-6b2eac25-b848-41f8-837e-7f93f6d1f1ec.png",
+    "sourceSha256": "0da88b6fb5d5dcf196e0170f8290a9ba05bca0da17defd7cbd3469b0cdab1427",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the EXACT adult person's face, age, hair, identity and clothing from the reference. A separate restrained non-graphic horror photograph of the same ADULT lying still, eyes closed, on the ground beside the same rural setting. A plain wool blanket covers the torso; recognizable face and a piece of their original shirt/collar remain visible. No blood, wounds, gore, disfigurement, violence or other people. This is a quiet aftermath film still, no graphic detail.",
+    "reference": "sally",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/sally-killed.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 105016,
+      "sha256": "0149da51ca2b5f2ad67782e16e032a6029917e711ec0f0d39ab2f084632b879c"
+    }
+  },
+  {
+    "id": "ralph",
+    "source": "exec-ffbd7b13-27b9-4934-8ef5-3d1b843c205c.png",
+    "sourceSha256": "95ec24d34d609054218584059133b4bbad9b6fb2f8981517ef8bbb416a096212",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A clearly adult mechanic around fifty, short greying brown hair and moustache, weathered face, oil-stained navy coveralls and rolled sleeves, standing naturally by an old rural garage workbench. A 1980s red tool chest and ordinary tools distant in background. Believable face and hands, no text or logos.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/ralph.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 96934,
+      "sha256": "e0ade374fab45654bc02932a80a6737b0daa697e4d2d9f6310fc6dcb959cd726"
+    }
+  },
+  {
+    "id": "ralph-saved",
+    "source": "exec-dd712392-83bd-464d-9ba3-3de28c19fafb.png",
+    "sourceSha256": "6e5a0ab7b992dd47c016a0425dea27dfcdf551b9a8aca10e49e9861d7eb561be",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the EXACT adult person's face, age, hair, identity, clothing and camera realism from the reference. A separate candid photograph of the same person safely beyond the farm fence on the roadside, relieved and exhausted but uninjured, warm distant farmhouse light. Keep clearly recognisable identity and a believable quiet rescued posture. No police insignia, text or logos.",
+    "reference": "ralph",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/ralph-saved.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 114538,
+      "sha256": "18fffad86ed31054c59837374f3acf138c9044211b607fe72b47c75e38092e99"
+    }
+  },
+  {
+    "id": "ralph-killed",
+    "source": "exec-d652fb00-ec6b-4ff2-b6a2-3011dd1e38a6.png",
+    "sourceSha256": "6eef3e8b01ae25553d418e9ae6591e1739152d6a824a7b001cc032171ebb8bf3",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the EXACT adult person's face, age, hair, identity and clothing from the reference. A separate restrained non-graphic horror photograph of the same ADULT lying still, eyes closed, on the ground beside the same rural setting. A plain wool blanket covers the torso; recognizable face and a piece of their original shirt/collar remain visible. No blood, wounds, gore, disfigurement, violence or other people. This is a quiet aftermath film still, no graphic detail.",
+    "reference": "ralph",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/ralph-killed.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 129868,
+      "sha256": "df63c37752af4bb1932643fbbaced2ba9829f06618ddf4840cf2f13d6147df3f"
+    }
+  },
+  {
+    "id": "cultist",
+    "source": "exec-4e6e62cd-07c3-49b0-b297-5455b23ead1f.png",
+    "sourceSha256": "7a514e7268d34c1560bc9c404a3714071b27efa6429627b6cec18eb39d13898a",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A clearly adult farm worker around forty, short dark hair, weathered face, faded burnt-orange work shirt and brown canvas overalls, standing quietly with unsettling conviction at a cornfield fence in cold dusk. Ordinary man, no robes, theatrical occult signs, weapons or injuries.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/cultist.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 75416,
+      "sha256": "1614e25f2480cb6a84324b8ba8866ecf51608e89c2dff0eae964bc79792510e2"
+    }
+  },
+  {
+    "id": "cultist-saved",
+    "source": "exec-2ed885b3-a37f-4d0e-bf97-151458614960.png",
+    "sourceSha256": "df6657abd25d5a749bf8a08908a4edcf3a481e2865a152ab5ae552bf3ad3d7bf",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the EXACT adult person's face, age, hair, identity, clothing and camera realism from the reference. A separate candid photograph of the same person safely beyond the farm fence on the roadside, relieved and exhausted but uninjured, warm distant farmhouse light. Keep clearly recognisable identity and a believable quiet rescued posture. No police insignia, text or logos.",
+    "reference": "cultist",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/cultist-saved.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 87746,
+      "sha256": "80c519dec8e56b7815e9873c175473c0253e429db96808a2f93947bf4d222c53"
+    }
+  },
+  {
+    "id": "cultist-killed",
+    "source": "exec-005656cd-303f-4bc9-994b-ee975efa6529.png",
+    "sourceSha256": "c5c9722ea30a597c9ef4138ae66e4c457b655b50a2647101d2b3db7a9bd724f3",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the EXACT adult person's face, age, hair, identity and clothing from the reference. A separate restrained non-graphic horror photograph of the same ADULT lying still, eyes closed, on the ground beside the same rural setting. A plain wool blanket covers the torso; recognizable face and a piece of their original shirt/collar remain visible. No blood, wounds, gore, disfigurement, violence or other people. This is a quiet aftermath film still, no graphic detail.",
+    "reference": "cultist",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/cultist-killed.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 103970,
+      "sha256": "2dae713c345063f592779aabba7eb68fb6e7eaad54e72a0db0798b8a3d97a58f"
+    }
+  },
+  {
+    "id": "hungers",
+    "source": "exec-bce3c620-6e5e-4dd9-88b3-b38c88628e88.png",
+    "sourceSha256": "438e5b075f588c5d52b06a915304383e197ce8a1a1ced446242ea48122b68040",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. An old barn doorway opening onto a dense dark cornfield, several distant ADULT farm visitors seen from behind suddenly pausing as if hearing something. Natural unease and implied panic, no identifiable killer, injuries or violence.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/hungers.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 92068,
+      "sha256": "a1d400fd78f14e5c254f6042617e0adb4ebacb84d72c276acae4d1498353bbee"
+    }
+  },
+  {
+    "id": "festering",
+    "source": "exec-9cf9310b-6c8c-41e0-82b2-bb669cba4127.png",
+    "sourceSha256": "832aaab497daa5cf717b49b03be9a823133b314d49d57a5b25b81ac44d1baa79",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A half-rotted ear of corn and mouldering stalks lying in wet dark soil beneath a worn farm fence, stale autumn air made tangible through mist. Real natural rot, no bodies or gore.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/festering.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 159294,
+      "sha256": "aa331712e01f2b1a1c0dace248d0c9500f290a8523b5b2119d8428fe81add35a"
+    }
+  },
+  {
+    "id": "shadow",
+    "source": "exec-bf803733-4e9c-4503-8ee2-308901657aef.png",
+    "sourceSha256": "add40cd655dedb7144a4fe1a82b547fcd793db066aed1c0075be04c4842cf568",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. An unnaturally deep but physically photographed shadow stretching from a rough crooked tree across a farm path, a very faint adult-sized silhouette-like dark shape in the blackness, no identifiable creature. Ordinary available dusk and a single practical lantern, no CGI.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/shadow.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 156928,
+      "sha256": "5f906575b32618c83f30aa657ef7a35560f887f504942e24397fd4e823da2c4c"
+    }
+  },
+  {
+    "id": "ravens",
+    "source": "exec-dcf75be8-d6a9-4858-b12d-d8b04f619ca5.png",
+    "sourceSha256": "946c7119c180581afc5d30850b7bdfa8dc9cedac76e31cd49c85574383081656",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A flock of real ravens circling low over a rural cornfield and distant barn in a heavy grey autumn sky. Birds varied naturally in flight and focus, ominous quiet photograph, no fantasy red eyes or abstract graphics.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/ravens.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 128464,
+      "sha256": "c74828d98d9cb560f4e645037f98173753b0ef732c3e9601fd419ef10e053efa"
+    }
+  },
+  {
+    "id": "fields",
+    "source": "exec-6f7e0416-69b3-4612-b2f0-33b8cf999ebc.png",
+    "sourceSha256": "93ea595675349f7d92a5d1a7e0276e4cabac57b73a13886961b5e999f43645aa",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A farm hayfield and simple wooden fence, with tall dry corn pressing unexpectedly into its edges beside ordinary hay bales. Surreal only in the inexplicable encroachment, photographed as a real field, not a render.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/fields.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 145040,
+      "sha256": "2a87391f3ed3de6c46b24d27d89097ed69fa28584bd03027b564c8f728de43f3"
+    }
+  },
+  {
+    "id": "hatred",
+    "source": "exec-2d121e84-e535-4a4b-af7a-296fb689b476.png",
+    "sourceSha256": "f00ec8d0bd01c0a730f841ae03318aae326948aabd7485a2cf661016ba3a0256",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A low farm path between rigid corn rows, red-brown clay clinging to broken stalks and fence roots under oppressive storm light. Rural land feels hostile, no bodies, gore or literal magic.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/hatred.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 144854,
+      "sha256": "ad58931719759e62001f6eb123a0fc73e5218a3740bd871d19083722e97a4429"
+    }
+  },
+  {
+    "id": "lurks",
+    "source": "exec-3a017817-3e4e-4947-a221-133a9e57a086.png",
+    "sourceSha256": "8b23e1aeb6645fecc5751f97efc92f18e0451ec296d63c45ac148459b126138a",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A shadow between dense corn rows viewed from the edge of a real dirt road, a few disturbed leaves caught in mid-motion. Frightening absence and occlusion, no visible killer, weapon, victim or fantasy monster.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/lurks.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 156642,
+      "sha256": "0c3e52511b56098b28f405c8875f72c5df29b21d21e415aeca7f0af8a4d96603"
+    }
+  },
+  {
+    "id": "terror-kids",
+    "source": "exec-767ce6f9-e47f-4cda-bd5c-ff91e315ff13.png",
+    "sourceSha256": "acfd77cb80bc850486e10151f6f3e30edcadad0f338b48e15a869694a32dbefd",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. An unharmed dark-haired child in modest grey farm clothing at the end of a corn row, calmly half concealed behind physical stalks, subtle amber eye reflection, realistic twilight snapshot. Fictional folk-horror mood; no weapons, injuries, blood or violence.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/terror-kids.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 62440,
+      "sha256": "375ad5a3f7f09aa6159f20140b2e65d41c3e8b68f74713bc9ec17a5af99c25cb"
+    }
+  },
+  {
+    "id": "terror-chow",
+    "source": "exec-dc6f02db-e18e-4634-be1d-32083223e0db.png",
+    "sourceSha256": "39f180a72945e7f5f7532de13f5220aad8b8b34f69494e9e1c944ed4e42934b3",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Two clearly adult visitors arriving at an old barn entrance, distant other adults near a simple fenced cow pasture; a rural farm arrival photographed at dusk. No violence or injuries, no actual eating, no identifiable killer.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/terror-chow.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 138638,
+      "sha256": "b68d1af66ba4cf586cc6054f496328473831c18d0aec851a93b95d71c9a1de04"
+    }
+  },
+  {
+    "id": "terror-knows",
+    "source": "exec-3c95b39b-eba6-482c-bf77-7f242f5dd7b9.png",
+    "sourceSha256": "9e6329926d80d20982b649fc0163c39a64a140c8d40bab26e90a1b6869511add",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. View from within a dense cornfield toward a narrow gap where a very distant anonymous adult-sized dark silhouette stands almost lost in the shadow. No recognizable killer identity or costume; mostly corn and threatening empty space.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/terror-knows.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 62370,
+      "sha256": "492ec8e3adbecd47cfeaba91ab1286a20932ba557cf175eb27ab54c87f8d7661"
+    }
+  },
+  {
+    "id": "terror-rows",
+    "source": "exec-e1508489-6e99-442f-94e6-dfd6d89971bf.png",
+    "sourceSha256": "350d79bed651524eac2b76d8bfd134ba3222a3b82675278e053f8a25dc9fa6dd",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A bewildering but physically plausible perspective down tall dry corn rows bending with the land, cold evening sky and muddy path, one old fencepost as a landmark. No abstract repeating computer pattern or impossible architecture.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/terror-rows.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 140800,
+      "sha256": "3832e9f1df00609c61c08e4b99a345886c02d37c1d4dbd87607d46ec8197084d"
+    }
+  },
+  {
+    "id": "terror-gas",
+    "source": "exec-de187b34-41c4-4949-99a1-fca47126971d.png",
+    "sourceSha256": "462221e215153114e9dc171f0a4bab2d956e38ac1eb79605db1eba725f214967",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. An old late-1970s pickup stalled beside a dirt farm road, bonnet closed, door ajar, dim cornfield and hay bales beyond. Empty vehicle, natural grey dusk, no visible branding or lettering.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/terror-gas.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 88130,
+      "sha256": "833c6c786a766af4b09266bad6bae1222a58e1e70129dc09e6e1c8fdcf798a67"
+    }
+  },
+  {
+    "id": "terror-belong",
+    "source": "exec-70f0757a-5758-4d1a-8a4c-e65dcc5d5706.png",
+    "sourceSha256": "97f8ffeaaa84880ede297eb3dbe04e688e10d876a4409808537254a17bb43dc1",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Close dry corn stalks surrounding a narrow muddy track, foreground leaves almost brushing the ordinary camera, distant farmhouse barely visible. A feeling of being surrounded by real farmland, no person or monster.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/terror-belong.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 151866,
+      "sha256": "fbf1206df3a001be3f062eaa262cf6fdf67fbddeba9964b7975ed4a4bcae8a9d"
+    }
+  },
+  {
+    "id": "terror-nobody",
+    "source": "exec-810d7bb1-f5d5-4a92-9639-68ae0a8b7b9c.png",
+    "sourceSha256": "6796fc84a260a7b99bc759bea0cc3cef7e0e3dac68681244ce5c00173a6f569e",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Three distant unharmed children in modest plain farm clothes walking ahead of an ADULT visitor along a narrow autumn farm road toward a dark gnarled treeline. Quiet unsettling implication, no restraint, weapons, violence, injuries or graphic content; no actual altar ritual shown.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/terror-nobody.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 155030,
+      "sha256": "115c2b8a193c1879446a637dd4561f358d0bc19be2c8a80526167d76f1f6e863"
+    }
+  },
+  {
+    "id": "combine",
+    "source": "exec-b78ff024-2d1c-41c8-bff0-8734d5ccfd89.png",
+    "sourceSha256": "c38179002f626d848d554bdd9c27e540eaadb69a3cb530a7f53f9bbea8e808ac",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A real weathered late-1970s red agricultural combine harvester parked at the edge of a dry cornfield near a rural dirt road. Correct plausible farm machinery construction, metal wear and tyres, no futuristic parts, no person, no blood, no logos or lettering. Low dusk, imposing silhouette.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/combine.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 107862,
+      "sha256": "487f7eb0448615daa59749b7b3b20b7b242054c72769788f260474a68dac050b"
+    }
+  },
+  {
+    "id": "field-west-base",
+    "source": "exec-2b6d0ec1-d981-4e3b-a410-d79136ef94ad.png",
+    "sourceSha256": "a70a2b02ebc94fef7853d786f42139d7fb4612901a328b530fbb1f45601e3718",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Rows of dry autumn corn beside the corner of a weathered red-roof wooden barn on the right, broken fence rail close left and a sloping treeline beyond. Human-eye camera height, preserve this exact camera and landmarks for a harvested counterpart. Real late autumn dusk.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/field-west-base.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 144906,
+      "sha256": "15a55b1ea89d35a39311681c4c6554d26aa7b8fa6f8f9ee97e9d204fb502bac9"
+    }
+  },
+  {
+    "id": "field-west-harvested",
+    "source": "exec-64552f3b-2387-4db8-84a6-28587abb42dd.png",
+    "sourceSha256": "1e4363cd7ba9613b04e4eb9dcd78175c01b82e75fae0afb1da4d65bd2d490613",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the exact camera, angle, framing, light and ALL buildings/trees/fences/road landmarks from the reference photo. This is the same Field after agricultural harvesting: replace the standing corn with low cut stubble, flattened dry leaves and plausible combine tyre tracks. Keep tangible soil detail. No people, machinery, gore, magical effect, text or labels.",
+    "reference": "field-west-base",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/field-west-harvested.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 162624,
+      "sha256": "446c779b1ee97750b97575e3c3830887f0ad91748b134f965a2f0bd38883286c"
+    }
+  },
+  {
+    "id": "field-southwest-base",
+    "source": "exec-83a91eb8-21e3-4ea9-a728-a9c622aa3bf3.png",
+    "sourceSha256": "c8284533fce5f47a983b9a6a423c0f6391172e9fb449a25a7815ef59bb869be5",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "Edit reference to replace all cut stubble with mature uncut standing corn, preserving landmarks, sky and camera. ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Dry autumn corn rows on a gentle slope with one bent bare tree at the left edge and a low wooden fence across the distance. Human-eye camera height, preserve this exact camera and landmarks for a harvested counterpart. Real late autumn dusk.",
+    "reference": "superseded exec-775c99de-8e18-42c4-9b05-885e9acc728d.png",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/field-southwest-base.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 142158,
+      "sha256": "fda18c27e57721f9ce2e1f5acd068056696f3d503db57915773d1e9ec3dff9a3"
+    }
+  },
+  {
+    "id": "field-southwest-harvested",
+    "source": "exec-361a145d-cfd2-4b65-8a5b-93d87f7f67bf.png",
+    "sourceSha256": "1548844c6819ef44f874ff1c406cab5540b12329f2ea1ad6c6b713670353ba18",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the exact camera, angle, framing, light and ALL buildings/trees/fences/road landmarks from the reference photo. This is the same Field after agricultural harvesting: replace the standing corn with low cut stubble, flattened dry leaves and plausible combine tyre tracks. Keep tangible soil detail. No people, machinery, gore, magical effect, text or labels.",
+    "reference": "field-southwest-base",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/field-southwest-harvested.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 141884,
+      "sha256": "b640d5d83a8ffe94a2f507db42ec127be036a3295ddba7f3c63928ba10993746"
+    }
+  },
+  {
+    "id": "field-south-base",
+    "source": "exec-c22fb1fe-e23e-40eb-b2bb-ab1bf9c7995d.png",
+    "sourceSha256": "f767966c1fa10c78ac02d7ad771d6ac0d90bf79c00187af0de1617b9fb49d512",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Dry autumn corn rows with a narrow muddy drainage rut, three irregular wooden fenceposts on the right and an old garage roof small in the far distance. Human-eye camera height, preserve this exact camera and landmarks for a harvested counterpart. Real late autumn dusk.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/field-south-base.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 156414,
+      "sha256": "5da95e874fbe13d0b067c2cb40422862c90490d29ae4183fd843f62e6368772e"
+    }
+  },
+  {
+    "id": "field-south-harvested",
+    "source": "exec-5c684071-39bb-4284-8bfb-4a264a49bd13.png",
+    "sourceSha256": "cc83f1209effc9e17be43db0b50d3f12e8df25aef111029de8091c5bd86f84b3",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the exact camera, angle, framing, light and ALL buildings/trees/fences/road landmarks from the reference photo. This is the same Field after agricultural harvesting: replace the standing corn with low cut stubble, flattened dry leaves and plausible combine tyre tracks. Keep tangible soil detail. No people, machinery, gore, magical effect, text or labels.",
+    "reference": "field-south-base",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/field-south-harvested.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 152384,
+      "sha256": "94ec57c827a22693b28f10051fbbfd24dcbee0ea65fdacdc29c1eb50f065c886"
+    }
+  },
+  {
+    "id": "field-north-base",
+    "source": "exec-5fc1fd03-dbce-4352-869e-12892e429c0c.png",
+    "sourceSha256": "87ed366952c624aebafcd1e7d3af65b64d7e82406b556d90a8befc78aaf432bf",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "Edit reference to replace all cut stubble with mature uncut standing corn, preserving landmarks, sky and camera. ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A dry cornfield below an ordinary cow-pasture fence, distant round hay bales and one grey wooden gate on the far left. Human-eye camera height, preserve this exact camera and landmarks for a harvested counterpart. Real late autumn dusk.",
+    "reference": "superseded exec-39154371-7c6f-44c1-988a-ee50f5ea6427.png",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/field-north-base.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 150350,
+      "sha256": "fa079a95489a289d0558e44acde31d75c8b299bd7386dfb334646a0fd348d480"
+    }
+  },
+  {
+    "id": "field-north-harvested",
+    "source": "exec-299829bb-b32a-406a-83d5-810a5f6ccf69.png",
+    "sourceSha256": "5f23fb2daa031d7d22c80f8b3d49de75b398295e764bd70c7fcb3a01706f1f18",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the exact camera, angle, framing, light and ALL buildings/trees/fences/road landmarks from the reference photo. This is the same Field after agricultural harvesting: replace the standing corn with low cut stubble, flattened dry leaves and plausible combine tyre tracks. Keep tangible soil detail. No people, machinery, gore, magical effect, text or labels.",
+    "reference": "field-north-base",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/field-north-harvested.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 161410,
+      "sha256": "f03b88b2135a4f231c5cce64f13e8430070ce17824bb6d8635298c994b220014"
+    }
+  },
+  {
+    "id": "field-inner-east-base",
+    "source": "exec-2fd0bdb9-8f52-4d64-afab-68eff1c16fb9.png",
+    "sourceSha256": "922c60087783c9ed885419a30ece7621991581a87b1eac0d3ac090aa2568a4b7",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "Edit reference to replace all cut stubble with mature uncut standing corn, preserving landmarks, sky and camera. ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A smaller wedge of dry corn between two narrow farm tracks, a crooked bare oak in the right distance and a split fencepost near the left foreground. Human-eye camera height, preserve this exact camera and landmarks for a harvested counterpart. Real late autumn dusk.",
+    "reference": "superseded exec-73ac2558-9d92-4fc5-ba7d-925d4c34cc83.png",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/field-inner-east-base.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 142736,
+      "sha256": "ce985940e206cb7330755679fe2ec9808ba5c9d98965695eb6af618585f56db8"
+    }
+  },
+  {
+    "id": "field-inner-east-harvested",
+    "source": "exec-1b937b62-6291-4914-98c3-66995ae0f13c.png",
+    "sourceSha256": "659e13701e0c1e30d1adeb4a28494b89636c359a9b6fc0104f284042c7737e06",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the exact camera, angle, framing, light and ALL buildings/trees/fences/road landmarks from the reference photo. This is the same Field after agricultural harvesting: replace the standing corn with low cut stubble, flattened dry leaves and plausible combine tyre tracks. Keep tangible soil detail. No people, machinery, gore, magical effect, text or labels.",
+    "reference": "field-inner-east-base",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/field-inner-east-harvested.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 156036,
+      "sha256": "a868acdcb3bf265823302fbdbf61a3f3a89a87f14dc17e3c7f5f084739078558"
+    }
+  },
+  {
+    "id": "field-outer-east-base",
+    "source": "exec-bc61180a-5f03-4027-b04f-12f914272c3d.png",
+    "sourceSha256": "f19b0744b05daad143b9919fd08708b107942033589150a560a0e3e9e6b568b4",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "Edit reference to replace all cut stubble with mature uncut standing corn, preserving landmarks, sky and camera. ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Dry corn spreading toward a dark eastern treeline, a narrow dirt-road edge to the right and two old leaning fenceposts in the left middle distance. Human-eye camera height, preserve this exact camera and landmarks for a harvested counterpart. Real late autumn dusk.",
+    "reference": "superseded exec-a286111f-3166-4e29-8c6c-ef4b26087587.png",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/field-outer-east-base.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 163456,
+      "sha256": "d06c9756e2509f84844be65928a22bbf30fa217494e1ed03b875e12b4db5a958"
+    }
+  },
+  {
+    "id": "field-outer-east-harvested",
+    "source": "exec-a578baa4-71b3-4190-a891-666735549b7d.png",
+    "sourceSha256": "5173bf489f259a6e9c7f4c4754af6716cd7e9bae97228c6ec55ddb72d5ea0a1b",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the exact camera, angle, framing, light and ALL buildings/trees/fences/road landmarks from the reference photo. This is the same Field after agricultural harvesting: replace the standing corn with low cut stubble, flattened dry leaves and plausible combine tyre tracks. Keep tangible soil detail. No people, machinery, gore, magical effect, text or labels.",
+    "reference": "field-outer-east-base",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/field-outer-east-harvested.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 163122,
+      "sha256": "1e65cbdfec53f43d31902beaa375ef40650371776aa42fcb62a8f1f164e2ae71"
+    }
+  },
+  {
+    "id": "hayfield-base",
+    "source": "exec-b237ee24-c092-45ec-8966-67c4d18d29a6.png",
+    "sourceSha256": "b86e896eea568a5320839ad72e7cfc1dd4dda7b840dcf6fc3edd6549de2d91c4",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A real hayfield with scattered rectangular golden hay bales, a low fence and a weathered barn roof to the distant left, cold dusk. Fixed human-eye camera for later state variations.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/hayfield-base.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 138614,
+      "sha256": "ccdf42575f16a5b6186781c6f99fb61dbc41ff14ea8962d7dcff8b317a7e2fbe"
+    }
+  },
+  {
+    "id": "hayfield-field",
+    "source": "exec-b40c5a86-5924-4f3e-9256-88324e9cdd5b.png",
+    "sourceSha256": "3c1afe0cb47cec6fe28933fa01e86371d40ccd7d81b08b21997b1bc135fdb608",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the EXACT camera, lighting, fences, buildings, hay bales and other landmarks in the reference. Tall dry corn has inexplicably grown densely throughout this same place, pressing between the original landmarks. Photograph this physically real corn as a frightening rural folk-horror change, no CGI beams, labels or supernatural graphics.",
+    "reference": "hayfield-base",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/hayfield-field.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 158638,
+      "sha256": "3c1bdfec52367a82f1ac8d516f493db529ce76e9d4c0ea68ac44aff83e4eaf1f"
+    }
+  },
+  {
+    "id": "hayfield-harvested",
+    "source": "exec-75fbac4a-98b5-4e4b-a406-c3c87a376fcc.png",
+    "sourceSha256": "3fe2781765aa29d2c4d55b3ed7752c79441b3127d371452c3ae41686f410538d",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the EXACT camera, lighting, fences, buildings and other landmarks in the reference. The land has been freshly harvested: cut low stalk stubble and flattened dry crop leaves, plausible combine tracks, with original edge landmarks still recognizable. No people, text, blood or machinery. A separate real photographic state of the same environment.",
+    "reference": "hayfield-base",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/hayfield-harvested.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 142046,
+      "sha256": "66f22bf70be7a7d354283973e88da4b163536612ff3ac00bbdcaa65e94370071"
+    }
+  },
+  {
+    "id": "pasture-base",
+    "source": "exec-ac0f2664-2768-4c97-a0e8-539612178c65.png",
+    "sourceSha256": "60114fce5fc76dbe7c8a3c319aee45e60fe938745791b59b070eda1672a68e9e",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. A simple grass cow pasture with a wooden enclosure fence, two distant ordinary cows and a pair of round hay bales near the right edge, cold dusk. Fixed human-eye camera for later state variations.",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/pasture-base.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 97184,
+      "sha256": "d609bb54341041bae6516dcfeb8d473cae152ecbe37cdd917e5d3e9f3822169c"
+    }
+  },
+  {
+    "id": "pasture-field",
+    "source": "exec-9720b7f5-c3ee-4b31-84ef-5c2564d54f78.png",
+    "sourceSha256": "813aa27cd0d89208356ce23f1e7680eca952a1dd1ff62049011820d2d60ca19f",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the EXACT camera, lighting, fences, buildings, hay bales and other landmarks in the reference. Tall dry corn has inexplicably grown densely throughout this same place, pressing between the original landmarks. Photograph this physically real corn as a frightening rural folk-horror change, no CGI beams, labels or supernatural graphics.",
+    "reference": "pasture-base",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/pasture-field.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 152148,
+      "sha256": "6d5e5d37db7f3886e5f6a5fceb0d662aa0d429a2596f01d1ef71c3d476b7137c"
+    }
+  },
+  {
+    "id": "pasture-harvested",
+    "source": "exec-2035a96b-652d-4243-af2a-0502cae1591c.png",
+    "sourceSha256": "ae43c374ec40495ff9b3339a98ca63301646a5166786017751a6f09e1a010af3",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "prompt": "ONE standalone 1536x1024 landscape photograph for a rural folk-horror companion app. Candid 1980s consumer 35mm snapshot, physically real practical subjects and materials, coherent available natural light, believable anatomy/construction, natural perspective, restrained color-negative grain, subtly imperfect framing, NO illustration, painting, concept art, CGI, plastic skin, studio pose, extreme teal/orange, text, logos, captions, frames, black bars, game pieces or collage. Keep the essential subject near center/right with dark space for HTML captions at bottom. Horror is quiet, unsettling and tangible. Preserve the EXACT camera, lighting, fences, buildings and other landmarks in the reference. The land has been freshly harvested: cut low stalk stubble and flattened dry crop leaves, plausible combine tracks, with original edge landmarks still recognizable. No people, text, blood or machinery. A separate real photographic state of the same environment.",
+    "reference": "pasture-base",
+    "scene": {
+      "path": "src/assets/play/photos/shady-acres/pasture-harvested.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 159288,
+      "sha256": "09f49ac75c54565214d9a918a66705591cca5fb526c31fcff048207149376b7d"
+    }
+  }
+]

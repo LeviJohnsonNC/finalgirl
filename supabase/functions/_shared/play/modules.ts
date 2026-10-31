@@ -1,3 +1,4 @@
+import {SHADY_ITEMS,SHADY_PEOPLE,SHADY_CURSES,initialShady,validShadyField,shadyState,shadyFacts} from './shadyAcres.ts';
 import { GRIMLASH_POWERS, GRIMLASH_FINALES, GRIMLASH_MINORS, GRIMLASH_HARVEST, initialGrimlash, validGrimlashField, grimlashFacts } from './grimlash.ts';
 import { validKonradField, canonicalKonradSnapshot, initialKonrad, konradFacts } from './konrad.ts';
 import { KONRAD_ITEMS } from './konradCatalog.ts';
@@ -52,7 +53,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -157,6 +158,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === 'shady-acres') return validShadyField(key,value);
   if (module === "grimlash") return validGrimlashField(key,value);
   if (module === "konrad") return validKonradField(key,value);
   if (module === "evomorph") return validEvomorphField(key,value);
@@ -276,7 +278,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    !["shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -446,6 +448,7 @@ function valueLabel(key: string, value: ModuleValue) {
   return String(value);
 }
 export function describeModule(observation: ModuleObservation) {
+  if(observation.module==='shady-acres')return shadyFacts(shadyState(observation.changes)).join(' ')||'Shady Acres observations recorded';
   if(observation.module==='grimlash')return Object.entries(observation.changes).filter(([k])=>k!=='initialized').map(([k,v])=>`${k.replace(/\./g,' ')}: ${GRIMLASH_HARVEST.find(c=>c.id===v)?.name??v??'not recorded'}`).join('; ');
   if(observation.module === "konrad") return konradFacts(observation.changes).join(" ") || "USS Konrad state recorded";
   if(observation.module === "evomorph") return evomorphFacts(observation.changes);
@@ -466,6 +469,7 @@ export function moduleContext(
   entries: readonly ObservedEvent[],
 ) {
   const context: Record<string, ModuleState> = {};
+  if(selection.location==='Shady Acres'&&entries.some(e=>e.moduleData?.module==='shady-acres')) {const s=shadyState(moduleState(entries,'shady-acres'));delete s.initialized;context.shady={snapshot:JSON.stringify(s)};}
   if(selection.killer==='Grimlash'&&entries.some(e=>e.moduleData?.module==='grimlash')) {const s=moduleState(entries,'grimlash');delete s.initialized;context.grimlash=s;}
   if(selection.location === "USS Konrad" && entries.some(e=>e.moduleData?.module === "konrad")) context.konrad={snapshot:canonicalKonradSnapshot(moduleState(entries,"konrad").snapshot)!};
   if(selection.killer === "Evomorph" && entries.some(e=>e.moduleData?.module === "evomorph")) {const s=moduleState(entries,"evomorph");delete s.initialized;context.evomorph=s;}
@@ -537,6 +541,13 @@ export function moduleStoryBeats(
   if (!context) return "";
   // Preserve the established output for every other location. Each owner gets
   // room inside the existing 900-character module budget for Carnival mixes.
+  if(context.shady) {
+    const killer=moduleStoryBeats({...selection,location:''},entries);
+    const facts=shadyFacts(shadyState(context.shady));
+    let location='';for(const fact of facts)if(location.length+fact.length+1<=(killer?530:875))location+=fact+' ';
+    let k='';for(const fact of killer.split(/(?<=\.)\s+/))if(k.length+fact.length+1<=335)k+=fact+' ';
+    return [location&&`Shady Acres: ${location.trim()}`,k&&`Killer: ${k.trim()}`].filter(Boolean).join('\n');
+  }
   if(context.konrad) {
     const killer=moduleStoryBeats({...selection,location:""},entries);
     let location="";for(const fact of konradFacts(context.konrad))if(location.length+fact.length+1<=(killer?535:880))location+=fact+" ";
@@ -717,6 +728,7 @@ export function buddylandReferences(
     refs.push({name:'Poltergeist objective',effect:poltergeistFacts(state)+' The spirit cannot be attacked, damaged or killed. Finding is not escape; only recorded outcomes happened.'});
     for(const p of POLTERGEIST_MINORS) if(state[`minor.${p.id}`]==='active') refs.push({name:p.name,effect:p.effect});
   }
+  if(selection.location==='Shady Acres'&&context?.shady){const s=shadyState(context.shady);for(const c of s.curses.filter(c=>c.status==='active')){const card=SHADY_CURSES.find(x=>x.id===c.card);if(card)refs.push({name:card.name,effect:card.effect+' Presence does not prove resolution.'});}for(const fact of shadyFacts(s))refs.push({name:'Shady Acres observation',effect:fact});}
   if(selection.killer==='Grimlash') {const s=context?.grimlash??{};refs.push({name:'Grimlash',effect:grimlashFacts(s)});for(const c of [...GRIMLASH_POWERS,...GRIMLASH_FINALES])if(c.id===s.power||c.id===s.finale)refs.push({name:c.name,effect:c.effect+' Revelation does not prove resolution.'});for(const c of GRIMLASH_MINORS)if(typeof s[`minor.${c.id}.health`]==='number')refs.push({name:c.name,effect:s[`minor.${c.id}.health`]===0?'Removed; no longer active.':c.effect});}
   if (selection.killer === "Inkanyamba") {
     const state = context?.inkanyamba ?? {};
@@ -925,7 +937,7 @@ export function moduleItemBeats(
   entries: readonly ObservedEvent[],
 ) {
   const locationCatalog =
-    selection.location === "USS Konrad" ? KONRAD_ITEMS : selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
+    selection.location === "Shady Acres" ? SHADY_ITEMS : selection.location === "USS Konrad" ? KONRAD_ITEMS : selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
       ? CAMP_ITEMS
       : selection.location === "Carnival of Blood"
         ? CARNIVAL_ITEMS
@@ -970,8 +982,10 @@ export function initialModuleObservations(
   initializeEvomorph = false,
   initializeKonrad = false,
   initializeGrimlash = false,
+  initializeShady = false,
 ): ModuleObservation[] {
   return [
+    ...(initializeShady && selection.location==='Shady Acres' ? [{module:'shady-acres' as const,changes:initialShady(selection.startingEvent)}] : []),
     ...(initializeGrimlash && selection.killer==='Grimlash' ? [{module:'grimlash' as const,changes:initialGrimlash()}] : []),
     ...(initializeKonrad && selection.location === "USS Konrad" ? [{module:"konrad" as const,changes:initialKonrad(selection.setupScenario,selection.startingEvent)}] : []),
     ...(initializeEvomorph && selection.killer==='Evomorph' ? [{module:'evomorph' as const,changes:initialEvomorph()}] : []),

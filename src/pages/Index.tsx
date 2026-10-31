@@ -1,3 +1,4 @@
+import {shadyParent,shadyState,resolveShadyAction} from '@/lib/play/shadyAcres';
 import {grimlashFatal,grimlashParent,resolveGrimlashAction} from '@/lib/play/grimlash';
 import {konradFatal,konradParent,konradState,resolveKonradAction} from '@/lib/play/konrad';
 import {moduleState} from '@/lib/play/modules';
@@ -147,6 +148,7 @@ const IndexContent = () => {
       return;
     }
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
+      ...(selection.location === 'Shady Acres' && {shadySetupVersion:1 as const}),
       ...(selection.location === 'USS Konrad' && {konradSetupVersion:1 as const}),
       ...(selection.killer === 'Grimlash' && {grimlashSetupVersion:1 as const}),
       ...(selection.killer === 'Evomorph' && {evomorphSetupVersion:1 as const}),
@@ -204,7 +206,8 @@ const IndexContent = () => {
       }
     }
     if(game.selection.killer==='Grimlash'&&formData.grimlashReview) {const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'grimlash');if(state.loss!==formData.grimlashReview.loss){const action={parent:grimlashParent(en),command:'loss' as const,value:formData.grimlashReview.loss,correction:true};const changes=resolveGrimlashAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',grimlashAction:action,moduleData:{module:'grimlash',changes}})))throw new Error('The Madness ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Madness ending is unavailable.');}}
-    const {konradReview:_review,...fields}=formData;
+    if(game.selection.location==='Shady Acres'&&formData.childrenOnBoardAtFinish!==undefined){const entries=summarizePlay(game.playEvents).entries,state=moduleState(entries,'shady-acres');if(shadyState(state).finishChildren!==formData.childrenOnBoardAtFinish){const action={parent:shadyParent(entries),command:'finish' as const,value:formData.childrenOnBoardAtFinish};const changes=resolveShadyAction(action,state,entries);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',shadyAction:action,moduleData:{module:'shady-acres',changes}})))throw new Error('The Children observation could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Children observation is unavailable.');}}
+    const {konradReview:_review,childrenOnBoardAtFinish:_children,...fields}=formData;
     const reviewedEntries=summarizePlay(game.playEvents).entries;
     const fatalEnding=game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(reviewedEntries,'grimlash'))||game.selection.location==='USS Konrad'&&konradFatal(moduleState(reviewedEntries,'konrad'));
     const outcome=fatalEnding?'lost':game.selection.killer==='Grimlash'||game.selection.location==='USS Konrad'?formData.outcome??game.result.outcome:game.result.outcome;

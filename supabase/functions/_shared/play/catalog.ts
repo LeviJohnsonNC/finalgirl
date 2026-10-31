@@ -1,3 +1,4 @@
+import {SHADY_EVENTS,SHADY_TERRORS,SHADY_ITEMS,SHADY_PEOPLE,SHADY_SPACES,SHADY_SOURCE} from './shadyAcres.ts';
 import { GRIMLASH_TERRORS } from './grimlash.ts';
 import { KONRAD_ITEMS, KONRAD_EVENTS, KONRAD_TERRORS, KONRAD_SPACES, KONRAD_PEOPLE, KONRAD_SOURCE } from './konradCatalog.ts';
 import { EVOMORPH_TERRORS } from './evomorph.ts';
@@ -40,6 +41,8 @@ const station = wiki("Station_2891");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+ ...SHADY_TERRORS.map(c=>({...c,kind:'terror' as const})),
+ ...SHADY_EVENTS.map(c=>({...c,kind:'event' as const,location:'Shady Acres',source:SHADY_SOURCE})),
   ...GRIMLASH_TERRORS.map(c=>({...c,kind:'terror' as const})),
   ...KONRAD_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...KONRAD_EVENTS.map(c=>({...c,kind:"event" as const,location:"USS Konrad",source:KONRAD_SOURCE})),
@@ -194,6 +197,7 @@ export function playCardContext(
   });
 }
 export const PLAY_ROOMS: Record<string, readonly string[]> = {
+ 'Shady Acres':SHADY_SPACES.map(s=>s.name),
   "Sacred Groves": GROVES_SPACES.filter(s=>s.type === "sacred" || s.type === "search").map(s=>s.name),
   "Maple Lane": [...MAPLE_HOUSES,...MAPLE_STREETS].map(s=>s.name),
   "Carnival of Blood": CARNIVAL_ROOMS,
@@ -222,6 +226,7 @@ export function playMechanisms(selection: {
 }) {
   return [
     "Killer attack",
+    ...(selection.location==='Shady Acres'?['Child attack','Abduction','Ancient Curse','Decaying Earth','Omen of Blood']:[]),
     ...(selection.killer === "Evomorph" ? ["Ambush", "Acid Blood", "Razor Tail"] : []),
     ...(selection.killer==='Poltergeist'?['Clown Doll','Behemoth','Flying objects','Lightning']:[]),
     ...(selection.killer === "Inkanyamba" ? ["Killer Wrath", "Dark Lightning"] : []),
@@ -250,14 +255,14 @@ export function playMechanisms(selection: {
 export function playItems(
   location: string,
 ): readonly { name: string; effect: string }[] {
-  return location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
+  return location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
     ? CAMP_ITEMS
     : location === "Buddyland"
       ? BUDDYLAND_ITEMS
       : [];
 }
 export function playVictims(location: string): readonly { name: string }[] {
-  return location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
+  return location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
     ? CAMP_VICTIMS
     : location === "Buddyland"
       ? SPECIAL_VICTIMS

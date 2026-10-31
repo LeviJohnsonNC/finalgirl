@@ -129,3 +129,34 @@ for(const entry of grimManifest){
 const actualGrim=images.filter(p=>p.startsWith(grimFolder+'/')||p==='src/assets/play/banners/grimlash.webp'||p==='src/assets/characters/ai/grimlash.png'||p==='src/assets/collection-portraits/ai/grimlash.webp');
 if(actualGrim.length!==grimPaths.size||actualGrim.some(p=>!grimPaths.has(p)))throw Error('Orphan Grimlash artwork');
 console.log('Verified 47 independent Grimlash scenes, identity and 35 card thumbnails.');
+
+// Shady Acres: source IDs are stable across alphabetical UI sorting and state changes.
+const shadyFolder='src/assets/play/photos/shady-acres';
+const shadyManifest=JSON.parse(readFileSync(shadyFolder+'/manifest.json','utf8'));
+const shadyExpected=["header","child-1","child-2","child-3","sacrifice-0","sacrifice-1","sacrifice-2","sacrifice-3","omen-of-plague","decaying-earth","dark-fields","omen-of-death","malevolent-aura","chthonic-possession","omen-of-blood","gnarled-stalks","sally","sally-saved","sally-killed","ralph","ralph-saved","ralph-killed","cultist","cultist-saved","cultist-killed","hungers","festering","shadow","ravens","fields","hatred","lurks","terror-kids","terror-chow","terror-knows","terror-rows","terror-gas","terror-belong","terror-nobody","combine","field-west-base","field-west-harvested","field-southwest-base","field-southwest-harvested","field-south-base","field-south-harvested","field-north-base","field-north-harvested","field-inner-east-base","field-inner-east-harvested","field-outer-east-base","field-outer-east-harvested","hayfield-base","hayfield-field","hayfield-harvested","pasture-base","pasture-field","pasture-harvested"];
+const shadyCurses=new Set(['omen-of-plague','decaying-earth','dark-fields','omen-of-death','malevolent-aura','chthonic-possession','omen-of-blood','gnarled-stalks']);
+if(shadyManifest.length!==58||new Set(shadyManifest.map(r=>r.id)).size!==58||shadyManifest.some(r=>!shadyExpected.includes(r.id)))throw Error('Incomplete Shady Acres artwork');
+if(new Set(shadyManifest.map(r=>r.sourceSha256)).size!==58||new Set(shadyManifest.map(r=>r.source)).size!==58)throw Error('Shady Acres requires 58 independent sources');
+const shadyPaths=new Set();
+function webpDimensions(b){
+ for(let at=12;at+8<=b.length;){const tag=b.toString('ascii',at,at+4),n=b.readUInt32LE(at+4),p=at+8;
+  if(tag==='VP8 ')return [b.readUInt16LE(p+6)&16383,b.readUInt16LE(p+8)&16383];
+  if(tag==='VP8X')return [1+b.readUIntLE(p+4,3),1+b.readUIntLE(p+7,3)];
+  if(tag==='VP8L'){const bits=b.readUInt32LE(p+1);return [(bits&16383)+1,((bits>>>14)&16383)+1];}
+  at=p+n+(n%2);
+ }throw Error('Missing WebP image payload');
+}
+for(const r of shadyManifest){
+ if(!/^exec-[a-f0-9-]+\.png$/.test(r.source)||!/^[a-f0-9]{64}$/.test(r.sourceSha256)||r.nativeWidth<1280||r.nativeHeight<720)throw Error('Invalid Shady Acres original: '+r.id);
+ if(!!r.thumbnail!==shadyCurses.has(r.id))throw Error('Wrong Shady Acres thumbnail mapping: '+r.id);
+ for(const kind of ['scene',...(r.thumbnail?['thumbnail']:[])]){
+  const a=r[kind],expectedPath=kind==='thumbnail'?shadyFolder+'/thumbs/'+r.id+'.webp':r.id==='header'?'src/assets/play/banners/shady-acres.webp':shadyFolder+'/'+r.id+'.webp';
+  if(!a||a.path!==expectedPath||shadyPaths.has(a.path))throw Error('Wrong Shady Acres derivative: '+r.id);
+  const b=readFileSync(a.path),size=kind==='thumbnail'?[320,180]:[1280,720];
+  if(b.length!==a.bytes||b.length>(kind==='thumbnail'?35:160)*1024||createHash('sha256').update(b).digest('hex')!==a.sha256||String(webpDimensions(b))!==String(size)||a.width!==size[0]||a.height!==size[1])throw Error('Invalid Shady Acres derivative: '+a.path);
+  shadyPaths.add(a.path);
+ }
+}
+const actualShady=images.filter(p=>p.startsWith(shadyFolder+'/')||p==='src/assets/play/banners/shady-acres.webp');
+if(actualShady.length!==66||actualShady.some(p=>!shadyPaths.has(p)))throw Error('Orphan Shady Acres artwork');
+console.log('Verified 58 independent Shady Acres scenes and 8 chooser thumbnails.');

@@ -117,7 +117,7 @@ const TheEnd = ({
       finalGirlHealth: formData.finalGirlHealth,
       killerHealth: endingKillerHealth,
       mission: getMissionByName(result.mission),
-      scenarioRules: [result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='USS Konrad'?playStoryBeats(result.playEvents,result):undefined, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
+      scenarioRules: [result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='USS Konrad'||result.location==='Shady Acres'?playStoryBeats(result.playEvents,result):undefined, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
       gameId: result.id,
       previousImageUrl,
     });
