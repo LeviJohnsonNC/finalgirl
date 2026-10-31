@@ -103,6 +103,7 @@ export function resolveGrimlashAction(a:GrimlashAction,s:ModuleState,entries:rea
   if(a.value==='telluric'&&s['kept.3']!=='telluric-visions'&&!a.correction)return null;
   if((a.value==='none'||a.value==='unknown')&&!a.correction)return null;
   changes.loss=a.value!;
+  if(a.correction&&(a.value==='none'||a.value==='unknown')&&s.position===10){changes.position=null;if(s.peak===10)changes.peak=null;}
  }
  return Object.keys(changes).length?changes:null;
 }

@@ -56,6 +56,8 @@ export const GameOutcomeForm = ({
   const [reviewedOutcome,setReviewedOutcome]=useDraftField<'won'|'lost'>('reviewedOutcome',result.outcome,initialDraft,onDraftChange);
   const grimState=moduleState(summarizePlay(result.playEvents).entries,'grimlash');
   const [grimLoss,setGrimLoss]=useDraftField<GrimlashLoss>('grimlashLoss',(grimState.loss as GrimlashLoss)??'unknown',initialDraft,onDraftChange);
+  const retractingSkull=grimState.position===10&&(grimLoss==='none'||grimLoss==='unknown');
+  const reviewedGrimState=retractingSkull?{...grimState,position:undefined,peak:grimState.peak===10?undefined:grimState.peak}:grimState;
   const fatalGrim=result.killer==='Grimlash'&&grimlashFatal({loss:grimLoss});
   const fatalShip=result.location==='USS Konrad'&&['airlock-loss','explosion-loss'].includes(shipFate);
   const fatalEnding=fatalGrim||fatalShip;
@@ -328,7 +330,7 @@ export const GameOutcomeForm = ({
           : buddyParts.join('. ');
     }
     if(result.location==='Shady Acres')highlights=[highlights,`Children survived: ${childrenSurvived}`].filter(Boolean).join('. ');
-    if(isGrimlash){const facts=[typeof grimState.position==='number'?`Harvest Madness position ${grimState.position}, Level ${harvestLevel(grimState.position)}`:'',typeof grimState.peak==='number'?`Recorded Madness peak position ${grimState.peak}`:'',grimLoss==='skull'||grimLoss==='telluric'?`Game lost: ${grimLoss}`:'',harvestMadnessPeaked?'Legacy Madness peaked observation; exact position unknown':''];highlights=[highlights,...facts].filter(Boolean).join('. ');}
+    if(isGrimlash){const facts=[typeof reviewedGrimState.position==='number'?`Harvest Madness position ${reviewedGrimState.position}, Level ${harvestLevel(reviewedGrimState.position)}`:'',typeof reviewedGrimState.peak==='number'?`Recorded Madness peak position ${reviewedGrimState.peak}`:'',grimLoss==='skull'||grimLoss==='telluric'?`Game lost: ${grimLoss}`:'',harvestMadnessPeaked?'Legacy Madness peaked observation; exact position unknown':''];highlights=[highlights,...facts].filter(Boolean).join('. ');}
     if (isBerith) {
       const demonParts: string[] = [];
       if (isWin && ursulaSaved) demonParts.push('Ursula saved');
@@ -778,7 +780,7 @@ export const GameOutcomeForm = ({
             </div>
           )}
 
-          {isGrimlash&&<section className="outcome-panel outcome-module" aria-label="Grimlash ending review"><h3>Harvest Madness</h3><p>{typeof grimState.position==='number'?`Position ${grimState.position} · ${harvestLevel(grimState.position)===4?'Skull':`Level ${harvestLevel(grimState.position)}`}`:'Position not recorded'}{typeof grimState.peak==='number'?` · Recorded peak ${grimState.peak}`:''}</p><OutcomeSelect label="Madness loss record" value={grimLoss} onValueChange={v=>setGrimLoss(v as GrimlashLoss)}><option value="unknown">Not recorded</option><option value="none">No Madness loss recorded</option><option value="skull">Reached the skull</option><option value="telluric">Telluric Visions loss</option></OutcomeSelect><OutcomeSelect label="Reviewed game result" value={fatalEnding?'lost':reviewedOutcome} onValueChange={v=>setReviewedOutcome(v as 'won'|'lost')}><option value="won" disabled={fatalEnding}>Won</option><option value="lost">Lost</option></OutcomeSelect>{fatalGrim&&<p role="status">This Madness ending is a loss. Health and Victim totals remain as observed.</p>}{harvestMadnessPeaked&&<p>Legacy peaked record: exact level and position unknown.</p>}</section>}
+          {isGrimlash&&<section className="outcome-panel outcome-module" aria-label="Grimlash ending review"><h3>Harvest Madness</h3><p>{typeof reviewedGrimState.position==='number'?`Position ${reviewedGrimState.position} · ${harvestLevel(reviewedGrimState.position)===4?'Skull':`Level ${harvestLevel(reviewedGrimState.position)}`}`:'Position not recorded'}{typeof reviewedGrimState.peak==='number'?` · Recorded peak ${reviewedGrimState.peak}`:''}</p><OutcomeSelect label="Madness loss record" value={grimLoss} onValueChange={v=>setGrimLoss(v as GrimlashLoss)}><option value="unknown">Not recorded</option><option value="none">No Madness loss recorded</option><option value="skull">Reached the skull</option><option value="telluric">Telluric Visions loss</option></OutcomeSelect><OutcomeSelect label="Reviewed game result" value={fatalEnding?'lost':reviewedOutcome} onValueChange={v=>setReviewedOutcome(v as 'won'|'lost')}><option value="won" disabled={fatalEnding}>Won</option><option value="lost">Lost</option></OutcomeSelect>{retractingSkull&&<p>Saving this correction also leaves the earlier skull position and skull peak unrecorded.</p>}{fatalGrim&&<p role="status">This Madness ending is a loss. Health and Victim totals remain as observed.</p>}{harvestMadnessPeaked&&<p>Legacy peaked record: exact level and position unknown.</p>}</section>}
           {result.location==='Shady Acres'&&<section className="outcome-panel outcome-module"><label>Children survived (0–3)<input aria-label="Children survived" type="number" min="0" max="3" value={childrenSurvived} onChange={e=>setChildrenSurvived(Math.max(0,Math.min(3,Number(e.target.value))))}/></label></section>}
 
           {/* Section: Berith / A Demon in the Shadows */}
