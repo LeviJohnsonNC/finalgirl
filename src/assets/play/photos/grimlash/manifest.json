@@ -43,190 +43,267 @@
   },
   {
     "id": "madness-0",
-    "source": "exec-c47adb17-17b2-4c91-a686-09f7bea71b75.png",
+    "source": "ChatGPT Image Oct 31, 2026, 12_14_12 PM-0.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "87ae586c52a8bbef9dc1e2ce717d25adae184528da9b97bdeebf659dff43687e",
+    "sourceSha256": "90e43890fd279f678941b3439726e48e895fc53513edddce0a0628ae31efbd2a",
     "scene": {
       "path": "src/assets/play/photos/grimlash/madness-0.webp",
       "width": 1280,
       "height": 720,
-      "quality": 85,
-      "bytes": 68108,
-      "sha256": "1f85f6a38fa6c76e36735e37a189a7d7537de7a16b4c23eff220005d55268326"
+      "quality": 82,
+      "bytes": 147602,
+      "sha256": "80b4d7d6fd285ff31fcf480331bfb955d5a0944de917ab56aef10f39d80faa07"
     },
-    "position": "75% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "position": "20% 0%",
+    "crop": "Top-aligned native widescreen resize; no stretch or upscaling. Responsive cover anchors left/top; clear artwork space protects the scarecrow head above controls.",
+    "sourceKind": "user-supplied",
+    "protectedSubject": {
+      "left": 0.18,
+      "top": 0.02,
+      "right": 0.3,
+      "bottom": 0.23
+    }
   },
   {
     "id": "madness-2",
-    "source": "exec-030d6a23-cf12-4b7f-858a-456e8de1ce65.png",
+    "source": "ChatGPT Image Oct 31, 2026, 12_14_12 PM-2.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "748cc52e1f792ab545af56ce03b9f5ad532c3bc733e927adaa7a214cb46f7ff4",
+    "sourceSha256": "9f6c61e4e4a49e68f5f078db39de56f48663ba745ed544d55732c2c01752bd7c",
     "scene": {
       "path": "src/assets/play/photos/grimlash/madness-2.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 103614,
-      "sha256": "c9c5bf90b2238bb7f9465bee4e5ae99b37aef930802a184097f050b118294d54"
+      "bytes": 117936,
+      "sha256": "dfe5479911302bef4d4134e901fa9e93da1399943dcfb228f84c2c0f61d986f5"
     },
-    "position": "75% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "position": "20% 0%",
+    "crop": "Top-aligned native widescreen resize; no stretch or upscaling. Responsive cover anchors left/top; clear artwork space protects the scarecrow head above controls.",
+    "sourceKind": "user-supplied",
+    "protectedSubject": {
+      "left": 0.18,
+      "top": 0.02,
+      "right": 0.3,
+      "bottom": 0.23
+    }
   },
   {
     "id": "madness-1",
-    "source": "exec-d56aeb87-c276-4e25-b4d0-136a41ac04c9.png",
+    "source": "ChatGPT Image Oct 31, 2026, 12_14_12 PM-1.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "a244db15966b5e7be5e78827b73fa1e27dc22ee6b2ecf56513a39c802fdb383a",
+    "sourceSha256": "df332da6839d3227ff94071f1e51f1ed97eff6828ca786c90bcf0fdf05c8495d",
     "scene": {
       "path": "src/assets/play/photos/grimlash/madness-1.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 86048,
-      "sha256": "137f1abce79dd3bdc4f7a03d7f9740c5c6f227b26670342e706cd3d4008f3eca"
+      "bytes": 126632,
+      "sha256": "ba4b2fa8a01356443d8b2930090508f709c5c9605e9fc7fd60075e3cc6ac5a10"
     },
-    "position": "75% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "position": "20% 0%",
+    "crop": "Top-aligned native widescreen resize; no stretch or upscaling. Responsive cover anchors left/top; clear artwork space protects the scarecrow head above controls.",
+    "sourceKind": "user-supplied",
+    "protectedSubject": {
+      "left": 0.18,
+      "top": 0.02,
+      "right": 0.3,
+      "bottom": 0.23
+    }
   },
   {
     "id": "madness-4",
-    "source": "exec-7a16986f-634e-4668-af62-9fce80f74ad2.png",
+    "source": "ChatGPT Image Oct 31, 2026, 12_14_13 PM-4.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "5486a86c43766fa9e7076e3b66fa41f843e2c3af3971a21133df53decf20ab73",
+    "sourceSha256": "93b7c0ca69483cd991c3f8e2c107fe68e327b6f1d8b9c249dd45935f85e666ac",
     "scene": {
       "path": "src/assets/play/photos/grimlash/madness-4.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 90940,
-      "sha256": "372e8de62575de0b44e5c657f49a13fcbeedbaf8d0004959f17cc875062b6004"
+      "bytes": 128128,
+      "sha256": "25f5f5b5b2d7883f512ecb84b472f27596e770d0da413f8ea321bb343f3b3c5b"
     },
-    "position": "75% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "position": "20% 0%",
+    "crop": "Top-aligned native widescreen resize; no stretch or upscaling. Responsive cover anchors left/top; clear artwork space protects the scarecrow head above controls.",
+    "sourceKind": "user-supplied",
+    "protectedSubject": {
+      "left": 0.18,
+      "top": 0.02,
+      "right": 0.3,
+      "bottom": 0.23
+    }
   },
   {
     "id": "madness-3",
-    "source": "exec-b6626255-55a7-4b2f-b760-d5c305a0fac7.png",
+    "source": "ChatGPT Image Oct 31, 2026, 12_14_12 PM-3.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "fa6555cd2d278244336654f71f604831061d06d79b7acb6bb81e81c11b10d308",
+    "sourceSha256": "48e84ca3245ba88eaf6c7e72c2991b4b28b937c71fa4fe77aaf34cd9eb904123",
     "scene": {
       "path": "src/assets/play/photos/grimlash/madness-3.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 93072,
-      "sha256": "8fa1ea77a4885e6b2fbd833b0e6fd2fe0157bff98962c856eb8cc34c9e93d90b"
+      "bytes": 130912,
+      "sha256": "556659dd9ab0c6ef45e0bf780113990e4a49e804d523148a5d7bdc0fab94df6a"
     },
-    "position": "75% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "position": "20% 0%",
+    "crop": "Top-aligned native widescreen resize; no stretch or upscaling. Responsive cover anchors left/top; clear artwork space protects the scarecrow head above controls.",
+    "sourceKind": "user-supplied",
+    "protectedSubject": {
+      "left": 0.18,
+      "top": 0.02,
+      "right": 0.3,
+      "bottom": 0.23
+    }
   },
   {
     "id": "madness-6",
-    "source": "exec-d81feb14-b8f6-4992-b9bf-ef2921309ed7.png",
+    "source": "ChatGPT Image Oct 31, 2026, 12_14_13 PM-6.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "377a5013697dbe946924518e54a946c5e55f8ee530d95bce2eaaa690d81cf932",
+    "sourceSha256": "59b57dafa4634b8512fafbec22809ff4620908f9ed3d895ab00e1bca3e3f708c",
     "scene": {
       "path": "src/assets/play/photos/grimlash/madness-6.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 109934,
-      "sha256": "c67d94ebce320c22b4c70534d6be34b5655bcb061c684c60c95f6d7207b6b9bb"
+      "bytes": 143410,
+      "sha256": "a7bc42a84d3a140caab164624f6b4f2e5d95a41165a9a269d3d3e13f07eb9d7c"
     },
-    "position": "75% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "position": "20% 0%",
+    "crop": "Top-aligned native widescreen resize; no stretch or upscaling. Responsive cover anchors left/top; clear artwork space protects the scarecrow head above controls.",
+    "sourceKind": "user-supplied",
+    "protectedSubject": {
+      "left": 0.18,
+      "top": 0.02,
+      "right": 0.3,
+      "bottom": 0.23
+    }
   },
   {
     "id": "madness-5",
-    "source": "exec-b7acb073-a29f-4a4b-b971-b12bf5c2b442.png",
+    "source": "ChatGPT Image Oct 31, 2026, 12_14_13 PM-5.png",
     "nativeWidth": 1672,
-    "nativeHeight": 940,
-    "sourceSha256": "022365620fdcf25d74ec8ccbac55a176bd64fa7d0e488b1468826662330bc241",
+    "nativeHeight": 941,
+    "sourceSha256": "a9baad809b757487a0a0cdb7c13584e3e6e1c0500e069a99a76c77273c2b6d21",
     "scene": {
       "path": "src/assets/play/photos/grimlash/madness-5.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 116482,
-      "sha256": "a4d5bbf332b37352ddf6e7bac01ea96708250f30ca849d0ead3a109c5c0caa62"
+      "bytes": 136582,
+      "sha256": "6e1ec2df3a22643a2aba1d788b659a2ac75c65c52492933e5f3508b6faf75ea6"
     },
-    "position": "75% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "position": "20% 0%",
+    "crop": "Top-aligned native widescreen resize; no stretch or upscaling. Responsive cover anchors left/top; clear artwork space protects the scarecrow head above controls.",
+    "sourceKind": "user-supplied",
+    "protectedSubject": {
+      "left": 0.18,
+      "top": 0.02,
+      "right": 0.3,
+      "bottom": 0.23
+    }
   },
   {
     "id": "madness-7",
-    "source": "exec-18f512c3-b6c2-45ff-b514-32e05cdd3abc.png",
+    "source": "ChatGPT Image Oct 31, 2026, 12_14_14 PM-7.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "f5ec956dad9bfa1cfc1542953ccd17d6a107af9019ba00c82b0d7199c8775b05",
+    "sourceSha256": "ac4695e0893d20ab6b8729b851a946d27296ade8a6213a3022ec3da19ad0a4b5",
     "scene": {
       "path": "src/assets/play/photos/grimlash/madness-7.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 100902,
-      "sha256": "953122f9b769beda68f77d52a2474d758bee658121168e321523201cc170adb5"
+      "bytes": 110666,
+      "sha256": "c8ceb3ccfb3ed8d4420952776aa0dbcb4c2169e3b926f9e9d02d17f4d169a4cd"
     },
-    "position": "75% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "position": "20% 0%",
+    "crop": "Top-aligned native widescreen resize; no stretch or upscaling. Responsive cover anchors left/top; clear artwork space protects the scarecrow head above controls.",
+    "sourceKind": "user-supplied",
+    "protectedSubject": {
+      "left": 0.18,
+      "top": 0.02,
+      "right": 0.3,
+      "bottom": 0.23
+    }
   },
   {
     "id": "madness-8",
-    "source": "exec-1223cdce-47fc-4e15-a909-157bcb977027.png",
+    "source": "ChatGPT Image Oct 31, 2026, 12_14_14 PM-8.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "3397e207f918401836c8f4b181ca2563f13bffc5254151912d3ecbd9a311db58",
+    "sourceSha256": "3dc653e02508a38a715e325feb8e2410176f4ac9f084b307424adcee39c94457",
     "scene": {
       "path": "src/assets/play/photos/grimlash/madness-8.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 88506,
-      "sha256": "42fae2b6d24a35ebcf616de64dfbd45ffcf847f7d16e25b340bb78326611c2f9"
+      "bytes": 141392,
+      "sha256": "f5c6cf0dc2382904917cd6883f3b1accaab57222c02a293b9f4d33edb18288e6"
     },
-    "position": "75% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "position": "20% 0%",
+    "crop": "Top-aligned native widescreen resize; no stretch or upscaling. Responsive cover anchors left/top; clear artwork space protects the scarecrow head above controls.",
+    "sourceKind": "user-supplied",
+    "protectedSubject": {
+      "left": 0.18,
+      "top": 0.02,
+      "right": 0.3,
+      "bottom": 0.23
+    }
   },
   {
     "id": "madness-10",
-    "source": "exec-5dd4dcc8-f270-467d-8b7f-793ffda4f5fc.png",
+    "source": "ChatGPT Image Oct 31, 2026, 12_14_15 PM-10.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "089587f635f892f2c519a7e97264c2c92b199c3ddb3ca7207f40e389b9731fed",
+    "sourceSha256": "1eb78efcc70a8e07650d456b23fdf0ddc89fba2cc62814316716ab3215747c78",
     "scene": {
       "path": "src/assets/play/photos/grimlash/madness-10.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 91186,
-      "sha256": "01eb52a547cf2b9e6485d2b034e18912c6ea0f258cf6ecb748c5f8fa89d93dda"
+      "bytes": 150336,
+      "sha256": "28f40e02de82614dc716d0c481697590f699266bb460a2fa21ef41ebf16fc580"
     },
-    "position": "75% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "position": "20% 0%",
+    "crop": "Top-aligned native widescreen resize; no stretch or upscaling. Responsive cover anchors left/top; clear artwork space protects the scarecrow head above controls.",
+    "sourceKind": "user-supplied",
+    "protectedSubject": {
+      "left": 0.18,
+      "top": 0.02,
+      "right": 0.3,
+      "bottom": 0.23
+    }
   },
   {
     "id": "madness-9",
-    "source": "exec-562fb67a-6956-4ae5-a61b-dde571c79ac5.png",
+    "source": "ChatGPT Image Oct 31, 2026, 12_14_15 PM-9.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "5e7e0de88a47305163ccec3f6da6cdb7a76d025debbb27b8641e9dc4263dbee7",
+    "sourceSha256": "478c35e100b2fd74b4d1b4cde77d553a3348e2dc01533e47e4f5cdeb9d3247a0",
     "scene": {
       "path": "src/assets/play/photos/grimlash/madness-9.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 99296,
-      "sha256": "373a7373ce105658e154d3c642668b1798681db157b840575d89e656a45dfe7e"
+      "bytes": 151766,
+      "sha256": "0909a05b5ff252444fcc643bb1fc261dddd7e7d1d687b8ee8031d517a8187e1e"
     },
-    "position": "75% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "position": "20% 0%",
+    "crop": "Top-aligned native widescreen resize; no stretch or upscaling. Responsive cover anchors left/top; clear artwork space protects the scarecrow head above controls.",
+    "sourceKind": "user-supplied",
+    "protectedSubject": {
+      "left": 0.18,
+      "top": 0.02,
+      "right": 0.3,
+      "bottom": 0.23
+    }
   },
   {
     "id": "hollow-soul",
