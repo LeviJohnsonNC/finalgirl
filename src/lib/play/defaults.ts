@@ -12,6 +12,7 @@ export function playStartingValues(
   finalGirl: string,
 ): Record<Exclude<StateField,'killerHealth'>, number> & {killerHealth?:number} {
   const killerHealth: Record<string, number> = {
+    Grimlash: 10,
     Evomorph: 4,
     Inkanyamba: 9,
     "Billy the Bear": 8,

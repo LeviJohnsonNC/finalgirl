@@ -1,6 +1,7 @@
+import {grimlashParent} from '@/lib/play/grimlash';
 import {konradParent} from '@/lib/play/konrad';
 import {
-  canUndoKonrad,
+  canUndoKonrad, canUndoGrimlash,
   describeEvent,
   summarizePlay,
   isPermanentMoment,
@@ -47,6 +48,7 @@ export function PlayTimeline({
             summary.entries.find((e) => e.id === original.id) ?? original;
           const undone = summary.inactive.has(original.id);
           const konradBlocked=original.moduleData?.module==='konrad'&&(undone?konradParent(summary.entries)!==(original.konradAction?.parent??'root'):!canUndoKonrad(events,original.id));
+          const grimlashBlocked=original.moduleData?.module==='grimlash'&&(undone?grimlashParent(summary.entries)!==(original.grimlashAction?.parent??'root'):!canUndoGrimlash(events,original.id));
           const round = "currentRound" in entry ? entry.currentRound : null;
           return (
             <li
@@ -69,8 +71,8 @@ export function PlayTimeline({
                 {onToggle && entry.kind !== "start" && !isPermanentMoment(entry) && !isLockedPlayEvent(entry) && (
                   <button
                     type="button"
-                    disabled={konradBlocked}
-                    title={konradBlocked?"Undo or restore the intervening USS Konrad observations first":undefined}
+                    disabled={konradBlocked||grimlashBlocked}
+                    title={grimlashBlocked?'Undo or restore the intervening Grimlash observations first':konradBlocked?"Undo or restore the intervening USS Konrad observations first":undefined}
                     onClick={() => onToggle(original, undone)}
                     className="type-caption underline text-muted-foreground hover:text-foreground min-h-[44px]"
                   >

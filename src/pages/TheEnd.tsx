@@ -78,6 +78,7 @@ const TheEnd = ({
   const evomorphGuidance=result.killer==='Evomorph'?evomorphOpeningGuidance(endingModuleState(endingSummary(result.playEvents).entries,'evomorph').stage,false):undefined;
   const endingVisualGuidance=[evomorphGuidance,moduleContext?.visualGuidance].filter(Boolean).join('\n');
   const isWin = result.outcome === 'won';
+  const grimlashReview=useMemo(()=>result.killer==='Grimlash'?(formData.grimlashReview??{loss:(endingModuleState(endingSummary(result.playEvents).entries,'grimlash').loss??'unknown') as import('@/lib/play/grimlash').GrimlashLoss}):undefined,[result.killer,result.playEvents,formData.grimlashReview]);
   const shipReview=useMemo(()=>result.location==='USS Konrad'?{fate:konradState(endingModuleState(endingSummary(result.playEvents).entries,'konrad')).fate}:undefined,[result.location,result.playEvents]);
   const fate = reviewedCharacterFate(formData.finalGirlHealth,shipReview);
   const endingKillerHealth = isKillerUnkillable(result.killer) ? undefined : formData.killerHealth;
@@ -111,16 +112,17 @@ const TheEnd = ({
       referenceImageUrl: sceneImageUrl ?? result.sceneImageUrl,
       outcome: result.outcome,
       ...(shipReview&&{konradReview:shipReview}),
+       ...(grimlashReview&&{grimlashReview}),
       introStory,
       finalGirlHealth: formData.finalGirlHealth,
       killerHealth: endingKillerHealth,
       mission: getMissionByName(result.mission),
-      scenarioRules: [result.killer==='Evomorph'||result.location==='USS Konrad'?playStoryBeats(result.playEvents,result):undefined, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
+      scenarioRules: [result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='USS Konrad'?playStoryBeats(result.playEvents,result):undefined, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
       gameId: result.id,
       previousImageUrl,
     });
     if (url) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
-  }, [endingStory, shipReview, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
+  }, [endingStory, shipReview, grimlashReview, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
 
   // The poster develops on its own once the ending narration lands.
   //
@@ -194,6 +196,7 @@ const TheEnd = ({
         ...(formData.roundsPlayed != null && {roundsPlayed:formData.roundsPlayed}),
         ...(result.playEvents?.length && {playSummary:playStoryBeats(result.playEvents, result)}),
         ...(shipReview&&{konradReview:shipReview}),
+       ...(grimlashReview&&{grimlashReview}),
         ...(result.killer==='Poltergeist'&&formData.poltergeistReview&&{poltergeistReview:formData.poltergeistReview}),
         ...(formData.endingSubLocation && { endingSubLocation: formData.endingSubLocation }),
         ...(formData.gameHighlights && { gameHighlights: formData.gameHighlights }),

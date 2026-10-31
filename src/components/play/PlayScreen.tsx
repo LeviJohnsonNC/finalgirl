@@ -175,10 +175,10 @@ export function PlayScreen(props: PlayScreenProps) {
   const startingValues = playStartingValues(killer, finalGirl);
   const { characterImages, aiEnabled } = useActiveImages();
   const killerPortrait = killer === "Evomorph" ? evomorphStageArt(moduleState(summary.entries, "evomorph").stage) : {src: characterImages[killer], position: undefined};
-  const finalGirlMaxHealth = observedFinalGirlMaxHealth(finalGirl, events, props.finalGirlStartingHealth);
+  const finalGirlMaxHealth = observedFinalGirlMaxHealth(finalGirl, events, props.finalGirlStartingHealth, killer);
   // Legacy sessions can use the catalog to bound new input without backfilling observations.
   const trackerLimits = { ...stateLimits, finalGirlHealth: observedFinalGirlMaxHealth(
-    finalGirl, events, props.finalGirlStartingHealth ?? startingValues.finalGirlHealth,
+    finalGirl, events, props.finalGirlStartingHealth ?? startingValues.finalGirlHealth, killer,
   ) ?? stateLimits.finalGirlHealth };
   const [message, setMessage] = useState("");
   const [announcement, setAnnouncement] = useState("");
@@ -506,7 +506,7 @@ export function PlayScreen(props: PlayScreenProps) {
                       <button
                         aria-label={`Decrease ${stateLabels[field]}`}
                         disabled={value <= 0}
-                        onClick={() => setState(field, field === 'finalGirlHealth' ? Math.min(value - 1, trackerLimits[field]) : value - 1)}
+                        onClick={() => setState(field, value - 1)}
                       >
                         <Minus size={16} />
                       </button>

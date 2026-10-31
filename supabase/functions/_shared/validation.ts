@@ -1,6 +1,7 @@
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { corsHeaders } from './auth.ts';
 
+const GrimlashReviewSchema=z.object({loss:z.enum(['none','unknown','skull','telluric'])}).strict();
 const MissionSchema = z.object({ name: z.string().min(1).max(100), description: z.string().max(1500) });
 const KonradReviewSchema = z.object({fate:z.enum(['unknown','survived','airlock-loss','explosion-loss'])}).strict();
 
@@ -33,6 +34,7 @@ export const StoryRequestSchema = z.object({
 
 // Schema for generate-scene-image endpoint (opening still + closing poster)
 export const SceneImageRequestSchema = z.object({
+  grimlashReview:GrimlashReviewSchema.optional(),
   konradReview: KonradReviewSchema.optional(),
   sceneType: z.enum(['beginning', 'ending']),
   story: z.string().min(50).max(10000),
@@ -46,7 +48,7 @@ export const SceneImageRequestSchema = z.object({
   visualBible: z.string().max(1000).optional(),
   outcome: z.enum(['won', 'lost']).optional(),
   introStory: z.string().max(10000).optional(),
-  finalGirlHealth: z.number().int().min(0).max(10).optional(),
+  finalGirlHealth: z.number().int().min(0).max(14).optional(),
   killerHealth: z.number().int().min(0).max(20).optional(),
   mission: MissionSchema.optional(),
   scenarioRules: z.string().max(6000).optional(),
@@ -54,7 +56,7 @@ export const SceneImageRequestSchema = z.object({
   gameId: z.string().uuid().optional(),
   referenceImageUrl: z.string().url().max(2000).optional(),
   previousImageUrl: z.string().url().max(2000).optional()
-}).refine(value=>!value.konradReview||value.location==='USS Konrad'&&value.sceneType==='ending',{message:'Ship review belongs to USS Konrad ending',path:['konradReview']}).refine(value=>!value.konradReview||!['airlock-loss','explosion-loss'].includes(value.konradReview.fate)||value.outcome==='lost',{message:'Fatal ship ending requires a loss',path:['outcome']});
+}).refine(v=>!v.grimlashReview||v.killer==='Grimlash'&&v.sceneType==='ending',{message:'Madness review belongs to Grimlash ending'}).refine(v=>!v.grimlashReview||!['skull','telluric'].includes(v.grimlashReview.loss)||v.outcome==='lost',{message:'Madness loss requires lost outcome'}).refine(v=>v.killer==='Grimlash'||(v.finalGirlHealth??0)<=10,{message:'Raised Health requires Grimlash'}).refine(value=>!value.konradReview||value.location==='USS Konrad'&&value.sceneType==='ending',{message:'Ship review belongs to USS Konrad ending',path:['konradReview']}).refine(value=>!value.konradReview||!['airlock-loss','explosion-loss'].includes(value.konradReview.fate)||value.outcome==='lost',{message:'Fatal ship ending requires a loss',path:['outcome']});
 
 // Schema for generate-visual-bible endpoint
 export const VisualBibleRequestSchema = z.object({
@@ -80,6 +82,7 @@ export const NarrationRequestSchema = z.object({
 
 // Schema for generate-ending endpoint
 export const EndingRequestSchema = z.object({
+  grimlashReview:GrimlashReviewSchema.optional(),
   mission: MissionSchema.optional(),
   // Required fields
   introStory: z.string().min(50).max(10000),
@@ -101,9 +104,9 @@ export const EndingRequestSchema = z.object({
   // Optional game stats
   finalHorrorLevel: z.number().int().min(0).max(7).optional(),
   weaponUsed: z.string().max(100).optional(),
-  finalGirlHealth: z.number().int().min(0).max(10).optional(),  // Photographed cards span 4–7; buffer for explicit observations
+  finalGirlHealth: z.number().int().min(0).max(14).optional(),  // Photographed cards span 4–7; buffer for explicit observations
   killerHealth: z.number().int().min(0).max(20).optional(),
-  finalGirlMaxHealth: z.number().int().min(1).max(10).optional(),  // Session-specific; photographed cards span 4–7
+  finalGirlMaxHealth: z.number().int().min(1).max(14).optional(),  // Session-specific; photographed cards span 4–7
   victimsSaved: z.number().int().min(0).max(999).optional(),
   victimsKilled: z.number().int().min(0).max(999).optional(),
   endingSubLocation: z.string().max(200).optional(),
@@ -112,7 +115,7 @@ export const EndingRequestSchema = z.object({
   playSummary:z.string().max(1800).optional(),
   konradReview:KonradReviewSchema.optional(),
   poltergeistReview:z.object({carolynRescued:z.literal(true).nullable(),floppyAtEscape:z.literal(true).nullable(),epicRequired:z.boolean().nullable(),escapeRoute:z.enum(['exit','helicopter']).nullable().optional()}).strict().optional()
-}).refine(value=>!value.konradReview||value.location.name==='USS Konrad',{message:'Ship review belongs to USS Konrad',path:['konradReview']}).refine(value=>!value.konradReview||!['airlock-loss','explosion-loss'].includes(value.konradReview.fate)||value.outcome==='lost',{message:'Fatal ship ending requires a loss',path:['outcome']}).refine(value=>value.poltergeistReview?.escapeRoute!=='helicopter'||value.location.name==='Creech Manor',{message:'Helicopter rescue route belongs to Creech Manor',path:['poltergeistReview','escapeRoute']}).refine(value=>!value.poltergeistReview||value.killer.name==='Poltergeist',{message:'Rescue review belongs to Poltergeist',path:['poltergeistReview']});
+}).refine(v=>!v.grimlashReview||v.killer.name==='Grimlash',{message:'Madness review belongs to Grimlash'}).refine(v=>!v.grimlashReview||!['skull','telluric'].includes(v.grimlashReview.loss)||v.outcome==='lost',{message:'Madness loss requires lost outcome'}).refine(v=>v.killer.name==='Grimlash'||(v.finalGirlHealth??0)<=10&&(v.finalGirlMaxHealth??0)<=10,{message:'Raised Health requires Grimlash'}).refine(value=>!value.konradReview||value.location.name==='USS Konrad',{message:'Ship review belongs to USS Konrad',path:['konradReview']}).refine(value=>!value.konradReview||!['airlock-loss','explosion-loss'].includes(value.konradReview.fate)||value.outcome==='lost',{message:'Fatal ship ending requires a loss',path:['outcome']}).refine(value=>value.poltergeistReview?.escapeRoute!=='helicopter'||value.location.name==='Creech Manor',{message:'Helicopter rescue route belongs to Creech Manor',path:['poltergeistReview','escapeRoute']}).refine(value=>!value.poltergeistReview||value.killer.name==='Poltergeist',{message:'Rescue review belongs to Poltergeist',path:['poltergeistReview']});
 
 export type StoryRequest = z.infer<typeof StoryRequestSchema>;
 export type SceneImageRequest = z.infer<typeof SceneImageRequestSchema>;

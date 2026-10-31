@@ -1,3 +1,4 @@
+import { GRIMLASH_TERRORS } from './grimlash.ts';
 import { KONRAD_ITEMS, KONRAD_EVENTS, KONRAD_TERRORS, KONRAD_SPACES, KONRAD_PEOPLE, KONRAD_SOURCE } from './konradCatalog.ts';
 import { EVOMORPH_TERRORS } from './evomorph.ts';
 import { CREECH_ITEMS, CREECH_EVENTS, CREECH_TERRORS, CREECH_SPACES, CREECH_PEOPLE, CREECH_SOURCE } from './creech.ts';
@@ -39,6 +40,7 @@ const station = wiki("Station_2891");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+  ...GRIMLASH_TERRORS.map(c=>({...c,kind:'terror' as const})),
   ...KONRAD_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...KONRAD_EVENTS.map(c=>({...c,kind:"event" as const,location:"USS Konrad",source:KONRAD_SOURCE})),
   ...EVOMORPH_TERRORS.map(c=>({...c,kind:"terror" as const})),

@@ -8,6 +8,7 @@ export interface GameSelection {
   finalGirlStartingHealth?: number;
 }
 export interface EndingFormData {
+  grimlashReview?: {loss:import('../../supabase/functions/_shared/play/grimlash').GrimlashLoss};
   outcome?: "won"|"lost";
   konradReview?: {fate: import("../../supabase/functions/_shared/play/konrad").KonradFate};
   poltergeistReview?: {carolynRescued:true|null;floppyAtEscape:true|null;epicRequired:boolean|null;escapeRoute?:'exit'|'helicopter'|null};
@@ -17,6 +18,7 @@ export interface EndingFormData {
   endingSubLocation: string; gameHighlights: string;
 }
 export interface ActiveGame {
+  grimlashSetupVersion?: 1;
   evomorphSetupVersion?: 1;
   konradSetupVersion?: 1;
   creechSetupVersion?: 1;
@@ -46,6 +48,8 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if(game.grimlashSetupVersion!==undefined&&game.grimlashSetupVersion!==1)return false;
+  if(game.selection?.killer!=='Grimlash'&&game.playEvents?.some(e=>e.moduleData?.module==='grimlash'))return false;
   if(game.konradSetupVersion!==undefined&&game.konradSetupVersion!==1)return false;
   if(game.selection?.location!=="USS Konrad"&&game.playEvents?.some(e=>e.moduleData?.module==="konrad"))return false;
   if(game.evomorphSetupVersion!==undefined&&game.evomorphSetupVersion!==1)return false;

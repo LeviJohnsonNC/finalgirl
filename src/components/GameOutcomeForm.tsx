@@ -1,3 +1,4 @@
+import {grimlashFatal,harvestLevel,type GrimlashLoss} from '@/lib/play/grimlash';
 import {konradState,type KonradFate} from '@/lib/play/konrad';
 import { useState, useMemo } from 'react';
 import { ArrowRight, ChevronDown } from 'lucide-react';
@@ -53,8 +54,11 @@ export const GameOutcomeForm = ({
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [shipFate,setShipFate]=useDraftField<KonradFate>('konradFate',konradState(moduleState(summarizePlay(result.playEvents).entries,'konrad')).fate,initialDraft,onDraftChange);
   const [reviewedOutcome,setReviewedOutcome]=useDraftField<'won'|'lost'>('reviewedOutcome',result.outcome,initialDraft,onDraftChange);
+  const grimState=moduleState(summarizePlay(result.playEvents).entries,'grimlash');
+  const [grimLoss,setGrimLoss]=useDraftField<GrimlashLoss>('grimlashLoss',(grimState.loss as GrimlashLoss)??'unknown',initialDraft,onDraftChange);
+  const fatalGrim=result.killer==='Grimlash'&&grimlashFatal({loss:grimLoss});
   const fatalShip=result.location==='USS Konrad'&&['airlock-loss','explosion-loss'].includes(shipFate);
-  const isWin = (result.location==='USS Konrad'?fatalShip?'lost':reviewedOutcome:result.outcome) === 'won';
+  const isWin = (result.killer==='Grimlash'?(fatalGrim?'lost':reviewedOutcome):result.location==='USS Konrad'?fatalShip?'lost':reviewedOutcome:result.outcome) === 'won';
   const billyState = moduleState(summarizePlay(result.playEvents).entries, 'billy');
 
   // Session snapshots include observed Ultimate changes; old games keep their denominator.
@@ -215,7 +219,7 @@ export const GameOutcomeForm = ({
     initialDraft,
     onDraftChange,
   );
-  const [harvestMadnessPeaked, setHarvestMadnessPeaked] = useDraftField(
+  const [harvestMadnessPeaked] = useDraftField(
     'harvestMadnessPeaked',
     false,
     initialDraft,
@@ -322,13 +326,8 @@ export const GameOutcomeForm = ({
           ? `${highlights}. ${buddyParts.join('. ')}`
           : buddyParts.join('. ');
     }
-    if (isGrimlash) {
-      const harvestParts = [`Children survived: ${childrenSurvived}`];
-      if (harvestMadnessPeaked) harvestParts.push('Harvest Madness peaked');
-      highlights = highlights
-        ? `${highlights}. ${harvestParts.join('. ')}`
-        : harvestParts.join('. ');
-    }
+    if(result.location==='Shady Acres')highlights=[highlights,`Children survived: ${childrenSurvived}`].filter(Boolean).join('. ');
+    if(isGrimlash){const facts=[typeof grimState.position==='number'?`Harvest Madness position ${grimState.position}, Level ${harvestLevel(grimState.position)}`:'',typeof grimState.peak==='number'?`Recorded Madness peak position ${grimState.peak}`:'',grimLoss==='skull'||grimLoss==='telluric'?`Game lost: ${grimLoss}`:'',harvestMadnessPeaked?'Legacy Madness peaked observation; exact position unknown':''];highlights=[highlights,...facts].filter(Boolean).join('. ');}
     if (isBerith) {
       const demonParts: string[] = [];
       if (isWin && ursulaSaved) demonParts.push('Ursula saved');
@@ -376,6 +375,7 @@ export const GameOutcomeForm = ({
     }
 
     const formData: EndingFormData = {
+      ...(isGrimlash&&{grimlashReview:{loss:grimLoss},outcome:fatalGrim?'lost' as const:reviewedOutcome}),
       ...(result.location==='USS Konrad'&&{konradReview:{fate:shipFate},outcome:fatalShip?'lost' as const:reviewedOutcome}),
       finalHorrorLevel: finalHorrorLevel ?? undefined,
       finalGirlHealth: finalGirlHealth ?? undefined,
@@ -775,56 +775,8 @@ export const GameOutcomeForm = ({
             </div>
           )}
 
-          {/* Section: Grimlash / A Rotten Harvest */}
-          {isGrimlash && (
-            <div className="outcome-panel outcome-module space-y-3">
-              <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
-                Harvest
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="type-caption text-muted-foreground">
-                    Children Survived (0–3)
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={
-                      childrenSurvived === 0 ? "" : String(childrenSurvived)
-                    }
-                    onChange={(e) => {
-                      const val =
-                        e.target.value === ""
-                          ? 0
-                          : Math.min(
-                              3,
-                              Math.max(0, Math.trunc(Number(e.target.value))),
-                            );
-                      setChildrenSurvived(isNaN(val) ? 0 : val);
-                    }}
-                    placeholder="0"
-                    className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
-                  />
-                </div>
-                <div className="flex items-end pb-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={harvestMadnessPeaked}
-                      onChange={(e) =>
-                        setHarvestMadnessPeaked(e.target.checked)
-                      }
-                      className="w-4 h-4 accent-primary"
-                    />
-                    <span className="type-label text-foreground">
-                      Harvest Madness Peaked
-                    </span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          )}
+          {isGrimlash&&<section className="outcome-panel outcome-module" aria-label="Grimlash ending review"><h3>Harvest Madness</h3><p>{typeof grimState.position==='number'?`Position ${grimState.position} · ${harvestLevel(grimState.position)===4?'Skull':`Level ${harvestLevel(grimState.position)}`}`:'Position not recorded'}{typeof grimState.peak==='number'?` · Recorded peak ${grimState.peak}`:''}</p><OutcomeSelect label="Madness loss record" value={grimLoss} onValueChange={v=>setGrimLoss(v as GrimlashLoss)}><option value="unknown">Not recorded</option><option value="none">No Madness loss recorded</option><option value="skull">Reached the skull</option><option value="telluric">Telluric Visions loss</option></OutcomeSelect><OutcomeSelect label="Reviewed game result" value={fatalGrim?'lost':reviewedOutcome} onValueChange={v=>setReviewedOutcome(v as 'won'|'lost')}><option value="won" disabled={fatalGrim}>Won</option><option value="lost">Lost</option></OutcomeSelect>{fatalGrim&&<p role="status">This Madness ending is a loss. Health and Victim totals remain as observed.</p>}{harvestMadnessPeaked&&<p>Legacy peaked record: exact level and position unknown.</p>}</section>}
+          {result.location==='Shady Acres'&&<section className="outcome-panel outcome-module"><label>Children survived (0–3)<input aria-label="Children survived" type="number" min="0" max="3" value={childrenSurvived} onChange={e=>setChildrenSurvived(Math.max(0,Math.min(3,Number(e.target.value))))}/></label></section>}
 
           {/* Section: Berith / A Demon in the Shadows */}
           {isBerith && (

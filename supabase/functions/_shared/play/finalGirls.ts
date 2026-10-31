@@ -1,3 +1,4 @@
+import { grimlashState, grimlashHealthBonus, type GrimlashEntry } from './grimlash.ts';
 /** Owner photographs IMG_9327 (starting faces) and IMG_9326 (Ultimate faces),
  * verified 2026-10-21. Factual paraphrases; secret items deliberately live only
  * in the protected database, never in this shared/public catalog.
@@ -59,7 +60,7 @@ export const FINAL_GIRL_REFERENCES: readonly FinalGirlReference[] = [
 export const getFinalGirlReference = (name: string) => FINAL_GIRL_REFERENCES.find(girl => girl.name === name);
 
 /** Observation only: never flips a card, spends a reward, or heals the player. */
-export function observedFinalGirlMaxHealth(name: string, events: readonly { kind: string; momentType?: string; id: string; target?: string }[] = [], startingHealth?: number): number | undefined {
+export function observedFinalGirlMaxHealth(name: string, events: readonly (GrimlashEntry & {id:string})[] = [], startingHealth?: number, killer?:string): number | undefined {
   if (startingHealth === undefined) return undefined; // preserve legacy session interpretation
   const undone = new Set<string>();
   for (const event of events) {
@@ -67,5 +68,6 @@ export function observedFinalGirlMaxHealth(name: string, events: readonly { kind
     if (event.kind === 'restore' && event.target) undone.delete(event.target);
   }
   const flipped = events.some(event => event.kind === 'moment' && event.momentType === 'ultimate-unlocked' && !undone.has(event.id));
-  return flipped ? getFinalGirlReference(name)?.ultimateHealth ?? startingHealth : startingHealth;
+  const base=flipped ? getFinalGirlReference(name)?.ultimateHealth ?? startingHealth : startingHealth;
+  return base+(killer==='Grimlash'?grimlashHealthBonus(grimlashState(events.filter(e=>!undone.has(e.id)))):0);
 }
