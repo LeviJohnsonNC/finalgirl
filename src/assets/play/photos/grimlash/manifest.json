@@ -698,93 +698,96 @@
   },
   {
     "id": "flaming-eyes",
-    "source": "exec-067e2c67-56e6-4741-9669-dd580af7a784.png",
+    "source": "exec-24a7d6a3-39e1-47aa-abae-15a2d1446744.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "d7fb34023363ab63412d2ff535f3a63998c68739b9ee77e94d7cf56e165dc403",
+    "sourceSha256": "f14a05b6db4bddbfea5e68a098d292e23bbe21293f7214ff168bfdcd3924e6a0",
     "scene": {
       "path": "src/assets/play/photos/grimlash/flaming-eyes.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 91540,
-      "sha256": "6afc3e54b321d4cdeb919baa9c3b64d1d8a3ab296c825dcba650907db9cd82ed"
+      "bytes": 99360,
+      "sha256": "470bab01852e76c8be96fee1448ef4fcb87d4ec9e65dc6364c3b4f6b0b324b07"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/flaming-eyes.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 10042,
-      "sha256": "8497038a2629cfa180f53bf4efc02560432c612bb99d84fe3deab2b976ac9b6a"
+      "bytes": 9914,
+      "sha256": "19ffebfd6eca965d3e1361711f82d7eac16ef4b8fa0deb8a5de8ef8b768d3833"
     },
-    "position": "50% 5%",
-    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
-    "sourceKind": "approved-reference-edit",
+    "position": "50% 50%",
+    "crop": "Native widescreen crop, no stretch or upscaling. Card-specific focal point protects the principal prop/action in wide heroes and small choices.",
+    "sourceKind": "card-concept-edit",
     "identityReference": {
       "source": "Flaming Pumpkin Grimlash in Twilight.png",
       "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
-    }
+    },
+    "concept": "Oblique extreme close-up of burning carved eyes behind cracked window glass."
   },
   {
     "id": "burning-sickle",
-    "source": "exec-eda0ab0c-91d1-443c-83e5-33de1696b075.png",
+    "source": "exec-389163d8-dd6e-4652-ae41-48d44b7d8b08.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "f776ab8a1afe558ba354caab2673903355e3f12a020d388573f05cb3a2c67973",
+    "sourceSha256": "615a2fff106d32aeb1d96b0eda0eab1969b2b7c61164a87137541fec49a906f3",
     "scene": {
       "path": "src/assets/play/photos/grimlash/burning-sickle.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 107092,
-      "sha256": "2cc7090ed7bf4688b33beea26a1c2993896d0f7c61cb26b48785cd0332bdea40"
+      "bytes": 96236,
+      "sha256": "9917fe8d206ea424a372e345d17fb4ad981254ac21efde2521ade05b51fbad16"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/burning-sickle.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 12000,
-      "sha256": "8bbb0f535a9ca6c318cc330458cd3a8939d917909673eb376d57ca46c3c5b60b"
+      "bytes": 11962,
+      "sha256": "8c92ac9b66b45c8d470cb77005716dc240725cd143ae96bff6bacf62c6fe6f63"
     },
-    "position": "50% 5%",
-    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
-    "sourceKind": "approved-reference-edit",
+    "position": "50% 50%",
+    "crop": "Native widescreen crop, no stretch or upscaling. Card-specific focal point protects the principal prop/action in wide heroes and small choices.",
+    "sourceKind": "card-concept-edit",
     "identityReference": {
       "source": "Flaming Pumpkin Grimlash in Twilight.png",
       "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
-    }
+    },
+    "concept": "The complete curved flaming harvest blade and root-claw grip are the foreground subject."
   },
   {
     "id": "rite-of-the-corrupted",
-    "source": "exec-b08cb3af-a99c-4974-ba43-035e2f8673bb.png",
+    "source": "exec-463a1476-401b-4195-ae23-27bcb5980e5c.png",
     "nativeWidth": 1672,
-    "nativeHeight": 940,
-    "sourceSha256": "0a134467e6d9ef097601012b04907f95f46b06926f3aac99f78a6a2ac828808a",
+    "nativeHeight": 941,
+    "sourceSha256": "09bbf833466bc761a71138c4c51241f71aa057bddc22b3d1e97533c5f7a11ed1",
     "scene": {
       "path": "src/assets/play/photos/grimlash/rite-of-the-corrupted.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 109290,
-      "sha256": "73939c241aa7cc0007caabeff7aa9d85bec89aa2d24fb8c8bf1a87a4013a6cb2"
+      "bytes": 126636,
+      "sha256": "fb1ea6b6a56a3133da6dab4eca20484f2079a234892407f6ae78f3bc88aa8c85"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/rite-of-the-corrupted.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 10872,
-      "sha256": "cddbcd5e9a1253ab26018e15dc53e4326b34fde5166beb0fd156c7ca6556b331"
+      "bytes": 12752,
+      "sha256": "f99a6d196e7ab7894b9f9e0767dfaec4413a2a760b76e548d801898e83ad73fa"
     },
-    "position": "50% 5%",
-    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
-    "sourceKind": "approved-reference-edit",
+    "position": "50% 65%",
+    "crop": "Native widescreen crop, no stretch or upscaling. Card-specific focal point protects the principal prop/action in wide heroes and small choices.",
+    "sourceKind": "card-concept-edit",
     "identityReference": {
       "source": "Flaming Pumpkin Grimlash in Twilight.png",
       "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
-    }
+    },
+    "concept": "Roots creep around an adult wrist and spoiled corn in an ordinary kitchen."
   },
   {
     "id": "root-bound-curse",
@@ -813,183 +816,189 @@
   },
   {
     "id": "rite-of-the-old-one",
-    "source": "exec-6c393393-c59c-46af-bb2e-0bafec72b662.png",
+    "source": "exec-1d8f722d-3266-43bf-b137-042778a05b9e.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "e62359356ce8f45f22eb278192fbb9b2e3c1851df4c8668a365ec26cd9952ac3",
+    "sourceSha256": "5d47b93eb4c4f44de0429294df7f4238122ad3be34ba4ee6c396c3c2725796a7",
     "scene": {
       "path": "src/assets/play/photos/grimlash/rite-of-the-old-one.webp",
       "width": 1280,
       "height": 720,
-      "quality": 85,
-      "bytes": 128032,
-      "sha256": "bbc9de70a7cccab885e41b16d72bd1b6b51f2aafa6cdbf1e5321e9abfe6093fc"
+      "quality": 82,
+      "bytes": 147144,
+      "sha256": "2338d4e5f1caf776514ba4d08c81559e5c4bf8167251f2a6de05c4c2ed7d10e4"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/rite-of-the-old-one.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 12652,
-      "sha256": "53c017ea590abb322d8715f2c4314efed0da36a4e1251dcc3da7b3c9def90a36"
+      "bytes": 15770,
+      "sha256": "4af7f1f76617287467965754003df7b06a6cb97a438f0ec143ce294f34c36a5c"
     },
-    "position": "50% 5%",
-    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
-    "sourceKind": "approved-reference-edit",
+    "position": "50% 30%",
+    "crop": "Native widescreen crop, no stretch or upscaling. Card-specific focal point protects the principal prop/action in wide heroes and small choices.",
+    "sourceKind": "card-concept-edit",
     "identityReference": {
       "source": "Flaming Pumpkin Grimlash in Twilight.png",
       "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
-    }
+    },
+    "concept": "Low-angle ancient oak offering; Grimlash performs the rite in side/back view."
   },
   {
     "id": "hunger-of-the-old-gods",
-    "source": "exec-af7eff79-0e8e-4077-a96a-ddcaea5190f1.png",
+    "source": "exec-853e645e-35ae-400b-acb2-3a5a7e95b2ee.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "c66a8dc5c6eb21d9053bd272c7363c782e9a05e51f2bfc0137e042c879ff9f3e",
+    "sourceSha256": "28831711a267a4dbec7beb1e12c0d4ade23c8504714db4eee27ad6bdf36461d4",
     "scene": {
       "path": "src/assets/play/photos/grimlash/hunger-of-the-old-gods.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 121138,
-      "sha256": "e1b2a78868f79d50e1648819b2276c448cca120f1c4726e1bbf8ed6589ccc4e5"
+      "bytes": 141580,
+      "sha256": "7af9a99c5adfb8337eb85741ea7f2d5596b7485f2b7ee1b8e0a3d480b1ba9c46"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/hunger-of-the-old-gods.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 11116,
-      "sha256": "0a03a5a79a0987abb705ddbacacc37df5c7aa519408ab1db47df85f844fdce1f"
+      "bytes": 14740,
+      "sha256": "6e2db638f5c25fedff19177004b056a2970d6b883d4badf05198bd7327cd723a"
     },
-    "position": "50% 5%",
-    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
-    "sourceKind": "approved-reference-edit",
+    "position": "50% 10%",
+    "crop": "Native widescreen crop, no stretch or upscaling. Card-specific focal point protects the principal prop/action in wide heroes and small choices.",
+    "sourceKind": "card-concept-edit",
     "identityReference": {
       "source": "Flaming Pumpkin Grimlash in Twilight.png",
       "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
-    }
+    },
+    "concept": "A ravenous side-profile creature bends into spilling grain; claws and grain dominate."
   },
   {
     "id": "fields-of-madness",
-    "source": "exec-091a64c6-16f5-40ec-84cb-7b015fa20192.png",
+    "source": "exec-35f0e2ae-b754-4b94-87db-92d6b0463639.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "eb4b3832aa8dc5553801652e283170da29119137d45d3d9898141a056736dcdf",
+    "sourceSha256": "b6f5815a042bbab575b52b49b1dc2a1092be35d5d503a1def9db39b26edc8a9a",
     "scene": {
       "path": "src/assets/play/photos/grimlash/fields-of-madness.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 102186,
-      "sha256": "5e6c7b64969fa9117bf2490da6bccb0402e0d981d7513f0a2b2fcd856557c91f"
+      "bytes": 142360,
+      "sha256": "c6cf2520a53268dbe28032088a584a7f0f7faf96cf779321cd268a9b3db4021b"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/fields-of-madness.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 11412,
-      "sha256": "544f6713fe62711002575012ccbfd3198603597927acde9769b09148c8b9cdd3"
+      "bytes": 13676,
+      "sha256": "213f9998969446a6cbf6f45e69f30a05a4515337cf7269468119eaf63492c189"
     },
-    "position": "50% 5%",
-    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
-    "sourceKind": "approved-reference-edit",
+    "position": "50% 50%",
+    "crop": "Native widescreen crop, no stretch or upscaling. Card-specific focal point protects the principal prop/action in wide heroes and small choices.",
+    "sourceKind": "card-concept-edit",
     "identityReference": {
       "source": "Flaming Pumpkin Grimlash in Twilight.png",
       "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
-    }
+    },
+    "concept": "A disorienting corn corridor and conflicting shadows; no killer portrait."
   },
   {
     "id": "ancient-abomination",
-    "source": "exec-2f867483-7a11-478e-bad6-23381bdc1956.png",
+    "source": "exec-7de626db-4d78-4c56-8a3d-fcc8327ea9ab.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "aa686831ec40118a629a7880a00ac3cead01a1b509ec68d2a11c152304e5aa4a",
+    "sourceSha256": "e3f67d05c1f2f7261fb76fd36ded7645bab5b4c4d893c560a6a7c28df716955b",
     "scene": {
       "path": "src/assets/play/photos/grimlash/ancient-abomination.webp",
       "width": 1280,
       "height": 720,
-      "quality": 85,
-      "bytes": 127808,
-      "sha256": "5214b345d161e04042969eed4e888ee5e75be89de9245814aa63368c130e5dcf"
+      "quality": 82,
+      "bytes": 151796,
+      "sha256": "76d85bd5a6cd4f778209ef03846c5284163209e74cbcf92830e260473166cf42"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/ancient-abomination.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 13004,
-      "sha256": "7bf8d099c673dd5c4ef987043f34e580dcfda37fbdc286f9451add46286e9156"
+      "bytes": 17112,
+      "sha256": "c63709ce1f85352f59f17b774ab09f9c549d7f3bcf1d669041ad63909a0deedc"
     },
-    "position": "50% 5%",
-    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
-    "sourceKind": "approved-reference-edit",
+    "position": "50% 15%",
+    "crop": "Native widescreen crop, no stretch or upscaling. Card-specific focal point protects the principal prop/action in wide heroes and small choices.",
+    "sourceKind": "card-concept-edit",
     "identityReference": {
       "source": "Flaming Pumpkin Grimlash in Twilight.png",
       "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
-    }
+    },
+    "concept": "An inhuman low crawling silhouette and root claws force through ancient stonework."
   },
   {
     "id": "withered-harbinger",
-    "source": "exec-58c06efc-a27e-4967-9f1e-ca6f6a4aa2b4.png",
+    "source": "exec-3b47851d-a394-45b5-9b1e-864588764c2c.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "dac3e56a0700cae64615bfa86d8340914b09c5d94771f9083557b7fe3eef248c",
+    "sourceSha256": "34529e398cb6e17779bf1cdbe77f8b0e53471ddf5f3eb00e201314a6849229e7",
     "scene": {
       "path": "src/assets/play/photos/grimlash/withered-harbinger.webp",
       "width": 1280,
       "height": 720,
-      "quality": 85,
-      "bytes": 136148,
-      "sha256": "a7775692acf1686e6e34ed681f5c25dd90a70bb5522a103f6aa69c658567a52d"
+      "quality": 82,
+      "bytes": 149214,
+      "sha256": "669e17c2ec61a82c5b713db596dc2e9512b9eb8a7dec17acc2e8f68de84fce35"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/withered-harbinger.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 13324,
-      "sha256": "7a8a38d3ec01ceb7308432492fd47d6afb7cc6eb057bdd21d598988671e6d1c6"
+      "bytes": 16314,
+      "sha256": "60b49e014a94471902a72af672605546d58409fc7d926b4f92e0baa5fe03f6a9"
     },
-    "position": "50% 5%",
-    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
-    "sourceKind": "approved-reference-edit",
+    "position": "50% 0%",
+    "crop": "Native widescreen crop, no stretch or upscaling. Card-specific focal point protects the principal prop/action in wide heroes and small choices.",
+    "sourceKind": "card-concept-edit",
     "identityReference": {
       "source": "Flaming Pumpkin Grimlash in Twilight.png",
       "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
-    }
+    },
+    "concept": "Rear view in motion leaving a trail of withered stalks."
   },
   {
     "id": "god-of-blood-and-grain",
-    "source": "exec-1edba169-6bac-40dd-9a97-389a84276fe4.png",
+    "source": "exec-a1289eb4-b4ad-405a-bbbc-6ae5de1dbec3.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "2f49ca5ec0dbfa3ee55374d3643e05b385494d1b6d3b92b4a94f48ea2a6ca35c",
+    "sourceSha256": "cc6581e0b2d8ab26514a103394970d6080000c0b039711392e29ceb700749c59",
     "scene": {
       "path": "src/assets/play/photos/grimlash/god-of-blood-and-grain.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 118728,
-      "sha256": "8f41bf6426f7d12012a9ae30531b710be822a0d8687ade145ba77c5fc6839fae"
+      "bytes": 132140,
+      "sha256": "3f2fec1261dde7a2bd46b0280b182691718eb4030a489e157a584784d5d88e87"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/god-of-blood-and-grain.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 12306,
-      "sha256": "874c77603e8b6b3f3bd98a3e250e016dbbfd80d219dcc4941e27eea3b9093517"
+      "bytes": 14502,
+      "sha256": "5a8a23aac108b966ee2e3a66d615da223f67ac0990847fbb622aecb973c98385"
     },
-    "position": "50% 5%",
-    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
-    "sourceKind": "approved-reference-edit",
+    "position": "50% 55%",
+    "crop": "Native widescreen crop, no stretch or upscaling. Card-specific focal point protects the principal prop/action in wide heroes and small choices.",
+    "sourceKind": "card-concept-edit",
     "identityReference": {
       "source": "Flaming Pumpkin Grimlash in Twilight.png",
       "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
-    }
+    },
+    "concept": "An elongated root claw pours golden grain and a small dark crimson harvest tribute."
   },
   {
     "id": "consumes-all",
