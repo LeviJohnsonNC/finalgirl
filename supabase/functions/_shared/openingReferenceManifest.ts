@@ -22,7 +22,7 @@
 // tali.png SHA-256: 59ee831cfa84a4f00430e9d8266ed38afb10ef3d16cdc0b9042d335370c2fe1b
 // joy.png SHA-256: 0dfe4691dacc26a2ceca09c9e80544cd333a638e0931bb301db3095351bf9097
 // vicky.png SHA-256: 5e982189a68db9802d012dcd1cceb47d791559a1ffcb5eff81b956fa29264a9e
-// grimlash.png SHA-256: 7e6436fdb6ae982a670413ce218ac4cc4858ea5a1525bb9520c48ac73f8913fb
+// grimlash.png SHA-256: a2b62bccd9d3547be28221ccd3b6e0c6e5e6c920e9cd5ec8eb4c8439883891e0
 // ellen.png SHA-256: 26547a23a74afa84f1234d93a367b73f7045e4b7507d37ff79bad6507590f395
 // jenette.png SHA-256: 64d46e1698accfd7c58491f3cc02b874f69cebc6e149d1a858405739a6de6e41
 // kate.png SHA-256: 22917b029e87f87529d726dc6c0c2b7df93efe06f088a19ffc2bed4179ddc2e1
@@ -130,8 +130,8 @@ export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: 
     "sha256": "30339595f86c120abc57f67d47c2af069ac641e698f168452a00fd2fd1fa361f"
   },
   "Grimlash": {
-    "path": "grimlash.jpg",
-    "sha256": "479c632f7550e4c50c0736af026c865ebb43a9a6d656f3f8a4402fd1b7e091b0"
+    "path": "grimlash-214e58a025239a86.jpg",
+    "sha256": "214e58a025239a865d68eb080226214d11925cad9bb156a667370d2672342fad"
   },
   "Ellen": {
     "path": "ellen.jpg",

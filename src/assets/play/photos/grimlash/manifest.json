@@ -1,45 +1,61 @@
 [
   {
     "id": "identity",
-    "source": "exec-be07568d-2d38-441c-bed4-81f95c250617.png",
-    "nativeWidth": 1254,
-    "nativeHeight": 1254,
-    "sourceSha256": "279ea534aca6d5d09d176b439236174b9fd6f672ba4731a6789fc9414e8f425a",
+    "source": "Flaming Pumpkin Grimlash in Twilight.png",
+    "nativeWidth": 1024,
+    "nativeHeight": 1536,
+    "sourceSha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c",
     "identity": {
       "path": "src/assets/characters/ai/grimlash.png",
       "width": 768,
       "height": 768,
       "quality": 85,
-      "bytes": 996370,
-      "sha256": "7e6436fdb6ae982a670413ce218ac4cc4858ea5a1525bb9520c48ac73f8913fb"
+      "bytes": 754073,
+      "sha256": "a2b62bccd9d3547be28221ccd3b6e0c6e5e6c920e9cd5ec8eb4c8439883891e0"
     },
     "portrait": {
       "path": "src/assets/collection-portraits/ai/grimlash.webp",
       "width": 256,
       "height": 256,
       "quality": 85,
-      "bytes": 18396,
-      "sha256": "d989393081f7f5a7f179d69f2e3d05703255ca55b7d5877d530ba30f09409b35"
+      "bytes": 11716,
+      "sha256": "d747a3465c6a937fab1371f87c133684502f86e46d833d43849a8d98ae1e8cbf"
     },
-    "position": "50% center",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "position": "50% 5%",
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    }
   },
   {
     "id": "header",
-    "source": "exec-5176a49d-7148-45b1-9967-ba1323c10b3e.png",
+    "source": "exec-4e372175-9e94-4a39-be65-a4be18b6a146.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "195e8c339cd9203e874872054a0bc5c80eec3b07ac2b6f2614aaccb8039ce2aa",
+    "sourceSha256": "ce457528a1741dc06994fe85222a8310630588701e3c1b639fe759ad0676f016",
     "scene": {
       "path": "src/assets/play/banners/grimlash.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 108986,
-      "sha256": "d45dea60036fa585a421d3990c48cdc5a5e7cc5ccdb3f020f3b8312e6f339b50"
+      "bytes": 125462,
+      "sha256": "7a439c87a82fb191c40609ad883cf5c2db85b9be20a13790054453ec6d9ee649"
     },
-    "position": "75% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "position": "75% 20%",
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference-edit",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    },
+    "protectedSubject": {
+      "left": 0.68,
+      "top": 0.2,
+      "right": 0.77,
+      "bottom": 0.34
+    }
   },
   {
     "id": "madness-0",
@@ -682,78 +698,93 @@
   },
   {
     "id": "flaming-eyes",
-    "source": "exec-e693ba5d-9bcd-4df2-af3f-2e85c0c5cdda.png",
+    "source": "exec-067e2c67-56e6-4741-9669-dd580af7a784.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "1c5ee491bdb431f39527f9a32881d16ab8036698866450f38803d79ac154e6de",
+    "sourceSha256": "d7fb34023363ab63412d2ff535f3a63998c68739b9ee77e94d7cf56e165dc403",
     "scene": {
       "path": "src/assets/play/photos/grimlash/flaming-eyes.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 87744,
-      "sha256": "5169069e4ebf796105421b22b68ace1de93476788805da0ab1a75a25747fd08a"
+      "bytes": 91540,
+      "sha256": "6afc3e54b321d4cdeb919baa9c3b64d1d8a3ab296c825dcba650907db9cd82ed"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/flaming-eyes.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 9714,
-      "sha256": "fe0aa2a8c0520c0166fb2ddf1ecffc07cb46fdd87448fada2af06489fa6ea968"
+      "bytes": 10042,
+      "sha256": "8497038a2629cfa180f53bf4efc02560432c612bb99d84fe3deab2b976ac9b6a"
     },
     "position": "50% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference-edit",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    }
   },
   {
     "id": "burning-sickle",
-    "source": "exec-04430944-453d-4abf-b10f-2e49651a08ca.png",
+    "source": "exec-eda0ab0c-91d1-443c-83e5-33de1696b075.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "3a879851d452340d187863ebfadbb567723d06bf60b7100d44a8e9818cef7917",
+    "sourceSha256": "f776ab8a1afe558ba354caab2673903355e3f12a020d388573f05cb3a2c67973",
     "scene": {
       "path": "src/assets/play/photos/grimlash/burning-sickle.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 122226,
-      "sha256": "d83802065468c58e4985961219c734d66960eb9a01f3bfc965405a7f878b6448"
+      "bytes": 107092,
+      "sha256": "2cc7090ed7bf4688b33beea26a1c2993896d0f7c61cb26b48785cd0332bdea40"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/burning-sickle.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 11754,
-      "sha256": "51835de65b494b51ca109a2e60ae6e59b967fe77bedf98fdef50e406d6960b2e"
+      "bytes": 12000,
+      "sha256": "8bbb0f535a9ca6c318cc330458cd3a8939d917909673eb376d57ca46c3c5b60b"
     },
     "position": "50% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference-edit",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    }
   },
   {
     "id": "rite-of-the-corrupted",
-    "source": "exec-a74ec860-4672-4abf-bab4-942777fe5082.png",
+    "source": "exec-b08cb3af-a99c-4974-ba43-035e2f8673bb.png",
     "nativeWidth": 1672,
-    "nativeHeight": 941,
-    "sourceSha256": "1a1cb21b01d6e32020ad86fb2f40c1b81e137d142d009ced96e510fe2a16b409",
+    "nativeHeight": 940,
+    "sourceSha256": "0a134467e6d9ef097601012b04907f95f46b06926f3aac99f78a6a2ac828808a",
     "scene": {
       "path": "src/assets/play/photos/grimlash/rite-of-the-corrupted.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 124616,
-      "sha256": "f33cfd9897c9a8a5404e3cacd0c3489da20bb6308dd5579669cf988bbc36e7e9"
+      "bytes": 109290,
+      "sha256": "73939c241aa7cc0007caabeff7aa9d85bec89aa2d24fb8c8bf1a87a4013a6cb2"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/rite-of-the-corrupted.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 10752,
-      "sha256": "6140bef2c7d023190f0a909ca9e441e11cdf7c9ccb20792a772368c8e09ddb6b"
+      "bytes": 10872,
+      "sha256": "cddbcd5e9a1253ab26018e15dc53e4326b34fde5166beb0fd156c7ca6556b331"
     },
     "position": "50% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference-edit",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    }
   },
   {
     "id": "root-bound-curse",
@@ -782,253 +813,303 @@
   },
   {
     "id": "rite-of-the-old-one",
-    "source": "exec-36827c2d-f06a-4c15-a917-e9308748bc08.png",
+    "source": "exec-6c393393-c59c-46af-bb2e-0bafec72b662.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "6671b93a58a6f6aac867c111a92ced16667922213182bbb11c915a3a0f1fe692",
+    "sourceSha256": "e62359356ce8f45f22eb278192fbb9b2e3c1851df4c8668a365ec26cd9952ac3",
     "scene": {
       "path": "src/assets/play/photos/grimlash/rite-of-the-old-one.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 145448,
-      "sha256": "0b81592a995c31b22ed446304de4fedf7a72b6f9d8a36ee2ec855efca2c9badd"
+      "bytes": 128032,
+      "sha256": "bbc9de70a7cccab885e41b16d72bd1b6b51f2aafa6cdbf1e5321e9abfe6093fc"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/rite-of-the-old-one.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 12630,
-      "sha256": "e869df1128ed7ef4450a486b704e46aecc66dbea7ae816a3ba58cf8739859861"
+      "bytes": 12652,
+      "sha256": "53c017ea590abb322d8715f2c4314efed0da36a4e1251dcc3da7b3c9def90a36"
     },
     "position": "50% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference-edit",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    }
   },
   {
     "id": "hunger-of-the-old-gods",
-    "source": "exec-06b4564e-0498-465c-a128-8dd2ae4eda65.png",
+    "source": "exec-af7eff79-0e8e-4077-a96a-ddcaea5190f1.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "d390165f39779d6e734078d9289403e040a02b8ed54433da207de7c7be1df9fa",
+    "sourceSha256": "c66a8dc5c6eb21d9053bd272c7363c782e9a05e51f2bfc0137e042c879ff9f3e",
     "scene": {
       "path": "src/assets/play/photos/grimlash/hunger-of-the-old-gods.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 127778,
-      "sha256": "05a98681fda4a7c3df5c359c28a9708f33793ec068c4a1f045ee642ea709dc48"
+      "bytes": 121138,
+      "sha256": "e1b2a78868f79d50e1648819b2276c448cca120f1c4726e1bbf8ed6589ccc4e5"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/hunger-of-the-old-gods.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 10662,
-      "sha256": "727cc9c93c798c733f357ebf6feffa474e5a814374de6572ed05d697ba867c49"
+      "bytes": 11116,
+      "sha256": "0a03a5a79a0987abb705ddbacacc37df5c7aa519408ab1db47df85f844fdce1f"
     },
     "position": "50% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference-edit",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    }
   },
   {
     "id": "fields-of-madness",
-    "source": "exec-381e93aa-9208-416a-8484-610f9b97053b.png",
+    "source": "exec-091a64c6-16f5-40ec-84cb-7b015fa20192.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "703fd36dc4cecd12d023caaaf1ac6567a23c2cc7d8addac2af08dd35676ec0f5",
+    "sourceSha256": "eb4b3832aa8dc5553801652e283170da29119137d45d3d9898141a056736dcdf",
     "scene": {
       "path": "src/assets/play/photos/grimlash/fields-of-madness.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 120776,
-      "sha256": "76ddc15e9af541d84017adfe69e245c8c68ac1bea003eab881f7c4ffabc4d805"
+      "bytes": 102186,
+      "sha256": "5e6c7b64969fa9117bf2490da6bccb0402e0d981d7513f0a2b2fcd856557c91f"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/fields-of-madness.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 11676,
-      "sha256": "8e1209d15379bbc7f7fe3fa57815750e967c781d15ccd3fac187bd3a2eeee391"
+      "bytes": 11412,
+      "sha256": "544f6713fe62711002575012ccbfd3198603597927acde9769b09148c8b9cdd3"
     },
     "position": "50% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference-edit",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    }
   },
   {
     "id": "ancient-abomination",
-    "source": "exec-d18db860-6124-4dfb-b77f-ebaf62deac3f.png",
+    "source": "exec-2f867483-7a11-478e-bad6-23381bdc1956.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "fe1c0e6fa67c77a2b034c1517ee1d64b2b8bdfbad03ae8e248d60b22f00342e0",
+    "sourceSha256": "aa686831ec40118a629a7880a00ac3cead01a1b509ec68d2a11c152304e5aa4a",
     "scene": {
       "path": "src/assets/play/photos/grimlash/ancient-abomination.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 146732,
-      "sha256": "0a085ddd03658cf3393b7485f5686c866ebcc18a04849d09e6cf590caeb35d76"
+      "bytes": 127808,
+      "sha256": "5214b345d161e04042969eed4e888ee5e75be89de9245814aa63368c130e5dcf"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/ancient-abomination.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 12838,
-      "sha256": "0043ff9d9cc315f248eab52a9e41d2aa4a746e7693ff193e4cb7ab0eb183ebb9"
+      "bytes": 13004,
+      "sha256": "7bf8d099c673dd5c4ef987043f34e580dcfda37fbdc286f9451add46286e9156"
     },
     "position": "50% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference-edit",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    }
   },
   {
     "id": "withered-harbinger",
-    "source": "exec-8f312d00-e5dd-45bf-802e-699931c903d3.png",
+    "source": "exec-58c06efc-a27e-4967-9f1e-ca6f6a4aa2b4.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "93f6ce7de1337fcf2117e1ade273678e345b24c0cde50f3e2fbf93ae93b4ff78",
+    "sourceSha256": "dac3e56a0700cae64615bfa86d8340914b09c5d94771f9083557b7fe3eef248c",
     "scene": {
       "path": "src/assets/play/photos/grimlash/withered-harbinger.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 145366,
-      "sha256": "e36a4dfce73e606aaab83085256ba2de54296192c85d239595207402d7ca73bd"
+      "bytes": 136148,
+      "sha256": "a7775692acf1686e6e34ed681f5c25dd90a70bb5522a103f6aa69c658567a52d"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/withered-harbinger.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 13146,
-      "sha256": "1a229819bb8072d2e16b7a79f644784f5b76486e83d17a989ec6bca09e58842e"
+      "bytes": 13324,
+      "sha256": "7a8a38d3ec01ceb7308432492fd47d6afb7cc6eb057bdd21d598988671e6d1c6"
     },
     "position": "50% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference-edit",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    }
   },
   {
     "id": "god-of-blood-and-grain",
-    "source": "exec-cad8ba13-0854-44d1-802e-d8f86693deb1.png",
+    "source": "exec-1edba169-6bac-40dd-9a97-389a84276fe4.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "a2c554bade9e87a3252413941836c78d783b8a20fe66156a96786728c159c1ee",
+    "sourceSha256": "2f49ca5ec0dbfa3ee55374d3643e05b385494d1b6d3b92b4a94f48ea2a6ca35c",
     "scene": {
       "path": "src/assets/play/photos/grimlash/god-of-blood-and-grain.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 126884,
-      "sha256": "2f5402261df937cd0afed89fb0b6baacc5f55eea5ffd0751a61a72aa8b853b12"
+      "bytes": 118728,
+      "sha256": "8f41bf6426f7d12012a9ae30531b710be822a0d8687ade145ba77c5fc6839fae"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/god-of-blood-and-grain.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 12152,
-      "sha256": "1399fada39fb2bf98d8c0a2178f9ac8dc3379523b69e00dc59883a5c02e54fb9"
+      "bytes": 12306,
+      "sha256": "874c77603e8b6b3f3bd98a3e250e016dbbfd80d219dcc4941e27eea3b9093517"
     },
     "position": "50% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference-edit",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    }
   },
   {
     "id": "consumes-all",
-    "source": "exec-83025913-0d5b-4888-a0d2-df452cd6cb1a.png",
+    "source": "exec-60cb91e9-7c76-4a20-9f0d-2ce9fe42bb42.png",
     "nativeWidth": 1672,
-    "nativeHeight": 940,
-    "sourceSha256": "4d5432fdffa87bb0f3ba406cd8a77c85596cace6bb7007d751c4a26007b2c655",
+    "nativeHeight": 941,
+    "sourceSha256": "458a498b81e76289fa77237f686de5f67b46c10e4d08430f8836c54f63d67353",
     "scene": {
       "path": "src/assets/play/photos/grimlash/consumes-all.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 116224,
-      "sha256": "8e48559ce50bed0bbcffa22733c1f53cf2b635a5a54b8e5b7df179751ed9319f"
+      "bytes": 103658,
+      "sha256": "e0fbdb3562270820244a82fc26d3403a86c7af076309d5014e876363a0761879"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/consumes-all.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 11334,
-      "sha256": "7efae2b5fa16535e3374ae36829008358fbce889623c886e39e5978cfeb59514"
+      "bytes": 11406,
+      "sha256": "a543654674889c0d5068b6d8730ed103eddcdd29ad0409db8c65e7df0b9ec2c3"
     },
     "position": "50% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference-edit",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    }
   },
   {
     "id": "death-followed",
-    "source": "exec-3f2f42a5-88cb-4460-a197-44d2861871b2.png",
+    "source": "exec-089d0397-711c-4ba0-8d3a-35d7f89fe6b8.png",
     "nativeWidth": 1672,
-    "nativeHeight": 940,
-    "sourceSha256": "e15f3d4994a4e5c7dfb70f7b35b67a3070166587a0e076cf2602cbc45f07ba84",
+    "nativeHeight": 941,
+    "sourceSha256": "bf16dd128bd9ad31b409fa27e5d70859fa3554ae414400a3ea804b187e365554",
     "scene": {
       "path": "src/assets/play/photos/grimlash/death-followed.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 125374,
-      "sha256": "8d03d97acb20e9778eb914a42d99b6166b206da21d03218b978eadb99b0eb533"
+      "bytes": 110906,
+      "sha256": "d2ba81b858cb7c90c276f8b69fcaec807d5f96a9da2e835c0b6556428639fd66"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/death-followed.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 11906,
-      "sha256": "a0dc04e445cad63626a9534b19e0f1cb3e5e183140539b7a1c3901033ede2187"
+      "bytes": 11938,
+      "sha256": "a152d38f8bcd7dfad691378989dad36350495e4b03fba4994428228f51bfb14f"
     },
     "position": "50% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference-edit",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    }
   },
   {
     "id": "bleed-upon-the-earth",
-    "source": "exec-91acf9db-d69b-426b-b81c-a60cb351eb60.png",
+    "source": "exec-f44a389d-2269-4101-b91d-147c19693f17.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "a2ebaee101060000089400f2f79f5eda0468f346967d8fbd637844b7d79b14fc",
+    "sourceSha256": "a1d2ecfd58b3c40facb896a1addca472320af198bc78ebc0146e3f25a97ebd25",
     "scene": {
       "path": "src/assets/play/photos/grimlash/bleed-upon-the-earth.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 154468,
-      "sha256": "58a6f8d9c63f17cb01731af7e008137cb19c098701f7aae5bc9a51b9088a3a77"
+      "bytes": 144702,
+      "sha256": "643e2a58357c568dedccbce69f938f2859de124c27d34e83d6e4f31dbb0ad7f8"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/bleed-upon-the-earth.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 14998,
-      "sha256": "95d27ca0025cc8f0f5031922ad39c702085efe9ad719f494747ab9f037f0903d"
+      "bytes": 14936,
+      "sha256": "3607a4a6d107073ab3de8db88d1b17da460149508b828b43a93f63bb407682a3"
     },
     "position": "50% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference-edit",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    }
   },
   {
     "id": "bad-moon",
-    "source": "exec-18605a7a-92f4-4225-b586-bb6760579ff2.png",
+    "source": "exec-e32f9abb-1406-4939-850c-068796c2b67a.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
-    "sourceSha256": "0a216d154279b1dba5c849f2a147d3ea922bade7f8b477cf8a3220141bbb9c52",
+    "sourceSha256": "53840a487fee3467e98521e38f439990c8695c74944a43a78858492e8e536bc8",
     "scene": {
       "path": "src/assets/play/photos/grimlash/bad-moon.webp",
       "width": 1280,
       "height": 720,
       "quality": 85,
-      "bytes": 112290,
-      "sha256": "97207371cdbb3eaebd6d3d66818839d54ca6bddff0e70b69500efa2bf59fe3f3"
+      "bytes": 102156,
+      "sha256": "56748ac6480a7d3af90f6e3a04d327a3831e6a45ab060782a699e84ae55511b6"
     },
     "thumbnail": {
       "path": "src/assets/play/photos/grimlash/thumbs/bad-moon.webp",
       "width": 320,
       "height": 180,
       "quality": 80,
-      "bytes": 10176,
-      "sha256": "413422e0b7c28b376e6e6a2d1757b7e3b61b69c049d320c11c66078909e77901"
+      "bytes": 10414,
+      "sha256": "0a8ed7b0a6aab43c4849330ad3b6cc3586f7dc7a26b54a54d2c4c2b26df86371"
     },
     "position": "50% 5%",
-    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+    "crop": "Top-aligned native crop, no stretch or upscaling. Complete pumpkin face and stem preserved; approved coat and root ribs. Identity uses upper square of the approved full-body photograph.",
+    "sourceKind": "approved-reference-edit",
+    "identityReference": {
+      "source": "Flaming Pumpkin Grimlash in Twilight.png",
+      "sha256": "a706a98c3a18ac3647887d3a7ca24170d7bb15b10240b3f7a515cb8dd8b3ef6c"
+    }
   },
   {
     "id": "water-the-earth",

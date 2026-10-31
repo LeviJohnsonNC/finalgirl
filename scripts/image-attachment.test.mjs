@@ -27,7 +27,10 @@ new Function('require', 'exports', compile('../supabase/functions/_shared/openin
   name => { if (name === './openingReferenceManifest.ts') return manifest; throw new Error('Unexpected opening import: ' + name); }, opening);
 new Function('exports', compile('../supabase/functions/_shared/storyFacts.ts'))(storyFacts);
 new Function('exports', compile('../supabase/functions/_shared/narrativeStyle.ts'))(narrativeStyle);
+const grimlashIdentity = {};
+new Function('exports', compile('../supabase/functions/_shared/play/grimlash.ts'))(grimlashIdentity);
 new Function('require', 'exports', compile('../supabase/functions/_shared/prompts.ts'))(name => {
+  if (name === './play/grimlash.ts') return grimlashIdentity;
   if (name === './posterDesign.ts') return posterDesign;
   if (name === './finalGirlIdentity.ts') return finalGirlIdentity;
   if (name === './fictionBoundary.ts') return fiction;
@@ -316,4 +319,25 @@ test('reviewed fatal Konrad fate overrides stale positive Health in ending prose
   assert.match(storyFacts.endingFacts(context),/Final Girl fate: died/);
   assert.match(prompts.buildPosterPrompt(context),/Final Girl fate: died/);
  }
+});
+
+test('Grimlash pumpkin identity loads the reviewed immutable object and rejects stale or corrupted bytes',async()=>{
+ const bytes=new Uint8Array(readFileSync(new URL('../supabase/reference-assets/grimlash-pumpkin.jpg',import.meta.url)));
+ const digest=createHash('sha256').update(bytes).digest('hex');
+ assert.deepEqual(REFERENCE_MANIFEST.Grimlash,{path:`grimlash-${digest.slice(0,16)}.jpg`,sha256:digest});
+ assert.notEqual(REFERENCE_MANIFEST.Grimlash.path,'grimlash.jpg');
+ assert.deepEqual(opening.openingReferenceNames('Joy','Grimlash'),['Joy','Grimlash']);
+ const refs=await opening.openingReferences('Unknown','Grimlash',async path=>{assert.equal(path,REFERENCE_MANIFEST.Grimlash.path);return bytes;});
+ assert.equal(refs.length,1);assert.equal(refs[0].name,'Grimlash');
+ const stale=bytes.slice();stale[100]^=1;
+ await assert.rejects(()=>opening.openingReferences('Unknown','Grimlash',async()=>stale),/digest/);
+});
+
+test('approved pumpkin identity overrides obsolete Grimlash caller descriptions and cached continuity',async()=>{
+ for(const sceneType of ['beginning','ending']){
+  const f=imageHandler();const body={...await request(sceneType).json(),killer:'Grimlash',killerDescription:'OBSOLETE_OPEN_CROWN_CALLER',visualBible:JSON.stringify({finalGirl:'A woman with dark curly hair.',killer:'OBSOLETE_FACELESS_TREE_CONTINUITY',location:'A farm with weathered timber.',palette:'Cool dusk and warm local fire.'})};
+  assert.equal((await f.handler(new Request('https://example.test',{method:'POST',body:JSON.stringify(body)}))).status,200);
+  for(const prompt of [f.textCalls[0].user,f.imageCalls[0][0]]){assert.match(prompt,/complete closed, round ribbed scorched-orange pumpkin/);assert.doesNotMatch(prompt,/OBSOLETE_OPEN_CROWN_CALLER|OBSOLETE_FACELESS_TREE_CONTINUITY/);}
+ }
+ assert.match(prompts.buildVisualBiblePrompt({killer:'Grimlash',finalGirl:'Joy',location:'USS Konrad',killerDescription:'OBSOLETE_OPEN_CROWN_CALLER'}),/complete closed, round ribbed scorched-orange pumpkin/);
 });

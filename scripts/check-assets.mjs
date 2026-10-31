@@ -119,9 +119,14 @@ const grimCatalog=readFileSync('supabase/functions/_shared/play/grimlash.ts','ut
 const grimIds=new Set(['identity','header',...Array.from({length:11},(_,i)=>`madness-${i}`),...[...grimCatalog.matchAll(/\{id:'([^']+)'/g)].map(m=>m[1])]);
 if(grimManifest.length!==48||grimIds.size!==48||new Set(grimManifest.map(e=>e.id)).size!==48||grimManifest.some(e=>!grimIds.has(e.id)))throw Error('Incomplete Grimlash source-ID artwork coverage');
 if(new Set(grimManifest.map(e=>e.sourceSha256)).size!==48)throw Error('Grimlash requires independent scene sources');
+const likenessIds=new Set(['identity','header','flaming-eyes','burning-sickle','rite-of-the-corrupted','rite-of-the-old-one','fields-of-madness','hunger-of-the-old-gods','ancient-abomination','withered-harbinger','god-of-blood-and-grain','consumes-all','death-followed','bleed-upon-the-earth','bad-moon']);
+const grimReference=grimManifest.find(e=>e.id==='identity');
+for(const entry of grimManifest.filter(e=>likenessIds.has(e.id))){
+ if(!['approved-reference','approved-reference-edit'].includes(entry.sourceKind)||entry.identityReference?.sha256!==grimReference.sourceSha256||entry.identityReference?.source!=='Flaming Pumpkin Grimlash in Twilight.png')throw Error('Grimlash likeness reference drift: '+entry.id);
+}
 const grimPaths=new Set();
 for(const entry of grimManifest){
- if(!(entry.sourceKind==='user-supplied'&&entry.id.startsWith('madness-')?new RegExp('-'+entry.id.slice(8)+'\\.png$').test(entry.source):/^exec-[a-f0-9-]+\.png$/.test(entry.source))||!/^[a-f0-9]{64}$/.test(entry.sourceSha256))throw Error('Missing Grimlash provenance: '+entry.id);
+ if(!(entry.id==='identity'&&entry.sourceKind==='approved-reference'&&entry.source==='Flaming Pumpkin Grimlash in Twilight.png')&&!(entry.sourceKind==='user-supplied'&&entry.id.startsWith('madness-')?new RegExp('-'+entry.id.slice(8)+'\\.png$').test(entry.source):/^exec-[a-f0-9-]+\.png$/.test(entry.source))||!/^[a-f0-9]{64}$/.test(entry.sourceSha256))throw Error('Missing Grimlash provenance: '+entry.id);
  const keys=entry.id==='identity'?['identity','portrait']:entry.id==='header'||entry.id.startsWith('madness-')?['scene']:['scene','thumbnail'];
  if(entry.nativeWidth<(entry.id==='identity'?768:1280)||entry.nativeHeight<(entry.id==='identity'?768:720))throw Error('Upscaled Grimlash source: '+entry.id);
  for(const key of keys){const asset=entry[key];if(!asset||grimPaths.has(asset.path))throw Error('Missing/duplicate Grimlash derivative: '+entry.id);const b=readFileSync(asset.path);if(b.length!==asset.bytes||createHash('sha256').update(b).digest('hex')!==asset.sha256)throw Error('Grimlash digest mismatch: '+asset.path);if(key==='thumbnail'&&b.length>35*1024)throw Error('Grimlash thumbnail budget');grimPaths.add(asset.path);}
