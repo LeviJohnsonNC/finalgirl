@@ -20,6 +20,7 @@ export function deathFacts(
   eventId: string,
 ) {
   if(!validPlayLog(events))return null;
+  if(selection.location!=='Shady Acres'&&events.some(e=>e.moduleData?.module==='shady-acres'))return null;
   if(selection.killer!=='Grimlash'&&events.some(e=>e.moduleData?.module==='grimlash'))return null;
   if(selection.location!=='USS Konrad'&&events.some(e=>e.moduleData?.module==='konrad'))return null;
   if(selection.killer!=='Evomorph'&&events.some(e=>e.moduleData?.module==='evomorph'))return null;

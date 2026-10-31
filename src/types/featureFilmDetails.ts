@@ -1,3 +1,4 @@
+import {SHADY_SETUPS,SHADY_EVENTS,SHADY_SPACES} from '../../supabase/functions/_shared/play/shadyAcres';
 import {KONRAD_SETUPS,KONRAD_EVENTS} from '../../supabase/functions/_shared/play/konradCatalog';
 import {konradSetupDescription} from '@/data/rules/konradRules';
 import { CREECH_SETUPS,CREECH_EVENTS,creechSetupDescription } from '../../supabase/functions/_shared/play/creech';
@@ -329,25 +330,8 @@ Sunnydaze has the latest trends in fashion, state-of-the-art electronics, and a 
     location: {
       name: 'Shady Acres',
       description: `"Rural town, Shady Acres. in hardship as missing persons cases top thirteen this fall. Locals have given reports of lost children wandering the town. Officials claim no evidence of foul play as the latest investigation concludes. If you have information on a missing person or a child in distress, please contact the Shady Acres Sheriff's Department."`,
-      setupCards: [
-        { name: 'Demands of the Earth', description: 'A setup for A Rotten Harvest featuring initial victim and token placement around the rural farmland.' },
-        { name: 'Dusk Sacrifice', description: 'A setup for A Rotten Harvest with victims positioned for a twilight ritual scenario.' },
-        { name: 'Final Crop', description: 'A setup for A Rotten Harvest featuring endgame positioning with the harvest at its peak.' },
-        { name: 'Harvest Season', description: 'A setup for A Rotten Harvest with victims spread across the fields during the busy harvest.' },
-        { name: 'Reap What You Sow', description: 'A setup for A Rotten Harvest with karmic positioning based on past actions in the town.' }
-      ],
-      events: [
-        { name: 'Acres of Hatred', description: 'For each Field space with at least 1 Victim, lose 1 Health (max 2).' },
-        { name: 'Festering Rot', description: 'Whenever a Victim is killed in a Field space, plus 1 Horror.' },
-        { name: 'Harvest Cultist', description: 'The closest Victim to you is now the Harvest Cultist. During the Upkeep phase, move the Harvest Cultist 1 space towards you and if they are in your space, you both move 1 space toward the Killer. If you save the Harvest Cultist, minus 2 Horror.' },
-        { name: 'It Hungers for Us', description: 'All Victims panic. For each Victim in the Killer\'s space or an adjacent space, add 1 Horror (max 3).' },
-        { name: 'It Lurks Between the Rows', description: 'Panic every Victim in a Field space. All Victims that panic into the Killer\'s space are killed.' },
-        { name: 'Ralph the Mechanic', description: 'Place Ralph in Ralph\'s Garage. While with Ralph, if you take any Items with limited uses, add an extra Tracking marker even though it will exceed the number of circular spaces.' },
-        { name: 'Sally McCoy', description: 'Place Sally in the McCoy Farmhouse. When Sally is saved, find the Combine Keys Item card. Reshuffle the Item deck(s) if necessary. If you already have the Combine Keys, gain 1 Time.' },
-        { name: '"The fields are moving..."', description: 'Place a Field token in both the Hayfield and Cow Pasture spaces. They are now considered Field spaces.' },
-        { name: 'The Ravens Are Circling', description: 'Each Child moves 2 spaces towards the Killer. Place Health markers on this card equal to the amount of Children in its space. When the Killer takes damage, remove the Health markers from this card.' },
-        { name: 'Umbral Evocation', description: 'Place the Harvest Shadow token in the Killer\'s space. Each time you or a Victim enters that space, plus 1 Bloodlust.' }
-      ]
+      setupCards: SHADY_SETUPS.map(s=>({name:s.name,description:`Final Girl: ${SHADY_SPACES.find(p=>p.id===s.girl)!.name}. Killer: ${SHADY_SPACES.find(p=>p.id===s.killer)!.name}. Victim placements are listed in Shady Acres Rules.`})),
+      events: SHADY_EVENTS.map(e=>({name:e.name,description:e.effect}))
     },
     killer: {
       name: 'Grimlash',

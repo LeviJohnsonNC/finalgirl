@@ -1,3 +1,4 @@
+import {SHADY_CURSES,SHADY_EVENTS,SHADY_TERRORS,SHADY_ITEMS,SHADY_SETUPS,SHADY_SPACES} from '../../../supabase/functions/_shared/play/shadyAcres';
 import {GRIMLASH_ACTIONS,GRIMLASH_BLOODLUST,GRIMLASH_HARVEST,GRIMLASH_POWERS,GRIMLASH_FINALES,GRIMLASH_MINORS,GRIMLASH_TERRORS} from '../../../supabase/functions/_shared/play/grimlash';
 import { konradRules, KONRAD_PROMPT_CONTEXT } from './konradRules';
 import { evomorphRules, EVOMORPH_PROMPT_CONTEXT } from './evomorphRules';
@@ -176,7 +177,7 @@ const shadyAcres: EntityRuleModule = {
   filmId: 's4-rotten-harvest',
   source: 'A Rotten Harvest — Location Sheet',
   credits: { design: 'Ryan Jorjorian', art: 'Ondine Champetier de Ribes' },
-  tags: ['shady acres', 'children', 'ancient curse', 'field', 'location'],
+  tags: ['shady acres', 'children', 'ancient curse', 'field', 'location',...SHADY_CURSES.map(c=>c.name),...SHADY_ITEMS.map(c=>c.name),...SHADY_EVENTS.map(c=>c.name),...SHADY_TERRORS.map(c=>c.name)],
   setup: [
     {
       type: 'list',
@@ -188,6 +189,13 @@ const shadyAcres: EntityRuleModule = {
     },
   ],
   rules: [
+    {type:'paragraph',text:'Three reusable Children: Health 1, Attack Value 1, Movement Value 1. Their action token targets the closest Final Girl or Victim, moves, then resolves Abduction. Returning a defeated Child to the card does not record a Victim casualty.'},
+    {type:'table',headers:['Ancient Curse','Effect'],rows:SHADY_CURSES.map(c=>[c.name,c.effect])},
+    {type:'table',headers:['Event','Effect'],rows:SHADY_EVENTS.map(c=>[c.name,c.effect])},
+    {type:'table',headers:['Terror','Copies','Effect'],rows:SHADY_TERRORS.map(c=>[c.name,String(c.quantity),c.effect])},
+    {type:'table',headers:['Item','Effect'],rows:SHADY_ITEMS.map(c=>[c.name,c.effect])},
+    {type:'table',headers:['Setup','Final Girl','Killer','Victims (all unlisted spaces: 0)'],rows:SHADY_SETUPS.map(s=>[s.name,SHADY_SPACES.find(p=>p.id===s.girl)!.name,SHADY_SPACES.find(p=>p.id===s.killer)!.name,Object.entries(s.victims).map(([id,n])=>SHADY_SPACES.find(p=>p.id===id)!.name+': '+n).join('; ')])},
+    {type:'paragraph',text:'Board-coordinate labels North/West/Southwest/South/Inner East/Outer East Field and West exit/Central/Southeast/East exit road identify unnamed spaces, not printed location names. Search spaces: Old Barn, McCoy Farmhouse, Ralph’s Garage.'},
     { type: 'heading', level: 3, text: 'Children' },
     {
       type: 'paragraph',
@@ -215,7 +223,7 @@ const shadyAcres: EntityRuleModule = {
     {
       type: 'list',
       items: [
-        'On a 1-2 the Victim has been abducted to the altar of the Old Gods and sacrificed (killed). Return the Child to the Altar of the Old Gods space. Then, increase Terror as normal and place the Victim on the back of the top card of the Ancient Curse deck.',
+        'On a 1-2 the Victim has been abducted to the altar of the Old Gods and sacrificed (killed). Return the Child to the Altar of the Old Gods space. Then, increase Bloodlust as normal and place the Victim on the back of the top card of the Ancient Curse deck.',
         'On a 3-6 the Child failed to abduct the Victim and nothing happens.',
       ],
     },

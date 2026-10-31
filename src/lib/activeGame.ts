@@ -8,6 +8,7 @@ export interface GameSelection {
   finalGirlStartingHealth?: number;
 }
 export interface EndingFormData {
+  childrenOnBoardAtFinish?: number|null;
   grimlashReview?: {loss:import('../../supabase/functions/_shared/play/grimlash').GrimlashLoss};
   outcome?: "won"|"lost";
   konradReview?: {fate: import("../../supabase/functions/_shared/play/konrad").KonradFate};
@@ -18,6 +19,7 @@ export interface EndingFormData {
   endingSubLocation: string; gameHighlights: string;
 }
 export interface ActiveGame {
+  shadySetupVersion?: 1;
   grimlashSetupVersion?: 1;
   evomorphSetupVersion?: 1;
   konradSetupVersion?: 1;
@@ -48,6 +50,8 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if(game.shadySetupVersion!==undefined&&game.shadySetupVersion!==1)return false;
+  if(game.selection?.location!=='Shady Acres'&&game.playEvents?.some(e=>e.moduleData?.module==='shady-acres'))return false;
   if(game.grimlashSetupVersion!==undefined&&game.grimlashSetupVersion!==1)return false;
   if(game.selection?.killer!=='Grimlash'&&game.playEvents?.some(e=>e.moduleData?.module==='grimlash'))return false;
   if(game.konradSetupVersion!==undefined&&game.konradSetupVersion!==1)return false;

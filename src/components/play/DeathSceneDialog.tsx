@@ -1,3 +1,5 @@
+import {SHADY_TERRORS,SHADY_EVENTS} from '@/lib/play/shadyAcres';
+import {shadyArt} from './shadyAcresArt';
 import { GRIMLASH_TERRORS } from '@/lib/play/grimlash';
 import { grimlashArt } from './grimlashArt';
 import { useActiveImages } from '@/hooks/useActiveImages';
@@ -306,12 +308,12 @@ export function DeathSceneDialog({
                     }
                   }}
                 >
-                  {cause==='killer'&&selection.killer==='Grimlash'?<img src={characterImages.Grimlash} alt="" style={{objectPosition:'50% 0%'}}/>:cause==='terror'&&selection.killer==='Grimlash'&&GRIMLASH_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={grimlashArt(GRIMLASH_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:cause === 'minion' && selection.killer === 'Geppetto'
+                  {selection.location==='Shady Acres'&&cause==='terror'&&SHADY_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={shadyArt('terror-'+SHADY_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:selection.location==='Shady Acres'&&cause==='event'&&SHADY_EVENTS.some(c=>c.name===values.eventCard)?<ModuleArtwork art={shadyArt(SHADY_EVENTS.find(c=>c.name===values.eventCard)!.id)}/>:selection.location==='Shady Acres'&&cause==='minion'&&/^Child [123]$/.test(values.attacker??'')?<ModuleArtwork art={shadyArt('child-'+values.attacker!.slice(-1))}/>:cause==='killer'&&selection.killer==='Grimlash'?<img src={characterImages.Grimlash} alt="" style={{objectPosition:'50% 0%'}}/>:cause==='terror'&&selection.killer==='Grimlash'&&GRIMLASH_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={grimlashArt(GRIMLASH_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:cause === 'minion' && selection.killer === 'Geppetto'
                     ? <ModuleArtwork className="geppetto-cause-art" art={{src:geppettoPuppets,atlas:{width:1254,height:1254,x:421,y:3,cellWidth:412,cellHeight:412}}}/>
                     : cause === 'killer' && selection.killer === 'Evomorph'
                       ? <ModuleArtwork art={evomorphStageArt(facts?.moduleContext?.evomorph?.stage)} />
                       : <img src={art} alt="" />}
-                  <span>{cause === 'minion' && selection.killer === 'Geppetto' ? 'Puppet / minion' : deathCauseLabels[cause]}</span>
+                  <span>{cause==='minion'&&selection.location==='Shady Acres'?'Children / other enemies':cause === 'minion' && selection.killer === 'Geppetto' ? 'Puppet / minion' : deathCauseLabels[cause]}</span>
                 </button>
               ))}
             </div>
@@ -325,12 +327,12 @@ export function DeathSceneDialog({
                     label="Death attacker"
                     value={values.attacker ?? ""}
                     onChange={(v) => update("attacker", v)}
-                    options={
+                    options={[...(selection.location==='Shady Acres'?['Child 1','Child 2','Child 3']:[]),...(
                       selection.killer === "Billy the Bear"
                         ? BUDDIES.map((b) => b.name)
-                        : selection.killer === "Geppetto" ? ["Puppet", "Puppet 1", "Puppet 2", "Puppet 3"] : selection.killer === "Poltergeist" ? ["Behemoth","Clown Doll"] : []
+                        : selection.killer === "Geppetto" ? ["Puppet", "Puppet 1", "Puppet 2", "Puppet 3"] : selection.killer === "Poltergeist" ? ["Behemoth","Clown Doll"] : [])]
                     }
-                    placeholder={selection.killer === "Geppetto" ? "Choose a Puppet or enter a minion" : "Choose a Buddy or enter a minion"}
+                    placeholder={selection.location==='Shady Acres'?'Choose or enter an Enemy':selection.killer === "Geppetto" ? "Choose a Puppet or enter a minion" : "Choose a Buddy or enter a minion"}
                   />
                 </label>
               )}
