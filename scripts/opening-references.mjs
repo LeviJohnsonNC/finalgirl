@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 const catalog = readFileSync('src/types/gameData.ts', 'utf8');
 const finalGirls = new Set([...catalog.matchAll(/finalGirls: *\[([^\]]+)\]/g)].flatMap(([,names])=>[...names.matchAll(/'([^']+)'/g)].map(([,name])=>name)));
 const registry = catalog.split('const CHARACTER_FILES:')[1].split('};')[0];
-const portraits = Object.fromEntries([...registry.matchAll(/'([^']+)': '([^']+)[.]png'/g)].filter(([,name])=>finalGirls.has(name) || ['Billy the Bear','Inkanyamba','Poltergeist'].includes(name)).map(([,name,file])=>[name,file]));
+const portraits = Object.fromEntries([...registry.matchAll(/'([^']+)': '([^']+)[.]png'/g)].filter(([,name])=>finalGirls.has(name) || ['Billy the Bear','Inkanyamba','Poltergeist','Grimlash'].includes(name)).map(([,name,file])=>[name,file]));
 const slug = name => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const stage = 'build/opening-references';
 rmSync(stage, { recursive: true, force: true });

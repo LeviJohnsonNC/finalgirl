@@ -58,7 +58,8 @@ export const GameOutcomeForm = ({
   const [grimLoss,setGrimLoss]=useDraftField<GrimlashLoss>('grimlashLoss',(grimState.loss as GrimlashLoss)??'unknown',initialDraft,onDraftChange);
   const fatalGrim=result.killer==='Grimlash'&&grimlashFatal({loss:grimLoss});
   const fatalShip=result.location==='USS Konrad'&&['airlock-loss','explosion-loss'].includes(shipFate);
-  const isWin = (result.killer==='Grimlash'?(fatalGrim?'lost':reviewedOutcome):result.location==='USS Konrad'?fatalShip?'lost':reviewedOutcome:result.outcome) === 'won';
+  const fatalEnding=fatalGrim||fatalShip;
+  const isWin = !fatalEnding && (result.killer==='Grimlash'||result.location==='USS Konrad'?reviewedOutcome:result.outcome) === 'won';
   const billyState = moduleState(summarizePlay(result.playEvents).entries, 'billy');
 
   // Session snapshots include observed Ultimate changes; old games keep their denominator.
@@ -375,8 +376,8 @@ export const GameOutcomeForm = ({
     }
 
     const formData: EndingFormData = {
-      ...(isGrimlash&&{grimlashReview:{loss:grimLoss},outcome:fatalGrim?'lost' as const:reviewedOutcome}),
-      ...(result.location==='USS Konrad'&&{konradReview:{fate:shipFate},outcome:fatalShip?'lost' as const:reviewedOutcome}),
+      ...(isGrimlash&&{grimlashReview:{loss:grimLoss},outcome:fatalEnding?'lost' as const:reviewedOutcome}),
+      ...(result.location==='USS Konrad'&&{konradReview:{fate:shipFate},outcome:fatalEnding?'lost' as const:reviewedOutcome}),
       finalHorrorLevel: finalHorrorLevel ?? undefined,
       finalGirlHealth: finalGirlHealth ?? undefined,
       killerHealth: killerIsUnkillable ? undefined : killerHealth ?? undefined,
@@ -437,7 +438,7 @@ export const GameOutcomeForm = ({
           prominent
         />
       </div>
-      {result.location==='USS Konrad'&&<section className="outcome-panel" aria-label="USS Konrad ending review"><h2>Ship ending</h2><OutcomeSelect label="Reviewed ship fate" value={shipFate} onValueChange={v=>setShipFate(v as KonradFate)}><option value="unknown">Fate not recorded</option><option value="survived">Survived ship hazard</option><option value="airlock-loss">Lost to Airlock · no Final Health reveal</option><option value="explosion-loss">Lost outside Exit · Self Destruct</option></OutcomeSelect><OutcomeSelect label="Reviewed game result" value={fatalShip?'lost':reviewedOutcome} onValueChange={v=>setReviewedOutcome(v as 'won'|'lost')}><option value="won">Won</option><option value="lost">Lost</option></OutcomeSelect>{fatalShip&&<p role="status">This ship ending is a loss regardless of recorded Health or Killer death. Health is preserved as observed.</p>}<p>Surviving a ship hazard alone does not establish victory or Killer death.</p></section>}
+      {result.location==='USS Konrad'&&<section className="outcome-panel" aria-label="USS Konrad ending review"><h2>Ship ending</h2><OutcomeSelect label="Reviewed ship fate" value={shipFate} onValueChange={v=>setShipFate(v as KonradFate)}><option value="unknown">Fate not recorded</option><option value="survived">Survived ship hazard</option><option value="airlock-loss">Lost to Airlock · no Final Health reveal</option><option value="explosion-loss">Lost outside Exit · Self Destruct</option></OutcomeSelect><OutcomeSelect label="Reviewed game result" value={fatalEnding?'lost':reviewedOutcome} onValueChange={v=>setReviewedOutcome(v as 'won'|'lost')}><option value="won">Won</option><option value="lost">Lost</option></OutcomeSelect>{fatalShip&&<p role="status">This ship ending is a loss regardless of recorded Health or Killer death. Health is preserved as observed.</p>}<p>Surviving a ship hazard alone does not establish victory or Killer death.</p></section>}
       <div className="outcome-detail-grid">
         <section
           className="outcome-panel outcome-final-totals"
@@ -448,12 +449,14 @@ export const GameOutcomeForm = ({
             <p>The last state of the board.</p>
           </div>
           <div className="outcome-fields">
+            {isGrimlash&&finalGirlHealth!==null&&finalGirlHealth>maxFinalGirlHealth&&<p role="status">Recorded Health {finalGirlHealth} exceeds the current maximum {maxFinalGirlHealth}.</p>}
             <OutcomeNumberField
               label={`Final Girl health (0–${maxFinalGirlHealth})`}
               accessibleLabel="Final Girl Health"
               value={finalGirlHealth}
               onChange={setFinalGirlHealth}
               max={maxFinalGirlHealth}
+              preserveObservedExcess={isGrimlash}
               variant={finalGirlHealth === 0 ? "killed" : "saved"}
             />
             {!killerIsUnkillable && (
@@ -775,7 +778,7 @@ export const GameOutcomeForm = ({
             </div>
           )}
 
-          {isGrimlash&&<section className="outcome-panel outcome-module" aria-label="Grimlash ending review"><h3>Harvest Madness</h3><p>{typeof grimState.position==='number'?`Position ${grimState.position} · ${harvestLevel(grimState.position)===4?'Skull':`Level ${harvestLevel(grimState.position)}`}`:'Position not recorded'}{typeof grimState.peak==='number'?` · Recorded peak ${grimState.peak}`:''}</p><OutcomeSelect label="Madness loss record" value={grimLoss} onValueChange={v=>setGrimLoss(v as GrimlashLoss)}><option value="unknown">Not recorded</option><option value="none">No Madness loss recorded</option><option value="skull">Reached the skull</option><option value="telluric">Telluric Visions loss</option></OutcomeSelect><OutcomeSelect label="Reviewed game result" value={fatalGrim?'lost':reviewedOutcome} onValueChange={v=>setReviewedOutcome(v as 'won'|'lost')}><option value="won" disabled={fatalGrim}>Won</option><option value="lost">Lost</option></OutcomeSelect>{fatalGrim&&<p role="status">This Madness ending is a loss. Health and Victim totals remain as observed.</p>}{harvestMadnessPeaked&&<p>Legacy peaked record: exact level and position unknown.</p>}</section>}
+          {isGrimlash&&<section className="outcome-panel outcome-module" aria-label="Grimlash ending review"><h3>Harvest Madness</h3><p>{typeof grimState.position==='number'?`Position ${grimState.position} · ${harvestLevel(grimState.position)===4?'Skull':`Level ${harvestLevel(grimState.position)}`}`:'Position not recorded'}{typeof grimState.peak==='number'?` · Recorded peak ${grimState.peak}`:''}</p><OutcomeSelect label="Madness loss record" value={grimLoss} onValueChange={v=>setGrimLoss(v as GrimlashLoss)}><option value="unknown">Not recorded</option><option value="none">No Madness loss recorded</option><option value="skull">Reached the skull</option><option value="telluric">Telluric Visions loss</option></OutcomeSelect><OutcomeSelect label="Reviewed game result" value={fatalEnding?'lost':reviewedOutcome} onValueChange={v=>setReviewedOutcome(v as 'won'|'lost')}><option value="won" disabled={fatalEnding}>Won</option><option value="lost">Lost</option></OutcomeSelect>{fatalGrim&&<p role="status">This Madness ending is a loss. Health and Victim totals remain as observed.</p>}{harvestMadnessPeaked&&<p>Legacy peaked record: exact level and position unknown.</p>}</section>}
           {result.location==='Shady Acres'&&<section className="outcome-panel outcome-module"><label>Children survived (0–3)<input aria-label="Children survived" type="number" min="0" max="3" value={childrenSurvived} onChange={e=>setChildrenSurvived(Math.max(0,Math.min(3,Number(e.target.value))))}/></label></section>}
 
           {/* Section: Berith / A Demon in the Shadows */}

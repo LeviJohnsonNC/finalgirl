@@ -39,3 +39,6 @@ lerna-debug.log*
 
 # Transient compiled component reviews
 review/
+
+# Reproducible private-reference staging
+build/opening-references/

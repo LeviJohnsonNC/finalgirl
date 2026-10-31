@@ -38,7 +38,7 @@ export const GRIMLASH_HARVEST = [
 ] as const;
 export const GRIMLASH_TERRORS = [
  {id:'scarecrow',name:'“Was That Scarecrow There Before?”',quantity:2,effect:'Target the Final Girl; move; increase Horror twice.'},
- {id:'consumes-all',name:'“It Consumes All!”',quantity:1,effect:'Madness Level 0/1: target the Final Girl, move, attack. Level 2/3: target the closest Final Girl or Victim, move, attack; then target the Final Girl, move, attack.'},
+ {id:'consumes-all',name:'“It Consumes All!”',quantity:1,effect:'First resolve the block for the current Madness level: Level 0/1 targets the Final Girl, moves and attacks; Level 2/3 targets the closest Final Girl or Victim, moves and attacks. Then at every level, target the Final Girl, move and attack.'},
  {id:'death-followed',name:'“…And Death Followed With Him.”',quantity:2,effect:'Target the closest Final Girl or Victim; move; attack. At Madness Level 1 or higher, choose lose 1 Health or increase Bloodlust once.'},
  {id:'bleed-upon-the-earth',name:'Bleed Upon the Earth',quantity:1,effect:'Target the closest Final Girl or Victim; move; attack. Increase Horror 0/1/2/3 times at Madness Level 0/1/2/3 respectively.'},
  {id:'bad-moon',name:'A Bad Moon Rises',quantity:2,effect:'Increase Madness once; target the closest Final Girl or Victim; move; attack.'},
@@ -81,8 +81,7 @@ export function resolveGrimlashAction(a:GrimlashAction,s:ModuleState,entries:rea
   if(a.value===s.position||(a.value===null&&s.position===undefined))return null;
   changes.position=a.value!;
   const before=harvestLevel(s.position),after=harvestLevel(a.value);
-  if(a.correction)changes.peak=null;
-  else if(typeof a.value==='number')changes.peak=Math.max(typeof s.peak==='number'?s.peak:0,a.value);
+  if(!a.correction&&typeof a.value==='number')changes.peak=Math.max(typeof s.peak==='number'?s.peak:0,a.value);
   for(const level of [1,2,3]) {
    if(after!==undefined&&after<level){changes[`kept.${level}`]='none';changes[`face.${level}`]=null;}
    else if(after!==undefined&&before!==undefined&&before<level&&after>=level){changes[`kept.${level}`]=null;changes[`face.${level}`]=null;}
@@ -93,7 +92,7 @@ export function resolveGrimlashAction(a:GrimlashAction,s:ModuleState,entries:rea
   const key=`kept.${a.level}`;if(s[key]===a.value||(a.value===null&&s[key]===undefined))return null;
   changes[key]=a.value!;
   const c=GRIMLASH_HARVEST.find(c=>c.id===a.value);
-  changes[`face.${a.level}`]=c?.flip?(a.correction?(s[`face.${a.level}`]??'unknown'):'ready'):null;
+  if(a.value!==null||!a.correction)changes[`face.${a.level}`]=c?.flip?(a.correction?(s[`face.${a.level}`]??'unknown'):'ready'):null;
  } else if(a.command==='face') {
   const c=GRIMLASH_HARVEST.find(c=>c.id===s[`kept.${a.level}`]);if(!c?.flip||a.value===s[`face.${a.level}`])return null;changes[`face.${a.level}`]=a.value!;
  } else if(a.command==='upkeep') {
@@ -118,3 +117,34 @@ export function grimlashFacts(s:ModuleState) {
 
  return parts.join(' ')+' Physical dice, costs, healing, movements and casualties are player-resolved; no unrecorded effects are implied. Children belong only to Shady Acres.';
 }
+
+/** Printed board entry icons, not effects run by companion tracking. */
+export const GRIMLASH_BLOODLUST = [
+ {attack:1,move:1,entry:'Starting position'},
+ {attack:1,move:1,entry:'Increase Harvest Madness once'},
+ {attack:1,move:1,entry:'No additional entry icon'},
+ {attack:2,move:1,entry:'No additional entry icon'},
+ {attack:2,move:2,entry:'Reveal Dark Power'},
+ {attack:3,move:2,entry:'Recover 2 killer Health'},
+ {attack:3,move:2,entry:'Increase Harvest Madness once'},
+ {attack:4,move:3,entry:'Increase Horror once'},
+ {attack:4,move:3,entry:'Recover 2 killer Health'},
+] as const;
+/** Icon sequences kept separate from triggered/conditional card prose. */
+export const GRIMLASH_ACTIONS:Record<string,string>={
+ base:'Closest Final Girl or Victim → move exactly 1 space → attack → if a Victim was killed, increase Madness once. The photographed landscape face is unnamed; its exact reverse identity is unverified.',
+ 'hunger-of-the-old-gods':'Closest Final Girl or Victim → move → move → attack → attack',
+ 'ancient-abomination':'Closest Final Girl or Victim → move → move → attack',
+ 'withered-harbinger':'Final Girl → move → attack → attack',
+ 'god-of-blood-and-grain':'Final Girl → move → attack → attack',
+ scarecrow:'Final Girl → move; then Horror +2',
+ 'consumes-all':'First: Level 0/1 Final Girl → move → attack, OR Level 2/3 closest Final Girl or Victim → move → attack. Then ALWAYS: Final Girl → move → attack.',
+ 'death-followed':'Closest Final Girl or Victim → move → attack; then level-dependent choice',
+ 'bleed-upon-the-earth':'Closest Final Girl or Victim → move → attack; then level-dependent Horror',
+ 'bad-moon':'Madness +1; then closest Final Girl or Victim → move → attack',
+ shadows:'Panic all Victims in your space; then Madness +2',
+ 'water-the-earth':'No Victims: discard/redraw. Otherwise Victim → move → attack',
+ 'roots-of-insanity':'Horror 5+: Madness +2 and discard. Otherwise Horror +2',
+ 'violent-growth':'No Victims: discard/redraw. Otherwise Victim → move → attack; then Horror +2',
+ 'always-here':'Level 3: Horror +2 and discard. Otherwise Madness +2',
+};

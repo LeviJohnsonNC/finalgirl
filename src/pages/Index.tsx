@@ -205,7 +205,9 @@ const IndexContent = () => {
     }
     if(game.selection.killer==='Grimlash'&&formData.grimlashReview) {const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'grimlash');if(state.loss!==formData.grimlashReview.loss){const action={parent:grimlashParent(en),command:'loss' as const,value:formData.grimlashReview.loss,correction:true};const changes=resolveGrimlashAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',grimlashAction:action,moduleData:{module:'grimlash',changes}})))throw new Error('The Madness ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Madness ending is unavailable.');}}
     const {konradReview:_review,...fields}=formData;
-    const outcome=game.selection.killer==='Grimlash'?(grimlashFatal(moduleState(summarizePlay(game.playEvents).entries,'grimlash'))?'lost':formData.outcome??game.result.outcome):game.selection.location==='USS Konrad'?(konradFatal(moduleState(summarizePlay(game.playEvents).entries,'konrad'))?'lost':formData.outcome??game.result.outcome):game.result.outcome;
+    const reviewedEntries=summarizePlay(game.playEvents).entries;
+    const fatalEnding=game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(reviewedEntries,'grimlash'))||game.selection.location==='USS Konrad'&&konradFatal(moduleState(reviewedEntries,'konrad'));
+    const outcome=fatalEnding?'lost':game.selection.killer==='Grimlash'||game.selection.location==='USS Konrad'?formData.outcome??game.result.outcome:game.result.outcome;
     const updates={...fields,outcome,playEvents:game.playEvents};
     updateGame(game.result.id,updates);
     const result={...game.result,...updates};

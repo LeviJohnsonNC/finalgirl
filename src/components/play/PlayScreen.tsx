@@ -269,7 +269,7 @@ export function PlayScreen(props: PlayScreenProps) {
   const setState = (field: StateField, value: number | null) => {
     if (
       value !== null &&
-      (!Number.isInteger(value) || value < 0 || value > trackerLimits[field])
+      (!Number.isInteger(value) || value < 0 || (value > trackerLimits[field] && !(killer==='Grimlash' && field==='finalGirlHealth' && value < (summary.finalGirlHealth??0))))
     ) {
       setMessage(`Use a whole number from 0 to ${trackerLimits[field]}.`);
       return;
@@ -423,6 +423,7 @@ export function PlayScreen(props: PlayScreenProps) {
         data-healthless={killer === 'Poltergeist' || undefined}
       >
         <h2>Track more</h2>
+        {killer==='Grimlash'&&summary.finalGirlHealth!==undefined&&finalGirlMaxHealth!==undefined&&summary.finalGirlHealth>finalGirlMaxHealth&&<p role="status" className="grim-health-discrepancy">Recorded Health {summary.finalGirlHealth} exceeds the current maximum {finalGirlMaxHealth}.</p>}
         <div className="play-state-grid">
           {orderedStateFields.filter(field=>killer!=='Poltergeist'||field!=='killerHealth').map((field) => {
             const value = field === "killerHealth" && summary.killerHealthTracking === false ? undefined : summary[field];
@@ -506,7 +507,7 @@ export function PlayScreen(props: PlayScreenProps) {
                       <button
                         aria-label={`Decrease ${stateLabels[field]}`}
                         disabled={value <= 0}
-                        onClick={() => setState(field, value - 1)}
+                        onClick={() => setState(field, killer==='Grimlash'&&field==='finalGirlHealth'?value-1:Math.min(trackerLimits[field],value-1))}
                       >
                         <Minus size={16} />
                       </button>

@@ -555,7 +555,7 @@ export function moduleStoryBeats(
     for(const fact of killer.split(/(?<=\.)\s+/))if(killerFacts.length+fact.length+1<=340)killerFacts+=fact+" ";
     return [location&&`Creech Manor: ${location.trim()}`,killerFacts&&`Killer: ${killerFacts.trim()}`].filter(Boolean).join("\n");
   }
-  if(context.grimlash&&!context.konrad&&!context.creech&&!context.groves) {const location=moduleStoryBeats({...selection,killer:''},entries);return [grimlashFacts(context.grimlash).slice(0,location?440:870),location.slice(0,440)].filter(Boolean).join('\n');}
+  if(context.grimlash&&!context.konrad&&!context.creech&&!context.groves&&!context.maple&&!context.carnival) {const location=moduleStoryBeats({...selection,killer:''},entries);const budget=location?440:870;let killer='';for(const fact of grimlashFacts(context.grimlash).split(/(?<=\.)\s+/))if(killer.length+fact.length+1<=budget)killer+=fact+' ';return [killer.trim(),location.slice(0,440)].filter(Boolean).join('\n');}
   if (context.groves) {
     const killer = moduleStoryBeats({ ...selection, location: "" }, entries);
     const facts = grovesFacts(context.groves);

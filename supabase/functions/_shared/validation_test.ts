@@ -275,3 +275,15 @@ Deno.test('USS Konrad reviewed fatal ending is owner-specific and reaches prose/
   assertEquals(EndingRequestSchema.safeParse({...prose,outcome:'won'}).success,false);
  }
 });
+
+Deno.test('Grimlash raised Health and recorded loss remain scoped and authoritative for prose and poster',()=>{
+ const base={outcome:'lost',killer:{name:'Grimlash'},location:{name:'Camp Happy Trails'},finalGirl:{name:'Charlie'},introStory:'The fields were quiet until the burning crown appeared behind the farm gate.',finalGirlHealth:11,finalGirlMaxHealth:11,grimlashReview:{loss:'skull'}};
+ assertEquals(validateRequest(EndingRequestSchema,base).success,true);
+ assertEquals(validateRequest(EndingRequestSchema,{...base,outcome:'won'}).success,false);
+ assertEquals(validateRequest(EndingRequestSchema,{...base,killer:{name:'Hans'}}).success,false);
+ assertEquals(validateRequest(EndingRequestSchema,{...base,grimlashReview:{loss:'none'},outcome:'won'}).success,true);
+ const poster={story:base.introStory,sceneType:'ending',killer:'Grimlash',location:'Camp Happy Trails',finalGirl:'Charlie',outcome:'lost',finalGirlHealth:11,grimlashReview:{loss:'telluric'}};
+ assertEquals(validateRequest(SceneImageRequestSchema,poster).success,true);
+ assertEquals(validateRequest(SceneImageRequestSchema,{...poster,outcome:'won'}).success,false);
+ assertEquals(validateRequest(SceneImageRequestSchema,{...poster,sceneType:'beginning'}).success,false);
+});

@@ -107,7 +107,7 @@ export function illustratedKillerCards(
     }))
     .map((card) => ({
       ...card,
-      art: card.heroArt ?? { ...card.art, fit: "meet" as const },
+      art: killer==='Grimlash'?grimlashArt(card.id,true):card.heroArt ?? { ...card.art, fit: "meet" as const },
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
