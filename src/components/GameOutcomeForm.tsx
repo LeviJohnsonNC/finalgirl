@@ -330,7 +330,7 @@ export const GameOutcomeForm = ({
           : buddyParts.join('. ');
     }
     if(result.location==='Shady Acres')highlights=[highlights,`Children survived: ${childrenSurvived}`].filter(Boolean).join('. ');
-    if(isGrimlash){const facts=[typeof reviewedGrimState.position==='number'?`Harvest Madness position ${reviewedGrimState.position}, Level ${harvestLevel(reviewedGrimState.position)}`:'',typeof reviewedGrimState.peak==='number'?`Recorded Madness peak position ${reviewedGrimState.peak}`:'',grimLoss==='skull'||grimLoss==='telluric'?`Game lost: ${grimLoss}`:'',harvestMadnessPeaked?'Legacy Madness peaked observation; exact position unknown':''];highlights=[highlights,...facts].filter(Boolean).join('. ');}
+    if(isGrimlash){const facts=[typeof reviewedGrimState.position==='number'?`Harvest Madness position ${reviewedGrimState.position}, ${harvestLevel(reviewedGrimState.position)===4?'Skull':`Level ${harvestLevel(reviewedGrimState.position)}`}`:'',typeof reviewedGrimState.peak==='number'?`Recorded Madness peak position ${reviewedGrimState.peak}`:'',grimLoss==='skull'||grimLoss==='telluric'?`Game lost: ${grimLoss}`:'',harvestMadnessPeaked?'Legacy Madness peaked observation; exact position unknown':''];highlights=[highlights,...facts].filter(Boolean).join('. ');}
     if (isBerith) {
       const demonParts: string[] = [];
       if (isWin && ursulaSaved) demonParts.push('Ursula saved');
