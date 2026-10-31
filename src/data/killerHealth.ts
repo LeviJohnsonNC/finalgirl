@@ -40,7 +40,7 @@ const KILLER_MAX_HP: Record<string, number> = {
   'The Eyeless': 8,
 
   // Season 4
-  'Grimlash': 9,
+  'Grimlash': 10,
   'Billy the Bear': 8,
 };
 

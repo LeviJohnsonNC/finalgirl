@@ -10,6 +10,7 @@ interface OutcomeNumberFieldProps {
   max: number;
   variant?: string;
   prominent?: boolean;
+  preserveObservedExcess?: boolean;
 }
 
 /** Blank is unknown, zero is a recorded observation. Neither is inferred. */
@@ -22,9 +23,10 @@ export function OutcomeNumberField({
   max,
   variant = "neutral",
   prominent = false,
+  preserveObservedExcess = false,
 }: OutcomeNumberFieldProps) {
   const id = useId();
-  const bounded = (n: number) => Math.min(max, Math.max(min, Math.trunc(n)));
+  const bounded = (n: number) => Math.min(preserveObservedExcess ? Math.max(max,value??max) : max, Math.max(min, Math.trunc(n)));
   return (
     <div
       className={`outcome-number outcome-number--${variant}${prominent ? " outcome-counter" : ""}`}

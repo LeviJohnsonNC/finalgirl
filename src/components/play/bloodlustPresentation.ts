@@ -30,6 +30,7 @@ const photographs = [
  * Billy's board remains a documented source gap, so he uses the generic scale.
  */
 export const verifiedBloodlustMaximum: Readonly<Record<string, number>> = {
+  Grimlash: 8,
   Evomorph: 10,
   Hans: 10,
   "Dr. Fright": 9,

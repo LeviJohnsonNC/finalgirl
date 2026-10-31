@@ -1,3 +1,5 @@
+import { GRIMLASH_POWERS, GRIMLASH_FINALES } from '@/lib/play/grimlash';
+import { grimlashArt } from './grimlashArt';
 import { EVOMORPH_POWERS, EVOMORPH_FINALES } from '../../../supabase/functions/_shared/play/evomorph';
 import { evomorphArt } from './evomorphArt';
 import { POLTERGEIST_POWERS, POLTERGEIST_FINALES } from '../../../supabase/functions/_shared/play/poltergeist';
@@ -57,7 +59,7 @@ export function illustratedKillerCards(
 ): IllustratedKillerCard[] {
   const power = type === "dark-power";
   const cards =
-    killer === 'Evomorph' ? (power ? EVOMORPH_POWERS : EVOMORPH_FINALES) : killer === 'Poltergeist' ? (power ? POLTERGEIST_POWERS : POLTERGEIST_FINALES) : killer === "Inkanyamba"
+    killer === 'Grimlash' ? (power ? GRIMLASH_POWERS : GRIMLASH_FINALES) : killer === 'Evomorph' ? (power ? EVOMORPH_POWERS : EVOMORPH_FINALES) : killer === 'Poltergeist' ? (power ? POLTERGEIST_POWERS : POLTERGEIST_FINALES) : killer === "Inkanyamba"
       ? power
         ? INKANYAMBA_POWERS
         : INKANYAMBA_FINALES
@@ -85,12 +87,12 @@ export function illustratedKillerCards(
         ("epic" in card && card.epic === true) ||
         card.effect.startsWith("Epic"),
       heroArt:
-        (killer==='Evomorph' ? evomorphArt(card.id) : undefined) ?? (killer==='Poltergeist' ? poltergeistArt(card.id) : undefined) ?? modulePhoto(killer, index + (power ? 0 : 4)) ??
+        (killer==='Grimlash' ? grimlashArt(card.id) : undefined) ?? (killer==='Evomorph' ? evomorphArt(card.id) : undefined) ?? (killer==='Poltergeist' ? poltergeistArt(card.id) : undefined) ?? modulePhoto(killer, index + (power ? 0 : 4)) ??
         (killer === "Inkanyamba"
           ? inkanyambaHero(index + (power ? 0 : 4))
           : undefined),
       art:
-        killer === "Inkanyamba"
+        killer === 'Grimlash' ? grimlashArt(card.id) : killer === "Inkanyamba"
           ? inkanyambaCell(index + (power ? 0 : 4))
           : killer === "Dr. Fright"
             ? atlasCell(frightCards, index + (power ? 0 : 4), 1254, 1254)
@@ -105,7 +107,7 @@ export function illustratedKillerCards(
     }))
     .map((card) => ({
       ...card,
-      art: card.heroArt ?? { ...card.art, fit: "meet" as const },
+      art: killer==='Grimlash'?grimlashArt(card.id,true):card.heroArt ?? { ...card.art, fit: "meet" as const },
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 }

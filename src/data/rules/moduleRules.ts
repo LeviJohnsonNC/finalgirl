@@ -1,3 +1,4 @@
+import {GRIMLASH_ACTIONS,GRIMLASH_BLOODLUST,GRIMLASH_HARVEST,GRIMLASH_POWERS,GRIMLASH_FINALES,GRIMLASH_MINORS,GRIMLASH_TERRORS} from '../../../supabase/functions/_shared/play/grimlash';
 import { konradRules, KONRAD_PROMPT_CONTEXT } from './konradRules';
 import { evomorphRules, EVOMORPH_PROMPT_CONTEXT } from './evomorphRules';
 import { creechRules,CREECH_PROMPT_CONTEXT } from './creechRules';
@@ -37,7 +38,7 @@ const grimlash: EntityRuleModule = {
   filmId: 's4-rotten-harvest',
   source: 'A Rotten Harvest — Killer Sheet',
   credits: { design: 'Ryan Jorjorian', art: 'Ondine Champetier de Ribes' },
-  tags: ['grimlash', 'harvest madness', 'killer'],
+  tags: ['grimlash', 'harvest madness', 'killer',...GRIMLASH_HARVEST.map(c=>c.name),...GRIMLASH_TERRORS.map(c=>c.name)],
   setup: [
     {
       type: 'list',
@@ -48,6 +49,12 @@ const grimlash: EntityRuleModule = {
     },
   ],
   rules: [
+    {type:'paragraph',text:'Standard board: Grimlash starts with 10 Health and Horror 4. Bloodlust has nine positions, 0–8. Its overflow discards the next Terror card. Harvest Madness positions 0–2 are Level 0; 3–4 Level 1; 5–6 Level 2; 7–9 Level 3; 10 is the fatal skull. These indices describe physical spaces, not printed numbers.'},
+    {type:'table',headers:['Bloodlust position','Attack','Movement','Entry icon'],rows:GRIMLASH_BLOODLUST.map((c,i)=>[String(i),String(c.attack),String(c.move),c.entry])},
+    {type:'paragraph',text:'Photographed unnamed landscape action face: '+GRIMLASH_ACTIONS.base},
+    {type:'table',headers:['Harvest ability','Level','Effect'],rows:GRIMLASH_HARVEST.map(c=>[c.name,String(c.level),c.effect])},
+    {type:'table',headers:['Power / Finale / Minor','Effect'],rows:[...GRIMLASH_MINORS,...GRIMLASH_POWERS,...GRIMLASH_FINALES].map(c=>[c.name,c.effect])},
+    {type:'table',headers:['Terror','Copies','Action sequence','Effect'],rows:GRIMLASH_TERRORS.map(c=>[c.name,String(c.quantity),GRIMLASH_ACTIONS[c.id]??'Triggered Minor Dark Power',c.effect])},
     { type: 'heading', level: 3, text: 'Harvest Madness' },
     {
       type: 'paragraph',

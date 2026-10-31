@@ -36,3 +36,9 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Transient compiled component reviews
+review/
+
+# Reproducible private-reference staging
+build/opening-references/

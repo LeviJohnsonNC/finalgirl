@@ -1,3 +1,6 @@
+import { GRIMLASH_TERRORS } from '@/lib/play/grimlash';
+import { grimlashArt } from './grimlashArt';
+import { useActiveImages } from '@/hooks/useActiveImages';
 import { evomorphStageArt } from './evomorphArt';
 import geppettoPuppets from '@/assets/play/geppetto/puppets.webp';
 import { ModuleArtwork } from './ModuleArtwork';
@@ -68,6 +71,7 @@ export function DeathSceneDialog({
   draft,
   onDraft,
 }: Props) {
+  const {characterImages}=useActiveImages();
   const facts = deathFacts(selection, events, eventId);
   const initial: PlayDetails = {
     room: facts?.room ?? "",
@@ -302,7 +306,7 @@ export function DeathSceneDialog({
                     }
                   }}
                 >
-                  {cause === 'minion' && selection.killer === 'Geppetto'
+                  {cause==='killer'&&selection.killer==='Grimlash'?<img src={characterImages.Grimlash} alt="" style={{objectPosition:'50% 0%'}}/>:cause==='terror'&&selection.killer==='Grimlash'&&GRIMLASH_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={grimlashArt(GRIMLASH_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:cause === 'minion' && selection.killer === 'Geppetto'
                     ? <ModuleArtwork className="geppetto-cause-art" art={{src:geppettoPuppets,atlas:{width:1254,height:1254,x:421,y:3,cellWidth:412,cellHeight:412}}}/>
                     : cause === 'killer' && selection.killer === 'Evomorph'
                       ? <ModuleArtwork art={evomorphStageArt(facts?.moduleContext?.evomorph?.stage)} />

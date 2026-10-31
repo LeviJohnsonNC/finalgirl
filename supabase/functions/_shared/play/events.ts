@@ -1,3 +1,4 @@
+import { resolveGrimlashAction, validGrimlashAction, isInitialGrimlash, grimlashParent, type GrimlashAction } from './grimlash.ts';
 import { resolveKonradAction, validKonradAction, validKonradObservation, isInitialKonrad, konradParent, type KonradAction } from './konrad.ts';
 import { resolveEvomorphAction, validEvomorphAction, validEvomorphObservation, type EvomorphAction } from './evomorph.ts';
 import { validCreechAction, validCreechObservation, type CreechAction } from './creech.ts';
@@ -76,6 +77,7 @@ export interface PlayDetails {
   killerCard?: string;
 }
 export interface PlayEvent extends PlayDetails {
+  grimlashAction?: GrimlashAction;
   grovesReference?: true;
   /** One explicit location action can also update selected Inkanyamba. */
   grovesAction?: GrovesAction;
@@ -145,6 +147,8 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if(e.grimlashAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='grimlash'||!validGrimlashAction(e.grimlashAction)))return false;
+  if(e.moduleData?.module==='grimlash'&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.grimlashAction&&!isInitialGrimlash(e.moduleData.changes))))return false;
   if(e.konradAction!==undefined&&(e.kind!=="module"||e.moduleData?.module!=="konrad"||!validKonradAction(e.konradAction)))return false;
   if(e.moduleData?.module==="konrad"&&(e.kind!=="module"||!validKonradObservation(e.konradAction,e.moduleData.changes)))return false;
   if(e.evomorphAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='evomorph'||!validEvomorphAction(e.evomorphAction)))return false;
@@ -222,9 +226,25 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validEvomorphHistory(log) && validKonradHistory(log) &&
+    validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
+}
+export function canUndoGrimlash(log:readonly PlayEvent[],target:string):boolean {
+ const entries=summarizePlay(log).entries,item=entries.find(e=>e.id===target);
+ return item?.moduleData?.module!=='grimlash'||grimlashParent(entries)===target;
+}
+export function validGrimlashHistory(log:readonly PlayEvent[]):boolean {
+ for(let i=0;i<log.length;i++) {
+  const e=log[i],prefix=log.slice(0,i),entries=summarizePlay(prefix).entries;
+  if(e.kind==='undo'&&!canUndoGrimlash(prefix,e.target!))return false;
+  if(e.kind==='restore'){const old=prefix.find(x=>x.id===e.target);if(old?.moduleData?.module==='grimlash'&&grimlashParent(entries)!==(old.grimlashAction?.parent??'root'))return false;}
+  if(e.moduleData?.module!=='grimlash')continue;
+  if(!e.grimlashAction){if(prefix.some(x=>x.moduleData?.module==='grimlash')||!isInitialGrimlash(e.moduleData.changes))return false;continue;}
+  const changes=resolveGrimlashAction(e.grimlashAction,moduleState(entries,'grimlash'),entries);
+  if(!changes||JSON.stringify(Object.entries(changes).sort())!==JSON.stringify(Object.entries(e.moduleData.changes).sort()))return false;
+ }
+ return true;
 }
 /** Replay canonical linked changes; key order is irrelevant after JSONB roundtrips. */
 export function validKonradHistory(log: readonly PlayEvent[]): boolean {
@@ -325,6 +345,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       frightParent = original.id;
     }
     if(original.moduleData?.module==='konrad'&&original.konradAction&&!resolveKonradAction(original.konradAction,moduleState(summary.entries,'konrad'),summary.entries)){summary.inactive.add(original.id);continue;}
+    if(original.moduleData?.module==='grimlash'&&original.grimlashAction&&!resolveGrimlashAction(original.grimlashAction,moduleState(summary.entries,'grimlash'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='evomorph'&&original.evomorphAction&&!resolveEvomorphAction(original.evomorphAction,moduleState(summary.entries,'evomorph'),summary.entries)){summary.inactive.add(original.id);continue;}
     const e = { ...original };
     if (e.kind === "killed" || e.kind === "saved") {

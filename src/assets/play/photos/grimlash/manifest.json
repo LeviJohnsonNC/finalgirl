@@ -1,0 +1,1106 @@
+[
+  {
+    "id": "identity",
+    "source": "exec-be07568d-2d38-441c-bed4-81f95c250617.png",
+    "nativeWidth": 1254,
+    "nativeHeight": 1254,
+    "sourceSha256": "279ea534aca6d5d09d176b439236174b9fd6f672ba4731a6789fc9414e8f425a",
+    "identity": {
+      "path": "src/assets/characters/ai/grimlash.png",
+      "width": 768,
+      "height": 768,
+      "quality": 85,
+      "bytes": 996370,
+      "sha256": "7e6436fdb6ae982a670413ce218ac4cc4858ea5a1525bb9520c48ac73f8913fb"
+    },
+    "portrait": {
+      "path": "src/assets/collection-portraits/ai/grimlash.webp",
+      "width": 256,
+      "height": 256,
+      "quality": 85,
+      "bytes": 18396,
+      "sha256": "d989393081f7f5a7f179d69f2e3d05703255ca55b7d5877d530ba30f09409b35"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "header",
+    "source": "exec-5176a49d-7148-45b1-9967-ba1323c10b3e.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "195e8c339cd9203e874872054a0bc5c80eec3b07ac2b6f2614aaccb8039ce2aa",
+    "scene": {
+      "path": "src/assets/play/banners/grimlash.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 108986,
+      "sha256": "d45dea60036fa585a421d3990c48cdc5a5e7cc5ccdb3f020f3b8312e6f339b50"
+    },
+    "position": "75% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "madness-0",
+    "source": "exec-c47adb17-17b2-4c91-a686-09f7bea71b75.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "87ae586c52a8bbef9dc1e2ce717d25adae184528da9b97bdeebf659dff43687e",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/madness-0.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 68108,
+      "sha256": "1f85f6a38fa6c76e36735e37a189a7d7537de7a16b4c23eff220005d55268326"
+    },
+    "position": "75% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "madness-2",
+    "source": "exec-030d6a23-cf12-4b7f-858a-456e8de1ce65.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "748cc52e1f792ab545af56ce03b9f5ad532c3bc733e927adaa7a214cb46f7ff4",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/madness-2.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 103614,
+      "sha256": "c9c5bf90b2238bb7f9465bee4e5ae99b37aef930802a184097f050b118294d54"
+    },
+    "position": "75% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "madness-1",
+    "source": "exec-d56aeb87-c276-4e25-b4d0-136a41ac04c9.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "a244db15966b5e7be5e78827b73fa1e27dc22ee6b2ecf56513a39c802fdb383a",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/madness-1.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 86048,
+      "sha256": "137f1abce79dd3bdc4f7a03d7f9740c5c6f227b26670342e706cd3d4008f3eca"
+    },
+    "position": "75% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "madness-4",
+    "source": "exec-7a16986f-634e-4668-af62-9fce80f74ad2.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "5486a86c43766fa9e7076e3b66fa41f843e2c3af3971a21133df53decf20ab73",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/madness-4.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 90940,
+      "sha256": "372e8de62575de0b44e5c657f49a13fcbeedbaf8d0004959f17cc875062b6004"
+    },
+    "position": "75% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "madness-3",
+    "source": "exec-b6626255-55a7-4b2f-b760-d5c305a0fac7.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "fa6555cd2d278244336654f71f604831061d06d79b7acb6bb81e81c11b10d308",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/madness-3.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 93072,
+      "sha256": "8fa1ea77a4885e6b2fbd833b0e6fd2fe0157bff98962c856eb8cc34c9e93d90b"
+    },
+    "position": "75% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "madness-6",
+    "source": "exec-d81feb14-b8f6-4992-b9bf-ef2921309ed7.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "377a5013697dbe946924518e54a946c5e55f8ee530d95bce2eaaa690d81cf932",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/madness-6.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 109934,
+      "sha256": "c67d94ebce320c22b4c70534d6be34b5655bcb061c684c60c95f6d7207b6b9bb"
+    },
+    "position": "75% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "madness-5",
+    "source": "exec-b7acb073-a29f-4a4b-b971-b12bf5c2b442.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 940,
+    "sourceSha256": "022365620fdcf25d74ec8ccbac55a176bd64fa7d0e488b1468826662330bc241",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/madness-5.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 116482,
+      "sha256": "a4d5bbf332b37352ddf6e7bac01ea96708250f30ca849d0ead3a109c5c0caa62"
+    },
+    "position": "75% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "madness-7",
+    "source": "exec-18f512c3-b6c2-45ff-b514-32e05cdd3abc.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "f5ec956dad9bfa1cfc1542953ccd17d6a107af9019ba00c82b0d7199c8775b05",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/madness-7.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 100902,
+      "sha256": "953122f9b769beda68f77d52a2474d758bee658121168e321523201cc170adb5"
+    },
+    "position": "75% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "madness-8",
+    "source": "exec-1223cdce-47fc-4e15-a909-157bcb977027.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "3397e207f918401836c8f4b181ca2563f13bffc5254151912d3ecbd9a311db58",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/madness-8.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 88506,
+      "sha256": "42fae2b6d24a35ebcf616de64dfbd45ffcf847f7d16e25b340bb78326611c2f9"
+    },
+    "position": "75% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "madness-10",
+    "source": "exec-5dd4dcc8-f270-467d-8b7f-793ffda4f5fc.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "089587f635f892f2c519a7e97264c2c92b199c3ddb3ca7207f40e389b9731fed",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/madness-10.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 91186,
+      "sha256": "01eb52a547cf2b9e6485d2b034e18912c6ea0f258cf6ecb748c5f8fa89d93dda"
+    },
+    "position": "75% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "madness-9",
+    "source": "exec-562fb67a-6956-4ae5-a61b-dde571c79ac5.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "5e7e0de88a47305163ccec3f6da6cdb7a76d025debbb27b8641e9dc4263dbee7",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/madness-9.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 99296,
+      "sha256": "373a7373ce105658e154d3c642668b1798681db157b840575d89e656a45dfe7e"
+    },
+    "position": "75% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "hollow-soul",
+    "source": "exec-55b49ec6-c4d7-449c-9947-776b6e05ef7f.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "7fb67dd36479f4dd9e604da98e33c60fc1e5843033efd1538670d4dde172fb49",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/hollow-soul.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 142712,
+      "sha256": "b42f6e87351c3ae5b7eead49736a5dad9ceb44c285801353c2422a902c275484"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/hollow-soul.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 12738,
+      "sha256": "3cc2eae42ddc77b99114b98eec822e24fd37b5a0547734dd6ca3ff1a92c76bfd"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "vile-prowess",
+    "source": "exec-14ec0324-da4f-4c25-ad44-f0a0e4a63e67.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "22c874eb9ca6113eec0275c4df1f582f15e26e60f84cf9e26f81aa9ae24ecbe9",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/vile-prowess.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 131898,
+      "sha256": "20d12aaca8b86936b83a714a21b34b693b7270ce7e421b0f827fcc773a477990"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/vile-prowess.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 11058,
+      "sha256": "225589b4be697b3458e12c3e165c6164f00bfcae80eabdb7f856a409857a4257"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "thorn-choked-veins",
+    "source": "exec-191a2656-2755-47f3-bc42-d6a7dd2a4446.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "57b8f1f83c1df4d4e303f7a9542f4354205df7f3350efa4296447b39cca350d0",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/thorn-choked-veins.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 92776,
+      "sha256": "20cc741785a9f42d42fb66920ede4f40978d706759951d22b51eb28d7f4b9872"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/thorn-choked-veins.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 10114,
+      "sha256": "19d0c7e8b0ff18b8028218dfb6aef7e830c3dd1dd8b2e01b8b05a5f241433834"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "decaying-humanity",
+    "source": "exec-4c506a2f-54cc-49d7-bf1f-c40d3181bb95.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "aa9e6d74761eb9c76e0f96dc8fdec21d74f7190eb5c6421625f8158875b36b44",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/decaying-humanity.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 82744,
+      "sha256": "df04d1b9e32c1635afd07ecfd4d9dbd2a584de16193231db30a6c7b2c6681b88"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/decaying-humanity.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 8790,
+      "sha256": "c9c1ccaaf2890606cef26f6eaea34051cb932a0f33cea81c1386b18401c26927"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "blooming-pestilence",
+    "source": "exec-9a7a9e8c-ef3a-4ec9-96e9-b17c5d310733.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "b340b5b6535318248bb286e6830334907fbb4d9af4902465f05b1bff8e860882",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/blooming-pestilence.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 125670,
+      "sha256": "d6b0bc489959bccd53c5f4a349a42990eaa5b831c8d59b695bf49217e739efd6"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/blooming-pestilence.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 13640,
+      "sha256": "ee3bfdcb10f26aa0e7d1bc3bb22400545f2d39ae5f1d3ff81671f76abad096f4"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "vulgar-regrowth",
+    "source": "exec-5616e378-ebb5-4b85-820d-5d079249cfa9.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "0e1f5c9dcee5b2043bc5eff145c844359f882cd1632417bfdf05cfa5c64f2132",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/vulgar-regrowth.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 144892,
+      "sha256": "a26c9202269526599613fc54f8447addaeb5584a079167e60695fff8636ad1b8"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/vulgar-regrowth.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 14142,
+      "sha256": "7d6295bab255077d3ee0e1017b3e628fc7d06c040bfe261c90401f229854fe7b"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "visions-of-the-beyond",
+    "source": "exec-aa54b300-b9c3-4fe5-8469-e3db5f341441.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "cb20ea6eb31dbbafc02551ea6e0502c1473f6d9d82a9312013626e4b23c107e2",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/visions-of-the-beyond.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 99352,
+      "sha256": "72287f85812da2bcba4c7671116b0991f58f7680f1f8173b2568f290b68ed13f"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/visions-of-the-beyond.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 8000,
+      "sha256": "1fb86d48034ebf338ac5b93428d56063ca53bc19a73843c69555e82b604e1899"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "blood-of-the-reaper",
+    "source": "exec-3b23b565-ee2d-413d-9b45-33ee7229a61a.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "a3a5b2c34e23d954eb6343c489254f0c2c70f17ac08f4f817c1ab62e03c7d0ae",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/blood-of-the-reaper.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 82,
+      "bytes": 145242,
+      "sha256": "cdeac1b356c0b2a5c392a23466274972da1831e7c30e6e1d2f424f3e95ac61ff"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/blood-of-the-reaper.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 14466,
+      "sha256": "94436c0ad004af5757362330715d3bc056917f7513578de87b49d6d1614b6dab"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "all-consuming-energy",
+    "source": "exec-266888cd-57ab-4c4e-97e8-8b5a6f91e24d.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "abc1f4646a81c0626265b2dd210d37283673cbbd7ec18c23698ed234d64b9a94",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/all-consuming-energy.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 101124,
+      "sha256": "1e15aa3dbf7812351cdb43651801fa098f19d7c4b047e27855c51325b73425a7"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/all-consuming-energy.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 9452,
+      "sha256": "d9cb5d64b0d4a8caad0e4c67aca8399346109988bb9d575efdda6327bcfacdaa"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "primal-awareness",
+    "source": "exec-c58fc84a-7e5c-4d02-8436-9e9cd8ce95de.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "905ce06afa7ca59f1564d480fe0c05ff7adec31fd3f08aa21a29ce392c7bdf6e",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/primal-awareness.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 145800,
+      "sha256": "776448042621850696fe1e319e52a48d660d2cb69f47eca077d942995acc2529"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/primal-awareness.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 11498,
+      "sha256": "ecb98706e67ed336be280cd0d9dc1b725cb4017dd26e2a9c3ac72f5b78815fe1"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "fiendish-vitality",
+    "source": "exec-c350c7b2-9e44-4667-9bb8-6fe765d0501c.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "a4651c311fe274a7595f697f01ce505e99dead3172603e1f0b9563f06e02c3d1",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/fiendish-vitality.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 124470,
+      "sha256": "5f383a7b1732ec4a6096c82f8e343ef8d859d1833045d81982b3c191c9a5ef63"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/fiendish-vitality.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 13304,
+      "sha256": "2cffb86006e5768fcaa478f0aed8133c72ab33e9dd0c32e4b862b471a0340491"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "unnatural-possibilities",
+    "source": "exec-7889056f-eaea-4484-b8c5-864787112cb4.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "d451277725e3954176c1e80e135ac048ee4b8cff475a0fb4517cbe18a034a2d0",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/unnatural-possibilities.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 74260,
+      "sha256": "2336d7affe11c8ab6faf63b9f0a420bd6b9092eb2949b3048d38fc9d0e7346d9"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/unnatural-possibilities.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 6614,
+      "sha256": "1b8653b325ae18a286df30da6940b153a1d41cdaa98d50ec07d8377984cec492"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "entangled-fates",
+    "source": "exec-9990cbce-7d8c-4cad-b700-8c770d80fb87.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "e858c67152bb5dbeecb80946bd4638952ca042658a7d9b07fff234bc8ebb3e62",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/entangled-fates.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 111480,
+      "sha256": "f3e9d4a51898d68e70519344879096494a35f5c824d7db0b4e2c7863d941419c"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/entangled-fates.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 9754,
+      "sha256": "f495c56d642a0f5eb5e14896e81645e84135e78c6dde09df45d514b0765d20a5"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "one-with-the-land",
+    "source": "exec-fccdbe4e-7483-405d-bbbc-947547b57d8d.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "022b112e5427674cedd9f644749a5232634d3ddbdc63483623ab20885ba427c5",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/one-with-the-land.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 77296,
+      "sha256": "dfa4086190b0f787da03cbde453e48675b50a5b4955a1bba0e4ef6343c10b5c2"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/one-with-the-land.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 9404,
+      "sha256": "0fde2df11c1c152fb5aed71154453ac642ed3c0d6a1fe74f80bc2ea4d10537f5"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "telluric-visions",
+    "source": "exec-c6b4cc60-95f2-4e4a-a44b-bdc796844e4a.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "2560d41a241374009a4a5abf58173d6e6b066025fde8d3b09f5bf957ce88ca5e",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/telluric-visions.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 114276,
+      "sha256": "0a7c39a8ff1e9f22a6824960413d667733c278e62722cfcb0da020ae10d5831c"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/telluric-visions.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 11974,
+      "sha256": "bf9c7502e62b3dd63bea1007180c3499318eab9f2d1f6b43b6595ff9e229298f"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "flaming-eyes",
+    "source": "exec-e693ba5d-9bcd-4df2-af3f-2e85c0c5cdda.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "1c5ee491bdb431f39527f9a32881d16ab8036698866450f38803d79ac154e6de",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/flaming-eyes.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 87744,
+      "sha256": "5169069e4ebf796105421b22b68ace1de93476788805da0ab1a75a25747fd08a"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/flaming-eyes.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 9714,
+      "sha256": "fe0aa2a8c0520c0166fb2ddf1ecffc07cb46fdd87448fada2af06489fa6ea968"
+    },
+    "position": "50% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "burning-sickle",
+    "source": "exec-04430944-453d-4abf-b10f-2e49651a08ca.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "3a879851d452340d187863ebfadbb567723d06bf60b7100d44a8e9818cef7917",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/burning-sickle.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 122226,
+      "sha256": "d83802065468c58e4985961219c734d66960eb9a01f3bfc965405a7f878b6448"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/burning-sickle.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 11754,
+      "sha256": "51835de65b494b51ca109a2e60ae6e59b967fe77bedf98fdef50e406d6960b2e"
+    },
+    "position": "50% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "rite-of-the-corrupted",
+    "source": "exec-a74ec860-4672-4abf-bab4-942777fe5082.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "1a1cb21b01d6e32020ad86fb2f40c1b81e137d142d009ced96e510fe2a16b409",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/rite-of-the-corrupted.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 124616,
+      "sha256": "f33cfd9897c9a8a5404e3cacd0c3489da20bb6308dd5579669cf988bbc36e7e9"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/rite-of-the-corrupted.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 10752,
+      "sha256": "6140bef2c7d023190f0a909ca9e441e11cdf7c9ccb20792a772368c8e09ddb6b"
+    },
+    "position": "50% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "root-bound-curse",
+    "source": "exec-50e685bb-0589-4835-bf5d-33a77e4ab547.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "f900393ee76211b26684f2425c2c2399d265b068e2418f3d9a5d4a8d85bbb9a5",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/root-bound-curse.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 78,
+      "bytes": 140996,
+      "sha256": "36e1dae96d946516f186d12d09c15305a5915ff3bc9ede756b378957590786e7"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/root-bound-curse.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 16452,
+      "sha256": "9861bc949009d4b527a2184d8aabda74f4480d61edc12c7513849a8abd7fafa9"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "rite-of-the-old-one",
+    "source": "exec-36827c2d-f06a-4c15-a917-e9308748bc08.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "6671b93a58a6f6aac867c111a92ced16667922213182bbb11c915a3a0f1fe692",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/rite-of-the-old-one.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 145448,
+      "sha256": "0b81592a995c31b22ed446304de4fedf7a72b6f9d8a36ee2ec855efca2c9badd"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/rite-of-the-old-one.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 12630,
+      "sha256": "e869df1128ed7ef4450a486b704e46aecc66dbea7ae816a3ba58cf8739859861"
+    },
+    "position": "50% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "hunger-of-the-old-gods",
+    "source": "exec-06b4564e-0498-465c-a128-8dd2ae4eda65.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "d390165f39779d6e734078d9289403e040a02b8ed54433da207de7c7be1df9fa",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/hunger-of-the-old-gods.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 127778,
+      "sha256": "05a98681fda4a7c3df5c359c28a9708f33793ec068c4a1f045ee642ea709dc48"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/hunger-of-the-old-gods.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 10662,
+      "sha256": "727cc9c93c798c733f357ebf6feffa474e5a814374de6572ed05d697ba867c49"
+    },
+    "position": "50% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "fields-of-madness",
+    "source": "exec-381e93aa-9208-416a-8484-610f9b97053b.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "703fd36dc4cecd12d023caaaf1ac6567a23c2cc7d8addac2af08dd35676ec0f5",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/fields-of-madness.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 120776,
+      "sha256": "76ddc15e9af541d84017adfe69e245c8c68ac1bea003eab881f7c4ffabc4d805"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/fields-of-madness.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 11676,
+      "sha256": "8e1209d15379bbc7f7fe3fa57815750e967c781d15ccd3fac187bd3a2eeee391"
+    },
+    "position": "50% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "ancient-abomination",
+    "source": "exec-d18db860-6124-4dfb-b77f-ebaf62deac3f.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "fe1c0e6fa67c77a2b034c1517ee1d64b2b8bdfbad03ae8e248d60b22f00342e0",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/ancient-abomination.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 146732,
+      "sha256": "0a085ddd03658cf3393b7485f5686c866ebcc18a04849d09e6cf590caeb35d76"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/ancient-abomination.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 12838,
+      "sha256": "0043ff9d9cc315f248eab52a9e41d2aa4a746e7693ff193e4cb7ab0eb183ebb9"
+    },
+    "position": "50% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "withered-harbinger",
+    "source": "exec-8f312d00-e5dd-45bf-802e-699931c903d3.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "93f6ce7de1337fcf2117e1ade273678e345b24c0cde50f3e2fbf93ae93b4ff78",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/withered-harbinger.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 145366,
+      "sha256": "e36a4dfce73e606aaab83085256ba2de54296192c85d239595207402d7ca73bd"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/withered-harbinger.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 13146,
+      "sha256": "1a229819bb8072d2e16b7a79f644784f5b76486e83d17a989ec6bca09e58842e"
+    },
+    "position": "50% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "god-of-blood-and-grain",
+    "source": "exec-cad8ba13-0854-44d1-802e-d8f86693deb1.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "a2c554bade9e87a3252413941836c78d783b8a20fe66156a96786728c159c1ee",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/god-of-blood-and-grain.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 126884,
+      "sha256": "2f5402261df937cd0afed89fb0b6baacc5f55eea5ffd0751a61a72aa8b853b12"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/god-of-blood-and-grain.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 12152,
+      "sha256": "1399fada39fb2bf98d8c0a2178f9ac8dc3379523b69e00dc59883a5c02e54fb9"
+    },
+    "position": "50% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "consumes-all",
+    "source": "exec-83025913-0d5b-4888-a0d2-df452cd6cb1a.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 940,
+    "sourceSha256": "4d5432fdffa87bb0f3ba406cd8a77c85596cace6bb7007d751c4a26007b2c655",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/consumes-all.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 116224,
+      "sha256": "8e48559ce50bed0bbcffa22733c1f53cf2b635a5a54b8e5b7df179751ed9319f"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/consumes-all.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 11334,
+      "sha256": "7efae2b5fa16535e3374ae36829008358fbce889623c886e39e5978cfeb59514"
+    },
+    "position": "50% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "death-followed",
+    "source": "exec-3f2f42a5-88cb-4460-a197-44d2861871b2.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 940,
+    "sourceSha256": "e15f3d4994a4e5c7dfb70f7b35b67a3070166587a0e076cf2602cbc45f07ba84",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/death-followed.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 125374,
+      "sha256": "8d03d97acb20e9778eb914a42d99b6166b206da21d03218b978eadb99b0eb533"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/death-followed.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 11906,
+      "sha256": "a0dc04e445cad63626a9534b19e0f1cb3e5e183140539b7a1c3901033ede2187"
+    },
+    "position": "50% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "bleed-upon-the-earth",
+    "source": "exec-91acf9db-d69b-426b-b81c-a60cb351eb60.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "a2ebaee101060000089400f2f79f5eda0468f346967d8fbd637844b7d79b14fc",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/bleed-upon-the-earth.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 154468,
+      "sha256": "58a6f8d9c63f17cb01731af7e008137cb19c098701f7aae5bc9a51b9088a3a77"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/bleed-upon-the-earth.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 14998,
+      "sha256": "95d27ca0025cc8f0f5031922ad39c702085efe9ad719f494747ab9f037f0903d"
+    },
+    "position": "50% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "bad-moon",
+    "source": "exec-18605a7a-92f4-4225-b586-bb6760579ff2.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "0a216d154279b1dba5c849f2a147d3ea922bade7f8b477cf8a3220141bbb9c52",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/bad-moon.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 112290,
+      "sha256": "97207371cdbb3eaebd6d3d66818839d54ca6bddff0e70b69500efa2bf59fe3f3"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/bad-moon.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 10176,
+      "sha256": "413422e0b7c28b376e6e6a2d1757b7e3b61b69c049d320c11c66078909e77901"
+    },
+    "position": "50% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "water-the-earth",
+    "source": "exec-076aa7ae-e4f2-4664-91d1-c56f3dfe42e3.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "8f58ff2c91db86dcec5098943b7aeeb6849555a09ab241cea6fe69323a2605c0",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/water-the-earth.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 126712,
+      "sha256": "32be21b3ab66ef46c487aaac9c93e1d24d6769af8e0ddf1a1784bd9b624450f2"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/water-the-earth.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 13374,
+      "sha256": "28ba2646c64275115ac47e4153b9a18107bf2d47c7f13350d58358b471db454e"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "shadows",
+    "source": "exec-d0c5e9ff-e62c-46db-8860-d0f8830bf191.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "228149b5b1a71a8fe25b2249f3c41d80207dcf6d481d1e90d6bb7263c33662f1",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/shadows.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 152948,
+      "sha256": "13fbbd2141d7d292ee3361329ae0365a98907f2306a425fa81b05f8e819d7326"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/shadows.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 10096,
+      "sha256": "e9477036fe5d44d06ade71c68ac77bff86209db9c302e3cc49d0ce5c4f8c14da"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "roots-of-insanity",
+    "source": "exec-1f64d806-3ec0-4729-94d9-66ce17668cce.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "b94223e4b39bdcdea0c032aedbb92fec22cf63bb94787658e8c856e8888f2d44",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/roots-of-insanity.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 140822,
+      "sha256": "0f270f8878a0c9743b38d79bf8105a2c5cb282ddca16a743552a35243bc2c5c7"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/roots-of-insanity.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 11308,
+      "sha256": "55f34b7ecb279820f276f90eb6f4446a534d8856608254e1901809eaa327d299"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "violent-growth",
+    "source": "exec-e2648809-a253-426e-ad94-63baf2527802.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "9044b9081246c4ad7af78ce34eb982acb4ab9b2cc0667de4c46900f781f0c7f4",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/violent-growth.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 82,
+      "bytes": 159342,
+      "sha256": "9943cfa85035b2dd68b38b345a7cffb06fb69d7c5fd5522074c5f64429f547f2"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/violent-growth.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 15226,
+      "sha256": "e45dfd2d7cb4fef27ddaebf77750c2e68d5e31c817eacd7ca349c9f2135d9f48"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "always-here",
+    "source": "exec-0a61df9c-35cc-4775-97ce-54e270c8ccad.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "3a3494b3e427d711e6c82315f7ff0b4a426136520412ac8139f77cf3928776ba",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/always-here.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 82,
+      "bytes": 155450,
+      "sha256": "caaaeaa48cb7669959077a125b40ba365f76eedbf10e86e6c0dea2276cf0c133"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/always-here.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 14028,
+      "sha256": "66b8ca38814e3d4b77a34254439d13077c50a14103be627767711b1fa34ef4e9"
+    },
+    "position": "50% center",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  },
+  {
+    "id": "scarecrow",
+    "source": "exec-f07b2120-7b80-46b3-99f4-7fee65bf3b11.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
+    "sourceSha256": "763c013745b1969631d40df27067ad19afd012aabcacfa2e01a256dced8d5590",
+    "scene": {
+      "path": "src/assets/play/photos/grimlash/scarecrow.webp",
+      "width": 1280,
+      "height": 720,
+      "quality": 85,
+      "bytes": 93618,
+      "sha256": "19716048f457d12e0f9a3b9f7d5098d308d7ebe4652f7442f12abf300691062e"
+    },
+    "thumbnail": {
+      "path": "src/assets/play/photos/grimlash/thumbs/scarecrow.webp",
+      "width": 320,
+      "height": 180,
+      "quality": 80,
+      "bytes": 8592,
+      "sha256": "a96729dd3c0b50d9a013d88a49a003583ff5d568f32e998f587a9f3248a47a81"
+    },
+    "position": "50% 5%",
+    "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
+  }
+]

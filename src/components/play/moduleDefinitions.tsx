@@ -1,3 +1,6 @@
+import { GrimlashControls } from './GrimlashControls';
+import { grimlashArt } from './grimlashArt';
+import { harvestLevel } from '@/lib/play/grimlash';
 import { KonradControls } from './KonradControls';
 import { konradArt } from './konradArt';
 import { konradState, konradToggle, KONRAD_FUNCTIONS, KONRAD_SHAFTS } from '@/lib/play/konrad';
@@ -50,7 +53,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -76,6 +79,7 @@ const peopleSummary = (
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
 export const moduleDefinitions: Definition[] = [
+ {id:'grimlash',owner:'killer',match:'Grimlash',title:'Grimlash · The Old One',art:grimlashArt('header'),capabilities:['reveals','minor-power'],summary:s=>`Harvest Madness ${s.position===undefined?'not recorded':harvestLevel(s.position)===4?'Skull':`Level ${harvestLevel(s.position)} · ${s.position}/10`}`,Controls:p=><GrimlashControls {...p}/>},
  {id:"konrad",owner:"location",match:"USS Konrad",title:"Aboard USS Konrad",art:konradArt("header"),capabilities:["character","event","minor-power"],summary:state=>{const s=konradState(state);
  const describe=(keys:string[],noun:string)=>{const values=keys.map(key=>konradToggle(s,key)),known=values.filter(v=>v!==undefined);return known.length?`${known.filter(Boolean).length}/${known.length} ${noun}${known.length<keys.length?' (partly recorded)':''}`:`${noun.replace(/ (on|open)$/,'')} not recorded`;};
  return describe(KONRAD_FUNCTIONS.map(f=>`system:${f.id}`),'systems on')+' · '+describe(KONRAD_SHAFTS.map(id=>`shaft:${id}`),'shafts open');

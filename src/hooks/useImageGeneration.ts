@@ -15,6 +15,7 @@ const DEFAULT_SETTINGS: ImageSettings = {
 };
 
 export interface GenerateImageContext {
+  grimlashReview?:{loss:import('../../supabase/functions/_shared/play/grimlash').GrimlashLoss};
   konradReview?: {fate:import('../../supabase/functions/_shared/play/konrad').KonradFate};
   story: string;
   killer: string;

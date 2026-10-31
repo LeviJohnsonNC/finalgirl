@@ -1,3 +1,4 @@
+import {grimlashFatal,grimlashParent,resolveGrimlashAction} from '@/lib/play/grimlash';
 import {konradFatal,konradParent,konradState,resolveKonradAction} from '@/lib/play/konrad';
 import {moduleState} from '@/lib/play/modules';
 import {summarizePlay,newPlayEvent} from '@/lib/play/events';
@@ -147,6 +148,7 @@ const IndexContent = () => {
     }
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
       ...(selection.location === 'USS Konrad' && {konradSetupVersion:1 as const}),
+      ...(selection.killer === 'Grimlash' && {grimlashSetupVersion:1 as const}),
       ...(selection.killer === 'Evomorph' && {evomorphSetupVersion:1 as const}),
       ...(selection.location === 'Creech Manor' && {creechSetupVersion:1 as const}),
       ...(selection.location === 'Sacred Groves' && {grovesSetupVersion: 1 as const}),
@@ -166,9 +168,10 @@ const IndexContent = () => {
     const game = getCurrentGame();
     if (!game || game.id !== activeGame?.id) return;
     try {
-      const resolvedOutcome=game.selection.location==='USS Konrad'&&konradFatal(moduleState(summarizePlay(game.playEvents).entries,'konrad'))?'lost':outcome;
+      const grimlashLost=game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(summarizePlay(game.playEvents).entries,'grimlash'));
+      const resolvedOutcome=grimlashLost?'lost':game.selection.location==='USS Konrad'&&konradFatal(moduleState(summarizePlay(game.playEvents).entries,'konrad'))?'lost':outcome;
       const result = game.result ?? recordGame({ outcome:resolvedOutcome, ...game.selection, ...trackedOutcome(game.playEvents),
-        introStory: story, sceneImageUrl, visualBible: bible, finalGirlMaxHealth: observedFinalGirlMaxHealth(game.selection.finalGirl,game.playEvents,game.selection.finalGirlStartingHealth) }, game.id);
+        introStory: story, sceneImageUrl, visualBible: bible, finalGirlMaxHealth: observedFinalGirlMaxHealth(game.selection.finalGirl,game.playEvents,game.selection.finalGirlStartingHealth,game.selection.killer) }, game.id);
       recordedIds.current.add(game.id);
       if (checkpoint(game.id, { phase: 'outcome', result, introStory: story, sceneImageUrl, visualBible: bible })) {
         setCurrentPage('outcome');
@@ -200,8 +203,11 @@ const IndexContent = () => {
         if(!game?.result)throw new Error('The saved ship review could not be read. Please retry.');
       }
     }
+    if(game.selection.killer==='Grimlash'&&formData.grimlashReview) {const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'grimlash');if(state.loss!==formData.grimlashReview.loss){const action={parent:grimlashParent(en),command:'loss' as const,value:formData.grimlashReview.loss,correction:true};const changes=resolveGrimlashAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',grimlashAction:action,moduleData:{module:'grimlash',changes}})))throw new Error('The Madness ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Madness ending is unavailable.');}}
     const {konradReview:_review,...fields}=formData;
-    const outcome=game.selection.location==='USS Konrad'?(konradFatal(moduleState(summarizePlay(game.playEvents).entries,'konrad'))?'lost':formData.outcome??game.result.outcome):game.result.outcome;
+    const reviewedEntries=summarizePlay(game.playEvents).entries;
+    const fatalEnding=game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(reviewedEntries,'grimlash'))||game.selection.location==='USS Konrad'&&konradFatal(moduleState(reviewedEntries,'konrad'));
+    const outcome=fatalEnding?'lost':game.selection.killer==='Grimlash'||game.selection.location==='USS Konrad'?formData.outcome??game.result.outcome:game.result.outcome;
     const updates={...fields,outcome,playEvents:game.playEvents};
     updateGame(game.result.id,updates);
     const result={...game.result,...updates};

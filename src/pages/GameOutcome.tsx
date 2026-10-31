@@ -1,3 +1,6 @@
+import {grimlashFatal} from '@/lib/play/grimlash';
+import {moduleState} from '@/lib/play/modules';
+import {summarizePlay} from '@/lib/play/events';
 import { GameResult } from "@/hooks/useGameHistory";
 import { GameOutcomeForm } from "@/components/GameOutcomeForm";
 import { EndingFormData } from "./TheEnd";
@@ -25,7 +28,11 @@ const GameOutcome = ({
   onDraftChange,
   onSaveResult,
 }: GameOutcomeProps) => {
-  const reviewedOutcome=result.location==='USS Konrad'&&['airlock-loss','explosion-loss'].includes(String(initialDraft?.konradFate))?'lost':result.location==='USS Konrad'&&['won','lost'].includes(String(initialDraft?.reviewedOutcome))?initialDraft!.reviewedOutcome:result.outcome;
+  const grimLoss=initialDraft?.grimlashLoss??moduleState(summarizePlay(result.playEvents).entries,'grimlash').loss;
+  const fatalGrim=result.killer==='Grimlash'&&grimlashFatal({loss:typeof grimLoss==='string'?grimLoss:'unknown'});
+  const shipFate=initialDraft?.konradFate??moduleState(summarizePlay(result.playEvents).entries,'konrad').fate;
+  const fatalShip=result.location==='USS Konrad'&&['airlock-loss','explosion-loss'].includes(String(shipFate));
+  const reviewedOutcome=fatalGrim||fatalShip?'lost':(result.killer==='Grimlash'||result.location==='USS Konrad')&&['won','lost'].includes(String(initialDraft?.reviewedOutcome))?initialDraft!.reviewedOutcome:result.outcome;
   const isWin = reviewedOutcome === "won";
   const locationArt =
     result.location === "Buddyland"

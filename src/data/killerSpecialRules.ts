@@ -140,7 +140,8 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   'Grimlash': {
     narrativeNote:
-      'A pumpkin-headed, fire-wielding entity that emerges from the harvest fields of Shady Acres. Fire is both its weapon and its essence — the autumnal setting amplifies its menace.',
+      'An ancient harvest entity with a charred burning gourd crown, root-like tendrils and ragged dark clothing. Use the selected Location. Harvest Madness has exact positions and Level 0–3; reaching the skull is immediate loss. Kept abilities persist at or above their level; never infer card effects, Children, casualties or death from decorative imagery.',
+    lossCondition:'Harvest Madness reaches the skull beyond Level 3, or the explicitly recorded Telluric Visions loss condition occurs. A game loss does not itself prove zero Health or a physical death.',
   },
   'Mort the Teenage Dirtbag': {
     narrativeNote:

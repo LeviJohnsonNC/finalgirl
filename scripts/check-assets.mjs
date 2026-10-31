@@ -111,3 +111,21 @@ for(const id of evomorphExpected){
  evomorphHashes.add(hash);evomorphSources.add(photo.source);
 }
 if(images.filter(file=>file.startsWith(evomorphDirectory+'/')).length!==evomorphExpected.length)throw new Error('Unmapped Evomorph photograph');
+
+// Grimlash is a complete source-ID catalog, including all physical Madness positions.
+const grimFolder='src/assets/play/photos/grimlash';
+const grimManifest=JSON.parse(readFileSync(join(grimFolder,'manifest.json'),'utf8'));
+const grimCatalog=readFileSync('supabase/functions/_shared/play/grimlash.ts','utf8');
+const grimIds=new Set(['identity','header',...Array.from({length:11},(_,i)=>`madness-${i}`),...[...grimCatalog.matchAll(/\{id:'([^']+)'/g)].map(m=>m[1])]);
+if(grimManifest.length!==48||grimIds.size!==48||new Set(grimManifest.map(e=>e.id)).size!==48||grimManifest.some(e=>!grimIds.has(e.id)))throw Error('Incomplete Grimlash source-ID artwork coverage');
+if(new Set(grimManifest.map(e=>e.sourceSha256)).size!==48)throw Error('Grimlash requires independent scene sources');
+const grimPaths=new Set();
+for(const entry of grimManifest){
+ if(!/^exec-[a-f0-9-]+\.png$/.test(entry.source)||!/^[a-f0-9]{64}$/.test(entry.sourceSha256))throw Error('Missing Grimlash provenance: '+entry.id);
+ const keys=entry.id==='identity'?['identity','portrait']:entry.id==='header'||entry.id.startsWith('madness-')?['scene']:['scene','thumbnail'];
+ if(entry.nativeWidth<(entry.id==='identity'?768:1280)||entry.nativeHeight<(entry.id==='identity'?768:720))throw Error('Upscaled Grimlash source: '+entry.id);
+ for(const key of keys){const asset=entry[key];if(!asset||grimPaths.has(asset.path))throw Error('Missing/duplicate Grimlash derivative: '+entry.id);const b=readFileSync(asset.path);if(b.length!==asset.bytes||createHash('sha256').update(b).digest('hex')!==asset.sha256)throw Error('Grimlash digest mismatch: '+asset.path);if(key==='thumbnail'&&b.length>35*1024)throw Error('Grimlash thumbnail budget');grimPaths.add(asset.path);}
+}
+const actualGrim=images.filter(p=>p.startsWith(grimFolder+'/')||p==='src/assets/play/banners/grimlash.webp'||p==='src/assets/characters/ai/grimlash.png'||p==='src/assets/collection-portraits/ai/grimlash.webp');
+if(actualGrim.length!==grimPaths.size||actualGrim.some(p=>!grimPaths.has(p)))throw Error('Orphan Grimlash artwork');
+console.log('Verified 47 independent Grimlash scenes, identity and 35 card thumbnails.');

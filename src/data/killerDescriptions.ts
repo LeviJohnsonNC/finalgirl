@@ -1,3 +1,4 @@
+import {GRIMLASH_VISUAL} from '../../supabase/functions/_shared/play/grimlash';
 import { INKANYAMBA_VISUAL } from "../../supabase/functions/_shared/play/inkanyamba";
 import { FRIGHT_VISUAL } from '../../supabase/functions/_shared/play/fright';
 import { GEPPETTO_VISUAL } from '../../supabase/functions/_shared/play/geppetto';
@@ -44,9 +45,7 @@ The clothing is a gritty "urban warrior" ensemble: a deep-red hoodie worn under 
 
 The overall aesthetic is "synthwave noir"—a gritty, neon-soaked homage to 80s action thrillers and retro-futuristic vigilantes.`,
 
-  "Grimlash": `A tall, imposing figure with a lean, rigid frame and a menacing, supernatural presence. Its head is a large, weathered jack-o'-lantern with a jagged, sinister grin carved into its surface. Intense, flickering flames erupt from the hollowed-out eyes and mouth, casting a hellish, orange glow over its torso.
-
-The figure is dressed in a dark, formal suit that is profoundly distressed, scorched, and caked in grime. The fabric is shredded at the cuffs and hem, hanging in tattered ribbons that suggest a long period of decay or a recent emergence from fire. Its hands are entirely engulfed in roaring flames, held slightly away from its body in a vigilant, predatory stance.`,
+  "Grimlash": GRIMLASH_VISUAL,
 
   "Evomorph": `A monstrous, biomechanical apex predator with a powerful, sinewy build and a terrifying, lethal presence. Its anatomy is a grotesque blend of glistening, deep-red muscular tissue and pale, exposed skeletal structures that look both organic and engineered. It occupies a low, aggressive crouch, conveying a sense of coiled tension and imminent violence.
 

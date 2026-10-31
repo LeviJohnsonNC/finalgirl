@@ -174,11 +174,11 @@ export function PlayScreen(props: PlayScreenProps) {
   const { item: personalItem } = usePersonalItem(finalGirl);
   const startingValues = playStartingValues(killer, finalGirl);
   const { characterImages, aiEnabled } = useActiveImages();
-  const killerPortrait = killer === "Evomorph" ? evomorphStageArt(moduleState(summary.entries, "evomorph").stage) : {src: characterImages[killer], position: undefined};
-  const finalGirlMaxHealth = observedFinalGirlMaxHealth(finalGirl, events, props.finalGirlStartingHealth);
+  const killerPortrait = killer === "Evomorph" ? evomorphStageArt(moduleState(summary.entries, "evomorph").stage) : {src: characterImages[killer], position: killer==='Grimlash'?'50% 0%':undefined};
+  const finalGirlMaxHealth = observedFinalGirlMaxHealth(finalGirl, events, props.finalGirlStartingHealth, killer);
   // Legacy sessions can use the catalog to bound new input without backfilling observations.
   const trackerLimits = { ...stateLimits, finalGirlHealth: observedFinalGirlMaxHealth(
-    finalGirl, events, props.finalGirlStartingHealth ?? startingValues.finalGirlHealth,
+    finalGirl, events, props.finalGirlStartingHealth ?? startingValues.finalGirlHealth, killer,
   ) ?? stateLimits.finalGirlHealth };
   const [message, setMessage] = useState("");
   const [announcement, setAnnouncement] = useState("");
@@ -269,7 +269,7 @@ export function PlayScreen(props: PlayScreenProps) {
   const setState = (field: StateField, value: number | null) => {
     if (
       value !== null &&
-      (!Number.isInteger(value) || value < 0 || value > trackerLimits[field])
+      (!Number.isInteger(value) || value < 0 || (value > trackerLimits[field] && !(killer==='Grimlash' && field==='finalGirlHealth' && value < (summary.finalGirlHealth??0))))
     ) {
       setMessage(`Use a whole number from 0 to ${trackerLimits[field]}.`);
       return;
@@ -423,6 +423,7 @@ export function PlayScreen(props: PlayScreenProps) {
         data-healthless={killer === 'Poltergeist' || undefined}
       >
         <h2>Track more</h2>
+        {killer==='Grimlash'&&summary.finalGirlHealth!==undefined&&finalGirlMaxHealth!==undefined&&summary.finalGirlHealth>finalGirlMaxHealth&&<p role="status" className="grim-health-discrepancy">Recorded Health {summary.finalGirlHealth} exceeds the current maximum {finalGirlMaxHealth}.</p>}
         <div className="play-state-grid">
           {orderedStateFields.filter(field=>killer!=='Poltergeist'||field!=='killerHealth').map((field) => {
             const value = field === "killerHealth" && summary.killerHealthTracking === false ? undefined : summary[field];
@@ -506,7 +507,7 @@ export function PlayScreen(props: PlayScreenProps) {
                       <button
                         aria-label={`Decrease ${stateLabels[field]}`}
                         disabled={value <= 0}
-                        onClick={() => setState(field, field === 'finalGirlHealth' ? Math.min(value - 1, trackerLimits[field]) : value - 1)}
+                        onClick={() => setState(field, killer==='Grimlash'&&field==='finalGirlHealth'?value-1:Math.min(trackerLimits[field],value-1))}
                       >
                         <Minus size={16} />
                       </button>

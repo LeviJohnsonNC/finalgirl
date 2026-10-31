@@ -1,3 +1,4 @@
+import { GRIMLASH_POWERS, GRIMLASH_FINALES, GRIMLASH_MINORS, GRIMLASH_HARVEST, initialGrimlash, validGrimlashField, grimlashFacts } from './grimlash.ts';
 import { validKonradField, canonicalKonradSnapshot, initialKonrad, konradFacts } from './konrad.ts';
 import { KONRAD_ITEMS } from './konradCatalog.ts';
 import { EVOMORPH_POWERS, EVOMORPH_FINALES, EVOMORPH_AMBUSH, validEvomorphField, initialEvomorph, evomorphFacts } from './evomorph.ts';
@@ -51,7 +52,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -68,6 +69,7 @@ type ObservedEvent = {
 
 /** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
 export function killerMomentCards(killer: string, type: string) {
+  if(killer==='Grimlash')return [...(type==='dark-power'?GRIMLASH_POWERS:type==='finale'?GRIMLASH_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Evomorph") return [...(type === "dark-power" ? EVOMORPH_POWERS : type === "finale" ? EVOMORPH_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Poltergeist") return [...(type === "dark-power" ? POLTERGEIST_POWERS : type === "finale" ? POLTERGEIST_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Inkanyamba") return [...(type === "dark-power" ? INKANYAMBA_POWERS : type === "finale" ? INKANYAMBA_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
@@ -155,6 +157,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === "grimlash") return validGrimlashField(key,value);
   if (module === "konrad") return validKonradField(key,value);
   if (module === "evomorph") return validEvomorphField(key,value);
   if (module === "creech") return validCreechField(key,value);
@@ -273,7 +276,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    !["grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -297,6 +300,7 @@ export function moduleState(
   if (module === "fright") { const state=frightState(entries); if(!state) return {}; const {eventId:_id,...snapshot}=state; return {snapshot:JSON.stringify(snapshot),sleep:state.sleep,mode:state.mode,progress:state.path.length,...frightPublic(entries)}; }
   const state: ModuleState = {};
   for (const e of entries) {
+    if(module==='grimlash'&&e.kind==='moment') {if(e.momentType==='dark-power') {state.powerRevealed=true;state.power=GRIMLASH_POWERS.find(c=>c.name===e.killerCard)?.id??null;} if(e.momentType==='finale') {state.finaleRevealed=true;state.finale=GRIMLASH_FINALES.find(c=>c.name===e.killerCard)?.id??null;}}
     if(module === "evomorph" && e.kind === "moment") {if(e.momentType === "dark-power") {state.powerRevealed=true; state.power=EVOMORPH_POWERS.find(c=>c.name===e.killerCard)?.id??null;}if(e.momentType === "finale") {state.finaleRevealed=true;state.finale=EVOMORPH_FINALES.find(c=>c.name===e.killerCard)?.id??null;}}
     if (module === "groves" && e.kind === "moment" && e.momentType === "finale") state.finaleRevealed = true;
     if (module === "inkanyamba" && e.kind === "moment") {
@@ -442,6 +446,7 @@ function valueLabel(key: string, value: ModuleValue) {
   return String(value);
 }
 export function describeModule(observation: ModuleObservation) {
+  if(observation.module==='grimlash')return Object.entries(observation.changes).filter(([k])=>k!=='initialized').map(([k,v])=>`${k.replace(/\./g,' ')}: ${GRIMLASH_HARVEST.find(c=>c.id===v)?.name??v??'not recorded'}`).join('; ');
   if(observation.module === "konrad") return konradFacts(observation.changes).join(" ") || "USS Konrad state recorded";
   if(observation.module === "evomorph") return evomorphFacts(observation.changes);
   if(observation.module==='creech')return creechFacts(observation.changes).join(' ') || Object.entries(observation.changes).filter(([k])=>k!=='initialized').map(([k,v])=>`${k.replace(/\./g,' ')}: ${v??'not recorded'}`).join('; ');
@@ -461,6 +466,7 @@ export function moduleContext(
   entries: readonly ObservedEvent[],
 ) {
   const context: Record<string, ModuleState> = {};
+  if(selection.killer==='Grimlash'&&entries.some(e=>e.moduleData?.module==='grimlash')) {const s=moduleState(entries,'grimlash');delete s.initialized;context.grimlash=s;}
   if(selection.location === "USS Konrad" && entries.some(e=>e.moduleData?.module === "konrad")) context.konrad={snapshot:canonicalKonradSnapshot(moduleState(entries,"konrad").snapshot)!};
   if(selection.killer === "Evomorph" && entries.some(e=>e.moduleData?.module === "evomorph")) {const s=moduleState(entries,"evomorph");delete s.initialized;context.evomorph=s;}
   if (selection.killer === "Dr. Fright") { const facts=frightPublic(entries); if(facts) context.fright=facts; }
@@ -549,6 +555,7 @@ export function moduleStoryBeats(
     for(const fact of killer.split(/(?<=\.)\s+/))if(killerFacts.length+fact.length+1<=340)killerFacts+=fact+" ";
     return [location&&`Creech Manor: ${location.trim()}`,killerFacts&&`Killer: ${killerFacts.trim()}`].filter(Boolean).join("\n");
   }
+  if(context.grimlash&&!context.konrad&&!context.creech&&!context.groves&&!context.maple&&!context.carnival) {const location=moduleStoryBeats({...selection,killer:''},entries);const budget=location?440:870;let killer='';for(const fact of grimlashFacts(context.grimlash).split(/(?<=\.)\s+/))if(killer.length+fact.length+1<=budget)killer+=fact+' ';return [killer.trim(),location.slice(0,440)].filter(Boolean).join('\n');}
   if (context.groves) {
     const killer = moduleStoryBeats({ ...selection, location: "" }, entries);
     const facts = grovesFacts(context.groves);
@@ -710,6 +717,7 @@ export function buddylandReferences(
     refs.push({name:'Poltergeist objective',effect:poltergeistFacts(state)+' The spirit cannot be attacked, damaged or killed. Finding is not escape; only recorded outcomes happened.'});
     for(const p of POLTERGEIST_MINORS) if(state[`minor.${p.id}`]==='active') refs.push({name:p.name,effect:p.effect});
   }
+  if(selection.killer==='Grimlash') {const s=context?.grimlash??{};refs.push({name:'Grimlash',effect:grimlashFacts(s)});for(const c of [...GRIMLASH_POWERS,...GRIMLASH_FINALES])if(c.id===s.power||c.id===s.finale)refs.push({name:c.name,effect:c.effect+' Revelation does not prove resolution.'});for(const c of GRIMLASH_MINORS)if(typeof s[`minor.${c.id}.health`]==='number')refs.push({name:c.name,effect:s[`minor.${c.id}.health`]===0?'Removed; no longer active.':c.effect});}
   if (selection.killer === "Inkanyamba") {
     const state = context?.inkanyamba ?? {};
     refs.push({name:"Inkanyamba the Avenger", effect:"A masked human-shaped avenger with paired curved weapons in the selected Location; never a serpent or weather-controlled creature. Wrath is recorded anger, not proof of an Unleash, injury, movement or extra casualty."});
@@ -961,8 +969,10 @@ export function initialModuleObservations(
   initializeCreech = false,
   initializeEvomorph = false,
   initializeKonrad = false,
+  initializeGrimlash = false,
 ): ModuleObservation[] {
   return [
+    ...(initializeGrimlash && selection.killer==='Grimlash' ? [{module:'grimlash' as const,changes:initialGrimlash()}] : []),
     ...(initializeKonrad && selection.location === "USS Konrad" ? [{module:"konrad" as const,changes:initialKonrad(selection.setupScenario,selection.startingEvent)}] : []),
     ...(initializeEvomorph && selection.killer==='Evomorph' ? [{module:'evomorph' as const,changes:initialEvomorph()}] : []),
     ...(initializeCreech && selection.location==='Creech Manor' ? [{module:'creech' as const,changes:creechStartingObservations(selection.startingEvent)}] : []),
