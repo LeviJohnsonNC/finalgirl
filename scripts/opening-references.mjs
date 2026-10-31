@@ -1,6 +1,6 @@
 // Requires ImageMagick. Rebuild after changing these reviewed photographic portraits.
 // Emits the fixed manifest the edge function trusts, and stages the exact JPEG bytes for
-// upload to the private "opening-references" bucket. Bucket contents must match the manifest.
+// upload to the private "opening-references" bucket. Every manifest object must be present; prior immutable versions may remain during rollout.
 import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
@@ -18,9 +18,11 @@ const hashes = [];
 for (const [name, file] of Object.entries(portraits)) {
   const source = `src/assets/characters/ai/${file}.png`;
   const bytes = execFileSync('magick', [source, '-auto-orient', '-resize', '768x768>', '-strip', '-quality', '90', 'jpeg:-']);
-  const path = `${slug(name)}.jpg`;
+  const digest = createHash('sha256').update(bytes).digest('hex');
+  // Keep the prior Grimlash object valid for already-deployed consumers.
+  const path = name === 'Grimlash' ? `${slug(name)}-${digest.slice(0,16)}.jpg` : `${slug(name)}.jpg`;
   writeFileSync(`${stage}/${path}`, bytes);
-  entries[name] = { path, sha256: createHash('sha256').update(bytes).digest('hex') };
+  entries[name] = { path, sha256: digest };
   hashes.push(`// ${file}.png SHA-256: ${createHash('sha256').update(readFileSync(source)).digest('hex')}`);
 }
 writeFileSync('supabase/functions/_shared/openingReferenceManifest.ts',

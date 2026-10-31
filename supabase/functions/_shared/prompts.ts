@@ -1,3 +1,4 @@
+import { GRIMLASH_VISUAL } from './play/grimlash.ts';
 import { FICTION_BOUNDARY } from './fictionBoundary.ts';
 import { resolveFinalGirlIdentity, reviewedFinalGirlIdentity } from './finalGirlIdentity.ts';
 // Sole home of image direction. Preserve facts and identity within the requested medium.
@@ -26,7 +27,7 @@ export interface SceneContext {
 const block = (label: string, value?: string): string => value ? `\n${label}:\n${value}\n` : '';
 const isPoster = (ctx: SceneContext): boolean => ctx.sceneType ? ctx.sceneType === 'ending' : Boolean(ctx.outcome);
 const cast = (ctx: SceneContext): string => `FINAL GIRL: ${ctx.finalGirl}: ${resolveFinalGirlIdentity(ctx.finalGirl, ctx.finalGirlDescription) || 'Appearance unrecorded; do not substitute a famous character.'}
-THREAT: ${ctx.killer}: ${ctx.killerDescription || 'Appearance unrecorded; follow established story facts.'}
+THREAT: ${ctx.killer}: ${(ctx.killer === 'Grimlash' ? GRIMLASH_VISUAL : ctx.killerDescription) || 'Appearance unrecorded; follow established story facts.'}
 LOCATION: ${ctx.location}: ${ctx.locationDescription || 'Use the selected location, not the killer\'s home setting.'}`;
 const facts = (ctx: SceneContext): string => `${cast(ctx)}
 ${block('MODULE VISUAL RULES', ctx.moduleVisualGuidance)}${block('NON-DEPICTABLE GAME CONSTRAINTS: never enact player procedures or render card titles', ctx.scenarioRules)}${block('MANDATORY MISSION', ctx.mission && `${ctx.mission.name}: ${ctx.mission.description}`)}
@@ -66,8 +67,11 @@ export function parseVisualBible(text?: string): string | undefined {
 /** Repair only the prompt view of legacy identity; never rewrite saved continuity. */
 function visualContinuity(ctx: SceneContext): string | undefined {
   const parsed = parseVisualBible(ctx.visualBible);
-  if (!parsed || !reviewedFinalGirlIdentity(ctx.finalGirl)) return parsed;
-  return JSON.stringify({ ...JSON.parse(parsed), finalGirl: 'Use the current named cast identity above.' });
+  if (!parsed) return parsed;
+  return JSON.stringify({ ...JSON.parse(parsed),
+    ...(reviewedFinalGirlIdentity(ctx.finalGirl) ? { finalGirl: 'Use the current named cast identity above.' } : {}),
+    ...(ctx.killer === 'Grimlash' ? { killer: 'Use the current approved full-pumpkin Grimlash identity above.' } : {}),
+  });
 }
 
 const identityLock = (ctx: SceneContext): string => `CAST IDENTITY LOCK: The selected Final Girl is ${ctx.finalGirl}. Preserve her own face, skin tone, hair colour/texture/style, age range and established clothing from her named cast reference and current description. Never substitute a generic survivor or another Final Girl. Current named cast identity must override contradictory old continuity, story descriptions, shot descriptions and earlier generated images. An opening photograph with a different person is not identity authority. Reference bruises, blood, props and poses do not establish new injuries or possessions.`;

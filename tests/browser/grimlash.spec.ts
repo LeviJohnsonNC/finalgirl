@@ -26,11 +26,23 @@ async function expectScarecrowHead(track:import('@playwright/test').Locator){
  const heading=(await track.locator('.play-eyebrow').boundingBox())!;
  expect(crop.head.bottom).toBeLessThanOrEqual(heading.y);
 }
+// Bounds of the complete pumpkin and stem in the reviewed, pulled-back banner.
+async function expectPumpkinBanner(panel:import('@playwright/test').Locator){
+ const crop=await panel.locator(':scope > summary > img').evaluate(im=>{
+  const img=im as HTMLImageElement,box=img.getBoundingClientRect();
+  const [x,y]=getComputedStyle(img).objectPosition.split(' ').map(n=>parseFloat(n)/100);
+  const scale=Math.max(box.width/img.naturalWidth,box.height/img.naturalHeight),w=img.naturalWidth*scale,h=img.naturalHeight*scale;
+  const left=(box.width-w)*x,top=(box.height-h)*y;
+  return{width:box.width,height:box.height,left:left+w*.68,right:left+w*.77,top:top+h*.20,bottom:top+h*.34};
+ });
+ expect(crop.left).toBeGreaterThanOrEqual(0);expect(crop.top).toBeGreaterThanOrEqual(0);
+ expect(crop.right).toBeLessThanOrEqual(crop.width);expect(crop.bottom).toBeLessThanOrEqual(crop.height);
+}
 async function resume(page:import('@playwright/test').Page){await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'grimlash');}
 test('Grimlash level drop is atomic, Undo restores spent ability, failed save never changes the record',async({page,archive},info)=>{
  test.setTimeout(90000);const f=fixture();f.act({command:'position',value:5});f.act({command:'card',level:1,value:'hollow-soul'});f.act({command:'card',level:2,value:'vulgar-regrowth'});f.act({command:'face',level:2,value:'spent'});
  await archive.install(page,{draft:{...draft,playEvents:f.events}});await resume(page);const panel=page.locator('[data-module="grimlash"]'),before=await log(page);
- for(const [width,height]of info.project.name==='mobile'?[[390,844],[320,568]]:[[1280,640],[1366,768],[1440,900]]){await page.setViewportSize({width,height});await panel.locator('img').evaluateAll(async images=>{await Promise.all(images.map(async im=>{const image=im as HTMLImageElement;image.loading='eager';await image.decode();}));});await expectScarecrowHead(panel.locator('.grim-track'));await panel.screenshot({path:info.outputPath(`grimlash-kept-${width}.jpg`),type:'jpeg',quality:80,animations:'disabled',style:'.app-footer{visibility:hidden}'});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);const frame=(await panel.locator('.grim-track').boundingBox())!;for(const button of await panel.locator('.grim-position-grid button').all()){const b=(await button.boundingBox())!;expect(b.width).toBeGreaterThanOrEqual(44);expect(b.height).toBeGreaterThanOrEqual(44);expect(b.x).toBeGreaterThanOrEqual(frame.x);expect(b.x+b.width).toBeLessThanOrEqual(frame.x+frame.width);}}
+ for(const [width,height]of info.project.name==='mobile'?[[390,844],[320,568]]:[[1280,640],[1366,768],[1440,900]]){await page.setViewportSize({width,height});await panel.locator('img').evaluateAll(async images=>{await Promise.all(images.map(async im=>{const image=im as HTMLImageElement;image.loading='eager';await image.decode();}));});await expectScarecrowHead(panel.locator('.grim-track'));await expectPumpkinBanner(panel);await panel.screenshot({path:info.outputPath(`grimlash-kept-${width}.jpg`),type:'jpeg',quality:80,animations:'disabled',style:'.app-footer{visibility:hidden}'});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);const frame=(await panel.locator('.grim-track').boundingBox())!;for(const button of await panel.locator('.grim-position-grid button').all()){const b=(await button.boundingBox())!;expect(b.width).toBeGreaterThanOrEqual(44);expect(b.height).toBeGreaterThanOrEqual(44);expect(b.x).toBeGreaterThanOrEqual(frame.x);expect(b.x+b.width).toBeLessThanOrEqual(frame.x+frame.width);}}
  for(const tile of await panel.locator('.grim-kept-level > .play-illustrated-tile').all()){const caption=tile.locator('.play-tile-caption');await expect(caption).toBeVisible();const a=(await tile.boundingBox())!,b=(await caption.boundingBox())!;expect(b.y).toBeGreaterThanOrEqual(a.y);expect(b.y+b.height).toBeLessThanOrEqual(a.y+a.height);}
  expect(await log(page)).toEqual(before);
  await panel.getByRole('button',{name:'Decrease Harvest Madness',exact:true}).click();const state=grimlashState(summarizePlay(await log(page)).entries);expect(state.position).toBe(4);expect(state['kept.2']).toBe('none');expect(state['kept.1']).toBe('hollow-soul');
@@ -75,4 +87,18 @@ for(const owner of ['ship','madness'])test(`mixed Grimlash/Konrad ${owner} loss 
  f.events.push(newPlayEvent({kind:'state',field:'finalGirlHealth',value:5}));await archive.install(page,{draft:{...draft,konradSetupVersion:1,selection:{...draft.selection,location:'USS Konrad',setupScenario:'Bloody Feast'},playEvents:f.events}});await resume(page);await page.getByRole('button',{name:'Finish game',exact:true}).click();await page.getByRole('button',{name:'Won',exact:true}).click();
  if(owner==='ship')await statusPick(page,page.getByRole('combobox',{name:'Madness loss record',exact:true}),'No Madness loss recorded');else await statusPick(page,page.getByRole('combobox',{name:'Reviewed ship fate',exact:true}),'Survived ship hazard');
  await expect(page.locator('[data-outcome="lost"]')).toBeVisible();await expect(page.getByRole('textbox',{name:'Final Girl Health',exact:true})).toHaveValue('5');await saveResultOnly(page);await expect.poll(()=>archive.history.length).toBe(1);expect(archive.history[0].outcome).toBe('lost');expect(archive.history[0].final_girl_health).toBe(5);if(owner==='madness'){await expect.poll(()=>String(archive.history[0].game_highlights)).toContain('Skull');expect(String(archive.history[0].game_highlights)).not.toContain('Level 4');}
+});
+
+test('approved Grimlash portrait stays loaded and framed in casting at every target size',async({page,archive},info)=>{
+ archive.aiCastingArt=true;archive.films=['s4-rotten-harvest'];await archive.install(page);await page.goto('/');
+ await page.getByRole('button',{name:'START THE TAPE',exact:true}).click();
+ const slot=page.locator('.casting-slot--killer');await slot.getByRole('button',{name:'Choose',exact:true}).click();
+ await page.getByRole('dialog').getByRole('button',{name:/Grimlash/}).click();
+ const image=slot.getByRole('img',{name:'Grimlash',exact:true});await expect(image).toHaveAttribute('src',/grimlash-.*\.png$/);
+ for(const[width,height]of info.project.name==='mobile'?[[390,844],[320,568]]:[[1280,640],[1366,768],[1440,900]]){
+  await page.setViewportSize({width,height});await image.evaluate(im=>(im as HTMLImageElement).decode());
+  await expect(async()=>expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)).toPass();
+  await slot.screenshot({path:info.outputPath(`grimlash-portrait-${width}.jpg`),type:'jpeg',quality:85,animations:'disabled',style:'.app-footer{visibility:hidden}'});
+ }
+ expect(archive.calls).toEqual([]);
 });
