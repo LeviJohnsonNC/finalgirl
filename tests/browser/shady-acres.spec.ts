@@ -88,10 +88,10 @@ test('removed Curses disappear durably and terminal person outcomes stay correct
    if(status!=='left')await expect(card.locator('img')).toHaveAttribute('src',new RegExp('/'+p.id+'-'+status+'-'));
   }
  }
- const before=await logs(page);await people.getByRole('button',{name:'Mark Sally saved',exact:true}).click();expect(await logs(page)).toEqual(before);
+ const before=await logs(page);await people.getByRole('button',{name:'Mark Sally McCoy saved',exact:true}).click();expect(await logs(page)).toEqual(before);
  await page.evaluate(()=>{const original=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k.startsWith('final-girl-active-game-v1:')&&localStorage.getItem('reject-play-write')==='yes')throw Error('synthetic quota');return original.call(this,k,v);};localStorage.setItem('reject-play-write','yes');});
  await curses.getByRole('button',{name:'Remove Dark Fields',exact:true}).click();await expect(curses.getByRole('button',{name:'Dark Fields In play',exact:true})).toBeVisible();await expect(panel.getByRole('alert')).toContainText('could not be saved');expect(await logs(page)).toEqual(before);
- await people.getByRole('button',{name:'Mark Sally killed',exact:true}).click();await expect(people.locator('.module-character').first()).toHaveAttribute('data-state','saved');expect(await logs(page)).toEqual(before);
+ await people.getByRole('button',{name:'Mark Sally McCoy killed',exact:true}).click();await expect(people.locator('.module-character').first()).toHaveAttribute('data-state','saved');expect(await logs(page)).toEqual(before);
  await page.evaluate(()=>localStorage.setItem('reject-play-write','no'));await curses.getByRole('button',{name:'Remove Dark Fields',exact:true}).press('Enter');
  await expect(curses.locator('img')).toHaveCount(0);const s=shadyState(moduleState(summarizePlay(await logs(page)).entries,'shady-acres'));expect(s.curses).toEqual([{id:'visible-curse',card:'dark-fields',status:'removed'}]);
  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'shady-acres');await expect(curses.locator('img')).toHaveCount(0);
