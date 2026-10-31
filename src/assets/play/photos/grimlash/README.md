@@ -58,3 +58,7 @@ Deliberate reuse: approved shared Bloodlust scenes and jeweled live/spent hearts
 | vulgar-regrowth | exec-5616e378-ebb5-4b85-820d-5d079249cfa9.png | Named card scene + small choice / cause tile |
 | water-the-earth | exec-076aa7ae-e4f2-4664-91d1-c56f3dfe42e3.png | Named card scene + small choice / cause tile |
 | withered-harbinger | exec-8f312d00-e5dd-45bf-802e-699931c903d3.png | Named card scene + small choice / cause tile |
+
+## Harvest Madness position marker — October 31, 2026
+
+User-requested UI token at `src/assets/play/grimlash-pumpkin-marker.webp`: an isolated photographic flaming pumpkin, shown only inside the selected Madness-position button. Generated source `exec-d2e63daa-1fa6-47e3-b8a3-2b4f6e98e185.png`, derived from the corrected pumpkin-head Grimlash reference `exec-b65efb82-d598-44b0-8695-663912248554.png`. Source is 1280×1280 RGBA; derivative 128×128 WebP, quality 86, 9,254 bytes, displayed at 40px. Native alpha preserved, no upscaling. Labels/numbers/current state remain HTML; the image is decorative and has empty alt text. The existing 48-source photographic catalog is unchanged by this control pass.
