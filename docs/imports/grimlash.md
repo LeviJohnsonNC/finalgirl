@@ -323,3 +323,13 @@ Execution follows the six steps above. Location implementation stays deferred. P
 No additional source upload is presently required for the core killer scope. Retained limitations: loose marker not separately laid out, unrelated Final Girl faces/secret items not supplied, no reverse variant, and exact provenance of the unnamed landscape action face not labeled. Full-resolution existing identity approval, generated artwork quality, actual rendering and live rollout remain unperformed. If a consequential small icon is unreadable during final canonical transcription, isolate that specific gap and complete independent work rather than inventing an effect.
 
 Known source access: online repository read works; terminal git and automated original-image downloads previously failed DNS. A working checkout/test route is a first-step requirement, not an assumed capability or a request for new permissions at this planning stage.
+
+## Play control refinement — October 31, 2026
+
+Levi requested this presentation pass before continuing the Grimlash likeness replacement:
+- Remove the **Correct Madness record** button and its position/loss editor from Play. Existing immutable history/Undo and ending-review correction remain available.
+- Rename each empty ability action to **Record Madness Level x Ability**.
+- Group the eleven positions by the existing source-backed ranges: Level 0 = 0–2, Level 1 = 3–4, Level 2 = 5–6, Level 3 = 7–9, then Skull = 10. Level headers and a text Current label identify the active group; the selected number retains its number, gains a photographic flaming-pumpkin marker and uses aria-current/aria-pressed. Unknown legacy position selects no group or marker.
+- Keep existing event resolver, stepper, linked card retirement, loss semantics, failed-save behavior and owner boundaries. The token establishes no story/game facts. See the [art README](../../src/assets/play/photos/grimlash/README.md) for marker provenance. Broader identity/card/background replacements are deferred.
+
+This is a frontend-only change: no functions, migrations, private reference objects or generation prompt changes. Production merge/deployment remains separate. Verification: local typecheck/build/assets pass; full local check and compiled-browser evidence are pending CI because this host prevents the preview listening socket and writing the shared dependency cache. Final CI/visual findings will be recorded after review.
