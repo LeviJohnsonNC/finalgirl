@@ -174,7 +174,7 @@ export function PlayScreen(props: PlayScreenProps) {
   const { item: personalItem } = usePersonalItem(finalGirl);
   const startingValues = playStartingValues(killer, finalGirl);
   const { characterImages, aiEnabled } = useActiveImages();
-  const killerPortrait = killer === "Evomorph" ? evomorphStageArt(moduleState(summary.entries, "evomorph").stage) : {src: characterImages[killer], position: undefined};
+  const killerPortrait = killer === "Evomorph" ? evomorphStageArt(moduleState(summary.entries, "evomorph").stage) : {src: characterImages[killer], position: killer==='Grimlash'?'50% 0%':undefined};
   const finalGirlMaxHealth = observedFinalGirlMaxHealth(finalGirl, events, props.finalGirlStartingHealth, killer);
   // Legacy sessions can use the catalog to bound new input without backfilling observations.
   const trackerLimits = { ...stateLimits, finalGirlHealth: observedFinalGirlMaxHealth(

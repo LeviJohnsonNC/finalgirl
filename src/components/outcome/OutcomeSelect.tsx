@@ -37,12 +37,13 @@ export function OutcomeSelect({
         collisionPadding={12}
       >
         {Children.toArray(children).map((child) => {
-          if (!isValidElement<{ value: string; children: ReactNode }>(child))
+          if (!isValidElement<{ value: string; children: ReactNode; disabled?: boolean }>(child))
             return null;
           return (
             <SelectItem
               key={child.props.value || EMPTY}
               value={child.props.value || EMPTY}
+              disabled={child.props.disabled}
             >
               {child.props.children}
             </SelectItem>

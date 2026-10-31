@@ -625,7 +625,7 @@
       "bytes": 9714,
       "sha256": "fe0aa2a8c0520c0166fb2ddf1ecffc07cb46fdd87448fada2af06489fa6ea968"
     },
-    "position": "50% center",
+    "position": "50% 5%",
     "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
   },
   {
@@ -650,7 +650,7 @@
       "bytes": 11754,
       "sha256": "51835de65b494b51ca109a2e60ae6e59b967fe77bedf98fdef50e406d6960b2e"
     },
-    "position": "50% center",
+    "position": "50% 5%",
     "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
   },
   {
@@ -675,7 +675,7 @@
       "bytes": 10752,
       "sha256": "6140bef2c7d023190f0a909ca9e441e11cdf7c9ccb20792a772368c8e09ddb6b"
     },
-    "position": "50% center",
+    "position": "50% 5%",
     "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
   },
   {
@@ -725,7 +725,7 @@
       "bytes": 12630,
       "sha256": "e869df1128ed7ef4450a486b704e46aecc66dbea7ae816a3ba58cf8739859861"
     },
-    "position": "50% center",
+    "position": "50% 5%",
     "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
   },
   {
@@ -750,7 +750,7 @@
       "bytes": 10662,
       "sha256": "727cc9c93c798c733f357ebf6feffa474e5a814374de6572ed05d697ba867c49"
     },
-    "position": "50% center",
+    "position": "50% 5%",
     "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
   },
   {
@@ -775,7 +775,7 @@
       "bytes": 11676,
       "sha256": "8e1209d15379bbc7f7fe3fa57815750e967c781d15ccd3fac187bd3a2eeee391"
     },
-    "position": "50% center",
+    "position": "50% 5%",
     "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
   },
   {
@@ -800,7 +800,7 @@
       "bytes": 12838,
       "sha256": "0043ff9d9cc315f248eab52a9e41d2aa4a746e7693ff193e4cb7ab0eb183ebb9"
     },
-    "position": "50% center",
+    "position": "50% 5%",
     "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
   },
   {
@@ -825,7 +825,7 @@
       "bytes": 13146,
       "sha256": "1a229819bb8072d2e16b7a79f644784f5b76486e83d17a989ec6bca09e58842e"
     },
-    "position": "50% center",
+    "position": "50% 5%",
     "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
   },
   {
@@ -850,7 +850,7 @@
       "bytes": 12152,
       "sha256": "1399fada39fb2bf98d8c0a2178f9ac8dc3379523b69e00dc59883a5c02e54fb9"
     },
-    "position": "50% center",
+    "position": "50% 5%",
     "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
   },
   {
@@ -875,7 +875,7 @@
       "bytes": 11334,
       "sha256": "7efae2b5fa16535e3374ae36829008358fbce889623c886e39e5978cfeb59514"
     },
-    "position": "50% center",
+    "position": "50% 5%",
     "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
   },
   {
@@ -900,7 +900,7 @@
       "bytes": 11906,
       "sha256": "a0dc04e445cad63626a9534b19e0f1cb3e5e183140539b7a1c3901033ede2187"
     },
-    "position": "50% center",
+    "position": "50% 5%",
     "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
   },
   {
@@ -925,7 +925,7 @@
       "bytes": 14998,
       "sha256": "95d27ca0025cc8f0f5031922ad39c702085efe9ad719f494747ab9f037f0903d"
     },
-    "position": "50% center",
+    "position": "50% 5%",
     "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
   },
   {
@@ -950,7 +950,7 @@
       "bytes": 10176,
       "sha256": "413422e0b7c28b376e6e6a2d1757b7e3b61b69c049d320c11c66078909e77901"
     },
-    "position": "50% center",
+    "position": "50% 5%",
     "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
   },
   {
@@ -1100,7 +1100,7 @@
       "bytes": 8592,
       "sha256": "a96729dd3c0b50d9a013d88a49a003583ff5d568f32e998f587a9f3248a47a81"
     },
-    "position": "50% center",
+    "position": "50% 5%",
     "crop": "Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px."
   }
 ]

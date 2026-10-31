@@ -1,8 +1,30 @@
-# Grimlash killer import record and implementation plan
+# Grimlash killer module import record
+
+## Implementation record — October 31, 2026
+
+Implemented on [PR #156](https://github.com/LeviJohnsonNC/finalgirl/pull/156), branch `codex/grimlash-killer`, based on main `1844e7c39c2056abbc1f28c52ea2c837894145cb`. The source inventory and revised decisions below preserve the planning evidence; this implementation record supersedes their earlier “planning only” status.
+
+- Killer-only Rules, Play, shared reveals/Minors, narrative/death facts, persistence and ending review are implemented. No Shady Acres module, location art, Children mechanics or new Final Girl abilities/items were added. The existing Children outcome field is now location-scoped.
+- Canonical catalogs preserve all 15 Harvest cards, 16 physical Terrors across 12 unique faces including Minors, 4 Powers and 4 Finales. Board starts at Health 10/Horror 4; Bloodlust 0–8 has its own printed entry-effect table. Action sequences are separate from triggered prose. The unconditional last action block of “It Consumes All!” applies after either level-specific block.
+- Exact Madness positions, owner-parent replay, atomic card retirement, owner-ordered Undo/Restore, Ready/Spent/unknown faces, explicit Upkeep, correction-preserved peak/face state and sticky skull/explicit Telluric loss share one frontend/edge resolver. Legacy records remain unknown. Physical rules, dice, decks, costs, healing and casualties remain player-resolved.
+- Effective Health composes the starting/Ultimate provenance and the known +1/+3 kept cards for Grimlash only. Both Play and ending review preserve observed excess Health and decrement exactly one. Card metadata does not heal or clamp. Fatal Grimlash and USS Konrad endings are combined before computing the reviewed result.
+- Completed 47 dedicated independent photographic scenes plus a source-faithful replacement identity and 35 card thumbnails. No production contact-sheet crops, borrowed killer art, known-ID fallback or orphan images. Exact sources, native dimensions, crops, budgets, byte sizes and SHA-256 live in [the art manifest](../../src/assets/play/photos/grimlash/manifest.json) and [art README](../../src/assets/play/photos/grimlash/README.md). Official/user-image preferences retain precedence. Shared Bloodlust, jeweled hearts and unknown/custom Terror cause illustrations are deliberate reuse.
+- Actual compiled UI review covers 1280×640, 1366×768, 1440×900, 390×844 and 320×568. Reproducible capture journeys are in `tests/browser/grimlash.spec.ts`; artifacts are attached to the [PR checks](https://github.com/LeviJohnsonNC/finalgirl/pull/156/checks). Review found and corrected caption positioning, wide entity focal points, narrow track fitting and a non-Grimlash Health-stepper regression introduced by the first draft. The Minor journey uses the standard Add another Minor Power interaction.
+- Verification commands: `npm run check`, `npm run check:assets`, `npm run build`; complete required frontend, Deno edge, PostgreSQL and desktop/mobile browser CI. Final head status and exact run evidence are recorded on PR #156. Local Node 25 needs `NODE_OPTIONS=--no-experimental-webstorage` for jsdom; supported CI uses Node 22. Local preview sockets/headless launch were restricted, so rendered verification uses the real compiled frontend in CI with synthetic ArchiveMock sessions, never production game data or live generation.
+
+### Release state
+
+This is a reviewable implementation, not a production release. No merge, frontend publication, backend deployment or paid live provider smoke test has been performed. No SQL schema migration is required.
+
+`node scripts/opening-references.mjs` now includes Grimlash and stages the exact JPEG at `build/opening-references/grimlash.jpg`. Its manifest digest is `479c632f7550e4c50c0736af026c865ebb43a9a6d656f3f8a4402fd1b7e091b0`; all 42 existing object entries/digests are unchanged. The private `opening-references/grimlash.jpg` object has **not** been uploaded or verified remotely. Upload those exact bytes and check the digest before releasing the new manifest consumer; a listed missing object fails closed. Storage management/deployment credentials were not available through the repository connector.
+
+Compatible backend consumers to deploy before frontend release: `generate-story`, `generate-visual-bible`, `generate-ending`, `generate-scene-image`, `generate-death-scene` and `narrate-story`. Then perform a live Grimlash opening/Reshoot, death vignette, reviewed ending and poster smoke test. Mocked transport/schema/browser success does not establish live model likeness, provider behavior, private object availability or deployed revision parity.
+
+## Original inventory and approved revised plan
 
 ## Scope and status
 
-Planning and source review only, reviewed October 30, 2026, America/Regina. No gameplay implementation, GitHub writes, merge or deployment performed.
+The following inventory and plan were reviewed October 30, 2026, America/Regina, before implementation. See the implementation record above for current status.
 
 - Owner: killer, **Grimlash**. Retain existing film ID `s4-rotten-harvest`; proposed new Play owner ID `grimlash`.
 - Extend the existing A Rotten Harvest entry. Keep Shady Acres, Children, Ancient Curses, location Setups/Events/Items, Joy/Vicky abilities and secret items outside this pass.

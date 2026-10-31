@@ -6,6 +6,7 @@ import {createHash} from 'node:crypto';
 import {join} from 'node:path';
 const folder='src/assets/play/photos/grimlash',manifestPath=join(folder,'manifest.json');
 const manifest=JSON.parse(readFileSync(manifestPath,'utf8'));
+const upperFocal=new Set(["flaming-eyes", "burning-sickle", "rite-of-the-corrupted", "rite-of-the-old-one", "fields-of-madness", "hunger-of-the-old-gods", "ancient-abomination", "withered-harbinger", "god-of-blood-and-grain", "consumes-all", "death-followed", "bleed-upon-the-earth", "bad-moon", "scarecrow"]);
 const sourceDirectory=process.argv[2];if(!sourceDirectory)throw Error('Supply the reviewed generated source directory');
 const hash=b=>createHash('sha256').update(b).digest('hex');
 for(const entry of manifest){
@@ -17,6 +18,6 @@ for(const entry of manifest){
   for(quality of(kind==='identity'?[85]:kind==='thumbnail'?[80,75,70]:[85,82,78,74,70])){execFileSync('magick',[source,'-auto-orient','-resize',`${width}x${height}^`,'-gravity','center','-extent',`${width}x${height}`,'-strip','-quality',String(quality),path]);bytes=readFileSync(path);if(bytes.length<=budget)break;}
   if(bytes.length>budget)throw Error('Photo exceeds budget: '+path);entry[kind]={path,width,height,quality,bytes:statSync(path).size,sha256:hash(bytes)};
  }
- entry.position=entry.id==='header'||entry.id.startsWith('madness-')?'75% 5%':'50% center';entry.crop='Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px.';
+ entry.position=entry.id==='header'||entry.id.startsWith('madness-')?'75% 5%':upperFocal.has(entry.id)?'50% 5%':'50% center';entry.crop='Center to native 16:9; no stretch or upscaling. Identity square; Collection 256px.';
 }
 writeFileSync(manifestPath,JSON.stringify(manifest,null,2)+'\n');console.log('Optimized '+manifest.length+' independent reviewed sources');
