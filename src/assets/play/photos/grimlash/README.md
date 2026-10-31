@@ -1,10 +1,10 @@
 # Grimlash photographic artwork
 
-48 independent generated photographs: 47 dedicated module scenes and one replacement identity. The source board and Power/Finale photographs govern the charred open gourd crown, roots and ragged dark silhouette. The supplied Inkanyamba image governed photographic quality only. Generated 2026-10-31 with imagegen; these thematic UI photographs establish no selected location, cast, event, injury or casualty.
+48 independent photographs: 37 generated sources (including the identity) and 11 user-supplied Harvest Madness replacements. The source board and Power/Finale photographs govern the charred open gourd crown, roots and ragged dark silhouette. The supplied Inkanyamba image governed photographic quality only. Generated 2026-10-31 with imagegen; these thematic UI photographs establish no selected location, cast, event, injury or casualty.
 
-Every source was reviewed at native resolution as generated. The first scarecrow candidate was rejected because it duplicated Grimlash; the retained scene depicts an ordinary burlap scarecrow. No contact sheets were used as production sources. Original PNGs remain in image-generation output. `manifest.json` pins source names/native dimensions/hashes and exact derivatives, focal points, sizes and digests. Rebuild using `node scripts/import-grimlash-art.mjs /absolute/generated_images`.
+Generated sources were reviewed at native resolution as generated. The first scarecrow candidate was rejected because it duplicated Grimlash; the retained scene depicts an ordinary burlap scarecrow. No contact sheets were used as production sources. Original PNGs remain in image-generation output. `manifest.json` pins source names/native dimensions/hashes and exact derivatives, focal points, sizes and digests. Rebuild generated sources using `node scripts/import-grimlash-art.mjs /absolute/generated_images`; this preserves the user-supplied replacements. Rebuild the eleven replacements using `node scripts/import-harvest-madness-art.mjs /absolute/numbered-originals`.
 
-Selected scenes are 1280×720 WebP, at most 160 KiB; card choices are 320×180 WebP, at most 35 KiB. Center crops preserve native aspect without stretching or upscaling. Header and Madness backgrounds anchor at 75% 5% to retain the crown under wide desktop cropping; entity-based Power/Finale/Minor scenes and selected Terror figures anchor at 50% 5% to retain the crown in wide heroes; environmental card motifs use center. Identity is 768px PNG with a 256px Collection derivative. Labels, Epic, Health and Ready/Spent are HTML. Thirty-five card thumbnails are used for choices/removed Minors, with full scenes used for selected heroes and named Terror causes. Eleven Madness images map exact positions 0–10; early scenes are distant and later scenes approach. Artwork does not change levels or recorded facts.
+Selected scenes are 1280×720 WebP, at most 160 KiB; card choices are 320×180 WebP, at most 35 KiB. Center crops preserve native aspect without stretching or upscaling. The header anchors at 75% 5% to retain the crown under wide desktop cropping; entity-based Power/Finale/Minor scenes and selected Terror figures anchor at 50% 5% to retain the crown in wide heroes; environmental card motifs use center. Identity is 768px PNG with a 256px Collection derivative. Labels, Epic, Health and Ready/Spent are HTML. Thirty-five card thumbnails are used for choices/removed Minors, with full scenes used for selected heroes and named Terror causes. Eleven Madness images map exact positions 0–10; the supplied filename suffix determines the position, from the golden field at 0 to the red storm at 10. Artwork does not change levels or recorded facts.
 
 Deliberate reuse: approved shared Bloodlust scenes and jeweled live/spent hearts. Duplicate physical Terror copies share their title's scene. Spent abilities dim the same photograph. Unknown/custom Terrors keep the generic cause illustration. Official/user-image preferences retain priority over AI cast art. No location artwork or Final Girl redesign is included.
 
@@ -30,17 +30,17 @@ Deliberate reuse: approved shared Bloodlust scenes and jeweled live/spent hearts
 | hollow-soul | exec-55b49ec6-c4d7-449c-9947-776b6e05ef7f.png | Named card scene + small choice / cause tile |
 | hunger-of-the-old-gods | exec-06b4564e-0498-465c-a128-8dd2ae4eda65.png | Named card scene + small choice / cause tile |
 | identity | exec-be07568d-2d38-441c-bed4-81f95c250617.png | AI identity + Collection portrait + private opening reference |
-| madness-0 | exec-c47adb17-17b2-4c91-a686-09f7bea71b75.png | Harvest Madness track |
-| madness-1 | exec-d56aeb87-c276-4e25-b4d0-136a41ac04c9.png | Harvest Madness track |
-| madness-10 | exec-5dd4dcc8-f270-467d-8b7f-793ffda4f5fc.png | Harvest Madness track |
-| madness-2 | exec-030d6a23-cf12-4b7f-858a-456e8de1ce65.png | Harvest Madness track |
-| madness-3 | exec-b6626255-55a7-4b2f-b760-d5c305a0fac7.png | Harvest Madness track |
-| madness-4 | exec-7a16986f-634e-4668-af62-9fce80f74ad2.png | Harvest Madness track |
-| madness-5 | exec-b7acb073-a29f-4a4b-b971-b12bf5c2b442.png | Harvest Madness track |
-| madness-6 | exec-d81feb14-b8f6-4992-b9bf-ef2921309ed7.png | Harvest Madness track |
-| madness-7 | exec-18f512c3-b6c2-45ff-b514-32e05cdd3abc.png | Harvest Madness track |
-| madness-8 | exec-1223cdce-47fc-4e15-a909-157bcb977027.png | Harvest Madness track |
-| madness-9 | exec-562fb67a-6956-4ae5-a61b-dde571c79ac5.png | Harvest Madness track |
+| madness-0 | ChatGPT Image Oct 31, 2026, 12_14_12 PM-0.png | Harvest Madness track |
+| madness-1 | ChatGPT Image Oct 31, 2026, 12_14_12 PM-1.png | Harvest Madness track |
+| madness-10 | ChatGPT Image Oct 31, 2026, 12_14_15 PM-10.png | Harvest Madness track |
+| madness-2 | ChatGPT Image Oct 31, 2026, 12_14_12 PM-2.png | Harvest Madness track |
+| madness-3 | ChatGPT Image Oct 31, 2026, 12_14_12 PM-3.png | Harvest Madness track |
+| madness-4 | ChatGPT Image Oct 31, 2026, 12_14_13 PM-4.png | Harvest Madness track |
+| madness-5 | ChatGPT Image Oct 31, 2026, 12_14_13 PM-5.png | Harvest Madness track |
+| madness-6 | ChatGPT Image Oct 31, 2026, 12_14_13 PM-6.png | Harvest Madness track |
+| madness-7 | ChatGPT Image Oct 31, 2026, 12_14_14 PM-7.png | Harvest Madness track |
+| madness-8 | ChatGPT Image Oct 31, 2026, 12_14_14 PM-8.png | Harvest Madness track |
+| madness-9 | ChatGPT Image Oct 31, 2026, 12_14_15 PM-9.png | Harvest Madness track |
 | one-with-the-land | exec-fccdbe4e-7483-405d-bbbc-947547b57d8d.png | Named card scene + small choice / cause tile |
 | primal-awareness | exec-c58fc84a-7e5c-4d02-8436-9e9cd8ce95de.png | Named card scene + small choice / cause tile |
 | rite-of-the-corrupted | exec-a74ec860-4672-4abf-bab4-942777fe5082.png | Named card scene + small choice / cause tile |
@@ -62,3 +62,9 @@ Deliberate reuse: approved shared Bloodlust scenes and jeweled live/spent hearts
 ## Harvest Madness position marker — October 31, 2026
 
 User-requested UI token at `src/assets/play/grimlash-pumpkin-marker.webp`: an isolated photographic flaming pumpkin, shown only inside the selected Madness-position button. Generated source `exec-d2e63daa-1fa6-47e3-b8a3-2b4f6e98e185.png`, derived from the corrected pumpkin-head Grimlash reference `exec-b65efb82-d598-44b0-8695-663912248554.png`. Source is 1280×1280 RGBA; derivative 128×128 WebP, quality 86, 9,254 bytes, displayed at 40px. Native alpha preserved, no upscaling. Labels/numbers/current state remain HTML; the image is decorative and has empty alt text. The existing 48-source photographic catalog is unchanged by this control pass.
+
+## User-supplied Harvest Madness backgrounds — October 31, 2026
+
+The numbered originals replace only `madness-0` through `madness-10`. The 1672×941 originals are resized to 1280×720 WebP (at most 160 KiB each), top-aligned with no stretch, upscaling or repainting. Source filenames, native dimensions and SHA-256 digests are pinned in the manifest. Filename suffixes, rather than upload display order, map to the exact recorded position.
+
+Responsive backgrounds anchor at `20% 0%`. A clear art area above the controls preserves the scarecrow head and hat; the lower scrim keeps labels and buttons readable. The source-reviewed head region is recorded in the manifest and checked against the actual rendered crop/control boundary in the compiled browser journeys, across all eleven stages and the five required laptop/phone sizes. The identity, card scenes, pumpkin position marker and gameplay observations are unchanged.

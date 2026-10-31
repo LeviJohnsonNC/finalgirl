@@ -121,7 +121,7 @@ if(grimManifest.length!==48||grimIds.size!==48||new Set(grimManifest.map(e=>e.id
 if(new Set(grimManifest.map(e=>e.sourceSha256)).size!==48)throw Error('Grimlash requires independent scene sources');
 const grimPaths=new Set();
 for(const entry of grimManifest){
- if(!/^exec-[a-f0-9-]+\.png$/.test(entry.source)||!/^[a-f0-9]{64}$/.test(entry.sourceSha256))throw Error('Missing Grimlash provenance: '+entry.id);
+ if(!(entry.sourceKind==='user-supplied'&&entry.id.startsWith('madness-')?new RegExp('-'+entry.id.slice(8)+'\\.png$').test(entry.source):/^exec-[a-f0-9-]+\.png$/.test(entry.source))||!/^[a-f0-9]{64}$/.test(entry.sourceSha256))throw Error('Missing Grimlash provenance: '+entry.id);
  const keys=entry.id==='identity'?['identity','portrait']:entry.id==='header'||entry.id.startsWith('madness-')?['scene']:['scene','thumbnail'];
  if(entry.nativeWidth<(entry.id==='identity'?768:1280)||entry.nativeHeight<(entry.id==='identity'?768:720))throw Error('Upscaled Grimlash source: '+entry.id);
  for(const key of keys){const asset=entry[key];if(!asset||grimPaths.has(asset.path))throw Error('Missing/duplicate Grimlash derivative: '+entry.id);const b=readFileSync(asset.path);if(b.length!==asset.bytes||createHash('sha256').update(b).digest('hex')!==asset.sha256)throw Error('Grimlash digest mismatch: '+asset.path);if(key==='thumbnail'&&b.length>35*1024)throw Error('Grimlash thumbnail budget');grimPaths.add(asset.path);}
