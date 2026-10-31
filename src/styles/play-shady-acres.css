@@ -14,3 +14,7 @@
 @media(prefers-reduced-motion:reduce){.play-shady *{transition:none!important}}
 
 .play-shady .shady-chooser .shady-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.play-shady .shady-chooser .play-illustrated-tile{min-height:110px}.play-shady .shady-chooser .play-tile-caption strong{font-size:16px}.play-shady .shady-chooser .play-tile-state{display:none}@media(max-width:700px){.play-shady .shady-chooser .shady-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.play-shady .play-health-tokens{display:flex;gap:.35rem;margin-top:.5rem}
+.play-shady .play-health-tokens>button{display:block;flex:0 0 44px;width:44px;height:44px;max-height:44px;padding:0;border:1px solid #756247;border-radius:4px;background:#171510;overflow:hidden}
+.play-shady .play-health-tokens>button>.play-module-art{display:block;width:100%;height:100%}
