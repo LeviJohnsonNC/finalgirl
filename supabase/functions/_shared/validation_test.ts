@@ -287,3 +287,20 @@ Deno.test('Grimlash raised Health and recorded loss remain scoped and authoritat
  assertEquals(validateRequest(SceneImageRequestSchema,{...poster,outcome:'won'}).success,false);
  assertEquals(validateRequest(SceneImageRequestSchema,{...poster,sceneType:'beginning'}).success,false);
 });
+
+Deno.test('Tormentor ending truth remains owner-specific for prose and poster, including mixed Konrad fate',()=>{
+ for(const loss of ['trap-terminal','no-escape','endless-traps']){
+  const prose={introStory:'Laurie waited in the corridor while the machinery counted down beyond the steel door.',killer:{name:'The Tormentor'},location:{name:'USS Konrad'},finalGirl:{name:'Laurie'},outcome:'lost',finalGirlHealth:5,tormentorReview:{loss},konradReview:{fate:'survived'}};
+  assertEquals(EndingRequestSchema.safeParse(prose).success,true);
+  assertEquals(EndingRequestSchema.safeParse({...prose,outcome:'won'}).success,false);
+  assertEquals(EndingRequestSchema.safeParse({...prose,killer:{name:'Hans'}}).success,false);
+  const image={story:prose.introStory,sceneType:'ending',killer:'The Tormentor',location:'USS Konrad',finalGirl:'Laurie',outcome:'lost',finalGirlHealth:5,tormentorReview:{loss},konradReview:{fate:'survived'}};
+  assertEquals(SceneImageRequestSchema.safeParse(image).success,true);
+  assertEquals(SceneImageRequestSchema.safeParse({...image,outcome:'won'}).success,false);
+  assertEquals(SceneImageRequestSchema.safeParse({...image,sceneType:'beginning'}).success,false);
+ }
+ const opening={killer:{name:'The Tormentor'},location:{name:'Camp Happy Trails'},finalGirl:{name:'Laurie'},tormentorOpening:'fresh-v1'};
+ assertEquals(StoryRequestSchema.safeParse(opening).success,true);
+ assertEquals(StoryRequestSchema.safeParse({...opening,killer:{name:'Hans'}}).success,false);
+ assertEquals(StoryRequestSchema.safeParse({...opening,tormentorOpening:'https://example.test/arbitrary'}).success,false);
+});

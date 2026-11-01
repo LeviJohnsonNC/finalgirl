@@ -1,3 +1,4 @@
+import {TORMENTOR_VISUAL} from '../../supabase/functions/_shared/play/tormentor';
 import {GRIMLASH_VISUAL} from '../../supabase/functions/_shared/play/grimlash';
 import { INKANYAMBA_VISUAL } from "../../supabase/functions/_shared/play/inkanyamba";
 import { FRIGHT_VISUAL } from '../../supabase/functions/_shared/play/fright';
@@ -19,11 +20,7 @@ export const KILLER_DESCRIPTIONS: Record<string, string> = {
 The face is gaunt and monstrous, with deeply sunken, dark eyes and a wide-open, snarling mouth that reveals rows of long, needle-sharp fangs. Viscous saliva drips from the lower jaw, emphasizing a primal, predatory state. The creature's expression is one of pure, mindless aggression. Its location, pose and lighting are determined by the selected scene; it is blind and hunts by sound.`,
 
   // Season 3 - The Marrek Murders
-  'The Tormentor': `A woman with a lean, athletic build and a menacing, predatory presence. Her face is obscured by a stark white, smooth mask reminiscent of a porcelain doll, featuring a single, jagged vertical bloodstain running down the left eye. Through the narrow eyeholes, her dark eyes are fixed in an intense, unwavering stare that feels cold and calculated. She wears a deep red hooded vest pulled over her head, framing the mask in shadow.
-
-Her attire is a mix of practical survival gear and dark, industrial aesthetics. She wears a black sleeveless top underneath the red vest, cinched at the waist by a thick, multi-buckled black leather corset. Several distressed brown leather belts are layered around her hips, and her forearms are wrapped in weathered leather bracers. Her pale, toned arms are heavily splattered with dried, smeared blood, suggesting a recent and violent encounter.
-
-She grips a heavy, industrial red power drill in her right hand, held upright like a primary weapon. The tool is scuffed and weathered, matching the gritty, high-contrast aesthetic of a 1980s slasher film. Her overall appearance is that of a formidable, silent antagonist—utilitarian, blood-soaked, and devoid of any ornamental flair.`,
+  'The Tormentor': TORMENTOR_VISUAL,
 
   // Season 3 - Hell to Pay
   'Razorface': `A man in his late 20s to mid-30s with a lean, muscular, and athletic build. He has a chilling, authoritative presence that feels ritualistic and intensely focused. His skin is a stark, sickly pale white, providing a high-contrast canvas for the metalwork. His head and face are meticulously pierced with long metal pins arranged in a precise, geometric grid pattern. He has dark, hollowed eyes with an unblinking, cold stare and sharp, angular facial features, including a defined jawline and a thin, expressionless mouth.

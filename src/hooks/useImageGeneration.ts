@@ -15,6 +15,8 @@ const DEFAULT_SETTINGS: ImageSettings = {
 };
 
 export interface GenerateImageContext {
+  tormentorOpening?:import('../../supabase/functions/_shared/play/tormentor').TormentorOpening;
+  tormentorReview?:{loss:import('../../supabase/functions/_shared/play/tormentor').TormentorLoss};
   grimlashReview?:{loss:import('../../supabase/functions/_shared/play/grimlash').GrimlashLoss};
   konradReview?: {fate:import('../../supabase/functions/_shared/play/konrad').KonradFate};
   story: string;
@@ -172,6 +174,7 @@ export const useImageGeneration = () => {
   /** One short look-book paragraph per game, shared by both of its images. */
   const generateVisualBible = useCallback(
     async (context: {
+      tormentorOpening?:import('../../supabase/functions/_shared/play/tormentor').TormentorOpening;
       killer: string;
       finalGirl: string;
       location: string;

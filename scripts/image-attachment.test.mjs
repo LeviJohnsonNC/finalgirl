@@ -27,9 +27,12 @@ new Function('require', 'exports', compile('../supabase/functions/_shared/openin
   name => { if (name === './openingReferenceManifest.ts') return manifest; throw new Error('Unexpected opening import: ' + name); }, opening);
 new Function('exports', compile('../supabase/functions/_shared/storyFacts.ts'))(storyFacts);
 new Function('exports', compile('../supabase/functions/_shared/narrativeStyle.ts'))(narrativeStyle);
+const tormentorIdentity = {};
+new Function('exports', compile('../supabase/functions/_shared/play/tormentor.ts'))(tormentorIdentity);
 const grimlashIdentity = {};
 new Function('exports', compile('../supabase/functions/_shared/play/grimlash.ts'))(grimlashIdentity);
 new Function('require', 'exports', compile('../supabase/functions/_shared/prompts.ts'))(name => {
+  if (name === './play/tormentor.ts') return tormentorIdentity;
   if (name === './play/grimlash.ts') return grimlashIdentity;
   if (name === './posterDesign.ts') return posterDesign;
   if (name === './finalGirlIdentity.ts') return finalGirlIdentity;
@@ -340,4 +343,11 @@ test('approved pumpkin identity overrides obsolete Grimlash caller descriptions 
   for(const prompt of [f.textCalls[0].user,f.imageCalls[0][0]]){assert.match(prompt,/complete closed, round ribbed scorched-orange pumpkin/);assert.doesNotMatch(prompt,/OBSOLETE_OPEN_CROWN_CALLER|OBSOLETE_FACELESS_TREE_CONTINUITY/);}
  }
  assert.match(prompts.buildVisualBiblePrompt({killer:'Grimlash',finalGirl:'Joy',location:'USS Konrad',killerDescription:'OBSOLETE_OPEN_CROWN_CALLER'}),/complete closed, round ribbed scorched-orange pumpkin/);
+});
+
+test('verified unseen Tormentor openings retain the Final Girl reference and omit the killer portrait',()=>{
+ assert.deepEqual(opening.openingReferenceNames('Laurie','The Tormentor',false),['Laurie']);
+ assert.deepEqual(opening.openingReferenceNames('Laurie','The Tormentor'),['Laurie','The Tormentor']);
+ const prompt=prompts.buildBeginningPrompt({sceneType:'beginning',story:'Laurie heard a latch click in the empty corridor.',killer:'The Tormentor',location:'Camp Happy Trails',finalGirl:'Laurie',tormentorOpening:'fresh-v1'});
+ assert.ok(JSON.stringify(prompt).includes('off-frame'));
 });

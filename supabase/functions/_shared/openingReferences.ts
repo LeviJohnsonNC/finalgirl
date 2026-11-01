@@ -4,8 +4,8 @@ import { OPENING_REFERENCE_MANIFEST } from './openingReferenceManifest.ts';
 export class OpeningReferenceError extends Error {}
 
 /** Casts that have a reviewed portrait, in the order the model should receive them. */
-export function openingReferenceNames(finalGirl: string, killer: string): string[] {
-  return [...new Set([finalGirl, killer])].filter((name) =>
+export function openingReferenceNames(finalGirl: string, killer: string, includeKiller=true): string[] {
+  return [...new Set(includeKiller?[finalGirl,killer]:[finalGirl])].filter((name) =>
     Object.prototype.hasOwnProperty.call(OPENING_REFERENCE_MANIFEST, name)
   );
 }
@@ -32,8 +32,9 @@ export async function openingReferences(
   finalGirl: string,
   killer: string,
   load: (path: string) => Promise<Uint8Array>,
+  includeKiller=true,
 ): Promise<Array<{ name: string; url: string }>> {
-  return Promise.all(openingReferenceNames(finalGirl, killer).map(async (name) => {
+  return Promise.all(openingReferenceNames(finalGirl, killer, includeKiller).map(async (name) => {
     const { path, sha256 } = OPENING_REFERENCE_MANIFEST[name];
     let bytes: Uint8Array;
     try {

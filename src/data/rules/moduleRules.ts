@@ -1,3 +1,4 @@
+import {tormentorRules,TORMENTOR_PROMPT_CONTEXT} from './tormentorRules';
 import {SHADY_CURSES,SHADY_EVENTS,SHADY_TERRORS,SHADY_ITEMS,SHADY_SETUPS,SHADY_SPACES} from '../../../supabase/functions/_shared/play/shadyAcres';
 import {GRIMLASH_ACTIONS,GRIMLASH_BLOODLUST,GRIMLASH_HARVEST,GRIMLASH_POWERS,GRIMLASH_FINALES,GRIMLASH_MINORS,GRIMLASH_TERRORS} from '../../../supabase/functions/_shared/play/grimlash';
 import { konradRules, KONRAD_PROMPT_CONTEXT } from './konradRules';
@@ -658,7 +659,7 @@ const marrekWarehouse: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer, marrekWarehouse];
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolf, shadyAcres, mortTheTeenageDirtbag, megaBgCon, theIntruders, wingardCottage, falconwood, slayer, marrekWarehouse];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -716,11 +717,7 @@ const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
     visualGuidance: 'Depict a cavernous industrial warehouse at night: towering steel storage racks, pallets and crates, a forklift in a wide open central pit area, chained and padlocked exit doors, buzzing uneven fluorescent lights, oil-stained concrete, and long shadows between rack rows.',
     rulesSummary: 'All Exits start Locked — Victims cannot be saved there until unlocked by an effect or by one of the 3 "Click" Terror cards. Rack spaces are the tops of storage racks; the Climb and Leap Action cards (gained by discarding Walk or Sprint) are the only way onto and between them, and Victims may follow. Failing a Leap drops the Final Girl to the ground. Panicking someone out of The Pit rolls 2 dice for direction instead of 1. A Forklift token waits in The Pit for whoever finds the Forklift Keys Item.',
   },
-  'The Tormentor': {
-    narrativeGuidance: 'The Tormentor is a calm, methodical engineer of fear rather than a raging brute. She works through locks, timers, and traps — she is often unseen, felt only through a sprung mechanism, a chained exit, or a click that promises mercy and delivers none. Emphasize the cruelty of rules written to betray the victim.',
-    visualGuidance: 'Depict a lean, athletic masked woman in a deep red hooded vest, wearing a smooth white porcelain-like mask with a single jagged bloodstain running down the left eye. She carries tools — wrenches, pliers, remote triggers — not a machete. Industrial warehouse setting, cold shadows, mechanical timers and padlocks in frame.',
-    rulesSummary: 'A patient trap-setter who uses the warehouse\u2019s locking system and rack maze to isolate and corner victims, forcing choices under a timer.',
-  },
+  'The Tormentor': TORMENTOR_PROMPT_CONTEXT,
 };
 
 export function getEntityPromptContext(entity: string): ModulePromptContext | undefined {

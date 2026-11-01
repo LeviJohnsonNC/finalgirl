@@ -1,3 +1,5 @@
+import {tormentorParent} from '@/lib/play/tormentor';
+import {canUndoTormentor} from '@/lib/play/events';
 import {shadyParent} from '@/lib/play/shadyAcres';
 import {canUndoShady} from '@/lib/play/events';
 import {grimlashParent} from '@/lib/play/grimlash';
@@ -49,6 +51,7 @@ export function PlayTimeline({
           const entry =
             summary.entries.find((e) => e.id === original.id) ?? original;
           const undone = summary.inactive.has(original.id);
+          const tormentorBlocked=original.moduleData?.module==='tormentor'&&(undone?tormentorParent(summary.entries)!==(original.tormentorAction?.parent??'root'):!canUndoTormentor(events,original.id));
           const shadyBlocked=original.moduleData?.module==='shady-acres'&&(undone?shadyParent(summary.entries)!==(original.shadyAction?.parent??'root'):!canUndoShady(events,original.id));
           const konradBlocked=original.moduleData?.module==='konrad'&&(undone?konradParent(summary.entries)!==(original.konradAction?.parent??'root'):!canUndoKonrad(events,original.id));
           const grimlashBlocked=original.moduleData?.module==='grimlash'&&(undone?grimlashParent(summary.entries)!==(original.grimlashAction?.parent??'root'):!canUndoGrimlash(events,original.id));
@@ -74,8 +77,8 @@ export function PlayTimeline({
                 {onToggle && entry.kind !== "start" && !isPermanentMoment(entry) && !isLockedPlayEvent(entry) && (
                   <button
                     type="button"
-                    disabled={shadyBlocked||konradBlocked||grimlashBlocked}
-                    title={shadyBlocked?'Undo or restore the intervening Shady Acres observations first':grimlashBlocked?'Undo or restore the intervening Grimlash observations first':konradBlocked?"Undo or restore the intervening USS Konrad observations first":undefined}
+                    disabled={tormentorBlocked||shadyBlocked||konradBlocked||grimlashBlocked}
+                    title={tormentorBlocked?'Undo or restore intervening Tormentor observations first':shadyBlocked?'Undo or restore the intervening Shady Acres observations first':grimlashBlocked?'Undo or restore the intervening Grimlash observations first':konradBlocked?"Undo or restore the intervening USS Konrad observations first":undefined}
                     onClick={() => onToggle(original, undone)}
                     className="type-caption underline text-muted-foreground hover:text-foreground min-h-[44px]"
                   >

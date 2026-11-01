@@ -1,3 +1,4 @@
+import {tormentorOpeningGuidance} from './play/tormentor.ts';
 import { FICTION_BOUNDARY } from './fictionBoundary.ts';
 import { reviewedFinalGirlIdentity } from './finalGirlIdentity.ts';
 import { endingFacts } from './storyFacts.ts';
@@ -38,13 +39,14 @@ function currentIdentity(data: Record<string, unknown>): string {
 
 export function buildOpeningUser(data: unknown): string {
   const input = data as Record<string, unknown>;
-  const { startingEvent, startingSetup, killer, location, ...world } = input;
+  const { startingEvent, startingSetup, killer, location, tormentorOpening, ...world } = input;
   const split = (entity: unknown) => {
     const { specialRules, ...identity } = (entity ?? {}) as Record<string, unknown>;
     return { identity, specialRules };
   };
   const threat = split(killer), place = split(location);
-  return `${currentIdentity(input)}WORLD AND CAST: physical identities and explicit starting facts:\n${JSON.stringify({ ...world, killer: threat.identity, location: place.identity }, null, 2)}\n\nNON-DEPICTABLE GAME CONTEXT: preserve supported starting conditions, but never perform player procedures or turn metadata into props. Random placements remain unknown until recorded.\n${JSON.stringify({ killerConstraints: threat.specialRules, locationConstraints: place.specialRules, eventMetadata: startingEvent, setupMetadata: startingSetup }, null, 2)}`;
+  const tor=(killer as {name?:string})?.name==='The Tormentor'?tormentorOpeningGuidance(tormentorOpening==='fresh-v1'?'fresh-v1':'legacy-unknown'):'';
+  return `${currentIdentity(input)}${tor?`TORMENTOR OPENING CONSTRAINT: ${tor}\n`:''}WORLD AND CAST: physical identities and explicit starting facts:\n${JSON.stringify({ ...world, killer: threat.identity, location: place.identity }, null, 2)}\n\nNON-DEPICTABLE GAME CONTEXT: preserve supported starting conditions, but never perform player procedures or turn metadata into props. Random placements remain unknown until recorded.\n${JSON.stringify({ killerConstraints: threat.specialRules, locationConstraints: place.specialRules, eventMetadata: startingEvent, setupMetadata: startingSetup }, null, 2)}`;
 }
 
 export function buildEndingUser(data: Record<string, unknown> & { introStory: string; outcome: 'won' | 'lost'; finalGirlHealth?: number; killerHealth?: number }): string {

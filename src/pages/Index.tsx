@@ -1,3 +1,4 @@
+import {tormentorState,tormentorFatal,tormentorParent,resolveTormentorAction} from '@/lib/play/tormentor';
 import {shadyParent,shadyState,resolveShadyAction} from '@/lib/play/shadyAcres';
 import {grimlashFatal,grimlashParent,resolveGrimlashAction} from '@/lib/play/grimlash';
 import {konradFatal,konradParent,konradState,resolveKonradAction} from '@/lib/play/konrad';
@@ -150,6 +151,7 @@ const IndexContent = () => {
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
       ...(selection.location === 'Shady Acres' && {shadySetupVersion:1 as const}),
       ...(selection.location === 'USS Konrad' && {konradSetupVersion:1 as const}),
+      ...(selection.killer === 'The Tormentor' && {tormentorSetupVersion:1 as const}),
       ...(selection.killer === 'Grimlash' && {grimlashSetupVersion:1 as const}),
       ...(selection.killer === 'Evomorph' && {evomorphSetupVersion:1 as const}),
       ...(selection.location === 'Creech Manor' && {creechSetupVersion:1 as const}),
@@ -171,7 +173,8 @@ const IndexContent = () => {
     if (!game || game.id !== activeGame?.id) return;
     try {
       const grimlashLost=game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(summarizePlay(game.playEvents).entries,'grimlash'));
-      const resolvedOutcome=grimlashLost?'lost':game.selection.location==='USS Konrad'&&konradFatal(moduleState(summarizePlay(game.playEvents).entries,'konrad'))?'lost':outcome;
+      const tormentorLost=game.selection.killer==='The Tormentor'&&tormentorFatal(tormentorState(moduleState(summarizePlay(game.playEvents).entries,'tormentor')));
+      const resolvedOutcome=tormentorLost||grimlashLost?'lost':game.selection.location==='USS Konrad'&&konradFatal(moduleState(summarizePlay(game.playEvents).entries,'konrad'))?'lost':outcome;
       const result = game.result ?? recordGame({ outcome:resolvedOutcome, ...game.selection, ...trackedOutcome(game.playEvents),
         introStory: story, sceneImageUrl, visualBible: bible, finalGirlMaxHealth: observedFinalGirlMaxHealth(game.selection.finalGirl,game.playEvents,game.selection.finalGirlStartingHealth,game.selection.killer) }, game.id);
       recordedIds.current.add(game.id);
@@ -205,12 +208,13 @@ const IndexContent = () => {
         if(!game?.result)throw new Error('The saved ship review could not be read. Please retry.');
       }
     }
+    if(game.selection.killer==='The Tormentor'&&formData.tormentorReview){const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'tormentor');if(tormentorState(state).loss!==formData.tormentorReview.loss){const action={parent:tormentorParent(en),command:'loss' as const,value:formData.tormentorReview.loss};const changes=resolveTormentorAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',tormentorAction:action,moduleData:{module:'tormentor',changes}})))throw new Error('The trap ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The reviewed trap ending is unavailable.');}}
     if(game.selection.killer==='Grimlash'&&formData.grimlashReview) {const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'grimlash');if(state.loss!==formData.grimlashReview.loss){const action={parent:grimlashParent(en),command:'loss' as const,value:formData.grimlashReview.loss,correction:true};const changes=resolveGrimlashAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',grimlashAction:action,moduleData:{module:'grimlash',changes}})))throw new Error('The Madness ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Madness ending is unavailable.');}}
     if(game.selection.location==='Shady Acres'&&formData.childrenOnBoardAtFinish!==undefined){const entries=summarizePlay(game.playEvents).entries,state=moduleState(entries,'shady-acres');if(shadyState(state).finishChildren!==formData.childrenOnBoardAtFinish){const action={parent:shadyParent(entries),command:'finish' as const,value:formData.childrenOnBoardAtFinish};const changes=resolveShadyAction(action,state,entries);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',shadyAction:action,moduleData:{module:'shady-acres',changes}})))throw new Error('The Children observation could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Children observation is unavailable.');}}
     const {konradReview:_review,childrenOnBoardAtFinish:_children,...fields}=formData;
     const reviewedEntries=summarizePlay(game.playEvents).entries;
-    const fatalEnding=game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(reviewedEntries,'grimlash'))||game.selection.location==='USS Konrad'&&konradFatal(moduleState(reviewedEntries,'konrad'));
-    const outcome=fatalEnding?'lost':game.selection.killer==='Grimlash'||game.selection.location==='USS Konrad'?formData.outcome??game.result.outcome:game.result.outcome;
+    const fatalEnding=game.selection.killer==='The Tormentor'&&tormentorFatal(tormentorState(moduleState(reviewedEntries,'tormentor')))||game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(reviewedEntries,'grimlash'))||game.selection.location==='USS Konrad'&&konradFatal(moduleState(reviewedEntries,'konrad'));
+    const outcome=fatalEnding?'lost':game.selection.killer==='The Tormentor'||game.selection.killer==='Grimlash'||game.selection.location==='USS Konrad'?formData.outcome??game.result.outcome:game.result.outcome;
     const updates={...fields,outcome,playEvents:game.playEvents};
     updateGame(game.result.id,updates);
     const result={...game.result,...updates};
@@ -325,6 +329,7 @@ const IndexContent = () => {
               filmId={gameSelection.filmId}
               key={activeGame.id}
               sessionId={activeGame.id}
+              tormentorFreshSetup={activeGame.tormentorSetupVersion === 1}
               evomorphFreshSetup={activeGame.evomorphSetupVersion === 1}
               playEvents={activeGame.playEvents}
               playDrafts={activeGame.playDrafts}

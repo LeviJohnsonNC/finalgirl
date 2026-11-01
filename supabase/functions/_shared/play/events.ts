@@ -1,3 +1,4 @@
+import {resolveTormentorAction,validTormentorAction,isInitialTormentor,tormentorParent,serializeTormentor,parseTormentor,type TormentorAction} from './tormentor.ts';
 import {resolveShadyAction,validShadyAction,isInitialShady,shadyParent,type ShadyAction} from './shadyAcres.ts';
 import { resolveGrimlashAction, validGrimlashAction, isInitialGrimlash, grimlashParent, type GrimlashAction } from './grimlash.ts';
 import { resolveKonradAction, validKonradAction, validKonradObservation, isInitialKonrad, konradParent, type KonradAction } from './konrad.ts';
@@ -79,6 +80,7 @@ export interface PlayDetails {
 }
 export interface PlayEvent extends PlayDetails {
   shadyAction?: ShadyAction;
+  tormentorAction?: TormentorAction;
   grimlashAction?: GrimlashAction;
   grovesReference?: true;
   /** One explicit location action can also update selected Inkanyamba. */
@@ -149,6 +151,8 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if(e.tormentorAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='tormentor'||!validTormentorAction(e.tormentorAction)))return false;
+  if(e.moduleData?.module==='tormentor'&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.tormentorAction&&!isInitialTormentor(e.moduleData.changes))))return false;
   if(e.shadyAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='shady-acres'||!validShadyAction(e.shadyAction)))return false;
   if(e.moduleData?.module==='shady-acres'&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.shadyAction&&!isInitialShady(e.moduleData.changes))))return false;
   if(e.grimlashAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='grimlash'||!validGrimlashAction(e.grimlashAction)))return false;
@@ -230,9 +234,21 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
+}
+export function canUndoTormentor(log:readonly PlayEvent[],target:string):boolean {const entries=summarizePlay(log).entries;return entries.find(e=>e.id===target)?.moduleData?.module!=='tormentor'||tormentorParent(entries)===target;}
+export function validTormentorHistory(log:readonly PlayEvent[]):boolean {
+ for(let i=0;i<log.length;i++){const e=log[i],prefix=log.slice(0,i),entries=summarizePlay(prefix).entries;
+ if(e.kind==='undo'&&!canUndoTormentor(prefix,e.target!))return false;
+ if(e.kind==='restore'){const old=prefix.find(x=>x.id===e.target);if(old?.moduleData?.module==='tormentor'&&tormentorParent(entries)!==(old.tormentorAction?.parent??'root'))return false;}
+ if(e.moduleData?.module!=='tormentor')continue;
+ if(!e.tormentorAction){if(prefix.some(x=>x.moduleData?.module==='tormentor')||!isInitialTormentor(e.moduleData.changes))return false;continue;}
+ const changes=resolveTormentorAction(e.tormentorAction,moduleState(entries,'tormentor'),entries);
+ const actual=parseTormentor(e.moduleData.changes.snapshot);
+ if(!changes||!actual||changes.snapshot!==serializeTormentor(actual))return false;
+ }return true;
 }
 export function canUndoShady(log:readonly PlayEvent[],target:string):boolean {
  const entries=summarizePlay(log).entries,item=entries.find(e=>e.id===target);
@@ -364,6 +380,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       if (!snapshot || snapshot.parent !== frightParent) { summary.inactive.add(original.id); continue; }
       frightParent = original.id;
     }
+    if(original.moduleData?.module==='tormentor'&&original.tormentorAction&&!resolveTormentorAction(original.tormentorAction,moduleState(summary.entries,'tormentor'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='konrad'&&original.konradAction&&!resolveKonradAction(original.konradAction,moduleState(summary.entries,'konrad'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='shady-acres'&&original.shadyAction&&!resolveShadyAction(original.shadyAction,moduleState(summary.entries,'shady-acres'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='grimlash'&&original.grimlashAction&&!resolveGrimlashAction(original.grimlashAction,moduleState(summary.entries,'grimlash'),summary.entries)){summary.inactive.add(original.id);continue;}

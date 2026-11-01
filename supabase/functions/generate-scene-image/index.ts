@@ -69,7 +69,7 @@ serve(async (req) => {
     let references: Array<{ name: string; url: string }> = [];
     if (!isPoster) {
       try {
-        references = await openingReferences(body.finalGirl, body.killer, downloadReference);
+        references = await openingReferences(body.finalGirl, body.killer, downloadReference, !(body.killer==='The Tormentor'&&body.tormentorOpening==='fresh-v1'));
       } catch (err) {
         console.error("Opening identity references unavailable:", err);
         return json({ error: "The cast references could not be loaded. Please try again." }, 503);
