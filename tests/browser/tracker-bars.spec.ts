@@ -21,7 +21,8 @@ test('tracker film strips keep every title and control below the artwork at lapt
   await archive.install(page, { draft: { ...session, playEvents: observed([3, 12, 4, 3]) } });
   await resume(page);
   const before = await log(page);
-  for (const label of labels) await expect(page.getByRole('button', { name: `Stop tracking ${label}`, exact: true })).toHaveText('×');
+  await expect(page.getByRole('button', {name: /^Stop tracking /})).toHaveCount(0);
+  await expect(page.getByRole('button', {name: /^Track /})).toHaveCount(0);
   for (const [width, height] of [[1280,640], [1366,768], [1440,900], [390,844], [320,568]]) {
     await page.setViewportSize({ width, height });
     for (const title of titles) {
@@ -67,7 +68,7 @@ test('tracker film strips keep every title and control below the artwork at lapt
   expect(await log(page)).toEqual(before);
 });
 
-test('close, Undo, reload, rejected writes and opt-in tracking preserve existing observations', async ({ page, archive }, info) => {
+test('always-visible legacy trackers preserve zero, Undo, reload and rejected writes', async ({ page, archive }, info) => {
   await archive.install(page, { draft: { ...session, playEvents: observed([0, 1, 7, 99]) } });
   await resume(page);
   await expect(page.getByRole('group', { name: 'Health tracker', exact: true })).toContainText('No health remaining');
@@ -76,17 +77,12 @@ test('close, Undo, reload, rejected writes and opt-in tracking preserve existing
     await page.setViewportSize({ width, height: 844 });
     await page.locator('.play-track-more').screenshot({ path: info.outputPath(`critical-${width}.png`), style: '.app-footer{visibility:hidden}' });
   }
-  for (const label of labels) await page.getByRole('button', { name: `Stop tracking ${label}`, exact: true }).click();
-  for (const label of labels) await expect(page.getByRole('button', { name: `Track ${label}`, exact: true })).toBeVisible();
-  await page.locator('.play-track-more').screenshot({ path: info.outputPath('untracked-320.png'), style: '.app-footer{visibility:hidden}' });
+  await page.getByRole('button', {name: 'Increase Final Girl health', exact: true}).click();
   await undoLatestObservation(page);
-  await expect(page.getByRole('button', { name: 'Set Bloodlust', exact: true })).toHaveText('99');
+  await expect(page.getByRole('button', {name: 'Set Final Girl health', exact: true})).toHaveText('0');
   await page.reload();
-  await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Track Final Girl health', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Track Final Girl health', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Set Final Girl health', exact: true })).toHaveText('5');
-  await expect(page.getByRole('button', { name: 'Increase Final Girl health', exact: true })).toBeDisabled();
+  await page.getByRole('button', {name: 'RESUME GAME', exact: true}).click();
+  for (const [label, value] of labels.map((label,i)=>[label,[0,1,7,99][i]])) await expect(page.getByRole('button', {name: `Set ${label}`, exact: true})).toHaveText(String(value));
   const before = await log(page);
   await page.evaluate(() => {
     const original = Storage.prototype.setItem;
@@ -95,11 +91,41 @@ test('close, Undo, reload, rejected writes and opt-in tracking preserve existing
       return original.call(this, key, value);
     };
   });
-  const close = page.getByRole('button', { name: 'Stop tracking Final Girl health', exact: true });
-  await close.focus(); await page.keyboard.press('Enter');
-  await expect(close).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Set Final Girl health', exact: true })).toHaveText('5');
+  await page.getByRole('button', {name: 'Increase Final Girl health', exact: true}).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('button', {name: 'Set Final Girl health', exact: true})).toHaveText('0');
   expect(await log(page)).toEqual(before);
+  await page.reload(); await page.getByRole('button', {name: 'RESUME GAME', exact: true}).click();
+  await page.getByRole('button', {name: 'Increase Final Girl health', exact: true}).click();
+  await expect(page.getByRole('button', {name: 'Set Final Girl health', exact: true})).toHaveText('1');
+});
+
+test('fresh games start all applicable trackers once', async ({page,archive})=>{
+  await archive.install(page,{draft:{...session,coreTrackersVersion:1}});
+  await resume(page);
+  for(const [label,value] of [['Final Girl health',5],['Killer health',12],['Horror',4],['Bloodlust',0]])await expect(page.getByRole('button',{name:`Set ${label}`,exact:true})).toHaveText(String(value));
+  const freshLog=await log(page);
+  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  expect(await log(page)).toEqual(freshLog);
+});
+
+test('legacy cleared values stay editable and unknown without opt-in',async({page,archive},info)=>{
+  // Old stop-tracking records remain valid history, without hiding the controls.
+  const oldLog=[...observed([2,3,4,5]),...fields.map(field=>newPlayEvent({kind:'state',field,value:null}))];
+  await archive.install(page,{draft:{...session,playEvents:oldLog}});
+  await resume(page);
+  for(const label of labels){
+    await expect(page.getByRole('button',{name:`Set ${label}`,exact:true})).toHaveText('?');
+    await expect(page.getByRole('button',{name:`Increase ${label}`,exact:true})).toBeDisabled();
+  }
+  expect(await log(page)).toEqual(oldLog);
+  await page.locator('.play-track-more').screenshot({path:info.outputPath('unknown-trackers.png'),style:'.app-footer{visibility:hidden}'});
+  await page.getByRole('button',{name:'Set Final Girl health',exact:true}).click();
+  await page.getByLabel('Final Girl health value',{exact:true}).fill('5');
+  await page.getByRole('button',{name:'Set',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Increase Final Girl health',exact:true})).toBeDisabled();
+  await undoLatestObservation(page);
+  await expect(page.getByRole('button',{name:'Set Final Girl health',exact:true})).toHaveText('?');
 });
 
 test('healthless killers retain three independent tracker strips', async ({ page, archive }, info) => {

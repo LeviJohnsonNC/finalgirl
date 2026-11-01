@@ -86,3 +86,10 @@ export async function showMinorChoices(scope: Locator) {
   });
   if (await add.isVisible()) await add.click();
 }
+
+/** Set an always-visible core tracker, including an unknown legacy value. */
+export async function setTracker(page: Page, label: string, value: number) {
+  await page.getByRole('button', {name: `Set ${label}`, exact: true}).click();
+  await page.getByLabel(`${label} value`, {exact: true}).fill(String(value));
+  await page.getByRole('button', {name: 'Set', exact: true}).click();
+}

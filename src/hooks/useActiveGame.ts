@@ -17,6 +17,7 @@ import { mapleLinkedChange } from '../../supabase/functions/_shared/play/maple';
 import { initialModuleObservations, moduleState } from '@/lib/play/modules';
 import { frightState, parseFright, initialFright, validFrightSuccessor } from '../../supabase/functions/_shared/play/fright';
 import { discardedGamesKey, isGameDiscarded } from '@/lib/discardedGames';
+import { playStartingValues } from '@/lib/play/defaults';
 
 export function useActiveGame() {
   const { user, isAuthReady } = useAuth();
@@ -95,6 +96,16 @@ export function useActiveGame() {
       const setup = log.length === 0
         ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1, previous.mapleSetupVersion === 1, previous.inkanyambaSetupVersion === 1, previous.grovesSetupVersion === 1, previous.poltergeistSetupVersion === 1, previous.creechSetupVersion === 1, previous.evomorphSetupVersion === 1, previous.konradSetupVersion === 1, previous.grimlashSetupVersion === 1, previous.shadySetupVersion === 1, previous.tormentorSetupVersion === 1, previous.marrekSetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
         : [];
+      // Only genuinely new sessions get starting tracker observations. Include
+      // them in the first durable write; legacy unknowns and Undo stay unknown.
+      if (log.length === 0 && previous.coreTrackersVersion === 1) {
+        const values = playStartingValues(previous.selection.killer, previous.selection.finalGirl);
+        values.finalGirlHealth = previous.selection.finalGirlStartingHealth ?? values.finalGirlHealth;
+        for (const field of ['finalGirlHealth', 'killerHealth', 'bloodlust', 'finalHorrorLevel'] as const) {
+          const value = values[field];
+          if (value !== undefined) setup.unshift(newPlayEvent({kind:'state',field,value}));
+        }
+      }
       if (log.length === 0 && previous.frightSetupVersion === 1 && previous.selection.killer === 'Dr. Fright' && event.moduleData?.module !== 'fright') setup.unshift(newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(initialFright())}}}));
       if (event.moduleData?.module === 'maple') {
         if (previous.selection.location !== 'Maple Lane') return previous;

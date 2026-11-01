@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId, installTestAudio } from "./fixtures";
-import { chooseKillerCard, showMinorChoices, openModule, searchPick, openHistory, undoLatestObservation } from "./play-helpers";
+import { chooseKillerCard, showMinorChoices, openModule, searchPick, openHistory, undoLatestObservation, setTracker } from "./play-helpers";
 import { newPlayEvent, type PlayEvent } from "../../src/lib/play/events";
 import { deathFacts } from "../../src/lib/play/death";
 const selection = {
@@ -384,9 +384,7 @@ test("fresh casting seeds verified setup and nine health through ending, archive
   await panel(page)
     .getByRole("button", { name: "Set Killer Wrath to 6", exact: true })
     .click();
-  await page
-    .getByRole("button", { name: "Track Killer health", exact: true })
-    .click();
+  await setTracker(page, "Killer health", 9);
   await page.getByRole("button", { name: "Finish game", exact: true }).click();
   await page
     .getByRole("dialog")

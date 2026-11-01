@@ -124,7 +124,7 @@
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 132px 44px;
+  grid-template-columns: minmax(0, 1fr) 132px;
   align-items: center;
   min-height: 60px;
   flex: 1 0 auto;
@@ -190,33 +190,10 @@
   font: 400 28px/1 Georgia, serif;
 }
 .play-workspace .play-state .play-state-stepper button:first-child::before { filter: brightness(.7) saturate(.7); }
-.play-workspace .play-state-close {
-  display: grid;
-  place-items: center;
-  min-width: 44px;
-  min-height: 44px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-left: 1px solid #b8ae8b40;
-  border-radius: 0;
-  background: none;
-  color: #d6d0bb;
-  font: 22px/1 Arial, sans-serif;
-}
 .play-workspace .play-state-control-bar button:hover:not(:disabled) { filter: brightness(1.25); }
-.play-workspace .play-state-close:hover { color: #fff5dc; }
-.play-workspace .play-state-enable {
-  grid-column: 2 / -1;
-  justify-self: end;
-  min-width: 88px;
-  min-height: 44px;
-  padding: 4px 12px;
-  border: 1px solid var(--tracker-button-border);
-  border-radius: 4px;
-  background: linear-gradient(var(--tracker-button-top), var(--tracker-button-bottom));
-  color: #f4ecd4;
-  font: 400 16px/1.1 'IM Fell English', Georgia, serif;
+.play-workspace .play-state-unknown {
+  color: #d6d0bb;
+  font-size: 12px;
 }
 .play-workspace .play-state form {
   grid-column: 2 / -1;

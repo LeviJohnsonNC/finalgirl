@@ -1,5 +1,5 @@
 import { test, expect, installTestAudio } from "./fixtures";
-import { chooseKillerCard, openModule, openHistory } from "./play-helpers";
+import { chooseKillerCard, openModule, openHistory, setTracker } from "./play-helpers";
 import { parseFright } from "../../supabase/functions/_shared/play/fright";
 import { summarizePlay } from "../../src/lib/play/events";
 import {
@@ -309,9 +309,7 @@ test("fresh casts use verified setup once, and timeline Undo rewinds a dependent
       exact: true,
     }),
   ).toHaveAttribute("aria-pressed", "true");
-  await page
-    .getByRole("button", { name: "Track Killer health", exact: true })
-    .click();
+  await setTracker(page, "Killer health", 9);
   expect(summarizePlay(await log(page)).killerHealth).toBe(9);
   await panel(page)
     .getByRole("button", {

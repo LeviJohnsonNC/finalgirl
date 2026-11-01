@@ -47,7 +47,7 @@ test('reviewed helicopter route reaches the ending request',async({page,archive}
 
 test('Rope Ladder cycles directly with Undo, retry and no editor; Poltergeist trackers fit their content',async({page,archive},info)=>{
  await archive.install(page,{draft});await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
- const trackers=page.getByRole('region',{name:'Optional trackers',exact:true});
+ const trackers=page.getByRole('region',{name:'Game trackers',exact:true});
  await expect(trackers.locator('.play-state')).toHaveCount(3);
  if(info.project.name==='desktop'){
   const bounds=await trackers.boundingBox();const last=await trackers.locator('.play-state').last().boundingBox();

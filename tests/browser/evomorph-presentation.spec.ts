@@ -11,7 +11,7 @@ test('Evomorph portraits follow evolution, quiet correction, Undo and reload acr
  const panel=page.locator('[data-module="evomorph"]');
  const evolution=panel.getByRole('button',{name:'Evomorph visibility'});
  const banner=panel.locator(':scope > summary img');
- await page.getByRole('button',{name:'Track Killer health',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Set Killer health',exact:true})).toHaveText('4');
  const health=page.locator('.play-state--killerHealth .play-stat-portrait');
  const pictures=async()=>Promise.all([evolution.locator('img').getAttribute('src'),banner.getAttribute('src'),health.getAttribute('src')]);
  const hatchling=await pictures();expect(new Set(hatchling).size).toBe(1);expect(hatchling[0]).toContain('hatchling');

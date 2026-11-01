@@ -1,5 +1,5 @@
 import { test, expect, activeGame } from "./fixtures";
-import { searchPick, openHistory, saveResultOnly } from "./play-helpers";
+import { searchPick, openHistory, saveResultOnly, setTracker } from "./play-helpers";
 import type { Page } from "@playwright/test";
 
 async function resume(page: Page) {
@@ -373,9 +373,7 @@ test("Kate’s manual Ultimate preserves current health and allows the correct o
     },
   });
   await resume(page);
-  await page
-    .getByRole("button", { name: "Track Final Girl health", exact: true })
-    .click();
+  await setTracker(page, "Final Girl health", 4);
   await page
     .getByRole("button", { name: "Ultimate unlocked", exact: true })
     .click();
