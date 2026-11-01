@@ -6,7 +6,7 @@ Independent 1536×1024 originals produce 960×640 WebP heroes and 256×160 choos
 
 Stable IDs are mapped explicitly in `tormentorArt.ts` before display sorting; unknown IDs fail rather than reusing unrelated pictures. Duplicate physical Terror cards share their verified title photograph. `portrait` deliberately uses the existing identity PNG. All labels, countdowns and interactive state are HTML. Photos provide atmosphere, never evidence of a casualty or present board location.
 
-Heroes use central 50%/50% crops; header uses 70%/0% so the complete mask survives wide laptop crops. Exit locked/unlocked scenes have different physical shackle states. Unseen shows an unoccupied control room. Individual prompts, original filenames/SHA-256, dimensions, derivative hashes and byte counts are recorded in `manifest.json`. Original temporary paths are excluded.
+Heroes use central 50%/50% crops; header uses 70%/9% so the complete mask survives wide laptop crops. Exit locked/unlocked scenes have different physical shackle states. Unseen shows an unoccupied control room. Individual prompts, original filenames/SHA-256, dimensions, derivative hashes and byte counts are recorded in `manifest.json`. Original temporary paths are excluded.
 
 | Stable ID | Scene file | Bytes |
 | --- | --- | --- |

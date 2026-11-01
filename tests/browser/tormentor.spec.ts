@@ -12,7 +12,10 @@ test('Tormentor critical slice: simultaneous traps, durable failure, reveals and
  for(const[width,height]of info.project.name==='mobile'?[[390,844],[320,568]]:[[1280,640],[1366,768],[1440,900]]){
   await page.setViewportSize({width,height});await page.emulateMedia({reducedMotion:'reduce'});await panel.locator('img').evaluateAll(async images=>Promise.all(images.map(im=>{const image=im as HTMLImageElement;image.loading='eager';return image.decode();})));
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-  await panel.screenshot({path:info.outputPath(`tormentor-active-${width}.jpg`),type:'jpeg',quality:85,animations:'disabled',style:'.app-footer{visibility:hidden}'});
+  const header=panel.locator(':scope > summary img').first();
+    const crop=await header.evaluate(im=>{const image=im as HTMLImageElement,box=image.getBoundingClientRect(),pos=getComputedStyle(image).objectPosition.split(' ').map(x=>parseFloat(x)/100),scale=Math.max(box.width/image.naturalWidth,box.height/image.naturalHeight),w=image.naturalWidth*scale,h=image.naturalHeight*scale,left=box.x+(box.width-w)*pos[0],top=box.y+(box.height-h)*pos[1];return{box:{left:box.left,top:box.top,right:box.right,bottom:box.bottom},head:{left:left+w*.74,right:left+w*.845,top:top+h*.082,bottom:top+h*.3}};});
+    expect(crop.head.left).toBeGreaterThanOrEqual(crop.box.left);expect(crop.head.right).toBeLessThanOrEqual(crop.box.right);expect(crop.head.top).toBeGreaterThanOrEqual(crop.box.top);expect(crop.head.bottom).toBeLessThanOrEqual(crop.box.bottom);
+    await panel.screenshot({path:info.outputPath(`tormentor-active-${width}.jpg`),type:'jpeg',quality:85,animations:'disabled',style:'.app-footer{visibility:hidden}'});
  }
  await panel.getByRole('button',{name:'Advance all traps',exact:true}).click();await panel.getByRole('button',{name:'Advance all traps',exact:true}).click();await expect(panel.getByText(/Super Saw reaches Killed/)).toBeVisible();await panel.getByRole('button',{name:'Advance all traps',exact:true}).click();
  await expect(panel.getByRole('article',{name:'Super Saw',exact:true})).toHaveCount(0);await expect(panel.getByRole('article',{name:'Infestation Box',exact:true})).toBeVisible();await expect(panel.getByRole('status')).toContainText('Final Girl killed');

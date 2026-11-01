@@ -59,9 +59,11 @@ export type TormentorAction = {parent:string} & (
  |{command:'presence';value:TormentorSnapshot['presence']}
  |{command:'arrive'}
  |{command:'exit';name:string;locked:boolean|null}
+ |{command:'clear-exit';name:string}
  |{command:'loss';value:TormentorLoss}
  |{command:'empty'}
  |{command:'complete-list'}
+ |{command:'clear-replacements'}
 );
 const object=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const label=(v:unknown):v is string=>typeof v==='string'&&v.length<=120&&![...v].some(c=>c.charCodeAt(0)<32);
@@ -97,7 +99,7 @@ export const tormentorCard=(entries:readonly Entry[],kind:'dark-power'|'finale')
 export function tormentorPresence(s:TormentorSnapshot,entries:readonly Entry[]){return s.presence==='off-board'&&entries.some(e=>e.kind==='moment'&&e.momentType==='finale')?'arrival-pending':s.presence;}
 export function validTormentorAction(v:unknown):v is TormentorAction {
  if(!object(v)||typeof v.parent!=='string'||!/^(root|[0-9a-f-]{36})$/i.test(v.parent)||typeof v.command!=='string')return false;
- const fields:Record<string,string[]>={add:['id','subject','space'],task:['id'],advance:[],correct:['id','timer','tasks','status','subject','space'],clear:['id'],cleanup:[],presence:['value'],arrive:[],exit:['name','locked'],loss:['value'],empty:[],'complete-list':[]};
+ const fields:Record<string,string[]>={add:['id','subject','space'],task:['id'],advance:[],correct:['id','timer','tasks','status','subject','space'],clear:['id'],cleanup:[],presence:['value'],arrive:[],exit:['name','locked'],'clear-exit':['name'],loss:['value'],empty:[],'complete-list':[],'clear-replacements':[]};
  if(!fields[v.command]||Object.keys(v).sort().join()!==['parent','command',...fields[v.command]].sort().join())return false;
  const c=TORMENTOR_TRAPS.find(c=>c.id===v.id);
  switch(v.command){
@@ -105,6 +107,7 @@ export function validTormentorAction(v:unknown):v is TormentorAction {
  case 'task':case 'clear':return !!c;
  case 'correct':return !!c&&label(v.subject)&&room(v.space)&&['active','escaped','spent','removed'].includes(String(v.status))&&(v.timer===null||integer(v.timer,c.checkpoints.length-1))&&(v.tasks===null||integer(v.tasks,c.tasks.length));
  case 'presence':return ['unknown','off-board','on-board'].includes(String(v.value));
+ case 'clear-exit':return label(v.name)&&!!v.name.trim()&&v.name!=='__proto__';
  case 'exit':return label(v.name)&&!!v.name.trim()&&v.name!=='__proto__'&&(v.locked===null||typeof v.locked==='boolean');
  case 'loss':return losses.includes(v.value as TormentorLoss);
  default:return true;
@@ -148,15 +151,18 @@ export function resolveTormentorAction(a:TormentorAction,state:ModuleState,entri
  case 'presence':s.presence=a.value;break;
  case 'arrive':if(!entries.some(e=>e.kind==='moment'&&e.momentType==='finale')||s.presence==='on-board')return null;s.presence='on-board';break;
  case 'exit':s.exits[a.name]=a.locked;break;
+ case 'clear-exit':if(!(a.name in s.exits))return null;delete s.exits[a.name];break;
  case 'loss':s.loss=a.value;if(a.value==='none'||a.value==='unknown')for(const [id,t] of Object.entries(s.traps)){const c=TORMENTOR_TRAPS.find(c=>c.id===id)!;if(c.deck==='girl'&&t.timer===c.checkpoints.length-1){t.timer=null;if(t.status==='spent'&&!Object.entries(s.traps).some(([otherId,other])=>otherId!==id&&other.status==='active'&&TORMENTOR_TRAPS.find(c=>c.id===otherId)?.deck==='girl'))t.status='active';}}break;
  case 'empty':if(Object.values(s.traps).some(t=>t.status==='active'))return null;s.known=true;s.pendingSetup=false;s.replacement=0;break;
  case 'complete-list':s.known=true;s.pendingSetup=false;break;
+ case 'clear-replacements':if(!s.replacement)return null;s.replacement=0;s.known=false;break;
  }
  const next=serializeTormentor(s);return next===before||!parseTormentor(next)?null:{snapshot:next};
 }
 export function tormentorFacts(s:TormentorSnapshot,entries:readonly Entry[]=[]):string {
  const parts:string[]=[];
  if(tormentorFatal(s))parts.push(`Tormentor loss: ${s.loss}${s.loss==='trap-terminal'?'; Final Girl died, regardless of recorded Health':'; physical death not established'}.`);
+ if(s.loss==='trap-terminal'){const terminal=Object.entries(s.traps).find(([id,t])=>{const c=TORMENTOR_TRAPS.find(c=>c.id===id)!;return c.deck==='girl'&&t.timer===c.checkpoints.length-1&&t.status!=='escaped';});if(terminal)parts.push(`Terminal trap: ${TORMENTOR_TRAPS.find(c=>c.id===terminal[0])!.name}, Killed.`);}
  const girl=Object.entries(s.traps).find(([id,t])=>TORMENTOR_TRAPS.find(c=>c.id===id)?.deck==='girl'&&t.status==='active');
  if(girl){const c=TORMENTOR_TRAPS.find(c=>c.id===girl[0])!;parts.push(`Final Girl trapped: ${c.name}, position ${girl[1].timer??'unknown'}.`);}
  parts.push(`Tormentor presence: ${tormentorPresence(s,entries)}.`);

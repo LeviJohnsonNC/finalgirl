@@ -228,7 +228,7 @@ export function playMechanisms(selection: {
 }) {
   return [
     "Killer attack",
-    ...(selection.killer==='The Tormentor'?TORMENTOR_TRAPS.map(c=>c.name):[]),
+    ...(selection.killer==='The Tormentor'?TORMENTOR_TRAPS.filter(c=>c.deck==='victim').map(c=>c.name):[]),
     ...(selection.location==='Shady Acres'?['Child attack','Abduction','Ancient Curse','Decaying Earth','Omen of Blood']:[]),
     ...(selection.killer === "Evomorph" ? ["Ambush", "Acid Blood", "Razor Tail"] : []),
     ...(selection.killer==='Poltergeist'?['Clown Doll','Behemoth','Flying objects','Lightning']:[]),

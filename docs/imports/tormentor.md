@@ -4,7 +4,7 @@
 
 The Tormentor, killer in `s3-marrek-murders`, stable module `tormentor`. Standard mode from seven owner photographs, reviewed 2026-11-01. Extends the existing selectable killer without duplicating the film, Final Girls or location. Marrek Warehouse, Mandy/Cassie rules and personal items are outside this killer import. Saw informs the mechanical horror atmosphere; the supplied female masked Tormentor governs identity, not Jigsaw or film actors.
 
-Branch: `codex/tormentor-killer`, based on main `12ee423344c53742d75bcbfa71551760a4ace71e`. Implementation and local verification are in progress below; deployment is a separate release gate. Existing identity photograph, Collection selection, physical-game companion boundaries and painted ending posters are retained.
+Branch: `codex/tormentor-killer`, based on main `12ee423344c53742d75bcbfa71551760a4ace71e`. Implemented and locally verified; production deployment remains a separate release gate. Existing identity photograph, Collection selection, physical-game companion boundaries and painted ending posters are retained.
 
 ## Evidence ledger
 
@@ -69,7 +69,7 @@ Printed credits: design **A. J. Porfirio**; art **Agnieszka Dabrowiecka** (T3).
 | Illustrated Play panel | Killer-first registration; off-board/unknown/pending/on-board presence; per-trap illustrated cards; ordered task control; single global advance with terminal preview |
 | Equivalent shared controls | Existing `KillerCards`, permanent reveal handling, Remember This, PlaySelect, ModuleArtwork and timeline controls; no duplicate reveal workflow |
 | Mechanic-specific exception | Unique trap cards track independently and advance atomically as a group; not ordinary Minions or Victim counters. No generic map, inventory, resource or phase engine |
-| Corrections/recovery | Quiet presence and trap correction; unknown timer/task counts; owner-ordered Undo/Restore; optimistic-parent validation; failed durable writes leave gameplay unchanged and retryable |
+| Corrections/recovery | Quiet presence/trap correction and clearing mistaken Exit names; unknown timer/task counts; owner-ordered Undo/Restore; optimistic-parent validation; failed durable writes leave gameplay unchanged and retryable |
 | Setup/legacy | Fresh provenance initializes only at the durable new-session boundary. Old games remain unknown. Pending setup/replacements block a falsely complete global advance |
 | Death | Eight owner-filtered Terror titles, named mechanisms in existing Other cause tile, six-cause layout retained. Snapshot/context and selected mechanism are historical. No Final Girl death in Victim totals |
 | Narrative budget | Critical terminal fate / Final Girl trap / physical presence precede Victim count; location retains its own reserved budget and ownership |
@@ -84,20 +84,20 @@ The hardest slice (two simultaneous unequal tracks, global progression and termi
 
 | Check | Evidence / status |
 | --- | --- |
-| Local lint/typecheck/unit suite | `npm run check`; final totals recorded after final run |
+| Local lint/typecheck/unit suite | `npm run check`; 624 tests passed; final-head CI covers the complete revision |
 | Edge adapters | `npm run test:edge`: 120 pass, including owner-specific prose/poster schema review, opening reference omission, historical death and narration regressions |
 | Source/trap transitions | Catalog count/ranges, all eight legal simultaneous traps, no inferred totals, legacy state, ordered tasks, Endless replacements, sticky fatal observations/retraction, stale/forged writes, Undo/Restore and owner mixing |
 | Art/build | `npm run check:assets`, `npm run build`; hashes, dimensions, independent scene count and budgets verified |
 | Tormentor browser journeys | Desktop/phone simultaneous trap progression, reload, permanent reveals/arrival, persistence failure/retry, ordered escape, exit toggles and positive-Health terminal ending; screenshots generated in Playwright report |
 | Actual viewports | 1280×640, 1366×768, 1440×900, 390×844, 320×568: loaded art, no horizontal overflow, phone task wrapping and touch targets; final header crop reviewed |
-| Shared/mixed regressions | Module consistency, Konrad, Grimlash and named Final Girl identity browser journeys; final result recorded below |
-| Required final-head CI | Pending branch push / PR; finish before handoff |
+| Shared/mixed regressions | Module consistency, Konrad, Grimlash and named Final Girl identity browser journeys; 80 passed, no skipped/flaky/failing tests (complete compiled HTML report verified) |
+| Required final-head CI | [PR #164](https://github.com/LeviJohnsonNC/finalgirl/pull/164/checks); final-head workflow is required before handoff |
 | Live providers / deployment | Not performed; mocked browser tests do not establish provider quality or deployment |
 
 ## Release and handoff
 
 No database migration. Deploy compatible shared-domain consumers before the frontend: `generate-story`, `generate-ending`, `generate-scene-image`, `generate-visual-bible`, `generate-death-scene`, `narrate-story`. Other edge entry points receive Deno typecheck in Reliability CI.
 
-Opening identity staging extends the fixed-name allowlist. `node scripts/opening-references.mjs --only='The Tormentor'` stages only the new identity and preserves all previous manifest entries; use `OPENING_IMAGEMAGICK=convert` for ImageMagick 6. Exact required private object: `opening-references/the-tormentor-bcbe59ed85cb2d02.jpg`, SHA-256 `bcbe59ed85cb2d02f3edbe9e4a963af1d17865f6878eef485d4d594481a7e47e`. Upload these staged JPEG bytes and verify the private loader before releasing the functions/frontend. An absent/mismatched object fails closed for legacy openings that request it. Fresh verified unseen openings deliberately attach only the Final Girl reference. No Storage service credentials or deployment access were provided in this session; object upload and signed-in live smoke remain release checks.
+Opening identity staging extends the fixed-name allowlist. `node scripts/opening-references.mjs --only='The Tormentor'` stages only the new identity and preserves all previous manifest entries; use `OPENING_IMAGEMAGICK=convert` for ImageMagick 6. Exact required private object: `opening-references/the-tormentor-bcbe59ed85cb2d02.jpg`, SHA-256 `bcbe59ed85cb2d02f3edbe9e4a963af1d17865f6878eef485d4d594481a7e47e`. The same reviewed bytes are committed as `supabase/reference-assets/tormentor.jpg`. Upload these staged JPEG bytes and verify the private loader before releasing the functions/frontend. An absent/mismatched object fails closed for legacy openings that request it. Fresh verified unseen openings deliberately attach only the Final Girl reference. No Storage service credentials or deployment access were provided in this session; object upload and signed-in live smoke remain release checks.
 
 After authorized release: mixed-location new-game setup, save/reload, arrival, multiple traps, contextual death/takes/cached reopening/audio, reviewed ending and poster. Preserve previous deployed manifest objects. Branch/CI success does not imply production deployment.
