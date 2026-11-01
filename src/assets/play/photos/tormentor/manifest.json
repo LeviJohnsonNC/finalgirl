@@ -621,5 +621,467 @@
       "width": 256,
       "height": 160
     }
+  },
+  {
+    "id": "guillotine-deactivated",
+    "prompt": "Edit target: the attached existing guillotine photograph. Make one separate original 1536x1024 landscape photograph for a horror-game companion. Preserve exactly the same wooden frame, iron hardware, low camera angle, room, fluorescent light and physically believable candid 1980s 35mm photographic treatment. Keep all apparatus readable inside the central crop. No illustration, CGI, text, UI, collage, people, body parts, silhouettes or reflections of people. Change only the device to visibly DEACTIVATED after a successful escape: the blade is raised safely and secured, the hinged neck stock is opened, the release rope hangs slack and disconnected. The same empty apparatus is clearly harmless and at rest. No blood or injuries.",
+    "source": "exec-19a03b03-7402-4f48-9c0f-14349b800731.png",
+    "originalSha256": "16904d6704064288639a465f56f8de88b70fc860d4f3cf6649609012fbb09b0f",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/guillotine-deactivated.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "1a42abde49b60f200934dbd076cfcb81213242c2b1d89e5df43b89eb3c77e36e",
+    "bytes": 60110,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/guillotine-deactivated-thumb.webp",
+      "sha256": "d7cad7b2d1637e6e8bb4c34cbcd386645c82cb9a3aebbcb0a04de865e17212d0",
+      "bytes": 6542,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "guillotine-sprung",
+    "prompt": "Edit target: the attached existing guillotine photograph. Make one separate original 1536x1024 landscape photograph for a horror-game companion. Preserve exactly the same wooden frame, iron hardware, low camera angle, room, fluorescent light and physically believable candid 1980s 35mm photographic treatment. Keep all apparatus readable inside the central crop. No illustration, CGI, text, UI, collage, people, body parts, silhouettes or reflections of people. Change only the device to its SPRUNG aftermath state: the guillotine blade has dropped fully into the lower stock; restrained dark red blood stains mark the blade edge and wooden stock. Non-graphic aftermath on an empty practical movie prop, no human remains, no body, no person, no gore or splashing. Keep the identifiable frame and room.",
+    "source": "exec-e1b78a9d-5717-4204-aee9-75fc7d346897.png",
+    "originalSha256": "fdd557c6f1ce5b725d1a688081cbcf7e6e5413e4f3c41545083bdbeacce7ab40",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/guillotine-sprung.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "5fbb0535875dcb8f049354fb95c5bc201de10f6648c14f55001416b52b9a300d",
+    "bytes": 81944,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/guillotine-sprung-thumb.webp",
+      "sha256": "1699f1b9a1e98353a1743aba60d7dca5fdf669d2085267aff8548bc96240baef",
+      "bytes": 7664,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "infestation-box-deactivated",
+    "prompt": "Edit target: the attached infestation-box photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The heavy box lid is propped fully open, the mesh restraint lid is lifted clear, and the fastening is unlatched. The box is empty of people and safely deactivated; contained dark insects remain only deep inside. No blood. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-2d89849a-17b0-47f8-95e8-7e61b9e1cf81.png",
+    "originalSha256": "d32b2850737fd4457491697dee1164d84663c732ed838785de7535bb61806395",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/infestation-box-deactivated.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "39797410edb94ed6835d9fe20901ac0024badd0e8670a9fdc43994d1970e42c0",
+    "bytes": 95008,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/infestation-box-deactivated-thumb.webp",
+      "sha256": "e463ae61f5b9db11435325a8a27eafa298b131e030945991682d2cdd1d22bc10",
+      "bytes": 7500,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "infestation-box-sprung",
+    "prompt": "Edit target: the attached infestation-box photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The same heavy lid and mesh have slammed shut; the restraint area is sealed, with restrained dark red smears on the timber rim and wire. A few insects visible through the mesh. Empty prop aftermath only, no human remains or gore. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-e9563321-5781-4548-aad5-a7bfcd87480e.png",
+    "originalSha256": "aec3b3acf06f1ecb4f9a8b706d5335f756d480f42dd10530d72a8ce0396cab3f",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/infestation-box-sprung.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "de41ade3410ae2dd195f26ff1ebababfbe47514134f96b1e6a4a4317c4312c4b",
+    "bytes": 81354,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/infestation-box-sprung-thumb.webp",
+      "sha256": "604d6b049a40caad2af61e42c3eda0af4ec5812472b83433fe39efb75e483c5f",
+      "bytes": 6844,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "razor-maze-deactivated",
+    "prompt": "Edit target: the attached razor-maze photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The obstructing razor-wire runs have been safely released and pulled aside against their timber posts, leaving a clearly passable central route through the same corridor. No blood; same wire and room. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-62c20a89-4d99-46de-be73-5dbee9da32ea.png",
+    "originalSha256": "60c3ac55045bbb9dcc1248cdca509f972f845afb48231ed08a2a8f4a4a1854c1",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/razor-maze-deactivated.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "b5cfc66b843488bbc7d818dcb5de1562af643b0f78368440e78ffdfd87d21661",
+    "bytes": 114006,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/razor-maze-deactivated-thumb.webp",
+      "sha256": "f4955423c518b0899956640a848c36c7da5371d76c194c536dac883990537dca",
+      "bytes": 10288,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "razor-maze-sprung",
+    "prompt": "Edit target: the attached razor-maze photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The wire has drawn tight across the narrow corridor and tangled into a closed barrier, with restrained dark red smears on several sharp coils and a small stain on concrete below. No person, body parts or gore. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-7225336e-d203-44fc-875e-4b3e824fbffe.png",
+    "originalSha256": "26aad495b4fdef67d97fdf3096f8fcd101d727513b217e5d744e862221618c53",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/razor-maze-sprung.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "d7bc70b2851bf97d0540dc1d4a1136c25d394e6ca76e1027ae40103251d00bdb",
+    "bytes": 126052,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/razor-maze-sprung-thumb.webp",
+      "sha256": "2d067467f43875489998c4664526544b54ba66c5661cbbbb6e3b4f068f410aa1",
+      "bytes": 11400,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "super-saw-deactivated",
+    "prompt": "Edit target: the attached super-saw photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The large circular blade remains recognizable but is pulled away from the empty bench; the bench restraints are opened, a slack disconnected drive belt rests beside the machine. Still, safely deactivated. No blood. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-0ae2078e-6f19-4f89-b534-b76d2a971f20.png",
+    "originalSha256": "02a3ad886cb4df2cb24ecbd20fcac80d9160afedb8ca9ca1b928f93cac4cde79",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/super-saw-deactivated.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "e04b8b78b530bd8faea3e71e390c687b5fd125769a3fb590357dbc4738d1eee6",
+    "bytes": 99110,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/super-saw-deactivated-thumb.webp",
+      "sha256": "75a4de30db04456a151159df15096b73d32ed616bb17fbd33294a9cbf4ad8a9b",
+      "bytes": 8934,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "super-saw-sprung",
+    "prompt": "Edit target: the attached super-saw photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The enormous blade has cut through the empty restraint bench, leaving a fresh saw kerf, red smears on its lower teeth and on the scarred bench. The blade is now still. No person, body parts, remains or gore. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-4e2ebcf7-76a6-43e7-bfdb-77a2c66718d1.png",
+    "originalSha256": "aa5f932b175bd43df1634a5fa11e2ff224cde73afbe1ed27193890ee07029917",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/super-saw-sprung.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "0cbb0b6648d3dd5240e71003f66b77eda1da62d032973f7313436996e48e70fd",
+    "bytes": 103250,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/super-saw-sprung-thumb.webp",
+      "sha256": "cfa4f6fea416b4e1fc91f9620f6d8a341f94ff9530acbf0a909cd295f9e956d5",
+      "bytes": 8972,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "electric-cage-deactivated",
+    "prompt": "Edit target: the attached electric-cage photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The cage door is swung fully open, the old power switch is down and disconnected loose power leads lie outside. Quiet, safely deactivated, no electrical glow or blood. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-0a5dd8db-7c5c-4d10-82fa-08c911aa823c.png",
+    "originalSha256": "ddad6851d4590828109ddd0213b6fba5d56c828efc7f9a8b6bb0a33c0da8404b",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/electric-cage-deactivated.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "16ba15aaee6a3311e1e8bbab759861677183258d977cb6d2681a9b53c6cfe163",
+    "bytes": 109136,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/electric-cage-deactivated-thumb.webp",
+      "sha256": "a1ed8b26cd689f7e23def57eff58b4dfb5e8dc4ab375f0a05731251a2d8136d9",
+      "bytes": 8190,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "electric-cage-sprung",
+    "prompt": "Edit target: the attached electric-cage photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The cage door is latched shut; black electrical scorch marks scar its wire and floor, a small final spark at a ceramic insulator and faint residual smoke indicate a discharged electrical trap. No person, body, burns on skin or blood. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-d180cdc7-c5d3-4cf8-9a93-44cc47607822.png",
+    "originalSha256": "286ef38f9c45fbab877af8da48268834f4d98c8be405f1610e5584f96019bfb6",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/electric-cage-sprung.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "437cd1bc66933d6cc0278922a42b4aa1f837abe4036494e3994591c96c54a715",
+    "bytes": 111476,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/electric-cage-sprung-thumb.webp",
+      "sha256": "1be8c388486e3c30efd498ea0fe5a989272e3b3896e8149eb55eeba6c922042e",
+      "bytes": 7962,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "swinging-blades-deactivated",
+    "prompt": "Edit target: the attached swinging-blades photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: Both heavy curved blades have been drawn up safely high against their support beams and securely parked; the floor route below is clearly open. Same apparatus, no blood. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-0fb394ec-eb2f-4db6-a5f4-15a39ebbd838.png",
+    "originalSha256": "ff576b328dc6ee2c6bfc5579977f80561da1e379564d044a25393cceaa855ce8",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/swinging-blades-deactivated.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "00d77422685327b1a532b6a87e0cd0f501b3b489e80742301d5dae098ab30cdf",
+    "bytes": 48272,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/swinging-blades-deactivated-thumb.webp",
+      "sha256": "ba75b8887430ba5b6477232fb31818b9e614da0b005503e492adfd7895ff8703",
+      "bytes": 5556,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "swinging-blades-sprung",
+    "prompt": "Edit target: the attached swinging-blades photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The same heavy curved blades hang at the low end of their swing, now still, with restrained dark red smears along the cutting edges and a small smear on concrete beneath. Empty prop only, no people or remains. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-269ae77a-f745-4d59-96be-0b5bcac9cd51.png",
+    "originalSha256": "f68fdd4073b97bce5ae407b9bb2435f26d3b8befaaefcb0f1d183a82d98fc09c",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/swinging-blades-sprung.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "9ecd1a7a4b0f29016453c6d41d7f8ed94034656cb6d52da85c67a4d5c6bbf7d4",
+    "bytes": 67368,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/swinging-blades-sprung-thumb.webp",
+      "sha256": "138c11b55952c035384951db93f767509d251f28ff256e0889f55e3f0785884d",
+      "bytes": 6904,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "temple-drills-deactivated",
+    "prompt": "Edit target: the attached temple-drills photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: Both drill carriages are retracted well away from the empty chair; forehead and wrist restraints hang fully open. The drills are unpowered and harmless, no blood. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-d251dfb3-fd92-4a7b-b269-56a9b0bc7cbd.png",
+    "originalSha256": "fe519ef1d2e66a439692c9f9780f7cb0b72df04d5f43c6c5aee85994432dde13",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/temple-drills-deactivated.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "8347e8099b7ab8aff611973bcb99126fa52e99bc1db881701ee0c214fe9cc3ae",
+    "bytes": 60108,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/temple-drills-deactivated-thumb.webp",
+      "sha256": "0260b37b1d792a9a9fd3aff322c17c7ae8f5f10435f9c5d1036c260c10580c7d",
+      "bytes": 6256,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "temple-drills-sprung",
+    "prompt": "Edit target: the attached temple-drills photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: Both opposing drills have moved inward to the empty head-rest area, now still, with small dark red stains on the drill tips and forehead restraint. No person, head, body part or gore. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-59b73f9a-fa3b-4137-b992-2e4f56abd88f.png",
+    "originalSha256": "a054ce9de41db76a4ee2be83f040446116e0bb8198d0ed4eb512cf09ca237034",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/temple-drills-sprung.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "4442ae0d3164f6000772411f8c500b2ad9cc9ac45568baf89951b168213a99bb",
+    "bytes": 66468,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/temple-drills-sprung-thumb.webp",
+      "sha256": "aa23c605f85e3f002ff1d6c53cfde2542ed8e23fd3c3a9005a02cc4b0f8c93d1",
+      "bytes": 6790,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "the-slicer-deactivated",
+    "prompt": "Edit target: the attached the-slicer photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The knife-covered rotor is parked away from the empty chair, drive belt slack and chair straps released. Same recognizable bladed drum, now safely deactivated, no blood. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-d903e98f-caa8-47a2-9d17-a5677dd1d298.png",
+    "originalSha256": "51e70678d7d3aeb998f6d5219d7d9f11623268201e735cedcca90fdafc2fb5bf",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/the-slicer-deactivated.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "1269ccf6038bdac2db211678bfa9fe568a06a9c8ca2a62d30ea981b3461ebf2b",
+    "bytes": 89822,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/the-slicer-deactivated-thumb.webp",
+      "sha256": "aa60d00f549552ab7ac7921eb135228e860ca117fb9906768560216630786c69",
+      "bytes": 9736,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "the-slicer-sprung",
+    "prompt": "Edit target: the attached the-slicer photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The heavy knife rotor is now at the near end of its travel beside the empty chair; restrained dark red streaks mark the blade edges and a few marks on the chair hardware. Now still. No person, body part or gore. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-e99e6530-68c4-4d09-a394-3926c731e5a9.png",
+    "originalSha256": "37c93813be5d7ea427595c757fd2769412c278ab6b016e5071cf05b1e33a4853",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/the-slicer-sprung.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "6f7e2df008fe12f4fc947c1e6d95f1d95e45d0b4034d4a52d7ae61f904077ec4",
+    "bytes": 90478,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/the-slicer-sprung-thumb.webp",
+      "sha256": "f84905a7b6dfa569d4f8197ab96bdcbb69685924df38be885dd1dc6cbdddea0d",
+      "bytes": 10110,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "reverse-bear-trap-deactivated",
+    "prompt": "Create ONE 1536x1024 landscape candid 1980s consumer 35mm photograph in an old practical-effects workshop. A battered wooden workbench fills the foreground, an old cream-colored round clock dial sits behind it to the left, and daylight from a high dirty window comes from the right. On the bench is an inert dismantled theatrical prop, completely wrapped and protected in plain beige canvas, with only a harmless curved metal mounting ring and a loose brown leather strap beside the wrapping. A disconnected small mechanical timer rests separately on the bench, its casing open and unpowered. The wrapped item has no visible points, cutting surfaces or operational machinery. Quiet out-of-service storage, no human figures, injury, blood or horror action. Real cloth folds, aged wood, tarnished metal, coherent ordinary available light, restrained natural grain. Keep central objects clear in a wide crop. No text, logos, UI, illustration, CGI or collage.",
+    "source": "exec-f3131902-11a3-4740-a700-9af8f154c95b.png",
+    "originalSha256": "6985c6a394a5a01a5e7d7daef3af290f2a7af7d0ed113a73459a82a150d5425f",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/reverse-bear-trap-deactivated.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "8c36d91a447178d74adaebf0a5e6f6a2c341656072b33350a364a2a26683f2a9",
+    "bytes": 117542,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/reverse-bear-trap-deactivated-thumb.webp",
+      "sha256": "c91488781e40f4cc4464ea39222b4dbfe2e5fb4bf9348694487135e096d2712b",
+      "bytes": 11374,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "reverse-bear-trap-sprung",
+    "prompt": "Edit target: the attached reverse-bear-trap photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The same metal jaw apparatus has sprung outward into its unmistakable wide-forced-open end position; restrained dark red stains on the inner teeth and hinges, side spring now released. Empty apparatus only, no wearer, body parts, teeth or gore. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-28a15272-64b8-4e47-ad37-5451d9b92330.png",
+    "originalSha256": "4cdc9df7c6a88258473ddb7f6b44464cd7b18e82d1c32a7b58d22aab487c2bad",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/reverse-bear-trap-sprung.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "35781e8434b1bc9d0bd777803d0fba19dff3501193629eaa4bdace8ab3eca373",
+    "bytes": 79882,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/reverse-bear-trap-sprung-thumb.webp",
+      "sha256": "c0654aa62874080b97222fc71204badc55c56f251d2b4d1813596b77d15661ba",
+      "bytes": 8714,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "fireworks-target-deactivated",
+    "prompt": "Edit target: the attached fireworks-target photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The same target frame remains intact; the large striped rocket props are unlit, lowered and disconnected from the empty target, with loose harmless fuse ends. No damage, fire or blood. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-41dd7bba-8637-4262-93c8-367424483872.png",
+    "originalSha256": "1eaa6b5ed8ba8dce7a37f0c4708f80cf16755ce53dace58461ebd4c1f14cd654",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/fireworks-target-deactivated.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "92155e20abe27cae3ce3769dccd1c96185b7c0e5b6614c71e86a517f8c9f8d0e",
+    "bytes": 67384,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/fireworks-target-deactivated-thumb.webp",
+      "sha256": "61e01f2f9a104652bc87ec371561824969351ce12f87d159a0146512abcf9515",
+      "bytes": 7056,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "fireworks-target-sprung",
+    "prompt": "Edit target: the attached fireworks-target photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The striped rocket casings are spent and partly blackened, the empty circular target has scorch patches and restrained red stains, with a faint thread of residual smoke. No active fireworks display, person, body or remains. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-a6e5410f-6a92-4274-a5c5-5334a17e9537.png",
+    "originalSha256": "3e204ba0a64cf2ff2fd46478d5a741e608863bf1e8473f8f0f0e36e6a7b7bb52",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/fireworks-target-sprung.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "09a047ca178fc02798a148fead0f161bcb61f0493256cd5ccfe5420c9f31d7c3",
+    "bytes": 83186,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/fireworks-target-sprung-thumb.webp",
+      "sha256": "e0440cb28451e339fb834290b7b105d803f3694c64e701cafcb40ab4472a7bd9",
+      "bytes": 7618,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "drowning-tank-deactivated",
+    "prompt": "Edit target: the attached drowning-tank photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The same glass tank is drained nearly to its floor, its top hatch open and restraints released. Quiet small puddles and droplets remain. No person, blood or casualty. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-7d7d6a8b-75a6-4669-beee-0496c153fae7.png",
+    "originalSha256": "13cde680cd07b61a5b9e8a7de1f4f6fceb01a2d14bf4980256a139e5a11af91f",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/drowning-tank-deactivated.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "310b0adcd5d284b1169e6f949c9857ffcfa149855595da6bb2e95c36106c856b",
+    "bytes": 131734,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/drowning-tank-deactivated-thumb.webp",
+      "sha256": "62c00a769d4c6f2cdb9c6f67b619a18d513f6a750b94582d3c18b4bbc292fa89",
+      "bytes": 7514,
+      "width": 256,
+      "height": 160
+    }
+  },
+  {
+    "id": "drowning-tank-sprung",
+    "prompt": "Edit target: the attached drowning-tank photograph. Produce ONE 1536x1024 landscape photo for the same horror-game companion. Preserve the same apparatus, room, camera view, materials, natural available lighting and candid 1980s consumer 35mm photographic realism. Change only the physical state as follows: The same glass tank is filled to the very top, its heavy hatch shut and latched; faint bubbles cling to the glass, water has spilled down the outside onto the floor. Still, grim post-trigger state; no person, submerged silhouette, body or blood. Keep the apparatus readable within the central responsive crop. No people, human silhouettes/reflections, body parts, illustration, CGI, text, UI, diagrams, collage or black borders.",
+    "source": "exec-0c805e5f-5fee-4ee6-9474-ba647d8a2ac6.png",
+    "originalSha256": "e6dfbe0de33f6039ecdd76e9b987d54689e8089f9eace0622ae783ebe0dc1d1c",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/tormentor/drowning-tank-sprung.webp",
+    "width": 960,
+    "height": 640,
+    "sha256": "167bde9bf54fd049732189c5daea1ef38fb4a24af5fc8bd383bc7acb17d6d758",
+    "bytes": 138030,
+    "position": "50% 50%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/tormentor/drowning-tank-sprung-thumb.webp",
+      "sha256": "c779fbd944a607d2b9cd88beb39e1b95cb0fead48d2c431060aafb3e85ca0778",
+      "bytes": 7844,
+      "width": 256,
+      "height": 160
+    }
   }
 ]

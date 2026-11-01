@@ -1,3 +1,47 @@
+import statePhoto_drowning_tank_sprung from '@/assets/play/photos/tormentor/drowning-tank-sprung.webp';
+import stateThumb_drowning_tank_sprung from '@/assets/play/photos/tormentor/drowning-tank-sprung-thumb.webp';
+import statePhoto_drowning_tank_deactivated from '@/assets/play/photos/tormentor/drowning-tank-deactivated.webp';
+import stateThumb_drowning_tank_deactivated from '@/assets/play/photos/tormentor/drowning-tank-deactivated-thumb.webp';
+import statePhoto_fireworks_target_sprung from '@/assets/play/photos/tormentor/fireworks-target-sprung.webp';
+import stateThumb_fireworks_target_sprung from '@/assets/play/photos/tormentor/fireworks-target-sprung-thumb.webp';
+import statePhoto_fireworks_target_deactivated from '@/assets/play/photos/tormentor/fireworks-target-deactivated.webp';
+import stateThumb_fireworks_target_deactivated from '@/assets/play/photos/tormentor/fireworks-target-deactivated-thumb.webp';
+import statePhoto_reverse_bear_trap_sprung from '@/assets/play/photos/tormentor/reverse-bear-trap-sprung.webp';
+import stateThumb_reverse_bear_trap_sprung from '@/assets/play/photos/tormentor/reverse-bear-trap-sprung-thumb.webp';
+import statePhoto_reverse_bear_trap_deactivated from '@/assets/play/photos/tormentor/reverse-bear-trap-deactivated.webp';
+import stateThumb_reverse_bear_trap_deactivated from '@/assets/play/photos/tormentor/reverse-bear-trap-deactivated-thumb.webp';
+import statePhoto_the_slicer_sprung from '@/assets/play/photos/tormentor/the-slicer-sprung.webp';
+import stateThumb_the_slicer_sprung from '@/assets/play/photos/tormentor/the-slicer-sprung-thumb.webp';
+import statePhoto_the_slicer_deactivated from '@/assets/play/photos/tormentor/the-slicer-deactivated.webp';
+import stateThumb_the_slicer_deactivated from '@/assets/play/photos/tormentor/the-slicer-deactivated-thumb.webp';
+import statePhoto_temple_drills_sprung from '@/assets/play/photos/tormentor/temple-drills-sprung.webp';
+import stateThumb_temple_drills_sprung from '@/assets/play/photos/tormentor/temple-drills-sprung-thumb.webp';
+import statePhoto_temple_drills_deactivated from '@/assets/play/photos/tormentor/temple-drills-deactivated.webp';
+import stateThumb_temple_drills_deactivated from '@/assets/play/photos/tormentor/temple-drills-deactivated-thumb.webp';
+import statePhoto_swinging_blades_sprung from '@/assets/play/photos/tormentor/swinging-blades-sprung.webp';
+import stateThumb_swinging_blades_sprung from '@/assets/play/photos/tormentor/swinging-blades-sprung-thumb.webp';
+import statePhoto_swinging_blades_deactivated from '@/assets/play/photos/tormentor/swinging-blades-deactivated.webp';
+import stateThumb_swinging_blades_deactivated from '@/assets/play/photos/tormentor/swinging-blades-deactivated-thumb.webp';
+import statePhoto_electric_cage_sprung from '@/assets/play/photos/tormentor/electric-cage-sprung.webp';
+import stateThumb_electric_cage_sprung from '@/assets/play/photos/tormentor/electric-cage-sprung-thumb.webp';
+import statePhoto_electric_cage_deactivated from '@/assets/play/photos/tormentor/electric-cage-deactivated.webp';
+import stateThumb_electric_cage_deactivated from '@/assets/play/photos/tormentor/electric-cage-deactivated-thumb.webp';
+import statePhoto_super_saw_sprung from '@/assets/play/photos/tormentor/super-saw-sprung.webp';
+import stateThumb_super_saw_sprung from '@/assets/play/photos/tormentor/super-saw-sprung-thumb.webp';
+import statePhoto_super_saw_deactivated from '@/assets/play/photos/tormentor/super-saw-deactivated.webp';
+import stateThumb_super_saw_deactivated from '@/assets/play/photos/tormentor/super-saw-deactivated-thumb.webp';
+import statePhoto_razor_maze_sprung from '@/assets/play/photos/tormentor/razor-maze-sprung.webp';
+import stateThumb_razor_maze_sprung from '@/assets/play/photos/tormentor/razor-maze-sprung-thumb.webp';
+import statePhoto_razor_maze_deactivated from '@/assets/play/photos/tormentor/razor-maze-deactivated.webp';
+import stateThumb_razor_maze_deactivated from '@/assets/play/photos/tormentor/razor-maze-deactivated-thumb.webp';
+import statePhoto_infestation_box_sprung from '@/assets/play/photos/tormentor/infestation-box-sprung.webp';
+import stateThumb_infestation_box_sprung from '@/assets/play/photos/tormentor/infestation-box-sprung-thumb.webp';
+import statePhoto_infestation_box_deactivated from '@/assets/play/photos/tormentor/infestation-box-deactivated.webp';
+import stateThumb_infestation_box_deactivated from '@/assets/play/photos/tormentor/infestation-box-deactivated-thumb.webp';
+import statePhoto_guillotine_sprung from '@/assets/play/photos/tormentor/guillotine-sprung.webp';
+import stateThumb_guillotine_sprung from '@/assets/play/photos/tormentor/guillotine-sprung-thumb.webp';
+import statePhoto_guillotine_deactivated from '@/assets/play/photos/tormentor/guillotine-deactivated.webp';
+import stateThumb_guillotine_deactivated from '@/assets/play/photos/tormentor/guillotine-deactivated-thumb.webp';
 import portrait from '@/assets/characters/ai/the-tormentor.png';
 import type {ModuleArt} from './ModuleArtwork';
 import photo0 from '@/assets/play/photos/tormentor/infestation-box.webp';
@@ -88,6 +132,28 @@ export const TORMENTOR_ART:Readonly<Record<string,readonly [string,string]>>={
  'no-escape': [photo27,thumb27],
  'the-ultimate-trap': [photo28,thumb28],
  'game-over': [photo29,thumb29],
+ 'guillotine-deactivated':[statePhoto_guillotine_deactivated,stateThumb_guillotine_deactivated],
+ 'guillotine-sprung':[statePhoto_guillotine_sprung,stateThumb_guillotine_sprung],
+ 'infestation-box-deactivated':[statePhoto_infestation_box_deactivated,stateThumb_infestation_box_deactivated],
+ 'infestation-box-sprung':[statePhoto_infestation_box_sprung,stateThumb_infestation_box_sprung],
+ 'razor-maze-deactivated':[statePhoto_razor_maze_deactivated,stateThumb_razor_maze_deactivated],
+ 'razor-maze-sprung':[statePhoto_razor_maze_sprung,stateThumb_razor_maze_sprung],
+ 'super-saw-deactivated':[statePhoto_super_saw_deactivated,stateThumb_super_saw_deactivated],
+ 'super-saw-sprung':[statePhoto_super_saw_sprung,stateThumb_super_saw_sprung],
+ 'electric-cage-deactivated':[statePhoto_electric_cage_deactivated,stateThumb_electric_cage_deactivated],
+ 'electric-cage-sprung':[statePhoto_electric_cage_sprung,stateThumb_electric_cage_sprung],
+ 'swinging-blades-deactivated':[statePhoto_swinging_blades_deactivated,stateThumb_swinging_blades_deactivated],
+ 'swinging-blades-sprung':[statePhoto_swinging_blades_sprung,stateThumb_swinging_blades_sprung],
+ 'temple-drills-deactivated':[statePhoto_temple_drills_deactivated,stateThumb_temple_drills_deactivated],
+ 'temple-drills-sprung':[statePhoto_temple_drills_sprung,stateThumb_temple_drills_sprung],
+ 'the-slicer-deactivated':[statePhoto_the_slicer_deactivated,stateThumb_the_slicer_deactivated],
+ 'the-slicer-sprung':[statePhoto_the_slicer_sprung,stateThumb_the_slicer_sprung],
+ 'reverse-bear-trap-deactivated':[statePhoto_reverse_bear_trap_deactivated,stateThumb_reverse_bear_trap_deactivated],
+ 'reverse-bear-trap-sprung':[statePhoto_reverse_bear_trap_sprung,stateThumb_reverse_bear_trap_sprung],
+ 'fireworks-target-deactivated':[statePhoto_fireworks_target_deactivated,stateThumb_fireworks_target_deactivated],
+ 'fireworks-target-sprung':[statePhoto_fireworks_target_sprung,stateThumb_fireworks_target_sprung],
+ 'drowning-tank-deactivated':[statePhoto_drowning_tank_deactivated,stateThumb_drowning_tank_deactivated],
+ 'drowning-tank-sprung':[statePhoto_drowning_tank_sprung,stateThumb_drowning_tank_sprung],
 };
 export function tormentorArt(id:string,thumb=false):ModuleArt {
  if(id==='portrait')return {src:portrait,fit:'slice',position:'50% 35%'};

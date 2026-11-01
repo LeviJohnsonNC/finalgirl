@@ -66,7 +66,7 @@ export type ExitId=typeof MARREK_EXITS[number]['id'];
 export type PersonId=typeof MARREK_PEOPLE[number]['id'];
 export type PersonStatus='in-play'|'saved'|'killed'|'left'|'not-in-play';
 export type Delivery='waiting'|'entered'|null;
-export interface MarrekSnapshot {initialized?:true;exits:Partial<Record<ExitId,boolean|null>>;people:Partial<Record<PersonId,PersonStatus>>;withZipp:boolean|null;forklift:boolean|null;plank:readonly [string,string]|false|null;smarter:boolean|null;days:boolean|null;heads:number|null;trucks:{a:Delivery;b:Delivery}|null;traps:string[]|null}
+export interface MarrekSnapshot {initialized?:true;exits:Partial<Record<ExitId,boolean|null>>;people:Partial<Record<PersonId,PersonStatus>>;withZipp:boolean|null;forklift:boolean|null;plank:readonly [string,string]|boolean|null;smarter:boolean|null;days:boolean|null;heads:number|null;trucks:{a:Delivery;b:Delivery}|null;traps:string[]|null}
 export interface MarrekEntry {id?:string;kind:string;moduleData?:{module:string;changes:ModuleState}}
 export type MarrekCommand=
  |{command:'exit';id:ExitId;locked:boolean;intent:'resolve'}
@@ -74,7 +74,7 @@ export type MarrekCommand=
  |{command:'person';id:PersonId;status:PersonStatus|null}
  |{command:'zipp';value:boolean|null}
  |{command:'forklift';value:boolean|null}
- |{command:'plank';value:readonly [string,string]|false|null}
+ |{command:'plank';value:readonly [string,string]|boolean|null}
  |{command:'ongoing';id:'days'|'smarter';value:boolean|null}
  |{command:'heads';value:number|null}
  |{command:'trucks';intent:'resolve'}
@@ -87,7 +87,7 @@ const bool=(v:unknown)=>v===null||typeof v==='boolean';
 const exact=(v:Record<string,unknown>,keys:string[])=>Object.keys(v).sort().join()===keys.sort().join();
 const person=(v:unknown)=>['in-play','saved','killed','left','not-in-play'].includes(String(v));
 const delivery=(v:unknown)=>v===null||v==='waiting'||v==='entered';
-const plank=(v:unknown)=>v===null||v===false||Array.isArray(v)&&v.length===2&&v[0]!==v[1]&&v.every(x=>MARREK_RACKS.some(r=>r.id===x));
+const plank=(v:unknown)=>v===null||typeof v==='boolean'||Array.isArray(v)&&v.length===2&&v[0]!==v[1]&&v.every(x=>MARREK_RACKS.some(r=>r.id===x));
 export function emptyMarrek():MarrekSnapshot{return {exits:{},people:{},withZipp:null,forklift:null,plank:null,smarter:null,days:null,heads:null,trucks:null,traps:null};}
 export function parseMarrek(v:unknown):MarrekSnapshot|null {
  if(typeof v!=='string'||v.length>6000)return null;
@@ -144,7 +144,8 @@ export function marrekFacts(s:MarrekSnapshot,entries:readonly MarrekEntry[]=[]):
  if(s.withZipp===true)parts.push('Zipp is with the Final Girl: may treat Exits as Unlocked; physical locks are unchanged.');
  if(s.trucks)parts.push(`Truck arrivals: Dock A ${s.trucks.a??'unknown'}, Dock B ${s.trucks.b??'unknown'}; waiting Victims are off-board, not saved.`);
  for(const p of MARREK_PEOPLE)if(s.people[p.id]&&s.people[p.id]!=='not-in-play')parts.push(`${p.name}: ${s.people[p.id]}.`);
- if(s.plank)parts.push(`Plank joins ${s.plank.map(id=>MARREK_RACKS.find(r=>r.id===id)!.name).join(' and ')}.`);
+ if(s.plank===true)parts.push('Plank placed; endpoints unrecorded.');
+ else if(s.plank)parts.push(`Plank joins ${s.plank.map(id=>MARREK_RACKS.find(r=>r.id===id)!.name).join(' and ')}.`);
  if(s.heads!==null&&s.heads>0)parts.push(`${s.heads} Severed Head tokens remain; no new casualty is inferred.`);
  if(s.days)parts.push('0 Days is active: Rack-to-normal-space Panic is lethal.');if(s.smarter)parts.push('Smarter Than They Look is active; no rescue is inferred.');if(s.forklift)parts.push('Forklift access recorded; current vehicle position and movement are unrecorded.');
  if(s.traps?.length)parts.push(`Placed Booby Traps: ${s.traps.map(id=>MARREK_SPACES.find(x=>x.id===id)!.name).join(', ')}; target Enemies, no damage inferred.`);

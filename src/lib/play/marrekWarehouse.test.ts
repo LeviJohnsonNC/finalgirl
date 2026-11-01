@@ -28,3 +28,5 @@ it('projects one physical exit truth into both new narrative owners without chan
 it('rejects a Warehouse log mounted under a different active-session location',()=>{
  const log=table().log;expect(isActiveGame({version:1,id:'11111111-1111-4111-8111-111111111111',phase:'nowPlaying',selection:{killer:'Hans',location:'Camp Happy Trails',finalGirl:'Mandy',filmId:'s1-happy-trails-horror',setupScenario:null,startingEvent:null,mission:null},playEvents:log})).toBe(false);
 });
+
+it('tracks simple Plank presence without fabricated endpoints and preserves earlier detailed records',()=>{const t=table();t.act({command:'plank',value:true});expect(t.state().plank).toBe(true);expect(parseMarrek(JSON.stringify(t.state()))?.plank).toBe(true);t.act({command:'plank',value:false});expect(t.state().plank).toBe(false);t.act({command:'plank',value:['rack-nw','rack-se']});expect(t.state().plank).toEqual(['rack-nw','rack-se']);expect(validPlayLog(t.log)).toBe(true);});
