@@ -1,3 +1,4 @@
+import {resolveMarrekAction,validMarrekAction,isInitialMarrek,marrekParent,type MarrekAction} from './marrekWarehouse.ts';
 import {resolveTormentorAction,validTormentorAction,isInitialTormentor,tormentorParent,serializeTormentor,parseTormentor,type TormentorAction} from './tormentor.ts';
 import {resolveShadyAction,validShadyAction,isInitialShady,shadyParent,type ShadyAction} from './shadyAcres.ts';
 import { resolveGrimlashAction, validGrimlashAction, isInitialGrimlash, grimlashParent, type GrimlashAction } from './grimlash.ts';
@@ -79,6 +80,7 @@ export interface PlayDetails {
   killerCard?: string;
 }
 export interface PlayEvent extends PlayDetails {
+  marrekAction?: MarrekAction;
   shadyAction?: ShadyAction;
   tormentorAction?: TormentorAction;
   grimlashAction?: GrimlashAction;
@@ -151,6 +153,8 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if(e.marrekAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='marrek'||!validMarrekAction(e.marrekAction)))return false;
+  if(e.moduleData?.module==='marrek'&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.marrekAction&&!isInitialMarrek(e.moduleData.changes))))return false;
   if(e.tormentorAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='tormentor'||!validTormentorAction(e.tormentorAction)))return false;
   if(e.moduleData?.module==='tormentor'&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.tormentorAction&&!isInitialTormentor(e.moduleData.changes))))return false;
   if(e.shadyAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='shady-acres'||!validShadyAction(e.shadyAction)))return false;
@@ -234,11 +238,23 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
 }
-export function canUndoTormentor(log:readonly PlayEvent[],target:string):boolean {const entries=summarizePlay(log).entries;return entries.find(e=>e.id===target)?.moduleData?.module!=='tormentor'||tormentorParent(entries)===target;}
+export function canUndoMarrek(log:readonly PlayEvent[],target:string):boolean {const entries=summarizePlay(log).entries;return entries.find(e=>e.id===target)?.moduleData?.module!=='marrek'||marrekParent(entries)===target;}
+export function validMarrekHistory(log:readonly PlayEvent[]):boolean {
+ for(let i=0;i<log.length;i++){const e=log[i],prefix=log.slice(0,i),entries=summarizePlay(prefix).entries;
+ if(e.kind==='undo'&&!canUndoMarrek(prefix,e.target!))return false;
+ if(e.kind==='restore'){const old=prefix.find(x=>x.id===e.target);if(old?.moduleData?.module==='marrek'&&marrekParent(entries)!==(old.marrekAction?.parent??'root'))return false;}
+ if(e.tormentorAction&&['exit','clear-exit'].includes(e.tormentorAction.command)&&prefix.some(x=>x.moduleData?.module==='marrek'))return false;
+ if(e.moduleData?.module!=='marrek')continue;
+ if(!e.marrekAction){if(prefix.some(x=>x.moduleData?.module==='marrek')||!isInitialMarrek(e.moduleData.changes))return false;continue;}
+ const changes=resolveMarrekAction(e.marrekAction,moduleState(entries,'marrek'),entries);
+ if(!changes||changes.snapshot!==e.moduleData.changes.snapshot)return false;
+ }return true;
+}
+export function canUndoTormentor(log:readonly PlayEvent[],target:string):boolean {const entries=summarizePlay(log).entries;return entries.find(e=>e.id===target)?.moduleData?.module!=='tormentor'||tormentorParent(entries)===target&&(!entries.some(e=>e.moduleData?.module==='marrek')||marrekParent(entries)===target);}
 export function validTormentorHistory(log:readonly PlayEvent[]):boolean {
  for(let i=0;i<log.length;i++){const e=log[i],prefix=log.slice(0,i),entries=summarizePlay(prefix).entries;
  if(e.kind==='undo'&&!canUndoTormentor(prefix,e.target!))return false;
@@ -380,6 +396,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       if (!snapshot || snapshot.parent !== frightParent) { summary.inactive.add(original.id); continue; }
       frightParent = original.id;
     }
+    if(original.moduleData?.module==='marrek'&&original.marrekAction&&!resolveMarrekAction(original.marrekAction,moduleState(summary.entries,'marrek'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='tormentor'&&original.tormentorAction&&!resolveTormentorAction(original.tormentorAction,moduleState(summary.entries,'tormentor'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='konrad'&&original.konradAction&&!resolveKonradAction(original.konradAction,moduleState(summary.entries,'konrad'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='shady-acres'&&original.shadyAction&&!resolveShadyAction(original.shadyAction,moduleState(summary.entries,'shady-acres'),summary.entries)){summary.inactive.add(original.id);continue;}

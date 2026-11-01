@@ -1,3 +1,5 @@
+import {marrekParent} from '@/lib/play/marrekWarehouse';
+import {canUndoMarrek} from '@/lib/play/events';
 import {tormentorParent} from '@/lib/play/tormentor';
 import {canUndoTormentor} from '@/lib/play/events';
 import {shadyParent} from '@/lib/play/shadyAcres';
@@ -51,7 +53,9 @@ export function PlayTimeline({
           const entry =
             summary.entries.find((e) => e.id === original.id) ?? original;
           const undone = summary.inactive.has(original.id);
-          const tormentorBlocked=original.moduleData?.module==='tormentor'&&(undone?tormentorParent(summary.entries)!==(original.tormentorAction?.parent??'root'):!canUndoTormentor(events,original.id));
+          const marrekBlocked=original.moduleData?.module==='marrek'&&(undone?marrekParent(summary.entries)!==(original.marrekAction?.parent??'root'):!canUndoMarrek(events,original.id));
+          const laterWarehouse=summary.entries.some(e=>e.moduleData?.module==='marrek'&&e.marrekAction&&events.findIndex(x=>x.id===e.id)>events.findIndex(x=>x.id===original.id));
+          const tormentorBlocked=original.moduleData?.module==='tormentor'&&(undone?laterWarehouse||tormentorParent(summary.entries)!==(original.tormentorAction?.parent??'root'):!canUndoTormentor(events,original.id));
           const shadyBlocked=original.moduleData?.module==='shady-acres'&&(undone?shadyParent(summary.entries)!==(original.shadyAction?.parent??'root'):!canUndoShady(events,original.id));
           const konradBlocked=original.moduleData?.module==='konrad'&&(undone?konradParent(summary.entries)!==(original.konradAction?.parent??'root'):!canUndoKonrad(events,original.id));
           const grimlashBlocked=original.moduleData?.module==='grimlash'&&(undone?grimlashParent(summary.entries)!==(original.grimlashAction?.parent??'root'):!canUndoGrimlash(events,original.id));
@@ -77,8 +81,8 @@ export function PlayTimeline({
                 {onToggle && entry.kind !== "start" && !isPermanentMoment(entry) && !isLockedPlayEvent(entry) && (
                   <button
                     type="button"
-                    disabled={tormentorBlocked||shadyBlocked||konradBlocked||grimlashBlocked}
-                    title={tormentorBlocked?'Undo or restore intervening Tormentor observations first':shadyBlocked?'Undo or restore the intervening Shady Acres observations first':grimlashBlocked?'Undo or restore the intervening Grimlash observations first':konradBlocked?"Undo or restore the intervening USS Konrad observations first":undefined}
+                    disabled={marrekBlocked||tormentorBlocked||shadyBlocked||konradBlocked||grimlashBlocked}
+                    title={marrekBlocked?'Undo or restore intervening Warehouse/Tormentor observations first':tormentorBlocked?'Undo or restore intervening Tormentor observations first':shadyBlocked?'Undo or restore the intervening Shady Acres observations first':grimlashBlocked?'Undo or restore the intervening Grimlash observations first':konradBlocked?"Undo or restore the intervening USS Konrad observations first":undefined}
                     onClick={() => onToggle(original, undone)}
                     className="type-caption underline text-muted-foreground hover:text-foreground min-h-[44px]"
                   >

@@ -323,11 +323,13 @@ const schemas = load("../supabase/functions/_shared/validation.ts", {
 });
 const quantities = load("../supabase/functions/_shared/narrativeStyle.ts");
 const facts = load("../supabase/functions/_shared/storyFacts.ts");
+const marrek = load('../supabase/functions/_shared/play/marrekWarehouse.ts');
 const tormentor = load('../supabase/functions/_shared/play/tormentor.ts');
 const prompts = load("../supabase/functions/_shared/storyPrompts.ts", {
   "./finalGirlIdentity.ts": load("../supabase/functions/_shared/finalGirlIdentity.ts"),
   "./fictionBoundary.ts": load("../supabase/functions/_shared/fictionBoundary.ts"),
   "./storyFacts.ts": facts,
+  "./play/marrekWarehouse.ts":marrek,
   "./play/tormentor.ts":tormentor,
   "./narrativeStyle.ts": quantities,
 });

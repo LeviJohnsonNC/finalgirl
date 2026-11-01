@@ -1,3 +1,4 @@
+import {initialMarrek,validMarrekField,marrekState,marrekFacts,marrekExits,MARREK_EXITS,MARREK_VISUAL,MARREK_ITEMS} from './marrekWarehouse.ts';
 import {TORMENTOR_POWERS,TORMENTOR_FINALES,TORMENTOR_TRAPS,initialTormentor,validTormentorField,tormentorState,tormentorFacts,serializeTormentor,tormentorCard} from './tormentor.ts';
 import {SHADY_ITEMS,SHADY_PEOPLE,SHADY_CURSES,initialShady,validShadyField,shadyState,shadyFacts} from './shadyAcres.ts';
 import { GRIMLASH_POWERS, GRIMLASH_FINALES, GRIMLASH_MINORS, GRIMLASH_HARVEST, initialGrimlash, validGrimlashField, grimlashFacts } from './grimlash.ts';
@@ -54,7 +55,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -161,6 +162,7 @@ function validField(
   value: unknown,
 ) {
   if (module === 'shady-acres') return validShadyField(key,value);
+  if(module==='marrek')return validMarrekField(key,value);
   if(module==='tormentor')return validTormentorField(key,value);
   if (module === "grimlash") return validGrimlashField(key,value);
   if (module === "konrad") return validKonradField(key,value);
@@ -281,7 +283,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    !["marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -451,6 +453,7 @@ function valueLabel(key: string, value: ModuleValue) {
   return String(value);
 }
 export function describeModule(observation: ModuleObservation) {
+  if(observation.module==='marrek')return marrekFacts(marrekState(observation.changes)).join(' ');
   if(observation.module==='tormentor')return tormentorFacts(tormentorState(observation.changes));
   if(observation.module==='shady-acres')return shadyFacts(shadyState(observation.changes)).join(' ')||'Shady Acres observations recorded';
   if(observation.module==='grimlash')return Object.entries(observation.changes).filter(([k])=>k!=='initialized').map(([k,v])=>`${k.replace(/\./g,' ')}: ${GRIMLASH_HARVEST.find(c=>c.id===v)?.name??v??'not recorded'}`).join('; ');
@@ -473,7 +476,9 @@ export function moduleContext(
   entries: readonly ObservedEvent[],
 ) {
   const context: Record<string, ModuleState> = {};
+  if(selection.location==='Marrek Warehouse'&&entries.some(e=>e.moduleData?.module==='marrek')){const s=marrekState(moduleState(entries,'marrek'));s.exits=marrekExits(s,entries);delete s.initialized;context.marrek={snapshot:JSON.stringify(s)};}
   if(selection.killer==='The Tormentor'&&entries.some(e=>e.moduleData?.module==='tormentor'))context.tormentor={snapshot:serializeTormentor(tormentorState(moduleState(entries,'tormentor'))),power:tormentorCard(entries,'dark-power')??null,finale:tormentorCard(entries,'finale')??null};
+  if(context.marrek&&context.tormentor){const t=tormentorState(context.tormentor),locks=marrekExits(marrekState(context.marrek));t.exits=Object.fromEntries(MARREK_EXITS.map(e=>[e.name,locks[e.id]]));context.tormentor.snapshot=serializeTormentor(t);}
   if(selection.location==='Shady Acres'&&entries.some(e=>e.moduleData?.module==='shady-acres')) {const s=shadyState(moduleState(entries,'shady-acres'));delete s.initialized;context.shady={snapshot:JSON.stringify(s)};}
   if(selection.killer==='Grimlash'&&entries.some(e=>e.moduleData?.module==='grimlash')) {const s=moduleState(entries,'grimlash');delete s.initialized;context.grimlash=s;}
   if(selection.location === "USS Konrad" && entries.some(e=>e.moduleData?.module === "konrad")) context.konrad={snapshot:canonicalKonradSnapshot(moduleState(entries,"konrad").snapshot)!};
@@ -543,8 +548,10 @@ export function moduleStoryBeats(
   entries: readonly ObservedEvent[],
 ): string {
   const context = moduleContext(selection, entries);
+  if(context?.marrek){const killer=moduleStoryBeats({...selection,location:''},entries);let place='';for(const fact of marrekFacts(marrekState(context.marrek)))if(place.length+fact.length+1<=(killer?535:875))place+=fact+' ';let threat='';for(const fact of killer.split(/(?<=\.)\s+/))if(threat.length+fact.length+1<=335)threat+=fact+' ';return [place.trim(),threat.trim()].filter(Boolean).join('\n');}
   if(context?.tormentor){const place=moduleStoryBeats({...selection,killer:''},entries);let threat='';for(const fact of tormentorFacts(tormentorState(context.tormentor),entries).split(/(?<=\.)\s+/))if(threat.length+fact.length+1<=(place?340:870))threat+=fact+' ';return [threat.trim(),place.slice(0,535)].filter(Boolean).join('\n');}
   if (!context) return "";
+
   // Preserve the established output for every other location. Each owner gets
   // room inside the existing 900-character module budget for Carnival mixes.
   if(context.shady) {
@@ -723,6 +730,7 @@ export function buddylandReferences(
   attacker?: string,
 ) {
   const refs: { name: string; effect: string }[] = [];
+  if(selection.location==='Marrek Warehouse'){refs.push({name:'Marrek Warehouse',effect:MARREK_VISUAL});if(context?.marrek)refs.push({name:'Warehouse observations',effect:marrekFacts(marrekState(context.marrek)).join(' ')});}
   if(selection.killer==='The Tormentor'&&context?.tormentor){refs.push({name:'Tormentor observations',effect:tormentorFacts(tormentorState(context.tormentor))});for(const card of [...TORMENTOR_POWERS,...TORMENTOR_FINALES])if(card.name===context.tormentor.power||card.name===context.tormentor.finale)refs.push({name:card.name,effect:card.effect+' Recording the reveal does not prove its actions or consequences occurred.'});}
   if (selection.location === "Sacred Groves") {
     refs.push({name:"Sacred Groves",effect:GROVES_VISUAL});
@@ -945,7 +953,7 @@ export function moduleItemBeats(
   entries: readonly ObservedEvent[],
 ) {
   const locationCatalog =
-    selection.location === "Shady Acres" ? SHADY_ITEMS : selection.location === "USS Konrad" ? KONRAD_ITEMS : selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
+    selection.location === "Marrek Warehouse" ? MARREK_ITEMS : selection.location === "Shady Acres" ? SHADY_ITEMS : selection.location === "USS Konrad" ? KONRAD_ITEMS : selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
       ? CAMP_ITEMS
       : selection.location === "Carnival of Blood"
         ? CARNIVAL_ITEMS
@@ -992,8 +1000,10 @@ export function initialModuleObservations(
   initializeGrimlash = false,
   initializeShady = false,
   initializeTormentor = false,
+  initializeMarrek = false,
 ): ModuleObservation[] {
   return [
+    ...(initializeMarrek && selection.location==='Marrek Warehouse' ? [{module:'marrek' as const,changes:initialMarrek(selection.startingEvent)}] : []),
     ...(initializeTormentor && selection.killer==='The Tormentor' ? [{module:'tormentor' as const,changes:initialTormentor()}] : []),
     ...(initializeShady && selection.location==='Shady Acres' ? [{module:'shady-acres' as const,changes:initialShady(selection.startingEvent)}] : []),
     ...(initializeGrimlash && selection.killer==='Grimlash' ? [{module:'grimlash' as const,changes:initialGrimlash()}] : []),

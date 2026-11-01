@@ -1,3 +1,4 @@
+import {marrekOpeningGuidance} from '@/lib/play/marrekWarehouse';
 import {tormentorOpeningGuidance} from '@/lib/play/tormentor';
 import { evomorphOpeningGuidance } from '../../supabase/functions/_shared/play/evomorph';
 import { moduleState as openingModuleState } from '@/lib/play/modules';
@@ -36,6 +37,7 @@ import type { ActiveGame } from '@/lib/activeGame';
 import { parseVisualBible } from '../../supabase/functions/_shared/prompts';
 
 interface NowPlayingProps {
+  marrekFreshSetup?: boolean;
   tormentorFreshSetup?: boolean;
   evomorphFreshSetup?: boolean;
   playSyncBlocked?: boolean;
@@ -67,7 +69,7 @@ interface NowPlayingProps {
 
 const NowPlaying = ({
   playEvents = [], playDrafts = {}, playMode = false, showDeathPanel = true, syncPlayNow, getPlayEvents, onPlayEvent, playSyncBlocked=false,
-  tormentorFreshSetup=false,evomorphFreshSetup=false,
+  marrekFreshSetup=false,tormentorFreshSetup=false,evomorphFreshSetup=false,
   sessionId, initialStory, initialSceneImageUrl, initialVisualBible, onCheckpoint, onDiscard,
   killer,
   location,
@@ -114,9 +116,11 @@ const NowPlaying = ({
   const streamAbortRef = useRef<AbortController | null>(null);
   const moduleContext = getModulePromptContext(killer, location);
   const evomorphGuidance=killer==='Evomorph'?evomorphOpeningGuidance(openingModuleState(openingSummary(playEvents).entries,'evomorph').stage,evomorphFreshSetup&&!playEvents.some(e=>e.moduleData?.module==='evomorph')):undefined;
+  const marrekOpening=location==='Marrek Warehouse'?(marrekFreshSetup?'fresh-v1' as const:'legacy-unknown' as const):undefined;
+  const marrekGuidance=marrekOpening?marrekOpeningGuidance(marrekOpening):undefined;
   const tormentorOpening=killer==='The Tormentor'?(tormentorFreshSetup?'fresh-v1' as const:'legacy-unknown' as const):undefined;
   const tormentorGuidance=tormentorOpening?tormentorOpeningGuidance(tormentorOpening):undefined;
-  const visualGuidance=[tormentorGuidance,evomorphGuidance,moduleContext?.visualGuidance].filter(Boolean).join('\n');
+  const visualGuidance=[marrekGuidance,tormentorGuidance,evomorphGuidance,moduleContext?.visualGuidance].filter(Boolean).join('\n');
   const missionData = getMissionByName(mission);
   const applicableSpecialRules = getApplicableSpecialRules(killer, location);
   // Reserve the image column as soon as there is something to show there —
@@ -140,6 +144,7 @@ const NowPlaying = ({
     (async () => {
       const bible = await generateVisualBible({
         ...(tormentorOpening&&{tormentorOpening}),
+        ...(marrekOpening&&{marrekOpening}),
         killer,
         killerDescription: evomorphGuidance ?? getKillerDescription(killer),
         finalGirl,
@@ -157,12 +162,13 @@ const NowPlaying = ({
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, autoGenerate, settingsReady, initialVisualBible, killer, finalGirl, location, generateVisualBible, tormentorOpening, evomorphGuidance, visualGuidance]);
+  }, [isAuthenticated, autoGenerate, settingsReady, initialVisualBible, killer, finalGirl, location, generateVisualBible, marrekOpening, tormentorOpening, evomorphGuidance, visualGuidance]);
 
   const developScene = useCallback(async (previousImageUrl?: string) => {
     if (!story) return;
     const url = await generateImage({
       ...(tormentorOpening&&{tormentorOpening}),
+        ...(marrekOpening&&{marrekOpening}),
       story,
       killer,
       killerDescription: evomorphGuidance ?? getKillerDescription(killer),
@@ -179,7 +185,7 @@ const NowPlaying = ({
       previousImageUrl,
     });
     if (url) { setSceneImageUrl(url); checkpointRef.current({ sceneImageUrl: url }); }
-  }, [story, killer, finalGirl, location, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, mission, visualBible, generateImage, tormentorOpening, tormentorGuidance, evomorphGuidance, visualGuidance]);
+  }, [story, killer, finalGirl, location, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, mission, visualBible, generateImage, marrekOpening, tormentorOpening, tormentorGuidance, evomorphGuidance, visualGuidance]);
 
   // Images generate on their own now — no API key, no button to find.
   //
@@ -227,6 +233,7 @@ const NowPlaying = ({
       const payload = {
         mission: missionData,
         ...(tormentorOpening&&{tormentorOpening}),
+        ...(marrekOpening&&{marrekOpening}),
         killer: {
           name: killer,
           description: killerDetails?.description || `A terrifying killer known as ${killer}.`,

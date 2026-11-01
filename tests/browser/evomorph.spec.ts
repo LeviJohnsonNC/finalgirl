@@ -4,7 +4,7 @@ import type {PlayEvent} from '../../src/lib/play/events';
 const key=`final-girl-active-game-v1:${userId}`;
 const log=(page:import('@playwright/test').Page):Promise<PlayEvent[]>=>page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents,key);
 async function resume(page:import('@playwright/test').Page){await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'evomorph');}
-for(const location of ['Camp Happy Trails','Buddyland','Carnival of Blood','Maple Lane','Sacred Groves','Creech Manor'])test(`Evomorph evolution and owner isolation at ${location}`,async({page,archive},info)=>{
+for(const location of ['Camp Happy Trails','Buddyland','Carnival of Blood','Maple Lane','Sacred Groves','Creech Manor','Marrek Warehouse'])test(`Evomorph evolution and owner isolation at ${location}`,async({page,archive},info)=>{
  await archive.install(page,{draft:{...activeGame,evomorphSetupVersion:1,playMode:true,selection:{...activeGame.selection,killer:'Evomorph',location}}});
  await resume(page);const panel=page.locator('[data-module="evomorph"]');
  await expect(panel.getByRole('button',{name:'Evolve to Youngling',exact:true})).toBeVisible();
