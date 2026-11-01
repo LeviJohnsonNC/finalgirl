@@ -15,6 +15,47 @@ const game: ActiveGame = { version: 1, id: 'session-A', phase: 'nowPlaying', sel
 } };
 
 describe('recoverable active game', () => {
+  it('initializes core trackers once with the first durable Play write, including an early first tap', () => {
+    const {result}=renderHook(useActiveGame);
+    act(()=>result.current.save({...game,coreTrackersVersion:1,selection:{...game.selection,finalGirlStartingHealth:4}}));
+    expect(result.current.activeGame.playEvents).toBeUndefined();
+    act(()=>expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'state',field:'bloodlust',value:2}))).toBe(true));
+    expect(summarizePlay(result.current.activeGame.playEvents)).toMatchObject({finalGirlHealth:4,killerHealth:12,finalHorrorLevel:4,bloodlust:2});
+    const initial=result.current.activeGame.playEvents;
+    const health=initial.find(e=>e.kind==='state'&&e.field==='finalGirlHealth');
+    act(()=>result.current.appendPlayEvent(game.id,newPlayEvent({kind:'undo',target:health.id})));
+    act(()=>result.current.appendPlayEvent(game.id,newPlayEvent({kind:'round'})));
+    expect(summarizePlay(result.current.activeGame.playEvents).finalGirlHealth).toBeUndefined();
+    expect(result.current.activeGame.playEvents.filter(e=>e.kind==='state')).toHaveLength(5);
+    cleanup();
+    const restored=renderHook(useActiveGame);
+    expect(summarizePlay(restored.result.current.activeGame.playEvents).finalGirlHealth).toBeUndefined();
+  });
+  it('does not backfill legacy trackers and never creates Poltergeist health', () => {
+    const {result}=renderHook(useActiveGame);
+    act(()=>{result.current.save(game);result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));});
+    expect(summarizePlay(result.current.activeGame.playEvents).finalGirlHealth).toBeUndefined();
+    const start=newPlayEvent({kind:'start',saved:0,killed:0,round:2});
+    act(()=>{result.current.save({...game,coreTrackersVersion:1,playEvents:[start]});result.current.appendPlayEvent(game.id,newPlayEvent({kind:'round'}));});
+    expect(summarizePlay(result.current.activeGame.playEvents).killerHealth).toBeUndefined();
+    act(()=>{result.current.save({...game,coreTrackersVersion:1,selection:{...game.selection,killer:'Poltergeist'}});result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}));});
+    const summary=summarizePlay(result.current.activeGame.playEvents);
+    expect(summary.killerHealth).toBeUndefined();
+    expect(summary.finalHorrorLevel).toBe(3);
+    expect(summary.bloodlust).toBe(0);
+  });
+  it('retries rejected first-Play initialization without a partial baseline', () => {
+    const {result}=renderHook(useActiveGame);
+    act(()=>result.current.save({...game,coreTrackersVersion:1}));
+    const write=vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('quota');});
+    act(()=>expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}))).toBe(false));
+    expect(result.current.activeGame.playEvents).toBeUndefined();
+    write.mockRestore();
+    act(()=>expect(result.current.appendPlayEvent(game.id,newPlayEvent({kind:'start',saved:0,killed:0,round:1}))).toBe(true));
+    expect(result.current.activeGame.playEvents.filter(e=>e.kind==='start')).toHaveLength(1);
+    expect(result.current.activeGame.playEvents.filter(e=>e.kind==='state')).toHaveLength(4);
+    expect(summarizePlay(result.current.activeGame.playEvents).killerHealth).toBe(12);
+  });
   it('seeds only fresh Dr. Fright games; rejects stale, foreign and impossible Boiler Room writes',()=>{
     const {result}=renderHook(useActiveGame);
     const fresh={...game,frightSetupVersion:1 as const,selection:{...game.selection,killer:'Dr. Fright'},formDraft:{killerHealth:8}};

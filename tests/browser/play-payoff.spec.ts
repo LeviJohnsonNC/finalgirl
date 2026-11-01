@@ -4,6 +4,7 @@ const storageKey = `final-girl-active-game-v1:${userId}`;
 const draft = {
   ...activeGame,
   playMode: true,
+  coreTrackersVersion: 1,
   selection: {
     ...activeGame.selection,
     killer: "Billy the Bear",
@@ -15,7 +16,7 @@ async function open(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
 }
-test("opt-in defaults, compact adjustments and the two comeback moments survive reload", async ({
+test("always-on defaults, compact adjustments and the two comeback moments survive reload", async ({
   page,
   archive,
 }, info) => {
@@ -27,9 +28,6 @@ test("opt-in defaults, compact adjustments and the two comeback moments survive 
     ["Horror", "4"],
     ["Bloodlust", "0"],
   ]) {
-    await page
-      .getByRole("button", { name: `Track ${label}`, exact: true })
-      .click();
     await expect(
       page.getByRole("button", { name: `Set ${label}`, exact: true }),
     ).toHaveText(value);

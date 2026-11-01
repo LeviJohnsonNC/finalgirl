@@ -266,9 +266,8 @@ export function PlayScreen(props: PlayScreenProps) {
       setAnnouncement(`${choice.title} recorded.`);
     }
   };
-  const setState = (field: StateField, value: number | null) => {
+  const setState = (field: StateField, value: number) => {
     if (
-      value !== null &&
       (!Number.isInteger(value) || value < 0 || (value > trackerLimits[field] && !(killer==='Grimlash' && field==='finalGirlHealth' && value < (summary.finalGirlHealth??0))))
     ) {
       setMessage(`Use a whole number from 0 to ${trackerLimits[field]}.`);
@@ -419,14 +418,14 @@ export function PlayScreen(props: PlayScreenProps) {
       </section>
       <section
         className="play-panel play-track-more"
-        aria-label="Optional trackers"
+        aria-label="Game trackers"
         data-healthless={killer === 'Poltergeist' || undefined}
       >
-        <h2>Track more</h2>
+        <h2>Game trackers</h2>
         {killer==='Grimlash'&&summary.finalGirlHealth!==undefined&&finalGirlMaxHealth!==undefined&&summary.finalGirlHealth>finalGirlMaxHealth&&<p role="status" className="grim-health-discrepancy">Recorded Health {summary.finalGirlHealth} exceeds the current maximum {finalGirlMaxHealth}.</p>}
         <div className="play-state-grid">
           {orderedStateFields.filter(field=>killer!=='Poltergeist'||field!=='killerHealth').map((field) => {
-            const value = field === "killerHealth" && summary.killerHealthTracking === false ? undefined : summary[field];
+            const value = summary[field];
             const health = field === "finalGirlHealth" || field === "killerHealth";
             const critical = health && value !== undefined && value <= 2;
             const horror = value ?? startingValues.finalHorrorLevel;
@@ -465,6 +464,7 @@ export function PlayScreen(props: PlayScreenProps) {
                 <div className="play-state-control-bar">
                   <div className="play-state-caption">
                     <span className="play-state-title">{trackerTitles[field]}</span>
+                    {value === undefined && <small className="play-state-unknown">Not recorded</small>}
                     {critical && <small className="play-critical-label">{value === 0 ? "No health remaining" : "Low health"}</small>}
                   </div>
                 {editingState === field ? (
@@ -491,52 +491,33 @@ export function PlayScreen(props: PlayScreenProps) {
                       Cancel
                     </button>
                   </form>
-                ) : value === undefined ? (
-                  <button
-                    className="play-state-enable"
-                    aria-label={`Track ${stateLabels[field]}`}
-                    onClick={() => {
-                      setState(field, Math.min(summary[field] ?? startingValues[field] ?? 0, trackerLimits[field]));
-                    }}
-                  >
-                    + Track
-                  </button>
                 ) : (
-                  <>
                     <div className="play-state-stepper">
                       <button
                         aria-label={`Decrease ${stateLabels[field]}`}
-                        disabled={value <= 0}
-                        onClick={() => setState(field, killer==='Grimlash'&&field==='finalGirlHealth'?value-1:Math.min(trackerLimits[field],value-1))}
+                        disabled={value === undefined || value <= 0}
+                        onClick={() => value !== undefined && setState(field, killer==='Grimlash'&&field==='finalGirlHealth'?value-1:Math.min(trackerLimits[field],value-1))}
                       >
                         <Minus size={16} />
                       </button>
                       <button
                         aria-label={`Set ${stateLabels[field]}`}
+                        title={value === undefined ? 'Not recorded — set the current value' : undefined}
                         onClick={() => {
                           setEditingState(field);
-                          setStateValue(String(value));
+                          setStateValue(value === undefined ? '' : String(value));
                         }}
                       >
-                        {value}
+                        {value ?? '?'}
                       </button>
                       <button
                         aria-label={`Increase ${stateLabels[field]}`}
-                        disabled={value >= trackerLimits[field]}
-                        onClick={() => setState(field, value + 1)}
+                        disabled={value === undefined || value >= trackerLimits[field]}
+                        onClick={() => value !== undefined && setState(field, value + 1)}
                       >
                         <Plus size={16} />
                       </button>
                     </div>
-                    <button
-                      className="play-state-close"
-                      aria-label={`Stop tracking ${stateLabels[field]}`}
-                      title={`Stop tracking ${stateLabels[field]}`}
-                      onClick={() => setState(field, null)}
-                    >
-                      <span aria-hidden="true">×</span>
-                    </button>
-                  </>
                 )}
                 </div>
               </div>

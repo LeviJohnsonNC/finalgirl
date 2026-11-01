@@ -1,4 +1,4 @@
-import { showMinorChoices, undoLatestObservation } from "./play-helpers";
+import { showMinorChoices, undoLatestObservation, setTracker } from "./play-helpers";
 import { test, expect, activeGame, userId } from "./fixtures";
 import {
   searchPick,
@@ -141,9 +141,7 @@ test("illustrated Camp states and Hans hearts survive reload without changing to
       })
       .click();
   }
-  await page
-    .getByRole("button", { name: "Track Killer health", exact: true })
-    .click();
+  await setTracker(page, "Killer health", 12);
   await expect(
     page.getByRole("button", { name: "Set Killer health", exact: true }),
   ).toHaveText("12");

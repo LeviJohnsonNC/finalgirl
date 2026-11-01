@@ -1,3 +1,4 @@
+import { newPlayEvent } from "../../src/lib/play/events";
 import { searchPick, openHistory } from "./play-helpers";
 import { test, expect, activeGame, userId } from "./fixtures";
 const storageKey = `final-girl-active-game-v1:${userId}`;
@@ -6,23 +7,20 @@ async function resume(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
 }
 
-test("optional observations preserve zero, survive reload, and reach the ending", async ({
+test("always-visible trackers preserve zero, survive reload, and reach the ending", async ({
   page,
   archive,
 }) => {
   await archive.install(page, { draft: { ...activeGame, playMode: true } });
   await resume(page);
   await expect(
-    page.getByRole("button", { name: "Track Final Girl health", exact: true }),
+    page.getByRole("button", { name: "Set Final Girl health", exact: true }),
   ).toBeVisible();
   for (const [label, value] of [
     ["Final Girl health", "5"],
     ["Horror", "0"],
     ["Bloodlust", "3"],
   ]) {
-    await page
-      .getByRole("button", { name: `Track ${label}`, exact: true })
-      .click();
     await page
       .getByRole("button", { name: `Set ${label}`, exact: true })
       .click();
@@ -31,9 +29,6 @@ test("optional observations preserve zero, survive reload, and reach the ending"
   }
   await page
     .getByRole("button", { name: "Decrease Final Girl health", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "Stop tracking Bloodlust", exact: true })
     .click();
   await expect(
     page.getByRole("button", { name: "Decrease Horror", exact: true }),
@@ -52,8 +47,8 @@ test("optional observations preserve zero, survive reload, and reach the ending"
     page.getByRole("button", { name: "Set Final Girl health", exact: true }),
   ).toHaveText("4");
   await expect(
-    page.getByRole("button", { name: "Track Bloodlust", exact: true }),
-  ).toBeVisible();
+    page.getByRole("button", { name: "Set Bloodlust", exact: true }),
+  ).toHaveText("3");
   await openHistory(page);
   await expect(
     page.getByRole("region", { name: "Game timeline" }),
@@ -82,19 +77,17 @@ test("optional observations preserve zero, survive reload, and reach the ending"
   expect(request.body.weaponUsed).toBeUndefined();
 });
 
-test("stopping Horror tracking keeps it unrecorded through the ending", async ({
+test("legacy cleared Horror stays unknown through the ending", async ({
   page,
   archive,
 }) => {
-  await archive.install(page, { draft: { ...activeGame, playMode: true } });
+  await archive.install(page, { draft: { ...activeGame, playMode: true, playEvents: [
+    newPlayEvent({kind:'start',saved:0,killed:0,round:1}),
+    newPlayEvent({kind:'state',field:'finalHorrorLevel',value:3}),
+    newPlayEvent({kind:'state',field:'finalHorrorLevel',value:null}),
+  ] } });
   await resume(page);
-  await page.getByRole("button", { name: "Track Horror", exact: true }).click();
-  await page.getByRole("button", { name: "Set Horror", exact: true }).click();
-  await page.getByLabel("Horror value", { exact: true }).fill("3");
-  await page.getByRole("button", { name: "Set", exact: true }).click();
-  await page
-    .getByRole("button", { name: "Stop tracking Horror", exact: true })
-    .click();
+  await expect(page.getByRole('button',{name:'Set Horror',exact:true})).toHaveText('?');
   await page.getByRole("button", { name: "Finish game", exact: true }).click();
   await page
     .getByRole("dialog")

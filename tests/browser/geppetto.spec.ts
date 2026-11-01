@@ -513,9 +513,8 @@ test("casting a fresh Gepetto game marks verified setup and uses eight Health in
   await expect(panel(page).locator(".geppetto-tray-heading")).toContainText(
     "0 on board · 3 ready · 0 exhausted",
   );
-  await page
-    .getByRole("button", { name: "Track Killer health", exact: true })
-    .click();
+  await expect(page.getByRole('button', {name:'Set Killer health',exact:true})).toHaveText('8');
+  expect(await page.evaluate(owner=>JSON.parse(localStorage.getItem('final-girl-active-game-v1:'+owner)!).coreTrackersVersion,userId)).toBe(1);
   await page.getByRole("button", { name: "Finish game", exact: true }).click();
   await page
     .getByRole("dialog")

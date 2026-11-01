@@ -108,7 +108,7 @@ for (const [killer, maximum] of [
   });
 }
 
-test("legacy Bloodlust remains exact, unknown stays untracked, and rejected saves do not advance the photograph", async ({
+test("legacy Bloodlust remains exact, unknown remains editable, and rejected saves do not advance the photograph", async ({
   page,
   archive,
 }, info) => {
@@ -119,13 +119,14 @@ test("legacy Bloodlust remains exact, unknown stays untracked, and rejected save
     card.getByRole("button", { name: "Set Bloodlust", exact: true }),
   ).toHaveText("99");
   await expect(card).toHaveAttribute("data-bloodlust-stage", "10");
-  await page
-    .getByRole("button", { name: "Stop tracking Bloodlust", exact: true })
-    .click();
+  await page.getByRole('button', {name: /^The night so far/}).click();
+  await page.getByRole('region', {name: 'Game timeline', exact: true}).getByRole('button', {name: /^Undo /}).first().click();
+  await page.getByRole('button', {name: /^The night so far/}).click();
   await expect(card).toHaveAttribute("data-bloodlust-stage", "unknown");
-  await page
-    .getByRole("button", { name: "Track Bloodlust", exact: true })
-    .click();
+  await expect(card.getByRole('button', {name: 'Set Bloodlust', exact: true})).toHaveText('?');
+  await card.getByRole('button', {name: 'Set Bloodlust', exact: true}).click();
+  await page.getByLabel('Bloodlust value', {exact: true}).fill('0');
+  await card.getByRole('button', {name: 'Set', exact: true}).click();
   await expect(card).toHaveAttribute("data-bloodlust-stage", "0");
   for (const width of [1366, 390, 320]) {
     await page.setViewportSize({ width, height: width === 1366 ? 768 : 844 });

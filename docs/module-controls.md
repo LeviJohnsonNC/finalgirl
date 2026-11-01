@@ -16,6 +16,10 @@ Read the [approved module standard](MODULE_STANDARD.md) and [actual UI reference
 | `IllustratedTile` / `ModuleArtwork`                      | Component names do not dictate art medium. Current photo defaults are in the standard. Keep labels/state/actions in HTML, valid keyboard semantics and real crop metadata; no nested interactive elements.                                                         |
 | `useModuleRecord`                                        | Save linked observations atomically; prevent stale/double transitions. A rejected durable write leaves the displayed state unchanged and retryable. Undo restores the whole linked observation.                                                                    |
 
+## Core trackers
+
+Health, Killer Health, Bloodlust and Horror are always visible; no + Track or Stop tracking/× action. Preserve the bottom artwork strips, manual numeric editing and current health caps. New sessions carry `coreTrackersVersion:1` and initialize existing starting values atomically with their first Play write. Do not backfill or reset resumed logs: unknown values stay editable as ?; zero remains zero, Undo remains unknown, and Poltergeist has no Killer Health card. Old null/stop observations and the legacy Evomorph tracking flag remain valid historical data; they no longer hide cards.
+
 ## Existing mechanic-specific exceptions
 
 Reuse operations only where their semantics match. Audit the owner domain and Rules before adapting any example below.

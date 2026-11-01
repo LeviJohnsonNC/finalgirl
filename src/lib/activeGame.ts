@@ -20,6 +20,8 @@ export interface EndingFormData {
   endingSubLocation: string; gameHighlights: string;
 }
 export interface ActiveGame {
+  /** New sessions initialize the always-visible core trackers once on first Play entry. */
+  coreTrackersVersion?: 1;
   marrekSetupVersion?: 1;
   tormentorSetupVersion?: 1;
   shadySetupVersion?: 1;
@@ -53,6 +55,7 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if(game.coreTrackersVersion!==undefined&&game.coreTrackersVersion!==1)return false;
   if(game.marrekSetupVersion!==undefined&&game.marrekSetupVersion!==1)return false;
   if(game.selection?.location!=='Marrek Warehouse'&&Array.isArray(game.playEvents)&&game.playEvents.some(e=>e.moduleData?.module==='marrek'))return false;
   if(game.tormentorSetupVersion!==undefined&&game.tormentorSetupVersion!==1)return false;

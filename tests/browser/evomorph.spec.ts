@@ -17,7 +17,7 @@ for(const location of ['Camp Happy Trails','Buddyland','Carnival of Blood','Mapl
  await panel.getByRole('button',{name:'Evomorph visibility',exact:true}).click();
  await panel.getByRole('button',{name:'Evolve to Adult',exact:true}).click();
  await expect(panel.getByText('Scan & Ambush',{exact:true})).toHaveCount(0);
- await expect(page.getByRole('button',{name:'Track Killer health',exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Set Killer health',exact:true})).toHaveText('10');
  await panel.getByText('Dark Power & Finale',{exact:true}).click();
  await panel.getByRole('button',{name:'Choose Acid Blood',exact:true}).click();
  await expect(panel.getByRole('region',{name:'Dark Power entry effects'})).toHaveCount(0);

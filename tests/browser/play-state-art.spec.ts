@@ -97,7 +97,6 @@ test('horror bands and critical health change artwork without inventing death or
     expect(bounds!.height).toBeLessThanOrEqual(44);
   }
   await page.screenshot({path:info.outputPath('play-header.png'),animations:'disabled'});
-  for(const label of ['Final Girl health','Killer health','Bloodlust','Horror'])await page.getByRole('button',{name:`Track ${label}`,exact:true}).click();
   async function set(label:string,value:number) {
     await page.getByRole('button',{name:`Set ${label}`,exact:true}).click();
     await page.getByRole('textbox',{name:`${label} value`,exact:true}).fill(String(value));
