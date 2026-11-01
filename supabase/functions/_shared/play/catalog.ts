@@ -1,3 +1,4 @@
+import {MARREK_TERRORS,MARREK_EVENTS,MARREK_ITEMS,MARREK_PEOPLE,MARREK_SPACES,MARREK_SOURCE} from './marrekWarehouse.ts';
 import {TORMENTOR_TERRORS,TORMENTOR_TRAPS,TORMENTOR_SOURCE} from './tormentor.ts';
 import {SHADY_EVENTS,SHADY_TERRORS,SHADY_ITEMS,SHADY_PEOPLE,SHADY_SPACES,SHADY_SOURCE} from './shadyAcres.ts';
 import { GRIMLASH_TERRORS } from './grimlash.ts';
@@ -42,6 +43,8 @@ const station = wiki("Station_2891");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+ ...MARREK_TERRORS.map(c=>({...c,kind:'terror' as const})),
+ ...MARREK_EVENTS.map(c=>({...c,kind:'event' as const,location:'Marrek Warehouse',source:MARREK_SOURCE})),
  ...SHADY_TERRORS.map(c=>({...c,kind:'terror' as const})),
  ...SHADY_EVENTS.map(c=>({...c,kind:'event' as const,location:'Shady Acres',source:SHADY_SOURCE})),
   ...TORMENTOR_TERRORS.map(c=>({...c,kind:'terror' as const,killer:'The Tormentor',source:TORMENTOR_SOURCE})),
@@ -199,6 +202,7 @@ export function playCardContext(
   });
 }
 export const PLAY_ROOMS: Record<string, readonly string[]> = {
+ 'Marrek Warehouse':MARREK_SPACES.map(s=>s.name),
  'Shady Acres':SHADY_SPACES.map(s=>s.name),
   "Sacred Groves": GROVES_SPACES.filter(s=>s.type === "sacred" || s.type === "search").map(s=>s.name),
   "Maple Lane": [...MAPLE_HOUSES,...MAPLE_STREETS].map(s=>s.name),
@@ -228,6 +232,7 @@ export function playMechanisms(selection: {
 }) {
   return [
     "Killer attack",
+    ...(selection.location==='Marrek Warehouse'?['Rack fall','Booby Trap']:[]),
     ...(selection.killer==='The Tormentor'?TORMENTOR_TRAPS.filter(c=>c.deck==='victim').map(c=>c.name):[]),
     ...(selection.location==='Shady Acres'?['Child attack','Abduction','Ancient Curse','Decaying Earth','Omen of Blood']:[]),
     ...(selection.killer === "Evomorph" ? ["Ambush", "Acid Blood", "Razor Tail"] : []),
@@ -258,14 +263,14 @@ export function playMechanisms(selection: {
 export function playItems(
   location: string,
 ): readonly { name: string; effect: string }[] {
-  return location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
+  return location === "Marrek Warehouse" ? MARREK_ITEMS : location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
     ? CAMP_ITEMS
     : location === "Buddyland"
       ? BUDDYLAND_ITEMS
       : [];
 }
 export function playVictims(location: string): readonly { name: string }[] {
-  return location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
+  return location === "Marrek Warehouse" ? MARREK_PEOPLE : location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
     ? CAMP_VICTIMS
     : location === "Buddyland"
       ? SPECIAL_VICTIMS

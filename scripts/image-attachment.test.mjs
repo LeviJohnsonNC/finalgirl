@@ -27,11 +27,14 @@ new Function('require', 'exports', compile('../supabase/functions/_shared/openin
   name => { if (name === './openingReferenceManifest.ts') return manifest; throw new Error('Unexpected opening import: ' + name); }, opening);
 new Function('exports', compile('../supabase/functions/_shared/storyFacts.ts'))(storyFacts);
 new Function('exports', compile('../supabase/functions/_shared/narrativeStyle.ts'))(narrativeStyle);
+const marrekIdentity = {};
+new Function('exports', compile('../supabase/functions/_shared/play/marrekWarehouse.ts'))(marrekIdentity);
 const tormentorIdentity = {};
 new Function('exports', compile('../supabase/functions/_shared/play/tormentor.ts'))(tormentorIdentity);
 const grimlashIdentity = {};
 new Function('exports', compile('../supabase/functions/_shared/play/grimlash.ts'))(grimlashIdentity);
 new Function('require', 'exports', compile('../supabase/functions/_shared/prompts.ts'))(name => {
+  if (name === './play/marrekWarehouse.ts') return marrekIdentity;
   if (name === './play/tormentor.ts') return tormentorIdentity;
   if (name === './play/grimlash.ts') return grimlashIdentity;
   if (name === './posterDesign.ts') return posterDesign;

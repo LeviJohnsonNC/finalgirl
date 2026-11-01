@@ -1,3 +1,6 @@
+import {MarrekControls} from './MarrekControls';
+import marrekBanner from '@/assets/play/banners/marrek.webp';
+import {marrekState,marrekExits} from '@/lib/play/marrekWarehouse';
 import {TormentorControls} from './TormentorControls';
 import {tormentorState} from '@/lib/play/tormentor';
 import tormentorBanner from '@/assets/play/banners/tormentor.webp';
@@ -59,7 +62,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -85,6 +88,7 @@ const peopleSummary = (
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
 export const moduleDefinitions: Definition[] = [
+ {id:'marrek',owner:'location',match:'Marrek Warehouse',title:'Inside Marrek Warehouse',art:{src:marrekBanner,fit:'slice',position:'50% 42%'},capabilities:['character','event'],summary:state=>{const s=marrekState(state),exits=Object.values(marrekExits(s));return `${exits.filter(v=>v===true).length}/3 locked · ${exits.some(v=>v===null)?'partly recorded':s.withZipp?'Zipp with you':'Physical locks'}`;},Controls:p=><MarrekControls {...p}/>},
  {id:'tormentor',owner:'killer',match:'The Tormentor',title:'The Tormentor',art:{src:tormentorBanner,fit:'slice',position:'70% 9%'},capabilities:['reveals'],summary:state=>{const s=tormentorState(state),active=Object.values(s.traps).filter(t=>t.status==='active');return `${s.presence==='unknown'?'Presence not recorded':s.presence==='on-board'?'On the board':'Unseen'} · ${s.pendingSetup?'Starting trap not recorded':!s.known?'Trap list incomplete':`${active.length} active trap${active.length===1?'':'s'}`}`;},Controls:p=><TormentorControls {...p}/>},
  {id:'shady-acres',owner:'location',match:'Shady Acres',title:'Inside Shady Acres',art:shadyArt('header'),capabilities:['character','event'],summary:state=>{const s=shadyState(state),n=shadyChildrenCount(s);return `${n===null?'Children not fully recorded':`${n}/3 Children on board`} · ${s.curses.length?s.curses.filter(c=>c.status==='active').length+' Curse'+(s.curses.filter(c=>c.status==='active').length===1?'':'s')+' in play':s.initialized?'No Curses revealed':'Curses not recorded'}`;},Controls:props=><ShadyAcresControls {...props}/>},
  {id:'grimlash',owner:'killer',match:'Grimlash',title:'Grimlash · The Old One',art:grimlashArt('header'),capabilities:['reveals','minor-power'],summary:s=>`Harvest Madness ${s.position===undefined?'not recorded':harvestLevel(s.position)===4?'Skull':`Level ${harvestLevel(s.position)} · ${s.position}/10`}`,Controls:p=><GrimlashControls {...p}/>},

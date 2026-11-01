@@ -1,5 +1,5 @@
 import { assertEquals, assertExists } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { StoryRequestSchema, SceneImageRequestSchema, EndingRequestSchema, NarrationRequestSchema, DeathRequestSchema, validateRequest } from "./validation.ts";
+import { StoryRequestSchema, VisualBibleRequestSchema, SceneImageRequestSchema, EndingRequestSchema, NarrationRequestSchema, DeathRequestSchema, validateRequest } from "./validation.ts";
 
 // ============== StoryRequestSchema Tests ==============
 
@@ -303,4 +303,15 @@ Deno.test('Tormentor ending truth remains owner-specific for prose and poster, i
  assertEquals(StoryRequestSchema.safeParse(opening).success,true);
  assertEquals(StoryRequestSchema.safeParse({...opening,killer:{name:'Hans'}}).success,false);
  assertEquals(StoryRequestSchema.safeParse({...opening,tormentorOpening:'https://example.test/arbitrary'}).success,false);
+});
+
+Deno.test('Warehouse opening provenance stays location-scoped and opening-only',()=>{
+ const story={killer:{name:'Hans'},location:{name:'Marrek Warehouse'},finalGirl:{name:'Mandy'},marrekOpening:'fresh-v1'};
+ assertEquals(StoryRequestSchema.safeParse(story).success,true);
+ assertEquals(StoryRequestSchema.safeParse({...story,location:{name:'Camp Happy Trails'}}).success,false);
+ const image={story:'A sufficiently long original opening story in the warehouse, before any gameplay.',killer:'Hans',location:'Marrek Warehouse',finalGirl:'Mandy',sceneType:'beginning',marrekOpening:'legacy-unknown'};
+ assertEquals(SceneImageRequestSchema.safeParse(image).success,true);
+ assertEquals(SceneImageRequestSchema.safeParse({...image,sceneType:'ending'}).success,false);
+ assertEquals(VisualBibleRequestSchema.safeParse({killer:'Hans',location:'Marrek Warehouse',finalGirl:'Mandy',marrekOpening:'fresh-v1'}).success,true);
+ assertEquals(VisualBibleRequestSchema.safeParse({killer:'Hans',location:'Maple Lane',finalGirl:'Mandy',marrekOpening:'fresh-v1'}).success,false);
 });

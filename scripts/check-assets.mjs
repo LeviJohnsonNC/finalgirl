@@ -179,3 +179,18 @@ for(const photo of tormentorPhotos){
  }
 }
 if(images.filter(file=>file.startsWith(tormentorDirectory+'/')).length!==58)throw Error('Unmapped Tormentor photograph');
+
+// Warehouse: 33 independent native photographs, plus deliberate Click/door aliases.
+const marrekFolder='src/assets/play/photos/marrek';
+const marrekManifest=JSON.parse(readFileSync(join(marrekFolder,'manifest.json'),'utf8'));
+const marrekAliases=JSON.parse(readFileSync(join(marrekFolder,'aliases.json'),'utf8'));
+const marrekExpected=['header',...['main','dock-a','dock-b'].flatMap(id=>[id+'-locked',id+'-unlocked']),...['zipp','friend','supervisor'].flatMap(id=>[id,id+'-saved',id+'-killed']),'forklift-off','forklift-on','plank-off','plank-on','racks','scatter','days','relock','heads','smarter','trucks','trap',...['could-be-anywhere','safer-up-there','saw-the-killer','open-boxes','pushed'].map(id=>'terror-'+id)];
+if(marrekManifest.length!==33||new Set(marrekManifest.map(p=>p.id)).size!==33||marrekExpected.some(id=>!marrekManifest.some(p=>p.id===id))||new Set(marrekManifest.map(p=>p.source)).size!==33||new Set(marrekManifest.map(p=>p.sourceSha256)).size!==33)throw Error('Incomplete/duplicate Warehouse sources');
+const marrekPaths=new Set();
+for(const p of marrekManifest){
+ if(!/^exec-[a-f0-9-]+\.png$/.test(p.source)||p.nativeWidth<1536||p.nativeHeight<1024||!p.prompt||!/^\d+% \d+%$/.test(p.position))throw Error('Invalid Warehouse source: '+p.id);
+ for(const [thumb,d] of [[false,p],[true,p.thumbnail]]){const expected=thumb?`${marrekFolder}/${p.id}-thumb.webp`:p.id==='header'?'src/assets/play/banners/marrek.webp':`${marrekFolder}/${p.id}.webp`;if(!d||d.file!==expected||marrekPaths.has(d.file))throw Error('Invalid Warehouse mapping: '+p.id);const b=readFileSync(d.file),[w,h]=konradWebpDimensions(b);if(w!==d.width||h!==d.height||w>p.nativeWidth||h>p.nativeHeight||(w<(thumb?399:1279)||w>(thumb?400:1280))||b.length!==d.bytes||b.length>(thumb?35:160)*1024||createHash('sha256').update(b).digest('hex')!==d.sha256)throw Error('Invalid Warehouse derivative: '+d.file);marrekPaths.add(d.file);}
+}
+const actualMarrek=images.filter(p=>p.startsWith(marrekFolder+'/')||p==='src/assets/play/banners/marrek.webp');
+if(actualMarrek.length!==66||actualMarrek.some(p=>!marrekPaths.has(p))||JSON.stringify(marrekAliases)!==JSON.stringify({'terror-click-main':'main-unlocked','terror-click-dock-a':'dock-a-unlocked','terror-click-dock-b':'dock-b-unlocked'}))throw Error('Unmapped Warehouse art/aliases');
+console.log('Verified 33 independent Warehouse scenes, 66 bounded derivatives and three deliberate Click/Exit aliases.');

@@ -1,3 +1,4 @@
+import {MARREK_EVENTS,MARREK_SETUPS,MARREK_SPACES,MARREK_VISUAL} from '../../supabase/functions/_shared/play/marrekWarehouse';
 import {SHADY_SETUPS,SHADY_EVENTS,SHADY_SPACES} from '../../supabase/functions/_shared/play/shadyAcres';
 import {KONRAD_SETUPS,KONRAD_EVENTS} from '../../supabase/functions/_shared/play/konradCatalog';
 import {konradSetupDescription} from '@/data/rules/konradRules';
@@ -672,47 +673,9 @@ What her captor didn't expect, however, was that under the fancy dress and quirk
     ],
     location: {
       name: 'Marrek Warehouse',
-      description: `"The locking system in Marrek Warehouse is state of the art and the first of its kind. Devised by our ingenious mechanical engineers, the system ensures precise shift changes and security." - Loctrocel Inc. spokesperson during the ribbon cutting ceremony for Marrek Warehouse.
-
-The Marrek Warehouse presents itself as a squat, anonymous industrial structure of concrete and corrugated steel, fenced off with patched chain-link and secured by heavy locks that feel more symbolic than reassuring. Inside, the air is cool and stale, carrying dust, oil, and old chemical residue soaked into the floor. Fluorescent lights buzz overhead in uneven rows, leaving pockets of dimness between them. The walls are lined with narrow service corridors and sealed doors, many chained or padlocked, their purpose long forgotten. Sound behaves strangely here—footsteps echo sharply and then vanish, swallowed by the sheer volume of the space.
-
-At the heart of the warehouse lies the central depression known as The Pit—a sunken concrete area that disrupts the otherwise flat floor plan and draws the eye no matter where you stand. A lone industrial forklift sits abandoned at its edge, forks lowered as if left mid-task, its chipped paint and dead controls suggesting it hasn't moved in years. The Pit creates a natural focal point and a constant sense of exposure; anyone crossing its edges feels visible, while anyone below feels watched. The space around it amplifies every movement, turning even cautious steps into declarations.
-
-Surrounding all of this are the stacked boxes—towering metal shelves and palletized crates rising high enough to block light and sightlines alike. Many are unmarked or mislabeled, wrapped in yellowed plastic or rotting cardboard, forming narrow aisles that twist the warehouse into a maze. These stacks provide momentary cover but also trap sound and shadow, making it impossible to tell whether the creak you heard came from shifting weight, settling steel, or something moving where it shouldn't.`,
-      setupCards: [
-        {
-          name: 'Units Per Hour',
-          description: 'The killer and the final girl are on the main floor, with the victims well spread out - the victims are all working.'
-        },
-        {
-          name: 'Unloading',
-          description: 'Victims are unloading in the loading bays.'
-        },
-        {
-          name: 'Shift Change',
-          description: 'Victims are changing shifts, most in and around the main entrance.'
-        },
-        {
-          name: 'Daily Huddle',
-          description: 'Victims are having a standup meeting in the center of the warehouse.'
-        },
-        {
-          name: "You're Fired",
-          description: 'One victim is in the midst of getting fired in the manager\'s office.'
-        }
-      ],
-      events: [
-        { name: 'The Supervisor', description: 'There\'s a supervisor on the floor now, trying to direct the workers.' },
-        { name: 'Trucks Are Here!', description: 'Lots of new victims have just arrived on the loading docks.' },
-        { name: 'Help on the Racks', description: 'Victims have been asked to help out in the rack areas of the warehouse.' },
-        { name: '"You Aren\'t Going Anywhere"', description: 'All exits in the warehouse are now locked.' },
-        { name: '"It Has Been 0 Days Since…"', description: 'Victims in the racks that panic die by horrific workplace accidents.' },
-        { name: 'Good Ole Zipp', description: 'One victim is called Zipp and he can help unlock locked doors.' },
-        { name: 'Heroic Best Friend', description: 'You have a best friend in the Warehouse, who protects you.' },
-        { name: 'Scatter!', description: 'All victims panic and scatter throughout the warehouse.' },
-        { name: 'Tumbling Boxes', description: 'There are severed heads in the warehouse boxes!' },
-        { name: 'Smarter Than They Look', description: 'Victims can now leave the warehouse on their own.' }
-      ]
+      description: MARREK_VISUAL,
+      setupCards: MARREK_SETUPS.map(c=>({name:c.name,description:`Starting Final Girl: ${MARREK_SPACES.find(s=>s.id===c.girl)!.name}. Killer-start: ${MARREK_SPACES.find(s=>s.id===c.killer)!.name}; killer-specific setup still applies. Twelve starting Victims: ${Object.entries(c.victims).map(([id,n])=>`${n} at ${MARREK_SPACES.find(s=>s.id===id)!.name}`).join(', ')}.`})),
+      events: MARREK_EVENTS.map(c=>({name:c.name,description:c.effect})),
     },
     killer: {
       name: 'The Tormentor',

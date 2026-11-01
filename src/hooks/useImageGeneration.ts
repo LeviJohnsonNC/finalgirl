@@ -15,6 +15,7 @@ const DEFAULT_SETTINGS: ImageSettings = {
 };
 
 export interface GenerateImageContext {
+  marrekOpening?:import('../../supabase/functions/_shared/play/marrekWarehouse').MarrekOpening;
   tormentorOpening?:import('../../supabase/functions/_shared/play/tormentor').TormentorOpening;
   tormentorReview?:{loss:import('../../supabase/functions/_shared/play/tormentor').TormentorLoss};
   grimlashReview?:{loss:import('../../supabase/functions/_shared/play/grimlash').GrimlashLoss};
@@ -174,7 +175,8 @@ export const useImageGeneration = () => {
   /** One short look-book paragraph per game, shared by both of its images. */
   const generateVisualBible = useCallback(
     async (context: {
-      tormentorOpening?:import('../../supabase/functions/_shared/play/tormentor').TormentorOpening;
+      marrekOpening?:import('../../supabase/functions/_shared/play/marrekWarehouse').MarrekOpening;
+  tormentorOpening?:import('../../supabase/functions/_shared/play/tormentor').TormentorOpening;
       killer: string;
       finalGirl: string;
       location: string;

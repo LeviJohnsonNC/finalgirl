@@ -37,9 +37,10 @@ const grimlash=moduleAt('../supabase/functions/_shared/play/grimlash.ts',{});
 const evomorph = moduleAt("../supabase/functions/_shared/play/evomorph.ts", {});
 const konradCatalog = moduleAt('../supabase/functions/_shared/play/konradCatalog.ts', {});
 const konrad = moduleAt('../supabase/functions/_shared/play/konrad.ts', {'./konradCatalog.ts':konradCatalog});
+const marrek=moduleAt('../supabase/functions/_shared/play/marrekWarehouse.ts',{});
 const tormentor=moduleAt('../supabase/functions/_shared/play/tormentor.ts',{});
 const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", {
-  './tormentor.ts':tormentor,'./konrad.ts':konrad,'./konradCatalog.ts':konradCatalog,
+  './marrekWarehouse.ts':marrek,'./tormentor.ts':tormentor,'./konrad.ts':konrad,'./konradCatalog.ts':konradCatalog,
   './shadyAcres.ts':shady,"./grimlash.ts":grimlash,"./evomorph.ts": evomorph,
   "./creech.ts": creech,
   "./poltergeist.ts": poltergeist,
@@ -53,7 +54,7 @@ const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", {
   "./fright.ts": fright,
 });
 const events = moduleAt("../supabase/functions/_shared/play/events.ts", {
-  './tormentor.ts':tormentor,'./konrad.ts':konrad,'./konradCatalog.ts':konradCatalog,
+  './marrekWarehouse.ts':marrek,'./tormentor.ts':tormentor,'./konrad.ts':konrad,'./konradCatalog.ts':konradCatalog,
   "./shadyAcres.ts":shady,"./grimlash.ts":grimlash,"./evomorph.ts": evomorph,
   "./creech.ts": creech,
   "./poltergeist.ts": poltergeist,

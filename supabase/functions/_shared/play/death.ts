@@ -20,6 +20,7 @@ export function deathFacts(
   eventId: string,
 ) {
   if(!validPlayLog(events))return null;
+  if(selection.location!=='Marrek Warehouse'&&events.some(e=>e.moduleData?.module==='marrek'))return null;
   if(selection.killer!=='The Tormentor'&&events.some(e=>e.moduleData?.module==='tormentor'))return null;
   if(selection.location!=='Shady Acres'&&events.some(e=>e.moduleData?.module==='shady-acres'))return null;
   if(selection.killer!=='Grimlash'&&events.some(e=>e.moduleData?.module==='grimlash'))return null;

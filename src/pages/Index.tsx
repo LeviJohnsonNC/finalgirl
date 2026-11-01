@@ -149,6 +149,7 @@ const IndexContent = () => {
       return;
     }
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
+      ...(selection.location === 'Marrek Warehouse' && {marrekSetupVersion:1 as const}),
       ...(selection.location === 'Shady Acres' && {shadySetupVersion:1 as const}),
       ...(selection.location === 'USS Konrad' && {konradSetupVersion:1 as const}),
       ...(selection.killer === 'The Tormentor' && {tormentorSetupVersion:1 as const}),
@@ -329,6 +330,7 @@ const IndexContent = () => {
               filmId={gameSelection.filmId}
               key={activeGame.id}
               sessionId={activeGame.id}
+              marrekFreshSetup={activeGame.marrekSetupVersion === 1}
               tormentorFreshSetup={activeGame.tormentorSetupVersion === 1}
               evomorphFreshSetup={activeGame.evomorphSetupVersion === 1}
               playEvents={activeGame.playEvents}
