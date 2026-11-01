@@ -165,3 +165,17 @@ for(const r of shadyManifest){
 const actualShady=images.filter(p=>p.startsWith(shadyFolder+'/')||p==='src/assets/play/banners/shady-acres.webp');
 if(actualShady.length!==66||actualShady.some(p=>!shadyPaths.has(p)))throw Error('Orphan Shady Acres artwork');
 console.log('Verified 58 independent Shady Acres scenes and 8 chooser thumbnails.');
+
+// Tormentor: thirty independent original scenes with exact, bounded derivatives.
+const tormentorDirectory='src/assets/play/photos/tormentor';
+const tormentorPhotos=JSON.parse(readFileSync(join(tormentorDirectory,'manifest.json'),'utf8'));
+const tormentorExpected=['header','unseen','locked','unlocked','infestation-box','razor-maze','super-saw','electric-cage','swinging-blades','temple-drills','the-slicer','reverse-bear-trap','guillotine','fireworks-target','drowning-tank','unfair-traps','horrifying-traps','overkill-traps','endless-traps','no-escape','the-ultimate-trap','game-over','we-have-to-help','help-im-trapped','you-dont-deserve-to-live','lets-play-a-game','live-or-die','tick-tock','no-respect-for-life','faulty-construction'];
+if(tormentorPhotos.map(x=>x.id).sort().join()!==tormentorExpected.sort().join()||new Set(tormentorPhotos.map(x=>x.originalSha256)).size!==30)throw Error('Incomplete or reused Tormentor scenes');
+for(const photo of tormentorPhotos){
+ if(photo.nativeWidth!==1536||photo.nativeHeight!==1024||!/^exec-[a-f0-9-]+\.png$/.test(photo.source))throw Error('Invalid Tormentor original: '+photo.id);
+ for(const derivative of [photo,...(photo.thumbnail?[photo.thumbnail]:[])]){
+  const bytes=readFileSync(derivative.file);
+  if(createHash('sha256').update(bytes).digest('hex')!==derivative.sha256||bytes.length!==derivative.bytes||bytes.length>(derivative===photo?160:35)*1024)throw Error('Invalid Tormentor derivative: '+derivative.file);
+ }
+}
+if(images.filter(file=>file.startsWith(tormentorDirectory+'/')).length!==58)throw Error('Unmapped Tormentor photograph');

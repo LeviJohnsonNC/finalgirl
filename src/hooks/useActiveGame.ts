@@ -1,3 +1,4 @@
+import {tormentorParent,resolveTormentorAction} from '@/lib/play/tormentor';
 import {shadyParent,resolveShadyAction} from '@/lib/play/shadyAcres';
 import { grimlashParent, resolveGrimlashAction } from '@/lib/play/grimlash';
 import { konradParent, resolveKonradAction } from '../../supabase/functions/_shared/play/konrad';
@@ -8,7 +9,7 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 import { readStoredValue, useLocalStorage } from './useLocalStorage';
-import { validPlayLog, canUndoShady, canUndoGrimlash, canUndoKonrad, canUndoEvomorph, canChangeDeathCount, isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
+import { validPlayLog, canUndoTormentor, canUndoShady, canUndoGrimlash, canUndoKonrad, canUndoEvomorph, canChangeDeathCount, isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
 import { ActiveGame, isActiveGame } from '@/lib/activeGame';
 import { resolveCreechAction } from '../../supabase/functions/_shared/play/creech';
 import { mapleLinkedChange } from '../../supabase/functions/_shared/play/maple';
@@ -52,6 +53,8 @@ export function useActiveGame() {
       // owns uniqueness, including two taps arriving before React renders.
       if (isPermanentMoment(event) && summarizePlay(previous.playEvents).entries.some(entry => entry.kind === 'moment' && entry.momentType === event.momentType)) return previous;
       const log = previous.playEvents ?? [];
+      if(event.kind==='undo'&&!canUndoTormentor(log,event.target!))return previous;
+      if(event.moduleData?.module==='tormentor'&&(previous.selection.killer!=='The Tormentor'||!event.tormentorAction))return previous;
       if(event.kind==='undo'&&!canUndoShady(log,event.target!))return previous;
       if(event.moduleData?.module==='shady-acres'&&(previous.selection.location!=='Shady Acres'||!event.shadyAction))return previous;
       if(event.kind==='undo'&&!canUndoGrimlash(log,event.target!))return previous;
@@ -86,7 +89,7 @@ export function useActiveGame() {
       // Persist setup and the first tap together. Never backfill an existing log:
       // a player may already have resolved, cleared or undone the starting state.
       const setup = log.length === 0
-        ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1, previous.mapleSetupVersion === 1, previous.inkanyambaSetupVersion === 1, previous.grovesSetupVersion === 1, previous.poltergeistSetupVersion === 1, previous.creechSetupVersion === 1, previous.evomorphSetupVersion === 1, previous.konradSetupVersion === 1, previous.grimlashSetupVersion === 1, previous.shadySetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
+        ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1, previous.mapleSetupVersion === 1, previous.inkanyambaSetupVersion === 1, previous.grovesSetupVersion === 1, previous.poltergeistSetupVersion === 1, previous.creechSetupVersion === 1, previous.evomorphSetupVersion === 1, previous.konradSetupVersion === 1, previous.grimlashSetupVersion === 1, previous.shadySetupVersion === 1, previous.tormentorSetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
         : [];
       if (log.length === 0 && previous.frightSetupVersion === 1 && previous.selection.killer === 'Dr. Fright' && event.moduleData?.module !== 'fright') setup.unshift(newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(initialFright())}}}));
       if (event.moduleData?.module === 'maple') {
@@ -134,6 +137,7 @@ export function useActiveGame() {
       }
       if(event.shadyAction){const entries=summarizePlay([...log,...baseline,...setup]).entries;const request=log.length===0&&event.shadyAction.parent==='root'?{...event.shadyAction,parent:shadyParent(entries)}:event.shadyAction;const changes=resolveShadyAction(request,moduleState(entries,'shady-acres'),entries);if(!changes)return previous;accepted={...event,shadyAction:request,moduleData:{module:'shady-acres',changes}};}
       if(event.grimlashAction) {const entries=summarizePlay([...log,...baseline,...setup]).entries;const request=log.length===0&&event.grimlashAction.parent==='root'?{...event.grimlashAction,parent:grimlashParent(entries)}:event.grimlashAction;const changes=resolveGrimlashAction(request,moduleState(entries,'grimlash'),entries);if(!changes)return previous;accepted={...event,grimlashAction:request,moduleData:{module:'grimlash',changes}};}
+      if(event.tormentorAction){const entries=summarizePlay([...log,...baseline,...setup]).entries;const request=log.length===0&&event.tormentorAction.parent==='root'?{...event.tormentorAction,parent:tormentorParent(entries)}:event.tormentorAction;const changes=resolveTormentorAction(request,moduleState(entries,'tormentor'),entries);if(!changes)return previous;accepted={...event,tormentorAction:request,moduleData:{module:'tormentor',changes}};}
       const reveal:PlayEvent[]=[];
       if(event.moduleData?.module==='evomorph') {
         if(previous.selection.killer!=='Evomorph'||!event.evomorphAction)return previous;
@@ -146,6 +150,7 @@ export function useActiveGame() {
       }
       const additions = event.kind === 'start' ? [accepted, ...setup] : [...baseline, ...setup, ...reveal, accepted];
       if (log.length + additions.length > 1000) return previous;
+      if([...log,...additions].some(e=>e.moduleData?.module==='tormentor')&&!validPlayLog([...log,...additions]))return previous;
       if([...log,...additions].some(e=>e.moduleData?.module==='shady-acres')&&!validPlayLog([...log,...additions]))return previous;
       if([...log,...additions].some(e=>e.moduleData?.module==='grimlash')&&!validPlayLog([...log,...additions]))return previous;
       if((event.konradAction||event.kind==='undo'||event.kind==='restore')&&[...log,...additions].some(e=>e.moduleData?.module==='konrad')&&!validPlayLog([...log,...additions]))return previous;

@@ -20,6 +20,7 @@ export function playStartingValues(
     Geppetto: 8,
     'Dr. Fright': 9,
   };
+  if(killer==='The Tormentor')return {finalGirlHealth:getFinalGirlHealth(finalGirl),killerHealth:7,finalHorrorLevel:3,bloodlust:0};
   return {
     finalGirlHealth: getFinalGirlHealth(finalGirl),
     ...(killer!=='Poltergeist'&&{killerHealth:killerHealth[killer]??10}),

@@ -1,3 +1,4 @@
+import {TORMENTOR_POWERS,TORMENTOR_FINALES,TORMENTOR_TRAPS,initialTormentor,validTormentorField,tormentorState,tormentorFacts,serializeTormentor,tormentorCard} from './tormentor.ts';
 import {SHADY_ITEMS,SHADY_PEOPLE,SHADY_CURSES,initialShady,validShadyField,shadyState,shadyFacts} from './shadyAcres.ts';
 import { GRIMLASH_POWERS, GRIMLASH_FINALES, GRIMLASH_MINORS, GRIMLASH_HARVEST, initialGrimlash, validGrimlashField, grimlashFacts } from './grimlash.ts';
 import { validKonradField, canonicalKonradSnapshot, initialKonrad, konradFacts } from './konrad.ts';
@@ -53,7 +54,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -70,6 +71,7 @@ type ObservedEvent = {
 
 /** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
 export function killerMomentCards(killer: string, type: string) {
+  if(killer==='The Tormentor')return [...(type==='dark-power'?TORMENTOR_POWERS:type==='finale'?TORMENTOR_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if(killer==='Grimlash')return [...(type==='dark-power'?GRIMLASH_POWERS:type==='finale'?GRIMLASH_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Evomorph") return [...(type === "dark-power" ? EVOMORPH_POWERS : type === "finale" ? EVOMORPH_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Poltergeist") return [...(type === "dark-power" ? POLTERGEIST_POWERS : type === "finale" ? POLTERGEIST_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
@@ -159,6 +161,7 @@ function validField(
   value: unknown,
 ) {
   if (module === 'shady-acres') return validShadyField(key,value);
+  if(module==='tormentor')return validTormentorField(key,value);
   if (module === "grimlash") return validGrimlashField(key,value);
   if (module === "konrad") return validKonradField(key,value);
   if (module === "evomorph") return validEvomorphField(key,value);
@@ -278,7 +281,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    !["tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -448,6 +451,7 @@ function valueLabel(key: string, value: ModuleValue) {
   return String(value);
 }
 export function describeModule(observation: ModuleObservation) {
+  if(observation.module==='tormentor')return tormentorFacts(tormentorState(observation.changes));
   if(observation.module==='shady-acres')return shadyFacts(shadyState(observation.changes)).join(' ')||'Shady Acres observations recorded';
   if(observation.module==='grimlash')return Object.entries(observation.changes).filter(([k])=>k!=='initialized').map(([k,v])=>`${k.replace(/\./g,' ')}: ${GRIMLASH_HARVEST.find(c=>c.id===v)?.name??v??'not recorded'}`).join('; ');
   if(observation.module === "konrad") return konradFacts(observation.changes).join(" ") || "USS Konrad state recorded";
@@ -469,6 +473,7 @@ export function moduleContext(
   entries: readonly ObservedEvent[],
 ) {
   const context: Record<string, ModuleState> = {};
+  if(selection.killer==='The Tormentor'&&entries.some(e=>e.moduleData?.module==='tormentor'))context.tormentor={snapshot:serializeTormentor(tormentorState(moduleState(entries,'tormentor'))),power:tormentorCard(entries,'dark-power')??null,finale:tormentorCard(entries,'finale')??null};
   if(selection.location==='Shady Acres'&&entries.some(e=>e.moduleData?.module==='shady-acres')) {const s=shadyState(moduleState(entries,'shady-acres'));delete s.initialized;context.shady={snapshot:JSON.stringify(s)};}
   if(selection.killer==='Grimlash'&&entries.some(e=>e.moduleData?.module==='grimlash')) {const s=moduleState(entries,'grimlash');delete s.initialized;context.grimlash=s;}
   if(selection.location === "USS Konrad" && entries.some(e=>e.moduleData?.module === "konrad")) context.konrad={snapshot:canonicalKonradSnapshot(moduleState(entries,"konrad").snapshot)!};
@@ -538,6 +543,7 @@ export function moduleStoryBeats(
   entries: readonly ObservedEvent[],
 ): string {
   const context = moduleContext(selection, entries);
+  if(context?.tormentor){const place=moduleStoryBeats({...selection,killer:''},entries);let threat='';for(const fact of tormentorFacts(tormentorState(context.tormentor),entries).split(/(?<=\.)\s+/))if(threat.length+fact.length+1<=(place?340:870))threat+=fact+' ';return [threat.trim(),place.slice(0,535)].filter(Boolean).join('\n');}
   if (!context) return "";
   // Preserve the established output for every other location. Each owner gets
   // room inside the existing 900-character module budget for Carnival mixes.
@@ -717,6 +723,7 @@ export function buddylandReferences(
   attacker?: string,
 ) {
   const refs: { name: string; effect: string }[] = [];
+  if(selection.killer==='The Tormentor'&&context?.tormentor){refs.push({name:'Tormentor observations',effect:tormentorFacts(tormentorState(context.tormentor))});for(const card of [...TORMENTOR_POWERS,...TORMENTOR_FINALES])if(card.name===context.tormentor.power||card.name===context.tormentor.finale)refs.push({name:card.name,effect:card.effect+' Recording the reveal does not prove its actions or consequences occurred.'});}
   if (selection.location === "Sacred Groves") {
     refs.push({name:"Sacred Groves",effect:GROVES_VISUAL});
     for(const e of GROVES_EVENTS) if(context?.groves?.[`event.${e.id}`] === "active") refs.push({name:e.name,effect:`${e.effect} Activation alone does not prove any conditional effect occurred.`});
@@ -780,6 +787,7 @@ export function moduleReferences(
   mechanism?: string,
 ) {
   const refs = buddylandReferences(selection, context, attacker);
+    if(selection.killer==='The Tormentor'){const trap=TORMENTOR_TRAPS.find(c=>c.name===mechanism);if(trap)refs.push({name:trap.name,effect:`${trap.deck==='girl'?'Final Girl':'Victim'} Death Trap. Tasks: ${trap.tasks.join('; ')}. Progress: ${trap.checkpoints.join(' → ')}. ${trap.fail} Only this recorded death is established; costs and other casualties are not inferred.`});}
   if(selection.location === "USS Konrad" && context?.konrad) for(const effect of konradFacts(context.konrad)) refs.push({name:"USS Konrad observation",effect});
   if (selection.location === "Sacred Groves") {
     const state=context?.groves ?? {};
@@ -983,8 +991,10 @@ export function initialModuleObservations(
   initializeKonrad = false,
   initializeGrimlash = false,
   initializeShady = false,
+  initializeTormentor = false,
 ): ModuleObservation[] {
   return [
+    ...(initializeTormentor && selection.killer==='The Tormentor' ? [{module:'tormentor' as const,changes:initialTormentor()}] : []),
     ...(initializeShady && selection.location==='Shady Acres' ? [{module:'shady-acres' as const,changes:initialShady(selection.startingEvent)}] : []),
     ...(initializeGrimlash && selection.killer==='Grimlash' ? [{module:'grimlash' as const,changes:initialGrimlash()}] : []),
     ...(initializeKonrad && selection.location === "USS Konrad" ? [{module:"konrad" as const,changes:initialKonrad(selection.setupScenario,selection.startingEvent)}] : []),

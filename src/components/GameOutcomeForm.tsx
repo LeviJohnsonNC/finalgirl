@@ -1,3 +1,4 @@
+import {tormentorState,type TormentorLoss} from '@/lib/play/tormentor';
 import {shadyState,shadyChildrenCount} from '@/lib/play/shadyAcres';
 import {grimlashFatal,harvestLevel,type GrimlashLoss} from '@/lib/play/grimlash';
 import {konradState,type KonradFate} from '@/lib/play/konrad';
@@ -53,6 +54,7 @@ export const GameOutcomeForm = ({
   onDiscard,
 }: GameOutcomeFormProps) => {
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const [tormentorLoss,setTormentorLoss]=useDraftField<TormentorLoss>('tormentorLoss',tormentorState(moduleState(summarizePlay(result.playEvents).entries,'tormentor')).loss,initialDraft,onDraftChange);
   const [shipFate,setShipFate]=useDraftField<KonradFate>('konradFate',konradState(moduleState(summarizePlay(result.playEvents).entries,'konrad')).fate,initialDraft,onDraftChange);
   const [reviewedOutcome,setReviewedOutcome]=useDraftField<'won'|'lost'>('reviewedOutcome',result.outcome,initialDraft,onDraftChange);
   const grimState=moduleState(summarizePlay(result.playEvents).entries,'grimlash');
@@ -61,8 +63,9 @@ export const GameOutcomeForm = ({
   const reviewedGrimState=retractingSkull?{...grimState,position:undefined,peak:grimState.peak===10?undefined:grimState.peak}:grimState;
   const fatalGrim=result.killer==='Grimlash'&&grimlashFatal({loss:grimLoss});
   const fatalShip=result.location==='USS Konrad'&&['airlock-loss','explosion-loss'].includes(shipFate);
-  const fatalEnding=fatalGrim||fatalShip;
-  const isWin = !fatalEnding && (result.killer==='Grimlash'||result.location==='USS Konrad'?reviewedOutcome:result.outcome) === 'won';
+  const fatalTormentor=result.killer==='The Tormentor'&&!['none','unknown'].includes(tormentorLoss);
+  const fatalEnding=fatalGrim||fatalShip||fatalTormentor;
+  const isWin = !fatalEnding && (result.killer==='The Tormentor'||result.killer==='Grimlash'||result.location==='USS Konrad'?reviewedOutcome:result.outcome) === 'won';
   const billyState = moduleState(summarizePlay(result.playEvents).entries, 'billy');
 
   // Session snapshots include observed Ultimate changes; old games keep their denominator.
@@ -327,6 +330,7 @@ export const GameOutcomeForm = ({
           : buddyParts.join('. ');
     }
     if(result.location==='Shady Acres'&&childrenAtFinish!==null)highlights=[highlights,`Children on board at finish: ${childrenAtFinish}`].filter(Boolean).join('. ');
+    if(result.killer==='The Tormentor')highlights=[highlights,`Tormentor ending: ${tormentorLoss}${tormentorLoss==='trap-terminal'?' (Final Girl died without Final Health)':''}`].filter(Boolean).join('. ');
     if(isGrimlash){const facts=[typeof reviewedGrimState.position==='number'?`Harvest Madness position ${reviewedGrimState.position}, ${harvestLevel(reviewedGrimState.position)===4?'Skull':`Level ${harvestLevel(reviewedGrimState.position)}`}`:'',typeof reviewedGrimState.peak==='number'?`Recorded Madness peak position ${reviewedGrimState.peak}`:'',grimLoss==='skull'||grimLoss==='telluric'?`Game lost: ${grimLoss}`:'',harvestMadnessPeaked?'Legacy Madness peaked observation; exact position unknown':''];highlights=[highlights,...facts].filter(Boolean).join('. ');}
     if (isBerith) {
       const demonParts: string[] = [];
@@ -376,6 +380,7 @@ export const GameOutcomeForm = ({
 
     const formData: EndingFormData = {
       ...(result.location==='Shady Acres'&&{childrenOnBoardAtFinish:childrenAtFinish}),
+      ...(result.killer==='The Tormentor'&&{tormentorReview:{loss:tormentorLoss},outcome:fatalEnding?'lost' as const:reviewedOutcome}),
       ...(isGrimlash&&{grimlashReview:{loss:grimLoss},outcome:fatalEnding?'lost' as const:reviewedOutcome}),
       ...(result.location==='USS Konrad'&&{konradReview:{fate:shipFate},outcome:fatalEnding?'lost' as const:reviewedOutcome}),
       finalHorrorLevel: finalHorrorLevel ?? undefined,
@@ -778,6 +783,7 @@ export const GameOutcomeForm = ({
             </div>
           )}
 
+          {result.killer==='The Tormentor'&&<section className="outcome-panel outcome-module" aria-label="Tormentor ending review"><h3>Tormentor ending</h3><OutcomeSelect label="Tormentor loss record" value={tormentorLoss} onValueChange={v=>setTormentorLoss(v as TormentorLoss)}><option value="unknown">Not recorded</option><option value="none">No special loss recorded</option><option value="trap-terminal">Killed by terminal Death Trap</option><option value="no-escape">No Escape · all Exits locked at Killer phase start</option><option value="endless-traps">Endless Traps · no Victim trap cards left</option></OutcomeSelect><OutcomeSelect label="Reviewed game result" value={fatalEnding?'lost':reviewedOutcome} onValueChange={v=>setReviewedOutcome(v as 'won'|'lost')}><option value="won" disabled={fatalEnding}>Won</option><option value="lost">Lost</option></OutcomeSelect>{fatalTormentor&&<p role="status">{tormentorLoss==='trap-terminal'?'The Final Girl died without revealing Final Health.':'This is a game loss; physical death is not established.'} Health and Victim totals remain as observed.</p>}</section>}
           {isGrimlash&&<section className="outcome-panel outcome-module" aria-label="Grimlash ending review"><h3>Harvest Madness</h3><p>{typeof reviewedGrimState.position==='number'?`Position ${reviewedGrimState.position} · ${harvestLevel(reviewedGrimState.position)===4?'Skull':`Level ${harvestLevel(reviewedGrimState.position)}`}`:'Position not recorded'}{typeof reviewedGrimState.peak==='number'?` · Recorded peak ${reviewedGrimState.peak}`:''}</p><OutcomeSelect label="Madness loss record" value={grimLoss} onValueChange={v=>setGrimLoss(v as GrimlashLoss)}><option value="unknown">Not recorded</option><option value="none">No Madness loss recorded</option><option value="skull">Reached the skull</option><option value="telluric">Telluric Visions loss</option></OutcomeSelect><OutcomeSelect label="Reviewed game result" value={fatalEnding?'lost':reviewedOutcome} onValueChange={v=>setReviewedOutcome(v as 'won'|'lost')}><option value="won" disabled={fatalEnding}>Won</option><option value="lost">Lost</option></OutcomeSelect>{retractingSkull&&<p>Saving this correction also leaves the earlier skull position and skull peak unrecorded.</p>}{fatalGrim&&<p role="status">This Madness ending is a loss. Health and Victim totals remain as observed.</p>}{harvestMadnessPeaked&&<p>Legacy peaked record: exact level and position unknown.</p>}</section>}
           {result.location==='Shady Acres'&&<section className="outcome-panel outcome-module"><label>Children on board at finish<select aria-label="Children on board at finish" value={childrenAtFinish??''} onChange={e=>setChildrenAtFinish(e.target.value===''?null:Number(e.target.value))}><option value="">Not recorded</option>{[0,1,2,3].map(n=><option key={n}>{n}</option>)}</select></label></section>}
 

@@ -108,10 +108,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
       'A ritualistic, pain-worshipping killer who moves through his hellish domain with calm purpose. Violence is ceremony to him.',
   },
 
-  'The Tormentor': {
-    narrativeNote:
-      'A calculated, silent killer who has locked down Marrek Warehouse and uses its timers, padlocks, and towering storage racks to isolate and corner victims. She plans her kills: no victim can be led out an exit until a lock opens, and escape routes run across the racks or through the chaotic open "Pit" in the middle of the warehouse.',
-  },
+  'The Tormentor': {narrativeNote:'The Tormentor begins off-board and remains unseen until Finale; she arrives at the beginning of the next Killer phase. Separate Victim and Final Girl Death Traps drive the pressure. Trapped subjects normally cannot be targeted unless the printed Finale says otherwise. Keep the selected location; only explicit recorded trap effects and outcomes happened.'},
 
 
   'The Eyeless': {

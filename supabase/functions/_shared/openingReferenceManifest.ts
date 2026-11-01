@@ -44,6 +44,7 @@
 // gabrielle.png SHA-256: 01636ac3d1f7bcc1eb3fb1bb3ee383b28e0506397f6a3fc86ba66dafa45882cd
 // adrianne.png SHA-256: 62493fe13d21e57cf0428ff28999ceee27045df062b9f8bcbbafe0958af16531
 // maureen.png SHA-256: 9bd680a9c0e83efc9c9f7bd2756f4e7a1fb1daf85c36c4272f1bc88e00c9f087
+// the-tormentor.png SHA-256: 55e22335ed5f3c3e8b70cda0633f0adf372346a3250734c13fbc10e5598d18d3
 export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: string }> = {
   "Billy the Bear": {
     "path": "billy-the-bear.jpg",
@@ -216,5 +217,9 @@ export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: 
   "Maureen": {
     "path": "maureen.jpg",
     "sha256": "4e36e1e47be86e28440c4f0eb90290f484508644b4f94b7b76064ae2c5a98bd1"
+  },
+  "The Tormentor": {
+    "path": "the-tormentor-bcbe59ed85cb2d02.jpg",
+    "sha256": "bcbe59ed85cb2d02f3edbe9e4a963af1d17865f6878eef485d4d594481a7e47e"
   }
 };

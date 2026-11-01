@@ -1,3 +1,4 @@
+import {TORMENTOR_TERRORS,TORMENTOR_TRAPS,TORMENTOR_SOURCE} from './tormentor.ts';
 import {SHADY_EVENTS,SHADY_TERRORS,SHADY_ITEMS,SHADY_PEOPLE,SHADY_SPACES,SHADY_SOURCE} from './shadyAcres.ts';
 import { GRIMLASH_TERRORS } from './grimlash.ts';
 import { KONRAD_ITEMS, KONRAD_EVENTS, KONRAD_TERRORS, KONRAD_SPACES, KONRAD_PEOPLE, KONRAD_SOURCE } from './konradCatalog.ts';
@@ -43,6 +44,7 @@ const rules =
 export const PLAY_CARDS: readonly PlayCard[] = [
  ...SHADY_TERRORS.map(c=>({...c,kind:'terror' as const})),
  ...SHADY_EVENTS.map(c=>({...c,kind:'event' as const,location:'Shady Acres',source:SHADY_SOURCE})),
+  ...TORMENTOR_TERRORS.map(c=>({...c,kind:'terror' as const,killer:'The Tormentor',source:TORMENTOR_SOURCE})),
   ...GRIMLASH_TERRORS.map(c=>({...c,kind:'terror' as const})),
   ...KONRAD_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...KONRAD_EVENTS.map(c=>({...c,kind:"event" as const,location:"USS Konrad",source:KONRAD_SOURCE})),
@@ -226,6 +228,7 @@ export function playMechanisms(selection: {
 }) {
   return [
     "Killer attack",
+    ...(selection.killer==='The Tormentor'?TORMENTOR_TRAPS.filter(c=>c.deck==='victim').map(c=>c.name):[]),
     ...(selection.location==='Shady Acres'?['Child attack','Abduction','Ancient Curse','Decaying Earth','Omen of Blood']:[]),
     ...(selection.killer === "Evomorph" ? ["Ambush", "Acid Blood", "Razor Tail"] : []),
     ...(selection.killer==='Poltergeist'?['Clown Doll','Behemoth','Flying objects','Lightning']:[]),

@@ -9,6 +9,7 @@ export interface GameSelection {
 }
 export interface EndingFormData {
   childrenOnBoardAtFinish?: number|null;
+  tormentorReview?:{loss:import('../../supabase/functions/_shared/play/tormentor').TormentorLoss};
   grimlashReview?: {loss:import('../../supabase/functions/_shared/play/grimlash').GrimlashLoss};
   outcome?: "won"|"lost";
   konradReview?: {fate: import("../../supabase/functions/_shared/play/konrad").KonradFate};
@@ -19,6 +20,7 @@ export interface EndingFormData {
   endingSubLocation: string; gameHighlights: string;
 }
 export interface ActiveGame {
+  tormentorSetupVersion?: 1;
   shadySetupVersion?: 1;
   grimlashSetupVersion?: 1;
   evomorphSetupVersion?: 1;
@@ -50,6 +52,8 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if(game.tormentorSetupVersion!==undefined&&game.tormentorSetupVersion!==1)return false;
+  if(game.selection?.killer!=='The Tormentor'&&game.playEvents?.some(e=>e.moduleData?.module==='tormentor'))return false;
   if(game.shadySetupVersion!==undefined&&game.shadySetupVersion!==1)return false;
   if(game.selection?.location!=='Shady Acres'&&game.playEvents?.some(e=>e.moduleData?.module==='shady-acres'))return false;
   if(game.grimlashSetupVersion!==undefined&&game.grimlashSetupVersion!==1)return false;
