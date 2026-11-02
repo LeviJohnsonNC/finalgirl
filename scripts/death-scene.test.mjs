@@ -240,6 +240,7 @@ function fixture(options = {}) {
             choices: [
               {
                 finish_reason: options.finishReason,
+                native_finish_reason: options.nativeFinishReason,
                 message: { content: options.text ?? completeText },
               },
             ],
@@ -292,6 +293,22 @@ test("cached and in-flight scenes never reserve quota or call a model", async ()
     assert.equal(r.status, action === "cached" ? 200 : 409);
     assert.deepEqual(f.calls, ["claim"]);
   }
+});
+
+test('a guillotine safety refusal is explicit, leaves the death recorded and makes no automatic retry', async () => {
+  const f = fixture({ realGateway: true, finishReason: 'stop', nativeFinishReason: 'SAFETY',
+    expectedFacts: { killer: 'The Tormentor', mechanism: 'Guillotine', quantity: 1 } });
+  f.owned.selection.killer = 'The Tormentor';
+  f.owned.playEvents[1] = { ...f.owned.playEvents[1], quantity: 1, cause: 'other', mechanism: 'Guillotine' };
+  const original = structuredClone(f.owned.playEvents);
+  const response = await f.handler(f.request());
+  const body = await response.json();
+  assert.equal(body.code, 'content_policy');
+  assert.match(body.error, /declined.*still recorded.*without graphic injury/i);
+  assert.equal(f.calls.filter(c => c === 'AI').length, 1);
+  assert.ok(f.updates.some(value => value.status === 'failed'));
+  assert.ok(!f.updates.some(value => value.status === 'ready'));
+  assert.deepEqual(f.owned.playEvents, original);
 });
 test('Hans and Camp module logs authorize killer, Terror and Event death payoffs without replaying later state', async () => {
   for (const cause of ['killer','terror','event']) {

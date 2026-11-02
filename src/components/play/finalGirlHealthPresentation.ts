@@ -21,10 +21,17 @@ export function healthPortraitState(health?: number, maximum?: number): HealthPo
 }
 
 export function finalGirlHealthPortrait(name: string, health: number | undefined, maximum: number | undefined, aiEnabled: boolean) {
-  const state = healthPortraitState(health, maximum);
-  if (!aiEnabled || state === 'original') return undefined;
+  if (!aiEnabled) return undefined;
   const portrait = manifest.find(entry => entry.name === name);
   if (!portrait) return undefined;
+  const recordedState = healthPortraitState(health, maximum);
+  // A few bloody identity originals need a gentler intermediate tracker edit.
+  // Unknown/invalid/above-maximum health must still use the untouched original.
+  const state = recordedState === 'original' && 'injured' in portrait &&
+    health !== undefined && Number.isInteger(health) && health > 2 &&
+    maximum !== undefined && Number.isInteger(maximum) && health < maximum
+      ? 'injured' : recordedState;
+  if (state === 'original') return undefined;
   const src = images[`/src/assets/play/final-girl-health/${portrait.slug}-${state}.webp`];
   return src ? { src, state, position: portrait.position } : undefined;
 }

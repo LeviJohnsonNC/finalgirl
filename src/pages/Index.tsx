@@ -357,6 +357,7 @@ const IndexContent = () => {
         if (lastGameResult) {
           return (
             <GameOutcome
+              key={`${owner}:${activeGame.id}`}
               result={lastGameResult}
               introStory={introStory}
               initialDraft={activeGame.formDraft}

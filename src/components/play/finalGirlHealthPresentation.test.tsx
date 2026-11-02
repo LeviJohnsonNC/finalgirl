@@ -57,4 +57,13 @@ describe('Final Girl health photographs', () => {
     expect(image.getAttribute('src')).toBe(props.original);
     expect(image.dataset.healthPortrait).toBeUndefined();
   });
+
+  it.each(['Asami', 'Mandy', 'Veronica'])('uses the mild intermediate edit for %s only at confirmed intermediate health', name => {
+    expect(finalGirlHealthPortrait(name, 3, 5, true)?.state).toBe('injured');
+    expect(finalGirlHealthPortrait(name, 2, 5, true)?.state).toBe('critical');
+    expect(finalGirlHealthPortrait(name, 5, 5, true)?.state).toBe('healthy');
+    for (const health of [undefined, 1.5, -1, 6]) expect(finalGirlHealthPortrait(name, health, 5, true)).toBeUndefined();
+    expect(finalGirlHealthPortrait(name, 3, undefined, true)).toBeUndefined();
+    expect(finalGirlHealthPortrait(name, 3, 5, false)).toBeUndefined();
+  });
 });
