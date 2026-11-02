@@ -42,7 +42,7 @@ const healthPaths = new Set();
 for (const entry of healthManifest) {
   const sourceHash = createHash('sha256').update(readFileSync(entry.original)).digest('hex');
   if (sourceHash !== entry.originalSha256) throw new Error('Original portrait changed: ' + entry.name);
-  for (const state of ['healthy', 'critical']) {
+  for (const state of ['healthy', 'critical', ...('injured' in entry ? ['injured'] : [])]) {
     const file = join(healthDirectory, `${entry.slug}-${state}.webp`), metadata = entry[state];
     if (!metadata?.source || !/^exec-[a-f0-9-]+\.png$/.test(metadata.source)) throw new Error('Missing health-photo provenance: ' + file);
     const bytes = readFileSync(file);

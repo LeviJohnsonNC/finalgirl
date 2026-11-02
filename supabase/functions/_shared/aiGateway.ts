@@ -47,7 +47,7 @@ export const userFacingMessage = (err: unknown): string => {
       case "credits":
         return "AI credits depleted. Please add credits to continue.";
       case "content_policy":
-        return "That scene was too dark even for the censors. Try regenerating.";
+        return "The AI provider declined this depiction. Try a less graphic description.";
       case "incomplete_response":
         return "The scene stopped before it was finished. Please try again.";
       case "image_unavailable":
@@ -442,7 +442,14 @@ export const generateText = async (opts: {
         completionTokens: usage?.completion_tokens,
         reasoningTokens: usage?.completion_tokens_details?.reasoning_tokens,
       });
-      if (finish === "content_filter" || choices?.[0]?.message?.refusal)
+      // Some gateway responses preserve Gemini's native safety reason even
+      // when the normalized reason is just `stop`, `other`, or missing.
+      const policyReasons = ["content_filter", "safety", "blocklist", "prohibited_content", "spii", "image_safety", "image_prohibited_content"];
+      const feedback = (data.promptFeedback ?? data.prompt_feedback) as
+        { blockReason?: string; block_reason?: string } | undefined;
+      const promptBlock = feedback?.blockReason ?? feedback?.block_reason;
+      if (policyReasons.includes(finish ?? "") || policyReasons.includes(nativeFinish ?? "") ||
+        policyReasons.includes(promptBlock?.toLowerCase() ?? "") || choices?.[0]?.message?.refusal)
         throw new GatewayError("content_policy", "Provider declined the scene");
       if (
         !["stop", "end_turn"].includes(finish ?? "") ||

@@ -143,6 +143,8 @@ describe('gameplay without AI dependencies', () => {
     expect(screen.getByDisplayValue('Axe')).toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: 'Rescued Carolyn' })).not.toBeChecked();
     fireEvent.change(screen.getByLabelText('Weapon Used'), { target: { value: 'Knife' } });
+    expect(draft).not.toHaveBeenCalled();
+    fireEvent.blur(screen.getByLabelText('Weapon Used'));
     expect(draft).toHaveBeenCalledWith({ weaponUsed: 'Knife' });
     saveOnly();
     expect(save.mock.calls[0][0]).toMatchObject({ weaponUsed: 'Knife', victimsSaved: 0 });

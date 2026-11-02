@@ -14,12 +14,16 @@
       "sha256": "14881976533618417f04035432df9740753f7800783991514d8a32bbf22140eb"
     },
     "critical": {
-      "source": "exec-a52f6067-7e67-4b6d-9788-e909ab1ddcb9.png",
+      "source": "exec-60b813d8-8a69-4200-82c2-94957d081bc1.png",
       "nativeWidth": 1387,
       "nativeHeight": 1134,
       "width": 768,
       "height": 628,
-      "sha256": "1e0c53ff14a88c004a89626a9e84ab29fd0cc2bc0683bf99d607cf3497ab307b"
+      "sha256": "31588edcf59cbb2aef084ec3fc2a00dcea0d11bd37b788624ef3272c073c1631",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: this attached portrait of the fictional adult character adelaide. Make ONE LOW HEALTH game-state photo. Preserve exact identity, face anatomy, age, complexion, eyes, hairstyle/color, glasses/jewelry, garment design, pose, camera, crop, background and lighting. Keep existing visual marks. Make her visibly more battered and exhausted using only NON-GRAPHIC closed-skin practical movie makeup: pronounced purple cheek and eye bruising, puffy tired eyes, dirty sweaty face, tangled damp hair, strongly worn and frayed clothing. Expression visibly weary, pained, barely holding on but alive and conscious. No new blood, no open wounds, no gore, no disfigurement. Existing visible scratches need not be intensified. Facial bruising must be clearly legible in a small tracker. Physically real 1980s consumer 35mm candid photograph, natural skin texture and restrained grain. No illustration, CGI, beauty retouching, text, logos, border, collage, or added people. Same aspect ratio and composition.",
+      "sourceInput": "src/assets/characters/ai/adelaide.png",
+      "replacesSha256": "1e0c53ff14a88c004a89626a9e84ab29fd0cc2bc0683bf99d607cf3497ab307b"
     },
     "scale": 1,
     "origin": "center bottom"
@@ -64,12 +68,16 @@
       "sha256": "d2ae75249f9ea0272e18925814bfd404faa70de9be98ab68b5f1a006fcc39d7c"
     },
     "critical": {
-      "source": "exec-52a6294c-c22b-4902-94b7-a349b6cb19aa.png",
+      "source": "exec-174a4658-a52f-405b-8e43-de2d2f5d7eab.png",
       "nativeWidth": 1387,
       "nativeHeight": 1134,
       "width": 768,
       "height": 628,
-      "sha256": "ce547be362f649cde478f5f1f95fc3c69ca5cad1fde45cb73463d2f9d859c19a"
+      "sha256": "9e392daa6b1928b4cdb2acb2d69a8458bc9b7fd11e9354fa40da28917effbf74",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: attached fictional adult horror-film character alice. Create ONE LOW HEALTH replacement photo, significantly more battered than this already injured source. Preserve EXACT facial identity, age, skin tone, eye color, hair style and color, jewelry, glasses if present, wardrobe design, pose, crop, background and original lighting. Preserve ALL existing superficial cuts, scrapes, small dried blood marks and clothing stains in this source; DO NOT clean up or heal anything. Build on that damage with pronounced dark purple bruises around one eye and across cheeks, mild swelling of the split lip, extra small superficial abrasions, sweat and grime, disheveled damp hair, noticeably torn and dirty garment edges and an unmistakably drained, pained expression. She is conscious, recognizable, alive. Non-graphic practical movie makeup only, no open wounds, gore or disfigurement. The added facial bruising must read clearly in a small health-tracker portrait. Real candid 1980s consumer 35mm photograph, natural skin texture, restrained film grain, coherent existing light. No illustration, CGI, text, logos, borders, collage or added people. Match the reference composition and aspect ratio exactly.",
+      "sourceInput": "src/assets/characters/ai/alice.png",
+      "replacesSha256": "ce547be362f649cde478f5f1f95fc3c69ca5cad1fde45cb73463d2f9d859c19a"
     },
     "scale": 1.15,
     "origin": "center bottom"
@@ -97,7 +105,18 @@
       "sha256": "e392b4934d4f29f5d50c590e88e831afb544b3bb8bf8099a771bbf90bae6a42e"
     },
     "scale": 1,
-    "origin": "center bottom"
+    "origin": "center bottom",
+    "injured": {
+      "source": "exec-5fc84e63-9490-4889-9d34-0887e53f26d9.png",
+      "nativeWidth": 1397,
+      "nativeHeight": 1126,
+      "width": 768,
+      "height": 619,
+      "sha256": "eb04e7c4bab3439dea4958be8c23c8138511ef0e710ac85bb1dc66f840e55af9",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: the attached HEALTHY portrait of fictional adult character asami. Create ONE very mildly injured intermediate-health game-state photograph. Preserve exact face, anatomy, age, complexion, hair, jewelry, garment design, pose/camera/crop, background and lighting. Change ONLY a tiny faint bruise at the outer temple, one small dry superficial cheek scuff and a light dust smudge on clothing. She should still look alert and capable, almost healthy. NO blood, open wounds, swelling, severe bruising, torn skin, gore or disfigurement. This is a MILD intermediate portrait; a much more battered low-health photo exists separately. Real candid 1980s 35mm photographic skin/materials, restrained grain, coherent existing light. No illustration, CGI, beauty retouching, text, collage or added people. Same aspect and framing.",
+      "sourceInput": "src/assets/play/final-girl-health/asami-healthy.webp"
+    }
   },
   {
     "name": "Ava",
@@ -139,12 +158,16 @@
       "sha256": "01a16108458ff0dde25720c02f19c201b6dc629875db64ce4bc079f2c9de70de"
     },
     "critical": {
-      "source": "exec-187e3fc2-af02-412d-9e32-ff87ae9aaec7.png",
+      "source": "exec-f698c89f-b8fc-4692-b259-9a02ce1379a7.png",
       "nativeWidth": 1397,
       "nativeHeight": 1126,
       "width": 768,
       "height": 619,
-      "sha256": "8e458cf5491474bb800c0982cc4e030b7412d4e9834e55002a1b17bc323d68e7"
+      "sha256": "9a63333e137f8a262872cbde48a3f8a2a22356070d58b29d925afed045271e31",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: attached fictional adult horror-film character barbara. Create ONE LOW HEALTH replacement photo, significantly more battered than this already injured source. Preserve EXACT facial identity, age, skin tone, eye color, hair style and color, jewelry, glasses if present, wardrobe design, pose, crop, background and original lighting. Preserve ALL existing superficial cuts, scrapes, small dried blood marks and clothing stains in this source; DO NOT clean up or heal anything. Build on that damage with pronounced dark purple bruises around one eye and across cheeks, mild swelling of the split lip, extra small superficial abrasions, sweat and grime, disheveled damp hair, noticeably torn and dirty garment edges and an unmistakably drained, pained expression. She is conscious, recognizable, alive. Non-graphic practical movie makeup only, no open wounds, gore or disfigurement. The added facial bruising must read clearly in a small health-tracker portrait. Real candid 1980s consumer 35mm photograph, natural skin texture, restrained film grain, coherent existing light. No illustration, CGI, text, logos, borders, collage or added people. Match the reference composition and aspect ratio exactly.",
+      "sourceInput": "src/assets/characters/ai/barbara.png",
+      "replacesSha256": "8e458cf5491474bb800c0982cc4e030b7412d4e9834e55002a1b17bc323d68e7"
     },
     "scale": 1,
     "origin": "center bottom"
@@ -164,12 +187,16 @@
       "sha256": "d81b3fbaca9ffc561aa70a363bc2b9f561eab122d6a30c44aff8f2ef675407a3"
     },
     "critical": {
-      "source": "exec-4156bd8b-4d57-4dbf-a39e-fd9d8a95e10d.png",
+      "source": "exec-e9aeddbd-7b14-4662-bf93-ae609ec66cb0.png",
       "nativeWidth": 1387,
       "nativeHeight": 1134,
       "width": 768,
       "height": 628,
-      "sha256": "1e340bd8ed64d5814b69d43f75d6978d00bb328a460b7efdfb149d6207dd6339"
+      "sha256": "dd54545aeaecb17339ac76948579a2f88308ae851fa2a1e856ef9b4a6881d4ce",
+      "revision": "2026-11-02",
+      "prompt": "Reference edit from Cassie's original: preserve identity, scene and existing superficial damage; low-health progression through pronounced bruising, mild swelling, exhaustion, sweat and torn clothing, non-graphic 1980s candid photographic treatment.",
+      "sourceInput": "src/assets/characters/ai/cassie.png",
+      "replacesSha256": "1e340bd8ed64d5814b69d43f75d6978d00bb328a460b7efdfb149d6207dd6339"
     },
     "scale": 1,
     "origin": "center bottom"
@@ -189,12 +216,16 @@
       "sha256": "5769f65755c2d04150eee4f3eb8224d1a54197db193d1b882a33d9005f9ebd49"
     },
     "critical": {
-      "source": "exec-cd0635e6-827d-486d-85cf-8629f0299dae.png",
+      "source": "exec-1cbffe53-0815-43b9-8aec-8b52a0175d0d.png",
       "nativeWidth": 1387,
       "nativeHeight": 1134,
       "width": 768,
       "height": 628,
-      "sha256": "7dd1b9d282231465f526dd37857493162e848213322a66816082a8be99a99ef4"
+      "sha256": "e51c1416885f76f1e2b8ff0e350940d3e7b38548af8a1dd6b61b1e449c9c57d1",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: this attached portrait of the fictional adult character charlie. Make ONE LOW HEALTH game-state photo. Preserve exact identity, face anatomy, age, complexion, eyes, hairstyle/color, glasses/jewelry, garment design, pose, camera, crop, background and lighting. Keep existing visual marks. Make her visibly more battered and exhausted using only NON-GRAPHIC closed-skin practical movie makeup: pronounced purple cheek and eye bruising, puffy tired eyes, dirty sweaty face, tangled damp hair, strongly worn and frayed clothing. Expression visibly weary, pained, barely holding on but alive and conscious. No new blood, no open wounds, no gore, no disfigurement. Existing visible scratches need not be intensified. Facial bruising must be clearly legible in a small tracker. Physically real 1980s consumer 35mm candid photograph, natural skin texture and restrained grain. No illustration, CGI, beauty retouching, text, logos, border, collage, or added people. Same aspect ratio and composition.",
+      "sourceInput": "src/assets/characters/ai/charlie.png",
+      "replacesSha256": "7dd1b9d282231465f526dd37857493162e848213322a66816082a8be99a99ef4"
     },
     "scale": 1,
     "origin": "center bottom"
@@ -214,12 +245,16 @@
       "sha256": "af8f4b6ea67d1c5214c2491bc4b6d28a581789a0ed86cae3325de9d3b5ce4013"
     },
     "critical": {
-      "source": "exec-160818a6-c981-49f8-afa3-2521846f7e0b.png",
+      "source": "exec-5a0f4430-8d8d-4e30-b78f-aef00caa7aed.png",
       "nativeWidth": 1387,
       "nativeHeight": 1134,
       "width": 768,
       "height": 628,
-      "sha256": "a9ba66df93a7d7a043c3d4dd7a74a69dbf4b56c3250baa8f6d84b65cda4d4b1e"
+      "sha256": "964d3f1bf60452cee4d84d81ae08459ddc2d3fac864c4c70ac3bbcdae634534b",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: this attached portrait of the fictional adult character ellen. Make ONE LOW HEALTH game-state photo. Preserve exact identity, face anatomy, age, complexion, eyes, hairstyle/color, glasses/jewelry, garment design, pose, camera, crop, background and lighting. Keep existing visual marks. Make her visibly more battered and exhausted using only NON-GRAPHIC closed-skin practical movie makeup: pronounced purple cheek and eye bruising, puffy tired eyes, dirty sweaty face, tangled damp hair, strongly worn and frayed clothing. Expression visibly weary, pained, barely holding on but alive and conscious. No new blood, no open wounds, no gore, no disfigurement. Existing visible scratches need not be intensified. Facial bruising must be clearly legible in a small tracker. Physically real 1980s consumer 35mm candid photograph, natural skin texture and restrained grain. No illustration, CGI, beauty retouching, text, logos, border, collage, or added people. Same aspect ratio and composition.",
+      "sourceInput": "src/assets/characters/ai/ellen.png",
+      "replacesSha256": "a9ba66df93a7d7a043c3d4dd7a74a69dbf4b56c3250baa8f6d84b65cda4d4b1e"
     },
     "scale": 1,
     "origin": "center bottom"
@@ -364,12 +399,16 @@
       "sha256": "6cd8ac7966613dc2edd2818f9a3f52a719cf46247519c3604e344e1902e96061"
     },
     "critical": {
-      "source": "exec-59287157-3f81-4f27-b315-004e1266fca4.png",
+      "source": "exec-b3f45888-acd8-4523-801e-4e6a524c7eeb.png",
       "nativeWidth": 1126,
       "nativeHeight": 1397,
       "width": 619,
       "height": 768,
-      "sha256": "857941e5c1f4e8ae5ec24968bf5ae3fe709bb2ec79f510dcb9e82fc4a6982182"
+      "sha256": "c049684cb53e44072200873dcb5df6a9e2cf2bd3b25faba7a2d4bdf281fb9930",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: this attached portrait of the fictional adult character janelle. Make ONE LOW HEALTH game-state photo. Preserve exact identity, face anatomy, age, complexion, eyes, hairstyle/color, glasses/jewelry, garment design, pose, camera, crop, background and lighting. Keep existing visual marks. Make her visibly more battered and exhausted using only NON-GRAPHIC closed-skin practical movie makeup: pronounced purple cheek and eye bruising, puffy tired eyes, dirty sweaty face, tangled damp hair, strongly worn and frayed clothing. Expression visibly weary, pained, barely holding on but alive and conscious. No new blood, no open wounds, no gore, no disfigurement. Existing visible scratches need not be intensified. Facial bruising must be clearly legible in a small tracker. Physically real 1980s consumer 35mm candid photograph, natural skin texture and restrained grain. No illustration, CGI, beauty retouching, text, logos, border, collage, or added people. Same aspect ratio and composition.",
+      "sourceInput": "src/assets/characters/ai/janelle.png",
+      "replacesSha256": "857941e5c1f4e8ae5ec24968bf5ae3fe709bb2ec79f510dcb9e82fc4a6982182"
     },
     "scale": 1,
     "origin": "center bottom"
@@ -389,12 +428,16 @@
       "sha256": "4dc10d8538a28aba146bb8fea1ee8f138ed32b8bef21fec0d7735820c9a01b17"
     },
     "critical": {
-      "source": "exec-ff19aa68-2aec-406a-be95-a98a848805b4.png",
+      "source": "exec-927f34d5-aab5-4bf5-9caf-6d2a9136dc0a.png",
       "nativeWidth": 1387,
       "nativeHeight": 1134,
       "width": 768,
       "height": 628,
-      "sha256": "65d35bbf555f8be5ca5d016a68a0425318883cf2e7c584d4cd640f8d12abeff7"
+      "sha256": "67743fd180876c3d18209fc5c7a00604a8bf9d729c8a0284f10bd0c0aab0094e",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: this attached portrait of the fictional adult character jenette. Make ONE LOW HEALTH game-state photo. Preserve exact identity, face anatomy, age, complexion, eyes, hairstyle/color, glasses/jewelry, garment design, pose, camera, crop, background and lighting. Keep existing visual marks. Make her visibly more battered and exhausted using only NON-GRAPHIC closed-skin practical movie makeup: pronounced purple cheek and eye bruising, puffy tired eyes, dirty sweaty face, tangled damp hair, strongly worn and frayed clothing. Expression visibly weary, pained, barely holding on but alive and conscious. No new blood, no open wounds, no gore, no disfigurement. Existing visible scratches need not be intensified. Facial bruising must be clearly legible in a small tracker. Physically real 1980s consumer 35mm candid photograph, natural skin texture and restrained grain. No illustration, CGI, beauty retouching, text, logos, border, collage, or added people. Same aspect ratio and composition.",
+      "sourceInput": "src/assets/characters/ai/jenette.png",
+      "replacesSha256": "65d35bbf555f8be5ca5d016a68a0425318883cf2e7c584d4cd640f8d12abeff7"
     },
     "scale": 1.2,
     "origin": "center bottom"
@@ -514,12 +557,16 @@
       "sha256": "9f6493ec1e9ed64802cd77016fa42f4296697ef6ce6bd9439cad3bf1f923da8c"
     },
     "critical": {
-      "source": "exec-50ab8ffc-c9f1-49e0-8516-d3afe438cfcf.png",
+      "source": "exec-27cea520-cd22-45ef-a152-53bd6db567b6.png",
       "nativeWidth": 1387,
       "nativeHeight": 1134,
       "width": 768,
       "height": 628,
-      "sha256": "4ddb685e69436fea883f8c2d105ad9c789ee08fd2575df2e53a2356966f8f6fa"
+      "sha256": "feb19df2e5b20fafa7bdd0f45dd1af7602a8fedff098e0e117b4cda3c71c2184",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: attached fictional adult horror-film character kenzie. Create ONE LOW HEALTH replacement photo, significantly more battered than this already injured source. Preserve EXACT facial identity, age, skin tone, eye color, hair style and color, jewelry, glasses if present, wardrobe design, pose, crop, background and original lighting. Preserve ALL existing superficial cuts, scrapes, small dried blood marks and clothing stains in this source; DO NOT clean up or heal anything. Build on that damage with pronounced dark purple bruises around one eye and across cheeks, mild swelling of the split lip, extra small superficial abrasions, sweat and grime, disheveled damp hair, noticeably torn and dirty garment edges and an unmistakably drained, pained expression. She is conscious, recognizable, alive. Non-graphic practical movie makeup only, no open wounds, gore or disfigurement. The added facial bruising must read clearly in a small health-tracker portrait. Real candid 1980s consumer 35mm photograph, natural skin texture, restrained film grain, coherent existing light. No illustration, CGI, text, logos, borders, collage or added people. Match the reference composition and aspect ratio exactly.",
+      "sourceInput": "src/assets/characters/ai/kenzie.png",
+      "replacesSha256": "4ddb685e69436fea883f8c2d105ad9c789ee08fd2575df2e53a2356966f8f6fa"
     },
     "scale": 1.6,
     "origin": "center bottom"
@@ -539,12 +586,16 @@
       "sha256": "666851e27f4e30f8a3bb558e9c86f04aacdc7875202172c22e037e4cfdf82f38"
     },
     "critical": {
-      "source": "exec-c63a0568-c4b9-417f-a430-b9417990f835.png",
+      "source": "exec-44bebe69-02e7-438f-9cb8-ea37a2471a86.png",
       "nativeWidth": 1397,
       "nativeHeight": 1126,
       "width": 768,
       "height": 619,
-      "sha256": "7614a251a2b80d0235a74551697017a0918337e1dcc181b2ce0a631cc1285ee1"
+      "sha256": "7279fc53a63378af010ffc4424847810ae55cf7a09a8793fff2aa0c48f8e67c4",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: attached fictional adult character laurie. Produce ONE LOW HEALTH portrait significantly more battered than the source. Preserve exact facial identity, age, complexion, eyes, hairstyle/color, jewelry, wardrobe design, pose, crop, camera, background, and light. Retain existing visual marks. Add only non-graphic closed-skin practical film makeup: conspicuous deep purple eye and cheek bruising, weary puffy eyes, sweat and dirt, messy damp hair, worn and torn clothing edges, and a visibly pained exhausted expression. She is alive, conscious and recognizable. No new blood, no exposed wounds, gore, or disfigurement. Stronger facial bruising must read clearly at thumbnail size. Physically real candid 1980s consumer 35mm photograph, natural skin, restrained grain, original coherent lighting. No illustration, CGI, text, logo, border, collage, extra people. Same aspect and composition.",
+      "sourceInput": "src/assets/characters/ai/laurie.png",
+      "replacesSha256": "7614a251a2b80d0235a74551697017a0918337e1dcc181b2ce0a631cc1285ee1"
     },
     "scale": 1,
     "origin": "center bottom"
@@ -572,7 +623,18 @@
       "sha256": "1904cbd88f46c251a7dffd78a04f487f37f28a598908a48cde0c9651b5cfc4ef"
     },
     "scale": 1,
-    "origin": "center bottom"
+    "origin": "center bottom",
+    "injured": {
+      "source": "exec-d8d8fd8f-0563-4560-8192-a7405b111430.png",
+      "nativeWidth": 1387,
+      "nativeHeight": 1134,
+      "width": 768,
+      "height": 628,
+      "sha256": "5ea32a3efe27c3da62af3eefa941c150fa8f494c9db82b51dca089c8e2bf2a7c",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: the attached HEALTHY portrait of fictional adult character mandy. Create ONE very mildly injured intermediate-health game-state photograph. Preserve exact face, anatomy, age, complexion, hair, jewelry, garment design, pose/camera/crop, background and lighting. Change ONLY a tiny faint bruise at the outer temple, one small dry superficial cheek scuff and a light dust smudge on clothing. She should still look alert and capable, almost healthy. NO blood, open wounds, swelling, severe bruising, torn skin, gore or disfigurement. This is a MILD intermediate portrait; a much more battered low-health photo exists separately. Real candid 1980s 35mm photographic skin/materials, restrained grain, coherent existing light. No illustration, CGI, beauty retouching, text, collage or added people. Same aspect and framing.",
+      "sourceInput": "src/assets/play/final-girl-health/mandy-healthy.webp"
+    }
   },
   {
     "name": "Maureen",
@@ -614,12 +676,16 @@
       "sha256": "f9cd7751fe4ab253039038e12b314821e84a46f094126164a35cb3e9b369b10f"
     },
     "critical": {
-      "source": "exec-856de85e-debf-430e-864d-035abc87c96f.png",
+      "source": "exec-b9e304af-177e-4e44-b6ed-2d57e5fd31cd.png",
       "nativeWidth": 1387,
       "nativeHeight": 1134,
       "width": 768,
       "height": 628,
-      "sha256": "d87fc75473e7a068881d8baac5c4122f8b7d05391a364781e40f1aad2cef9ace"
+      "sha256": "1b59a63c9173578bef2768105ab46ea286552233cb2e584040444ed9dbfc7183",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: attached fictional adult character meghan. Produce ONE LOW HEALTH portrait significantly more battered than the source. Preserve exact facial identity, age, complexion, eyes, hairstyle/color, jewelry, wardrobe design, pose, crop, camera, background, and light. Retain existing visual marks. Add only non-graphic closed-skin practical film makeup: conspicuous deep purple eye and cheek bruising, weary puffy eyes, sweat and dirt, messy damp hair, worn and torn clothing edges, and a visibly pained exhausted expression. She is alive, conscious and recognizable. No new blood, no exposed wounds, gore, or disfigurement. Stronger facial bruising must read clearly at thumbnail size. Physically real candid 1980s consumer 35mm photograph, natural skin, restrained grain, original coherent lighting. No illustration, CGI, text, logo, border, collage, extra people. Same aspect and composition.",
+      "sourceInput": "src/assets/characters/ai/meghan.png",
+      "replacesSha256": "d87fc75473e7a068881d8baac5c4122f8b7d05391a364781e40f1aad2cef9ace"
     },
     "scale": 1,
     "origin": "center bottom"
@@ -639,12 +705,16 @@
       "sha256": "7d507720c478e1de94af86d6237c2217d55c7d3b04d7400deaf6420bfd1e1552"
     },
     "critical": {
-      "source": "exec-d9cdedaa-74d6-425f-8903-eba466e00f65.png",
+      "source": "exec-503b8edf-da9e-47b6-8441-0a0437280712.png",
       "nativeWidth": 1387,
       "nativeHeight": 1134,
       "width": 768,
       "height": 628,
-      "sha256": "ee176e437955668ba9e6764b1fcc6b2c1c4e620266014ac2a0e48d633cf3f21b"
+      "sha256": "e2b65962d1c3ed65f177ef92410e43d6f612053b1c34b3ecc05d7121f3582589",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: attached fictional adult character melanie. Produce ONE LOW HEALTH portrait significantly more battered than the source. Preserve exact facial identity, age, complexion, eyes, hairstyle/color, jewelry, wardrobe design, pose, crop, camera, background, and light. Retain existing visual marks. Add only non-graphic closed-skin practical film makeup: conspicuous deep purple eye and cheek bruising, weary puffy eyes, sweat and dirt, messy damp hair, worn and torn clothing edges, and a visibly pained exhausted expression. She is alive, conscious and recognizable. No new blood, no exposed wounds, gore, or disfigurement. Stronger facial bruising must read clearly at thumbnail size. Physically real candid 1980s consumer 35mm photograph, natural skin, restrained grain, original coherent lighting. No illustration, CGI, text, logo, border, collage, extra people. Same aspect and composition.",
+      "sourceInput": "src/assets/characters/ai/melanie.png",
+      "replacesSha256": "ee176e437955668ba9e6764b1fcc6b2c1c4e620266014ac2a0e48d633cf3f21b"
     },
     "scale": 1,
     "origin": "center bottom"
@@ -664,12 +734,16 @@
       "sha256": "9d071416911fcde185a688574b42aa5761f01f3bbd571a026e59d586b721120b"
     },
     "critical": {
-      "source": "exec-9aea87bf-1f79-4e34-a32f-a8a04718b453.png",
+      "source": "exec-319930b2-6baf-40de-b328-d6d5cbea376e.png",
       "nativeWidth": 1397,
       "nativeHeight": 1126,
       "width": 768,
       "height": 619,
-      "sha256": "79fc634a903d70655f5d8ba6b5cb25206fff7d329f444a6230ebdf0a82ef3d76"
+      "sha256": "767227f8c48e640900408d720adfc19a546e773935344d3ba511b4415e9d9f6b",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: attached fictional adult character nancy. Produce ONE LOW HEALTH portrait significantly more battered than the source. Preserve exact facial identity, age, complexion, eyes, hairstyle/color, jewelry, wardrobe design, pose, crop, camera, background, and light. Retain existing visual marks. Add only non-graphic closed-skin practical film makeup: conspicuous deep purple eye and cheek bruising, weary puffy eyes, sweat and dirt, messy damp hair, worn and torn clothing edges, and a visibly pained exhausted expression. She is alive, conscious and recognizable. No new blood, no exposed wounds, gore, or disfigurement. Stronger facial bruising must read clearly at thumbnail size. Physically real candid 1980s consumer 35mm photograph, natural skin, restrained grain, original coherent lighting. No illustration, CGI, text, logo, border, collage, extra people. Same aspect and composition.",
+      "sourceInput": "src/assets/characters/ai/nancy.png",
+      "replacesSha256": "79fc634a903d70655f5d8ba6b5cb25206fff7d329f444a6230ebdf0a82ef3d76"
     },
     "scale": 1,
     "origin": "center bottom"
@@ -689,12 +763,16 @@
       "sha256": "296682031e8a7ab22280d87d9bf7b0b95eee71fe7c1ac03a3df5194cd12f38a7"
     },
     "critical": {
-      "source": "exec-e3a3ef58-5cd3-4276-86d4-fca572db81aa.png",
+      "source": "exec-92c267bd-6082-47cd-b040-2ec07edd8e48.png",
       "nativeWidth": 1387,
       "nativeHeight": 1134,
       "width": 768,
       "height": 628,
-      "sha256": "9d7162032467d30262f57475c0bd4f8a4e77bb74c7297a4318a07f13cdf8bb6a"
+      "sha256": "6877ae95c4a493ad8835c6034b11c6ce41900175ac1ad9e7d2fbb0171d95082f",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: attached fictional adult character octavia. Produce ONE LOW HEALTH portrait significantly more battered than the source. Preserve exact facial identity, age, complexion, eyes, hairstyle/color, jewelry, wardrobe design, pose, crop, camera, background, and light. Retain existing visual marks. Add only non-graphic closed-skin practical film makeup: conspicuous deep purple eye and cheek bruising, weary puffy eyes, sweat and dirt, messy damp hair, worn and torn clothing edges, and a visibly pained exhausted expression. She is alive, conscious and recognizable. No new blood, no exposed wounds, gore, or disfigurement. Stronger facial bruising must read clearly at thumbnail size. Physically real candid 1980s consumer 35mm photograph, natural skin, restrained grain, original coherent lighting. No illustration, CGI, text, logo, border, collage, extra people. Same aspect and composition.",
+      "sourceInput": "src/assets/characters/ai/octavia.png",
+      "replacesSha256": "9d7162032467d30262f57475c0bd4f8a4e77bb74c7297a4318a07f13cdf8bb6a"
     },
     "scale": 1.3,
     "origin": "center bottom"
@@ -764,12 +842,16 @@
       "sha256": "ab94a3840f69c9c103786de889ffde983b66757399511be6e8365112fc042923"
     },
     "critical": {
-      "source": "exec-35d9c684-aacd-4cc3-8493-9eeabd72623a.png",
+      "source": "exec-96bbd4ca-36fb-4c53-8ba1-654536b5f3ec.png",
       "nativeWidth": 1387,
       "nativeHeight": 1134,
       "width": 768,
       "height": 628,
-      "sha256": "468e0c31a6ffd4dc1eaa2d7bcc705aadd38ee457c1e958d3610853b0032ce02b"
+      "sha256": "955f5915dd92bad58fd5cd2680747d25ae4403accea5619e8e84d08610a2e5c2",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: attached fictional adult character reiko. ONE LOW HEALTH tracker photo, significantly more battered than source. Preserve exact face, age, skin, eyes, hair, eyewear, jewelry, clothes design, pose/camera/crop, background and light. Retain existing visual marks. Add non-graphic CLOSED-SKIN practical movie makeup only: conspicuous purple bruises at one eye and cheeks, puffy tired eyelids, dirty sweaty face, damp tangled hair, more frayed dirty clothing and unmistakably weary pained expression. Alive and conscious. No new blood, exposed wounds, gore or disfigurement. Make facial bruising clear at thumbnail scale. Real candid 1980s consumer 35mm photo, natural skin and restrained grain, coherent original light. No illustration, CGI, text, border, collage, extra people. Same composition/aspect.",
+      "sourceInput": "src/assets/characters/ai/reiko.png",
+      "replacesSha256": "468e0c31a6ffd4dc1eaa2d7bcc705aadd38ee457c1e958d3610853b0032ce02b"
     },
     "scale": 1,
     "origin": "center bottom"
@@ -864,12 +946,16 @@
       "sha256": "45d458b1f7748f5081e12defb2b29af15a2d50f6c6e65c981fe750469c8b95f4"
     },
     "critical": {
-      "source": "exec-21f3989d-97cc-4214-ad8c-9188c3b5947e.png",
+      "source": "exec-0b14176c-25b8-4c50-8c63-13a0c810b0dc.png",
       "nativeWidth": 1387,
       "nativeHeight": 1134,
       "width": 768,
       "height": 628,
-      "sha256": "150c7cf9662364e774ea4fd99235bfcf36e8000ded7f5b3899cff5c927135b5c"
+      "sha256": "4f450d934a2d6ddb7849eb8cff61e5c70e1875011a1a5de80d24f4c337f45095",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: attached fictional adult character sheila. ONE LOW HEALTH tracker photo, significantly more battered than source. Preserve exact face, age, skin, eyes, hair, eyewear, jewelry, clothes design, pose/camera/crop, background and light. Retain existing visual marks. Add non-graphic CLOSED-SKIN practical movie makeup only: conspicuous purple bruises at one eye and cheeks, puffy tired eyelids, dirty sweaty face, damp tangled hair, more frayed dirty clothing and unmistakably weary pained expression. Alive and conscious. No new blood, exposed wounds, gore or disfigurement. Make facial bruising clear at thumbnail scale. Real candid 1980s consumer 35mm photo, natural skin and restrained grain, coherent original light. No illustration, CGI, text, border, collage, extra people. Same composition/aspect.",
+      "sourceInput": "src/assets/characters/ai/sheila.png",
+      "replacesSha256": "150c7cf9662364e774ea4fd99235bfcf36e8000ded7f5b3899cff5c927135b5c"
     },
     "scale": 1,
     "origin": "center bottom"
@@ -889,12 +975,16 @@
       "sha256": "a00f4f2955c5308aabcee9d32888d2e1eedd07d6d5671e56292eae5b801ae2c9"
     },
     "critical": {
-      "source": "exec-48728543-0294-450b-8d0f-5f0e85cdf644.png",
+      "source": "exec-57b8cd64-1ced-49ea-b31a-8252c4f4a2b2.png",
       "nativeWidth": 1387,
       "nativeHeight": 1134,
       "width": 768,
       "height": 628,
-      "sha256": "f2513f53e9cda60696b3ac41e4c5b368264a07b62ec7816e48fac6f5c18e5976"
+      "sha256": "d1e3cf9371b6de9192fa88122e47019b0116c2e063c42d8f00b886b8f63565de",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: attached fictional adult character tali. ONE LOW HEALTH tracker photo, significantly more battered than source. Preserve exact face, age, skin, eyes, hair, eyewear, jewelry, clothes design, pose/camera/crop, background and light. Retain existing visual marks. Add non-graphic CLOSED-SKIN practical movie makeup only: conspicuous purple bruises at one eye and cheeks, puffy tired eyelids, dirty sweaty face, damp tangled hair, more frayed dirty clothing and unmistakably weary pained expression. Alive and conscious. No new blood, exposed wounds, gore or disfigurement. Make facial bruising clear at thumbnail scale. Real candid 1980s consumer 35mm photo, natural skin and restrained grain, coherent original light. No illustration, CGI, text, border, collage, extra people. Same composition/aspect.",
+      "sourceInput": "src/assets/characters/ai/tali.png",
+      "replacesSha256": "f2513f53e9cda60696b3ac41e4c5b368264a07b62ec7816e48fac6f5c18e5976"
     },
     "scale": 1,
     "origin": "center bottom"
@@ -947,7 +1037,18 @@
       "sha256": "a4a9ff1b34d0dcf56f1855cc047de746ad3137f7f1dc21a308e66eaeaa334508"
     },
     "scale": 1,
-    "origin": "center bottom"
+    "origin": "center bottom",
+    "injured": {
+      "source": "exec-e0f483a7-65b3-4824-adfd-472f38dfd4ad.png",
+      "nativeWidth": 1387,
+      "nativeHeight": 1134,
+      "width": 768,
+      "height": 628,
+      "sha256": "dd5a02fa8e08cd52c717c6678d839b1c896b0e35ebb04ab2b17f3562d6308762",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: attached HEALTHY portrait of fictional adult character Veronica. ONE very mildly injured intermediate game-state photograph. Preserve exact face, anatomy, age, complexion, eyes, hair, hat, clothes, pose/camera/crop, background and light. Change ONLY a tiny faint bruise on outer temple and a light dust smudge on one jacket shoulder. She still looks alert and capable, almost healthy. No blood, wounds, cuts, swelling, severe bruises, gore or disfigurement. This is a MILD intermediate portrait; a separate much more battered low-health photo already exists. Real candid 1980s consumer 35mm photograph, natural skin, restrained grain, original coherent light. No illustration, CGI, beauty retouching, text, collage or added people. Same aspect and composition.",
+      "sourceInput": "src/assets/play/final-girl-health/veronica-healthy.webp"
+    }
   },
   {
     "name": "Vicky",
@@ -964,12 +1065,16 @@
       "sha256": "37109b9a80530f3605aa97a4a75f303fe0a56f21b1a0f6410c1acd01d27e486f"
     },
     "critical": {
-      "source": "exec-0fbc2aa0-0679-4f2c-a523-df19c7ba9693.png",
+      "source": "exec-8aaa664b-5718-4e49-be8f-c8d839950798.png",
       "nativeWidth": 1387,
       "nativeHeight": 1134,
       "width": 768,
       "height": 628,
-      "sha256": "eccca3ad25f3bc6d18a9620acb3472a5868a6e0cdbcc8973bb2b5fdbfa178fc4"
+      "sha256": "353786e0a83e45c7247711f8c01df3a45f6ddefede3c7b9bb65bc3daae5d7c61",
+      "revision": "2026-11-02",
+      "prompt": "Use case: identity-preserve. Edit target: attached fictional adult character vicky. ONE LOW HEALTH tracker photo, significantly more battered than source. Preserve exact face, age, skin, eyes, hair, eyewear, jewelry, clothes design, pose/camera/crop, background and light. Retain existing visual marks. Add non-graphic CLOSED-SKIN practical movie makeup only: conspicuous purple bruises at one eye and cheeks, puffy tired eyelids, dirty sweaty face, damp tangled hair, more frayed dirty clothing and unmistakably weary pained expression. Alive and conscious. No new blood, exposed wounds, gore or disfigurement. Make facial bruising clear at thumbnail scale. Real candid 1980s consumer 35mm photo, natural skin and restrained grain, coherent original light. No illustration, CGI, text, border, collage, extra people. Same composition/aspect.",
+      "sourceInput": "src/assets/characters/ai/vicky.png",
+      "replacesSha256": "eccca3ad25f3bc6d18a9620acb3472a5868a6e0cdbcc8973bb2b5fdbfa178fc4"
     },
     "scale": 1.25,
     "origin": "center bottom"

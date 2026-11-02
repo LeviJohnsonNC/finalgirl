@@ -187,6 +187,25 @@ test('successful planning never spends another call and also supports Responses 
   assert.equal(responses.calls.length, 1);
 });
 
+test('native provider safety finishes and prompt blocks are classified without retrying another model', async () => {
+  for (const payload of [
+    { choices: [{ finish_reason: 'stop', native_finish_reason: 'SAFETY', message: { content: 'declined' } }] },
+    { choices: [{ finish_reason: 'other', native_finish_reason: 'PROHIBITED_CONTENT', message: {} }] },
+    { choices: [{ finish_reason: 'content_filter', message: {} }] },
+    { choices: [{ finish_reason: 'stop', message: { refusal: 'declined' } }] },
+    { promptFeedback: { blockReason: 'SAFETY' } },
+    { prompt_feedback: { block_reason: 'BLOCKLIST' } },
+  ]) {
+    const f = planningFailover(() => new Response(JSON.stringify(payload)));
+    await assert.rejects(f.exports.generateText({ ...planOptions, candidates: ['primary', 'backup'], singleAttempt: true }), error => {
+      assert.equal(error.kind, 'content_policy');
+      assert.match(f.exports.userFacingMessage(error), /less graphic/);
+      return true;
+    });
+    assert.deepEqual(f.calls.map(call => call.model), ['primary']);
+  }
+});
+
 test('the observed slow 503 switches image model instead of repeating the failed provider', async () => {
   const f = imageFailover(({ body, advance }) => {
     if (body.model === 'primary') { advance(59_000); return new Response('{"error":{"message":"Service temporarily unavailable","type":"upstream_error"}}', { status: 503 }); }

@@ -5,7 +5,7 @@ import {summarizePlay} from '@/lib/play/events';
 import { GameResult } from "@/hooks/useGameHistory";
 import { GameOutcomeForm } from "@/components/GameOutcomeForm";
 import { EndingFormData } from "./TheEnd";
-import type { CSSProperties } from "react";
+import { useMemo, type CSSProperties } from "react";
 import { LOCATION_IMAGES_AI } from "@/types/gameData";
 import buddylandBanner from "@/assets/outcome/buddyland-banner.webp";
 import caseSurface from "@/assets/outcome/case-surface.webp";
@@ -29,11 +29,12 @@ const GameOutcome = ({
   onDraftChange,
   onSaveResult,
 }: GameOutcomeProps) => {
-  const grimLoss=initialDraft?.grimlashLoss??moduleState(summarizePlay(result.playEvents).entries,'grimlash').loss;
+  const entries = useMemo(() => summarizePlay(result.playEvents).entries, [result.playEvents]);
+  const grimLoss=initialDraft?.grimlashLoss??moduleState(entries,'grimlash').loss;
   const fatalGrim=result.killer==='Grimlash'&&grimlashFatal({loss:typeof grimLoss==='string'?grimLoss:'unknown'});
-  const shipFate=initialDraft?.konradFate??moduleState(summarizePlay(result.playEvents).entries,'konrad').fate;
+  const shipFate=initialDraft?.konradFate??moduleState(entries,'konrad').fate;
   const fatalShip=result.location==='USS Konrad'&&['airlock-loss','explosion-loss'].includes(String(shipFate));
-  const trapLoss=initialDraft?.tormentorLoss??tormentorState(moduleState(summarizePlay(result.playEvents).entries,'tormentor')).loss;
+  const trapLoss=initialDraft?.tormentorLoss??tormentorState(moduleState(entries,'tormentor')).loss;
   const fatalTrap=result.killer==='The Tormentor'&&!['none','unknown'].includes(String(trapLoss));
   const reviewedOutcome=fatalTrap||fatalGrim||fatalShip?'lost':(result.killer==='The Tormentor'||result.killer==='Grimlash'||result.location==='USS Konrad')&&['won','lost'].includes(String(initialDraft?.reviewedOutcome))?initialDraft!.reviewedOutcome:result.outcome;
   const isWin = reviewedOutcome === "won";

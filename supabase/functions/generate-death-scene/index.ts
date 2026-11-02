@@ -55,10 +55,12 @@ serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   let admin: ReturnType<typeof createClient> | undefined;
   let claim: { id: string; lease: string } | undefined;
+  let diagnostic: { sessionId?: string; eventId?: string; mechanism?: string } = {};
   try {
     const parsed = validateRequest(DeathRequestSchema, await req.json(), cors);
     if (!parsed.success) return parsed.error;
     const { sessionId, eventId, take, narrativeProfile } = parsed.data;
+    diagnostic = { sessionId, eventId };
     const auth = req.headers.get("Authorization");
     if (!auth)
       return json({ error: "Sign in to generate a death scene." }, 401);
@@ -102,6 +104,7 @@ serve(async (req) => {
     const facts = deathFacts(state.selection, state.playEvents, eventId);
     if (!facts)
       return json({ error: "That death is not active in this game." }, 409);
+    diagnostic.mechanism = facts.mechanism;
     // Old open tabs still expect the pre-profile hash during backend-first rollout.
     const signature = await deathSignature(facts, narrativeProfile ? "current" : "legacy");
     admin = createClient(url, serviceKey);
@@ -246,7 +249,10 @@ serve(async (req) => {
         .eq("id", claim.id)
         .eq("lease", claim.lease)
         .eq("status", "pending");
-    console.error("Death scene failed:", error);
+    console.error("Death scene failed:", {
+      ...diagnostic,
+      code: error instanceof GatewayError ? error.kind : "generation_failed",
+    }, error);
     if (error instanceof Error && error.name === "TimeoutError")
       return json({
         code: "generation_timeout",
@@ -254,7 +260,10 @@ serve(async (req) => {
       }, 504);
     return json(
       {
-        error: `${userFacingMessage(error)} The death is still recorded. Retry is optional and may use another AI call.`,
+        code: error instanceof GatewayError ? error.kind : "generation_failed",
+        error: error instanceof GatewayError && error.kind === "content_policy"
+          ? "The writer declined this depiction. Your death is still recorded. Try describing the trap's action and aftermath without graphic injury detail."
+          : `${userFacingMessage(error)} The death is still recorded. Retry is optional and may use another AI call.`,
       },
       statusFor(error),
     );

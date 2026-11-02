@@ -4,6 +4,7 @@ import {grimlashFatal,harvestLevel,type GrimlashLoss} from '@/lib/play/grimlash'
 import {konradState,type KonradFate} from '@/lib/play/konrad';
 import { useState, useMemo } from 'react';
 import { ArrowRight, ChevronDown } from 'lucide-react';
+import { useBufferedOutcomeDraft } from './outcome/useBufferedOutcomeDraft';
 import { OutcomeNumberField } from './outcome/OutcomeNumberField';
 import { poltergeistPower } from '../../supabase/functions/_shared/play/poltergeist';
 import { OutcomeSelect } from './outcome/OutcomeSelect';
@@ -53,11 +54,23 @@ export const GameOutcomeForm = ({
   onContinue,
   onDiscard,
 }: GameOutcomeFormProps) => {
+  const textDraft = useBufferedOutcomeDraft(onDraftChange);
+  const entries = useMemo(() => summarizePlay(result.playEvents).entries, [result.playEvents]);
+  const observed = useMemo(() => ({
+    tormentor: tormentorState(moduleState(entries, 'tormentor')),
+    konrad: konradState(moduleState(entries, 'konrad')),
+    grimlash: moduleState(entries, 'grimlash'),
+    billy: moduleState(entries, 'billy'),
+    poltergeist: moduleState(entries, 'poltergeist'),
+    creech: moduleState(entries, 'creech'),
+    power: poltergeistPower(entries),
+    shady: shadyState(moduleState(entries, 'shady-acres')),
+  }), [entries]);
   const [optionsOpen, setOptionsOpen] = useState(false);
-  const [tormentorLoss,setTormentorLoss]=useDraftField<TormentorLoss>('tormentorLoss',tormentorState(moduleState(summarizePlay(result.playEvents).entries,'tormentor')).loss,initialDraft,onDraftChange);
-  const [shipFate,setShipFate]=useDraftField<KonradFate>('konradFate',konradState(moduleState(summarizePlay(result.playEvents).entries,'konrad')).fate,initialDraft,onDraftChange);
+  const [tormentorLoss,setTormentorLoss]=useDraftField<TormentorLoss>('tormentorLoss',observed.tormentor.loss,initialDraft,onDraftChange);
+  const [shipFate,setShipFate]=useDraftField<KonradFate>('konradFate',observed.konrad.fate,initialDraft,onDraftChange);
   const [reviewedOutcome,setReviewedOutcome]=useDraftField<'won'|'lost'>('reviewedOutcome',result.outcome,initialDraft,onDraftChange);
-  const grimState=moduleState(summarizePlay(result.playEvents).entries,'grimlash');
+  const grimState=observed.grimlash;
   const [grimLoss,setGrimLoss]=useDraftField<GrimlashLoss>('grimlashLoss',(grimState.loss as GrimlashLoss)??'unknown',initialDraft,onDraftChange);
   const retractingSkull=grimState.position===10&&(grimLoss==='none'||grimLoss==='unknown');
   const reviewedGrimState=retractingSkull?{...grimState,position:undefined,peak:grimState.peak===10?undefined:grimState.peak}:grimState;
@@ -66,7 +79,7 @@ export const GameOutcomeForm = ({
   const fatalTormentor=result.killer==='The Tormentor'&&!['none','unknown'].includes(tormentorLoss);
   const fatalEnding=fatalGrim||fatalShip||fatalTormentor;
   const isWin = !fatalEnding && (result.killer==='The Tormentor'||result.killer==='Grimlash'||result.location==='USS Konrad'?reviewedOutcome:result.outcome) === 'won';
-  const billyState = moduleState(summarizePlay(result.playEvents).entries, 'billy');
+  const billyState = observed.billy;
 
   // Session snapshots include observed Ultimate changes; old games keep their denominator.
   const maxFinalGirlHealth = useMemo(
@@ -83,10 +96,9 @@ export const GameOutcomeForm = ({
     [result.killer],
   );
   const isPoltergeist = result.killer === 'Poltergeist';
-  const polterEntries=summarizePlay(result.playEvents).entries;
-  const polterState=moduleState(polterEntries,'poltergeist');
-  const creechState=moduleState(polterEntries,'creech');
-  const polterPower=poltergeistPower(polterEntries);
+  const polterState=observed.poltergeist;
+  const creechState=observed.creech;
+  const polterPower=observed.power;
   const isOrganism = result.killer === 'The Organism';
   const isEvomorph = result.killer === 'Evomorph';
   const isRatchetLady = result.killer === 'Ratchet Lady';
@@ -125,7 +137,7 @@ export const GameOutcomeForm = ({
     'weaponUsed',
     result.weaponUsed ?? '',
     initialDraft,
-    onDraftChange,
+    textDraft.queue,
   );
   const [victimsSaved, setVictimsSaved] = useDraftField<number | null>(
     'victimsSaved',
@@ -149,13 +161,13 @@ export const GameOutcomeForm = ({
     'endingSubLocation',
     result.endingSubLocation ?? '',
     initialDraft,
-    onDraftChange,
+    textDraft.queue,
   );
   const [gameHighlights, setGameHighlights] = useDraftField(
     'gameHighlights',
     result.gameHighlights ?? '',
     initialDraft,
-    onDraftChange,
+    textDraft.queue,
   );
   // Poltergeist-specific win condition fields
   const [foundCarolyn, setFoundCarolyn] = useDraftField(
@@ -220,7 +232,7 @@ export const GameOutcomeForm = ({
     onDraftChange,
   );
   // Grimlash / A Rotten Harvest
-  const shady=shadyState(moduleState(summarizePlay(result.playEvents).entries,'shady-acres'));
+  const shady=observed.shady;
   const [childrenAtFinish,setChildrenAtFinish]=useDraftField<number|null>('childrenOnBoardAtFinish',shady.finishChildren!==undefined?shady.finishChildren:shadyChildrenCount(shady),initialDraft,onDraftChange);
   const [harvestMadnessPeaked] = useDraftField(
     'harvestMadnessPeaked',
@@ -262,13 +274,13 @@ export const GameOutcomeForm = ({
     'missionProgress',
     '',
     initialDraft,
-    onDraftChange,
+    textDraft.queue,
   );
   const [friendJoined, setFriendJoined] = useDraftField(
     'friendJoined',
     '',
     initialDraft,
-    onDraftChange,
+    textDraft.queue,
   );
   const [endingDimension, setEndingDimension] = useDraftField<
     'Our Dimension' | 'Mirror Dimension'
@@ -396,11 +408,12 @@ export const GameOutcomeForm = ({
     };
     return formData;
   };
-  const handleContinue = () => onContinue(buildFormData());
+  const handleContinue = () => { if (textDraft.flush()) onContinue(buildFormData()); };
 
   return (
     <div
       className={`outcome-form${isWin ? " outcome-form--won" : " outcome-form--lost"}`}
+      onBlurCapture={() => { textDraft.flush(); }}
     >
       <div className="outcome-review-line">
         <ol className="outcome-steps" aria-label="Ending progress">
@@ -1013,6 +1026,7 @@ export const GameOutcomeForm = ({
           </label>
         </div>
       </section>
+      {textDraft.saveFailed && <p role="alert">Your latest text could not be saved. Keep this page open and free browser storage, then <button type="button" onClick={textDraft.flush}>retry saving</button>.</p>}
       <div className="outcome-actions">
         <button
           type="button"
@@ -1038,7 +1052,7 @@ export const GameOutcomeForm = ({
                   type="button"
                   onClick={() => {
                     setOptionsOpen(false);
-                    onSaveResult(buildFormData());
+                    if (textDraft.flush()) onSaveResult(buildFormData());
                   }}
                 >
                   Save result without narration

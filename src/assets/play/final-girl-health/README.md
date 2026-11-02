@@ -9,6 +9,7 @@ Use only in the Play Final Girl health tracker. Do not replace casting, Collecti
 - Full recorded health at the observed session maximum: healthy.
 - Recorded 1–2 HP, and 0 HP with the explicit zero-health label: critical.
 - Intermediate, untracked, invalid or above-maximum health: original.
+- 2026-11-02 exception: Asami, Mandy and Veronica have a dedicated mildly injured intermediate tracker photo. Use it only for integer health above 2 and below a reliable maximum; unknown/invalid/above-maximum states still use the original. The low-health photograph must visibly look worse than this intermediate image.
 - Without a reliable maximum, never infer full health. A recorded 0–2 HP can still use critical.
 - Derive the maximum from the session starting-health snapshot and the existing observed Ultimate/Undo/restore helper. Never use the input ceiling, highest observed value or a backfilled catalog default as the maximum.
 - Rendering, artwork loading and image fallback never write gameplay. Official art retains the existing treatment.
@@ -20,3 +21,9 @@ Follow `docs/IDENTITY_PHOTOS.md`: real photographic people/materials/light and r
 Cassie, Sheila and Selena formed the pilot. Inspect every original/healthy/critical trio and actual tracker crops before accepting the set. The image service rejected the first bloody Cassie critical attempt; the accepted critical direction is non-graphic. Keep essential features readable under real HTML controls at the approved laptop/phone sizes. New variants replace the generic critical overlay/filter/zoom for this tracker only.
 
 `manifest.json` records original paths/SHA-256, generation source filenames, derivative dimensions and stable focal positions/scale/origin. Runtime uses explicit girl/state filenames rather than generation order. Individual images are self-hosted WebP, maximum 768px on the long side, quality 88, no upscaling, at most 160KiB each. URLs are resolved at build time; only the currently displayed portrait is fetched, not the full set. The same reviewed frame applies to the original and both derivatives in this tracker; selected off-center/distant faces use recorded framing adjustments, without editing the original source. A failed variant falls back to the existing selected portrait.
+
+## 2026-11-02 progression correction
+
+Visually compared all 39 healthy/intermediate/critical sets. Eighteen critical portraits now retain the source's superficial damage and add much stronger closed-skin bruising, exhaustion and worn clothing: Adelaide, Alice, Barbara, Cassie, Charlie, Ellen, Janelle, Jenette, Kenzie, Laurie, Meghan, Melanie, Nancy, Octavia, Reiko, Sheila, Tali and Vicky. The earlier set often erased small cuts or blood marks while adding dirt, making the low-health state look cleaner. Three rejected critical generation attempts (Asami, Mandy and Veronica) were resolved with mild intermediate edits from their healthy tracker photos, keeping their existing non-graphic critical photos. No graphic escalation or provider bypass.
+
+Built-in image generation used one reference edit per asset. The manifest records the prompt set, source input, generated filename, dimensions and hashes. All 39 original identity photographs and their pinned hashes remain unchanged, as do casting, Collection and private opening references. The remaining eighteen sets already have a clear progression and were retained. Inspect actual tracker crops on both laptop and phone in addition to the full-frame comparison.
