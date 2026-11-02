@@ -1,8 +1,8 @@
 # The Tormentor photographs
 
-Thirty original landscape scenes generated individually on 2026-11-01 with the built-in image generator. Candid practical 1980s consumer-camera direction, using the existing Tormentor identity photograph for character scenes. Inkanyamba is the quality reference. No source card photos appear in the UI. Existing Tormentor identity and painted ending-poster medium are retained.
+Fifty-two original landscape scenes generated individually on 2026-11-01 with the built-in image generator. Candid practical 1980s consumer-camera direction, using the existing Tormentor identity photograph for character scenes. Inkanyamba is the quality reference. No source card photos appear in the UI. Existing Tormentor identity and painted ending-poster medium are retained.
 
-Independent 1536×1024 originals produce 960×640 WebP heroes and 256×160 chooser thumbnails. Header is a separately composed 1200×550 derivative. Heroes are below 160 KiB; thumbnails below 35 KiB. Total shipped scene bytes including thumbnails: 1698088.
+Independent 1536×1024 originals produce 960×640 WebP heroes and 256×160 chooser thumbnails. Header is a separately composed 1200×550 derivative. Heroes are below 160 KiB; thumbnails below 35 KiB. The manifest records current total bytes, exact hashes and budgets.
 
 Stable IDs are mapped explicitly in `tormentorArt.ts` before display sorting; unknown IDs fail rather than reusing unrelated pictures. Duplicate physical Terror cards share their verified title photograph. `portrait` deliberately uses the existing identity PNG. All labels, countdowns and interactive state are HTML. Photos provide atmosphere, never evidence of a casualty or present board location.
 
@@ -40,3 +40,11 @@ Heroes use central 50%/50% crops; header uses 70%/9% so the complete mask surviv
 | unseen | unseen.webp | 33720 |
 | we-have-to-help | we-have-to-help.webp | 47574 |
 | you-dont-deserve-to-live | you-dont-deserve-to-live.webp | 47420 |
+
+## Playtest state refinement — 2026-11-01
+
+Twenty-two additional independent 1536×1024 photographs supply a deactivated and a sprung state for every one of the eleven traps. They keep the original device/camera/workshop where possible. Deactivated states show released restraints, stopped/disconnected machinery or an open/drained route; sprung states show physical aftermath appropriate to each device. No person occupies a trap, and no human remains are shown. Blood is confined to practical-prop aftermath, while electrical, fireworks and drowning states use scorch marks, spent casings or a full latched tank. Each state is an original native generation/edit, with its full prompt in the manifest, 960×640 hero and 256×160 thumbnail. Built-in image generation was used; originals remain with the generation outputs.
+
+The generator rejected the deactivated Reverse Bear Trap edits twice. Its final safer alternative shows the dismantled prop wrapped on a workshop bench, with the mounting ring, strap and disconnected timer outside. It is a distinct original deactivated-state photograph, not a reused image or generic fallback.
+
+UI labels, ordered task progress, countdowns, skull marker and interactivity remain HTML/vector. State pictures never add a person, a new injury, casualty, damage or reward to the observation log. Escaped traps remain visible; spent traps remain visible through Upkeep. Every named state is explicitly mapped in `tormentorArt.ts`, and missing IDs fail.

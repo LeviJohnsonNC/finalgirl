@@ -52,6 +52,7 @@ type Entry={id?:string;kind:string;moduleData?:{module:string;changes:Record<str
 export type TormentorAction = {parent:string} & (
  |{command:'add';id:string;subject:string;space:string|null}
  |{command:'task';id:string}
+ |{command:'checkpoint'|'task-progress';id:string;value:number}
  |{command:'advance'}
  |{command:'correct';id:string;timer:number|null;tasks:number|null;status:TrapRecord['status'];subject:string;space:string|null}
  |{command:'clear';id:string}
@@ -99,12 +100,14 @@ export const tormentorCard=(entries:readonly Entry[],kind:'dark-power'|'finale')
 export function tormentorPresence(s:TormentorSnapshot,entries:readonly Entry[]){return s.presence==='off-board'&&entries.some(e=>e.kind==='moment'&&e.momentType==='finale')?'arrival-pending':s.presence;}
 export function validTormentorAction(v:unknown):v is TormentorAction {
  if(!object(v)||typeof v.parent!=='string'||!/^(root|[0-9a-f-]{36})$/i.test(v.parent)||typeof v.command!=='string')return false;
- const fields:Record<string,string[]>={add:['id','subject','space'],task:['id'],advance:[],correct:['id','timer','tasks','status','subject','space'],clear:['id'],cleanup:[],presence:['value'],arrive:[],exit:['name','locked'],'clear-exit':['name'],loss:['value'],empty:[],'complete-list':[],'clear-replacements':[]};
+ const fields:Record<string,string[]>={add:['id','subject','space'],task:['id'],checkpoint:['id','value'],'task-progress':['id','value'],advance:[],correct:['id','timer','tasks','status','subject','space'],clear:['id'],cleanup:[],presence:['value'],arrive:[],exit:['name','locked'],'clear-exit':['name'],loss:['value'],empty:[],'complete-list':[],'clear-replacements':[]};
  if(!fields[v.command]||Object.keys(v).sort().join()!==['parent','command',...fields[v.command]].sort().join())return false;
  const c=TORMENTOR_TRAPS.find(c=>c.id===v.id);
  switch(v.command){
  case 'add':return !!c&&label(v.subject)&&room(v.space);
  case 'task':case 'clear':return !!c;
+ case 'checkpoint':return !!c&&integer(v.value,c.checkpoints.length-1);
+ case 'task-progress':return !!c&&integer(v.value,c.tasks.length);
  case 'correct':return !!c&&label(v.subject)&&room(v.space)&&['active','escaped','spent','removed'].includes(String(v.status))&&(v.timer===null||integer(v.timer,c.checkpoints.length-1))&&(v.tasks===null||integer(v.tasks,c.tasks.length));
  case 'presence':return ['unknown','off-board','on-board'].includes(String(v.value));
  case 'clear-exit':return label(v.name)&&!!v.name.trim()&&v.name!=='__proto__';
@@ -129,6 +132,21 @@ export function resolveTormentorAction(a:TormentorAction,state:ModuleState,entri
   if(!t||t.status!=='active'||t.tasks===null||t.tasks>=c.tasks.length)return null;
   t.tasks++;
   if(t.tasks===c.tasks.length){t.status='escaped';if(c.deck==='victim'&&tormentorCard(entries,'dark-power')==='Endless Traps')s.replacement=Math.min(7,s.replacement+1);}
+  break;
+ }
+ case 'checkpoint':case 'task-progress':{
+  const t=s.traps[a.id],c=TORMENTOR_TRAPS.find(c=>c.id===a.id)!;
+  if(!t||t.status==='removed')return null;
+  if(a.command==='checkpoint'){
+   t.timer=a.value;
+   if(a.value===c.checkpoints.length-1&&t.tasks===c.tasks.length)t.tasks=c.tasks.length-1;
+  }else t.tasks=a.value;
+  t.status=t.tasks===c.tasks.length?'escaped':t.timer===c.checkpoints.length-1?'spent':'active';
+  // Direct progress edits correct this observation; old `correct` replay is unchanged.
+  if(c.deck==='girl'){
+   if(t.status==='spent')s.loss='trap-terminal';
+   else if(s.loss==='trap-terminal'&&!Object.entries(s.traps).some(([id,other])=>TORMENTOR_TRAPS.find(x=>x.id===id)?.deck==='girl'&&other.status!=='escaped'&&other.timer===TORMENTOR_TRAPS.find(x=>x.id===id)!.checkpoints.length-1))s.loss='none';
+  }
   break;
  }
  case 'advance':{
