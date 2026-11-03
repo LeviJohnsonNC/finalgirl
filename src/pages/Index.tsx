@@ -1,3 +1,4 @@
+import { WOODS } from "../../supabase/functions/_shared/play/storybookWoods";
 import {tormentorState,tormentorFatal,tormentorParent,resolveTormentorAction} from '@/lib/play/tormentor';
 import {shadyParent,shadyState,resolveShadyAction} from '@/lib/play/shadyAcres';
 import {grimlashFatal,grimlashParent,resolveGrimlashAction} from '@/lib/play/grimlash';
@@ -150,6 +151,7 @@ const IndexContent = () => {
     }
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
       coreTrackersVersion: 1,
+      ...(selection.location === WOODS && {woodsSetupVersion:1 as const}),
       ...(selection.location === 'Marrek Warehouse' && {marrekSetupVersion:1 as const}),
       ...(selection.location === 'Shady Acres' && {shadySetupVersion:1 as const}),
       ...(selection.location === 'USS Konrad' && {konradSetupVersion:1 as const}),

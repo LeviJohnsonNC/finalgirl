@@ -1,3 +1,4 @@
+import { WOODS, WOODS_MODULE, initialWoods } from "../../supabase/functions/_shared/play/storybookWoods";
 import { validPlayLog, validPlayDetails, type PlayEvent, type PlayDetails } from './play/events';
 import type { GameResult } from '@/hooks/useGameHistory';
 
@@ -22,6 +23,7 @@ export interface EndingFormData {
 export interface ActiveGame {
   /** New sessions initialize the always-visible core trackers once on first Play entry. */
   coreTrackersVersion?: 1;
+  woodsSetupVersion?: 1;
   marrekSetupVersion?: 1;
   tormentorSetupVersion?: 1;
   wolfSetupVersion?: 1;
@@ -57,6 +59,11 @@ export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
   if(game.coreTrackersVersion!==undefined&&game.coreTrackersVersion!==1)return false;
+  if (game.woodsSetupVersion !== undefined && (game.woodsSetupVersion !== 1 || game.selection?.location !== WOODS)) return false;
+  if (Array.isArray(game.playEvents) && game.playEvents.some(event =>
+    (event?.woodsReference || event?.moduleData?.module === WOODS_MODULE) && game.selection?.location !== WOODS ||
+    event?.moduleData?.module === WOODS_MODULE && !event.woodsAction &&
+      (game.woodsSetupVersion !== 1 || initialWoods(game.selection?.startingEvent)?.snapshot !== event.moduleData.changes?.snapshot))) return false;
   if(game.marrekSetupVersion!==undefined&&game.marrekSetupVersion!==1)return false;
   if(game.selection?.location!=='Marrek Warehouse'&&Array.isArray(game.playEvents)&&game.playEvents.some(e=>e.moduleData?.module==='marrek'))return false;
   if (game.wolfSetupVersion !== undefined && (game.wolfSetupVersion !== 1 || game.selection?.killer !== "Big Bad Wolf")) return false;

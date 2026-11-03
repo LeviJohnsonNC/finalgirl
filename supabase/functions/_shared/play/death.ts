@@ -1,3 +1,4 @@
+import { WOODS, WOODS_MODULE } from "./storybookWoods.ts";
 import {
   summarizePlay,
   validPlayLog,
@@ -22,6 +23,7 @@ export function deathFacts(
 ) {
   if(!validPlayLog(events))return null;
   if (selection.killer !== WOLF && events.some(e => e.moduleData?.module === "big-bad-wolf" || e.wolfReference)) return null;
+  if (selection.location !== WOODS && events.some(event => event.moduleData?.module === WOODS_MODULE || event.woodsReference)) return null;
   if(selection.location!=='Marrek Warehouse'&&events.some(e=>e.moduleData?.module==='marrek'))return null;
   if(selection.killer!=='The Tormentor'&&events.some(e=>e.moduleData?.module==='tormentor'))return null;
   if(selection.location!=='Shady Acres'&&events.some(e=>e.moduleData?.module==='shady-acres'))return null;
@@ -33,9 +35,18 @@ export function deathFacts(
   const entries = summarizePlay(events).entries;
   const e = entries.find((e) => e.id === eventId && e.kind === "killed");
   if (!e) return null;
+  const woodsDeath = selection.location === WOODS && e.woodsReference;
+  const wolfDeath = selection.killer === WOLF && e.wolfReference;
+  const historical = woodsDeath || wolfDeath
+    ? summarizePlay(events.slice(0, events.findIndex(event => event.id === eventId) + 1)).entries
+    : [];
+  // The death's own fields reflect deliberate edits. Only the surrounding
+  // context is frozen for newly recorded Woods deaths.
+  const contextEntries = woodsDeath
+    ? historical : entries.slice(0, entries.indexOf(e) + 1);
   let context = moduleContext(
     selection,
-    entries.slice(0, entries.indexOf(e) + 1).map((entry) =>
+    contextEntries.map((entry) =>
       entry.kind === "module" && entry.moduleData
         ? {
             ...entry,
@@ -57,12 +68,11 @@ export function deathFacts(
     ),
     false,
   );
-  if (selection.killer === WOLF && e.wolfReference) {
-    const rawIndex = events.findIndex(event => event.id === eventId);
-    const historical = moduleState(summarizePlay(events.slice(0, rawIndex + 1)).entries, "big-bad-wolf");
-    if (Object.keys(historical).length) {
+  if (wolfDeath) {
+    const wolf = moduleState(historical, "big-bad-wolf");
+    if (Object.keys(wolf).length) {
       // Stable ordering across browser objects and JSONB reads.
-      const sorted = Object.fromEntries(Object.entries(historical).sort(([a], [b]) => a.localeCompare(b)));
+      const sorted = Object.fromEntries(Object.entries(wolf).sort(([a], [b]) => a.localeCompare(b)));
       context = { ...context, "big-bad-wolf": sorted };
     }
   }

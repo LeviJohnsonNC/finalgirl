@@ -1,3 +1,4 @@
+import { WOODS, WOODS_SOURCE, WOODS_BRIDGES, WOODS_SPACES, WOODS_EVENTS, WOODS_TERRORS, WOODS_ITEMS, WOODS_SETUPS, woodsSpaceName, woodsSetupDescription } from "../../../supabase/functions/_shared/play/storybookWoods";
 import { bigBadWolfRules, WOLF_PROMPT_CONTEXT } from "./bigBadWolfRules";
 import {marrekRules,MARREK_PROMPT_CONTEXT} from './marrekRules';
 import {tormentorRules,TORMENTOR_PROMPT_CONTEXT} from './tormentorRules';
@@ -89,40 +90,27 @@ const grimlash: EntityRuleModule = {
   ],
 };
 
-// ─── Storybook Woods (Location) — Once Upon a Full Moon ───────────────────
 const storybookWoods: EntityRuleModule = {
-  entity: 'Storybook Woods',
-  kind: 'location',
-  filmId: 's2-once-upon-full-moon',
-  source: 'Once Upon a Full Moon — Location Sheet',
-  credits: { design: 'Julie Ahern', art: 'Tyler Johnson' },
-  tags: ['storybook woods', 'bridges', 'raft', 'location'],
+  entity: WOODS,
+  kind: "location",
+  filmId: "s2-once-upon-full-moon",
+  source: WOODS_SOURCE,
+  credits: {design:"Julie Ahern",art:"Tyler Johnson"},
+  tags: ["storybook woods","bridges","raft","troll bridge",
+    ...WOODS_SPACES.map(space => space.name),...WOODS_SETUPS.map(card => card.name),
+    ...WOODS_EVENTS.map(card => card.name),...WOODS_TERRORS.map(card => card.name),...WOODS_ITEMS.map(card => card.name)],
   setup: [
-    {
-      type: 'paragraph',
-      text: 'Setup the game as normal — there are no special setup rules for this Location.',
-    },
+    {type:"paragraph",text:"Use normal setup. The board has three search spaces, two exits and three printed river bridges."},
+    {type:"table",headers:["Setup","Printed placement"],rows:WOODS_SETUPS.map(card => [card.name,woodsSetupDescription(card)])},
   ],
   rules: [
-    { type: 'heading', level: 3, text: 'Fewer Spaces' },
-    {
-      type: 'paragraph',
-      text: 'Storybook Woods has fewer spaces than most locations! Be careful, as this can make it seem easy, but the woods can become very dangerous, very quickly.',
-    },
-    { type: 'heading', level: 3, text: 'Bridges' },
-    {
-      type: 'paragraph',
-      text: 'There are three bridges on the board that cross the River (circled in red on the board). They are built very poorly and could collapse with too much weight! Therefore, only 1 Victim will follow you when crossing a bridge.',
-    },
-    {
-      type: 'paragraph',
-      text: 'Additionally, the Toll Bridge Event card may have you placing a Toll Bridge token on the board. Just like the other three bridges, only 1 Victim will follow you across the Toll Bridge.',
-    },
-    { type: 'heading', level: 3, text: 'The Raft' },
-    {
-      type: 'paragraph',
-      text: 'One of the items you may find is a Raft. When you find the Raft, you will need to choose 4 spaces where the Raft can go ashore (these spaces are clearly marked on the board). You must place the Raft tokens such that they are touching both the river and one non-exit space. With the Raft you will be able to move to and from these spaces along the river as indicated on the Raft Item card.',
-    },
+    {type:"heading",level:3,text:"Crossing the river"},
+    {type:"paragraph",text:"Only one Victim may follow across a printed bridge or the Toll Bridge. The Toll Bridge also costs Time as shown on its Event."},
+    {type:"list",items:WOODS_BRIDGES.map(pair => pair.map(woodsSpaceName).join(" ↔ "))},
+    {type:"paragraph",text:`Raft tokens go in four of these marked non-exit spaces: ${WOODS_SPACES.filter(space => "landing" in space).map(space => space.name).join(", ")}. Compass and bank labels identify unnamed printed spaces.`},
+    {type:"table",headers:["Event","Effect"],rows:WOODS_EVENTS.map(card => [card.name,card.effect])},
+    {type:"table",headers:["Terror","Effect"],rows:WOODS_TERRORS.map(card => [card.name,card.effect])},
+    {type:"table",headers:["Item","Copies","Effect"],rows:WOODS_ITEMS.map(card => [card.name,String("quantity" in card ? card.quantity : 1),card.effect])},
   ],
 };
 

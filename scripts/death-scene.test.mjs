@@ -39,8 +39,9 @@ const konradCatalog = moduleAt('../supabase/functions/_shared/play/konradCatalog
 const konrad = moduleAt('../supabase/functions/_shared/play/konrad.ts', {'./konradCatalog.ts':konradCatalog});
 const marrek=moduleAt('../supabase/functions/_shared/play/marrekWarehouse.ts',{});
 const tormentor=moduleAt('../supabase/functions/_shared/play/tormentor.ts',{});
+const woods = moduleAt('../supabase/functions/_shared/play/storybookWoods.ts', {});
 const wolf = moduleAt('../supabase/functions/_shared/play/bigBadWolf.ts', {});
-const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", { './bigBadWolf.ts': wolf,
+const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", { './storybookWoods.ts': woods, './bigBadWolf.ts': wolf,
   './marrekWarehouse.ts':marrek,'./tormentor.ts':tormentor,'./konrad.ts':konrad,'./konradCatalog.ts':konradCatalog,
   './shadyAcres.ts':shady,"./grimlash.ts":grimlash,"./evomorph.ts": evomorph,
   "./creech.ts": creech,
@@ -54,7 +55,7 @@ const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", { './b
   "./carnival.ts": carnival,
   "./fright.ts": fright,
 });
-const events = moduleAt("../supabase/functions/_shared/play/events.ts", { './bigBadWolf.ts': wolf,
+const events = moduleAt("../supabase/functions/_shared/play/events.ts", { './storybookWoods.ts': woods, './bigBadWolf.ts': wolf,
   './marrekWarehouse.ts':marrek,'./tormentor.ts':tormentor,'./konrad.ts':konrad,'./konradCatalog.ts':konradCatalog,
   "./shadyAcres.ts":shady,"./grimlash.ts":grimlash,"./evomorph.ts": evomorph,
   "./creech.ts": creech,
@@ -63,7 +64,7 @@ const events = moduleAt("../supabase/functions/_shared/play/events.ts", { './big
   "./modules.ts": modules,
   "./fright.ts": fright,
 });
-const death = moduleAt("../supabase/functions/_shared/play/death.ts", { './bigBadWolf.ts': wolf,
+const death = moduleAt("../supabase/functions/_shared/play/death.ts", { './storybookWoods.ts': woods, './bigBadWolf.ts': wolf,
   "./events.ts": events,
   "./groves.ts": groves,
   "./modules.ts": modules,
@@ -597,4 +598,22 @@ test('Sacred Groves linked outcomes reach the real death handler with both histo
  assert.equal((await f.handler(f.request())).status,200);
  assert.deepEqual(f.owned.playEvents,original);
  assert.equal(f.calls.filter(c=>c==='AI').length,1);
+});
+
+test("Woods death context keeps its original prefix through later Undo and JSONB key order", async () => {
+  const selection = { killer:"Hans", location:woods.WOODS, finalGirl:"Laurie" };
+  const initial = events.newPlayEvent({kind:"start",saved:0,killed:0,round:1});
+  const woodsAction = {parent:"root",field:"piper",value:"in-play"};
+  const changes = woods.resolveWoodsAction(woodsAction,{},[]);
+  const observation = events.newPlayEvent({kind:"module",moduleData:{module:woods.WOODS_MODULE,changes},woodsAction});
+  const casualty = events.newPlayEvent({kind:"killed",quantity:1,cause:"event",eventCard:"Pied Piper",woodsReference:true});
+  const log = [initial,observation,casualty];
+  const facts = death.deathFacts(selection,log,casualty.id);
+  assert.ok(facts?.moduleContext?.[woods.WOODS_MODULE]);
+  const undo = events.newPlayEvent({kind:"undo",target:observation.id});
+  const reordered = JSON.parse(JSON.stringify([...log,undo]), (_key,value) =>
+    value && typeof value === "object" && !Array.isArray(value)
+      ? Object.fromEntries(Object.entries(value).sort(([a],[b]) => a.length-b.length || a.localeCompare(b)))
+      : value);
+  assert.equal(await death.deathSignature(death.deathFacts(selection,reordered,casualty.id)),await death.deathSignature(facts));
 });

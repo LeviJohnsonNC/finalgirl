@@ -1,3 +1,6 @@
+import { StorybookWoodsControls } from "./StorybookWoodsControls";
+import { woodsArt } from "./woodsArt";
+import { WOODS, WOODS_MODULE, woodsState, woodsBreadcrumbLabel } from "../../../supabase/functions/_shared/play/storybookWoods";
 import { BigBadWolfControls } from "./BigBadWolfControls";
 import { wolfArt } from "./wolfArt";
 import { WOLF, WOLF_MINORS, wolfMinorField, wolfModeLabel } from "@/lib/play/bigBadWolf";
@@ -65,7 +68,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -91,6 +94,12 @@ const peopleSummary = (
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
 export const moduleDefinitions: Definition[] = [
+  {id:WOODS_MODULE,owner:"location",match:WOODS,title:"Inside Storybook Woods",art:woodsArt("banner"),
+    capabilities:["event","character"],summary:state=>{
+      const woods=woodsState(state);
+      const crossings=[woods.toll && "Toll Bridge",woods.raft && "Raft",woods.breadcrumb && woods.breadcrumb!=="absent" && woodsBreadcrumbLabel(woods.breadcrumb)].filter(Boolean);
+      return crossings.join(" · ") || (Object.keys(woods).length ? "River and woodland paths" : "Crossings not recorded");
+    },Controls:StorybookWoodsControls},
   {
     id: "big-bad-wolf",
     owner: "killer",

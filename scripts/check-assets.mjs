@@ -234,3 +234,37 @@ if (wolfExpected.size || wolfFiles.size !== 33 || images.filter(file => file.sta
   throw new Error('Incomplete Wolf runtime artwork mapping');
 }
 console.log('Verified 23 independent Big Bad Wolf photographs and 10 choice thumbnails.');
+
+const woodsFolder = 'src/assets/play/photos/storybook-woods';
+const woodsBanner = 'src/assets/play/banners/storybook-woods.webp';
+const woodsPhotos = JSON.parse(readFileSync(join(woodsFolder, 'manifest.json'), 'utf8'));
+const woodsExpected = new Set([
+  'banner', 'toll-on', 'toll-off', 'raft-on', 'raft-off', 'breadcrumb', 'breadcrumb-off', 'primrose',
+  ...['hansel', 'woodsman', 'piper'].flatMap(id => [id, id + '-saved', id + '-killed']),
+  'treats', 'out', 'moon-clearing', 'moon-meadow', 'moon-glen',
+]);
+const woodsFiles = new Set();
+const woodsSources = new Set();
+const woodsDigests = new Set();
+for (const photo of woodsPhotos) {
+  const file = photo.id === 'banner' ? woodsBanner : join(woodsFolder, photo.id + '.webp');
+  const bytes = readFileSync(file);
+  const digest = createHash('sha256').update(bytes).digest('hex');
+  const [width, height] = konradWebpDimensions(bytes);
+  const [expectedWidth, expectedHeight] = photo.id === 'banner' ? [1500, 500] : [1280, 720];
+  if (!woodsExpected.delete(photo.id) || photo.file !== file || woodsSources.has(photo.source) ||
+      !/^exec-[a-f0-9-]+\.png$/.test(photo.source) || !photo.prompt || !photo.surface ||
+      width !== expectedWidth || height !== expectedHeight || width > photo.nativeWidth || height > photo.nativeHeight ||
+      bytes.length !== photo.bytes || bytes.length > 160 * 1024 || digest !== photo.sha256 || woodsDigests.has(digest)) {
+    throw new Error('Invalid or reused Storybook Woods photograph: ' + file);
+  }
+  woodsFiles.add(file);
+  woodsSources.add(photo.source);
+  woodsDigests.add(digest);
+}
+const woodsRuntime = images.filter(file => file === woodsBanner || file.startsWith(woodsFolder + '/'));
+if (woodsExpected.size || woodsFiles.size !== 22 || woodsRuntime.length !== woodsFiles.size ||
+    woodsRuntime.some(file => !woodsFiles.has(file))) {
+  throw new Error('Incomplete Storybook Woods runtime artwork mapping');
+}
+console.log('Verified 22 original Storybook Woods photographs with bounded derivatives and complete surface mapping.');

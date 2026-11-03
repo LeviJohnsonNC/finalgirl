@@ -1,0 +1,75 @@
+.woods-controls {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+}
+
+.woods-controls h3 {
+  margin: 0 0 .5rem;
+  font-size: .95rem;
+}
+
+.woods-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .65rem;
+}
+
+.play-module-content .woods-controls .module-control-tile {
+  aspect-ratio: 16 / 9;
+  border-radius: .3rem;
+}
+
+.woods-controls .module-control-tile:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.woods-controls .module-character[data-state="killed"] .play-module-art {
+  filter: saturate(.7) brightness(.9);
+}
+
+.woods-controls :is([data-state="unknown"], [data-state="inactive"], [data-state="absent"], [data-state="left"], [data-state="replaced"], [data-state="unrecorded"]) .play-module-art {
+  filter: grayscale(.7) brightness(.7);
+}
+
+.woods-choices {
+  display: grid;
+  gap: .25rem;
+  margin-top: .35rem;
+}
+
+.woods-choices button {
+  min-height: 44px;
+  padding: .35rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: .3rem;
+}
+
+.woods-choices button[aria-pressed="true"] {
+  border-color: hsl(var(--primary));
+}
+
+.woods-controls .module-outcomes {
+  flex-wrap: wrap;
+}
+
+.woods-controls .module-outcomes button {
+  min-height: 44px;
+}
+
+@media (max-width: 660px) {
+  .woods-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.play-death-modal--illustrated .play-cause-tile[data-woods-photo][aria-pressed="true"]::before {
+  background: linear-gradient(0deg, #120c0bf2, transparent 85%);
+}
+
+.play-death-modal--illustrated .play-cause-tile[data-woods-photo][aria-pressed="true"] > img {
+  opacity: 1;
+}
