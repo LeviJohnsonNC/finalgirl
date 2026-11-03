@@ -24,7 +24,7 @@ export function BigBadWolfControls({ events, blocked, onEvent }: ControlsProps) 
   return (
     <section className="play-big-bad-wolf" aria-label="Big Bad Wolf tracking">
       <section className="wolf-mode" aria-label="Recorded mode" data-mode={mode ?? "unknown"}>
-        <div className="wolf-mode-photo"><ModuleArtwork art={wolfArt(mode ?? "header")} /></div>
+        <div className="wolf-mode-photo"><ModuleArtwork art={mode ? wolfArt(mode) : { ...wolfArt("header"), fit: "meet" }} /></div>
         <div className="wolf-mode-copy">
           <p className="play-eyebrow">Recorded mode</p>
           <h3 aria-live="polite">{wolfModeLabel(mode, state.powerRevealed)}</h3>

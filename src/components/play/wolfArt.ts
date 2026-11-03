@@ -12,8 +12,7 @@ const photo = (id: string) => photos[`/src/assets/play/photos/big-bad-wolf/${id}
 
 export function wolfArt(id: string, thumbnail = false): ModuleArt {
   if (id === "header") return { src: banner, fit: "slice", position: "87% 53%" };
-  const position = id === "slay" ? "64% 37%" : "center";
-  return { src: (thumbnail && photo(`${id}-thumb`)) || photo(id) || portrait, fit: "slice", position };
+  return { src: (thumbnail && photo(`${id}-thumb`)) || photo(id) || portrait, fit: "meet" };
 }
 
-export const wolfPortrait: ModuleArt = { src: portrait, fit: "slice", position: "56% 49%" };
+export const wolfPortrait: ModuleArt = { src: portrait, fit: "meet", position: "50% 56%" };
