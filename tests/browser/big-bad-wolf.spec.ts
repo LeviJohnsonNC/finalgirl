@@ -32,7 +32,7 @@ test("Wolf setup, linked reveals, Minor health and loaded photographs", async ({
     };
   }, key);
   await power.getByRole("button", { name: "Choose A Killing Machine", exact: true }).click();
-  await expect(panel.getByRole("alert")).toContainText("could not be saved");
+  await expect(panel.getByRole("status").filter({ hasText: "could not be saved" })).toBeVisible();
   await expect(mode.getByRole("heading")).toHaveText("Power revealed · mode unconfirmed");
   expect(await page.evaluate(k => localStorage.getItem(k), key)).toBe(savedBeforeFailure);
   await page.evaluate(() => (window as unknown as { restoreWolfStorage: () => void }).restoreWolfStorage());
