@@ -7,7 +7,8 @@
   border-radius: .65rem;
   background: #141112;
 }
-.wolf-mode-photo { height: clamp(8.5rem, 22vw, 17rem); }
+.wolf-mode-photo { width: 100%; aspect-ratio: 16 / 9; }
+.wolf-mode[data-mode="unknown"] .wolf-mode-photo { aspect-ratio: 3; }
 .wolf-mode-photo .play-module-art { width: 100%; height: 100%; display: block; }
 .wolf-mode[data-mode="unknown"] .wolf-mode-photo { filter: grayscale(.45) brightness(.72); }
 .wolf-mode-copy { padding: .8rem 1rem 1rem; color: #e9dfce; }
@@ -16,18 +17,60 @@
 .wolf-mode-copy p:last-of-type { font-size: .84rem; color: #c3b9ab; }
 .wolf-mode-copy .play-select-trigger { margin-top: .55rem; min-height: 44px; max-width: 100%; }
 
+/* Keep the full frame beside its controls on laptop and above them on phone. */
+@media (min-width: 701px) {
+  .wolf-mode,
+  [data-wolf-cards] .module-revealed-hero,
+  .wolf-minors .module-cinematic-minor[data-active="true"] .module-minor-scene {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, min(60%, 540px));
+    align-items: center;
+    min-height: 0;
+  }
+
+  .wolf-mode-photo,
+  [data-wolf-cards] .module-revealed-hero > .module-revealed-art,
+  .wolf-minors .module-cinematic-minor[data-active="true"] .module-minor-scene > .module-minor-art {
+    position: relative;
+    inset: auto;
+    grid-area: 1 / 2;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .wolf-mode[data-mode="unknown"] .wolf-mode-photo { aspect-ratio: 3; }
+
+  .wolf-mode-copy,
+  [data-wolf-cards] .module-revealed-hero > .module-revealed-copy,
+  .wolf-minors .module-cinematic-minor[data-active="true"] .module-minor-body {
+    grid-area: 1 / 1;
+    width: auto;
+    min-height: 0;
+  }
+
+  [data-wolf-cards] .module-revealed-art::after,
+  .wolf-minors .module-minor-scene > .module-minor-art::after {
+    background: linear-gradient(90deg, #090e1066, transparent 12%);
+  }
+}
+
 /* The panorama sits behind the shared frame. At laptop width, keeping its
    photographic layer narrower preserves the ears and muzzle in the shallow header. */
 .play-module-panel[data-module="big-bad-wolf"] > summary > img.play-module-art {
   left: auto;
-  width: min(100%, 740px);
-  mask-image: linear-gradient(to right, transparent, #000 27%);
+  right: 52px;
+  width: min(100%, 440px);
+  mask-image: linear-gradient(to right, transparent, #000 27%, #000 94%, transparent);
 }
 @media (max-width: 639px) {
   .play-module-panel[data-module="big-bad-wolf"] > summary .play-module-disclosure {
     align-self: flex-start;
   }
   .play-module-panel[data-module="big-bad-wolf"] > summary > img.play-module-art {
+    right: 0;
+    mask-image: linear-gradient(to right, transparent, #000 27%);
     object-position: 100% center !important;
   }
 }
@@ -39,4 +82,12 @@
 }
 .play-death-modal--illustrated .play-cause-tile[data-wolf-photo][aria-pressed="true"] > img {
   opacity: 1;
+}
+
+/* Shallow cause tiles leave room for their label beside the source frame. */
+.play-death-modal--illustrated .play-cause-tile[data-wolf-photo] > img {
+  inset: 0 0 0 auto;
+  width: auto;
+  max-width: 76%;
+  mask-image: linear-gradient(90deg, transparent, #000 16%);
 }

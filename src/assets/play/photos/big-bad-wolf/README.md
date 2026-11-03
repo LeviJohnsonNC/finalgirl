@@ -6,6 +6,8 @@ The common brief was a convincing candid 1980s consumer 35mm colour photograph o
 
 The [manifest](manifest.json) maps each original ID to its WebP, source and checksum. Card and state scenes are 1280×720. The banner is 1500×500 with a right-weighted focal point. Ten revealed card or Minor choices have 320×180 derivatives. Original image dimensions are recorded for each file. The Wolf’s existing identity also supplies the Killer cause tile. The dim header crop is the unrecorded mode illustration. Nine named Terror causes use distinct scenes. Duplicate physical cards share their named artwork.
 
+The mode panels preserve the complete 16:9 photograph. On larger screens the image sits beside the controls. The unrecorded mode shows the complete 3:1 panorama. Revealed cards and active Minors use the same wide framing. The death tiles place the full image beside the label to retain details in the shallow slot. The Play header uses a narrower, right-weighted crop, and Killer Health centers the approved identity on the Wolf’s eyes and muzzle.
+
 | Asset ID | Scene prompt |
 | --- | --- |
 | `header` | Panoramic banner crop. Low encounter with the complete head in the right third, dark branches and title space at left. |

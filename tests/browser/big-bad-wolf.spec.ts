@@ -6,7 +6,28 @@ import { summarizePlay, type PlayEvent } from "../../src/lib/play/events";
 const key = `final-girl-active-game-v1:${userId}`;
 const sizes = { desktop: [[1280, 640], [1366, 768], [1440, 900]], mobile: [[390, 844], [320, 568]] };
 
+async function captureMode(
+  mode: import("@playwright/test").Locator,
+  state: string,
+  info: import("@playwright/test").TestInfo,
+  width?: number,
+) {
+  const photo = mode.locator(".wolf-mode-photo img");
+  const geometry = await photo.evaluate(async element => {
+    const image = element as HTMLImageElement;
+    await image.decode();
+    const bounds = image.getBoundingClientRect();
+    return {fit:getComputedStyle(image).objectFit, box:bounds.width / bounds.height,
+      source:image.naturalWidth / image.naturalHeight};
+  });
+  expect(geometry.fit).toBe("contain");
+  expect(geometry.box).toBeCloseTo(geometry.source, 2);
+  await mode.screenshot({ path:info.outputPath(`mode-${state}${width ? `-${width}` : ""}.jpg`),
+    type:"jpeg",quality:85,animations:"disabled",style:".app-footer{visibility:hidden}" });
+}
+
 test("Wolf setup, linked reveals, Minor health and loaded photographs", async ({ page, archive }, info) => {
+  test.setTimeout(90000);
   const selection = { ...activeGame.selection, killer: "Big Bad Wolf", location: "Sacred Groves" };
   await archive.install(page, { draft: { ...activeGame, selection, playMode: true, coreTrackersVersion: 1, wolfSetupVersion: 1, playEvents: [] } });
   await page.goto("/");
@@ -15,6 +36,10 @@ test("Wolf setup, linked reveals, Minor health and loaded photographs", async ({
   const panel = page.locator('[data-module="big-bad-wolf"]');
   const mode = panel.getByRole("region", { name: "Recorded mode" });
   await expect(mode.getByRole("heading")).toHaveText("Track");
+  for (const [width, height] of sizes[info.project.name === "mobile" ? "mobile" : "desktop"]) {
+    await page.setViewportSize({ width, height });
+    await captureMode(mode, "track", info, width);
+  }
   const first: PlayEvent[] = await page.evaluate(k => JSON.parse(localStorage.getItem(k)!).playEvents, key);
   expect(summarizePlay(first)).toMatchObject({ killerHealth: 9, finalHorrorLevel: 5, bloodlust: 0, killed: 0 });
 
@@ -22,6 +47,7 @@ test("Wolf setup, linked reveals, Minor health and loaded photographs", async ({
   const power = panel.getByRole("region", { name: "Dark Power selection" });
   await power.getByRole("button", { name: "Record Dark Power card name", exact: true }).click();
   await expect(mode.getByRole("heading")).toHaveText("Power revealed · mode unconfirmed");
+  await captureMode(mode, "unconfirmed", info);
   const savedBeforeFailure = await page.evaluate(k => localStorage.getItem(k), key);
   await page.evaluate(k => {
     const set = Storage.prototype.setItem;
@@ -38,6 +64,7 @@ test("Wolf setup, linked reveals, Minor health and loaded photographs", async ({
   await page.evaluate(() => (window as unknown as { restoreWolfStorage: () => void }).restoreWolfStorage());
   await chooseKillerCard(panel, "Dark Power", "A Killing Machine");
   await expect(mode.getByRole("heading")).toHaveText("Track + Slay");
+  await captureMode(mode, "combined", info);
   await power.getByRole("button", { name: "Clear Dark Power card name", exact: true }).click();
   await expect(mode.getByRole("heading")).toHaveText("Track + Slay");
 
@@ -53,6 +80,9 @@ test("Wolf setup, linked reveals, Minor health and loaded photographs", async ({
   await panel.getByRole("button", { name: "Remove one What Big Teeth You Have! health, heart 1", exact: true }).click();
   await panel.getByRole("button", { name: "Remove one What Big Teeth You Have! health, heart 1", exact: true }).click();
   await expect(panel.getByText("Removed · 0/2 health")).toBeVisible();
+  await panel.getByRole("article", { name: "What Big Teeth You Have!" }).screenshot({
+    path:info.outputPath("teeth-removed.jpg"),type:"jpeg",animations:"disabled",style:".app-footer{visibility:hidden}",
+  });
   await panel.getByRole("button", { name: "Restore one What Big Teeth You Have! health, heart 1", exact: true }).click();
   await expect(panel.getByText("1/2 health")).toBeVisible();
 
@@ -73,6 +103,8 @@ test("Wolf setup, linked reveals, Minor health and loaded photographs", async ({
       return img.decode();
     })));
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await captureMode(mode, "slay", info, width);
+    await panel.locator(":scope > summary").screenshot({ path:info.outputPath(`header-${width}.jpg`),type:"jpeg",animations:"disabled",style:".app-footer{visibility:hidden}" });
     await panel.screenshot({ path: info.outputPath(`wolf-${width}.jpg`), type: "jpeg", quality: 85, animations: "disabled", style: ".app-footer{visibility:hidden}" });
   }
 });
@@ -103,7 +135,17 @@ test("each Wolf card loads its own photograph and a named Terror keeps the same 
     await img.evaluate(async element => { await (element as HTMLImageElement).decode(); });
     await element.screenshot({ path: info.outputPath(id + ".jpg"), type: "jpeg", quality: 82, animations: "disabled", style: ".app-footer{visibility:hidden}" });
   };
+  const tracker = page.getByRole("group", { name:"Killer Health tracker" });
+  await tracker.locator("img").evaluate(async image => { await (image as HTMLImageElement).decode(); });
+  await tracker.screenshot({path:info.outputPath("health-portrait.jpg"),type:"jpeg",style:".app-footer{visibility:hidden}"});
+  for (const card of WOLF_MINORS) {
+    await inspect(panel.getByRole("button",{name:"Reveal " + card.name,exact:true}),card.id + "-thumb");
+  }
   for (const [kind, cards] of [["Dark Power", WOLF_POWERS], ["Finale", WOLF_FINALES]] as const) {
+    const chooser = panel.getByRole("region", {name:kind + " selection"});
+    for (const card of cards) {
+      await inspect(chooser.getByRole("button",{name:"Choose " + card.name,exact:true}),card.id + "-thumb");
+    }
     for (const card of cards) {
       await chooseKillerCard(panel, kind, card.name);
       await inspect(panel.getByRole("region", { name: kind + " selection" }).locator(".module-revealed-hero"), card.id);
@@ -119,6 +161,7 @@ test("each Wolf card loads its own photograph and a named Terror keeps the same 
 
   await page.getByRole("button", { name: "Record one victim killed", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Gruesome Death", exact: true });
+  await inspect(dialog.locator(".play-cause-tile--killer"), "big-bad-wolf");
   await dialog.locator(".play-cause-tile--terror").click();
   for (const card of WOLF_TERRORS) {
     await searchPick(page, "Terror card", card.name);

@@ -1,3 +1,4 @@
+import { wolfPortrait } from "./wolfArt";
 import { WOODS, WOODS_EVENTS } from "../../../supabase/functions/_shared/play/storybookWoods";
 import { evomorphStageArt } from './evomorphArt';
 import { poltergeistParent, resolvePoltergeistAction } from '../../../supabase/functions/_shared/play/poltergeist';
@@ -176,7 +177,13 @@ export function PlayScreen(props: PlayScreenProps) {
   const { item: personalItem } = usePersonalItem(finalGirl);
   const startingValues = playStartingValues(killer, finalGirl);
   const { characterImages, aiEnabled } = useActiveImages();
-  const killerPortrait = killer === "Evomorph" ? evomorphStageArt(moduleState(summary.entries, "evomorph").stage) : {src: characterImages[killer], position: killer==='Grimlash'?'50% 0%':undefined};
+  const killerImage = characterImages[killer];
+  const killerPortrait = killer === "Evomorph"
+    ? evomorphStageArt(moduleState(summary.entries, "evomorph").stage)
+    : {
+        src: killerImage,
+        position: killer === "Grimlash" ? "50% 0%" : killer === WOLF && killerImage === wolfPortrait.src ? wolfPortrait.position : undefined,
+      };
   const finalGirlMaxHealth = observedFinalGirlMaxHealth(finalGirl, events, props.finalGirlStartingHealth, killer);
   // Legacy sessions can use the catalog to bound new input without backfilling observations.
   const trackerLimits = { ...stateLimits, finalGirlHealth: observedFinalGirlMaxHealth(

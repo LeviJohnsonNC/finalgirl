@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { WOLF } from "@/lib/play/bigBadWolf";
 import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
 import { moduleState } from "@/lib/play/modules";
 import { IllustratedTile } from "./IllustratedTile";
@@ -116,6 +117,7 @@ export function KillerCards({
           return (
             <section
               className="module-reveal-cards"
+              data-wolf-cards={killer === WOLF || undefined}
               key={type}
               aria-label={`${label} selection`}
             >
