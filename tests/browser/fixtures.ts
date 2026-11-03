@@ -46,6 +46,8 @@ export class ArchiveMock {
   releaseCollection=()=>{this.holdCollection=false;this.collectionWaiters.splice(0).forEach(done=>done());};
   films = ['s1-camp-happy-trails'];
   history: Array<Record<string, unknown>> = [];
+  styleReads: Array<{ owner: string | null; ids: string[] }> = [];
+  failStyleRead = false;
   calls: string[] = [];
   generationRequests: Array<{ name: string; body: Record<string, unknown> }> = [];
   storyText = opening;
@@ -150,7 +152,11 @@ export class ArchiveMock {
         if(b.p_revision!==row.revision)return json({ok:false,...row});
         Object.assign(row,{revision:row.revision+1,state:b.p_state,closed:b.p_closed});return json({ok:true,revision:row.revision});
       }
-      if (path.endsWith('/rpc/get_game_history_summary')) return json(this.history);
+      if (path.endsWith('/rpc/get_game_history_summary')) return json(this.history.map(row => {
+        const summary = { ...row };
+        delete summary.play_events;
+        return summary;
+      }));
       if (path.endsWith('/rpc/apply_collection_delta')) {
         if (this.failWrites) return json({ message: 'offline', code: 'TEST' }, 503);
         const body = request.postDataJSON();
@@ -174,6 +180,14 @@ export class ArchiveMock {
           if (!record) return json(null);
           Object.assign(record, request.postDataJSON());
           return json({ id });
+        }
+        if (url.searchParams.get('select') === 'id,play_events') {
+          const ids = (url.searchParams.get('id') ?? '').slice(4, -1).split(',');
+          const owner = url.searchParams.get('user_id');
+          this.styleReads.push({ owner, ids });
+          if (this.failStyleRead) return json({ message: 'Play evidence unavailable' }, 503);
+          return json(this.history.filter(game => ids.includes(String(game.id)))
+            .map(({ id, play_events }) => ({ id, play_events: play_events ?? null })));
         }
         return json(this.history.find(game => game.id === id) ?? null);
       }

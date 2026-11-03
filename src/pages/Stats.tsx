@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { useGameStats } from '@/hooks/useGameStats';
+import { usePlayStyle } from '@/hooks/usePlayStyle';
 import { RecordJacket } from '@/components/stats/RecordJacket';
 import { TrendsSection } from '@/components/stats/TrendsSection';
 import { BreakdownTabs } from '@/components/stats/BreakdownTabs';
@@ -17,9 +18,10 @@ interface StatsProps {
 }
 
 const Stats = ({ onOpenSession }: StatsProps) => {
-  const { gameHistory, isLoading, loadError, retryLoadHistory, isDegraded } = useGameHistoryContext();
+  const { gameHistory, isLoading, loadError, retryLoadHistory, isDegraded, pendingSaveCount } = useGameHistoryContext();
   const { user, authError } = useAuth();
   const stats = useGameStats(gameHistory);
+  const playStyle = usePlayStyle(user?.id, gameHistory, pendingSaveCount, isLoading);
   const [timestamp, setTimestamp] = useState('');
 
   // Update timestamp every second for archival feel
@@ -153,12 +155,7 @@ const Stats = ({ onOpenSession }: StatsProps) => {
             <SessionDetail stats={stats} onOpenSession={onOpenSession} />
 
             {/* The profile follows the recorded evidence in reading order. */}
-            <PlayerArchetypeBadge
-              archetype={stats.playerArchetype}
-              reason={stats.archetypeReason}
-              profile={stats.archetypeProfile}
-              scores={stats.archetypeScores}
-            />
+            <PlayerArchetypeBadge profile={stats.playerStyle} play={playStyle} onOpenSession={onOpenSession} />
           </div>
         </div>
       )}

@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { GameResult } from './useGameHistory';
 import { computeArchetype } from './useArchetypeScoring';
 import { GameRecord, buildGameRecord } from '@/lib/gameRecord';
-import { ArchetypeStanding } from './useArchetypeScoring';
 import {
   HorrorBin,
   SessionEntry,
@@ -40,8 +39,6 @@ export interface LocationStats {
   totalKilled: number;
 }
 
-export type PlayerArchetype = 'protector' | 'duelist' | 'survivor' | 'gambler' | 'newcomer';
-
 export interface ComputedStats {
   // Record Jacket
   playStats: ReturnType<typeof playStatistics>;
@@ -72,11 +69,7 @@ export interface ComputedStats {
   byLocation: LocationStats[];
   
   // Archetype
-  playerArchetype: PlayerArchetype;
-  archetypeReason: string;
-  archetypeProfile: string;
-  /** Every archetype ranked, so the near-misses are visible too. */
-  archetypeScores: ArchetypeStanding[];
+  playerStyle: ReturnType<typeof computeArchetype>;
 
   // Session detail — fields the app has always collected and never shown.
   horrorBins: HorrorBin[];
@@ -242,22 +235,7 @@ export const useGameStats = (gameHistory: GameResult[]): ComputedStats => {
     });
 
     // Player Archetype (scoring-based)
-    const narrativeCtx = {
-      nemesis: nemesisKiller && nemesisLosses >= 2 ? { killer: nemesisKiller, losses: nemesisLosses } : null,
-      usualSuspect: usualSuspectKiller && usualSuspectWins >= 2 ? { killer: usualSuspectKiller, wins: usualSuspectWins } : null,
-      cursedSite: cursedSiteLocation && cursedSiteLosses >= 2 ? { location: cursedSiteLocation, losses: cursedSiteLosses } : null,
-      homeTurf: homeTurfLocation && homeTurfWins >= 2 ? { location: homeTurfLocation, wins: homeTurfWins } : null,
-      comfortZone: comfortZoneGirl && comfortZoneWins >= 2 ? { finalGirl: comfortZoneGirl, wins: comfortZoneWins } : null,
-      grinder: grinderGirl && grinderPlays >= 2 ? { finalGirl: grinderGirl, plays: grinderPlays } : null,
-    };
     const horror = buildHorrorDistribution(filteredGames);
-
-    const {
-      archetype: playerArchetype,
-      reason: archetypeReason,
-      profile: archetypeProfile,
-      scores: archetypeScores,
-    } = computeArchetype(filteredGames, narrativeCtx);
 
     return {
       playStats:playStatistics(filteredGames),
@@ -277,10 +255,7 @@ export const useGameStats = (gameHistory: GameResult[]): ComputedStats => {
       byFinalGirl,
       byKiller,
       byLocation,
-      playerArchetype,
-      archetypeReason,
-      archetypeProfile,
-      archetypeScores,
+      playerStyle: computeArchetype(filteredGames),
       horrorBins: horror.bins,
       horrorRecorded: horror.recorded,
       weapons: buildWeaponTally(filteredGames, Infinity),
