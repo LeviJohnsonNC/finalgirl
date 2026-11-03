@@ -60,6 +60,14 @@ describe('Play style evidence', () => {
     expect(finding.cases[0].beats).toEqual(['Round 1 · Health dropped to 1 HP', 'Round 2 · Health recovered to 5 HP']);
   });
 
+  it('omits round labels when an unknown starting round has no later explicit anchor', () => {
+    const games = repeated(3, () => game([
+      newPlayEvent({ kind: 'start', saved: 0, killed: 0, round: null }),
+      state('finalGirlHealth', 5), round(), state('finalGirlHealth', 1),
+    ]));
+    expect(buildPlayStyle(games).findings[0].cases[0].beats).toEqual(['Health dropped to 1 HP']);
+  });
+
   it('compares stronger Horror recoveries only across matched casts with enough supporting wins', () => {
     const make = (change: number, fields: Partial<GameResult> = {}) =>
       game([start(), state('finalHorrorLevel', 2), state('finalHorrorLevel', 6), round(), state('finalHorrorLevel', 6 - change)], fields);

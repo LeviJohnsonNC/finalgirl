@@ -39,7 +39,7 @@ function Finding({ finding, onOpenSession }: { finding: StyleFinding; onOpenSess
         </button>
       </div>
       <div className="style-cases" id={caseListId} hidden={!expanded}>
-        {expanded && <ul aria-label={`Cases for ${finding.title}`}>
+        {expanded && <ul aria-label={`Cases for ${finding.title}`} tabIndex={finding.cases.length > 3 ? 0 : undefined}>
           {finding.cases.map(item => (
             <li key={item.id}>
               <p className="style-case-cast">{item.finalGirl} vs. {item.killer}</p>

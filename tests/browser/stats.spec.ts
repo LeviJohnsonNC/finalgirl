@@ -233,7 +233,10 @@ test('a fresh archive loads Play evidence in one bounded request and opens its e
   corrected.play_events = [...events, newPlayEvent({ kind: 'undo', target: events[2].id })];
   await page.reload();
   await page.getByRole('button', { name: 'Stats', exact: true }).click();
-  await expect(card).toContainText('7 of 20 recent games with usable logs');
+  // Deleting a game moves the boundary, so one earlier logged game joins the recent window.
+  await expect(card).toContainText('8 of 20 recent games with usable logs');
+  await expect(card).toContainText('1 of 3 games won after dropping to 1 HP');
+  await expect(card.getByText('Bigger Horror recoveries in recent wins')).toHaveCount(0);
   await expect(card.getByText('More rescues before the Dark Power')).toHaveCount(0);
   expect(archive.calls).toEqual([]);
 });

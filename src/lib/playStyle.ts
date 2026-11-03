@@ -44,21 +44,25 @@ function observe(game: PlayGame) {
   let canTimeRescues = true;
   let roundWasAdjusted = false;
   let roundKnownFromStart = false;
+  let roundAnchored = false;
   let previousRound: number | null = null;
   const rescues: Entry[] = [];
   let usable = false;
 
   // The first observed value in a tracker segment is its baseline. A clear
   // ends the segment, so readings on opposite sides cannot imply recovery.
-  for (const entry of entries) {
+  for (const recorded of entries) {
+    const entry = roundAnchored || recorded.currentRound == null ? recorded : { ...recorded, currentRound: null };
     if (entry.kind === 'start') {
       saved = entry.saved!;
       canTimeRescues = saved === 0;
       roundKnownFromStart = entry.round === 1;
+      roundAnchored = entry.round != null;
     }
     if (entry.kind === 'adjust') {
       if (entry.saved !== saved) canTimeRescues = false;
       if (entry.round !== previousRound) roundWasAdjusted = true;
+      roundAnchored = entry.round != null;
       saved = entry.saved!;
     }
     if (entry.kind === 'moment' && entry.momentType === 'dark-power' && !reveal) {
@@ -99,7 +103,7 @@ function observe(game: PlayGame) {
         if (!peak || value > peak.value!) peak = entry;
       }
     }
-    previousRound = entry.currentRound;
+    previousRound = recorded.currentRound;
   }
   return {
     game,
