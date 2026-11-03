@@ -1,5 +1,6 @@
 import { evomorphStageArt } from './evomorphArt';
 import { poltergeistParent, resolvePoltergeistAction } from '../../../supabase/functions/_shared/play/poltergeist';
+import { WOLF } from "@/lib/play/bigBadWolf";
 import { KillerCards } from "./KillerCards";
 import { illustratedKillerCards } from "./killerPresentation";
 import { ModuleArtwork } from './ModuleArtwork';
@@ -548,7 +549,7 @@ export function PlayScreen(props: PlayScreenProps) {
         {moment && (
           <div className="play-moment-editor">
             {isReveal && <KillerCards killer={killer} events={events} onEvent={onEvent} typeOnly={moment.momentType as "dark-power" | "finale"} />}
-            {isReveal && momentCards.length > 0 && (
+            {isReveal && killer !== WOLF && momentCards.length > 0 && (
               <label>
                 {moment.momentType === "dark-power"
                   ? "Which Dark Power?"

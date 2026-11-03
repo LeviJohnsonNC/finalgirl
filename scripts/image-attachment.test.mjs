@@ -31,11 +31,14 @@ const marrekIdentity = {};
 new Function('exports', compile('../supabase/functions/_shared/play/marrekWarehouse.ts'))(marrekIdentity);
 const tormentorIdentity = {};
 new Function('exports', compile('../supabase/functions/_shared/play/tormentor.ts'))(tormentorIdentity);
+const wolfIdentity = {};
+new Function('exports', compile('../supabase/functions/_shared/play/bigBadWolf.ts'))(wolfIdentity);
 const grimlashIdentity = {};
 new Function('exports', compile('../supabase/functions/_shared/play/grimlash.ts'))(grimlashIdentity);
 new Function('require', 'exports', compile('../supabase/functions/_shared/prompts.ts'))(name => {
   if (name === './play/marrekWarehouse.ts') return marrekIdentity;
   if (name === './play/tormentor.ts') return tormentorIdentity;
+  if (name === './play/bigBadWolf.ts') return wolfIdentity;
   if (name === './play/grimlash.ts') return grimlashIdentity;
   if (name === './posterDesign.ts') return posterDesign;
   if (name === './finalGirlIdentity.ts') return finalGirlIdentity;
@@ -353,4 +356,26 @@ test('verified unseen Tormentor openings retain the Final Girl reference and omi
  assert.deepEqual(opening.openingReferenceNames('Laurie','The Tormentor'),['Laurie','The Tormentor']);
  const prompt=prompts.buildBeginningPrompt({sceneType:'beginning',story:'Laurie heard a latch click in the empty corridor.',killer:'The Tormentor',location:'Camp Happy Trails',finalGirl:'Laurie',tormentorOpening:'fresh-v1'});
  assert.ok(JSON.stringify(prompt).includes('off-frame'));
+});
+
+test('the Wolf opening uses the staged immutable JPEG and keeps the Final Girl reference', async () => {
+  const bytes = new Uint8Array(readFileSync(new URL('../supabase/reference-assets/big-bad-wolf.jpg', import.meta.url)));
+  const sha256 = createHash('sha256').update(bytes).digest('hex');
+  assert.deepEqual(REFERENCE_MANIFEST['Big Bad Wolf'], { path: `big-bad-wolf-${sha256.slice(0, 16)}.jpg`, sha256 });
+  assert.deepEqual(opening.openingReferenceNames('Red', 'Big Bad Wolf'), ['Red', 'Big Bad Wolf']);
+  const prompt = prompts.buildBeginningPrompt({
+    killer: 'Big Bad Wolf', location: 'Marrek Warehouse', finalGirl: 'Red',
+    story: 'Red sees movement under the loading dock.',
+    killerDescription: 'STALE_WEREWOLF',
+    visualBible: JSON.stringify({ killer: 'STALE_WEREWOLF_CONTINUITY', finalGirl: 'The named Final Girl Red', location: 'An industrial loading dock', palette: 'Cool overhead practical lighting' }),
+  });
+  assert.match(prompt, /coarse matted fur/);
+  assert.match(prompt, /LOCATION: Marrek Warehouse/);
+  assert.doesNotMatch(prompt, /STALE_WEREWOLF/);
+  const refs = await opening.openingReferences('Unknown', 'Big Bad Wolf', async path => {
+    assert.equal(path, REFERENCE_MANIFEST['Big Bad Wolf'].path);
+    return bytes;
+  });
+  assert.equal(refs[0].name, 'Big Bad Wolf');
+  await assert.rejects(() => opening.openingReferences('Unknown', 'Big Bad Wolf', async () => { throw Error('object unavailable'); }), /object unavailable/);
 });

@@ -45,6 +45,7 @@
 // adrianne.png SHA-256: 62493fe13d21e57cf0428ff28999ceee27045df062b9f8bcbbafe0958af16531
 // maureen.png SHA-256: 9bd680a9c0e83efc9c9f7bd2756f4e7a1fb1daf85c36c4272f1bc88e00c9f087
 // the-tormentor.png SHA-256: 55e22335ed5f3c3e8b70cda0633f0adf372346a3250734c13fbc10e5598d18d3
+// big-bad-wolf.png SHA-256: 8f41e3b971858fc6d27cca84628cd284f33462fbae3abdf95222048d440368a4
 export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: string }> = {
   "Billy the Bear": {
     "path": "billy-the-bear.jpg",
@@ -221,5 +222,9 @@ export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: 
   "The Tormentor": {
     "path": "the-tormentor-bcbe59ed85cb2d02.jpg",
     "sha256": "bcbe59ed85cb2d02f3edbe9e4a963af1d17865f6878eef485d4d594481a7e47e"
+  },
+  "Big Bad Wolf": {
+    "path": "big-bad-wolf-17a24c1b9e0f9fc3.jpg",
+    "sha256": "17a24c1b9e0f9fc32f0fd7343c441fb7a76c1e9041c0bf9a6efc1299d4e3e612"
   }
 };

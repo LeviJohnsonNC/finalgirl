@@ -1,3 +1,5 @@
+import { WOLF, WOLF_POWERS, WOLF_FINALES } from "@/lib/play/bigBadWolf";
+import { wolfArt } from "./wolfArt";
 import {TORMENTOR_POWERS,TORMENTOR_FINALES} from '@/lib/play/tormentor';
 import {tormentorArt} from './tormentorArt';
 import { GRIMLASH_POWERS, GRIMLASH_FINALES } from '@/lib/play/grimlash';
@@ -60,6 +62,11 @@ export function illustratedKillerCards(
   type: "dark-power" | "finale",
 ): IllustratedKillerCard[] {
   const power = type === "dark-power";
+  if (killer === WOLF) {
+    return [...(power ? WOLF_POWERS : WOLF_FINALES)]
+      .map(card => ({ ...card, art: wolfArt(card.id, true), heroArt: wolfArt(card.id) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
   if(killer==='The Tormentor')return [...(power?TORMENTOR_POWERS:TORMENTOR_FINALES)].map(c=>({...c,epic:'epic'in c&&c.epic===true,art:tormentorArt(c.id,true),heroArt:tormentorArt(c.id)})).sort((a,b)=>a.name.localeCompare(b.name));
   const cards =
     killer === 'Grimlash' ? (power ? GRIMLASH_POWERS : GRIMLASH_FINALES) : killer === 'Evomorph' ? (power ? EVOMORPH_POWERS : EVOMORPH_FINALES) : killer === 'Poltergeist' ? (power ? POLTERGEIST_POWERS : POLTERGEIST_FINALES) : killer === "Inkanyamba"

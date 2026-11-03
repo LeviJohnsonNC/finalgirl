@@ -1,3 +1,4 @@
+import { WOLF_VISUAL } from "@/lib/play/bigBadWolf";
 import {TORMENTOR_VISUAL} from '../../supabase/functions/_shared/play/tormentor';
 import {GRIMLASH_VISUAL} from '../../supabase/functions/_shared/play/grimlash';
 import { INKANYAMBA_VISUAL } from "../../supabase/functions/_shared/play/inkanyamba";
@@ -57,11 +58,7 @@ From its head and back, several slick, dark tentacles and fleshy, wing-like appe
 The beast is hunched in a defensive yet aggressive stance amidst a blinding whiteout. Heavy snow cakes its malformed limbs and settles into the crevices of its mutated flesh. The background is a stark, desaturated blizzard that obscures all landmarks, creating an isolated and suffocating atmosphere. The overall aesthetic is one of high-concept body horror, blending visceral biological detail with a cold, unrelenting environment.`,
   
   // Once Upon a Full Moon
-  'Big Bad Wolf': `A massive, heavily muscled grey wolf with a formidable and menacing presence. Its thick, matted coat is a mix of charcoal, slate grey, and muddy brown, heavily stained with dark, viscous blood. The wolf is riddled with several wooden arrows protruding at jagged angles from its shoulders, back, and forelimbs, indicating a state of severe injury that has only fueled its ferocity.
-
-Its face is contorted into a visceral snarl, with the upper lip curled back to expose long, sharp canines and pale gums. The most striking feature is its eyes—luminous, glowing red orbs that pierce through the gloom with an unnatural, predatory intensity. The ears are pinned flat against its skull, and its brow is deeply furrowed, conveying a singular focus on its unseen assailant.
-
-The wolf is captured in a low, aggressive crouch amidst a dark, misty forest floor, its large paws firmly planted as if preparing for a final, desperate lunge. The background consists of blurred, towering tree trunks shrouded in a cold, desaturated atmosphere. The overall aesthetic is dark, cinematic, and visceral, portraying a creature that is dangerously resilient and driven by primal survival.`,
+  'Big Bad Wolf': WOLF_VISUAL,
 
   // A Knock at the Door
   'The Intruders': `A trio of menacing figures stands in a suburban street at night, projecting a predatory and cult-like presence. The group consists of three individuals of varying builds, each concealing their identity with disturbing, makeshift masks that suggest a ritualistic or horror-themed motivation. Their skin is mostly obscured, but their physical stances are aggressive and confrontational.

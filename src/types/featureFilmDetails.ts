@@ -481,13 +481,7 @@ The atmosphere is "dark fantasy horror"—think The Brothers Grimm rather than D
     },
     killer: {
       name: 'Big Bad Wolf',
-      description: `In the world of Final Girl, the Big Bad Wolf isn't just a large animal; he is an apex predator that embodies the terror of being hunted. He is often associated with Storybook Woods, a location that feels ripped from a dark Grimm Brothers tale.
-
-The Nature of the Beast: The Wolf is depicted as a massive, bipedal lycanthrope-style creature, but his behavior is more akin to a calculated serial killer than a mindless beast. He doesn't just kill; he stalks.
-
-The "Big Bad" Persona: He represents the classic "stranger danger" archetype. His mechanics—specifically his ability to move quickly and his "Ambush" style attacks—reflect the folklore of a wolf in sheep's clothing (or at least, a wolf that knows exactly how to corner its prey).
-
-The Connection to "Red": While the game allows any Final Girl to face him, his primary thematic rival is Gretel, a nod to the classic fairy tale protagonist. The lore suggests a cycle of hunter and hunted that has played out across the Storybook Woods for generations.`
+      description: `A huge gray wolf with red eyes and old arrows bristling from its shoulders. It follows a trail with terrible patience, then closes the distance when its Dark Power is revealed. The fairy tale began in Storybook Woods, but the Wolf will hunt wherever the film takes it.`
     }
   },
   's2-knock-at-door': {

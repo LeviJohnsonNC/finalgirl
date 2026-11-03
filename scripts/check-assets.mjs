@@ -196,3 +196,41 @@ for(const p of marrekManifest){
 const actualMarrek=images.filter(p=>p.startsWith(marrekFolder+'/')||p==='src/assets/play/banners/marrek.webp');
 if(actualMarrek.length!==66||actualMarrek.some(p=>!marrekPaths.has(p))||JSON.stringify(marrekAliases)!==JSON.stringify({'terror-click-main':'main-unlocked','terror-click-dock-a':'dock-a-unlocked','terror-click-dock-b':'dock-b-unlocked'}))throw Error('Unmapped Warehouse art/aliases');
 console.log('Verified 33 independent Warehouse scenes, 66 bounded derivatives and three deliberate Click/Exit aliases.');
+
+// Big Bad Wolf assets correspond to the source catalog, with independent photos
+// for each mode, reveal, and named Terror cause.
+const wolfFolder = 'src/assets/play/photos/big-bad-wolf';
+const wolfPhotos = JSON.parse(readFileSync(join(wolfFolder, 'manifest.json'), 'utf8'));
+const wolfCatalog = readFileSync('supabase/functions/_shared/play/bigBadWolf.ts', 'utf8');
+const wolfExpected = new Set(['header', 'track', 'slay', 'both',
+  ...[...wolfCatalog.matchAll(/\{ id: "([a-z0-9-]+)"/g)].map(match => match[1])]);
+const wolfSources = new Set();
+const wolfFiles = new Set();
+const wolfDigests = new Set();
+function checkWolfPhoto(photo, budget, dimensions) {
+  const bytes = readFileSync(photo.file);
+  const digest = createHash('sha256').update(bytes).digest('hex');
+  const size = konradWebpDimensions(bytes);
+  if (wolfFiles.has(photo.file) || wolfDigests.has(digest) || digest !== photo.sha256 ||
+      bytes.length !== photo.bytes || bytes.length > budget ||
+      size[0] !== photo.width || size[1] !== photo.height ||
+      size[0] !== dimensions[0] || size[1] !== dimensions[1]) {
+    throw new Error('Invalid or reused Wolf photograph: ' + photo.file);
+  }
+  wolfFiles.add(photo.file);
+  wolfDigests.add(digest);
+}
+if (wolfExpected.size !== 23 || wolfPhotos.length !== 23) throw new Error('Incomplete Wolf artwork');
+for (const photo of wolfPhotos) {
+  if (!wolfExpected.delete(photo.id) || wolfSources.has(photo.source) || !/^exec-[a-f0-9-]+\.png$/.test(photo.source) ||
+      photo.width > photo.nativeWidth || photo.height > photo.nativeHeight) {
+    throw new Error('Invalid Wolf source image: ' + photo.id);
+  }
+  wolfSources.add(photo.source);
+  checkWolfPhoto(photo, 160 * 1024, photo.id === 'header' ? [1500, 500] : [1280, 720]);
+  if (photo.thumbnail) checkWolfPhoto(photo.thumbnail, 40 * 1024, [320, 180]);
+}
+if (wolfExpected.size || wolfFiles.size !== 33 || images.filter(file => file.startsWith(wolfFolder + '/')).length !== 32) {
+  throw new Error('Incomplete Wolf runtime artwork mapping');
+}
+console.log('Verified 23 independent Big Bad Wolf photographs and 10 choice thumbnails.');

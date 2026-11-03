@@ -1,3 +1,4 @@
+import { WOLF, WOLF_BLOODLUST } from "@/lib/play/bigBadWolf";
 import level0 from "@/assets/play/bloodlust/level-0.webp";
 import level1 from "@/assets/play/bloodlust/level-1.webp";
 import level2 from "@/assets/play/bloodlust/level-2.webp";
@@ -30,6 +31,7 @@ const photographs = [
  * Billy's board remains a documented source gap, so he uses the generic scale.
  */
 export const verifiedBloodlustMaximum: Readonly<Record<string, number>> = {
+  [WOLF]: WOLF_BLOODLUST.length - 1,
   "The Tormentor": 6,
   Grimlash: 8,
   Evomorph: 10,

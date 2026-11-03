@@ -1,3 +1,4 @@
+import { WOLF, WOLF_MINORS, WOLF_POWERS, WOLF_FINALES, WOLF_VISUAL, validWolfField, wolfFacts, wolfMinorField, wolfModeLabel, wolfPowerMode, type WolfMode } from "./bigBadWolf.ts";
 import {initialMarrek,validMarrekField,marrekState,marrekFacts,marrekExits,MARREK_EXITS,MARREK_VISUAL,MARREK_ITEMS} from './marrekWarehouse.ts';
 import {TORMENTOR_POWERS,TORMENTOR_FINALES,TORMENTOR_TRAPS,initialTormentor,validTormentorField,tormentorState,tormentorFacts,serializeTormentor,tormentorCard} from './tormentor.ts';
 import {SHADY_ITEMS,SHADY_PEOPLE,SHADY_CURSES,initialShady,validShadyField,shadyState,shadyFacts} from './shadyAcres.ts';
@@ -55,10 +56,11 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
+  wolfPowerMode?: WolfMode;
   inkanyambaReference?: true;
   grovesReference?: true;
   linkedModule?: ModuleObservation;
@@ -72,6 +74,7 @@ type ObservedEvent = {
 
 /** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
 export function killerMomentCards(killer: string, type: string) {
+  if (killer === WOLF) return [...(type === "dark-power" ? WOLF_POWERS : type === "finale" ? WOLF_FINALES : [])].sort((a,b) => a.name.localeCompare(b.name));
   if(killer==='The Tormentor')return [...(type==='dark-power'?TORMENTOR_POWERS:type==='finale'?TORMENTOR_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if(killer==='Grimlash')return [...(type==='dark-power'?GRIMLASH_POWERS:type==='finale'?GRIMLASH_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Evomorph") return [...(type === "dark-power" ? EVOMORPH_POWERS : type === "finale" ? EVOMORPH_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
@@ -161,6 +164,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === "big-bad-wolf") return validWolfField(key, value);
   if (module === 'shady-acres') return validShadyField(key,value);
   if(module==='marrek')return validMarrekField(key,value);
   if(module==='tormentor')return validTormentorField(key,value);
@@ -283,7 +287,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    !["big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -306,6 +310,28 @@ export function moduleState(
 ): ModuleState {
   if (module === "fright") { const state=frightState(entries); if(!state) return {}; const {eventId:_id,...snapshot}=state; return {snapshot:JSON.stringify(snapshot),sleep:state.sleep,mode:state.mode,progress:state.path.length,...frightPublic(entries)}; }
   const state: ModuleState = {};
+  if (module === "big-bad-wolf") {
+    for (const event of entries) {
+      if (event.moduleData?.module !== module) continue;
+      for (const [key, value] of Object.entries(event.moduleData.changes)) {
+        if (value === null) delete state[key];
+        else state[key] = value;
+      }
+    }
+    const reveal = entries.find(e => e.kind === "moment" && e.momentType === "dark-power");
+    const finale = entries.find(e => e.kind === "moment" && e.momentType === "finale");
+    if (reveal) {
+      state.powerRevealed = true;
+      const namedMode = reveal.wolfPowerMode ?? wolfPowerMode(reveal.killerCard ?? "");
+      if (namedMode) state.mode = namedMode;
+      else if (state.mode === "track") delete state.mode;
+      const power = WOLF_POWERS.find(card => card.name === reveal.killerCard);
+      if (power) state.power = power.name;
+    }
+    const knownFinale = WOLF_FINALES.find(card => card.name === finale?.killerCard);
+    if (knownFinale) state.finale = knownFinale.name;
+    return state;
+  }
   for (const e of entries) {
     if(module==='grimlash'&&e.kind==='moment') {if(e.momentType==='dark-power') {state.powerRevealed=true;state.power=GRIMLASH_POWERS.find(c=>c.name===e.killerCard)?.id??null;} if(e.momentType==='finale') {state.finaleRevealed=true;state.finale=GRIMLASH_FINALES.find(c=>c.name===e.killerCard)?.id??null;}}
     if(module === "evomorph" && e.kind === "moment") {if(e.momentType === "dark-power") {state.powerRevealed=true; state.power=EVOMORPH_POWERS.find(c=>c.name===e.killerCard)?.id??null;}if(e.momentType === "finale") {state.finaleRevealed=true;state.finale=EVOMORPH_FINALES.find(c=>c.name===e.killerCard)?.id??null;}}
@@ -453,6 +479,13 @@ function valueLabel(key: string, value: ModuleValue) {
   return String(value);
 }
 export function describeModule(observation: ModuleObservation) {
+  if (observation.module === "big-bad-wolf") {
+    return Object.entries(observation.changes).map(([key, value]) => {
+      if (key === "mode") return wolfModeLabel(value);
+      const card = WOLF_MINORS.find(p => wolfMinorField(p.id) === key);
+      return `${card?.name ?? key} · ${value === null ? "health unrecorded" : `${value}/2 Health`}`;
+    }).join(", ");
+  }
   if(observation.module==='marrek')return marrekFacts(marrekState(observation.changes)).join(' ');
   if(observation.module==='tormentor')return tormentorFacts(tormentorState(observation.changes));
   if(observation.module==='shady-acres')return shadyFacts(shadyState(observation.changes)).join(' ')||'Shady Acres observations recorded';
@@ -474,8 +507,13 @@ export function describeModule(observation: ModuleObservation) {
 export function moduleContext(
   selection: ModuleSelection,
   entries: readonly ObservedEvent[],
+  includeWolf = true,
 ) {
   const context: Record<string, ModuleState> = {};
+  if (includeWolf && selection.killer === WOLF) {
+    const wolf = moduleState(entries, "big-bad-wolf");
+    if (Object.keys(wolf).length) context["big-bad-wolf"] = wolf;
+  }
   if(selection.location==='Marrek Warehouse'&&entries.some(e=>e.moduleData?.module==='marrek')){const s=marrekState(moduleState(entries,'marrek'));s.exits=marrekExits(s,entries);delete s.initialized;context.marrek={snapshot:JSON.stringify(s)};}
   if(selection.killer==='The Tormentor'&&entries.some(e=>e.moduleData?.module==='tormentor'))context.tormentor={snapshot:serializeTormentor(tormentorState(moduleState(entries,'tormentor'))),power:tormentorCard(entries,'dark-power')??null,finale:tormentorCard(entries,'finale')??null};
   if(context.marrek&&context.tormentor){const t=tormentorState(context.tormentor),locks=marrekExits(marrekState(context.marrek));t.exits=Object.fromEntries(MARREK_EXITS.map(e=>[e.name,locks[e.id]]));context.tormentor.snapshot=serializeTormentor(t);}
@@ -551,6 +589,11 @@ export function moduleStoryBeats(
   if(context?.marrek){const killer=moduleStoryBeats({...selection,location:''},entries);let place='';for(const fact of marrekFacts(marrekState(context.marrek)))if(place.length+fact.length+1<=(killer?535:875))place+=fact+' ';let threat='';for(const fact of killer.split(/(?<=\.)\s+/))if(threat.length+fact.length+1<=335)threat+=fact+' ';return [place.trim(),threat.trim()].filter(Boolean).join('\n');}
   if(context?.tormentor){const place=moduleStoryBeats({...selection,killer:''},entries);let threat='';for(const fact of tormentorFacts(tormentorState(context.tormentor),entries).split(/(?<=\.)\s+/))if(threat.length+fact.length+1<=(place?340:870))threat+=fact+' ';return [threat.trim(),place.slice(0,535)].filter(Boolean).join('\n');}
   if (!context) return "";
+  if (context["big-bad-wolf"]) {
+    const location = moduleStoryBeats({ ...selection, killer: "" }, entries);
+    const wolf = wolfFacts(context["big-bad-wolf"]);
+    return [wolf, location.slice(0, 895 - wolf.length)].filter(Boolean).join("\n");
+  }
 
   // Preserve the established output for every other location. Each owner gets
   // room inside the existing 900-character module budget for Carnival mixes.
@@ -730,6 +773,11 @@ export function buddylandReferences(
   attacker?: string,
 ) {
   const refs: { name: string; effect: string }[] = [];
+  if (selection.killer === WOLF) {
+    refs.push({ name: WOLF, effect: WOLF_VISUAL });
+    const wolf = context?.["big-bad-wolf"];
+    if (wolf) refs.push({ name: "Wolf observations", effect: wolfFacts(wolf) });
+  }
   if(selection.location==='Marrek Warehouse'){refs.push({name:'Marrek Warehouse',effect:MARREK_VISUAL});if(context?.marrek)refs.push({name:'Warehouse observations',effect:marrekFacts(marrekState(context.marrek)).join(' ')});}
   if(selection.killer==='The Tormentor'&&context?.tormentor){refs.push({name:'Tormentor observations',effect:tormentorFacts(tormentorState(context.tormentor))});for(const card of [...TORMENTOR_POWERS,...TORMENTOR_FINALES])if(card.name===context.tormentor.power||card.name===context.tormentor.finale)refs.push({name:card.name,effect:card.effect+' Recording the reveal does not prove its actions or consequences occurred.'});}
   if (selection.location === "Sacred Groves") {

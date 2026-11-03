@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 const catalog = readFileSync('src/types/gameData.ts', 'utf8');
 const finalGirls = new Set([...catalog.matchAll(/finalGirls: *\[([^\]]+)\]/g)].flatMap(([,names])=>[...names.matchAll(/'([^']+)'/g)].map(([,name])=>name)));
 const registry = catalog.split('const CHARACTER_FILES:')[1].split('};')[0];
-const portraits = Object.fromEntries([...registry.matchAll(/'([^']+)': '([^']+)[.]png'/g)].filter(([,name])=>finalGirls.has(name) || ['Billy the Bear','Inkanyamba','Poltergeist','Grimlash','The Tormentor'].includes(name)).map(([,name,file])=>[name,file]));
+const portraits = Object.fromEntries([...registry.matchAll(/'([^']+)': '([^']+)[.]png'/g)].filter(([,name])=>finalGirls.has(name) || ['Billy the Bear','Inkanyamba','Poltergeist','Grimlash','The Tormentor','Big Bad Wolf'].includes(name)).map(([,name,file])=>[name,file]));
 const slug = name => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const stage = 'build/opening-references';
 rmSync(stage, { recursive: true, force: true });
@@ -26,9 +26,13 @@ for (const [name, file] of Object.entries(portraits)) {
   const bytes = execFileSync(process.env.OPENING_IMAGEMAGICK || 'magick', [source, '-auto-orient', '-resize', '768x768>', '-strip', '-quality', '90', 'jpeg:-']);
   const digest = createHash('sha256').update(bytes).digest('hex');
   // Keep the prior Grimlash object valid for already-deployed consumers.
-  const path = ['Grimlash','The Tormentor'].includes(name) ? `${slug(name)}-${digest.slice(0,16)}.jpg` : `${slug(name)}.jpg`;
+  const path = ['Grimlash','The Tormentor','Big Bad Wolf'].includes(name) ? `${slug(name)}-${digest.slice(0,16)}.jpg` : `${slug(name)}.jpg`;
   writeFileSync(`${stage}/${path}`, bytes);
   if(name==='The Tormentor'){mkdirSync('supabase/reference-assets',{recursive:true});writeFileSync('supabase/reference-assets/tormentor.jpg',bytes);}
+  if (name === 'Big Bad Wolf') {
+    mkdirSync('supabase/reference-assets', { recursive: true });
+    writeFileSync('supabase/reference-assets/big-bad-wolf.jpg', bytes);
+  }
   entries[name] = { path, sha256: digest };
   hashes.push(`// ${file}.png SHA-256: ${createHash('sha256').update(readFileSync(source)).digest('hex')}`);
 }
