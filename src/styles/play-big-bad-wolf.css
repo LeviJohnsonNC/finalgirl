@@ -60,14 +60,17 @@
    photographic layer narrower preserves the ears and muzzle in the shallow header. */
 .play-module-panel[data-module="big-bad-wolf"] > summary > img.play-module-art {
   left: auto;
+  right: 52px;
   width: min(100%, 440px);
-  mask-image: linear-gradient(to right, transparent, #000 27%);
+  mask-image: linear-gradient(to right, transparent, #000 27%, #000 94%, transparent);
 }
 @media (max-width: 639px) {
   .play-module-panel[data-module="big-bad-wolf"] > summary .play-module-disclosure {
     align-self: flex-start;
   }
   .play-module-panel[data-module="big-bad-wolf"] > summary > img.play-module-art {
+    right: 0;
+    mask-image: linear-gradient(to right, transparent, #000 27%);
     object-position: 100% center !important;
   }
 }
