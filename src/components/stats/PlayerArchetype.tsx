@@ -1,140 +1,128 @@
-import { PlayerArchetype as ArchetypeType } from '@/hooks/useGameStats';
-import { ArchetypeStanding } from '@/hooks/useArchetypeScoring';
+import { useId, useState } from 'react';
+import { ArrowUpRight, ChevronDown } from 'lucide-react';
+import type { computeArchetype, StyleDimension } from '@/hooks/useArchetypeScoring';
+import type { usePlayStyle } from '@/hooks/usePlayStyle';
+import type { StyleFinding } from '@/lib/playStyle';
 
 interface PlayerArchetypeProps {
-  archetype: ArchetypeType;
-  reason: string;
-  profile: string;
-  scores: ArchetypeStanding[];
+  profile: ReturnType<typeof computeArchetype>;
+  play: ReturnType<typeof usePlayStyle>;
+  onOpenSession?: (gameId: string) => void;
 }
 
-const archetypeConfig: Record<ArchetypeType, { name: string; color: string; bgClass: string; blurb: string }> = {
-  protector: {
-    name: 'The Protector',
-    color: 'text-neon-cyan',
-    bgClass: 'archetype-protector',
-    blurb: 'Victims saved',
-  },
-  duelist: {
-    name: 'The Duelist',
-    color: 'text-vhs-yellow',
-    bgClass: 'archetype-duelist',
-    blurb: 'Clean, efficient wins',
-  },
-  survivor: {
-    name: 'The Survivor',
-    color: 'text-blood-red',
-    bgClass: 'archetype-survivor',
-    blurb: 'Wins at a sliver of health',
-  },
-  gambler: {
-    // Was text-purple-400. The design system has no purple in it, and CLAUDE.md
-    // rules it out by name; sickly green is the palette's own fourth voice.
-    name: 'The Gambler',
-    color: 'text-archetype-gambler',
-    bgClass: 'archetype-gambler',
-    blurb: 'Wild swings in horror',
-  },
-  newcomer: {
-    name: 'Newcomer',
-    color: 'text-dim',
-    bgClass: 'archetype-newcomer',
-    blurb: 'Not enough games yet',
-  },
+const dimensions: Record<StyleDimension, { title: string; measure: string; color: string; unit: string }> = {
+  duelist: { title: 'Duelist', measure: 'Low-Horror finishes', color: 'text-vhs-yellow', unit: 'games' },
+  protector: { title: 'Protector', measure: 'Victim rescues', color: 'text-neon-cyan', unit: 'games' },
+  survivor: { title: 'Survivor', measure: 'Close finishes', color: 'text-blood-red', unit: 'wins' },
+  gambler: { title: 'Gambler', measure: 'Pressure swings', color: 'text-archetype-gambler', unit: 'comparisons' },
 };
 
-/**
- * The player's style, as a profile card rather than a footnote.
- *
- * The scoring already computed all four archetypes and the page kept only the
- * winner — throwing away the interesting part. A 62/58 split says more about
- * how someone plays than the winning label does, so the ranking is shown.
- */
-export const PlayerArchetypeBadge = ({ archetype, profile, scores }: PlayerArchetypeProps) => {
-  const config = archetypeConfig[archetype];
-  const paragraphs = profile.split('\n\n').filter(Boolean);
-  const leader = scores[0];
-  const runnerUp = scores[1];
-  // "Razor-thin" is a claim the prose already makes; this is the number behind it.
-  const margin = leader && runnerUp ? leader.score - runnerUp.score : null;
+const caseDate = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
 
+function Finding({ finding, onOpenSession }: { finding: StyleFinding; onOpenSession?: PlayerArchetypeProps['onOpenSession'] }) {
+  const example = finding.cases[0];
+  const [expanded, setExpanded] = useState(false);
+  const caseListId = useId();
   return (
-    <section className={`archetype-badge ${config.bgClass}`} aria-label="Player archetype">
+    <article className="style-finding">
+      <p className="style-kicker">{finding.label}</p>
+      <h4>{finding.title}</h4>
+      <p className="archetype-reason">{finding.detail}</p>
+      <div className="style-finding-actions">
+        {onOpenSession && example && (
+          <button type="button" onClick={() => onOpenSession(example.id)}>
+            Open example <ArrowUpRight aria-hidden="true" />
+          </button>
+        )}
+        <button type="button" aria-expanded={expanded} aria-controls={caseListId} onClick={() => setExpanded(value => !value)}>
+          {expanded ? 'Hide cases' : `See ${finding.cases.length} cases`} <ChevronDown aria-hidden="true" />
+        </button>
+      </div>
+      <div className="style-cases" id={caseListId} hidden={!expanded}>
+        {expanded && <ul aria-label={`Cases for ${finding.title}`}>
+          {finding.cases.map(item => (
+            <li key={item.id}>
+              <p className="style-case-cast">{item.finalGirl} vs. {item.killer}</p>
+              <p>{item.location} · {item.outcome === 'won' ? 'Won' : 'Lost'} · {caseDate.format(item.timestamp)}</p>
+              <p className="style-case-note">{item.note}</p>
+              {item.beats.length > 0 && (
+                <ol>{item.beats.map((beat, index) => <li key={index}>{beat}</li>)}</ol>
+              )}
+              {onOpenSession && (
+                <button type="button" onClick={() => onOpenSession(item.id)} aria-label={`Open case for ${item.finalGirl} vs. ${item.killer} at ${item.location}, ${caseDate.format(item.timestamp)}`}>
+                  Open case <ArrowUpRight aria-hidden="true" />
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>}
+      </div>
+    </article>
+  );
+}
+
+export function PlayerArchetypeBadge({ profile, play, onOpenSession }: PlayerArchetypeProps) {
+  const { archetype, blend, summary, scores } = profile;
+  const lead = archetype === 'newcomer' ? undefined : dimensions[archetype];
+  const runnerUp = blend ? dimensions[blend] : undefined;
+  return (
+    <section className={`archetype-badge archetype-${archetype}`} aria-labelledby="style-title">
       <div className="archetype-content">
-        <header className="archetype-head">
-          <div>
-            <p className="archetype-eyebrow">// Your style</p>
-            <h3 className={`archetype-name ${config.color}`}>{config.name}</h3>
-          </div>
-          {margin !== null && (
-            <p className="archetype-margin">
-              {margin === 0
-                ? 'Dead tie with '
-                : margin <= 5
-                  ? 'Just ahead of '
-                  : `${margin} points clear of `}
-              <span className={archetypeConfig[runnerUp.archetype].color}>
-                {archetypeConfig[runnerUp.archetype].name}
-              </span>
-            </p>
-          )}
+        <header>
+          <p className="archetype-eyebrow">// Your style</p>
+          <p className="style-kicker">Career profile</p>
+          <h3 className="archetype-name" id="style-title">
+            {lead ? <span className={lead.color}>{runnerUp ? lead.title : `The ${lead.title}`}</span> : 'Style in the making'}
+            {runnerUp && <> <span className="style-title-divider">/</span> <span className={runnerUp.color}>{runnerUp.title}</span></>}
+          </h3>
         </header>
 
-        <div className="archetype-profile">
-          {paragraphs[0] && <p className="archetype-reason">{paragraphs[0]}</p>}
-          {paragraphs.length > 1 && (
-            <details className="archetype-more">
-              <summary>Read the full profile</summary>
-              {paragraphs.slice(1).map((p, i) => <p key={i} className="archetype-reason">{p}</p>)}
-            </details>
-          )}
-        </div>
+        <ul className="style-profile-facts">
+          {summary.map(fact => <li key={fact} className="archetype-reason">{fact}</li>)}
+        </ul>
 
-        {scores.length > 1 && (
-          <div className="archetype-scores">
-            <p className="archetype-scores-label">
-              How you score on each · sessions the score is built from
-            </p>
-            <dl className="archetype-score-list">
-              {scores.map((standing) => {
-                const cfg = archetypeConfig[standing.archetype];
-                return (
-                  <div key={standing.archetype} className="archetype-score-row">
-                    <dt
-                      className={`archetype-score-name ${
-                        standing.support === 0
-                          ? 'text-dimmer'
-                          : standing.archetype === archetype
-                            ? cfg.color
-                            : 'text-dim'
-                      }`}
-                    >
-                      {cfg.name.replace('The ', '')}
-                      <span className="archetype-score-blurb">{cfg.blurb}</span>
-                    </dt>
-                    <dd className="archetype-score-meter">
-                      <span
-                        className={`archetype-score-fill archetype-fill-${standing.archetype}`}
-                        style={{ width: `${standing.score}%` }}
-                      />
-                    </dd>
-                    <dd className="archetype-score-value">
-                      {standing.score}
-                      {/* What the number is built on. A 71 from four sessions
-                          and a 71 from forty are not the same claim. */}
-                      <span className="archetype-score-support">
-                        {standing.support === 0
-                          ? 'not recorded'
-                          : `${standing.support}/${standing.of}`}
-                      </span>
-                    </dd>
-                  </div>
-                );
-              })}
-            </dl>
+        <section className="style-reel" aria-labelledby="style-reel-title">
+          <div className="style-reel-head">
+            <h4 id="style-reel-title">From recent Play logs</h4>
+            {play.report && <p>{play.report.recorded} of {play.report.total} recent games with usable logs</p>}
           </div>
-        )}
+          {play.status === 'loading' && <p className="archetype-reason" role="status">Loading Play evidence…</p>}
+          {play.status === 'error' && (
+            <p className="archetype-reason" role="status">
+              Play evidence is temporarily unavailable. <button className="style-retry" type="button" onClick={play.retry}>Retry</button>
+            </p>
+          )}
+          {play.report && play.report.findings.length === 0 && (
+            <p className="archetype-reason">
+              {play.report.recorded === 0
+                ? 'Finish a game with rounds, rescues or tracker changes recorded in Play to start building this reel.'
+                : 'The logs are coming in. Findings appear when a pattern has enough recorded games behind it.'}
+            </p>
+          )}
+          {play.report?.findings.map(finding => <Finding key={finding.id} finding={finding} onOpenSession={onOpenSession} />)}
+        </section>
+
+        <details className="archetype-more">
+          <summary>How your style is measured</summary>
+          <p className="archetype-reason">
+            The profile looks across your saved archive, with more weight on recent games. Similar patterns share the title.
+          </p>
+          <dl className="style-dimensions">
+            {scores.map(standing => {
+              const cfg = dimensions[standing.archetype];
+              return (
+                <div className="archetype-score-row" key={standing.archetype}>
+                  <dt className={cfg.color}>{cfg.measure}</dt>
+                  <dd className="archetype-reason">
+                    {standing.support ? standing.evidence : 'No usable observations yet.'}
+                    {standing.of > 0 && <small>{standing.support} of {standing.of} {cfg.unit} included</small>}
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+        </details>
       </div>
     </section>
   );
-};
+}

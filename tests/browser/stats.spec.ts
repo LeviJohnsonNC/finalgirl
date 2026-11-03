@@ -1,4 +1,5 @@
-import { test, expect } from './fixtures';
+import { newPlayEvent } from '../../src/lib/play/events';
+import { test, expect, userId } from './fixtures';
 import { statsHistory } from './stats-data';
 
 const openStats = async (page: import('@playwright/test').Page) => {
@@ -90,6 +91,7 @@ test('one-session 0% and 100% records stay honest and fully readable without mis
 test('recent sessions open the exact case and the complete player profile remains available', async ({ page, archive }) => {
   archive.history = statsHistory();
   await archive.install(page); await openStats(page);
+  await expect(page.locator('.archetype-badge')).toContainText('0 of 20 recent games with usable logs');
   const summary = page.locator('.archetype-more summary');
   await expect(summary).toBeVisible(); await summary.click();
   await expect(page.locator('.archetype-more')).toHaveAttribute('open', '');
@@ -164,5 +166,74 @@ test('archive retrieval errors remain recoverable without displaying invented st
   fail = false;
   await page.getByRole('button', { name: 'RETRY ARCHIVE LOAD' }).click();
   await expect(page.getByRole('heading', { name: 'No Games Recorded' })).toBeVisible();
+  expect(archive.calls).toEqual([]);
+});
+
+test('a fresh archive loads Play evidence in one bounded request and opens its exact case', async ({ page, archive }, testInfo) => {
+  const reports = statsHistory();
+  const comparison = (recent: boolean) => [
+    newPlayEvent({ kind: 'start', saved: 0, killed: 0, round: 1 }),
+    newPlayEvent({ kind: 'state', field: 'finalHorrorLevel', value: 3 }),
+    newPlayEvent({ kind: 'state', field: 'finalHorrorLevel', value: 6 }),
+    newPlayEvent({ kind: 'round' }),
+    newPlayEvent({ kind: 'state', field: 'finalHorrorLevel', value: recent ? 2 : 5 }),
+  ];
+  const caseIds = reports.slice(0, 4).map(row => row.id);
+  archive.history = reports.map((row, i) => i < 4 ? {
+    ...row,
+    play_events: [
+      newPlayEvent({ kind: 'start', saved: 0, killed: 0, round: 1 }),
+      newPlayEvent({ kind: 'state', field: 'finalGirlHealth', value: 5 }),
+      newPlayEvent({ kind: 'saved', quantity: i === 3 ? 1 : 2 }),
+      newPlayEvent({ kind: 'round' }),
+      newPlayEvent({ kind: 'moment', momentType: 'dark-power', text: 'Dark Power revealed' }),
+      newPlayEvent({ kind: 'state', field: 'finalGirlHealth', value: 1 }),
+      newPlayEvent({ kind: 'round' }),
+      newPlayEvent({ kind: 'state', field: 'finalGirlHealth', value: 4 }),
+      newPlayEvent({ kind: 'saved', quantity: 1 }),
+    ],
+  } : (i >= 4 && i < 8) || (i >= 20 && i < 24) ? {
+    ...row, outcome: 'won', final_girl: 'Laurie', killer: 'Hans', location: 'Camp Happy Trails',
+    play_events: comparison(i < 8),
+  } : row);
+  archive.failStyleRead = true;
+  await archive.install(page);
+  await openStats(page);
+  const card = page.locator('.archetype-badge');
+  await expect(card.getByText('Career profile')).toBeVisible();
+  await expect(card.getByRole('status')).toContainText('temporarily unavailable');
+  archive.failStyleRead = false;
+  await card.getByRole('button', { name: 'Retry' }).click();
+  await expect(card).toContainText('8 of 20 recent games with usable logs');
+  await expect(card).toContainText('3 of 4 recent games');
+  await expect(card).toContainText('2 of 4 games won after dropping to 1 HP');
+  await expect(card).toContainText('Bigger Horror recoveries in recent wins');
+  expect(archive.styleReads).toHaveLength(2);
+  expect(archive.styleReads[1]).toEqual({ owner: `eq.${userId}`, ids: reports.slice(0, 40).map(row => row.id) });
+
+  const rescueFinding = card.locator('.style-finding').filter({ hasText: 'More rescues before the Dark Power' });
+  const disclosure = rescueFinding.getByRole('button', { name: 'See 3 cases' });
+  await disclosure.focus();
+  await page.keyboard.press('Enter');
+  await expect(rescueFinding).toContainText('Round 2 · Dark Power revealed');
+  await expect(rescueFinding.getByRole('button', { name: /^Open case for/ })).toHaveCount(3);
+
+  for (const width of testInfo.project.name === 'mobile' ? [320, 390] : [1280, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+    await card.screenshot({ path: testInfo.outputPath(`style-${width}.png`), animations: 'disabled', style: '.app-footer{visibility:hidden}' });
+  }
+  await rescueFinding.getByRole('button', { name: 'Open example' }).click();
+  await expect(page.locator('.story-page-content')).toContainText('Case 1:');
+
+  // A corrected archived log and a removed game must recalculate on a new Stats visit.
+  archive.history = archive.history.filter(row => row.id !== caseIds[1]);
+  const corrected = archive.history.find(row => row.id === caseIds[0])!;
+  const events = corrected.play_events as ReturnType<typeof newPlayEvent>[];
+  corrected.play_events = [...events, newPlayEvent({ kind: 'undo', target: events[2].id })];
+  await page.reload();
+  await page.getByRole('button', { name: 'Stats', exact: true }).click();
+  await expect(card).toContainText('7 of 20 recent games with usable logs');
+  await expect(card.getByText('More rescues before the Dark Power')).toHaveCount(0);
   expect(archive.calls).toEqual([]);
 });

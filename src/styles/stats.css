@@ -196,22 +196,11 @@
 .stats-page .archetype-badge { position: relative; padding: 18px; border-radius: 3px; border-color: #a2aa9163; background: linear-gradient(150deg, #8897650a, transparent), #030b0ee8; backdrop-filter: none; min-width: 0; box-shadow: inset 0 0 0 3px #020709; }
 .stats-page .archetype-badge::before { content: ''; position: absolute; width: 22px; height: 72px; left: -10px; top: 30px; background: #bdab7e4d; transform: rotate(4deg); border-block: 1px dotted #d1b78d66; pointer-events: none; }
 .stats-page .archetype-content { gap: 15px; }
-.stats-page .archetype-eyebrow { margin-bottom: 16px; font: 400 18px/1.2 'Archive Fell', Georgia, serif; color: #e5e5da; letter-spacing: .1em; text-transform: uppercase; }
 .stats-page .archetype-name { font: 400 29px/1.15 'Archive Fell', Georgia, serif; letter-spacing: .02em; }
-.stats-page .archetype-margin { font: 11px/1.5 var(--archive-label); color: #abb8b9; margin-top: 5px; }
-.stats-page .archetype-profile { gap: 10px; }
 .stats-page .archetype-reason { font: 13px/1.65 var(--archive-label); color: #c5ccca; letter-spacing: 0; }
 .archetype-more summary { padding-block: 6px; cursor: pointer; color: #d6cead; font: 12px/1.5 var(--archive-label); text-decoration: underline; text-underline-offset: 4px; }
 .archetype-more[open] summary { margin-bottom: 10px; }
 .archetype-more p + p { margin-top: 10px; }
-.stats-page .archetype-scores { padding-top: 13px; }
-.stats-page .archetype-scores-label { font: 11px/1.5 var(--archive-label); color: #9eafb2; }
-.stats-page .archetype-score-list { grid-template-columns: minmax(0, 1.15fr) minmax(25px, 1fr) auto; gap: 12px 9px; justify-content: stretch; }
-.stats-page .archetype-score-name { font: 13px/1.3 var(--archive-label); }
-.stats-page .archetype-score-blurb { display: block; margin-top: 4px; font: 11px/1.4 var(--archive-label); color: #a3afb2; }
-.stats-page .archetype-score-value { font: 13px/1.4 var(--archive-label); color: #c4cecc; }
-.stats-page .archetype-score-support { font: 11px var(--archive-label); color: #a1afb2; }
-.stats-page .archetype-score-meter { height: 6px; }
 
 @media (min-width: 1500px) { .stats-page .stats-bg-plate { background-size: auto, 100vw auto; } }
 @media (max-width: 1099px) {
@@ -297,9 +286,6 @@
   .stats-page .session-list { max-height: 330px; }
   .stats-page .archetype-badge { padding: 20px; }
   .stats-page .archetype-reason { font-size: 12px; }
-  .stats-page .archetype-score-list { gap: 16px 12px; }
-  .stats-page .archetype-score-name { font-size: 12px; }
-  .stats-page .archetype-margin, .stats-page .archetype-scores-label { font-size: 11px; }
   .archetype-more summary { padding-block: 12px; font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -330,7 +316,6 @@ body:has(.stats-page) .news-broadcast { display: none; }
   .stats-page .weapon-name, .stats-page .weapon-count, .stats-page .session-cast { font-size: 11px; }
   .stats-page .session-outcome, .stats-page .session-meta, .stats-page .session-place { font-size: 11px; }
   .stats-page .archetype-reason { font-size: 12px; }
-  .stats-page .archetype-margin, .stats-page .archetype-scores-label, .archetype-more summary { font-size: 11px; }
 }
 @media (min-width: 768px) and (max-width: 1099px) {
   .footage-layout { padding-left: 74px; }
@@ -377,3 +362,34 @@ body:has(.stats-page) main { padding-bottom: calc(var(--app-footer-h, 64px) + 24
 .stats-page .stats-content { font-variant-numeric: tabular-nums; }
 
 .stats-page .stats-bg-plate { overflow: clip; }
+
+/* Your Style keeps the record-jacket palette with quieter evidence rows. */
+.stats-page .archetype-eyebrow { margin-bottom: 12px; font: 400 18px/1.2 'Archive Fell', Georgia, serif; color: #e5e5da; letter-spacing: .1em; text-transform: uppercase; }
+.stats-page .archetype-name { margin-top: 4px; overflow-wrap: anywhere; }
+.style-title-divider { color: #889495; }
+.style-kicker { color: #d9c595; font: 700 10px/1.4 var(--archive-label); letter-spacing: .15em; text-transform: uppercase; }
+.style-profile-facts { display: grid; gap: 6px; }
+.style-profile-facts li { border-left: 1px solid #bda77b80; padding-left: 10px; }
+.style-reel { border-block: 1px solid #a2aa913d; padding-block: 13px; display: grid; gap: 12px; }
+.style-reel-head h4 { color: #e5e5da; font: 400 19px/1.2 'Archive Fell', Georgia, serif; }
+.style-reel-head > p { color: #a3b1b1; font: 11px/1.45 var(--archive-label); margin-top: 3px; }
+.style-finding { display: grid; gap: 4px; padding: 12px; border: 1px solid #a2aa913d; background: #b1b8a208; }
+.style-finding > h4 { color: #efede1; font: 600 15px/1.35 var(--archive-label); }
+.style-finding-actions { display: flex; flex-wrap: wrap; gap: 0 16px; }
+.style-finding-actions button, .style-cases button, .style-retry { color: #e3d5ab; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.style-finding-actions button, .style-cases button { display: inline-flex; align-items: center; gap: 4px; width: fit-content; min-height: 32px; padding-block: 7px; font: 12px/1.5 var(--archive-label); }
+.style-finding-actions svg, .style-cases button svg { width: 13px; height: 13px; }
+.style-finding-actions button[aria-expanded="true"] svg { transform: rotate(180deg); }
+.style-finding-actions button:focus-visible, .style-cases button:focus-visible, .style-retry:focus-visible { outline: 2px solid #9ad9d6; outline-offset: 2px; }
+.style-cases > ul { display: grid; gap: 6px; max-height: 25rem; overflow-y: auto; }
+.style-cases > ul > li { border-top: 1px solid #a2aa913d; padding: 8px 6px 0 0; color: #adbbba; font: 12px/1.55 var(--archive-label); overflow-wrap: anywhere; }
+.style-case-cast, .style-case-note { color: #e4e7df; }
+.style-case-cast { font-weight: 700; }
+.style-cases ol { margin: 3px 0 0 1.25em; list-style: decimal; }
+.style-dimensions { display: grid; gap: 10px; margin-top: 12px; }
+.style-dimensions .archetype-score-row { display: block; border-top: 1px solid #a2aa913d; padding-top: 8px; }
+.style-dimensions dt { font: 600 13px/1.45 var(--archive-label); }
+.style-dimensions small { display: block; color: #a3b1b1; }
+@media (pointer: coarse) {
+  .style-finding-actions button, .style-cases button { min-height: 44px; padding-block: 13px; }
+}

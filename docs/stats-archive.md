@@ -14,9 +14,15 @@ The chart keeps honest stacked bars, its existing windows and views, tooltips, a
 
 - Final Girls, Killers, and Locations have one keyboard-focusable scroll region with sticky column headings. Small archives shrink naturally; large archives remain bounded.
 - The weapon tally includes every recorded weapon, retaining the existing ranking and counts. Its list scrolls after the visible rows. The latest eight sessions remain available in a bounded list, and each row opens its exact saved case.
-- Your Style keeps the summary, point margin, four scores, and their supporting session counts visible. The remaining profile expands in place.
+- Your Style shows a career archetype (or a blend when two readings are close) with its supporting facts. The expanded methodology gives all four dimensions and their individual coverage. Recent findings show up to three patterns with a direct link to an example case and an expandable list of supporting cases and beats.
 - The basic record is visible from the first completed game. Sparse highlights use compact locked cards. Missing rounds and horror remain unrecorded rather than becoming zeroes. Entirely unrecorded victim totals show an em dash; the activity panel explains missing victim data and flags partial coverage without changing any calculations.
 - Existing navigation actions move above the archive. The ticker is suppressed only while Stats is mounted; other pages keep their existing layout. The full fan-app attribution remains below Stats in every state.
+
+## Play evidence
+
+Stats separately reads the Play logs for up to 40 known game IDs from the owner’s archive. The first 20 form the recent window and the next 20 are reserved for comparisons. This uses the existing history row policy and leaves the compact summary request unchanged. The report is derived in memory from effective Play observations. Setup alone does not count toward coverage. Missing tracker readings, unknown round numbers and reviewed ending values cannot fill gaps in a timeline.
+
+A rescue signature needs four games with timed rescues and a reveal, plus a direction seen in at least three games and 60% of the sample. An observed 1 HP report needs at least three drops. When rescue timing is sparse, four round-tracked wins can supply a median pace. Horror change compares paired wins with recorded recoveries and identical killers, locations and Final Girls. It requires at least four pairs, a mean difference of one level, and agreement in at least three quarters of the pairs. The career pressure dimension uses comparable ending Horror readings from the same cast and breaks the sequence at a missing reading.
 
 ## Review
 
