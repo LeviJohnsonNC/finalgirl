@@ -408,8 +408,12 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     if(original.moduleData?.module==='grimlash'&&original.grimlashAction&&!resolveGrimlashAction(original.grimlashAction,moduleState(summary.entries,'grimlash'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='evomorph'&&original.evomorphAction&&!resolveEvomorphAction(original.evomorphAction,moduleState(summary.entries,'evomorph'),summary.entries)){summary.inactive.add(original.id);continue;}
     const e: PlayEvent & { wolfPowerMode?: WolfMode } = { ...original };
+    // This field exists only in the derived summary. Read mode from card names,
+    // even when an unversioned or externally supplied log carries extra fields.
+    delete e.wolfPowerMode;
     const wolfReveal = e.kind === "moment" && e.momentType === "dark-power";
-    if (wolfReveal && e.killerCard) e.wolfPowerMode = wolfPowerMode(e.killerCard);
+    const initialWolfMode = wolfReveal && e.killerCard ? wolfPowerMode(e.killerCard) : undefined;
+    if (initialWolfMode) e.wolfPowerMode = initialWolfMode;
     if (e.kind === "killed" || e.kind === "saved") {
       e.quantity = quantities.get(e.id) ?? e.quantity!;
     }
@@ -431,7 +435,11 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
               e.killerCard = edit.killerCard;
               // A clear changes the label alone. Retain the last known mode on
               // this reveal and recompute it from the accepted log on replay.
-              if (wolfReveal && edit.killerCard) e.wolfPowerMode = wolfPowerMode(edit.killerCard);
+              if (wolfReveal && edit.killerCard) {
+                const correctedMode = wolfPowerMode(edit.killerCard);
+                if (correctedMode) e.wolfPowerMode = correctedMode;
+                else delete e.wolfPowerMode;
+              }
             }
           }
         }

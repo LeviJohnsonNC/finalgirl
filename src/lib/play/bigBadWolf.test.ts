@@ -28,6 +28,8 @@ describe("Big Bad Wolf observations", () => {
     expect(mode([start])).toBeUndefined();
     expect(mode([start, track])).toBe("track");
     expect(mode([start, track, reveal])).toBeUndefined();
+    const untrusted = { ...reveal, wolfPowerMode: "both" as const };
+    expect(mode([start, track, untrusted])).toBeUndefined();
     const epic = name("A Killing Machine");
     const clear = name("");
     expect(mode([start, track, reveal, epic, clear])).toBe("both");
