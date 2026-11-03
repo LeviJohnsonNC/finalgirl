@@ -1,3 +1,4 @@
+import { WOODS_MODULE, describeWoodsAction, isInitialWoods, resolveWoodsAction, validWoodsAction, woodsParent, type WoodsAction } from "./storybookWoods.ts";
 import { wolfPowerMode, type WolfMode } from "./bigBadWolf.ts";
 import {resolveMarrekAction,validMarrekAction,isInitialMarrek,marrekParent,type MarrekAction} from './marrekWarehouse.ts';
 import {resolveTormentorAction,validTormentorAction,isInitialTormentor,tormentorParent,serializeTormentor,parseTormentor,type TormentorAction} from './tormentor.ts';
@@ -81,6 +82,7 @@ export interface PlayDetails {
   killerCard?: string;
 }
 export interface PlayEvent extends PlayDetails {
+  woodsAction?: WoodsAction;
   marrekAction?: MarrekAction;
   shadyAction?: ShadyAction;
   tormentorAction?: TormentorAction;
@@ -97,6 +99,8 @@ export interface PlayEvent extends PlayDetails {
   inkanyambaReference?: true;
   /** Marks new Wolf deaths whose facts include the Wolf state at the event. */
   wolfReference?: true;
+  /** New Woods deaths freeze the surrounding module state at the raw log prefix. */
+  woodsReference?: true;
   permanent?: true;
   id: string;
   at: number;
@@ -156,7 +160,10 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if (e.woodsAction !== undefined && (e.kind !== "module" || e.moduleData?.module !== WOODS_MODULE || !validWoodsAction(e.woodsAction))) return false;
+  if (e.moduleData?.module === WOODS_MODULE && (e.kind !== "module" || !validModuleObservation(e.moduleData) || (!e.woodsAction && !isInitialWoods(e.moduleData.changes)))) return false;
   if(e.marrekAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='marrek'||!validMarrekAction(e.marrekAction)))return false;
+  if (e.woodsReference !== undefined && (e.kind !== "killed" || e.woodsReference !== true)) return false;
   if (e.moduleData?.module === "big-bad-wolf" && e.kind !== "module") return false;
   if(e.moduleData?.module==='marrek'&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.marrekAction&&!isInitialMarrek(e.moduleData.changes))))return false;
   if(e.tormentorAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='tormentor'||!validTormentorAction(e.tormentorAction)))return false;
@@ -243,9 +250,30 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validWoodsHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
+}
+function validWoodsHistory(log: readonly PlayEvent[]) {
+  if (!log.some(event => event.moduleData?.module === WOODS_MODULE)) return true;
+  for (const [index, event] of log.entries()) {
+    const isWoods = event.moduleData?.module === WOODS_MODULE;
+    const target = event.kind === "undo" || event.kind === "restore"
+      ? log.slice(0, index).find(prior => prior.id === event.target) : undefined;
+    if (!isWoods && target?.moduleData?.module !== WOODS_MODULE) continue;
+    const prefix = log.slice(0, index);
+    const entries = summarizePlay(prefix).entries;
+    if (target) {
+      const expected = event.kind === "undo" ? target.id : (target.woodsAction?.parent ?? "root");
+      if (woodsParent(entries) !== expected) return false;
+    } else if (!event.woodsAction) {
+      if (prefix.some(prior => prior.moduleData?.module === WOODS_MODULE) || !isInitialWoods(event.moduleData!.changes)) return false;
+    } else {
+      const changes = resolveWoodsAction(event.woodsAction, moduleState(entries, WOODS_MODULE), entries);
+      if (!changes || changes.snapshot !== event.moduleData!.changes.snapshot) return false;
+    }
+  }
+  return true;
 }
 export function canUndoMarrek(log:readonly PlayEvent[],target:string):boolean {const entries=summarizePlay(log).entries;return entries.find(e=>e.id===target)?.moduleData?.module!=='marrek'||marrekParent(entries)===target;}
 export function validMarrekHistory(log:readonly PlayEvent[]):boolean {
@@ -401,6 +429,11 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       if (!snapshot || snapshot.parent !== frightParent) { summary.inactive.add(original.id); continue; }
       frightParent = original.id;
     }
+    if (original.moduleData?.module === WOODS_MODULE && original.woodsAction &&
+        !resolveWoodsAction(original.woodsAction, moduleState(summary.entries, WOODS_MODULE), summary.entries)) {
+      summary.inactive.add(original.id);
+      continue;
+    }
     if(original.moduleData?.module==='marrek'&&original.marrekAction&&!resolveMarrekAction(original.marrekAction,moduleState(summary.entries,'marrek'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='tormentor'&&original.tormentorAction&&!resolveTormentorAction(original.tormentorAction,moduleState(summary.entries,'tormentor'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='konrad'&&original.konradAction&&!resolveKonradAction(original.konradAction,moduleState(summary.entries,'konrad'),summary.entries)){summary.inactive.add(original.id);continue;}
@@ -549,6 +582,7 @@ export function describeEvent(e: PlayEvent): string {
     case "moment":
       return `${e.text}${e.killerCard ? `: ${e.killerCard}` : ""}${e.detail ? `${e.killerCard ? ". " : ": "}${e.detail}` : ""}`;
     case "module":
+      if (e.woodsAction) return describeWoodsAction(e.woodsAction);
       return e.moduleData ? [describeModule(e.moduleData), e.linkedModule && describeModule(e.linkedModule)].filter(Boolean).join("; ") : "";
     default:
       return "";

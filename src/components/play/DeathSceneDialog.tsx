@@ -1,3 +1,5 @@
+import { WOODS, woodsMoonSpace } from "../../../supabase/functions/_shared/play/storybookWoods";
+import { woodsArt } from "./woodsArt";
 import { WOLF, WOLF_TERRORS } from "@/lib/play/bigBadWolf";
 import { wolfArt, wolfPortrait } from "./wolfArt";
 import {marrekArt} from './marrekArt';
@@ -46,8 +48,8 @@ import {
   type DeathSelection,
 } from "@/lib/play/death";
 import {
-  applicablePlayCards,
   findPlayCard,
+  suggestedDeathCards,
   PLAY_ROOMS,
   playMechanisms,
 } from "@/lib/play/catalog";
@@ -79,7 +81,19 @@ export function DeathSceneDialog({
   draft,
   onDraft,
 }: Props) {
-  const {characterImages}=useActiveImages();
+  function woodsDeathImage(card?: string, room = "") {
+  switch (card) {
+    case "The Full Moon Is Out": {
+      const space = woodsMoonSpace(room);
+      return space ? `moon-${space}` : "banner";
+    }
+    case "Getting Treats for Grandmother": return "treats";
+    case "Out of the Woods": return "out";
+    default: return undefined;
+  }
+}
+
+const {characterImages}=useActiveImages();
   const facts = deathFacts(selection, events, eventId);
   const initial: PlayDetails = {
     room: facts?.room ?? "",
@@ -224,14 +238,16 @@ export function DeathSceneDialog({
   if (!facts) return null;
   const update = (field: keyof PlayDetails, value: string) =>
     setValues((previous) => ({ ...previous, [field]: value }));
-  const catalogEvents = applicablePlayCards(selection, "event");
   // Legacy location data supplies names only. Unverified descriptions never become rules.
   const legacyEvents =
     getFilmDetails(getFilmIdByLocation(selection.location) ?? "")?.location
       ?.events ?? [];
+  const woodsTerror = selection.location === WOODS ? findPlayCard(selection, "terror", values.terrorCard) : undefined;
+  const woodsTerrorImage = woodsTerror?.location === WOODS ? woodsDeathImage(woodsTerror.name, values.room) : undefined;
+  const piperCause = selection.location === WOODS && findPlayCard(selection, "event", values.eventCard)?.name === "Pied Piper";
   const eventNames = Array.from(
     new Set([
-      ...catalogEvents.map((c) => c.name),
+      ...suggestedDeathCards(selection, "event").map((c) => c.name),
       ...legacyEvents
         .filter((c) => !findPlayCard(selection, "event", c.name))
         .map((c) => c.name),
@@ -305,6 +321,7 @@ export function DeathSceneDialog({
                   key={cause}
                   className={`play-cause-tile play-cause-tile--${cause}`}
                   aria-pressed={values.cause === cause}
+                  data-woods-photo={(cause === "terror" && !!woodsTerrorImage || cause === "event" && piperCause) || undefined}
                   data-wolf-photo={selection.killer === WOLF && (cause === "killer" || (cause === "terror" && !!wolfTerror)) || undefined}
                   disabled={scenes.busy}
                   onClick={() => {
@@ -319,6 +336,10 @@ export function DeathSceneDialog({
                   {selection.killer === WOLF && cause === "killer" ? <ModuleArtwork art={wolfPortrait} />
                     : cause === "terror" && wolfTerror
                       ? <ModuleArtwork art={wolfArt(wolfTerror.id)} />
+                      : cause === "event" && piperCause
+                        ? <ModuleArtwork art={woodsArt("piper")} />
+                      : cause === "terror" && woodsTerrorImage
+                        ? <ModuleArtwork art={woodsArt(woodsTerrorImage)} />
                       : selection.location==='Marrek Warehouse'&&cause==='terror' &&MARREK_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={marrekArt('terror-'+MARREK_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:selection.location==='Marrek Warehouse'&&cause==='event'&&MARREK_EVENTS.some(c=>c.name===values.eventCard)?<ModuleArtwork art={marrekArt(MARREK_EVENTS.find(c=>c.name===values.eventCard)!.id)}/>:selection.location==='Marrek Warehouse'&&cause==='other'&&values.mechanism==='Booby Trap'?<ModuleArtwork art={marrekArt('trap')}/>:selection.location==='Marrek Warehouse'&&cause==='other'&&values.mechanism==='Rack fall'?<ModuleArtwork art={marrekArt('terror-pushed')}/>:selection.killer==='The Tormentor'&&cause==='other'&&TORMENTOR_TRAPS.some(c=>c.name===values.mechanism)?<ModuleArtwork art={tormentorArt(TORMENTOR_TRAPS.find(c=>c.name===values.mechanism)!.id)}/>:selection.killer==='The Tormentor'&&cause==='terror'&&TORMENTOR_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={tormentorArt(TORMENTOR_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:selection.killer==='The Tormentor'&&cause==='killer'?<img src={characterImages['The Tormentor']} alt=""/>:selection.location==='Shady Acres'&&cause==='terror'&&SHADY_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={shadyArt('terror-'+SHADY_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:selection.location==='Shady Acres'&&cause==='event'&&SHADY_EVENTS.some(c=>c.name===values.eventCard)?<ModuleArtwork art={shadyArt(SHADY_EVENTS.find(c=>c.name===values.eventCard)!.id)}/>:selection.location==='Shady Acres'&&cause==='minion'&&/^Child [123]$/.test(values.attacker??'')?<ModuleArtwork art={shadyArt('child-'+values.attacker!.slice(-1))}/>:cause==='killer'&&selection.killer==='Grimlash'?<img src={characterImages.Grimlash} alt="" style={{objectPosition:'50% 0%'}}/>:cause==='terror'&&selection.killer==='Grimlash'&&GRIMLASH_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={grimlashArt(GRIMLASH_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:cause === 'minion' && selection.killer === 'Geppetto'
                     ? <ModuleArtwork className="geppetto-cause-art" art={{src:geppettoPuppets,atlas:{width:1254,height:1254,x:421,y:3,cellWidth:412,cellHeight:412}}}/>
                     : cause === 'killer' && selection.killer === 'Evomorph'
@@ -354,7 +375,7 @@ export function DeathSceneDialog({
                     label="Terror card"
                     value={values.terrorCard ?? ""}
                     onChange={(v) => update("terrorCard", v)}
-                    options={applicablePlayCards(selection, "terror").map(
+                    options={suggestedDeathCards(selection, "terror").map(
                       (c) => c.name,
                     )}
                     placeholder="Choose or enter a Terror card"

@@ -1,3 +1,4 @@
+import { WOODS, WOODS_VISUAL, WOODS_EVENTS, WOODS_SETUPS, woodsSetupDescription } from "../../supabase/functions/_shared/play/storybookWoods";
 import {MARREK_EVENTS,MARREK_SETUPS,MARREK_SPACES,MARREK_VISUAL} from '../../supabase/functions/_shared/play/marrekWarehouse';
 import {SHADY_SETUPS,SHADY_EVENTS,SHADY_SPACES} from '../../supabase/functions/_shared/play/shadyAcres';
 import {KONRAD_SETUPS,KONRAD_EVENTS} from '../../supabase/functions/_shared/play/konradCatalog';
@@ -451,33 +452,10 @@ Her brother would often take credit for their survival when telling townsfolk of
       }
     ],
     location: {
-      name: 'Storybook Woods',
-      description: `What if the stories you were told as a child were true? What if there did exist a place where tales and fables were a reality? Where magic and mischief were real?
-
-They are in fact real, but it isn't what you might think. It would be impossible to get you to understand this fully, but know that the following statement is true. Every world imagined by the inhabitants of Earth does in fact exist. The imagination, daydreams, nightmares, and all of the fantastic creations of the mind are actual visions of real places and times in the known and unknown universe. You don't have to believe it (and most humans don't), but that does not make it any less true.
-
-The location represents a dense, enchanted forest filled with landmarks pulled straight from folklore. You aren't just running through trees; you're navigating past The Three Pigs' Houses, The Grandma's House, and The Beanstalk.
-
-The atmosphere is "dark fantasy horror"—think The Brothers Grimm rather than Disney. The paths are winding, and the location is designed to make you feel like the forest itself is closing in on you.`,
-      setupCards: [
-        { name: 'Picnic', description: 'Victims are spread around the map, picnics are going on' },
-        { name: 'Forest Dwellers', description: 'Victims are mainly in the forest' },
-        { name: 'Scatter!', description: 'Victims have panicked, and are spread throughout the map' },
-        { name: 'Breadcrumb Trail', description: 'Victims have concentrated in the Glen, on the way to Grandmother\'s house' },
-        { name: 'Family Visit', description: 'Many victims are currently visiting Grandmother\'s house' }
-      ],
-      events: [
-        { name: 'Primrose Flowers', description: 'Something is sinister about the flowers in the meadow and glen, victims panic when they enter' },
-        { name: 'Harmless Old Woman', description: 'The killer is disguised as Grandmother, and the victims do not realize it!' },
-        { name: 'Hansel', description: 'One victim is Hansel, she wants to take her to the Gingerbread house' },
-        { name: 'Breadcrumb Path', description: 'Victims took bits of bread and scattered crumbs to lead them home' },
-        { name: 'Toll Bridge', description: 'You must pay to cross this bridge' },
-        { name: 'Furry Friends', description: 'The woodland creatures realize that you are keeping them safe, but make noise wherever you go' },
-        { name: 'Fairy Ring', description: 'All the victims at the Glen disappear. They aren\'t killed, they are just… somewhere else' },
-        { name: 'Travelers', description: 'New victims show up at the glen, meadow, and clearing' },
-        { name: 'The Woodsman', description: 'The woodsman will help attack the killer, and is eager to help' },
-        { name: 'Pied Piper', description: 'Any victims by the pied piper are killed' }
-      ]
+      name: WOODS,
+      description: WOODS_VISUAL,
+      setupCards: WOODS_SETUPS.map(setup => ({name:setup.name,description:woodsSetupDescription(setup)})),
+      events: WOODS_EVENTS.map(card => ({name:card.name,description:card.effect})),
     },
     killer: {
       name: 'Big Bad Wolf',

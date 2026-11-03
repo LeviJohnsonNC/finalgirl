@@ -1,3 +1,4 @@
+import { WOODS, WOODS_EVENTS } from "../../../supabase/functions/_shared/play/storybookWoods";
 import { evomorphStageArt } from './evomorphArt';
 import { poltergeistParent, resolvePoltergeistAction } from '../../../supabase/functions/_shared/play/poltergeist';
 import { WOLF } from "@/lib/play/bigBadWolf";
@@ -647,6 +648,14 @@ export function PlayScreen(props: PlayScreenProps) {
                 />
               )}
             </label>
+            {location === WOODS && moment.momentType === "other" && (
+              <button type="button" className="play-text-action" onClick={() => {
+                const detail = `Fairy Ring · ${WOODS_EVENTS.find(card => card.id === "fairy-ring")!.effect}`;
+                if (moment.detail === detail || commit({kind:"details",target:moment.id,detail})) {
+                  setMomentId(null);
+                }
+              }}>Record Fairy Ring disappearance</button>
+            )}
             {killer==='Poltergeist' && moment.momentType==='item' && ['Carolyn','Mr. Floppy'].includes(momentDetail.trim()) && <button type="button" onClick={()=>recordObjectiveFromItem(momentDetail.trim()==='Carolyn'?'join':'find-floppy')}>{momentDetail.trim()==='Carolyn'?'Record Carolyn joining you':'Record Mr. Floppy with you'}</button>}
             <button
               onClick={() => {

@@ -1,10 +1,12 @@
 import type { DeathFacts } from "./play/death.ts";
 import { DEATH_KILLER_CUES, DEATH_LOCATION_CUES } from "./deathLore.ts";
-import { playCardContext } from "./play/catalog.ts";
+import { findPlayCard, playCardContext } from "./play/catalog.ts";
 import { moduleReferences } from "./play/modules.ts";
 import { NARRATIVE_QUANTITIES } from './narrativeStyle.ts';
 import { DEATH_LOCATION_STYLE, deathSpaceCue } from './deathLocation.ts';
 export function deathPrompt(facts: DeathFacts, previous: string[]) {
+  const piper = facts.location === "Storybook Woods" && facts.cause === "event" &&
+    findPlayCard(facts, "event", facts.eventCard)?.name === "Pied Piper";
   const fright = facts.killer === "Dr. Fright" ? `
 Dr. Fright creative direction: when the recorded death is attributed to him (a killer cause, explicit Dr. Fright attacker, or a verified selected Terror card attributing the killing to him), portray murder through the victims' private nightmares. The Final Girl's recorded Awake/Asleep status belongs only to her, never to everyone at the Location. Victims can slip into a nightmare even while she is Awake; unknown sleep status stays unknown. Dream injuries become real in their bodies at the selected physical Location. Witnesses may see the consequences without seeing him touch anyone. He is the former dream therapist turned Dream Doctor, with his rusty three-tined pitchfork. Steam, impossible spaces, clinical memories and scraping boiler pipes are optional images, not a required repeated sequence. Distinguish imagined nightmare space from the actual board space and from the Final Girl's tracked Boiler Room cards. Do not import another franchise's name, glove or sweater. This is cinematic interpretation, not a new rule or a claim about every kill. Preserve any explicit fire, hazard, Event mechanism or different attacker; do not replace it with dream murder. Without attribution, keep the killer's involvement ambiguous.` : "";
   return {
@@ -34,6 +36,7 @@ Exactly the recorded quantity dies; a named victim is one member of a group, nev
         "Module state is the recorded state at the time of this death. Inventory does not prove an item was used. A nearby Buddy or a recently drawn card does not establish the attacker or cause. Death-specific fields take precedence over broader tracking context. Use the explicitly recorded attacker and death details; do not infer extra deaths or trigger rules.",
       cardContextNote:
         "Only the recorded deaths happened. A selected card describes context, not proof that every possible effect occurred. Names without supplied effects carry no inferred rules.",
+      ...(piper && {eventAttribution:"The recorded Event is the Pied Piper. Attribute the observed death to him unless the player supplied a more specific cause. His initial placement at the Village does not establish this death's location."}),
       killerCue: DEATH_KILLER_CUES[facts.killer]?.slice(0, 650),
       locationCue: DEATH_LOCATION_CUES[facts.location]?.slice(0, 550),
       earlierScenes: previous.slice(-3).map((s) => s.slice(0, 500)),

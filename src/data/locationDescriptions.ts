@@ -1,3 +1,4 @@
+import { WOODS_VISUAL } from "../../supabase/functions/_shared/play/storybookWoods";
 import { GROVES_VISUAL } from "../../supabase/functions/_shared/play/groves";
 import { CARNIVAL_VISUAL } from '../../supabase/functions/_shared/play/carnival';
 import { BUDDYLAND_VISUALS } from './buddyland';
@@ -107,19 +108,7 @@ The atmosphere is one of profound isolation, clinical cold, and quiet dread—a 
 Key elements: Arctic or Antarctic tundra setting with heavy snow. Insulated modular research buildings with visible exhaust. Restricted area signage and perimeter rope lines. Personnel in high-visibility red extreme-weather gear. Flat, hazy lighting suggesting a polar day or twilight.`,
   
   // Once Upon a Full Moon
-  'Storybook Woods': `A hidden, ancient hamlet nestled deep within a primeval, moss-choked forest. The settlement is composed of several primitive, low-slung hovels with thick, shaggy thatched roofs, constructed from rough-hewn stone and weathered wattle-and-daub. These smaller structures are huddled together along a muddy, root-strewn trail, appearing almost like natural outcroppings of the forest floor itself.
-
-Dominating the background is a larger, two-story timber-framed cottage that feels like the heart of the village. It stands taller and more sturdy than the surrounding huts, with a steep thatched roof and a single window emitting a warm, flickering amber glow. This light provides the only splash of color in an otherwise monochromatic world of greys, greens, and browns, suggesting a flicker of life and safety amidst the gloom.
-
-The atmosphere is heavy and damp, with a thick, cool mist that clings to the ground and weaves through the canopy above. Massive, gnarled trees with sprawling, serpentine roots hem in the clearing, their twisted branches draped in layers of lichen and moss. The forest feels alive and suffocating, as if the trees are slowly reclaiming the space occupied by the small community.
-
-A damp, uneven dirt path winds through the center of the hamlet, pockmarked with shallow puddles and choked by protruding roots. Dilapidated stone walls and piles of dry brush line the way, suggesting a community that lives in precarious harmony with the encroaching wilderness. There are no signs of modern life—no metal, no glass, just the raw materials of the earth.
-
-The village feels timeless and eerie, like a setting from a dark folk tale where the air is thick with the scent of damp earth and woodsmoke. It is a place of guarded seclusion and ancient secrets, where the silence is heavy and the forest seems to be watching.
-
-Key elements: Ancient forest hamlet with primitive, thatched hovels. Central two-story cottage featuring warm, interior amber light. Dense, moss-covered trees with massive, serpentine root systems. Muddy central path with puddles and crumbling stone walls. Heavy atmospheric mist and cool, overcast lighting.`,
-
-  // A Knock at the Door
+  "Storybook Woods": WOODS_VISUAL,
   'Wingard Cottage': `A cozy, rustic stone and log cabin perched on a rocky shoreline, overlooking a glass-calm lake at dawn. The cabin is small and sturdy, featuring a prominent fieldstone chimney with a gentle wisp of white smoke trailing into the cool, overcast sky. The architecture is traditional and inviting, with cedar-shingle roofing and small, warm-lit windows that suggest a quiet life inside.
 
 In the foreground, a weathered wooden dock extends into the still water, holding an overturned aluminum rowboat that sits ready for a morning paddle. The lake's surface is perfectly reflective, marred only by a thin, ethereal layer of morning mist that clings to the waterline and the distant evergreen silhouettes.

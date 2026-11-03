@@ -1,3 +1,4 @@
+import { WOODS_VISUAL } from "./play/storybookWoods.ts";
 import { GROVES_VISUAL } from "./play/groves.ts";
 import { INKANYAMBA_VISUAL } from "./play/inkanyamba.ts";
 import { CARNIVAL_VISUAL } from './play/carnival.ts';
@@ -69,8 +70,7 @@ export const DEATH_LOCATION_CUES: Record<string, string> = {
     'A massive, modular industrial mining vessel, the USS KONRAD, suspended in low orbit above a vast, rust-colored terrestrial planet. The ship is a heavy, rectangular behemoth constructed from weathered and scarred metal plating, showing years of exposure to space-borne debris and industrial soot. It is utilitarian and imposing, designed for function rather than aesthetics, with a "used future" aesthetic characterized by exposed machinery and reinforced hull segments.',
   'Station 2891':
     'A remote, high-arctic research outpost situated in a vast, frozen wasteland, characterized by a series of low-profile, modular industrial buildings heavily insulated against extreme cold. The station appears utilitarian and high-stakes—structures are wrapped in thick, quilted thermal blankets and reinforced panels, with plumes of steam or exhaust rising from vents into the frigid air.',
-  'Storybook Woods':
-    'A hidden, ancient hamlet nestled deep within a primeval, moss-choked forest. The settlement is composed of several primitive, low-slung hovels with thick, shaggy thatched roofs, constructed from rough-hewn stone and weathered wattle-and-daub. These smaller structures are huddled together along a muddy, root-strewn trail, appearing almost like natural outcroppings of the forest floor itself. Dominating the background is a larger, two-story timber-framed cottage that feels like the heart of the village.',
+  "Storybook Woods": WOODS_VISUAL,
   'Wingard Cottage':
     'A cozy, rustic stone and log cabin perched on a rocky shoreline, overlooking a glass-calm lake at dawn. The cabin is small and sturdy, featuring a prominent fieldstone chimney with a gentle wisp of white smoke trailing into the cool, overcast sky. The architecture is traditional and inviting, with cedar-shingle roofing and small, warm-lit windows that suggest a quiet life inside. In the foreground, a weathered wooden dock extends into the still water, holding an overturned aluminum rowboat that sits ready for a morning paddle.',
   Falconwood:
