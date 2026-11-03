@@ -1,3 +1,4 @@
+import { WOLF, WOLF_SETUP } from './bigBadWolf';
 import { getFinalGirlHealth } from '@/data/finalGirlHealth';
 import type { StateField } from "./events";
 
@@ -20,6 +21,7 @@ export function playStartingValues(
     Geppetto: 8,
     'Dr. Fright': 9,
   };
+  if (killer === WOLF) return { finalGirlHealth: getFinalGirlHealth(finalGirl), ...WOLF_SETUP };
   if(killer==='The Tormentor')return {finalGirlHealth:getFinalGirlHealth(finalGirl),killerHealth:7,finalHorrorLevel:3,bloodlust:0};
   return {
     finalGirlHealth: getFinalGirlHealth(finalGirl),

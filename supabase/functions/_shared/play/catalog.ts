@@ -1,3 +1,4 @@
+import { WOLF, WOLF_SOURCE, WOLF_TERRORS } from "./bigBadWolf.ts";
 import {MARREK_TERRORS,MARREK_EVENTS,MARREK_ITEMS,MARREK_PEOPLE,MARREK_SPACES,MARREK_SOURCE} from './marrekWarehouse.ts';
 import {TORMENTOR_TERRORS,TORMENTOR_TRAPS,TORMENTOR_SOURCE} from './tormentor.ts';
 import {SHADY_EVENTS,SHADY_TERRORS,SHADY_ITEMS,SHADY_PEOPLE,SHADY_SPACES,SHADY_SOURCE} from './shadyAcres.ts';
@@ -43,6 +44,7 @@ const station = wiki("Station_2891");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+  ...WOLF_TERRORS.map(card => ({ ...card, kind: "terror" as const, killer: WOLF, source: WOLF_SOURCE })),
  ...MARREK_TERRORS.map(c=>({...c,kind:'terror' as const})),
  ...MARREK_EVENTS.map(c=>({...c,kind:'event' as const,location:'Marrek Warehouse',source:MARREK_SOURCE})),
  ...SHADY_TERRORS.map(c=>({...c,kind:'terror' as const})),

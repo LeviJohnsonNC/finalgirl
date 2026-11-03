@@ -4,7 +4,8 @@ import {
   type PlayDetails,
   type PlayEvent,
 } from "./events.ts";
-import { moduleContext } from "./modules.ts";
+import { moduleContext, moduleState } from "./modules.ts";
+import { WOLF } from "./bigBadWolf.ts";
 // The browser also budgets for up to 20 seconds of cloud sync plus endpoint
 // authorization, claiming and persistence. These are ceilings, not delays.
 export const DEATH_GENERATION_TIMEOUT_MS = 30000;
@@ -20,6 +21,7 @@ export function deathFacts(
   eventId: string,
 ) {
   if(!validPlayLog(events))return null;
+  if (selection.killer !== WOLF && events.some(e => e.moduleData?.module === "big-bad-wolf" || e.wolfReference)) return null;
   if(selection.location!=='Marrek Warehouse'&&events.some(e=>e.moduleData?.module==='marrek'))return null;
   if(selection.killer!=='The Tormentor'&&events.some(e=>e.moduleData?.module==='tormentor'))return null;
   if(selection.location!=='Shady Acres'&&events.some(e=>e.moduleData?.module==='shady-acres'))return null;
@@ -31,7 +33,7 @@ export function deathFacts(
   const entries = summarizePlay(events).entries;
   const e = entries.find((e) => e.id === eventId && e.kind === "killed");
   if (!e) return null;
-  const context = moduleContext(
+  let context = moduleContext(
     selection,
     entries.slice(0, entries.indexOf(e) + 1).map((entry) =>
       entry.kind === "module" && entry.moduleData
@@ -53,7 +55,17 @@ export function deathFacts(
           }
         : entry,
     ),
+    false,
   );
+  if (selection.killer === WOLF && e.wolfReference) {
+    const rawIndex = events.findIndex(event => event.id === eventId);
+    const historical = moduleState(summarizePlay(events.slice(0, rawIndex + 1)).entries, "big-bad-wolf");
+    if (Object.keys(historical).length) {
+      // Stable ordering across browser objects and JSONB reads.
+      const sorted = Object.fromEntries(Object.entries(historical).sort(([a], [b]) => a.localeCompare(b)));
+      context = { ...context, "big-bad-wolf": sorted };
+    }
+  }
   return {
     version: 1,
     killer: selection.killer,

@@ -1,0 +1,42 @@
+.play-big-bad-wolf { display: grid; gap: 1rem; min-width: 0; }
+.wolf-mode {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(194, 154, 121, .34);
+  border-radius: .65rem;
+  background: #141112;
+}
+.wolf-mode-photo { height: clamp(8.5rem, 22vw, 17rem); }
+.wolf-mode-photo .play-module-art { width: 100%; height: 100%; display: block; }
+.wolf-mode[data-mode="unknown"] .wolf-mode-photo { filter: grayscale(.45) brightness(.72); }
+.wolf-mode-copy { padding: .8rem 1rem 1rem; color: #e9dfce; }
+.wolf-mode-copy h3 { margin: .15rem 0 .35rem; font-size: 1.25rem; }
+.wolf-mode-copy p { margin: 0; }
+.wolf-mode-copy p:last-of-type { font-size: .84rem; color: #c3b9ab; }
+.wolf-mode-copy .play-select-trigger { margin-top: .55rem; min-height: 44px; max-width: 100%; }
+
+/* The panorama sits behind the shared frame. At laptop width, keeping its
+   photographic layer narrower preserves the ears and muzzle in the shallow header. */
+.play-module-panel[data-module="big-bad-wolf"] > summary > img.play-module-art {
+  left: auto;
+  width: min(100%, 740px);
+  mask-image: linear-gradient(to right, transparent, #000 27%);
+}
+@media (max-width: 639px) {
+  .play-module-panel[data-module="big-bad-wolf"] > summary .play-module-disclosure {
+    align-self: flex-start;
+  }
+  .play-module-panel[data-module="big-bad-wolf"] > summary > img.play-module-art {
+    object-position: 100% center !important;
+  }
+}
+
+/* Preserve the selected border and title scrim while showing the named photo
+   in its original colours. The common red wash still applies to generic tiles. */
+.play-death-modal--illustrated .play-cause-tile[data-wolf-photo][aria-pressed="true"]::before {
+  background: linear-gradient(0deg, #120c0bf2, transparent 85%);
+}
+.play-death-modal--illustrated .play-cause-tile[data-wolf-photo][aria-pressed="true"] > img {
+  opacity: 1;
+}

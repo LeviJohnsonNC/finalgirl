@@ -1,3 +1,4 @@
+import { wolfPowerMode, type WolfMode } from "./bigBadWolf.ts";
 import {resolveMarrekAction,validMarrekAction,isInitialMarrek,marrekParent,type MarrekAction} from './marrekWarehouse.ts';
 import {resolveTormentorAction,validTormentorAction,isInitialTormentor,tormentorParent,serializeTormentor,parseTormentor,type TormentorAction} from './tormentor.ts';
 import {resolveShadyAction,validShadyAction,isInitialShady,shadyParent,type ShadyAction} from './shadyAcres.ts';
@@ -94,6 +95,8 @@ export interface PlayEvent extends PlayDetails {
   linkedModule?: ModuleObservation;
   /** Provenance for newly recorded Inkanyamba card facts; legacy death hashes stay unchanged. */
   inkanyambaReference?: true;
+  /** Marks new Wolf deaths whose facts include the Wolf state at the event. */
+  wolfReference?: true;
   permanent?: true;
   id: string;
   at: number;
@@ -120,7 +123,7 @@ export interface PlaySummary {
   killerHealthTracking?: boolean;
   finalHorrorLevel?: number;
   bloodlust?: number;
-  entries: Array<PlayEvent & { currentRound: number | null }>;
+  entries: Array<PlayEvent & { currentRound: number | null; wolfPowerMode?: WolfMode }>;
   inactive: Set<string>;
 }
 const uuid =
@@ -154,6 +157,7 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
   if(e.marrekAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='marrek'||!validMarrekAction(e.marrekAction)))return false;
+  if (e.moduleData?.module === "big-bad-wolf" && e.kind !== "module") return false;
   if(e.moduleData?.module==='marrek'&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.marrekAction&&!isInitialMarrek(e.moduleData.changes))))return false;
   if(e.tormentorAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='tormentor'||!validTormentorAction(e.tormentorAction)))return false;
   if(e.moduleData?.module==='tormentor'&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.tormentorAction&&!isInitialTormentor(e.moduleData.changes))))return false;
@@ -179,6 +183,7 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
     if(!grovesLink&&!creechRescue)return false;
   }
   if (e.inkanyambaReference !== undefined && (e.inkanyambaReference !== true || e.kind !== "moment" || !["dark-power", "finale"].includes(e.momentType!))) return false;
+  if (e.wolfReference !== undefined && (e.wolfReference !== true || e.kind !== "killed")) return false;
   if (e.permanent !== undefined && (e.permanent !== true || !isPermanentMoment(e))) return false;
   if (!uuid.test(e.id) || !integer(e.at, Number.MAX_SAFE_INTEGER)) return false;
   if (
@@ -402,7 +407,9 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     if(original.moduleData?.module==='shady-acres'&&original.shadyAction&&!resolveShadyAction(original.shadyAction,moduleState(summary.entries,'shady-acres'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='grimlash'&&original.grimlashAction&&!resolveGrimlashAction(original.grimlashAction,moduleState(summary.entries,'grimlash'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='evomorph'&&original.evomorphAction&&!resolveEvomorphAction(original.evomorphAction,moduleState(summary.entries,'evomorph'),summary.entries)){summary.inactive.add(original.id);continue;}
-    const e = { ...original };
+    const e: PlayEvent & { wolfPowerMode?: WolfMode } = { ...original };
+    const wolfReveal = e.kind === "moment" && e.momentType === "dark-power";
+    if (wolfReveal && e.killerCard) e.wolfPowerMode = wolfPowerMode(e.killerCard);
     if (e.kind === "killed" || e.kind === "saved") {
       e.quantity = quantities.get(e.id) ?? e.quantity!;
     }
@@ -420,7 +427,12 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
             }
           else {
             if (edit.detail !== undefined) e.detail = edit.detail;
-            if (edit.killerCard !== undefined) e.killerCard = edit.killerCard;
+            if (edit.killerCard !== undefined) {
+              e.killerCard = edit.killerCard;
+              // A clear changes the label alone. Retain the last known mode on
+              // this reveal and recompute it from the accepted log on replay.
+              if (wolfReveal && edit.killerCard) e.wolfPowerMode = wolfPowerMode(edit.killerCard);
+            }
           }
         }
       }

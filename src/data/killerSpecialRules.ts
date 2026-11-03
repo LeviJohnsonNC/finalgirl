@@ -74,7 +74,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   'Big Bad Wolf': {
     narrativeNote:
-      'A massive supernatural wolf with glowing red eyes, already wounded (arrows in its flank) but driven by primal rage. Fairy-tale logic applies — the dark forest of Storybook Woods has its own rules.',
+      'A massive arrow-studded gray wolf whose patience gives way to attack. Use the selected location and observed events. A reveal or mode alone establishes no injury, attack or casualty.',
   },
 
   'The Intruders': {

@@ -1,3 +1,5 @@
+import { WOLF, WOLF_TERRORS } from "@/lib/play/bigBadWolf";
+import { wolfArt, wolfPortrait } from "./wolfArt";
 import {marrekArt} from './marrekArt';
 import {MARREK_TERRORS,MARREK_EVENTS} from '@/lib/play/marrekWarehouse';
 import {TORMENTOR_TERRORS,TORMENTOR_TRAPS} from '@/lib/play/tormentor';
@@ -101,6 +103,7 @@ export function DeathSceneDialog({
   const [editingDetails, setEditingDetails] = useState(false);
   const payoff = useRef<HTMLElement>(null);
   const [message, setMessage] = useState("");
+  const wolfTerror = selection.killer === WOLF ? WOLF_TERRORS.find(card => card.name === values.terrorCard) : undefined;
   const [resultError, setResultError] = useState("");
   const scenes = useDeathScenes(sessionId, syncNow);
   const serialized = JSON.stringify(facts);
@@ -302,6 +305,7 @@ export function DeathSceneDialog({
                   key={cause}
                   className={`play-cause-tile play-cause-tile--${cause}`}
                   aria-pressed={values.cause === cause}
+                  data-wolf-photo={selection.killer === WOLF && (cause === "killer" || (cause === "terror" && !!wolfTerror)) || undefined}
                   disabled={scenes.busy}
                   onClick={() => {
                     if (values.cause !== cause) {
@@ -312,7 +316,10 @@ export function DeathSceneDialog({
                     }
                   }}
                 >
-                  {selection.location==='Marrek Warehouse'&&cause==='terror'&&MARREK_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={marrekArt('terror-'+MARREK_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:selection.location==='Marrek Warehouse'&&cause==='event'&&MARREK_EVENTS.some(c=>c.name===values.eventCard)?<ModuleArtwork art={marrekArt(MARREK_EVENTS.find(c=>c.name===values.eventCard)!.id)}/>:selection.location==='Marrek Warehouse'&&cause==='other'&&values.mechanism==='Booby Trap'?<ModuleArtwork art={marrekArt('trap')}/>:selection.location==='Marrek Warehouse'&&cause==='other'&&values.mechanism==='Rack fall'?<ModuleArtwork art={marrekArt('terror-pushed')}/>:selection.killer==='The Tormentor'&&cause==='other'&&TORMENTOR_TRAPS.some(c=>c.name===values.mechanism)?<ModuleArtwork art={tormentorArt(TORMENTOR_TRAPS.find(c=>c.name===values.mechanism)!.id)}/>:selection.killer==='The Tormentor'&&cause==='terror'&&TORMENTOR_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={tormentorArt(TORMENTOR_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:selection.killer==='The Tormentor'&&cause==='killer'?<img src={characterImages['The Tormentor']} alt=""/>:selection.location==='Shady Acres'&&cause==='terror'&&SHADY_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={shadyArt('terror-'+SHADY_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:selection.location==='Shady Acres'&&cause==='event'&&SHADY_EVENTS.some(c=>c.name===values.eventCard)?<ModuleArtwork art={shadyArt(SHADY_EVENTS.find(c=>c.name===values.eventCard)!.id)}/>:selection.location==='Shady Acres'&&cause==='minion'&&/^Child [123]$/.test(values.attacker??'')?<ModuleArtwork art={shadyArt('child-'+values.attacker!.slice(-1))}/>:cause==='killer'&&selection.killer==='Grimlash'?<img src={characterImages.Grimlash} alt="" style={{objectPosition:'50% 0%'}}/>:cause==='terror'&&selection.killer==='Grimlash'&&GRIMLASH_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={grimlashArt(GRIMLASH_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:cause === 'minion' && selection.killer === 'Geppetto'
+                  {selection.killer === WOLF && cause === "killer" ? <ModuleArtwork art={wolfPortrait} />
+                    : cause === "terror" && wolfTerror
+                      ? <ModuleArtwork art={wolfArt(wolfTerror.id)} />
+                      : selection.location==='Marrek Warehouse'&&cause==='terror' &&MARREK_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={marrekArt('terror-'+MARREK_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:selection.location==='Marrek Warehouse'&&cause==='event'&&MARREK_EVENTS.some(c=>c.name===values.eventCard)?<ModuleArtwork art={marrekArt(MARREK_EVENTS.find(c=>c.name===values.eventCard)!.id)}/>:selection.location==='Marrek Warehouse'&&cause==='other'&&values.mechanism==='Booby Trap'?<ModuleArtwork art={marrekArt('trap')}/>:selection.location==='Marrek Warehouse'&&cause==='other'&&values.mechanism==='Rack fall'?<ModuleArtwork art={marrekArt('terror-pushed')}/>:selection.killer==='The Tormentor'&&cause==='other'&&TORMENTOR_TRAPS.some(c=>c.name===values.mechanism)?<ModuleArtwork art={tormentorArt(TORMENTOR_TRAPS.find(c=>c.name===values.mechanism)!.id)}/>:selection.killer==='The Tormentor'&&cause==='terror'&&TORMENTOR_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={tormentorArt(TORMENTOR_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:selection.killer==='The Tormentor'&&cause==='killer'?<img src={characterImages['The Tormentor']} alt=""/>:selection.location==='Shady Acres'&&cause==='terror'&&SHADY_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={shadyArt('terror-'+SHADY_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:selection.location==='Shady Acres'&&cause==='event'&&SHADY_EVENTS.some(c=>c.name===values.eventCard)?<ModuleArtwork art={shadyArt(SHADY_EVENTS.find(c=>c.name===values.eventCard)!.id)}/>:selection.location==='Shady Acres'&&cause==='minion'&&/^Child [123]$/.test(values.attacker??'')?<ModuleArtwork art={shadyArt('child-'+values.attacker!.slice(-1))}/>:cause==='killer'&&selection.killer==='Grimlash'?<img src={characterImages.Grimlash} alt="" style={{objectPosition:'50% 0%'}}/>:cause==='terror'&&selection.killer==='Grimlash'&&GRIMLASH_TERRORS.some(c=>c.name===values.terrorCard)?<ModuleArtwork art={grimlashArt(GRIMLASH_TERRORS.find(c=>c.name===values.terrorCard)!.id)}/>:cause === 'minion' && selection.killer === 'Geppetto'
                     ? <ModuleArtwork className="geppetto-cause-art" art={{src:geppettoPuppets,atlas:{width:1254,height:1254,x:421,y:3,cellWidth:412,cellHeight:412}}}/>
                     : cause === 'killer' && selection.killer === 'Evomorph'
                       ? <ModuleArtwork art={evomorphStageArt(facts?.moduleContext?.evomorph?.stage)} />

@@ -1,3 +1,4 @@
+import { WOLF } from '@/lib/play/bigBadWolf';
 import {marrekParent,resolveMarrekAction} from '@/lib/play/marrekWarehouse';
 import {tormentorParent,resolveTormentorAction} from '@/lib/play/tormentor';
 import {shadyParent,resolveShadyAction} from '@/lib/play/shadyAcres';
@@ -68,7 +69,15 @@ export function useActiveGame() {
       if(event.moduleData?.module==='konrad'&&(previous.selection.location!=='USS Konrad'||!event.konradAction))return previous;
       if(event.kind==='undo'&&!canUndoEvomorph(log,event.target!))return previous;
       if (event.kind === 'death-count' && !canChangeDeathCount(log, event)) return previous;
-      let accepted = event;
+      const isWolf = previous.selection.killer === WOLF;
+      if (!isWolf && (event.moduleData?.module === "big-bad-wolf" || event.wolfReference)) return previous;
+      if (event.moduleData?.module === "big-bad-wolf") {
+        const state = moduleState(summarizePlay(log).entries, "big-bad-wolf");
+        const changes = event.moduleData.changes;
+        if (changes.mode === "track" && state.powerRevealed) return previous;
+        if (Object.entries(changes).every(([key, value]) => state[key] === (value ?? undefined))) return previous;
+      }
+      let accepted = isWolf && event.kind === "killed" ? { ...event, wolfReference: true as const } : event;
       if(previous.selection.killer==='Poltergeist' && ((event.kind==='state'&&event.field==='killerHealth') || (event.kind==='moment'&&event.momentType==='killer-revived'))) return previous;
       if (event.moduleData?.module === 'groves' && previous.selection.location !== 'Sacred Groves') return previous;
       if (event.linkedModule && !(event.moduleData?.module==='groves'&&previous.selection.location==='Sacred Groves'&&previous.selection.killer==='Inkanyamba') && !(event.moduleData?.module==='creech'&&previous.selection.location==='Creech Manor'&&previous.selection.killer==='Poltergeist')) return previous;
@@ -98,7 +107,11 @@ export function useActiveGame() {
         : [];
       // Only genuinely new sessions get starting tracker observations. Include
       // them in the first durable write; legacy unknowns and Undo stay unknown.
-      if (log.length === 0 && previous.coreTrackersVersion === 1) {
+      const freshWolf = isWolf && previous.wolfSetupVersion === 1;
+      if (log.length === 0 && freshWolf) {
+        setup.push(newPlayEvent({ kind: "module", moduleData: { module: "big-bad-wolf", changes: { mode: "track" } } }));
+      }
+      if (log.length === 0 && previous.coreTrackersVersion === 1 && (!isWolf || freshWolf)) {
         const values = playStartingValues(previous.selection.killer, previous.selection.finalGirl);
         values.finalGirlHealth = previous.selection.finalGirlStartingHealth ?? values.finalGirlHealth;
         for (const field of ['finalGirlHealth', 'killerHealth', 'bloodlust', 'finalHorrorLevel'] as const) {
