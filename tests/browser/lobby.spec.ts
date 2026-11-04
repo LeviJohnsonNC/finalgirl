@@ -54,6 +54,9 @@ test('the lobby is separate, browses real posters and opens the exact case witho
     })).toBe(true);
   }
   await page.setViewportSize(viewport);
+  // matchMedia delivers its change asynchronously. Wait for the responsive
+  // page size before ArrowRight, otherwise the old desktop step can skip a poster.
+  await expect(page.locator('.lobby-artwork img')).toHaveCount(expected);
 
   await page.locator('.lobby-gallery').focus();
   await page.keyboard.press('ArrowRight');
