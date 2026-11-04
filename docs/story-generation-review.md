@@ -1,5 +1,16 @@
 # Story and artwork direction
 
+## Recorded-evidence and prose follow-up (2026-11-04)
+
+The latest follow-up preserves consequential Play observations within the existing
+context budget, reconciles named deaths with stale legacy rosters in narrative
+context, and removes prompt wording that encouraged tense shifts and formulaic
+callbacks. Opening callbacks are now optional and earned. See the
+[implementation and release checks](verification/story-evidence-review.md).
+These changes require the frontend and `generate-story` / `generate-ending` to
+be deployed. The existing evaluation-table repair must also reach production
+before a fresh, attributable prose comparison is possible.
+
 ## Ending poster design update (2026-10-28)
 
 New ending posters now use coordinated story-specific lettering, placement, palettes, paper framing and billing instead of the original fixed red-serif template. The same bounded print plan controls painting safe areas and final raster composition; partial design failures preserve good copy. See the [current verification and release record](verification/ending-poster-variety.md) and [eight-poster visual review](reference/ending-posters/README.md). The improved painted medium, complete stored PNG and persistence safeguards remain. The original overhaul notes below describe that earlier implementation, not an instruction to restore its fixed typography.

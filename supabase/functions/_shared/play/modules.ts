@@ -1,3 +1,4 @@
+import { fitStoryText, storyVictimStatus } from './storyText.ts';
 import { WOODS, WOODS_MODULE, WOODS_VISUAL, parseWoods, woodsFacts, woodsState } from "./storybookWoods.ts";
 import { WOLF, WOLF_MINORS, WOLF_POWERS, WOLF_FINALES, WOLF_VISUAL, validWolfField, wolfFacts, wolfMinorField, wolfModeLabel, wolfPowerMode, type WolfMode } from "./bigBadWolf.ts";
 import {initialMarrek,validMarrekField,marrekState,marrekFacts,marrekExits,MARREK_EXITS,MARREK_VISUAL,MARREK_ITEMS} from './marrekWarehouse.ts';
@@ -71,6 +72,8 @@ type ObservedEvent = {
   momentType?: string;
   killerCard?: string;
   detail?: string;
+  victim?: string;
+  quantity?: number;
 };
 
 /** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
@@ -601,12 +604,12 @@ export function moduleStoryBeats(
     return [place, boundedThreat].filter(Boolean).join("\n");
   }
   if(context?.marrek){const killer=moduleStoryBeats({...selection,location:''},entries);let place='';for(const fact of marrekFacts(marrekState(context.marrek)))if(place.length+fact.length+1<=(killer?535:875))place+=fact+' ';let threat='';for(const fact of killer.split(/(?<=\.)\s+/))if(threat.length+fact.length+1<=335)threat+=fact+' ';return [place.trim(),threat.trim()].filter(Boolean).join('\n');}
-  if(context?.tormentor){const place=moduleStoryBeats({...selection,killer:''},entries);let threat='';for(const fact of tormentorFacts(tormentorState(context.tormentor),entries).split(/(?<=\.)\s+/))if(threat.length+fact.length+1<=(place?340:870))threat+=fact+' ';return [threat.trim(),place.slice(0,535)].filter(Boolean).join('\n');}
+  if(context?.tormentor){const place=moduleStoryBeats({...selection,killer:''},entries);let threat='';for(const fact of tormentorFacts(tormentorState(context.tormentor),entries).split(/(?<=\.)\s+/))if(threat.length+fact.length+1<=(place?340:870))threat+=fact+' ';return [threat.trim(),fitStoryText(place,535)].filter(Boolean).join('\n');}
   if (!context) return "";
   if (context["big-bad-wolf"]) {
     const location = moduleStoryBeats({ ...selection, killer: "" }, entries);
     const wolf = wolfFacts(context["big-bad-wolf"]);
-    return [wolf, location.slice(0, 895 - wolf.length)].filter(Boolean).join("\n");
+    return [wolf, fitStoryText(location, 895 - wolf.length)].filter(Boolean).join("\n");
   }
 
   // Preserve the established output for every other location. Each owner gets
@@ -636,11 +639,11 @@ export function moduleStoryBeats(
     for(const fact of killer.split(/(?<=\.)\s+/))if(killerFacts.length+fact.length+1<=340)killerFacts+=fact+" ";
     return [location&&`Creech Manor: ${location.trim()}`,killerFacts&&`Killer: ${killerFacts.trim()}`].filter(Boolean).join("\n");
   }
-  if(context.grimlash&&!context.konrad&&!context.creech&&!context.groves&&!context.maple&&!context.carnival) {const location=moduleStoryBeats({...selection,killer:''},entries);const budget=location?440:870;let killer='';for(const fact of grimlashFacts(context.grimlash).split(/(?<=\.)\s+/))if(killer.length+fact.length+1<=budget)killer+=fact+' ';return [killer.trim(),location.slice(0,440)].filter(Boolean).join('\n');}
+  if(context.grimlash&&!context.konrad&&!context.creech&&!context.groves&&!context.maple&&!context.carnival) {const location=moduleStoryBeats({...selection,killer:''},entries);const budget=location?440:870;let killer='';for(const fact of grimlashFacts(context.grimlash).split(/(?<=\.)\s+/))if(killer.length+fact.length+1<=budget)killer+=fact+' ';return [killer.trim(),fitStoryText(location,440)].filter(Boolean).join('\n');}
   if (context.groves) {
     const killer = moduleStoryBeats({ ...selection, location: "" }, entries);
     const facts = grovesFacts(context.groves);
-    return [`Sacred Groves: ${facts.slice(0,killer ? 525 : 875)}`, killer && `Killer: ${killer.slice(0,340)}`].filter(Boolean).join("\n");
+    return [`Sacred Groves: ${fitStoryText(facts,killer ? 525 : 875)}`, killer && `Killer: ${fitStoryText(killer,340)}`].filter(Boolean).join("\n");
   }
   if (context.maple) {
     const killer = moduleStoryBeats({ ...selection, location: "" }, entries);
@@ -649,14 +652,14 @@ export function moduleStoryBeats(
     const budget = killer ? 535 : 880;
     let location = "";
     for (const fact of facts) if (location.length + fact.length + 1 <= budget) location += `${fact} `;
-    return [location && `Maple Lane: ${location.trim()}`,killer && `Killer: ${killer.slice(0,340)}`].filter(Boolean).join("\n");
+    return [location && `Maple Lane: ${location.trim()}`,killer && `Killer: ${fitStoryText(killer,340)}`].filter(Boolean).join("\n");
   }
   if (context.carnival) {
     const killer = moduleStoryBeats({ ...selection, location: "" }, entries);
     const carnival = carnivalStoryFacts(context.carnival).join(" ");
     return [
-      carnival && `Carnival: ${carnival.slice(0, killer ? 535 : 880)}`,
-      killer && `Killer: ${killer.slice(0, 340)}`,
+      carnival && `Carnival: ${fitStoryText(carnival, killer ? 535 : 880)}`,
+      killer && `Killer: ${fitStoryText(killer, 340)}`,
     ]
       .filter(Boolean)
       .join("\n");
@@ -743,7 +746,7 @@ export function moduleStoryBeats(
       lines.push(`Last recorded Location Terror: ${venue.lastTerror}`);
     for (const v of SPECIAL_VICTIMS)
       if (venue[`victim.${v.id}`])
-        lines.push(`${v.name}: ${venue[`victim.${v.id}`]}`);
+        lines.push(`${v.name}: ${storyVictimStatus(v.name, String(venue[`victim.${v.id}`]), "buddyland", `victim.${v.id}`, entries)}`);
     if (venue.collapseRoom) lines.push(`Broken token: ${venue.collapseRoom}`);
     for (const e of BUDDYLAND_EVENTS)
       if (venue[`event.${e.id}`])
@@ -770,7 +773,7 @@ export function moduleStoryBeats(
   if (camp) {
     for (const v of CAMP_VICTIMS)
       if (camp[`victim.${v.id}`])
-        lines.push(`${v.name}: ${camp[`victim.${v.id}`]}.`);
+        lines.push(`${v.name}: ${storyVictimStatus(v.name, String(camp[`victim.${v.id}`]), "camp", `victim.${v.id}`, entries)}.`);
     for (const e of CAMP_EVENTS)
       if (camp[`event.${e.id}`])
         lines.push(`Camp Event ${e.name}: ${camp[`event.${e.id}`]}.`);
