@@ -84,7 +84,8 @@ for (const killer of ['The Tormentor', 'Evomorph']) {
     await page.goto('/');
     await page.reload();
     await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
-    await page.getByRole('button', { name: 'LOST', exact: true }).first().click();
+    await page.getByRole('button', { name: 'Finish game', exact: true }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Lost', exact: true }).click();
     await page.getByRole('button', { name: 'Generate ending', exact: true }).click();
     await expect(page.getByRole('region', { name: 'Ending narration', exact: true })).toContainText(archive.endingText);
     expect(context).toContain(killer === 'The Tormentor' ? 'Final Girl escaped: Electric Cage' : 'observed on in round 1, then observed off in round 1');
