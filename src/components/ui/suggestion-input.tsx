@@ -20,8 +20,9 @@ export function SuggestionInput({ label, value, onChange, options, placeholder, 
   const browse = useRef<HTMLButtonElement>(null);
   const items = useRef<Array<HTMLLIElement | null>>([]);
   const listId = useId();
-  const choices = ['', ...[...new Set(options)].sort(compareDropdownLabels)
-    .filter(option => option.toLowerCase().includes(query.trim().toLowerCase()))];
+  const choices = [...new Set(['', ...options])]
+    .filter(option => !option || option.toLowerCase().includes(query.trim().toLowerCase()))
+    .sort((a, b) => compareDropdownLabels(a || 'Not recorded', b || 'Not recorded'));
 
   useEffect(() => {
     if (open && active >= 0) items.current[active]?.scrollIntoView({ block: 'nearest' });
@@ -52,8 +53,10 @@ export function SuggestionInput({ label, value, onChange, options, placeholder, 
             setActive(-1);
             setOpen(true);
           }}
+          onFocus={() => { if (!open) showAll(); }}
+          onClick={() => { if (!open) showAll(); }}
           onKeyDown={event => {
-            if (event.key === 'Escape') { event.preventDefault(); setOpen(false); }
+            if (event.key === 'Escape') { event.preventDefault(); setOpen(false); setActive(-1); }
             if (event.key === 'Tab') setOpen(false);
             if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
               event.preventDefault();
