@@ -129,5 +129,6 @@ describe('real-game narrative failure regressions', () => {
     const text = buildEndingUser({ introStory: 'A past-tense opening.', outcome: 'lost', finalGirlHealth: 0, killerHealth: 4, gameHighlights: 'The final blow missed.', playSummary: 'Earlier: Final Girl Health: 1' });
     expect(text.indexOf('Final Girl fate: died')).toBeLessThan(text.indexOf('Earlier: Final Girl Health: 1'));
     expect(text).toContain('The final blow missed.');
+    expect(text).not.toContain('human callback');
   });
 });
