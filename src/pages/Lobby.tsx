@@ -77,6 +77,18 @@ export default function Lobby({ onTheater, onScrapbooks, onStats, onRules, onCol
   </nav>;
 
   return <div className="poster-lobby">
+    <div className="lobby-scene" aria-hidden="true">
+      <div className="lobby-wall">
+        <div className="lobby-light lobby-light--left" />
+        <div className="lobby-light lobby-light--right" />
+      </div>
+    </div>
+    <div className="lobby-scene lobby-spill" aria-hidden="true">
+      <div className="lobby-wall">
+        <div className="lobby-light lobby-light--left" />
+        <div className="lobby-light lobby-light--right" />
+      </div>
+    </div>
     <header className="lobby-header">
       <button className="lobby-brand" onClick={onTheater} aria-label="Final Girl home">
         <span>FINAL GIRL</span><small><b>Unofficial</b> Case Files</small>
@@ -104,16 +116,16 @@ export default function Lobby({ onTheater, onScrapbooks, onStats, onRules, onCol
             const label = `${game.finalGirl} vs. ${game.killer} at ${game.location}`;
             const picture = url && <img src={url} alt={`Movie poster for ${label}`} decoding="async" onError={() => fail(url)} />;
             return <figure className="lobby-exhibit" key={`${game.id}:${url}`}>
-              <div className="lobby-cabinet">
-                {broken ? <div className="lobby-artwork lobby-artwork-unavailable"><p>{!url && legacy[game.id] === undefined ? 'Retrieving poster…' : 'Poster unavailable'}</p>{url ? <button onClick={() => retry(url)}>Retry poster</button> : legacy[game.id] === null && <button onClick={() => {
+              {broken ? <div className="lobby-cabinet">
+                <div className="lobby-artwork lobby-artwork-unavailable"><p>{!url && legacy[game.id] === undefined ? 'Retrieving poster…' : 'Poster unavailable'}</p>{url ? <button onClick={() => retry(url)}>Retry poster</button> : legacy[game.id] === null && <button onClick={() => {
                   setLegacy(old => { const next = { ...old }; delete next[game.id]; return next; });
                   void fetchGameDetails(game.id).then(full => { if (mounted.current) setLegacy(old => ({ ...old, [game.id]: full?.posterImageUrl ?? null })); }).catch(() => { if (mounted.current) setLegacy(old => ({ ...old, [game.id]: null })); });
                 }}>Retry poster</button>}</div>
-                  : <button className="lobby-artwork" onClick={event => openPoster(game.id, event.currentTarget)} aria-label={`View poster for ${label}`}>{picture}</button>}
-              </div>
+              </div> : <button type="button" className="lobby-cabinet" onClick={event => openPoster(game.id, event.currentTarget)} aria-label={`View poster for ${label}`} aria-haspopup="dialog">
+                <span className="lobby-artwork">{picture}</span>
+              </button>}
               <figcaption>
                 {screeningDate(game.timestamp) && <time className="lobby-date" dateTime={new Date(game.timestamp).toISOString()}>{screeningDate(game.timestamp)}</time>}
-                <button className="lobby-view" disabled={broken} onClick={event => openPoster(game.id, event.currentTarget)} aria-label={`View full poster for ${label}`}>View poster</button>
               </figcaption>
             </figure>;
           })}
@@ -133,12 +145,14 @@ export default function Lobby({ onTheater, onScrapbooks, onStats, onRules, onCol
     </main>
     <footer className="lobby-footer">{nav}<p>Unofficial fan-made app · Not endorsed by or affiliated with Van Ryder Games.</p></footer>
     <Dialog open={Boolean(selected)} onOpenChange={open => { if (!open) setSelectedId(null); }}>
-      <DialogContent className="lobby-poster-viewer" onCloseAutoFocus={event => { event.preventDefault(); if (opener.current?.isConnected) opener.current.focus(); }}>
+      <DialogContent className="lobby-poster-viewer" overlayClassName="lobby-viewer-scrim" onCloseAutoFocus={event => { event.preventDefault(); if (opener.current?.isConnected) opener.current.focus(); }}>
         <DialogTitle className="sr-only">{selected ? `${selected.finalGirl} vs. ${selected.killer} movie poster` : 'Movie poster'}</DialogTitle>
         <DialogDescription className="sr-only">Full movie poster. Open its case file to read the recorded story.</DialogDescription>
         {selected && <>
-          {failed.has(selected.posterImageUrl!) ? <div className="lobby-viewer-error" role="status"><p>Poster unavailable</p><button onClick={() => retry(selected.posterImageUrl!)}>Retry poster</button></div>
-            : <img className="lobby-full-poster" src={selected.posterImageUrl} alt={`Movie poster for ${selected.finalGirl} vs. ${selected.killer} at ${selected.location}`} onError={() => fail(selected.posterImageUrl!)} />}
+          <div className="lobby-cabinet lobby-viewer-cabinet">
+            {failed.has(selected.posterImageUrl!) ? <div className="lobby-artwork lobby-artwork-unavailable" role="status"><p>Poster unavailable</p><button onClick={() => retry(selected.posterImageUrl!)}>Retry poster</button></div>
+              : <div className="lobby-artwork"><img className="lobby-full-poster" src={selected.posterImageUrl} alt={`Movie poster for ${selected.finalGirl} vs. ${selected.killer} at ${selected.location}`} onError={() => fail(selected.posterImageUrl!)} /></div>}
+          </div>
           <button className="lobby-open-case" onClick={() => { setSelectedId(null); onOpenCase(selected.id); }}>Open case file</button>
         </>}
       </DialogContent>

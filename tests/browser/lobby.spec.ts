@@ -18,6 +18,7 @@ test('the lobby is separate, browses real posters and opens the exact case witho
   await expect(page.locator('.poster-lobby')).toHaveCount(0);
   expect(requested).toEqual([]);
   expect(await page.evaluate(() => performance.getEntriesByType('resource').some(entry => /\/(wall|cabinet)-/.test(entry.name)))).toBe(false);
+  const viewport = page.viewportSize()!;
   const before = await page.locator('.theater-screen').boundingBox();
   await page.getByRole('navigation', { name: 'Theater navigation' }).getByRole('button', { name: 'Lobby', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Starlight Lobby' })).toBeVisible();
@@ -25,16 +26,50 @@ test('the lobby is separate, browses real posters and opens the exact case witho
   await expect(page.locator('.lobby-artwork img')).toHaveCount(expected);
   await page.locator('.lobby-artwork img').evaluateAll(images => Promise.all(images.map(image => (image as HTMLImageElement).decode())));
   expect(requested.length).toBe(expected);
+  await expect(page.getByText('View poster', { exact: true })).toHaveCount(0);
+  const lights = page.locator('.lobby-scene:not(.lobby-spill) .lobby-light');
+  await expect(lights.first()).toHaveCSS('animation-name', 'lobby-filament');
+  expect(await lights.evaluateAll(elements => elements.map(element => getComputedStyle(element).animationDuration))).toEqual(['13s', '19s']);
+  const pulse = await page.locator('.lobby-light').evaluateAll(elements => elements.map(element => {
+    const [animation] = element.getAnimations();
+    animation.pause();
+    animation.currentTime = 2810; // Left bulb's first dip, right bulb's steady phase.
+    return Number(getComputedStyle(element).opacity);
+  }));
+  expect(pulse[0]).toBeLessThan(pulse[1]);
+  expect(pulse.slice(2)).toEqual(pulse.slice(0, 2));
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(lights.first()).toHaveCSS('animation-name', 'none');
+  await expect(lights.last()).toHaveCSS('animation-name', 'none');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath('starlight-lobby.png'), fullPage: true, animations: 'disabled' });
+  for (const width of [320, 390, 1280, 1920]) {
+    await page.setViewportSize({ width, height: width <= 390 ? 700 : 900 });
+    expect(await page.locator('.lobby-scene:not(.lobby-spill) .lobby-wall').evaluate(wall => {
+      const bounds = wall.getBoundingClientRect();
+      const scene = wall.parentElement!.getBoundingClientRect();
+      return [.268, .752].every(x => bounds.x + bounds.width * x > scene.left
+        && bounds.x + bounds.width * x < scene.right)
+        && bounds.y + bounds.height * .157 > scene.top;
+    })).toBe(true);
+  }
+  await page.setViewportSize(viewport);
+
   await page.locator('.lobby-gallery').focus();
   await page.keyboard.press('ArrowRight');
   await expect(page.getByRole('img').first()).toHaveAttribute('src', poster(info.project.name === 'mobile' ? id2 : id3));
   await page.getByRole('button', { name: 'Previous posters' }).click();
-  await page.getByRole('button', { name: 'View poster for Laurie vs. Hans at Camp Happy Trails', exact: true }).click();
+  const frame = page.getByRole('button', { name: 'View poster for Laurie vs. Hans at Camp Happy Trails', exact: true });
+  const displayWidth = (await frame.boundingBox())!.width;
+  await frame.click({ position: { x: 12, y: 32 } });
   const viewer = page.getByRole('dialog');
   await expect(viewer).toBeVisible();
+  const enlarged = viewer.locator('.lobby-cabinet');
+  await expect(enlarged).toHaveCSS('background-image', /cabinet-.*\.webp/);
+  expect((await enlarged.boundingBox())!.width).toBeGreaterThan(displayWidth);
   await expect(viewer.locator('.lobby-full-poster')).toHaveCSS('object-fit', 'contain');
+  await expect(viewer.getByRole('button', { name: 'Close', exact: true })).toBeInViewport();
+  await expect(viewer.getByRole('button', { name: 'Open case file' })).toBeInViewport();
   await page.screenshot({ path: info.outputPath('lobby-viewer.png'), animations: 'disabled' });
   await page.keyboard.press('Escape');
   await expect(viewer).toBeHidden();
