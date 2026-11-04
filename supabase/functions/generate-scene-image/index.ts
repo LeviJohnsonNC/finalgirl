@@ -155,10 +155,10 @@ serve(async (req) => {
 
     const { data: urlData } = adminClient.storage.from("posters").getPublicUrl(path);
 
-    // A closing poster can finish after SAVE or a browser reload. Attach it
-    // server-side if the corresponding owned record already exists.
+    // Draft posters are attached by the explicit scrapbook save. Other image
+    // callers keep automatic attachment to the corresponding owned record.
     let attached = false;
-    if (body.gameId) {
+    if (body.gameId && !body.draftPoster) {
       const column = isPoster ? 'poster_image_url' : 'scene_image_url';
       const { data: rows, error: attachError } = await adminClient.from('game_history')
         .update({ [column]: urlData.publicUrl }).eq('id', body.gameId).eq('user_id', user.id).select('id');

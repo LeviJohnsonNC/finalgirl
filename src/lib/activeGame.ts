@@ -15,7 +15,7 @@ export interface EndingFormData {
   outcome?: "won"|"lost";
   konradReview?: {fate: import("../../supabase/functions/_shared/play/konrad").KonradFate};
   poltergeistReview?: {carolynRescued:true|null;floppyAtEscape:true|null;epicRequired:boolean|null;escapeRoute?:'exit'|'helicopter'|null};
-  finalHorrorLevel?: number; finalGirlHealth?: number; killerHealth?: number;
+  finalHorrorLevel?: number | null; finalGirlHealth?: number | null; killerHealth?: number | null;
   weaponUsed: string; victimsSaved: number | null; victimsKilled: number | null;
   roundsPlayed?: number | null;
   endingSubLocation: string; gameHighlights: string;
@@ -54,6 +54,8 @@ export interface ActiveGame {
   formDraft?: Record<string, unknown>;
   formData?: EndingFormData;
   endingStory?: string; posterImageUrl?: string;
+  endingRevision?: string;
+  endingNeedsRefresh?: boolean;
 }
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
@@ -92,7 +94,8 @@ export function isActiveGame(value: unknown): value is ActiveGame {
   if (game.playDrafts !== undefined && (!game.playDrafts || typeof game.playDrafts !== 'object' || Array.isArray(game.playDrafts) || Object.keys(game.playDrafts).length > 1000 || !Object.values(game.playDrafts).every(validPlayDetails))) return false;
   if (game.showDeathPanel !== undefined && typeof game.showDeathPanel !== 'boolean') return false;
   if (game.playMode !== undefined && typeof game.playMode !== 'boolean') return false;
-  const textFields = [game.introStory, game.sceneImageUrl, game.visualBible, game.endingStory, game.posterImageUrl];
+  const textFields = [game.introStory, game.sceneImageUrl, game.visualBible, game.endingStory, game.posterImageUrl, game.endingRevision];
+  if (game.endingNeedsRefresh !== undefined && typeof game.endingNeedsRefresh !== "boolean") return false;
   if (!textFields.every(field => field === undefined || typeof field === 'string')) return false;
   if (game.formDraft && (typeof game.formDraft !== 'object' || Array.isArray(game.formDraft) || !Object.values(game.formDraft).every(field => field === null || ['string', 'number', 'boolean'].includes(typeof field)))) return false;
   if (game.phase === 'ending' && !game.formData) return false;

@@ -203,7 +203,7 @@ test("ending diagnostics retain full gameplay and reviewed result while the mode
   await page.getByRole("button", { name: "RESUME GAME" }).click();
   await page.getByRole("button", { name: "WON", exact: true }).first().click();
   await page.getByLabel("Weapon Used", { exact: true }).fill("Axe");
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Generate ending", exact: true }).click();
   await expect
     .poll(() =>
       archive.generationRequests.some((r) => r.name === "generate-ending"),

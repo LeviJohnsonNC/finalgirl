@@ -36,7 +36,7 @@ const GameOutcome = ({
   const fatalShip=result.location==='USS Konrad'&&['airlock-loss','explosion-loss'].includes(String(shipFate));
   const trapLoss=initialDraft?.tormentorLoss??tormentorState(moduleState(entries,'tormentor')).loss;
   const fatalTrap=result.killer==='The Tormentor'&&!['none','unknown'].includes(String(trapLoss));
-  const reviewedOutcome=fatalTrap||fatalGrim||fatalShip?'lost':(result.killer==='The Tormentor'||result.killer==='Grimlash'||result.location==='USS Konrad')&&['won','lost'].includes(String(initialDraft?.reviewedOutcome))?initialDraft!.reviewedOutcome:result.outcome;
+  const reviewedOutcome=fatalTrap||fatalGrim||fatalShip?'lost':['won','lost'].includes(String(initialDraft?.reviewedOutcome))?initialDraft!.reviewedOutcome:result.outcome;
   const isWin = reviewedOutcome === "won";
   const locationArt =
     result.location === "Buddyland"

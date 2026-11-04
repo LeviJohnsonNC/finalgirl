@@ -24,6 +24,8 @@ export function OutcomeSelect({
   children: ReactNode;
 }) {
   return (
+    <div className="outcome-select-field">
+    <span className="outcome-field-label">{label}</span>
     <Select
       value={value || EMPTY}
       onValueChange={(next) => onValueChange(next === EMPTY ? "" : next)}
@@ -51,5 +53,6 @@ export function OutcomeSelect({
         })}
       </SelectContent>
     </Select>
+    </div>
   );
 }

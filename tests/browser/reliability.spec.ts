@@ -1,5 +1,5 @@
 import { saveResultOnly } from "./play-helpers";
-import { test, expect, activeGame, gameId, opening, selection, userId } from './fixtures';
+import { test, expect, activeGame, gameId, opening, selection } from './fixtures';
 
 async function resume(page: import('@playwright/test').Page) {
   await page.goto('/');
@@ -60,25 +60,25 @@ test('record and save a result through an AI outage', async ({ page, archive }, 
   await archive.install(page, { draft: { ...activeGame, introStory: undefined } }); await resume(page);
   await expect(page.getByRole('region', { name: 'Opening narration' }).getByText('Generation temporarily unavailable', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'LOST', exact: true }).first().click();
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Generate ending', exact: true }).click();
   await expect(page.getByText('Your result is saved. An opening story is needed to generate an ending.')).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('no-ai-save.png'), fullPage: true });
-  await page.getByRole('button', { name: 'SAVE RESULT', exact: true }).first().click();
+  await page.getByRole('button', { name: 'Save record only', exact: true }).first().click();
   await expect.poll(() => archive.history[0]?.outcome).toBe('lost');
   await expect.poll(() => archive.history[0]?.final_girl_health).toBeNull();
   expect(archive.calls.filter(name => name === 'generate-ending')).toHaveLength(0);
 });
 
-test('attach a poster that finishes after Save', async ({ page, archive }) => {
+test('save the finished ending without attaching a poster still developing', async ({ page, archive }) => {
   archive.autoImages = true;
   const record = { id: gameId, timestamp: 1, outcome: 'won', killer: selection.killer, location: selection.location, final_girl: selection.finalGirl, intro_story: opening };
   archive.history.push(record);
   await archive.install(page, { draft: { ...activeGame, phase: 'ending', result: { ...selection, id: gameId, timestamp: 1, outcome: 'won' }, endingStory: 'Laurie reached the road. She had survived the night.', formData: { finalHorrorLevel: 4, finalGirlHealth: 1, killerHealth: 0, weaponUsed: '', victimsSaved: 0, victimsKilled: 0, endingSubLocation: '', gameHighlights: '' } } });
   await resume(page);
   await expect.poll(() => Boolean(archive.releaseImage)).toBe(true);
-  await page.getByRole('button', { name: 'SAVE', exact: true }).first().click();
+  await page.getByRole('button', { name: 'Save to scrapbook', exact: true }).first().click();
   archive.releaseImage!();
-  await expect.poll(() => archive.history[0].poster_image_url).toBe('https://example.test/poster.png');
-  await expect.poll(() => page.evaluate(id => JSON.parse(localStorage.getItem('final-girl-history-v3:' + id) ?? '[]')[0]?.posterImageUrl, userId)).toBe('https://example.test/poster.png');
+  await expect.poll(() => archive.history[0].ending_narration).toBe('Laurie reached the road. She had survived the night.');
+  expect(archive.history[0].poster_image_url).toBeNull();
+  expect(archive.generationRequests.find(request => request.name === 'generate-scene-image')?.body.draftPoster).toBe(true);
 });
-

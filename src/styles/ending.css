@@ -36,14 +36,20 @@
   gap: 8px;
 }
 .ending-actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
 }
+.ending-actions:has(.narration-button--narrate) {
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+}
 .ending-actions > .narration-button {
-  flex: 1 1 140px;
+  min-width: 0;
   min-height: 56px;
-  font-size: clamp(17px, 1.4vw, 23px);
+  padding-inline: 8px;
+  font-size: clamp(15px, 1.3vw, 21px);
+  letter-spacing: .045em;
+  white-space: normal;
 }
 .narration-layout--ending .narration-button--narrate {
   border-color: hsl(var(--narration-paper) / 0.5);
@@ -259,4 +265,39 @@
     padding: 8px;
   }
   .narration-layout--ending .narration-photo--poster .narration-photo-edge { border-width: 16px; }
+}
+
+.ending-record-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 14px;
+}
+.ending-record-actions button {
+  min-height: 44px;
+  padding-inline: 2px;
+  color: hsl(var(--narration-paper));
+  text-decoration: underline;
+  text-underline-offset: .2em;
+  font-size: 14px;
+}
+.ending-record-actions button:hover { color: #fff4d8; }
+.ending-review-message {
+  align-self: start;
+  padding: 18px;
+  border: 1px solid hsl(var(--narration-paper) / .32);
+  background: hsl(var(--narration-ink) / .9);
+  color: hsl(var(--narration-paper));
+}
+.ending-poster-save-note { color: hsl(var(--narration-paper) / .85); font-size: 13px; }
+
+/* A retry message needs line length more than a portrait-shaped placeholder. */
+@media (min-width: 900px) and (min-height: 500px) {
+  .narration-layout--ending .ending-poster-window:has(.narration-photo-placeholder button) > .narration-photo-mount {
+    width: 100%;
+  }
+  .narration-layout--ending .narration-photo-placeholder:has(button) {
+    aspect-ratio: auto;
+    gap: 8px;
+    padding: 14px;
+  }
 }

@@ -184,7 +184,7 @@ test('rescue review and temporary attacker death preserve their own historical f
     await expect(page.getByRole('checkbox',{name:'Rescued Carolyn',exact:true})).toBeChecked();
     await expect(page.getByLabel('Killer Health',{exact:true})).toHaveCount(0);
     await page.screenshot({path:info.outputPath('rescue-outcome.png'),fullPage:true,animations:'disabled',style:'.app-footer,.news-broadcast{visibility:hidden}'});
-    await page.getByRole('button',{name:'Continue',exact:true}).click();
+    await page.getByRole('button',{name:'Generate ending',exact:true}).click();
     await expect(page.getByText(archive.endingText,{exact:true})).toBeVisible();
     const body=archive.generationRequests.find(r=>r.name==='generate-ending')!.body;
     expect(body).toMatchObject({poltergeistReview:{carolynRescued:true,floppyAtEscape:null,epicRequired:null},victimsKilled:1});

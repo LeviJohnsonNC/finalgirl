@@ -62,7 +62,7 @@ for (const failure of ['provider outage', 'platform timeout', 'missing image'] a
     await expect(photo.getByRole('button', { name: 'Try Again', exact: true })).toBeVisible();
     await expect(photo).toContainText(failure === 'provider outage' ? unavailable : failure === 'platform timeout' ? 'Your story and game result are safe' : 'returned no picture');
     await expect(page.getByRole('region', { name: 'Ending narration' })).toContainText(ending);
-    await expect(page.getByRole('button', { name: 'SAVE', exact: true })).toBeEnabled();
+    await expect(page.getByRole('button', { name: 'Save to scrapbook', exact: true })).toBeEnabled();
     expect(requests).toHaveLength(1);
     await page.screenshot({ path: info.outputPath('ending-poster-error.png'), fullPage: true });
     if (info.project.name === 'desktop') {
@@ -79,7 +79,7 @@ for (const failure of ['provider outage', 'platform timeout', 'missing image'] a
     expect(requests[1]).toEqual(requests[0]);
     expect(requests[0]).toMatchObject({ gameId, sceneType: 'ending', story: ending, outcome: 'won' });
     await expect(photo.getByRole('button', { name: 'Try Again', exact: true })).toHaveCount(0);
-    await page.getByRole('button', { name: 'SAVE', exact: true }).click();
+    await page.getByRole('button', { name: 'Save to scrapbook', exact: true }).click();
     await expect.poll(() => archive.history[0].poster_image_url).toBe('http://127.0.0.1:4173/recovered-poster.png');
     expect(archive.history).toHaveLength(1);
     await expect.poll(() => archive.history[0].ending_narration).toBe(ending);
@@ -146,7 +146,7 @@ test('a failed ending reshoot keeps the previous poster, error and retry above t
   await expect(
     page.getByRole('button', { name: 'Reshoot', exact: true }),
   ).toBeEnabled();
-  await page.getByRole('button', { name: 'SAVE', exact: true }).click();
+  await page.getByRole('button', { name: 'Save to scrapbook', exact: true }).click();
   await expect.poll(() => archive.history[0]?.poster_image_url).toBe(url);
   await expect
     .poll(() => archive.history[0]?.ending_narration)

@@ -559,7 +559,7 @@ test("fresh mixed casting reaches ending and archive with searchable complete lo
     .getByRole("dialog")
     .getByRole("button", { name: "Won", exact: true })
     .click();
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Generate ending", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Ending narration", exact: true }),
   ).toContainText(archive.endingText);

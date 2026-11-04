@@ -61,7 +61,7 @@ test("always-visible trackers preserve zero, survive reload, and reach the endin
   await expect(
     page.getByLabel("Final Horror Level", { exact: true }),
   ).toHaveValue("0");
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Generate ending", exact: true }).click();
   await expect
     .poll(
       () =>
@@ -101,7 +101,7 @@ test("legacy cleared Horror stays unknown through the ending", async ({
   await expect(
     page.getByLabel("Final Horror Level", { exact: true }),
   ).toHaveValue("");
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Generate ending", exact: true }).click();
   await expect
     .poll(() =>
       archive.generationRequests.some((r) => r.name === "generate-ending"),

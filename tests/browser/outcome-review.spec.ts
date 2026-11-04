@@ -54,10 +54,10 @@ for (const outcome of ["won", "lost"] as const)
     ).toBeVisible();
     await expect(
       page.getByRole("button", {
-        name: "Save result without narration",
+        name: "Save record only",
         exact: true,
       }),
-    ).toHaveCount(0);
+    ).toBeVisible();
     await expect(page.locator(".outcome-modules > .outcome-panel")).toHaveCount(
       1,
     );
@@ -132,7 +132,7 @@ for (const outcome of ["won", "lost"] as const)
       animations: "disabled",
     });
     const continueButton = page.getByRole("button", {
-      name: "Continue",
+      name: "Generate ending",
       exact: true,
     });
     await page.evaluate(() =>
@@ -284,9 +284,10 @@ test("the mission and dimension panels remain usable together", async ({
     page.getByRole("heading", { name: "The Mission", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "The Mirror Dimension", exact: true }),
+    page.getByRole("group", { name: "Dimension at finish", exact: true }),
   ).toBeVisible();
-  await page.getByLabel("Mirror Dimension", { exact: true }).check();
+  await page.getByText("Mirror Dimension", { exact: true }).click();
+  await page.getByText("Incomplete", { exact: true }).click();
   await page
     .getByPlaceholder("One clue short, halfway through the code...")
     .fill("One clue short.");
@@ -302,4 +303,70 @@ test("the mission and dimension panels remain usable together", async ({
     .poll(() => archive.history[0].game_highlights)
     .toContain("Mirror Dimension");
   expect(archive.history[0].game_highlights).toContain("One clue short.");
+});
+
+test("review corrections invalidate the old ending and save the exact case", async ({ page, archive }, info) => {
+  const result = { ...activeGame.selection, id: activeGame.id, timestamp: 1, outcome: "won" as const, finalGirlHealth: 3 };
+  archive.history.push({
+    id: result.id, timestamp: 1, outcome: result.outcome, killer: result.killer,
+    location: result.location, final_girl: result.finalGirl, final_girl_health: 3,
+  });
+  await archive.install(page, { draft: { ...activeGame, phase: "outcome", result } });
+  await page.goto("/");
+  await page.getByRole("button", { name: "RESUME GAME" }).click();
+  const location = page.getByRole("combobox", { name: "Ending Location", exact: true });
+  await page.getByRole("button", { name: "Browse board spaces" }).click();
+  await expect(page.getByRole("listbox", { name: "Ending Location suggestions" })).toBeVisible();
+  await page.screenshot({ path: info.outputPath("board-picker.png"), animations: "disabled" });
+  await page.getByRole("option", { name: "Dock", exact: true }).click();
+  await expect(location).toHaveValue("Dock");
+  await page.getByRole("button", { name: "Generate ending", exact: true }).click();
+  const original = archive.endingText;
+  await expect(page.getByText(original, { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Edit record", exact: true }).click();
+  await expect(location).toHaveValue("Dock");
+  await page.getByRole("button", { name: "Generate ending", exact: true }).click();
+  await expect(page.getByText(original, { exact: true })).toBeVisible();
+  const endings = () => archive.generationRequests.filter(request => request.name === "generate-ending");
+  expect(endings()).toHaveLength(1);
+
+  await page.getByRole("button", { name: "Edit record", exact: true }).click();
+  await page.getByRole("button", { name: "Clear Final Girl Health", exact: true }).click();
+  await location.fill("Cabin loft");
+  await page.getByRole("button", { name: "Generate ending", exact: true }).click();
+  await expect(page.getByText(original, { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Save to scrapbook", exact: true })).toHaveCount(0);
+  await expect.poll(() => archive.history[0].final_girl_health).toBeNull();
+  expect(endings()).toHaveLength(1);
+  await page.screenshot({ path: info.outputPath("ending-needs-update.png"), animations: "disabled" });
+  archive.endingText = "The cabin loft door finally opened. Laurie stepped toward the narrow stairs.";
+  await page.getByRole("button", { name: "Update ending", exact: true }).click();
+  await expect(page.getByText(archive.endingText, { exact: true })).toBeVisible();
+  expect(endings()).toHaveLength(2);
+  expect(endings()[1].body).toMatchObject({ endingSubLocation: "Cabin loft" });
+  expect(endings()[1].body).not.toHaveProperty("finalGirlHealth");
+  await page.getByRole("button", { name: "Save to scrapbook", exact: true }).click();
+  await expect.poll(() => archive.history[0].ending_narration).toBe(archive.endingText);
+  await expect(page.getByRole("region", { name: "Saved record" })).toBeVisible();
+  await page.screenshot({ path: info.outputPath("saved-record.png"), animations: "disabled" });
+  await page.getByRole("button", { name: "Open saved case", exact: true }).click();
+  await expect(page.locator(".story-page-content")).toContainText("Cabin loft");
+  expect(archive.history).toHaveLength(1);
+});
+
+test("an unobserved Wolf mode stays unknown in a mixed ship review", async ({ page, archive }, info) => {
+  const selection = { ...activeGame.selection, killer: "Big Bad Wolf", location: "USS Konrad" };
+  const result = { ...selection, id: activeGame.id, timestamp: 1, outcome: "won" as const, victimsSaved: 0 };
+  await archive.install(page, { draft: { ...activeGame, selection, phase: "outcome", result } });
+  await page.goto("/");
+  await page.getByRole("button", { name: "RESUME GAME" }).click();
+  await expect(page.getByRole("combobox", { name: "Game result", exact: true })).toHaveCount(1);
+  await expect(page.getByRole("group", { name: "Wolf mode at finish" }).getByRole("radio", { name: "Not recorded" })).toBeChecked();
+  await expect(page.getByRole("region", { name: "Location details" }).getByRole("combobox", { name: "Reviewed ship fate" })).toHaveText("Fate not recorded");
+  await page.screenshot({ path: info.outputPath("mixed-review.png"), fullPage: true, animations: "disabled" });
+  await page.getByRole("button", { name: "Generate ending", exact: true }).click();
+  await expect(page.getByText(archive.endingText, { exact: true })).toBeVisible();
+  const request = archive.generationRequests.find(item => item.name === "generate-ending")!;
+  expect(request.body).toMatchObject({ outcome: "won", victimsSaved: 0, konradReview: { fate: "unknown" } });
+  expect(request.body.gameHighlights ?? "").not.toContain("Wolf mode at end");
 });
