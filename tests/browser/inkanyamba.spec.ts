@@ -396,7 +396,7 @@ test("fresh casting seeds verified setup and nine health through ending, archive
   await expect(
     page.getByText("Killer health (0–9)", { exact: true }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Generate ending", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Ending narration", exact: true }),
   ).toContainText(archive.endingText);

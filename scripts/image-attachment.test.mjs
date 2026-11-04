@@ -94,7 +94,7 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
   }, {}, { env: { get: () => 'configured' } });
   return { handler, filters, removed, phases, imageCalls, textCalls, openingCalls, identityReferences, compositions };
 }
-const request = (sceneType = 'ending') => new Request('https://example.test', { method: 'POST', body: JSON.stringify({ sceneType, killer: 'Billy the Bear', finalGirl: 'Rena', location: 'Buddyland', story: 'Rena held her flashlight toward the empty prize counter. Across the arcade, the bear began to move.', gameId: 'record', previousImageUrl: 'https://example.test/storage/v1/object/public/posters/game-posters/owner-A/old.png' }) });
+const request = (sceneType = 'ending', fields = {}) => new Request('https://example.test', { method: 'POST', body: JSON.stringify({ ...fields, sceneType, killer: 'Billy the Bear', finalGirl: 'Rena', location: 'Buddyland', story: 'Rena held her flashlight toward the empty prize counter. Across the arcade, the bear began to move.', gameId: 'record', previousImageUrl: 'https://example.test/storage/v1/object/public/posters/game-posters/owner-A/old.png' }) });
 test('scene planning and rendering correct crossed caller identity for openings and posters', async () => {
   for (const [finalGirl, anchor] of [['Cassie', 'purple hoodie'], ['Mandy', 'black mesh athletic top'], ['Alice', 'copper-red hair'], ['Selena', 'high round bun']]) {
     for (const sceneType of ['beginning', 'ending']) {
@@ -252,6 +252,14 @@ test('late images attach only to the supplied record and authenticated owner', a
   assert.equal(response.status, 200);
   assert.deepEqual(filters, [['id', 'record'], ['user_id', 'owner-A']]);
   assert.deepEqual(removed, ['game-posters/owner-A/old.png']);
+});
+test('draft ending posters are returned without changing or deleting archived art', async () => {
+  const { handler, filters, removed } = imageHandler();
+  const response = await handler(request('ending', { draftPoster: true }));
+  assert.equal(response.status, 200);
+  assert.ok((await response.json()).imageUrl);
+  assert.deepEqual(filters, []);
+  assert.deepEqual(removed, []);
 });
 test('an absent row never authorizes deletion of the previous archived image', async () => {
   const { handler, removed } = imageHandler({ rowExists: false });

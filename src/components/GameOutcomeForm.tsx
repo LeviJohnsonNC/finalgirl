@@ -7,9 +7,11 @@ import { ArrowRight, ChevronDown } from 'lucide-react';
 import { useBufferedOutcomeDraft } from './outcome/useBufferedOutcomeDraft';
 import { OutcomeNumberField } from './outcome/OutcomeNumberField';
 import { poltergeistPower } from '../../supabase/functions/_shared/play/poltergeist';
+import { ENDING_BOARD_SPACES } from '@/data/endingBoardSpaces';
+import { PLAY_ROOMS, selectionItems } from '@/lib/play/catalog';
+import { OutcomeChoices } from './outcome/OutcomeChoices';
 import { OutcomeSelect } from './outcome/OutcomeSelect';
 import { SuggestionInput } from './ui/suggestion-input';
-import { BUDDYLAND_ITEMS, BUDDYLAND_ROOMS } from '@/lib/play/modules';
 import '@/styles/outcome.css';
 import { GameResult } from '@/hooks/useGameHistory';
 import { EndingFormData } from '@/pages/TheEnd';
@@ -64,6 +66,8 @@ export const GameOutcomeForm = ({
     poltergeist: moduleState(entries, 'poltergeist'),
     creech: moduleState(entries, 'creech'),
     power: poltergeistPower(entries),
+    evomorph: moduleState(entries, 'evomorph').stage,
+    wolf: moduleState(entries, 'big-bad-wolf').mode,
     shady: shadyState(moduleState(entries, 'shady-acres')),
   }), [entries]);
   const [optionsOpen, setOptionsOpen] = useState(false);
@@ -78,7 +82,7 @@ export const GameOutcomeForm = ({
   const fatalShip=result.location==='USS Konrad'&&['airlock-loss','explosion-loss'].includes(shipFate);
   const fatalTormentor=result.killer==='The Tormentor'&&!['none','unknown'].includes(tormentorLoss);
   const fatalEnding=fatalGrim||fatalShip||fatalTormentor;
-  const isWin = !fatalEnding && (result.killer==='The Tormentor'||result.killer==='Grimlash'||result.location==='USS Konrad'?reviewedOutcome:result.outcome) === 'won';
+  const isWin = !fatalEnding && reviewedOutcome === 'won';
   const billyState = observed.billy;
 
   // Session snapshots include observed Ultimate changes; old games keep their denominator.
@@ -107,12 +111,17 @@ export const GameOutcomeForm = ({
   const isBilly = result.killer === 'Billy the Bear';
   const isGrimlash = result.killer === 'Grimlash';
   const isBerith =
-    result.killer === 'Berith' || result.location === "L'Armes Abbey";
+    result.killer === 'Berith';
+  const isAbbey = result.location === "L'Armes Abbey";
   const isShriek =
-    result.killer === 'Mort the Teenage Dirtbag' ||
-    result.location === 'MegaBGCon';
+    result.killer === 'Mort the Teenage Dirtbag';
   const isFalconwood = result.location === 'Falconwood';
   const isSlayer = result.killer === 'Slayer';
+  const hasKillerDetails = (isWin && (isPoltergeist || isBerith)) || (!isWin && isOrganism)
+    || isEvomorph || isRatchetLady || isBigBadWolf || isIntruders || isBilly || isGrimlash
+    || isShriek || isSlayer || result.killer === 'The Tormentor';
+  const hasLocationDetails = result.location === 'USS Konrad' || result.location === 'Shady Acres' || isFalconwood || isAbbey;
+
 
   // Optional observations stay unknown until the player records them.
   const [finalHorrorLevel, setFinalHorrorLevel] = useDraftField<number | null>(
@@ -185,27 +194,27 @@ export const GameOutcomeForm = ({
   const [escapeRoute,setEscapeRoute]=useDraftField('rescueRoute',creechState['helicopter.carolyn']===true?'helicopter':'',initialDraft,onDraftChange);
   // Organism-specific loss type
   const [organismLossType, setOrganismLossType] = useDraftField<
-    'caught' | 'assimilated'
-  >('organismLossType', 'caught', initialDraft, onDraftChange);
+    '' | 'caught' | 'assimilated'
+  >('organismLossType', '', initialDraft, onDraftChange);
   // Evomorph evolution stage
   const [evomorphStage, setEvomorphStage] = useDraftField<
-    'Hatchling' | 'Youngling' | 'Adult'
-  >('evomorphStage', 'Hatchling', initialDraft, onDraftChange);
+    '' | 'Hatchling' | 'Youngling' | 'Adult'
+  >('evomorphStage', observed.evomorph === 'adult' ? 'Adult' : observed.evomorph === 'youngling' ? 'Youngling' : observed.evomorph === 'hatchling' ? 'Hatchling' : '', initialDraft, onDraftChange);
   // Ratchet Lady maniac count
-  const [maniacCount, setManiacCount] = useDraftField(
+  const [maniacCount, setManiacCount] = useDraftField<number | null>(
     'maniacCount',
-    0,
+    null,
     initialDraft,
     onDraftChange,
   );
   // Big Bad Wolf mode
   const [wolfMode, setWolfMode] = useDraftField<
-    'TRACK' | 'SLAY' | 'Killing Machine'
-  >('wolfMode', 'SLAY', initialDraft, onDraftChange);
+    '' | 'TRACK' | 'SLAY' | 'Killing Machine'
+  >('wolfMode', observed.wolf === 'track' ? 'TRACK' : observed.wolf === 'slay' ? 'SLAY' : observed.wolf === 'both' ? 'Killing Machine' : '', initialDraft, onDraftChange);
   // The Intruders - active killer at game end
   const [activeIntruder, setActiveIntruder] = useDraftField<
-    'Trish' | 'Baghead' | 'Zeke'
-  >('activeIntruder', 'Trish', initialDraft, onDraftChange);
+    '' | 'Trish' | 'Baghead' | 'Zeke'
+  >('activeIntruder', '', initialDraft, onDraftChange);
   // Buddyland - Buddies + power supplies
   const [buddiesInPlay, setBuddiesInPlay] = useDraftField<number | null>(
     'buddiesInPlay',
@@ -248,12 +257,12 @@ export const GameOutcomeForm = ({
     onDraftChange,
   );
   const [abbeyInfluence, setAbbeyInfluence] = useDraftField<
-    'Blessings Dominated' | 'Curses Dominated' | 'Balanced'
-  >('abbeyInfluence', 'Balanced', initialDraft, onDraftChange);
+    '' | 'Blessings Dominated' | 'Curses Dominated' | 'Balanced'
+  >('abbeyInfluence', '', initialDraft, onDraftChange);
   // Shriek / MegaBGCon
   const [mortRevealed, setMortRevealed] = useDraftField(
     'mortRevealed',
-    false,
+    null as boolean | null,
     initialDraft,
     onDraftChange,
   );
@@ -266,7 +275,7 @@ export const GameOutcomeForm = ({
   // Falconwood / Slayer
   const [missionCompleted, setMissionCompleted] = useDraftField(
     'missionCompleted',
-    isWin,
+    null as boolean | null,
     initialDraft,
     onDraftChange,
   );
@@ -283,8 +292,8 @@ export const GameOutcomeForm = ({
     textDraft.queue,
   );
   const [endingDimension, setEndingDimension] = useDraftField<
-    'Our Dimension' | 'Mirror Dimension'
-  >('endingDimension', 'Our Dimension', initialDraft, onDraftChange);
+    '' | 'Our Dimension' | 'Mirror Dimension'
+  >('endingDimension', '', initialDraft, onDraftChange);
 
   const buildFormData = (): EndingFormData => {
     // Augment gameHighlights with killer-specific conditions so the LLM gets full context
@@ -303,27 +312,26 @@ export const GameOutcomeForm = ({
           : `Win condition: ${parts.join(', ')}`;
       }
     }
-    if (isOrganism && !isWin && organismLossType === 'assimilated') {
-      highlights = highlights
-        ? `${highlights}. Loss type: Assimilation (Horror Track exceeded 6 — Final Girl was absorbed into the Organism)`
-        : 'Loss type: Assimilation (Horror Track exceeded 6 — Final Girl was absorbed into the Organism)';
+    if (isOrganism && !isWin && organismLossType) {
+      const cause = organismLossType === 'assimilated' ? 'Assimilation' : 'Caught by the Organism';
+      highlights = [highlights, `Loss type: ${cause}`].filter(Boolean).join('. ');
     }
-    if (isEvomorph) {
+    if (isEvomorph && evomorphStage) {
       highlights = highlights
         ? `${highlights}. Evomorph stage reached: ${evomorphStage}`
         : `Evomorph stage reached: ${evomorphStage}`;
     }
-    if (isRatchetLady) {
+    if (isRatchetLady && maniacCount !== null) {
       highlights = highlights
         ? `${highlights}. Maniacs on board at end: ${maniacCount}`
         : `Maniacs on board at end: ${maniacCount}`;
     }
-    if (isBigBadWolf) {
+    if (isBigBadWolf && wolfMode) {
       highlights = highlights
         ? `${highlights}. Wolf mode at end: ${wolfMode}`
         : `Wolf mode at end: ${wolfMode}`;
     }
-    if (isIntruders) {
+    if (isIntruders && activeIntruder) {
       highlights = highlights
         ? `${highlights}. Active Intruder at end: ${activeIntruder}`
         : `Active Intruder at end: ${activeIntruder}`;
@@ -347,19 +355,15 @@ export const GameOutcomeForm = ({
     if (isBerith) {
       const demonParts: string[] = [];
       if (isWin && ursulaSaved) demonParts.push('Ursula saved');
-      demonParts.push(`L'Armes Abbey influence: ${abbeyInfluence}`);
-      highlights = highlights
-        ? `${highlights}. ${demonParts.join('. ')}`
-        : demonParts.join('. ');
+      highlights = [highlights, ...demonParts].filter(Boolean).join('. ');
     }
+    if (isAbbey && abbeyInfluence) highlights = [highlights, `L'Armes Abbey influence: ${abbeyInfluence}`].filter(Boolean).join('. ');
     if (isShriek) {
-      const shriekParts = [`Final killer identity: ${finalKillerIdentity}`];
-      shriekParts.push(
-        mortRevealed ? 'Mort was revealed' : 'Mort remained hidden',
-      );
-      highlights = highlights
-        ? `${highlights}. ${shriekParts.join('. ')}`
-        : shriekParts.join('. ');
+      const shriekParts = [
+        finalKillerIdentity !== 'Unknown' ? `Final killer identity: ${finalKillerIdentity}` : '',
+        mortRevealed === true ? 'Mort was revealed' : mortRevealed === false ? 'Mort remained hidden' : '',
+      ];
+      highlights = [highlights, ...shriekParts].filter(Boolean).join('. ');
     }
     if (isFalconwood) {
       const falconParts: string[] = [];
@@ -372,18 +376,16 @@ export const GameOutcomeForm = ({
           falconParts.push(
             `Friend who joined the fight: ${friendJoined.trim()}`,
           );
-      } else {
+      } else if (missionCompleted === false) {
         falconParts.push(
           'Mission NOT completed — the killer could not be finished',
         );
         if (missionProgress.trim())
           falconParts.push(`Mission progress: ${missionProgress.trim()}`);
       }
-      highlights = highlights
-        ? `${highlights}. ${falconParts.join('. ')}`
-        : falconParts.join('. ');
+      highlights = [highlights, ...falconParts].filter(Boolean).join('. ');
     }
-    if (isSlayer) {
+    if (isSlayer && endingDimension) {
       const dimensionPart = `Ended in: ${endingDimension}`;
       highlights = highlights
         ? `${highlights}. ${dimensionPart}`
@@ -392,12 +394,13 @@ export const GameOutcomeForm = ({
 
     const formData: EndingFormData = {
       ...(result.location==='Shady Acres'&&{childrenOnBoardAtFinish:childrenAtFinish}),
-      ...(result.killer==='The Tormentor'&&{tormentorReview:{loss:tormentorLoss},outcome:fatalEnding?'lost' as const:reviewedOutcome}),
-      ...(isGrimlash&&{grimlashReview:{loss:grimLoss},outcome:fatalEnding?'lost' as const:reviewedOutcome}),
-      ...(result.location==='USS Konrad'&&{konradReview:{fate:shipFate},outcome:fatalEnding?'lost' as const:reviewedOutcome}),
-      finalHorrorLevel: finalHorrorLevel ?? undefined,
-      finalGirlHealth: finalGirlHealth ?? undefined,
-      killerHealth: killerIsUnkillable ? undefined : killerHealth ?? undefined,
+      ...(result.killer==='The Tormentor'&&{tormentorReview:{loss:tormentorLoss}}),
+      ...(isGrimlash&&{grimlashReview:{loss:grimLoss}}),
+      ...(result.location==='USS Konrad'&&{konradReview:{fate:shipFate}}),
+      outcome: isWin ? 'won' : 'lost',
+      finalHorrorLevel,
+      finalGirlHealth,
+      killerHealth: killerIsUnkillable ? null : killerHealth,
       weaponUsed: weaponUsed || '',
       victimsSaved,
       victimsKilled,
@@ -409,6 +412,14 @@ export const GameOutcomeForm = ({
     return formData;
   };
   const handleContinue = () => { if (textDraft.flush()) onContinue(buildFormData()); };
+  const playSummary = useMemo(() => summarizePlay(result.playEvents), [result.playEvents]);
+  const suggestedWeapons = useMemo(() => [
+    ...selectionItems(result).filter(item => /damage|attack|weapon/i.test(item.effect)).map(item => item.name),
+    ...entries.filter(entry => entry.kind === 'moment' && entry.momentType === 'item' && entry.detail)
+      .map(entry => entry.detail!),
+  ], [entries, result]);
+  const hasRecordedTotals = [playSummary.saved, playSummary.killed, playSummary.round, playSummary.finalGirlHealth,
+    playSummary.killerHealth, playSummary.finalHorrorLevel].some(value => value != null);
 
   return (
     <div
@@ -426,6 +437,15 @@ export const GameOutcomeForm = ({
         </ol>
         <p>Review your final totals. Blank fields stay unrecorded.</p>
       </div>
+      <section className="outcome-panel outcome-result" aria-label="Game result">
+        <OutcomeSelect label="Game result" value={isWin ? 'won' : 'lost'} onValueChange={value => setReviewedOutcome(value as 'won' | 'lost')}>
+          <option value="won" disabled={fatalEnding}>Won</option>
+          <option value="lost">Lost</option>
+        </OutcomeSelect>
+        {fatalEnding && <p role="status">Recorded {[
+          fatalShip && 'ship fate', fatalTormentor && 'trap outcome', fatalGrim && 'Harvest Madness',
+        ].filter(Boolean).join(' and ')} requires a loss. Health and victim totals stay as recorded.</p>}
+      </section>
       <div className="outcome-counters" aria-label="Final game totals">
         <OutcomeNumberField
           label="Victims saved"
@@ -456,7 +476,6 @@ export const GameOutcomeForm = ({
           prominent
         />
       </div>
-      {result.location==='USS Konrad'&&<section className="outcome-panel" aria-label="USS Konrad ending review"><h2>Ship ending</h2><OutcomeSelect label="Reviewed ship fate" value={shipFate} onValueChange={v=>setShipFate(v as KonradFate)}><option value="unknown">Fate not recorded</option><option value="survived">Survived ship hazard</option><option value="airlock-loss">Lost to Airlock · no Final Health reveal</option><option value="explosion-loss">Lost outside Exit · Self Destruct</option></OutcomeSelect><OutcomeSelect label="Reviewed game result" value={fatalEnding?'lost':reviewedOutcome} onValueChange={v=>setReviewedOutcome(v as 'won'|'lost')}><option value="won">Won</option><option value="lost">Lost</option></OutcomeSelect>{fatalShip&&<p role="status">This ship ending is a loss regardless of recorded Health or Killer death. Health is preserved as observed.</p>}<p>Surviving a ship hazard alone does not establish victory or Killer death.</p></section>}
       <div className="outcome-detail-grid">
         <section
           className="outcome-panel outcome-final-totals"
@@ -464,7 +483,7 @@ export const GameOutcomeForm = ({
         >
           <div className="outcome-panel-heading">
             <h2 id="outcome-final-totals-title">Final Totals</h2>
-            <p>The last state of the board.</p>
+            <p>{hasRecordedTotals ? 'Starting values come from Play. Adjust anything you need to correct.' : 'Enter what you recorded. Blank fields stay unrecorded.'}</p>
           </div>
           <div className="outcome-fields">
             {isGrimlash&&finalGirlHealth!==null&&finalGirlHealth>maxFinalGirlHealth&&<p role="status">Recorded Health {finalGirlHealth} exceeds the current maximum {maxFinalGirlHealth}.</p>}
@@ -494,19 +513,22 @@ export const GameOutcomeForm = ({
               onChange={setFinalHorrorLevel}
               max={7}
             />
-            <label className="outcome-text-field">
+            <div className="outcome-text-field">
               <span>Weapon used</span>
               <SuggestionInput
                 label="Weapon Used"
                 value={weaponUsed}
                 onChange={setWeaponUsed}
                 placeholder="Add a weapon…"
-                options={result.location === "Buddyland" ? BUDDYLAND_ITEMS.filter(item => /damage|attacking/i.test(item.effect)).map(item => item.name) : []}
+                options={suggestedWeapons}
+                browseLabel="Browse weapons"
               />
-            </label>
+            </div>
           </div>
         </section>
-        <div className="outcome-modules">
+        {(hasKillerDetails || hasLocationDetails) && <div className="outcome-module-stack">
+        {hasKillerDetails && <section className="outcome-modules" aria-labelledby="outcome-killer-details">
+          <h2 id="outcome-killer-details" className="outcome-module-group-title">Killer details</h2>
           {/* Section: Poltergeist win conditions */}
           {isPoltergeist && isWin && (
             <div className="outcome-panel outcome-module space-y-3">
@@ -514,7 +536,12 @@ export const GameOutcomeForm = ({
                 Poltergeist rescue review
               </h3>
               {isPoltergeist&&<p className="text-sm text-muted-foreground">Confirm the physical escape. {polterPower.epic?'The Epic Power requires Mr. Floppy too.':polterPower.revealed&&!polterPower.known?'The revealed Power name is unknown.':''}</p>}
-              {result.location==='Creech Manor'&&<label>Carolyn rescue route<select className="w-full min-h-11 bg-background border border-border rounded p-2" aria-label="Carolyn rescue route" value={escapeRoute} onChange={e=>setEscapeRoute(e.target.value)}><option value="">Not recorded</option><option value="exit">Exit</option><option value="helicopter">Helicopter</option></select><span className="text-sm">Helicopter is not an Exit; confirm your physical outcome.</span></label>}
+              {result.location === 'Creech Manor' && <>
+                <OutcomeSelect label="Carolyn rescue route" value={escapeRoute} onValueChange={setEscapeRoute}>
+                  <option value="">Not recorded</option><option value="exit">Exit</option><option value="helicopter">Helicopter</option>
+                </OutcomeSelect>
+                <p>Confirm the physical route. Helicopter is a separate rescue route.</p>
+              </>}
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -542,69 +569,15 @@ export const GameOutcomeForm = ({
             </div>
           )}
 
-          {/* Section: Organism loss type */}
-          {isOrganism && !isWin && (
-            <div className="outcome-panel outcome-module space-y-3">
-              <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
-                How Did You Lose?
-              </h3>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="organismLoss"
-                    value="caught"
-                    checked={organismLossType === "caught"}
-                    onChange={() => setOrganismLossType("caught")}
-                    className="accent-primary"
-                  />
-                  <span className="type-label text-foreground">
-                    Caught by the Organism
-                  </span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="organismLoss"
-                    value="assimilated"
-                    checked={organismLossType === "assimilated"}
-                    onChange={() => setOrganismLossType("assimilated")}
-                    className="accent-primary"
-                  />
-                  <span className="type-label text-foreground">
-                    Assimilated (Horror &gt; 6)
-                  </span>
-                </label>
-              </div>
-            </div>
-          )}
+          {isOrganism && !isWin && <section className="outcome-panel outcome-module">
+            <OutcomeChoices label="How did you lose?" value={organismLossType}
+              onChange={value => setOrganismLossType(value as typeof organismLossType)} options={[["caught", "Caught by the Organism"], ["assimilated", "Assimilated"]]} />
+          </section>}
 
-          {/* Section: Evomorph evolution stage */}
-          {isEvomorph && (
-            <div className="outcome-panel outcome-module space-y-3">
-              <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
-                Evomorph Evolution
-              </h3>
-              <div className="flex flex-col sm:flex-row gap-2">
-                {(["Hatchling", "Youngling", "Adult"] as const).map((stage) => (
-                  <label
-                    key={stage}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="evomorphStage"
-                      value={stage}
-                      checked={evomorphStage === stage}
-                      onChange={() => setEvomorphStage(stage)}
-                      className="accent-primary"
-                    />
-                    <span className="type-label text-foreground">{stage}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
+          {isEvomorph && <section className="outcome-panel outcome-module">
+            <OutcomeChoices label="Evomorph stage at finish" value={evomorphStage}
+              onChange={value => setEvomorphStage(value as typeof evomorphStage)} options={[["Hatchling", "Hatchling"], ["Youngling", "Youngling"], ["Adult", "Adult"]]} />
+          </section>}
 
           {/* Section: Ratchet Lady - maniacs */}
           {isRatchetLady && (
@@ -612,87 +585,20 @@ export const GameOutcomeForm = ({
               <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
                 Asylum Status
               </h3>
-              <div className="space-y-1">
-                <label className="type-caption text-muted-foreground">
-                  Maniacs on Board at End (0–6)
-                </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={maniacCount === 0 ? "" : String(maniacCount)}
-                  onChange={(e) => {
-                    const val =
-                      e.target.value === ""
-                        ? 0
-                        : Math.min(
-                            6,
-                            Math.max(0, Math.trunc(Number(e.target.value))),
-                          );
-                    setManiacCount(isNaN(val) ? 0 : val);
-                  }}
-                  placeholder="0"
-                  className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground focus:outline-none focus:border-primary/50 transition-colors"
-                />
-              </div>
+              <OutcomeNumberField label="Maniacs on board at finish" accessibleLabel="Maniacs on board at finish"
+                value={maniacCount} onChange={setManiacCount} max={6} />
             </div>
           )}
 
-          {/* Section: Big Bad Wolf mode */}
-          {isBigBadWolf && (
-            <div className="outcome-panel outcome-module space-y-3">
-              <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
-                Wolf Status
-              </h3>
-              <div className="flex flex-col sm:flex-row gap-2">
-                {(["TRACK", "SLAY", "Killing Machine"] as const).map((mode) => (
-                  <label
-                    key={mode}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="wolfMode"
-                      value={mode}
-                      checked={wolfMode === mode}
-                      onChange={() => setWolfMode(mode)}
-                      className="accent-primary"
-                    />
-                    <span className="type-label text-foreground">{mode}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
+          {isBigBadWolf && <section className="outcome-panel outcome-module">
+            <OutcomeChoices label="Wolf mode at finish" value={wolfMode}
+              onChange={value => setWolfMode(value as typeof wolfMode)} options={[["TRACK", "Track"], ["SLAY", "Slay"], ["Killing Machine", "Track and Slay"]]} />
+          </section>}
 
-          {/* Section: The Intruders - active killer */}
-          {isIntruders && (
-            <div className="outcome-panel outcome-module space-y-3">
-              <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
-                Active Intruder
-              </h3>
-              <div className="flex flex-col sm:flex-row gap-2">
-                {(["Trish", "Baghead", "Zeke"] as const).map((intruder) => (
-                  <label
-                    key={intruder}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="activeIntruder"
-                      value={intruder}
-                      checked={activeIntruder === intruder}
-                      onChange={() => setActiveIntruder(intruder)}
-                      className="accent-primary"
-                    />
-                    <span className="type-label text-foreground">
-                      {intruder}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
+          {isIntruders && <section className="outcome-panel outcome-module">
+            <OutcomeChoices label="Active Intruder at finish" value={activeIntruder}
+              onChange={value => setActiveIntruder(value as typeof activeIntruder)} options={[["Trish", "Trish"], ["Baghead", "Baghead"], ["Zeke", "Zeke"]]} />
+          </section>}
 
           {/* Section: Buddyland - Buddies + power supplies */}
           {isBilly && (
@@ -746,14 +652,7 @@ export const GameOutcomeForm = ({
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label
-                    htmlFor="billy-finale"
-                    className="type-caption text-muted-foreground"
-                  >
-                    Billy Finale (optional)
-                  </label>
                   <OutcomeSelect
-                    id="billy-finale"
                     value={billyFinale}
                     label="Billy Finale (optional)"
                     onValueChange={setBillyFinale}
@@ -770,14 +669,7 @@ export const GameOutcomeForm = ({
                 </div>
                 {billyFinale === "Power Surge" && (
                   <div className="space-y-1">
-                    <label
-                      htmlFor="boris-status"
-                      className="type-caption text-muted-foreground"
-                    >
-                      Boris at Game End
-                    </label>
                     <OutcomeSelect
-                      id="boris-status"
                       value={borisStatus}
                       label="Boris at Game End"
                       onValueChange={setBorisStatus}
@@ -796,12 +688,30 @@ export const GameOutcomeForm = ({
             </div>
           )}
 
-          {result.killer==='The Tormentor'&&<section className="outcome-panel outcome-module" aria-label="Tormentor ending review"><h3>Tormentor ending</h3><OutcomeSelect label="Tormentor loss record" value={tormentorLoss} onValueChange={v=>setTormentorLoss(v as TormentorLoss)}><option value="unknown">Not recorded</option><option value="none">No special loss recorded</option><option value="trap-terminal">Killed by terminal Death Trap</option><option value="no-escape">No Escape · all Exits locked at Killer phase start</option><option value="endless-traps">Endless Traps · no Victim trap cards left</option></OutcomeSelect><OutcomeSelect label="Reviewed game result" value={fatalEnding?'lost':reviewedOutcome} onValueChange={v=>setReviewedOutcome(v as 'won'|'lost')}><option value="won" disabled={fatalEnding}>Won</option><option value="lost">Lost</option></OutcomeSelect>{fatalTormentor&&<p role="status">{tormentorLoss==='trap-terminal'?'The Final Girl died without revealing Final Health.':'This is a game loss; physical death is not established.'} Health and Victim totals remain as observed.</p>}</section>}
-          {isGrimlash&&<section className="outcome-panel outcome-module" aria-label="Grimlash ending review"><h3>Harvest Madness</h3><p>{typeof reviewedGrimState.position==='number'?`Position ${reviewedGrimState.position} · ${harvestLevel(reviewedGrimState.position)===4?'Skull':`Level ${harvestLevel(reviewedGrimState.position)}`}`:'Position not recorded'}{typeof reviewedGrimState.peak==='number'?` · Recorded peak ${reviewedGrimState.peak}`:''}</p><OutcomeSelect label="Madness loss record" value={grimLoss} onValueChange={v=>setGrimLoss(v as GrimlashLoss)}><option value="unknown">Not recorded</option><option value="none">No Madness loss recorded</option><option value="skull">Reached the skull</option><option value="telluric">Telluric Visions loss</option></OutcomeSelect><OutcomeSelect label="Reviewed game result" value={fatalEnding?'lost':reviewedOutcome} onValueChange={v=>setReviewedOutcome(v as 'won'|'lost')}><option value="won" disabled={fatalEnding}>Won</option><option value="lost">Lost</option></OutcomeSelect>{retractingSkull&&<p>Saving this correction also leaves the earlier skull position and skull peak unrecorded.</p>}{fatalGrim&&<p role="status">This Madness ending is a loss. Health and Victim totals remain as observed.</p>}{harvestMadnessPeaked&&<p>Legacy peaked record: exact level and position unknown.</p>}</section>}
-          {result.location==='Shady Acres'&&<section className="outcome-panel outcome-module"><label>Children on board at finish<select aria-label="Children on board at finish" value={childrenAtFinish??''} onChange={e=>setChildrenAtFinish(e.target.value===''?null:Number(e.target.value))}><option value="">Not recorded</option>{[0,1,2,3].map(n=><option key={n}>{n}</option>)}</select></label></section>}
+          {result.killer === 'The Tormentor' && <section className="outcome-panel outcome-module" aria-label="Tormentor ending review">
+            <h3>Tormentor ending</h3>
+            <OutcomeSelect label="Tormentor loss record" value={tormentorLoss} onValueChange={v => setTormentorLoss(v as TormentorLoss)}>
+              <option value="unknown">Not recorded</option><option value="none">No special loss recorded</option>
+              <option value="trap-terminal">Killed by terminal Death Trap</option>
+              <option value="no-escape">No Escape · all Exits locked at Killer phase start</option>
+              <option value="endless-traps">Endless Traps · no Victim trap cards left</option>
+            </OutcomeSelect>
+            {fatalTormentor && <p>{tormentorLoss === 'trap-terminal' ? 'No Final Health was revealed.' : 'Physical death is unconfirmed.'}</p>}
+          </section>}
+          {isGrimlash && <section className="outcome-panel outcome-module" aria-label="Grimlash ending review">
+            <h3>Harvest Madness</h3>
+            <p>{typeof reviewedGrimState.position === 'number' ? `Position ${reviewedGrimState.position} · ${harvestLevel(reviewedGrimState.position) === 4 ? 'Skull' : `Level ${harvestLevel(reviewedGrimState.position)}`}` : 'Position not recorded'}
+              {typeof reviewedGrimState.peak === 'number' && ` · Recorded peak ${reviewedGrimState.peak}`}</p>
+            <OutcomeSelect label="Madness loss record" value={grimLoss} onValueChange={v => setGrimLoss(v as GrimlashLoss)}>
+              <option value="unknown">Not recorded</option><option value="none">No Madness loss recorded</option>
+              <option value="skull">Reached the skull</option><option value="telluric">Telluric Visions loss</option>
+            </OutcomeSelect>
+            {retractingSkull && <p>Saving this correction also leaves the earlier skull position and skull peak unrecorded.</p>}
+            {harvestMadnessPeaked && <p>Legacy peaked record: exact level and position unknown.</p>}
+          </section>}
 
           {/* Section: Berith / A Demon in the Shadows */}
-          {isBerith && (
+          {isBerith && isWin && (
             <div className="outcome-panel outcome-module space-y-3">
               <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
                 The Demon
@@ -819,37 +729,6 @@ export const GameOutcomeForm = ({
                   </span>
                 </label>
               )}
-              <div>
-                <p className="type-caption text-muted-foreground mb-2">
-                  L'Armes Abbey Influence
-                </p>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  {(
-                    [
-                      "Blessings Dominated",
-                      "Curses Dominated",
-                      "Balanced",
-                    ] as const
-                  ).map((influence) => (
-                    <label
-                      key={influence}
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        name="abbeyInfluence"
-                        value={influence}
-                        checked={abbeyInfluence === influence}
-                        onChange={() => setAbbeyInfluence(influence)}
-                        className="accent-primary"
-                      />
-                      <span className="type-label text-foreground">
-                        {influence}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
             </div>
           )}
 
@@ -861,9 +740,6 @@ export const GameOutcomeForm = ({
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="type-caption text-muted-foreground">
-                    Final Killer Identity
-                  </label>
                   <OutcomeSelect
                     value={finalKillerIdentity}
                     label="Final Killer Identity"
@@ -888,23 +764,41 @@ export const GameOutcomeForm = ({
                     ))}
                   </OutcomeSelect>
                 </div>
-                <div className="flex items-end pb-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={mortRevealed}
-                      onChange={(e) => setMortRevealed(e.target.checked)}
-                      className="w-4 h-4 accent-primary"
-                    />
-                    <span className="type-label text-foreground">
-                      Mort Revealed
-                    </span>
-                  </label>
-                </div>
+                <OutcomeChoices label="Mort reveal" value={mortRevealed === null ? '' : String(mortRevealed)}
+                  onChange={value => setMortRevealed(value === '' ? null : value === 'true')}
+                  options={[['true', 'Revealed'], ['false', 'Stayed hidden']]} />
               </div>
             </div>
           )}
 
+          {isSlayer && <section className="outcome-panel outcome-module">
+            <OutcomeChoices label="Dimension at finish" value={endingDimension}
+              onChange={value => setEndingDimension(value as typeof endingDimension)}
+              options={[['Our Dimension', 'Our Dimension'], ['Mirror Dimension', 'Mirror Dimension']]} />
+          </section>}
+        </section>}
+        {hasLocationDetails && <section className="outcome-modules" aria-labelledby="outcome-location-details">
+          <h2 id="outcome-location-details" className="outcome-module-group-title">Location details</h2>
+          {result.location === 'USS Konrad' && <section className="outcome-panel outcome-module" aria-label="USS Konrad ending review">
+            <h3>Ship ending</h3>
+            <OutcomeSelect label="Reviewed ship fate" value={shipFate} onValueChange={v => setShipFate(v as KonradFate)}>
+              <option value="unknown">Fate not recorded</option><option value="survived">Survived ship hazard</option>
+              <option value="airlock-loss">Lost to Airlock · no Final Health reveal</option>
+              <option value="explosion-loss">Lost outside Exit · Self Destruct</option>
+            </OutcomeSelect>
+          </section>}
+          {result.location === 'Shady Acres' && <section className="outcome-panel outcome-module" aria-label="Shady Acres ending review">
+            <h3>Shady Acres</h3>
+            <OutcomeSelect label="Children on board at finish" value={childrenAtFinish == null ? '' : String(childrenAtFinish)}
+              onValueChange={value => setChildrenAtFinish(value === '' ? null : Number(value))}>
+              <option value="">Not recorded</option>{[0, 1, 2, 3].map(n => <option key={n} value={String(n)}>{n}</option>)}
+            </OutcomeSelect>
+          </section>}
+          {isAbbey && <section className="outcome-panel outcome-module">
+            <OutcomeChoices label="L’Armes Abbey influence" value={abbeyInfluence}
+              onChange={value => setAbbeyInfluence(value as typeof abbeyInfluence)}
+              options={[['Blessings Dominated', 'Blessings dominated'], ['Curses Dominated', 'Curses dominated'], ['Balanced', 'Balanced']]} />
+          </section>}
           {/* Section: Falconwood Mission */}
           {isFalconwood && (
             <div className="outcome-panel outcome-module space-y-3">
@@ -916,39 +810,30 @@ export const GameOutcomeForm = ({
                   {result.mission}
                 </p>
               )}
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={missionCompleted}
-                  onChange={(e) => setMissionCompleted(e.target.checked)}
-                  className="w-4 h-4 accent-secondary"
-                />
-                <span className="type-label text-foreground">
-                  Mission Completed
-                </span>
-              </label>
-
+              <OutcomeChoices label="Mission result" value={missionCompleted === null ? '' : String(missionCompleted)}
+                onChange={value => setMissionCompleted(value === '' ? null : value === 'true')}
+                options={[['true', 'Completed'], ['false', 'Incomplete']]} />
               {missionCompleted ? (
                 <div className="space-y-1">
-                  <label className="type-caption text-muted-foreground">
+                  <label htmlFor="friend-joined" className="type-caption text-muted-foreground">
                     Friend Who Joined You
                   </label>
                   <input
                     type="text"
-                    value={friendJoined}
+                    id="friend-joined" value={friendJoined}
                     onChange={(e) => setFriendJoined(e.target.value)}
                     placeholder="Your father, your friend, the researcher..."
                     className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-secondary/50 transition-colors"
                   />
                 </div>
-              ) : (
+              ) : missionCompleted === false && (
                 <div className="space-y-1">
-                  <label className="type-caption text-muted-foreground">
+                  <label htmlFor="mission-progress" className="type-caption text-muted-foreground">
                     Mission Progress
                   </label>
                   <input
                     type="text"
-                    value={missionProgress}
+                    id="mission-progress" value={missionProgress}
                     onChange={(e) => setMissionProgress(e.target.value)}
                     placeholder="One clue short, halfway through the code..."
                     className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/50 transition-colors"
@@ -958,42 +843,8 @@ export const GameOutcomeForm = ({
             </div>
           )}
 
-          {/* Section: Slayer Mirror Dimension */}
-          {isSlayer && (
-            <div className="outcome-panel outcome-module space-y-3">
-              <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
-                The Mirror Dimension
-              </h3>
-              <div>
-                <p className="type-caption text-muted-foreground mb-2">
-                  Dimension at the End
-                </p>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  {(["Our Dimension", "Mirror Dimension"] as const).map(
-                    (dimension) => (
-                      <label
-                        key={dimension}
-                        className="flex items-center gap-2 cursor-pointer"
-                      >
-                        <input
-                          type="radio"
-                          name="endingDimension"
-                          value={dimension}
-                          checked={endingDimension === dimension}
-                          onChange={() => setEndingDimension(dimension)}
-                          className="accent-primary"
-                        />
-                        <span className="type-label text-foreground">
-                          {dimension}
-                        </span>
-                      </label>
-                    ),
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        </section>}
+        </div>}
       </div>
       <section
         className="outcome-panel outcome-last-moments"
@@ -1004,16 +855,17 @@ export const GameOutcomeForm = ({
           <p>Where did it end, and what made it memorable?</p>
         </div>
         <div className="outcome-last-fields">
-          <label className="outcome-text-field">
+          <div className="outcome-text-field">
             <span>Ending location</span>
             <SuggestionInput
               label="Ending Location"
               value={endingSubLocation}
               onChange={setEndingSubLocation}
               placeholder="Where did it end?"
-              options={result.location === "Buddyland" ? BUDDYLAND_ROOMS : []}
+              options={PLAY_ROOMS[result.location] ?? ENDING_BOARD_SPACES[result.location] ?? []}
+              browseLabel="Browse board spaces"
             />
-          </label>
+          </div>
           <label className="outcome-text-field">
             <span>Game highlights</span>
             <textarea
@@ -1033,8 +885,13 @@ export const GameOutcomeForm = ({
           onClick={handleContinue}
           className="outcome-continue"
         >
-          Continue <ArrowRight size={21} aria-hidden="true" />
+          Generate ending <ArrowRight size={21} aria-hidden="true" />
         </button>
+        {onSaveResult && (
+          <button type="button" className="outcome-save-only" onClick={() => {
+            if (textDraft.flush()) onSaveResult(buildFormData());
+          }}>Save record only</button>
+        )}
         {onSaveResult && (
           <div className="outcome-options">
             <button
@@ -1048,15 +905,6 @@ export const GameOutcomeForm = ({
             {optionsOpen && (
               <div id="outcome-options-menu">
                 <button type="button" className="outcome-discard-action" onClick={() => {setOptionsOpen(false); onDiscard();}}>Discard game…</button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOptionsOpen(false);
-                    if (textDraft.flush()) onSaveResult(buildFormData());
-                  }}
-                >
-                  Save result without narration
-                </button>
               </div>
             )}
           </div>

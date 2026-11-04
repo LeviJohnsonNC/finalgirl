@@ -1,3 +1,4 @@
+import { sameEndingReview } from '@/lib/endingReview';
 import { WOODS } from "../../supabase/functions/_shared/play/storybookWoods";
 import {tormentorState,tormentorFatal,tormentorParent,resolveTormentorAction} from '@/lib/play/tormentor';
 import {shadyParent,shadyState,resolveShadyAction} from '@/lib/play/shadyAcres';
@@ -73,6 +74,8 @@ const IndexContent = () => {
   // other route into the scrapbooks clears it, so they start on the covers.
   const [scrapbookFocusId, setScrapbookFocusId] = useState<string | null>(null);
 
+  const [savedCaseId, setSavedCaseId] = useState<string | null>(null);
+
   const goToScrapbooks = (focusGameId: string | null = null) => {
     setScrapbookFocusId(focusGameId);
     setCurrentPage('scrapbooks');
@@ -90,12 +93,11 @@ const IndexContent = () => {
   const checkpointGame = (id: string, updates: Partial<ActiveGame>) => {
     if (isGameDiscarded(owner,id)) return false;
     const saved = checkpoint(id, updates);
-    // A late image can land after SAVE unmounts its screen. Queue the attachment
+    // A late opening still can land after save. Queue the attachment
     // against the stable record ID, even after the active draft was cleared.
     if (recordedIds.current.has(id)) {
       try {
         if (updates.sceneImageUrl) updateGame(id, { sceneImageUrl: updates.sceneImageUrl });
-        if (updates.posterImageUrl) updateGame(id, { posterImageUrl: updates.posterImageUrl });
       } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save the image.'); }
     }
     return saved;
@@ -200,7 +202,7 @@ const IndexContent = () => {
   };
 
   // Each durable boundary remains retryable; use one case ID across retries.
-  const saveReviewedResult = (formData: EndingFormData) => {
+  const saveReviewedResult = (formData: EndingFormData, nextPhase: "outcome" | "ending") => {
     let game=getCurrentGame();
     if(!game?.result)throw new Error('The current result is unavailable. Keep this page open and retry.');
     if(game.selection.location==='USS Konrad'&&formData.konradReview) {
@@ -219,36 +221,69 @@ const IndexContent = () => {
     const {konradReview:_review,childrenOnBoardAtFinish:_children,...fields}=formData;
     const reviewedEntries=summarizePlay(game.playEvents).entries;
     const fatalEnding=game.selection.killer==='The Tormentor'&&tormentorFatal(tormentorState(moduleState(reviewedEntries,'tormentor')))||game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(reviewedEntries,'grimlash'))||game.selection.location==='USS Konrad'&&konradFatal(moduleState(reviewedEntries,'konrad'));
-    const outcome=fatalEnding?'lost':game.selection.killer==='The Tormentor'||game.selection.killer==='Grimlash'||game.selection.location==='USS Konrad'?formData.outcome??game.result.outcome:game.result.outcome;
-    const updates={...fields,outcome,playEvents:game.playEvents};
-    updateGame(game.result.id,updates);
-    const result={...game.result,...updates};
-    if(!checkpoint(game.id,{result,formData}))throw new Error('The reviewed result is saved, but this game could not advance. Keep it open and retry.');
-    return result;
+    const outcome = fatalEnding ? 'lost' : formData.outcome ?? game.result.outcome;
+    const review = { ...formData, outcome };
+    const changed = !sameEndingReview(game.formData, review, game.result.outcome)
+      || (game.result.playEvents?.length ?? 0) !== (game.playEvents?.length ?? 0);
+    const hasOldEnding = Boolean(game.endingStory || game.posterImageUrl || game.endingNeedsRefresh);
+    const clearEnding = nextPhase === 'outcome' || changed;
+    const updates = {
+      ...fields, outcome, playEvents: game.playEvents,
+      ...(clearEnding && { endingNarration: null, posterImageUrl: null }),
+    };
+    updateGame(game.result.id, updates);
+    if (!checkpoint(game.id, {
+      phase: nextPhase,
+      result: { ...game.result, ...updates },
+      formData: review,
+      endingRevision: changed || !game.endingRevision ? crypto.randomUUID() : game.endingRevision,
+      ...(clearEnding && {
+        endingStory: undefined,
+        posterImageUrl: undefined,
+        endingNeedsRefresh: nextPhase === 'ending' && hasOldEnding,
+      }),
+    })) throw new Error('The reviewed result is saved, but this game could not advance. Keep it open and retry.');
   };
+
   const handleContinueToEnding = (formData: EndingFormData) => {
-    if (!activeGame?.result) return;
     try {
-      const reviewed=saveReviewedResult(formData);
-      if (checkpoint(activeGame.id, { phase: 'ending', formData, result:reviewed })) setCurrentPage('ending');
+      saveReviewedResult(formData, 'ending');
+      setCurrentPage('ending');
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save your result.'); }
+  };
+
+  const handleEditRecord = () => {
+    const game = getCurrentGame();
+    if (game && checkpoint(game.id, { phase: 'outcome' })) setCurrentPage('outcome', { replace: true });
+  };
+
+  const finishSavedCase = (id: string) => {
+    if (!cloudPlay.close()) {
+      toast.error(cloudPlay.conflict ? 'Resolve the cloud version before closing this game.' : 'Could not close this game on this device. Keep it open and retry.');
+      return;
+    }
+    if (saveActiveGame(null)) {
+      setSavedCaseId(id);
+      setCurrentPage('stats', { replace: true, omit: ['nowPlaying', 'outcome', 'ending'] });
+    }
   };
 
   const handleSaveEnding = (endingNarration: string, posterImageUrl?: string) => {
     if (!lastGameResult || !endingFormData) return;
     try {
-      updateGame(lastGameResult.id, { ...endingFormData, endingNarration: endingNarration || undefined, posterImageUrl });
-      if (!cloudPlay.close()) { toast.error('Resolve the cloud version before closing this game.'); return; }
-      if (saveActiveGame(null)) setCurrentPage('stats');
+      updateGame(lastGameResult.id, {
+        endingNarration: endingNarration || null,
+        posterImageUrl: endingNarration ? posterImageUrl ?? null : null,
+      });
+      finishSavedCase(lastGameResult.id);
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save the ending.'); }
   };
 
   const handleSaveResult = (formData: EndingFormData) => {
     if (!lastGameResult) return;
     try {
-      saveReviewedResult(formData);
-      if (!cloudPlay.close()) { toast.error('Resolve the cloud version before closing this game.'); return; }
-      if (saveActiveGame(null)) setCurrentPage('stats');
+      saveReviewedResult(formData, 'outcome');
+      finishSavedCase(lastGameResult.id);
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save your result.'); }
   };
 
@@ -363,7 +398,9 @@ const IndexContent = () => {
               key={`${owner}:${activeGame.id}`}
               result={lastGameResult}
               introStory={introStory}
-              initialDraft={activeGame.formDraft}
+              initialDraft={activeGame.formData
+                ? { gameHighlights: '', ...activeGame.formDraft }
+                : activeGame.formDraft}
               onDraftChange={(fields) => updateFormDraft(activeGame.id, fields)}
               onSaveResult={handleSaveResult}
               onContinue={handleContinueToEnding}
@@ -382,7 +419,13 @@ const IndexContent = () => {
               visualBible={visualBible}
               initialEndingStory={activeGame.endingStory}
               initialPosterImageUrl={activeGame.posterImageUrl}
-              onCheckpoint={(updates) => checkpointGame(activeGame.id, updates)}
+              needsRefresh={activeGame.endingNeedsRefresh}
+              onEditRecord={handleEditRecord}
+              onCheckpoint={(updates) => {
+                const current = getCurrentGame();
+                if (current?.id === activeGame.id && current.phase === 'ending'
+                  && current.endingRevision === activeGame.endingRevision) checkpoint(current.id, updates);
+              }}
               formData={endingFormData}
               onSave={handleSaveEnding}
             />
@@ -399,7 +442,10 @@ const IndexContent = () => {
           />
         );
       case 'stats':
-        return <Stats onOpenSession={(gameId) => goToScrapbooks(gameId)} />;
+        return <Stats savedCaseId={savedCaseId} onOpenSession={(gameId) => {
+          setSavedCaseId(null);
+          goToScrapbooks(gameId);
+        }} />;
       case 'rules':
         return <Rules />;
       default:
@@ -439,7 +485,7 @@ const IndexContent = () => {
           {/* Left: Back button or Play indicator */}
           {canGoBack ? (
             <button
-              onClick={goBack}
+              onClick={currentPage === 'ending' ? handleEditRecord : goBack}
               aria-label="Back"
               className="type-caption text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 sm:gap-1.5 min-h-[44px] px-1 sm:px-2"
             >

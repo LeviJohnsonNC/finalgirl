@@ -194,7 +194,7 @@ test("streamlined portraits and reveals survive reload and reach deaths and endi
   await expect(
     page.getByLabel("Buddies in Play at End (0–7)", { exact: true }),
   ).toHaveValue("");
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Generate ending", exact: true }).click();
   await expect
     .poll(
       () =>
@@ -307,7 +307,7 @@ test("reveal selection can be cleared, corrected and left unnamed; unfinished no
   await expect(
     page.getByLabel("Billy Finale (optional)", { exact: true }),
   ).toHaveText("Power Surge");
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Generate ending", exact: true }).click();
   await expect
     .poll(
       () =>

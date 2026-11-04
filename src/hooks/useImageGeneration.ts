@@ -37,6 +37,7 @@ export interface GenerateImageContext {
   mission?: { name: string; description: string };
   scenarioRules?: string;
   gameId?: string;
+  draftPoster?: boolean;
   previousImageUrl?: string;
   referenceImageUrl?: string;
 }

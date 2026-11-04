@@ -445,7 +445,7 @@ test("two Hans powers remain one remembered reveal and reach ending context alon
     .getByRole("dialog")
     .getByRole("button", { name: "Won", exact: true })
     .click();
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Generate ending", exact: true }).click();
   await expect
     .poll(() =>
       archive.generationRequests.find((r) => r.name === "generate-ending"),

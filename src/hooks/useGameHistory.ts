@@ -19,7 +19,7 @@ const extractStoragePath = (publicUrl: string | undefined): string | null => {
 };
 
 // Delete storage files associated with a game record
-const deleteStorageFiles = async (game: { posterImageUrl?: string; sceneImageUrl?: string }) => {
+const deleteStorageFiles = async (game: { posterImageUrl?: string | null; sceneImageUrl?: string }) => {
   const posterPath = extractStoragePath(game.posterImageUrl);
   const scenePath = extractStoragePath(game.sceneImageUrl);
   
@@ -86,12 +86,12 @@ export interface GameResult {
   mission?: string | null;
   // Extended fields for game details
   introStory?: string;
-  endingNarration?: string;
+  endingNarration?: string | null;
   gameHighlights?: string;
-  finalHorrorLevel?: number; // 0-7
-  finalGirlHealth?: number;
+  finalHorrorLevel?: number | null; // 0-7
+  finalGirlHealth?: number | null;
   finalGirlMaxHealth?: number;
-  killerHealth?: number;
+  killerHealth?: number | null;
   weaponUsed?: string;
   endingSubLocation?: string;
   victimsSaved?: number | null;

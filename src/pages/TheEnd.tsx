@@ -37,6 +37,8 @@ export type { EndingFormData } from '@/lib/activeGame';
 interface TheEndProps {
   initialEndingStory?: string;
   initialPosterImageUrl?: string;
+  needsRefresh?: boolean;
+  onEditRecord: () => void;
   onCheckpoint: (updates: Partial<ActiveGame>) => void;
   result: GameResult;
   introStory?: string;
@@ -48,7 +50,7 @@ interface TheEndProps {
 }
 
 const TheEnd = ({
-  initialEndingStory, initialPosterImageUrl, onCheckpoint,
+  initialEndingStory, initialPosterImageUrl, onCheckpoint, onEditRecord, needsRefresh,
   result,
   introStory,
   sceneImageUrl,
@@ -58,6 +60,7 @@ const TheEnd = ({
 }: TheEndProps) => {
   const [endingStory, setEndingStory] = useState<string | null>(initialEndingStory ?? null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [awaitingRefresh, setAwaitingRefresh] = useState(Boolean(needsRefresh));
   const [error, setError] = useState<string | null>(null);
   const [posterImageUrl, setPosterImageUrl] = useState<string>(initialPosterImageUrl ?? '');
   const { isNarrating, isPlaying, progress, toggleNarration } = useNarration();
@@ -72,6 +75,7 @@ const TheEnd = ({
   const checkpointRef = useRef(onCheckpoint);
   checkpointRef.current = onCheckpoint;
   const autoGenerateTriggered = useRef(false);
+  const mounted = useRef(false);
   // Abort the ending stream when the user navigates away mid-generation.
   const streamAbortRef = useRef<AbortController | null>(null);
   const moduleContext = getModulePromptContext(result.killer, result.location);
@@ -82,8 +86,8 @@ const TheEnd = ({
   const grimlashReview=useMemo(()=>result.killer==='Grimlash'?(formData.grimlashReview??{loss:(endingModuleState(endingSummary(result.playEvents).entries,'grimlash').loss??'unknown') as import('@/lib/play/grimlash').GrimlashLoss}):undefined,[result.killer,result.playEvents,formData.grimlashReview]);
   const shipReview=useMemo(()=>result.location==='USS Konrad'?{fate:konradState(endingModuleState(endingSummary(result.playEvents).entries,'konrad')).fate}:undefined,[result.location,result.playEvents]);
   const tormentorReview=useMemo(()=>result.killer==='The Tormentor'?(formData.tormentorReview??{loss:tormentorState(endingModuleState(endingSummary(result.playEvents).entries,'tormentor')).loss}):undefined,[result.killer,result.playEvents,formData.tormentorReview]);
-  const fate = reviewedCharacterFate(formData.finalGirlHealth,shipReview,tormentorReview);
-  const endingKillerHealth = isKillerUnkillable(result.killer) ? undefined : formData.killerHealth;
+  const fate = reviewedCharacterFate(formData.finalGirlHealth ?? undefined,shipReview,tormentorReview);
+  const endingKillerHealth = isKillerUnkillable(result.killer) ? undefined : formData.killerHealth ?? undefined;
   const { locationImages } = useActiveImages();
   const background = locationImages[result.location] ?? nowPlayingBg;
   // Reserve the poster column while it develops, not just once it exists.
@@ -91,8 +95,9 @@ const TheEnd = ({
 
   // Auto-generate ending story on mount
   useEffect(() => {
-    if (!initialEndingStory) void generateEnding();
-    return () => streamAbortRef.current?.abort();
+    mounted.current = true;
+    if (!initialEndingStory && !needsRefresh) void generateEnding();
+    return () => { mounted.current = false; streamAbortRef.current?.abort(); };
     // Initial content belongs to this mounted record. Retry is explicit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result.id]);
@@ -117,14 +122,15 @@ const TheEnd = ({
        ...(grimlashReview&&{grimlashReview}),
       ...(tormentorReview&&{tormentorReview}),
       introStory,
-      finalGirlHealth: formData.finalGirlHealth,
+      finalGirlHealth: formData.finalGirlHealth ?? undefined,
       killerHealth: endingKillerHealth,
       mission: getMissionByName(result.mission),
       scenarioRules: [result.killer==='Big Bad Wolf'||result.killer==='The Tormentor'||result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='USS Konrad'||result.location==='Shady Acres'||result.location==='Storybook Woods'?playStoryBeats(result.playEvents,result):undefined, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
       gameId: result.id,
       previousImageUrl,
+      draftPoster: true,
     });
-    if (url) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
+    if (url && mounted.current) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
   }, [endingStory, tormentorReview, shipReview, grimlashReview, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
 
   // The poster develops on its own once the ending narration lands.
@@ -141,6 +147,7 @@ const TheEnd = ({
   }, [endingStory, isGenerating, error, isAuthenticated, autoGenerate, settingsReady, posterImageUrl, developPoster]);
 
   const generateEnding = async () => {
+    setAwaitingRefresh(false);
     if (!introStory) {
       setError('Your result is saved. An opening story is needed to generate an ending.');
       return;
@@ -190,9 +197,9 @@ const TheEnd = ({
         // Character-specific max health so the AI can contextualise HP fractions
         finalGirlMaxHealth,
         // Game stats from form
-        ...(formData.finalHorrorLevel !== undefined && { finalHorrorLevel: formData.finalHorrorLevel }),
+        ...(formData.finalHorrorLevel != null && { finalHorrorLevel: formData.finalHorrorLevel }),
         ...(formData.weaponUsed && { weaponUsed: formData.weaponUsed }),
-        ...(formData.finalGirlHealth !== undefined && { finalGirlHealth: formData.finalGirlHealth }),
+        ...(formData.finalGirlHealth != null && { finalGirlHealth: formData.finalGirlHealth }),
         ...(endingKillerHealth !== undefined && { killerHealth: endingKillerHealth }),
         ...(formData.victimsSaved != null && { victimsSaved: formData.victimsSaved }),
         ...(formData.victimsKilled != null && { victimsKilled: formData.victimsKilled }),
@@ -229,7 +236,7 @@ const TheEnd = ({
       });
 
       if (!full) throw new Error('No ending returned from the generator');
-      checkpointRef.current({ endingStory: full });
+      checkpointRef.current({ endingStory: full, endingNeedsRefresh: false });
       setEndingStory(full);
 
     } catch (err) {
@@ -254,9 +261,7 @@ const TheEnd = ({
       filmId: getFilmIdByLocation(result.location),
     });
 
-  const handleSave = () => {
-    onSave(!isGenerating && !error ? endingStory ?? '' : '', posterImageUrl || undefined);
-  };
+  const canSaveEnding = Boolean(endingStory && !isGenerating && !error && !awaitingRefresh);
 
   return (
     <NarrationLayout
@@ -268,17 +273,27 @@ const TheEnd = ({
       </>}
       controls={<>
         <div className="ending-actions">
-          <button onClick={handleSave} className="narration-button narration-button--primary">{endingStory && !isGenerating && !error ? 'SAVE' : 'SAVE RESULT'}</button>
+          {awaitingRefresh
+            ? <button onClick={generateEnding} className="narration-button narration-button--primary">Update ending</button>
+            : <button disabled={!canSaveEnding} onClick={() => onSave(endingStory!, posterImageUrl || undefined)}
+                className="narration-button narration-button--primary">Save to scrapbook</button>}
           {endingStory && <button onClick={handleNarrate} disabled={isNarrating || isGenerating} className="narration-button narration-button--narrate">
             {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : isPlaying ? <VolumeX className="w-4 h-4" aria-hidden="true" /> : <Volume2 className="w-4 h-4" aria-hidden="true" />}
             {isNarrating ? 'Generating...' : isPlaying ? 'Stop' : 'Narrate'}
           </button>}
         </div>
+        <div className="ending-record-actions">
+          <button type="button" onClick={onEditRecord}>Edit record</button>
+          <button type="button" onClick={() => onSave('', undefined)}>Save record only</button>
+        </div>
+        {isGeneratingImage && !posterImageUrl && <p className="ending-poster-save-note">The poster is developing. Wait to include it, or save the story now.</p>}
         <div className="ending-transport">{isPlaying && <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} />}</div>
       </>}
       image={showPosterSlot ? <NarrationPhoto variant="poster" imageUrl={posterImageUrl} isGenerating={isGeneratingImage} error={imageError} onRetry={() => developPoster(posterImageUrl || undefined)} caption={`${result.finalGirl} vs ${result.killer}`} /> : undefined}
     >
-      <NarrationReader kind="ending" story={endingStory} isGenerating={isGenerating} error={error} onRetry={generateEnding} />
+      {awaitingRefresh
+        ? <p className="ending-review-message" role="status">The record changed. Update the ending to reflect the new details.</p>
+        : <NarrationReader kind="ending" story={endingStory} isGenerating={isGenerating} error={error} onRetry={generateEnding} />}
     </NarrationLayout>
   );
 };

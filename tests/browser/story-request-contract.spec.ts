@@ -37,7 +37,7 @@ for (const location of ['Maple Lane', 'Camp Happy Trails', 'Buddyland', 'Carniva
     await expect(page.getByRole('region', { name: 'Opening narration', exact: true })).toContainText(archive.storyText);
     if (location === 'Maple Lane') await page.screenshot({ path: info.outputPath('fright-opening-recovered.png') });
     await page.getByRole('button', { name: 'WON', exact: true }).first().click();
-    await page.getByRole('button', { name: 'Continue', exact: true }).click();
+    await page.getByRole('button', { name: 'Generate ending', exact: true }).click();
     await expect(page.getByRole('region', { name: 'Ending narration', exact: true })).toContainText(archive.endingText);
     if (location === 'Maple Lane') await page.screenshot({ path: info.outputPath('fright-ending-recovered.png') });
     expect(checked).toEqual(['generate-story', 'generate-ending']);

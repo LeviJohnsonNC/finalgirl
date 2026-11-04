@@ -13,12 +13,13 @@ import forestPhoto from '@/assets/stats/recovered-forest.webp';
 import '@/styles/stats.css';
 
 interface StatsProps {
+  savedCaseId?: string | null;
   /** Open a recorded session in its scrapbook. */
   onOpenSession?: (gameId: string) => void;
 }
 
-const Stats = ({ onOpenSession }: StatsProps) => {
-  const { gameHistory, isLoading, loadError, retryLoadHistory, isDegraded, pendingSaveCount } = useGameHistoryContext();
+const Stats = ({ savedCaseId, onOpenSession }: StatsProps) => {
+  const { gameHistory, isLoading, loadError, retryLoadHistory, isDegraded, pendingSaveCount, saveError, retryPendingSaves } = useGameHistoryContext();
   const { user, authError } = useAuth();
   const stats = useGameStats(gameHistory);
   const playStyle = usePlayStyle(user?.id, gameHistory, pendingSaveCount, isLoading);
@@ -65,6 +66,17 @@ const Stats = ({ onOpenSession }: StatsProps) => {
           </p>
         </div>
       </div>
+
+      {savedCaseId && <section className="stats-saved-case" aria-label="Saved record">
+        <div role="status">
+          <strong>Record saved</strong>
+          <p>{saveError ? 'Saved on this device. Cloud sync needs a retry.' : pendingSaveCount ? 'Saved on this device. Cloud sync pending.' : 'Your case is ready in the scrapbook.'}</p>
+        </div>
+        <div className="stats-saved-case-actions">
+          {onOpenSession && <button type="button" onClick={() => onOpenSession(savedCaseId)}>Open saved case</button>}
+          {saveError && <button type="button" onClick={() => void retryPendingSaves()}>Retry sync</button>}
+        </div>
+      </section>}
 
       {/* Loading State */}
       {isLoading ? (

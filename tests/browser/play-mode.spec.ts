@@ -261,7 +261,7 @@ test("reviewed tracked totals drive the ending, statistics and saved case notes"
     path: info.outputPath("tracked-outcome.png"),
     fullPage: true,
   });
-  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Generate ending", exact: true }).click();
   await expect(
     page.getByText(archive.endingText, { exact: true }),
   ).toBeVisible();
@@ -276,7 +276,7 @@ test("reviewed tracked totals drive the ending, statistics and saved case notes"
   });
   expect(request.body.playSummary).toContain("Barricaded the cabins.");
   expect(request.body.playSummary).not.toContain("2 victims killed");
-  await page.getByRole("button", { name: "SAVE", exact: true }).first().click();
+  await page.getByRole("button", { name: "Save to scrapbook", exact: true }).first().click();
   await expect
     .poll(() => archive.history[0])
     .toMatchObject({ victims_saved: 4, victims_killed: 1, rounds_played: 5 });

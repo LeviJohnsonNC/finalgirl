@@ -115,7 +115,7 @@ export class ArchiveMock {
           if(this.discarded.has(body.gameId))return json({error:'This game was discarded.',discarded:true},410);
           const imageUrl = 'https://example.test/poster.png';
           const record = this.history.find(game => game.id === body.gameId);
-          if (record) record[body.sceneType === 'ending' ? 'poster_image_url' : 'scene_image_url'] = imageUrl;
+          if (record && !body.draftPoster) record[body.sceneType === 'ending' ? 'poster_image_url' : 'scene_image_url'] = imageUrl;
           return json({ imageUrl });
         }
         return json({ error: 'Unmocked generation' }, 500);

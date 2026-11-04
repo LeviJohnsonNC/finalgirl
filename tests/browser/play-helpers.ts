@@ -35,9 +35,8 @@ export async function undoLatestObservation(page: Page) {
 }
 
 export async function saveResultOnly(page: Page) {
-  await page.getByRole("button", { name: "More options", exact: true }).click();
   await page
-    .getByRole("button", { name: "Save result without narration", exact: true })
+    .getByRole("button", { name: "Save record only", exact: true })
     .click();
 }
 

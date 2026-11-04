@@ -50,3 +50,17 @@
 .themed-search-menu :is([cmdk-item], [role=option]) { min-height: 44px; padding: 10px 13px; font-size: 16px; white-space: normal; overflow-wrap: anywhere; cursor: pointer; }
 .themed-search-menu :is([cmdk-item], [role=option]):is([data-selected='true'], [aria-selected='true']) { background: #354338; color: #fff1cf; }
 .themed-search-menu :is([cmdk-empty], .themed-suggestion-empty) { padding: 12px; color: #bab7a6; font-size: 14px; }
+
+.themed-suggestion-control { display: flex; align-items: stretch; min-width: 0; }
+.themed-suggestion-control input { flex: 1; min-width: 0; border-start-end-radius: 0; border-end-end-radius: 0; }
+.themed-suggestion-browse {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  min-height: 44px;
+  border: 1px solid #a4b1a560;
+  border-radius: 0 3px 3px 0;
+  background: #182621;
+  color: #d9e4d8;
+}
+.themed-suggestion-browse:hover { background: #2b3f34; }

@@ -73,24 +73,24 @@ for (const outcome of ['won', 'lost'] as const) {
     expect(Math.abs(ratio - 341 / 512)).toBeLessThan(.01);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.screenshot({ path: testInfo.outputPath(`ending-${outcome}.png`), fullPage: true });
-    await expect(page.getByRole('button', { name: 'SAVE', exact: true })).toBeInViewport();
+    await expect(page.getByRole('button', { name: 'Save to scrapbook', exact: true })).toBeInViewport();
     const storyTop = (await page.locator('.narration-reader').boundingBox())!.y;
     await page.getByRole('button', { name: 'Narrate', exact: true }).click();
     await expect(page.getByRole('progressbar', { name: 'Narration progress' })).toBeVisible();
     expect((await page.locator('.narration-reader').boundingBox())!.y).toBe(storyTop);
     await page.getByRole('button', { name: 'Stop', exact: true }).click();
-    await page.getByRole('button', { name: 'SAVE', exact: true }).click();
+    await page.getByRole('button', { name: 'Save to scrapbook', exact: true }).click();
     await expect.poll(() => archive.history[0]?.outcome).toBe(outcome);
     await expect.poll(() => archive.history[0]?.ending_narration).toBe(story);
   });
 }
 
-test('ending gives its story the spare screen width and keeps only Save and Narrate', async ({ page, archive }, info) => {
+test('ending gives its story the spare screen width and keeps record actions reachable', async ({ page, archive }, info) => {
   await archive.install(page, { draft: { ...draft, phase: 'ending', result: { ...selection, id: gameId, timestamp: 1, outcome: 'lost' }, endingStory: story, posterImageUrl: posterUrl, formData } });
   await photos(page);
   await resume(page);
   await expect(page.getByRole('button', { name: 'Session options', exact: true })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'SAVE', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Save to scrapbook', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Narrate', exact: true })).toBeVisible();
   const sizes = info.project.name === 'desktop'
     ? [{ width: 1024, height: 600 }, { width: 1024, height: 768 }, { width: 1280, height: 800 }, { width: 1382, height: 766 }, { width: 1672, height: 941 }, { width: 1920, height: 1080 }, { width: 2560, height: 1440 }]
@@ -109,7 +109,7 @@ test('ending gives its story the spare screen width and keeps only Save and Narr
       const panel = (await page.locator('.narration-reader').boundingBox())!;
       const art = (await page.locator('.narration-art').boundingBox())!;
       expect(Math.abs(panel.y - art.y)).toBeLessThan(1);
-      const save = (await page.getByRole('button', { name: 'SAVE', exact: true }).boundingBox())!;
+      const save = (await page.getByRole('button', { name: 'Save to scrapbook', exact: true }).boundingBox())!;
       const narrate = (await page.getByRole('button', { name: 'Narrate', exact: true }).boundingBox())!;
       expect(Math.abs(save.y - narrate.y)).toBeLessThan(1);
       expect(save.x).toBeLessThan(narrate.x);
@@ -123,7 +123,7 @@ test('ending gives its story the spare screen width and keeps only Save and Narr
         const footer = (await page.locator('.app-footer').boundingBox())!;
         return bounds.y + bounds.height - footer.y;
       }).toBeLessThan(0);
-      expect((await page.getByRole('button', { name: 'SAVE', exact: true }).boundingBox())!.width).toBeLessThanOrEqual(440);
+      expect((await page.getByRole('button', { name: 'Save to scrapbook', exact: true }).boundingBox())!.width).toBeLessThanOrEqual(440);
     } else {
       await expect(reader).toHaveCSS('max-height', 'none');
       await expect(reader).toHaveCSS('overflow-y', 'visible');
@@ -179,7 +179,7 @@ test('ending reserves its poster through story failure, retry and developing', a
   const art = page.getByRole('complementary', { name: 'Closing movie poster' });
   await expect(reader.getByRole('button', { name: 'Try Again' })).toBeVisible();
   await expect(art).toContainText('The poster will develop after the ending.');
-  await expect(page.getByRole('button', { name: 'SAVE RESULT', exact: true })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Save record only', exact: true })).toBeEnabled();
   const width = (await reader.boundingBox())!.width;
   await page.screenshot({ path: info.outputPath('ending-story-failed.png'), fullPage: true });
   archive.failStory = false;
@@ -193,7 +193,7 @@ test('ending reserves its poster through story failure, retry and developing', a
   const poster = art.getByRole('img', { name: 'Movie poster', exact: true });
   await poster.evaluate((img: HTMLImageElement) => img.decode());
   expect((await reader.boundingBox())!.width).toBe(width);
-  await page.getByRole('button', { name: 'SAVE', exact: true }).scrollIntoViewIfNeeded();
+  await page.getByRole('button', { name: 'Save to scrapbook', exact: true }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: info.outputPath('ending-short-story.png'), fullPage: true });
   if (info.project.name === 'desktop') {
     expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true);
@@ -252,7 +252,7 @@ test('blank health is unknown, explicit zero remains zero across reload and gene
   await page.reload();
   await page.getByRole('button', { name: 'RESUME GAME' }).click();
   await expect(page.getByLabel('Final Girl Health', { exact: true })).toHaveValue('0');
-  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Generate ending', exact: true }).click();
   await expect(page.getByText('Victory came at a terrible cost.')).toBeVisible();
   await expect.poll(() => archive.generationRequests.some(r => r.name === 'generate-ending')).toBe(true);
   const ending = archive.generationRequests.find(r => r.name === 'generate-ending')!;
