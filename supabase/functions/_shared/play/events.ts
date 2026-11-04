@@ -1,3 +1,5 @@
+import { fitStoryFacts, fitStoryText } from './storyText.ts';
+import { storyTransitions } from './storyTransitions.ts';
 import { WOODS_MODULE, describeWoodsAction, isInitialWoods, resolveWoodsAction, validWoodsAction, woodsParent, type WoodsAction } from "./storybookWoods.ts";
 import { wolfPowerMode, type WolfMode } from "./bigBadWolf.ts";
 import {resolveMarrekAction,validMarrekAction,isInitialMarrek,marrekParent,type MarrekAction} from './marrekWarehouse.ts';
@@ -594,9 +596,9 @@ export function playStoryBeats(
 ): string {
   const s = summarizePlay(log);
   if (!s.tracked) return "";
-  const moduleFacts = selection ? moduleStoryBeats(selection, s.entries).replace(/[—–]/g, ',').slice(0,900) : '';
+  const moduleFacts = selection ? fitStoryText(moduleStoryBeats(selection, s.entries).replace(/[—–]/g, ','), 900) : '';
   // Module facts keep their existing reserved budget and never lose space to routine taps.
-  const itemFacts = selection ? moduleItemBeats(selection,s.entries).replace(/[—–]/g, ',').slice(0,Math.max(0,900-moduleFacts.length-1)) : '';
+  const itemFacts = selection ? fitStoryFacts(moduleItemBeats(selection,s.entries).replace(/[—–]/g, ',').split('\n'), Math.max(0,900-moduleFacts.length-1)) : '';
   const moduleBeats = [moduleFacts,itemFacts].filter(Boolean).join('\n');
   const suffix = moduleBeats ? `\nModule observations:\n${moduleBeats}` : '';
   const budget = 1800 - suffix.length;
@@ -614,16 +616,18 @@ export function playStoryBeats(
   const candidates = s.entries.map((e, index) => {
     let priority = e.kind === 'moment' ? priorities[e.momentType ?? 'other'] ?? 55 : 0;
     if (deaths.has(e) || rescues.has(e)) priority = 70;
+    if (e.kind === 'killed' && e.victim) priority = 92;
     if (e === lowHealth || e === highHorror) priority = 40;
     if (e.kind === 'module' && e.moduleData && Object.entries(e.moduleData.changes).some(([key,value]) =>
       (/^item\..+\.status$/.test(key) && value === 'carried') ||
       (/^buddy\..+\.status$/.test(key) && value === 'defeated') ||
       (/^victim\./.test(key) && value === 'killed'))) priority = 65;
     const text = describeEvent(e).replace(/[—–]/g, ',');
-    // Mark shortened observations; never cut the finished context mid-line.
-    const concise = text.length > 210 ? `${text.slice(0, 207).replace(/\s+\S*$/, '')}…` : text;
-    return { index, priority, line: `${e.currentRound ? `Round ${e.currentRound}: ` : ''}${concise}` };
-  }).filter(e => e.priority > 0).sort((a,b) => b.priority - a.priority || b.index - a.index);
+    // A late qualification can reverse a note's meaning. Include it whole or omit it.
+    return { index, priority, line: `${e.currentRound ? `Round ${e.currentRound}: ` : ''}${text}` };
+  }).filter(e => e.priority > 0);
+  candidates.push(...storyTransitions(s.entries, selection));
+  candidates.sort((a,b) => b.priority - a.priority || b.index - a.index);
   const chosen: typeof candidates = [];
   let used = 0;
   for (const candidate of candidates) {

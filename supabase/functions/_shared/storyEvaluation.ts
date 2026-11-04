@@ -183,7 +183,7 @@ export async function generateEvaluatedStory(options: {
       id,
       user_id: guard.user.id,
       kind,
-      prompt_version: "2026-11-04-v1",
+      prompt_version: "2026-11-04-v2",
       system_prompt: effectiveTextSystem(system),
       user_prompt: user,
       model_context: context,
