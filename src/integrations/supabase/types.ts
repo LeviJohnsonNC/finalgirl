@@ -295,6 +295,78 @@ export type Database = {
         }
         Relationships: []
       }
+      story_evaluations: {
+        Row: {
+          created_at: string
+          diagnostic_context: Json | null
+          diagnostic_status: string
+          duration_ms: number | null
+          error_code: string | null
+          finish_reason: string | null
+          finished_at: string | null
+          game_id: string | null
+          id: string
+          kind: string
+          model: string | null
+          model_context: Json
+          prompt_version: string
+          schema_version: number
+          sequence: number
+          status: string
+          story_text: string
+          system_prompt: string
+          user_id: string
+          user_prompt: string
+          word_count: number
+        }
+        Insert: {
+          created_at?: string
+          diagnostic_context?: Json | null
+          diagnostic_status: string
+          duration_ms?: number | null
+          error_code?: string | null
+          finish_reason?: string | null
+          finished_at?: string | null
+          game_id?: string | null
+          id?: string
+          kind: string
+          model?: string | null
+          model_context: Json
+          prompt_version: string
+          schema_version?: number
+          sequence?: never
+          status?: string
+          story_text?: string
+          system_prompt: string
+          user_id: string
+          user_prompt: string
+          word_count?: number
+        }
+        Update: {
+          created_at?: string
+          diagnostic_context?: Json | null
+          diagnostic_status?: string
+          duration_ms?: number | null
+          error_code?: string | null
+          finish_reason?: string | null
+          finished_at?: string | null
+          game_id?: string | null
+          id?: string
+          kind?: string
+          model?: string | null
+          model_context?: Json
+          prompt_version?: string
+          schema_version?: number
+          sequence?: never
+          status?: string
+          story_text?: string
+          system_prompt?: string
+          user_id?: string
+          user_prompt?: string
+          word_count?: number
+        }
+        Relationships: []
+      }
       user_image_settings: {
         Row: {
           auto_generate_images: boolean
