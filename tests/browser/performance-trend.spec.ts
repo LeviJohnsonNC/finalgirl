@@ -18,11 +18,15 @@ test('matched performance includes losses, preserves unknowns, and opens the evi
   await expect(report).toContainText('0 pairs with both values recorded');
   await report.scrollIntoViewIfNeeded();
   await report.screenshot({ path: info.outputPath('performance-comparison.png') });
+  const originalViewport = page.viewportSize()!;
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
-  await report.getByText('How this comparison works', { exact: false }).click();
+  await page.setViewportSize(originalViewport);
+  const disclosure = report.getByText('How this comparison works', { exact: false });
+  await disclosure.scrollIntoViewIfNeeded();
+  await disclosure.click();
   await expect(report.getByRole('listitem')).toHaveCount(20);
   const evidence = report.getByRole('button', { name: /^Open earlier case/ }).first();
   await evidence.focus(); await page.keyboard.press('Enter');
