@@ -89,14 +89,23 @@ for(const owner of ['ship','madness'])test(`mixed Grimlash/Konrad ${owner} loss 
  await expect(page.locator('[data-outcome="lost"]')).toBeVisible();await expect(page.getByRole('textbox',{name:'Final Girl Health',exact:true})).toHaveValue('5');await saveResultOnly(page);await expect.poll(()=>archive.history.length).toBe(1);expect(archive.history[0].outcome).toBe('lost');expect(archive.history[0].final_girl_health).toBe(5);if(owner==='madness'){await expect.poll(()=>String(archive.history[0].game_highlights)).toContain('Skull');expect(String(archive.history[0].game_highlights)).not.toContain('Level 4');}
 });
 
-test('approved Grimlash portrait stays loaded and framed in casting at every target size',async({page,archive},info)=>{
+test('Grimlash casting portrait keeps its flaming crown in frame at every target size',async({page,archive},info)=>{
  archive.aiCastingArt=true;archive.films=['s4-rotten-harvest'];await archive.install(page);await page.goto('/');
  await page.getByRole('button',{name:'START THE TAPE',exact:true}).click();
  const slot=page.locator('.casting-slot--killer');await slot.getByRole('button',{name:'Choose',exact:true}).click();
  await page.getByRole('dialog').getByRole('button',{name:/Grimlash/}).click();
- const image=slot.getByRole('img',{name:'Grimlash',exact:true});await expect(image).toHaveAttribute('src',/grimlash-.*\.png$/);
+ const image=slot.getByRole('img',{name:'Grimlash',exact:true});await expect(image).toHaveAttribute('src',/grimlash-.*\.webp$/);
  for(const[width,height]of info.project.name==='mobile'?[[390,844],[320,568]]:[[1280,640],[1366,768],[1440,900]]){
-  await page.setViewportSize({width,height});await image.evaluate(im=>(im as HTMLImageElement).decode());
+  await page.setViewportSize({width,height});
+  const frame=await image.evaluate(async im=>{
+   const photo=im as HTMLImageElement;await photo.decode();
+   const {clientWidth:boxWidth,clientHeight:boxHeight,naturalWidth,naturalHeight}=photo;
+   const scale=Math.max(boxWidth/naturalWidth,boxHeight/naturalHeight);
+   const cropped=(naturalHeight*scale-boxHeight)*0.42;
+   return {ratio:naturalWidth/naturalHeight,top:naturalHeight*scale*0.08-cropped};
+  });
+  expect(frame.ratio).toBeCloseTo(2/3,3);
+  expect(frame.top).toBeGreaterThanOrEqual(0);
   await expect(async()=>expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)).toPass();
   await slot.screenshot({path:info.outputPath(`grimlash-portrait-${width}.jpg`),type:'jpeg',quality:85,animations:'disabled',style:'.app-footer{visibility:hidden}'});
  }
