@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { X, Search } from 'lucide-react';
 import { useActiveImages } from '@/hooks/useActiveImages';
+import { castingKillerArt } from '@/lib/castingKillerArt';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import '@/styles/dropdowns.css';
 
@@ -115,7 +116,8 @@ export const CastingPicker = ({ type, options, onSelect, onClose }: CastingPicke
               }`}
             >
               {filteredOptions.map((option) => {
-                const cardImage = getImageForValue(type, option);
+                const source = getImageForValue(type, option);
+                const art = source && (type === 'killer' ? castingKillerArt(option, source, 'picker') : { src: source });
                 return (
                   <button
                     key={option}
@@ -129,9 +131,10 @@ export const CastingPicker = ({ type, options, onSelect, onClose }: CastingPicke
                       tabIndex={-1}
                     >
                       <span className="evidence-card__tick" />
-                      {cardImage ? (
+                      {art ? (
                         <img
-                          src={cardImage}
+                          src={art.src}
+                          style={art.style}
                           alt={option}
                           className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                           loading="lazy"

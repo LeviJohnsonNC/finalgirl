@@ -14,6 +14,7 @@ import { LOCATION_DESCRIPTIONS } from "@/data/locationDescriptions";
 import { FINAL_GIRL_DESCRIPTIONS } from "@/data/finalGirlDescriptions";
 import { FEATURE_FILMS } from "@/types/gameData";
 import { useActiveImages } from "@/hooks/useActiveImages";
+import { castingKillerArt } from "@/lib/castingKillerArt";
 import { getFinalGirlReference } from "@/data/finalGirlReferences";
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import "@/styles/final-girl-dossier.css";
@@ -196,6 +197,7 @@ function LoreInfoContent({
       </div>
     );
   }
+  const art = image && (type === "killer" ? castingKillerArt(name, image, "dossier") : { src: image });
   return (
     <>
       <DialogHeader className="shrink-0 text-left pr-8">
@@ -227,11 +229,12 @@ function LoreInfoContent({
       <div className="min-h-0 overflow-y-auto overscroll-contain pr-2">
         <div className="space-y-6">
           {/* Character/Location Image */}
-          {image && (
-            <div className="relative w-full aspect-video rounded-sm overflow-hidden">
+          {art && (
+            <div className={`relative rounded-sm overflow-hidden ${art.portrait ? "mx-auto aspect-[2/3] w-[min(28dvh,14rem)] max-w-full" : "w-full aspect-video"}`}>
               <img
-                src={image}
+                src={art.src}
                 alt={name}
+                style={art.style}
                 className={`w-full h-full ${type === "location" ? "object-cover" : "object-cover object-top"}`}
                 decoding="async"
               />
