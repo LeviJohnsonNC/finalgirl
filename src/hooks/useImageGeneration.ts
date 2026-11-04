@@ -208,7 +208,7 @@ export const useImageGeneration = () => {
       if (!userId || ownerRef.current !== userId) return undefined;
       const epoch = ownerEpoch.current;
       try {
-        const data = await callFunction<{ visualBible?: string }>('generate-visual-bible', context, userId, AbortSignal.timeout(45_000));
+        const data = await callFunction<{ visualBible?: string }>('generate-visual-bible', context, userId);
         return ownerRef.current === userId && epoch === ownerEpoch.current ? data.visualBible : undefined;
       } catch (err) {
         // Purely an enhancement — images still generate without it.
