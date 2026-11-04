@@ -347,9 +347,9 @@ test("review corrections invalidate the old ending and save the exact case", asy
   expect(endings()[1].body).not.toHaveProperty("finalGirlHealth");
   await page.getByRole("button", { name: "Save to scrapbook", exact: true }).click();
   await expect.poll(() => archive.history[0].ending_narration).toBe(archive.endingText);
-  await expect(page.getByRole("region", { name: "Saved record" })).toBeVisible();
-  await page.screenshot({ path: info.outputPath("saved-record.png"), animations: "disabled" });
-  await page.getByRole("button", { name: "Open saved case", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "STATS", exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Saved record" })).toHaveCount(0);
+  await page.getByRole("region", { name: "Recent sessions" }).getByRole("button", { name: /Laurie.*Hans/ }).click();
   await expect(page.locator(".story-page-content")).toContainText("Cabin loft");
   expect(archive.history).toHaveLength(1);
 });
