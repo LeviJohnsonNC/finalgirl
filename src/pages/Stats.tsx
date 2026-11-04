@@ -6,6 +6,7 @@ import { RecordJacket } from '@/components/stats/RecordJacket';
 import { TrendsSection } from '@/components/stats/TrendsSection';
 import { BreakdownTabs } from '@/components/stats/BreakdownTabs';
 import { PlayerArchetypeBadge } from '@/components/stats/PlayerArchetype';
+import { PerformanceTrend } from '@/components/stats/PerformanceTrend';
 import { SessionDetail } from '@/components/stats/SessionDetail';
 import { AlertTriangle, Film, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -167,7 +168,7 @@ const Stats = ({ savedCaseId, onOpenSession }: StatsProps) => {
             <SessionDetail stats={stats} onOpenSession={onOpenSession} />
 
             {/* The profile follows the recorded evidence in reading order. */}
-            <PlayerArchetypeBadge profile={stats.playerStyle} play={playStyle} onOpenSession={onOpenSession} />
+            <PlayerArchetypeBadge performance={<PerformanceTrend games={gameHistory} onOpenSession={onOpenSession} />} profile={stats.playerStyle} play={playStyle} onOpenSession={onOpenSession} />
           </div>
         </div>
       )}

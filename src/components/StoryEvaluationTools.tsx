@@ -6,7 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import {
   downloadStoryEvaluations,
-  loadStoryEvaluations,
+  loadStoryReview,
+  isEvaluationUnavailable,
 } from "@/lib/storyEvaluationExport";
 
 export function StoryEvaluationTools() {
@@ -49,22 +50,28 @@ export function StoryEvaluationTools() {
             "Evaluation data cleared. New stories will start a new set.",
           );
       } else {
-        const attempts = await loadStoryEvaluations(owner, controller.signal);
+        const { attempts, review } = await loadStoryReview(owner, controller.signal);
         if (currentOwner.current !== owner || controller.signal.aborted) return;
-        if (!attempts.length)
+        if (!attempts.length && !review?.games.length)
           setMessage(
-            "No evaluation data yet. Generate a new opening or ending, then export again.",
+            review?.captureStatus === 'unavailable'
+              ? "Detailed story capture is not available yet, and there are no saved stories to export."
+              : "No evaluation data yet, and no saved stories to export.",
           );
         else {
-          downloadStoryEvaluations(attempts);
+          downloadStoryEvaluations(attempts, review);
           setMessage(
-            `Exported ${attempts.length} generation attempts, including any retries and partial stories.`,
+            review
+              ? `Exported ${review.games.length} saved ${review.games.length === 1 ? 'game' : 'games'}. ${review.captureStatus === 'unavailable' ? 'Detailed story capture is not available yet.' : 'No captured attempts were available.'} Original prompts and model details are not included.`
+              : `Exported ${attempts.length} generation attempts, including any retries and partial stories.`,
           );
         }
       }
-    } catch {
+    } catch (error) {
       if (currentOwner.current === owner && pending.current === controller) {
-        const text = clear
+        const text = clear && isEvaluationUnavailable(error)
+          ? "Detailed story capture is not available yet. Your saved games have not been changed."
+          : clear
           ? "Evaluation data could not be cleared. Please retry."
           : "Evaluation export failed. Nothing was downloaded. Check your connection and try again.";
         setMessage(text);
@@ -88,7 +95,8 @@ export function StoryEvaluationTools() {
       <div className="mt-2 space-y-2 text-xs leading-relaxed text-muted-foreground">
         <p>
           Export new openings and endings with their full text, prompts, model
-          details and game context for review.
+          details and game context for review. If capture is unavailable or empty,
+          export your saved stories and game facts instead, clearly labelled without original prompts.
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <button
@@ -116,7 +124,7 @@ export function StoryEvaluationTools() {
         <p>
           Includes private notes. Evaluation copies survive resetting your
           plays; clear them here. Wait for generation to finish before clearing.
-          Older stories aren’t backfilled.
+          Detailed capture starts after deployment; archived stories remain a separate source.
         </p>
         <p role="status" aria-live="polite">
           {message}

@@ -2,7 +2,11 @@
 
 New, authenticated, validated opening/ending requests write a private evaluation record before calling the existing AI gateway. Every request is a distinct attempt, including retries. No paid requests are made for evaluation, and neither prompts nor generation settings change. The corpus is never read by gameplay, history, image generation or future story prompts.
 
-## Deployment and smoke check
+For the current missing-table repair, archived-story export fallback and release
+order, see [Quality pass](QUALITY_PASS.md). The steps below describe the original
+capture rollout; do not replay its migration against an existing table.
+
+## Original deployment and smoke check
 
 1. Apply `20261022180000_story_evaluations.sql` before deploying the changed `generate-story` and `generate-ending` functions (their shared dependencies bundle with them).
 2. Deploy the frontend. Older clients still produce captures with `diagnostic_status=not_provided` and no paired game ID. Older functions do not capture anything, even with a new frontend.

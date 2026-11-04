@@ -1,10 +1,11 @@
-import { useId, useState } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 import { ArrowUpRight, ChevronDown } from 'lucide-react';
 import type { computeArchetype, StyleDimension } from '@/hooks/useArchetypeScoring';
 import type { usePlayStyle } from '@/hooks/usePlayStyle';
 import type { StyleFinding } from '@/lib/playStyle';
 
 interface PlayerArchetypeProps {
+  performance?: ReactNode;
   profile: ReturnType<typeof computeArchetype>;
   play: ReturnType<typeof usePlayStyle>;
   onOpenSession?: (gameId: string) => void;
@@ -61,7 +62,7 @@ function Finding({ finding, onOpenSession }: { finding: StyleFinding; onOpenSess
   );
 }
 
-export function PlayerArchetypeBadge({ profile, play, onOpenSession }: PlayerArchetypeProps) {
+export function PlayerArchetypeBadge({ profile, play, onOpenSession, performance }: PlayerArchetypeProps) {
   const { archetype, blend, summary, scores } = profile;
   const lead = archetype === 'newcomer' ? undefined : dimensions[archetype];
   const runnerUp = blend ? dimensions[blend] : undefined;
@@ -102,6 +103,7 @@ export function PlayerArchetypeBadge({ profile, play, onOpenSession }: PlayerArc
           {play.report?.findings.map(finding => <Finding key={finding.id} finding={finding} onOpenSession={onOpenSession} />)}
         </section>
 
+        {performance}
         <details className="archetype-more">
           <summary>How your style is measured</summary>
           <p className="archetype-reason">

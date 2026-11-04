@@ -260,3 +260,33 @@ test("guests have no evaluation controls", async ({ page, archive }) => {
     0,
   );
 });
+
+test('missing capture table still downloads archived stories with explicit provenance and no image payload', async ({ page, archive }) => {
+  await archive.install(page);
+  await page.route('**/rest/v1/story_evaluations*', route => route.fulfill({ status: 404, json: { code: 'PGRST205', message: 'Missing table' } }));
+  let reads = 0;
+  await page.route('**/rest/v1/game_history*', async route => {
+    const url = new URL(route.request().url());
+    const select = url.searchParams.get('select');
+    if (select === 'id') { reads++; return route.fulfill({ json: [{ id: gameId }] }); }
+    if (select?.includes('intro_story')) {
+      reads++;
+      expect(url.searchParams.get('user_id')).toBe(`eq.${userId}`);
+      expect(select).not.toMatch(/poster|image|user_id/);
+      return route.fulfill({ json: [{ id: gameId, intro_story: 'Complete archived opening. '.repeat(1000), ending_narration: null,
+        victims_saved: 0, final_girl_health: null, play_events: [] }] });
+    }
+    return route.fallback();
+  });
+  await page.goto('/'); await page.getByRole('button', { name: 'Collection', exact: true }).click();
+  await openEvaluation(page); expect(reads).toBe(0);
+  const downloaded = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'EXPORT JSON', exact: true }).click();
+  const json = JSON.parse(await readFile((await (await downloaded).path())!, 'utf8'));
+  expect(json.schemaVersion).toBe(2); expect(json.captureStatus).toBe('unavailable');
+  expect(json.attempts).toEqual([]); expect(json.savedGames).toHaveLength(1);
+  expect(json.savedGames[0]).toMatchObject({ provenance: 'saved-game', system_prompt: null, user_prompt: null, model: null,
+    victims_saved: 0, final_girl_health: null, intro_story: 'Complete archived opening. '.repeat(1000), ending_narration: null });
+  await expect(page.getByRole('status').filter({ hasText: 'Exported 1 saved game' })).toBeVisible();
+  expect(reads).toBe(2); expect(archive.generationRequests).toEqual([]); expect(archive.calls).toEqual([]);
+});

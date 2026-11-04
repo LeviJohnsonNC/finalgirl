@@ -418,3 +418,23 @@ body:has(.stats-page) main { padding-bottom: calc(var(--app-footer-h, 64px) + 24
   color: #c2f2e6;
 }
 .stats-saved-case button:hover { background: #253d37; }
+
+/* A small, factual comparison within the existing scouting report. */
+.performance-trend { margin-top: 1.6rem; padding-top: 1.4rem; border-top: 1px solid rgba(160,205,204,.2); color: #c4d0ce; }
+.performance-trend h4 { color: #ede5cd; font-size: 1.15rem; line-height: 1.4; margin: .4rem 0 1rem; }
+.performance-periods { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; }
+.performance-periods strong { display:block; font-family: var(--font-mono, monospace); font-size: 2rem; color: #e5ded0; line-height:1.4; }
+.performance-periods p, .performance-matched p { margin:.25rem 0; }
+.performance-periods small { display:block; color:#9daead; font-size:.8rem; line-height:1.5; }
+.performance-note { font-size:.85rem; line-height:1.6; color:#a3b6b4; margin:.8rem 0; }
+.performance-matched { border-left:2px solid #8ccac7; padding:.7rem 1rem; background:rgba(15,46,45,.28); margin:1rem 0; }
+.performance-matched strong { font-size:1.3rem; color:#aee2dd; }
+.performance-metrics > div { display:flex; flex-wrap:wrap; justify-content:space-between; gap:.3rem .8rem; margin:.6rem 0; font-size:.9rem; }
+.performance-metrics dd { color:#d7dfdb; }
+.performance-evidence { font-size:.9rem; line-height:1.6; }
+.performance-evidence summary { display:list-item; cursor:pointer; min-height:44px; padding:.6rem 0; color:#c6dcd7; }
+.performance-evidence ol { list-style:none; padding:0; margin:.7rem 0; max-height:22rem; overflow:auto; position:relative; }
+.performance-evidence li { padding:.75rem 0; border-top:1px solid rgba(180,210,200,.14); }
+.performance-evidence button { min-height:44px; text-align:left; color:#a9d7d1; text-decoration:underline; text-underline-offset:3px; }
+.performance-trend :focus-visible { outline:2px solid #9dd7d3; outline-offset:3px; }
+@media(max-width:360px) { .performance-periods { grid-template-columns:1fr; gap:.8rem; } }

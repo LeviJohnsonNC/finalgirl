@@ -43,10 +43,11 @@ export interface GenerateImageContext {
 }
 
 /** POSTs to an edge function with the caller's session token. */
-const callFunction = async <T>(name: string, body: unknown, signal?: AbortSignal): Promise<T> => {
+const callFunction = async <T>(name: string, body: unknown, owner: string, signal?: AbortSignal): Promise<T> => {
   const { data: sessionData } = await supabase.auth.getSession();
   const token = sessionData?.session?.access_token;
   if (!token) throw new Error('Please sign in first.');
+  if (sessionData.session?.user.id !== owner) throw new Error('Your account changed. Please try again.');
 
   const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${name}`, {
     method: 'POST',
@@ -60,6 +61,10 @@ const callFunction = async <T>(name: string, body: unknown, signal?: AbortSignal
   });
 
   const data = await response.json().catch(() => ({}));
+  // The originating screen may have unmounted while the request was running,
+  // so its React owner ref alone cannot observe a later account switch.
+  const { data: currentSession } = await supabase.auth.getSession();
+  if (currentSession.session?.user.id !== owner) throw new Error('Your account changed. Please try again.');
   if (!response.ok || data.error) {
     const unavailable = name === 'generate-scene-image' && [502, 503, 504].includes(response.status);
     throw new Error(data.error || (unavailable
@@ -86,6 +91,15 @@ export const useImageGeneration = () => {
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
   const requestId = useRef(0);
+  const imageRequestId = useRef(0);
+  // Invalidate work across account changes, including A → B → A.
+  const ownerEpoch = useRef(0);
+  useEffect(() => {
+    ownerEpoch.current += 1;
+    imageRequestId.current += 1;
+    setIsGeneratingImage(false);
+    setImageError(null);
+  }, [userId]);
   const savingRef = useRef(false);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
 
@@ -151,15 +165,20 @@ export const useImageGeneration = () => {
    */
   const generateImage = useCallback(
     async (context: GenerateImageContext): Promise<string | null> => {
-      if (!userId) return null;
+      if (!userId || ownerRef.current !== userId) return null;
+      const id = ++imageRequestId.current;
+      const epoch = ownerEpoch.current;
+      const current = () => ownerRef.current === userId && epoch === ownerEpoch.current && id === imageRequestId.current;
 
       setIsGeneratingImage(true);
       setImageError(null);
       try {
-        const data = await callFunction<{ imageUrl?: string }>('generate-scene-image', context, AbortSignal.timeout(155_000));
+        const data = await callFunction<{ imageUrl?: string }>('generate-scene-image', context, userId, AbortSignal.timeout(155_000));
+        if (!current()) return null;
         if (!data.imageUrl) throw new Error('The image service returned no picture. Please try again.');
         return data.imageUrl;
       } catch (err) {
+        if (!current()) return null;
         const message = err instanceof Error && err.name === 'TimeoutError'
           ? 'The picture took too long to develop. Your story and game result are safe. Please try again.'
           : err instanceof Error ? err.message : 'Image generation failed';
@@ -167,7 +186,7 @@ export const useImageGeneration = () => {
         setImageError(message);
         return null;
       } finally {
-        setIsGeneratingImage(false);
+        if (current()) setIsGeneratingImage(false);
       }
     },
     [userId]
@@ -186,10 +205,11 @@ export const useImageGeneration = () => {
       finalGirlDescription?: string;
       moduleVisualGuidance?: string;
     }): Promise<string | undefined> => {
-      if (!userId) return undefined;
+      if (!userId || ownerRef.current !== userId) return undefined;
+      const epoch = ownerEpoch.current;
       try {
-        const data = await callFunction<{ visualBible?: string }>('generate-visual-bible', context);
-        return data.visualBible;
+        const data = await callFunction<{ visualBible?: string }>('generate-visual-bible', context, userId);
+        return ownerRef.current === userId && epoch === ownerEpoch.current ? data.visualBible : undefined;
       } catch (err) {
         // Purely an enhancement — images still generate without it.
         console.warn('Visual bible generation failed:', err);

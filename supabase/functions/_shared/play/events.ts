@@ -594,41 +594,49 @@ export function playStoryBeats(
 ): string {
   const s = summarizePlay(log);
   if (!s.tracked) return "";
-  // Reserve most context for explicit moments; routine taps cannot crowd them out.
-  const moments = s.entries.filter(
-    (e) =>
-      e.kind === "moment" ||
-      (e.kind === "module" &&
-        e.moduleData &&
-        Object.entries(e.moduleData.changes).some(
-          ([key, value]) =>
-            (/^item\..+\.status$/.test(key) && value === "carried") ||
-            (/^buddy\..+\.status$/.test(key) && value === "defeated") ||
-            (/^victim\./.test(key) && value === "killed"),
-        )),
-  );
-  const chosen = new Set(
-    [
-      ...moments.slice(0, 1),
-      ...moments.slice(-7),
-      ...s.entries.filter((e) => e.kind === "killed").slice(-3),
-    ].map((e) => e.id),
-  );
-  const lines = s.entries
-    .filter((e) => chosen.has(e.id))
-    .map(
-      (e) =>
-        `${e.currentRound ? `Round ${e.currentRound}: ` : ""}${describeEvent(e).replace(/[—–]/g, ",").slice(0, 145)}`,
-    );
   const moduleFacts = selection ? moduleStoryBeats(selection, s.entries).replace(/[—–]/g, ',').slice(0,900) : '';
-  // Keep observed state ahead of optional Item descriptions in the bounded ending context.
+  // Module facts keep their existing reserved budget and never lose space to routine taps.
   const itemFacts = selection ? moduleItemBeats(selection,s.entries).replace(/[—–]/g, ',').slice(0,Math.max(0,900-moduleFacts.length-1)) : '';
   const moduleBeats = [moduleFacts,itemFacts].filter(Boolean).join('\n');
-  if (!moduleBeats) return lines.join("\n").slice(0, 1800);
-  return `${lines.join("\n").slice(0, 875)}\nModule observations:\n${moduleBeats}`.slice(
-    0,
-    1800,
-  );
+  const suffix = moduleBeats ? `\nModule observations:\n${moduleBeats}` : '';
+  const budget = 1800 - suffix.length;
+  const priorities: Partial<Record<MomentType, number>> = {
+    'girl-revived': 100, 'killer-revived': 100, 'turning-point': 95,
+    'ultimate-used': 90, escape: 85, finale: 80, 'dark-power': 80,
+    item: 75, 'ultimate-unlocked': 60, other: 55,
+  };
+  const lowHealth = s.entries.filter(e => e.kind === 'state' && e.field === 'finalGirlHealth' && e.value != null && e.value > 0 && e.value <= 2)
+    .sort((a,b) => a.value! - b.value!)[0];
+  const highHorror = s.entries.filter(e => e.kind === 'state' && e.field === 'finalHorrorLevel' && e.value != null && e.value >= 5)
+    .sort((a,b) => b.value! - a.value!)[0];
+  const deaths = new Set(s.entries.filter(e => e.kind === 'killed').slice(-3));
+  const rescues = new Set(s.entries.filter(e => e.kind === 'saved').slice(-2));
+  const candidates = s.entries.map((e, index) => {
+    let priority = e.kind === 'moment' ? priorities[e.momentType ?? 'other'] ?? 55 : 0;
+    if (deaths.has(e) || rescues.has(e)) priority = 70;
+    if (e === lowHealth || e === highHorror) priority = 40;
+    if (e.kind === 'module' && e.moduleData && Object.entries(e.moduleData.changes).some(([key,value]) =>
+      (/^item\..+\.status$/.test(key) && value === 'carried') ||
+      (/^buddy\..+\.status$/.test(key) && value === 'defeated') ||
+      (/^victim\./.test(key) && value === 'killed'))) priority = 65;
+    const text = describeEvent(e).replace(/[—–]/g, ',');
+    // Mark shortened observations; never cut the finished context mid-line.
+    const concise = text.length > 210 ? `${text.slice(0, 207).replace(/\s+\S*$/, '')}…` : text;
+    return { index, priority, line: `${e.currentRound ? `Round ${e.currentRound}: ` : ''}${concise}` };
+  }).filter(e => e.priority > 0).sort((a,b) => b.priority - a.priority || b.index - a.index);
+  const chosen: typeof candidates = [];
+  let used = 0;
+  for (const candidate of candidates) {
+    // Repeated routine observations cannot displace distinct turning points.
+    if (chosen.some(e => e.line === candidate.line)) continue;
+    const cost = candidate.line.length + (chosen.length ? 1 : 0);
+    if (used + cost > budget) continue;
+    chosen.push(candidate);
+    used += cost;
+  }
+  // Importance chooses inclusion; chronological order tells the story. These are
+  // observations, never inferred causality, totals, or proof of a character's fate.
+  return chosen.sort((a,b) => a.index - b.index).map(e => e.line).join('\n') + suffix;
 }
 export function newPlayEvent(fields: Omit<PlayEvent, "id" | "at">): PlayEvent {
   const event = { ...fields, id: crypto.randomUUID(), at: Date.now() };
