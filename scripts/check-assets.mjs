@@ -23,6 +23,7 @@ for (const file of images) {
   const jpeg = bytes[0] === 255 && bytes[1] === 216;
   const webp = bytes.subarray(0, 4).toString() === 'RIFF' && bytes.subarray(8, 12).toString() === 'WEBP';
   if (bytes.length < 32 || !(png || jpeg || webp)) throw new Error('Invalid or stubbed artwork: ' + file);
+  if (file.startsWith('src/assets/casting-killers/') && (!webp || bytes.length > 180 * 1024)) throw new Error('Invalid or oversized killer casting portrait: ' + file);
   if (/\/groves\/wrath-[1-5]\.webp$/.test(file) && bytes.length > 120 * 1024) throw new Error('Divine Wrath background exceeds 120KiB: ' + file);
   if (/\/inkanyamba\/wrath-[1-5]\.webp$/.test(file) && bytes.length > 200 * 1024) throw new Error('Photographic Killer Wrath background exceeds 200KiB: ' + file);
   if (/\/bloodlust\/level-(?:[0-9]|10)\.webp$/.test(file) && bytes.length > 160 * 1024) throw new Error('Bloodlust photograph exceeds 160KiB: ' + file);

@@ -4,6 +4,7 @@ import { LoreInfoModal } from './LoreInfoModal';
 import shufflePlate from '@/assets/buttons/shuffle-plate.png.asset.json';
 import choosePlate from '@/assets/buttons/choose-plate.png.asset.json';
 import { useActiveImages } from '@/hooks/useActiveImages';
+import { castingKillerArt } from '@/lib/castingKillerArt';
 
 interface CastingSlotProps {
   type: 'killer' | 'location' | 'finalGirl';
@@ -54,10 +55,10 @@ export const CastingSlot = ({
     if (preloadedRef.current || options.length === 0) return;
     preloadedRef.current = true;
     options.forEach(option => {
-      const imgSrc = getImageForValue(type, option);
-      if (imgSrc) {
+      const source = getImageForValue(type, option);
+      if (source) {
         const img = new Image();
-        img.src = imgSrc;
+        img.src = type === 'killer' ? castingKillerArt(option, source, 'slot').src : source;
       }
     });
   }, [options, type, getImageForValue]);
@@ -93,7 +94,8 @@ export const CastingSlot = ({
     setDisplayValue(value);
   };
 
-  const cardImage = getImageForValue(type, displayValue);
+  const source = getImageForValue(type, displayValue);
+  const card = source && (type === 'killer' && displayValue ? castingKillerArt(displayValue, source, 'slot') : { src: source });
   const isEmpty = !displayValue && !isAnimating;
   const isLocation = type === 'location';
 
@@ -117,15 +119,16 @@ export const CastingSlot = ({
                 style={{ '--item-count': shuffleSequence.length } as React.CSSProperties}
                 onAnimationEnd={handleAnimationEnd}>
                 {shuffleSequence.map((option, idx) => {
-                  const img = getImageForValue(type, option);
-                  return img ? (
-                    <img key={idx} src={img} alt={option}
+                  const source = getImageForValue(type, option);
+                  const art = source && (type === 'killer' ? castingKillerArt(option, source, 'slot') : { src: source });
+                  return art ? (
+                    <img key={idx} src={art.src} alt={option} style={art.style}
                       className={`w-full h-full object-cover flex-shrink-0 ${getObjectPosition(type, option)}`} loading="eager" />
                   ) : <span key={idx} className="block w-full h-full mystery-static flex-shrink-0" />;
                 })}
               </span>
-            ) : cardImage ? (
-              <img src={cardImage} alt={displayValue || ''}
+            ) : card ? (
+              <img src={card.src} alt={displayValue || ''} style={card.style}
                 className={`casting-photo-image ${getObjectPosition(type, displayValue)}`} />
             ) : <span className="absolute inset-0 mystery-static" />}
             <span className="casting-photo-glass" aria-hidden="true" />
