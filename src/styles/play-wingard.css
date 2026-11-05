@@ -23,3 +23,25 @@
 .play-death-modal--illustrated .play-cause-tile[data-wingard-photo][aria-pressed="true"] > img { opacity:1; }
 .wingard-controls .module-outcomes { flex-wrap:wrap; }
 .wingard-controls .module-outcomes > button { min-width:44px; padding-inline:5px; }
+.wingard-recipe-links { display:flex; justify-content:flex-end; gap:.65rem; }
+.wingard-recipe-links > button { white-space:nowrap; }
+@media(max-width:360px) {
+  .wingard-heading:has(.wingard-recipe-links) { flex-wrap:wrap; }
+  .wingard-recipe-links { justify-content:flex-start; }
+}
+.wingard-recorded { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr)); gap:.75rem; margin-top:.65rem; }
+.wingard-recipe-card { min-width:0; width:100%; max-width:465px; }
+.wingard-controls .wingard-recipe-card .play-illustrated-tile:disabled,
+.wingard-controls .wingard-person .play-illustrated-tile:disabled { opacity:1; }
+.wingard-controls .wingard-recipe-card .play-tile-caption { bottom:26px; }
+.wingard-uses { position:absolute; left:12px; bottom:8px; display:flex; gap:.28em; color:#f3e1c4; font:600 12px/1 Arial,sans-serif; }
+.wingard-uses [data-used=true] { opacity:.7; }
+.wingard-controls .wingard-craft-action { font-size:.82rem; }
+.wingard-space-choices { max-height:155px; overflow:auto; align-content:start; }
+.wingard-controls .wingard-recipes { align-items:start; }
+.wingard-controls .wingard-person[data-state=present] { grid-column:1/-1; width:100%; max-width:465px; }
+.wingard-controls .wingard-person:is([data-state=present],[data-state=saved],[data-state=killed]) .play-module-art { filter:none; }
+.wingard-controls .wingard-person:is([data-state=unrecorded],[data-state=left]) .play-module-art { filter:grayscale(1) brightness(.55); }
+.wingard-scooter { position:relative; }
+.wingard-scooter-clear { position:absolute; top:0; right:0; padding:0 .5rem; background:#150f0dd9; }
+.play-module-content .wingard-controls .module-control-tile > img[src*="slingshot-blueprint"] { background:#102631; }

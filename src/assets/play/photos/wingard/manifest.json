@@ -868,5 +868,575 @@
     },
     "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. A long damp gravel driveway seen at low eye level toward the trees, headlights far away reflected in puddles, no people or vehicles in foreground.",
     "focalPosition": "center"
+  },
+  "tools-held": {
+    "source": "exec-22d5707a-d726-479d-aaf8-2502b04937f3.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "e0d0be78f16ac4587a2ea6bf587ce233df7968dfbe575c1bc0d60a4dbaf4ff74",
+    "hero": {
+      "file": "tools-held.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 151746,
+      "sha256": "0409c94b11617d037fc9634106a07aeade82881a76bb37a4d7777634be72a9f6"
+    },
+    "tile": {
+      "file": "tools-held-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 22888,
+      "sha256": "fdef02ff6f9f01a229629e1a7dba649dfdcb99bc7cbd263ebf5d49e2d2500e1e"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. a hand lifting a faded green toolbox by its handle in the cottage garage. A clear material centered in the frame with readable shape and distinct carrying action. Use the source only to match the material.",
+    "focalPosition": "center",
+    "reference": "tools"
+  },
+  "nails-held": {
+    "source": "exec-40b4969a-d08e-4081-8a1c-01d09c3b64ec.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "a330948f3e75aaf4aca5ea187c06998733e578a9b875833a98926b75c56eb005",
+    "hero": {
+      "file": "nails-held.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 144042,
+      "sha256": "725f7c35608bb4ba8c16d03c9e9079a0a028de0f647e4a30c60fb87148498590"
+    },
+    "tile": {
+      "file": "nails-held-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 23650,
+      "sha256": "5f1ebf3ab4db457325c014e7a913004898b400cfcefb5db71536d188f76ef55c"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. one hand carrying the small rusty hinged tin open, nails visible, at the cottage workshop. A clear material centered in the frame with readable shape and distinct carrying action. Use the source only to match the material.",
+    "focalPosition": "center",
+    "reference": "nails"
+  },
+  "rope-held": {
+    "source": "exec-3a1805bb-b152-417d-9a72-925b02ef982a.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "d4dbee6ef0996124ef74d4c7fa096d2ee9266106f0309ab1bad23e4ac3925e35",
+    "hero": {
+      "file": "rope-held.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 120412,
+      "sha256": "6d5dd357446f5b2c42ad16fe8733b21f1a3b7d6133db893f6a599c023b1583b6"
+    },
+    "tile": {
+      "file": "rope-held-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 19454,
+      "sha256": "48573cf93b19150b5b4f7f7bf5b46337657704aba04ff86588bbbfd5b48cd270"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. a hand carrying a neatly coiled coarse tan rope away from the lakeside boathouse. A clear material centered in the frame with readable shape and distinct carrying action. Use the source only to match the material.",
+    "focalPosition": "center",
+    "reference": "rope"
+  },
+  "wood-held": {
+    "source": "exec-f5964cae-fa61-42c2-95ae-fb7dd4e8f4f3.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "27976e4ccd1f52c262ddf0c926466eb3daee573e8ed7ff1c8faa9d011bbd93f8",
+    "hero": {
+      "file": "wood-held.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 147384,
+      "sha256": "7bea39c1fef60239ad21ffde1e29cf4aa7285e7f4a32b3b2eec60c2ee7a6126e"
+    },
+    "tile": {
+      "file": "wood-held-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 31124,
+      "sha256": "a28b9604c45be2af67732c5549b029d73bec9512e456bbdd57100718af52a9cc"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. a cropped arm carrying an armful of split dry wooden offcuts across the garden. A clear material centered in the frame with readable shape and distinct carrying action. Use the source only to match the material.",
+    "focalPosition": "center",
+    "reference": "wood"
+  },
+  "snare-blueprint": {
+    "source": "exec-582f3302-68ef-49f0-8a04-c47130ccc7c3.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "9260049e6211c786ecbb7124ccaad22b6713a0e1ec9b66b48adcf6743eeb22ce",
+    "hero": {
+      "file": "snare-blueprint.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 153670,
+      "sha256": "520ad441475ff3827eca76e2ae7f23635d14caa48912155e4261bc57506c836c"
+    },
+    "tile": {
+      "file": "snare-blueprint-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 18192,
+      "sha256": "96d50fbf23372b3b7146e1d6f1e9382977fb51270f2e8cd622f223b9a98c3e5b"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. A real aged cyanotype prop sheet lying on a cottage workbench, photographed close from above, pale cyan stylized outline of rope loop with knot, simple prop silhouette on deep Prussian blue. A single clear centered motif and faded decorative grid. Decorative movie prop only. No measurements, construction instructions, cross sections, labels or legible marks.",
+    "focalPosition": "center"
+  },
+  "slingshot-blueprint": {
+    "source": "exec-1d7bac91-eebb-4cac-ab05-5b4bfdec30db.png",
+    "sourceSize": [
+      1196,
+      1315
+    ],
+    "sourceSha256": "3088dbd70754ceda2e71662b893e6b28e6378933b2c1ba7165137e16bc8c98f2",
+    "hero": {
+      "file": "slingshot-blueprint.webp",
+      "size": [
+        782,
+        860
+      ],
+      "bytes": 76330,
+      "sha256": "78d9c366dee18700230332773a5b465da6cc6ab7705caeeaf128618d788a6b09"
+    },
+    "tile": {
+      "file": "slingshot-blueprint-tile.webp",
+      "size": [
+        259,
+        285
+      ],
+      "bytes": 9412,
+      "sha256": "19c4d4a7d6d60fc9664aa0dfbf8f0d57213271bad475d381d0de50f4217cc619"
+    },
+    "prompt": "Photograph a single worn dark-blue cyanotype print on an old pine cottage desk. A pale decorative flat silhouette of a short Y-shaped natural forked twig on its own, as in a botanical survey is centered on the page. Close straight-down framing, soft window light, tactile paper, 1980s consumer 35mm color film. No writing, lettering, dimensions or cross sections. This is a still life of the listed objects only.",
+    "focalPosition": "center"
+  },
+  "nail-bat-blueprint": {
+    "source": "exec-2feeec8f-46dd-44df-89c0-8642fce1f6ec.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "fc3fcd7409487eb04e4f755c5f9d96a349b8120bf54a6b62c715baf0f9fa5e0d",
+    "hero": {
+      "file": "nail-bat-blueprint.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 130770,
+      "sha256": "33c218784481266448909fa617ae7ee313b945602a8e11447dd56270cc74f1ed"
+    },
+    "tile": {
+      "file": "nail-bat-blueprint-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 19248,
+      "sha256": "c252b59549cfc2b4dc15786fc2ac616f0d676aaeddd3e8eb6e99e83ad246b003"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. A real aged cyanotype prop sheet lying on a cottage workbench, photographed close from above, pale cyan stylized outline of old baseball bat with a row of tiny metal studs indicated along its end on deep Prussian blue. A single clear centered motif and faded decorative grid. Decorative movie prop only. No measurements, construction instructions, cross sections, labels or legible marks.",
+    "focalPosition": "center"
+  },
+  "spear-blueprint": {
+    "source": "exec-050cb1b1-26b7-4544-8788-a5257413d7a2.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "3df0055d37a406b8771b93b2d23430318d94f7ddeaff44e81353dc72c1ad2a73",
+    "hero": {
+      "file": "spear-blueprint.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 128436,
+      "sha256": "b3db6e2e2665a33218dca23672e06ba1a0af75352e5b0141dd62ed189baf691c"
+    },
+    "tile": {
+      "file": "spear-blueprint-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 13876,
+      "sha256": "fa27620d1a4d6b3e3ba11e7fac3bb44c772b1571ce47adf597dc879dcaf1f926"
+    },
+    "prompt": "Photograph a single worn dark-blue cyanotype print on an old pine cottage desk. A pale decorative flat silhouette of a single plain long round wooden dowel and a loose coil of string is centered on the page. Close straight-down framing, soft window light, tactile paper, 1980s consumer 35mm color film. No writing, lettering, dimensions or cross sections. This is a still life of the listed objects only.",
+    "focalPosition": "center"
+  },
+  "disemboweler-blueprint": {
+    "source": "exec-c05837ff-14ca-4128-83d7-51bacec8172a.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "140754d377a0cf71f83675e20602b56a17360705cfd9e7ad5cc5a0b9409b438b",
+    "hero": {
+      "file": "disemboweler-blueprint.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 140474,
+      "sha256": "95bf1eab167b094019b1d1af2a1b329f65f2149647ce36acfa361d3fcc9bde4a"
+    },
+    "tile": {
+      "file": "disemboweler-blueprint-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 23224,
+      "sha256": "6164647e3a868ea5e33f3d135f8db6911390044fb77ca369a4f717ca6a7c5796"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. A real aged cyanotype prop sheet lying on a cottage workbench, photographed close from above, pale cyan stylized outline of baseball bat and short side-facing blade prop silhouette on deep Prussian blue. A single clear centered motif and faded decorative grid. Decorative movie prop only. No measurements, construction instructions, cross sections, labels or legible marks.",
+    "focalPosition": "center"
+  },
+  "nail-trap-blueprint": {
+    "source": "exec-1218d5ac-78fc-44ae-af5b-040619405e0b.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "27b22d4a11ba2da626be2534a8643a73d512aa10907cdad9cb502a769a574dc8",
+    "hero": {
+      "file": "nail-trap-blueprint.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 149178,
+      "sha256": "2c96a72282e6ca087b8f4f6a2fa304f45d7269a082df7a77791ba3694c8b3666"
+    },
+    "tile": {
+      "file": "nail-trap-blueprint-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 20544,
+      "sha256": "19f78a3c34062083bd0bf74f91bf918c15c286001195d53dad337f7d365306d0"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. A real aged cyanotype prop sheet lying on a cottage workbench, photographed close from above, pale cyan stylized outline of short board with tiny projecting studs on deep Prussian blue. A single clear centered motif and faded decorative grid. Decorative movie prop only. No measurements, construction instructions, cross sections, labels or legible marks.",
+    "focalPosition": "center"
+  },
+  "nailgun-blueprint": {
+    "source": "exec-955cdaee-d75e-4d1f-9ad5-638ea64f5579.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "32259883e78f5d82043e216730a0052ef48005c229488821ff4783596bfc990a",
+    "hero": {
+      "file": "nailgun-blueprint.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 138066,
+      "sha256": "4b192f969bb469e0e321a281d2bca0bea0f5f7a382cda049b7ecd41c455a8555"
+    },
+    "tile": {
+      "file": "nailgun-blueprint-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 23000,
+      "sha256": "4ec9a10cc026944e7fdcf8312b2ca17bb081328807a527be3536930e8ac24382"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. A real aged cyanotype prop sheet lying on a cottage workbench, photographed close from above, pale cyan stylized outline of chunky vintage pneumatic woodworking nailer on deep Prussian blue. A single clear centered motif and faded decorative grid. Decorative movie prop only. No measurements, construction instructions, cross sections, labels or legible marks.",
+    "focalPosition": "center"
+  },
+  "sawed-off-blueprint": {
+    "source": "exec-90bc0c28-d743-4412-8b06-793dce6eabe1.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "0e447b68b9ab98cea1b1f871b7c0719143893a5f29a4e314cf8828ab7ed30b94",
+    "hero": {
+      "file": "sawed-off-blueprint.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 141060,
+      "sha256": "a1faeb176eeac03201a51accac27c342d42925b5a684e4b66560d7d8784c6a15"
+    },
+    "tile": {
+      "file": "sawed-off-blueprint-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 17766,
+      "sha256": "b98877d1b1d5c21f1d643e7cac08fb96cc3da6b87cd18b1a798c19a19cf4a7ba"
+    },
+    "prompt": "Photograph a single worn dark-blue cyanotype print on an old pine cottage desk. A pale decorative flat silhouette of a closed vintage rectangular hard-sided sporting luggage case with rounded corners, latches, and one centered carry handle is centered on the page. Close straight-down framing, soft window light, tactile paper, 1980s consumer 35mm color film. No writing, lettering, dimensions or cross sections. This is a still life of the listed objects only.",
+    "focalPosition": "center"
+  },
+  "porcupine-blueprint": {
+    "source": "exec-1827d33c-01e9-4439-8b7d-7be7ad9c62c4.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "29064171c371b6722022f5ad596bd13c6e24f7d97e0c306a6ec8546f659cc84f",
+    "hero": {
+      "file": "porcupine-blueprint.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 131878,
+      "sha256": "52fd483a39f9ab9f574e05e34b183dde62c9e3c16494075ae78ef42b5be74574"
+    },
+    "tile": {
+      "file": "porcupine-blueprint-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 23258,
+      "sha256": "e0d59b86149b683f8989d6a4f2a4798d6e16ae75deff09e12d582874243347c0"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. A real aged cyanotype prop sheet lying on a cottage workbench, photographed close from above, pale cyan stylized outline of round metal lid with studded surface and central grab handle on deep Prussian blue. A single clear centered motif and faded decorative grid. Decorative movie prop only. No measurements, construction instructions, cross sections, labels or legible marks.",
+    "focalPosition": "center"
+  },
+  "obliterator-blueprint": {
+    "source": "exec-ce69f757-c962-462c-b6f0-f2b2ed8d58f2.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "1faba4e50178f7cb0f3a3853bafbfcfc17946af897d2f1537248e531209370c2",
+    "hero": {
+      "file": "obliterator-blueprint.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 127222,
+      "sha256": "668a2e1124d2713bc5aac2d31d69968b6f96dd196f27ea3c192e7b21d1c9144d"
+    },
+    "tile": {
+      "file": "obliterator-blueprint-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 19180,
+      "sha256": "1c82acc8347a6d0f56cef5792bc262a1154e751af648e036235aedaad2f75533"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. A real aged cyanotype prop sheet lying on a cottage workbench, photographed close from above, pale cyan stylized outline of crooked cross-braced rough wood tied with rope on deep Prussian blue. A single clear centered motif and faded decorative grid. Decorative movie prop only. No measurements, construction instructions, cross sections, labels or legible marks.",
+    "focalPosition": "center"
+  },
+  "outsider-saved": {
+    "source": "exec-c2a7658d-1fdf-41ad-aff3-4cd04dc1db5a.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "e1ced9d5478a4d6715927293a180f86f4225befe233552861d47bc94325c22a7",
+    "hero": {
+      "file": "outsider-saved.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 126914,
+      "sha256": "60be4b1510752d1bc256b0952dd63d84a5c18957343cc45597eee35da11e7c32"
+    },
+    "tile": {
+      "file": "outsider-saved-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 22694,
+      "sha256": "75789f87dc7f2fd39f6a98a89dbb26be4239b09659fe09b7a6b883abf73cc752"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. The same adult and clothes as the source, visibly relieved and safely outside by the lake at dawn. Candid waist-up angle, centered recognizable face. Preserve face, age, hair and costume from the supplied reference.",
+    "focalPosition": "center",
+    "reference": "outsider"
+  },
+  "outsider-killed": {
+    "source": "exec-b4072ac0-0b4e-4d85-af31-4f4c5c95be0e.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "812176b690e2c2c83dceff5dd9fe9d3e07061b2af3e9fe5cb26a65dfb992fb74",
+    "hero": {
+      "file": "outsider-killed.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 110810,
+      "sha256": "d9799daa8975ca5c490bf374f3f8519ab45f2a6bd6c9217cdcab1902a9daeba0"
+    },
+    "tile": {
+      "file": "outsider-killed-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 16152,
+      "sha256": "e57d587c9b49dacaa0527852c94cb11efee181ed9b50c5226186b7d9f8b4fda4"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. Non-graphic aftermath portrait of the same adult and clothes as the source, motionless with closed eyes, slumped in a chair in an empty cottage room, muted natural light, peaceful face visible. No injury, blood, attack, or weapon. Preserve face, age, hair and costume from the supplied reference.",
+    "focalPosition": "center",
+    "reference": "outsider"
+  },
+  "boyfriend-saved": {
+    "source": "exec-6bb0756e-8f33-44a2-9f98-d36d8d0cf3d5.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "8c959b124dc6dcb757757c5e1d8fd1a4434099efe80bb19782186c7da4827dc7",
+    "hero": {
+      "file": "boyfriend-saved.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 142274,
+      "sha256": "bc496cec026a7e8012e0f605f101f20e7c662aa656bd1673b0f98fed4e0a8cf2"
+    },
+    "tile": {
+      "file": "boyfriend-saved-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 25456,
+      "sha256": "2abfa70d97069ba670eeeb022652a096e15f0418ecf102a131200fbf81ff809d"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. The same adult and clothes as the source, visibly relieved and safely outside by the lake at dawn. Candid waist-up angle, centered recognizable face. Preserve face, age, hair and costume from the supplied reference.",
+    "focalPosition": "center",
+    "reference": "boyfriend"
+  },
+  "boyfriend-killed": {
+    "source": "exec-1a270399-7a85-4134-b244-3ca75de5f6b3.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "a9e0ecc3ce8fce83671f04e77cc76d02b1ee0d59b90748f2066d153db37fd18f",
+    "hero": {
+      "file": "boyfriend-killed.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 95686,
+      "sha256": "d496669f70ea636b3547ffbd4b04171ed570b9982c5f0e8fe218837c0a1fbae6"
+    },
+    "tile": {
+      "file": "boyfriend-killed-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 14368,
+      "sha256": "8295bb3a1d3a1c0cddb6fe391a83750de0a0a6213e085fadb6a570e35e3ca938"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. Non-graphic aftermath portrait of the same adult and clothes as the source, motionless with closed eyes, slumped in a chair in an empty cottage room, muted natural light, peaceful face visible. No injury, blood, attack, or weapon. Preserve face, age, hair and costume from the supplied reference.",
+    "focalPosition": "center",
+    "reference": "boyfriend"
+  },
+  "neighbor-saved": {
+    "source": "exec-17d4a3ef-0f66-44c7-a9f5-9b3517d135cf.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "0fa9f7b2db23462217d2f21e25dd3f3ca53d4de461f37890cc745b840c3d0d37",
+    "hero": {
+      "file": "neighbor-saved.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 154324,
+      "sha256": "dba398d55f82da113fd704e5b1f13fb6a112463098438bdba4d4f9967d785f9b"
+    },
+    "tile": {
+      "file": "neighbor-saved-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 28268,
+      "sha256": "a52afae78fc185cfd66deab87361a1db975b69b549385125a6828a869d518e9c"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. The same adult and clothes as the source, visibly relieved and safely outside by the lake at dawn. Candid waist-up angle, centered recognizable face. Preserve face, age, hair and costume from the supplied reference.",
+    "focalPosition": "center",
+    "reference": "neighbor"
+  },
+  "neighbor-killed": {
+    "source": "exec-ccd856e5-b917-4501-8a0a-ad10799284ec.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "f3b90134992bfa6d5c8d2219562ccbd302a8e675a481a88f5812ec64fc80f28c",
+    "hero": {
+      "file": "neighbor-killed.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 120802,
+      "sha256": "3976e202ee696e95ac6fe0107f2cf58faa87987b538aa804ab03d8910fa4d95c"
+    },
+    "tile": {
+      "file": "neighbor-killed-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 19772,
+      "sha256": "79c6402e8847349234bcbb48ea9110fa42c21f1400a76198f034bcfdb0c2bf04"
+    },
+    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. Non-graphic aftermath portrait of the same adult and clothes as the source, motionless with closed eyes, slumped in a chair in an empty cottage room, muted natural light, peaceful face visible. No injury, blood, attack, or weapon. Preserve face, age, hair and costume from the supplied reference.",
+    "focalPosition": "center",
+    "reference": "neighbor"
   }
 }

@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import {Minus,Plus} from 'lucide-react';
 import {
   INTRUDERS, INTRUDER_MODULE, INTRUDER_HEALTH, INTRUDER_MINORS, INTRUDER_ROSTER,
   intruderEpicReady, intruderFigure, intruderId, intruderMinorField, intruderMode, intruderParent,
@@ -34,90 +35,77 @@ export function IntruderRoster({events,onEvent}:{events:PlayEvent[];onEvent:Cont
   const [focus,setFocus]=useState<IntruderId>();
   const [input,setInput]=useState<string>();
   const active=intruderId(state.active)?state.active:undefined;
-  const who=focus??active??'trish';
+  const mode=intruderMode(entries);
+  const focusToken=focus?intruderFigure(state,focus).token:undefined;
+  const who=(mode==='all'||focusToken==='pending'?focus??active:active)??'trish';
+  const hero=(mode==='all'?focus??active:active??focus)??'trish';
   const person=INTRUDER_ROSTER.find(p=>p.id===who)!;
   const {health,token}=intruderFigure(state,who);
-  const mode=intruderMode(entries);
   const epic=intruderEpicReady(state,entries);
   const hasBonus=INTRUDER_ROSTER.some(({id})=>{
     const figure=intruderFigure(state,id);
     return figure.health===1 && (figure.token==='black'||figure.token==='white');
   });
-  const status=mode==='all'?'All Killers Active':mode==='unknown'?'Finale mode unconfirmed':state.active==='none'?'No Active Killer':active?'Active Killer marker':'Active Killer unrecorded';
   const resolve=(command:Command)=>{if(send(command))setInput(undefined);};
-  const canDown=can({command:'down',who});
-  const canConfirm=can({command:epic?'epic':'dead',who});
+  const zero:Command={command:token==='white'?(epic?'epic':'dead'):'down',who};
+  const portraits=[INTRUDER_ROSTER.find(p=>p.id===hero)!,...INTRUDER_ROSTER.filter(p=>p.id!==hero)];
   return (
     <div className="play-state play-state--intruders" role="group" aria-label="Intruder Killer Health tracker">
       <div className="intruder-portraits">
-        {INTRUDER_ROSTER.map(({id,name,color})=>{
+        {portraits.map(({id,name})=>{
           const figure=intruderFigure(state,id);
-          const isActive=mode==='all'?figure.token!=='pending'&&figure.token!=='dead'&&(figure.health!==undefined||figure.token!==undefined):active===id;
+          const out=figure.token==='dead'||figure.token==='pending';
+          const isActive=mode==='all'?!out&&(figure.health!==undefined||figure.token!==undefined):active===id;
           const fate=figure.token==='pending'?'Down':figure.token==='dead'?'Dead':`${figure.health??'?'} HP`;
-          return <button type="button" key={id} aria-pressed={id===who} aria-label={`View ${name} health`} aria-description={`${fate}${isActive?', Active':''}`}
-            data-focus={id===who} data-active={isActive} data-out={figure.token==='dead'||figure.token==='pending'}
-            onClick={()=>{setFocus(id);setInput(undefined);}}>
+          return <button type="button" key={id} aria-pressed={isActive} aria-label={name}
+            aria-description={`${fate}${isActive?', Active':''}`} data-active={isActive} data-out={out} disabled={figure.token==='dead'}
+            onClick={()=>{
+              if(!out&&mode!=='all'&&id!==active&&!send({command:'activate',who:id}))return;
+              setFocus(id);
+              setInput(undefined);
+            }}>
             <img src={intruderArt(id).src} alt="" />
             <span className="intruder-portrait-label"><strong>{name}</strong><small>{fate}</small></span>
-            <span className="intruder-marker-tag">{isActive?'Active':color}</span>
           </button>;
         })}
       </div>
-      <div className="intruder-actions">
-        {mode!=='all'&&!active&&<small className="intruder-marker-unknown">{status}</small>}
-        <div className="intruder-marker-row" aria-label="Active Killer">
-          {mode!=='all'&&<button type="button" aria-label="Shift Active Killer up" disabled={!can({command:'shift',direction:'up'})} onClick={()=>send({command:'shift',direction:'up'})}>↑</button>}
-          {mode!=='all'&&active!==who&&can({command:'activate',who})
-            ? <button type="button" onClick={()=>send({command:'activate',who})}>Set {person.name} active</button>
-            : (active||mode==='all')&&<small>{status}</small>}
-          {mode!=='all'&&<button type="button" aria-label="Shift Active Killer down" disabled={!can({command:'shift',direction:'down'})} onClick={()=>send({command:'shift',direction:'down'})}>↓</button>}
+      <div className="play-state-control-bar">
+        <div className="play-state-caption">
+          <span className="play-state-title">{person.name} Health</span>
+          {mode==='all'&&<small className="play-state-unknown">All Killers Active</small>}
+          {hasBonus&&<small className="play-state-unknown">+1 Horror die</small>}
         </div>
-        <div className="intruder-health-row">
-          <span><strong>{person.name}</strong> <small>Health</small></span>
-          {input!==undefined
-            ? <form onSubmit={event=>{
-                event.preventDefault();
-                const value=Number(input);
-                if(Number.isInteger(value)&&value>=1&&value<=INTRUDER_HEALTH) resolve({command:'health',who,value});
-              }}>
-              <input aria-label={`Set ${person.name} health`} type="number" min={1} max={INTRUDER_HEALTH} required value={input} onChange={e=>setInput(e.target.value)} autoFocus />
+        {input!==undefined
+          ? <form onSubmit={event=>{
+              event.preventDefault();
+              const value=Number(input);
+              if(value===0&&input!==''){if(send(zero)){setFocus(who);setInput(undefined);}}
+              else if(Number.isInteger(value)&&value>=1&&value<=INTRUDER_HEALTH)resolve({command:'health',who,value});
+            }}>
+              <input aria-label={`Set ${person.name} health`} type="number" min={0} max={INTRUDER_HEALTH} required value={input} onChange={e=>setInput(e.target.value)} autoFocus />
               <button type="submit">Set</button><button type="button" onClick={()=>setInput(undefined)} aria-label="Cancel health edit">×</button>
             </form>
-            : <div className="intruder-health-stepper">
-              <button type="button" aria-label={`Decrease ${person.name} health`} disabled={health===undefined||health<=1||!can({command:'health',who,value:health-1})} onClick={()=>send({command:'health',who,value:health!-1})}>−</button>
+          : <div className="play-state-stepper">
+              <button type="button" aria-label={`Decrease ${person.name} health`}
+                disabled={health===undefined||health===0||!can(health===1?zero:{command:'health',who,value:(health??0)-1})}
+                onClick={()=>{if(health===1){if(send(zero))setFocus(who);}else if(health)send({command:'health',who,value:health-1});}}><Minus size={16}/></button>
               <button type="button" aria-label={`Edit ${person.name} health`} disabled={token==='pending'||token==='dead'} onClick={()=>setInput(health===undefined?'':String(health))}>{health??'?'}</button>
-              <button type="button" aria-label={`Increase ${person.name} health`} disabled={health===undefined||health>=INTRUDER_HEALTH||!can({command:'health',who,value:health+1})} onClick={()=>send({command:'health',who,value:health!+1})}>+</button>
+              <button type="button" aria-label={`Increase ${person.name} health`} disabled={health===undefined||health>=INTRUDER_HEALTH||!can({command:'health',who,value:health+1})} onClick={()=>send({command:'health',who,value:health!+1})}><Plus size={16}/></button>
             </div>}
-        </div>
-        {hasBonus&&<small className="intruder-bonus">+1 Horror die</small>}
-        {token==='pending'
-          ? <label className="intruder-fate">Awaiting Final Health
-            <PlaySelect aria-label={`Resolve ${person.name} Final Health`} value="" onChange={event=>{
-              const choice=event.target.value;
-              if(choice==='blank')resolve({command:epic?'epic':'dead',who});
-              else if(choice)resolve({command:'return',who,value:Number(choice)});
-            }}>
-              <option value="" disabled>Record token result</option>
-              <option value="blank">{epic?'Blank · use Won’t Stay Down':'Blank · confirm death'}</option>
-              {[1,2,3].map(hp=><option key={hp} value={hp}>Returns with {hp} HP</option>)}
-            </PlaySelect>
-          </label>
-          : <details className="intruder-fate">
-            <summary>{token==='dead'?'Correct status':health===1?'Final Health':'Final Health / correction'}</summary>
-            {canDown&&<button type="button" onClick={()=>resolve({command:'down',who})}>Mark down</button>}
-            {canConfirm&&<button type="button" onClick={()=>resolve({command:epic?'epic':'dead',who})}>{epic?'Confirm death · Epic return':'Confirm death'}</button>}
-            <PlaySelect aria-label={`Correct ${person.name} Final Health token`} value={token==='dead'?'':token??''} onChange={e=>{
-              const value=e.target.value;
-              if(value==='black'||value==='white')resolve({command:'token',who,value});
-              if(value==='unknown')resolve({command:'token',who,value:null});
-            }}>
-              <option value="" disabled>Correct token</option>
-              <option value="black">Black token</option><option value="white">White token</option>
-              {token!=='dead'&&<option value="unknown">Token unrecorded</option>}
-            </PlaySelect>
-          </details>}
-        {message&&<p role="alert" className="play-module-error">{message}</p>}
       </div>
+      {token==='pending'&&<div className="intruder-zero-result">
+        <PlaySelect aria-label={`Resolve ${person.name} at zero health`} value="" onChange={event=>{
+          const choice=event.target.value;
+          if(!choice)return;
+          const command:Command=choice==='blank'?{command:epic?'epic':'dead',who}:{command:'return',who,value:Number(choice)};
+          if(send(command))setFocus(undefined);
+        }}>
+          <option value="" disabled>Resolve {person.name} at 0 HP</option>
+          <option value="blank">{epic?'Blank · use Won’t Stay Down':'Blank · confirm death'}</option>
+          {[1,2,3].map(hp=><option key={hp} value={hp}>Returns with {hp} HP</option>)}
+        </PlaySelect>
+      </div>}
+      {message&&<p role="alert" className="play-module-error">{message}</p>}
     </div>
   );
 }
