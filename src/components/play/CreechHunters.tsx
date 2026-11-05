@@ -40,7 +40,11 @@ export function CreechHunters({ state, onEvent, onGroup, onOutcome, onCorrect }:
     </> : <>
       <button className="creech-hunter-summary" aria-label="View Ghost Hunters" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}><span>{summary}</span><small>{roster.filter(h => state[`hunter.${h.id}`] === 'in-play').length} in play · {expanded ? 'Hide' : 'Show'}</small></button>
       {expanded && <>
-        <div className="creech-hunters">{roster.map(h => <IllustratedTile key={h.id} id={`${id}-${h.id}`} className="creech-hunter-portrait" art={creechArt[`hunter-${h.id}`]} title={h.id[0].toUpperCase() + h.id.slice(1)} status={states.find(s => s.value === state[`hunter.${h.id}`])?.label ?? 'Not recorded'} data-state={state[`hunter.${h.id}`]} aria-label={`View ${h.name}`} aria-expanded={selected === h.id} aria-pressed={selected === h.id} onClick={() => { setSelected(selected === h.id ? null : h.id); setBloodlust(''); }} />)}</div>
+        <div className="creech-hunters">{roster.map(h => <IllustratedTile key={h.id} id={`${id}-${h.id}`} className="creech-hunter-portrait" art={creechArt[`hunter-${h.id}`]} title={h.id[0].toUpperCase() + h.id.slice(1)} status={states.find(s => s.value === state[`hunter.${h.id}`])?.label ?? 'Not recorded'} data-state={state[`hunter.${h.id}`]} aria-label={`${state[`hunter.${h.id}`] === 'left-play' ? 'Restore' : 'View'} ${h.name}`} aria-expanded={selected === h.id} aria-pressed={selected === h.id} onClick={() => {
+          if (state[`hunter.${h.id}`] === 'left-play') {
+            if (onCorrect(`hunter.${h.id}`, 'in-play')) { setSelected(null); setBloodlust(''); }
+          } else { setSelected(selected === h.id ? null : h.id); setBloodlust(''); }
+        }} />)}</div>
         {hunter && <div className="creech-hunter-actions" role="group" aria-label={`${hunter.name} actions`}>
           <strong>{hunter.name}</strong>
           {state[`hunter.${hunter.id}`] === 'in-play' && <>

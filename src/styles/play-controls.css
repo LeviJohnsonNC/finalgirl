@@ -591,3 +591,7 @@
 .play-text-action:hover:not(:disabled){color:#ffe5b8}
 .play-text-action:focus-visible{outline:2px dashed #efd9af;outline-offset:3px}
 .play-text-action:disabled{cursor:default;opacity:.45}
+
+.module-character:is([data-state="left"], [data-state="left-play"], [data-state="away"]) .play-module-art {
+  filter: grayscale(1) brightness(.55);
+}

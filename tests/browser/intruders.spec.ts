@@ -14,7 +14,7 @@ test('Intruders worked example, direct portrait activation, loaded artwork and f
   await page.goto('/');
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   const roster=page.getByRole('group',{name:'Intruder Killer Health tracker'});
-  await expect(roster.getByText('6 HP',{exact:true})).toHaveCount(3);
+  await expect(roster.locator('.intruder-portraits > button')).toHaveText(['Trish','Baghead','Zeke']);
   await expect(roster.getByRole('button',{name:'Trish',exact:true})).toHaveAttribute('data-active','true');
   await roster.getByRole('button',{name:'Baghead',exact:true}).click();
   await expect(roster.getByRole('button',{name:'Baghead',exact:true})).toHaveAttribute('data-active','true');
@@ -44,7 +44,8 @@ test('Intruders worked example, direct portrait activation, loaded artwork and f
   await expect(roster.getByRole('combobox',{name:'Resolve Trish at zero health'})).toBeVisible();
   await roster.getByRole('combobox',{name:'Resolve Trish at zero health'}).click();
   await page.getByRole('option',{name:'Returns with 2 HP',exact:true}).click();
-  await expect(roster.getByRole('button',{name:'Trish',exact:true})).toContainText('2 HP');
+  await expect(roster.getByRole('button',{name:'Trish',exact:true})).toHaveText('Trish');
+  await expect(roster.getByRole('button',{name:'Trish',exact:true})).toHaveAttribute('aria-description',/2 HP/);
   await openModule(page,'intruders');
   const panel=page.locator('.play-module-panel[data-module="intruders"]');
   await panel.locator('details.module-card-section > summary').click();
@@ -113,7 +114,8 @@ test('legacy Intruders save retains the scalar history and starts with unrecorde
   await page.goto('/');
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   const roster=page.getByRole('group',{name:'Intruder Killer Health tracker'});
-  await expect(roster.getByText('? HP',{exact:true})).toHaveCount(3);
+  await expect(roster.locator('.intruder-portraits > button')).toHaveText(['Trish','Baghead','Zeke']);
+  await expect(roster.locator('.intruder-portraits > button[aria-description="? HP"]')).toHaveCount(3);
   await expect(roster.locator('button[aria-pressed=true]')).toHaveCount(0);
   const log:PlayEvent[]=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents,storageKey);
   expect(summarizePlay(log).killerHealth).toBe(9);
@@ -126,7 +128,7 @@ test('mixed-location death attribution, retry and cached playback use the record
   await page.goto('/');
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   const roster=page.getByRole('group',{name:'Intruder Killer Health tracker'});
-  await expect(roster.getByText('6 HP',{exact:true})).toHaveCount(3);
+  await expect(roster.locator('.intruder-portraits > button')).toHaveText(['Trish','Baghead','Zeke']);
   await page.evaluate(()=>{
     const prior=Storage.prototype.setItem;
     Object.assign(window,{restoreIntruderStorage:()=>{Storage.prototype.setItem=prior;}});

@@ -16,3 +16,5 @@
 .creech-hunter-section .creech-color-choices{grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
 .creech-hunter-section .module-correction label{display:grid;gap:.4rem;margin-bottom:.7rem}
 @media(max-width:650px){.creech-hunter-section .creech-hunter-portrait{aspect-ratio:3/4;min-height:135px}.creech-hunter-portrait .play-tile-caption{padding:.5rem}.creech-hunter-summary small{font-size:.65rem}.creech-hunter-portrait .play-tile-state{font-size:.7rem}}
+
+.creech-hunter-portrait[data-state="left-play"] .play-module-art{filter:grayscale(1) brightness(.55)}
