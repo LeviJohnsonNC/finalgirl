@@ -240,7 +240,7 @@ test("an evaluation write outage warns without breaking the generated opening", 
     page.getByRole("region", { name: "Opening narration" }),
   ).toContainText("The opening is still available.");
   await expect(
-    page.getByText("Story ready, evaluation copy wasn't saved", {
+    page.getByText("Generation evaluation wasn't saved", {
       exact: true,
     }),
   ).toBeVisible();

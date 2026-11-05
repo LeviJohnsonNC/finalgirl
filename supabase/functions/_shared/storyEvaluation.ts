@@ -1,5 +1,5 @@
 import type { GuardResult } from "./guard.ts";
-import { effectiveTextSystem, streamChat } from "./aiGateway.ts";
+import { effectiveTextSystem, streamChat, GatewayError } from "./aiGateway.ts";
 
 type Guard = Extract<GuardResult, { ok: true }>;
 type EvaluationStatus = "complete" | "incomplete" | "failed" | "cancelled";
@@ -53,6 +53,7 @@ export function observeStoryStream(
     error_code: string | null;
   }) => Promise<boolean>,
   id: string | null,
+  signal?: AbortSignal,
 ): ReadableStream<Uint8Array> {
   const reader = upstream.getReader(),
     decoder = new TextDecoder(),
@@ -81,7 +82,10 @@ export function observeStoryStream(
           if (typeof choice?.finish_reason === "string")
             reason = choice.finish_reason;
           // Never persist upstream error bodies: they can contain private provider details.
-          if (event.error) error = "upstream_stream_error";
+          if (event.error) {
+            error = ['content_policy','incomplete_response','rate_limit','credits','model_unavailable','upstream'].includes(event.code) ? event.code : 'upstream_stream_error';
+            if (error === 'content_policy') reason = 'content_filter';
+          }
         } catch {
           error = "malformed_stream_frame";
         }
@@ -100,7 +104,7 @@ export function observeStoryStream(
           : "failed"
         : !text.trim()
           ? "failed"
-          : reason === "stop"
+          : reason === "stop" || reason === "end_turn"
             ? "complete"
             : "incomplete");
     return finalize({
@@ -108,7 +112,7 @@ export function observeStoryStream(
       story_text: text,
       word_count: text.trim() ? text.trim().split(/\s+/u).length : 0,
       finish_reason: reason,
-      error_code: error ?? (!text.trim() ? "empty_output" : null),
+      error_code: error ?? (!text.trim() ? "empty_output" : !['stop','end_turn'].includes(reason ?? '') ? 'incomplete_response' : null),
     });
   }
   return new ReadableStream<Uint8Array>({
@@ -132,7 +136,7 @@ export function observeStoryStream(
         reader.releaseLock();
       } catch (cause) {
         error = "stream_transport_error";
-        await finish(text.trim() ? "incomplete" : "failed");
+        await finish(signal?.aborted ? 'cancelled' : text.trim() ? "incomplete" : "failed");
         controller.error(cause);
         reader.releaseLock();
       }
@@ -157,6 +161,9 @@ export async function generateEvaluatedStory(options: {
   context: unknown;
   system: string;
   user: string;
+  candidates?: string[];
+  signal?: AbortSignal;
+  promptVersion?: string;
 }) {
   const { guard, kind, request, context, system, user } = options;
   const started = Date.now();
@@ -183,7 +190,7 @@ export async function generateEvaluatedStory(options: {
       id,
       user_id: guard.user.id,
       kind,
-      prompt_version: "2026-11-04-v2",
+      prompt_version: options.promptVersion ?? "2026-11-04-v2",
       system_prompt: effectiveTextSystem(system),
       user_prompt: user,
       model_context: context,
@@ -193,7 +200,8 @@ export async function generateEvaluatedStory(options: {
   );
   if (!inserted) id = null;
   try {
-    const { body, model } = await streamChat({ system, user });
+    options.signal?.throwIfAborted();
+    const { body, model } = await streamChat({ system, user, ...(options.candidates && {candidates:options.candidates}), ...(options.signal && {signal:options.signal}) });
     return {
       model,
       body: observeStoryStream(
@@ -208,15 +216,18 @@ export async function generateEvaluatedStory(options: {
               })
             : false,
         id,
+        options.signal,
       ),
     };
   } catch (error) {
     if (id)
       await write({
-        status: "failed",
+        status: options.signal?.aborted ? 'cancelled' : "failed",
         finished_at: new Date().toISOString(),
         duration_ms: Date.now() - started,
-        error_code: "generation_request_failed",
+        error_code: error instanceof GatewayError ? error.kind : "generation_request_failed",
+        ...(error instanceof GatewayError && error.model && {model:error.model}),
+        ...(error instanceof GatewayError && error.kind === 'content_policy' && {finish_reason:'content_filter'}),
       });
     throw error;
   }

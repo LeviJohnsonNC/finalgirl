@@ -32,6 +32,7 @@ export type GatewayErrorKind =
   | "upstream";
 
 export class GatewayError extends Error {
+  model?: string;
   constructor(readonly kind: GatewayErrorKind, message: string, readonly status = 500) {
     super(message);
     this.name = "GatewayError";
@@ -78,7 +79,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const classify = (status: number, body: string): GatewayError => {
   if (status === 429) return new GatewayError("rate_limit", "Gateway rate limit", 429);
   if (status === 402) return new GatewayError("credits", "AI credits depleted", 402);
-  if (status === 400 && /safety|content.?polic|blocked/i.test(body)) {
+  if ([400, 403, 422].includes(status) && /safety|content.?polic|content_filter|prohibited_content/i.test(body)) {
     return new GatewayError("content_policy", "Prompt rejected by content policy", 400);
   }
   if (status === 404 || (status === 400 && /model/i.test(body))) {
@@ -147,6 +148,7 @@ const withModelFallback = async <T>(
     try {
       return { result: await call(model), model };
     } catch (err) {
+      if (err instanceof GatewayError) err.model = model;
       lastError = err;
       if (shouldFallback(err)) {
         console.warn(`Model ${model} unavailable, trying next candidate`);
@@ -255,6 +257,31 @@ const terminalErrorMessage = (event: Record<string, unknown>): string | null => 
   );
 };
 
+/** Classify explicit provider signals, never infer policy from story prose. */
+export const storyStreamError = (event: Record<string, unknown>): GatewayError | null => {
+  const choices = event.choices as Array<{finish_reason?: string; native_finish_reason?: string; delta?: {refusal?: string}; message?: {refusal?: string}}> | undefined;
+  const response = event.response as {error?: {code?: string}; incomplete_details?: {reason?: string}; output?: Array<{content?: Array<{type?:string}>}>} | undefined;
+  const error = event.error as {code?: string; type?: string} | string | undefined;
+  const feedback = (event.promptFeedback ?? event.prompt_feedback) as {blockReason?: string; block_reason?: string} | undefined;
+  const reasons = [event.code, typeof error === 'object' ? error?.code : error, typeof error === 'object' ? error?.type : undefined,
+    response?.error?.code, response?.incomplete_details?.reason, choices?.[0]?.finish_reason, choices?.[0]?.native_finish_reason,
+    feedback?.blockReason, feedback?.block_reason].filter((v): v is string => typeof v === 'string').map(v => v.toLowerCase());
+  const policy = ['content_policy','content_filter','safety','blocklist','prohibited_content','spii','image_safety','image_prohibited_content'];
+  if (reasons.some(reason => policy.includes(reason)) || event.type === 'response.refusal.delta' || event.type === 'response.refusal.done' ||
+    choices?.[0]?.delta?.refusal || choices?.[0]?.message?.refusal || response?.output?.some(item => item.content?.some(part => part.type === 'refusal')))
+    return new GatewayError('content_policy', 'Provider declined the scene');
+  if (reasons.some(reason => ['rate_limit','rate_limit_exceeded'].includes(reason))) return new GatewayError('rate_limit','Provider rate limit',429);
+  if (reasons.includes('credits')) return new GatewayError('credits','Credits depleted',402);
+  if (reasons.includes('model_unavailable')) return new GatewayError('model_unavailable','Model unavailable');
+  const failure = terminalErrorMessage(event);
+  if (failure || event.error) return new GatewayError(event.type === 'response.incomplete' || event.code === 'incomplete_response' ? 'incomplete_response' : 'upstream', 'Story stream did not complete');
+  if (choices?.[0]?.finish_reason && !['stop','end_turn'].includes(choices[0].finish_reason.toLowerCase()))
+    return new GatewayError('incomplete_response', 'Story stream did not complete');
+  if (choices?.[0]?.native_finish_reason && !['stop','end_turn'].includes(choices[0].native_finish_reason.toLowerCase()))
+    return new GatewayError('incomplete_response', 'Story stream did not complete');
+  return null;
+};
+
 /**
  * Re-emits a /v1/responses SSE stream in the OpenAI chat-completions frame shape
  * the browser already parses, so the client stays untouched.
@@ -281,13 +308,12 @@ const responsesToChatFrames = (
         return;
       }
 
-      if (event.type === "response.completed") {
-        controller.enqueue(chatFrame({ model, choices: [{ delta: {}, finish_reason: "stop" }] }));
-      }
-      const failure = terminalErrorMessage(event);
+      const failure = storyStreamError(event);
       if (failure) {
-        console.error(`Responses stream ${model} reported failure:`, failure);
-        controller.enqueue(chatFrame({ error: failure }));
+        console.error(`Responses stream ${model} reported failure:`, failure.kind);
+        controller.enqueue(chatFrame({ error: userFacingMessage(failure), code: failure.kind, ...(failure.kind === 'content_policy' ? {finish_reason:'content_filter'} : {}) }));
+      } else if (event.type === "response.completed") {
+        controller.enqueue(chatFrame({ model, choices: [{ delta: {}, finish_reason: "stop" }] }));
       }
     };
 
@@ -325,7 +351,7 @@ const collectResponsesText = async (
   const decoder = new TextDecoder();
   let buffer = "";
   let text = "";
-  let failure: string | null = null;
+  let failure: GatewayError | null = null;
   let completed = false;
 
   const handle = (event: Record<string, unknown>) => {
@@ -337,7 +363,7 @@ const collectResponsesText = async (
       text += event.delta;
       return;
     }
-    failure = failure ?? terminalErrorMessage(event);
+    failure = failure ?? storyStreamError(event);
   };
 
   while (true) {
@@ -352,8 +378,7 @@ const collectResponsesText = async (
   // Drain any frame left without its blank-line terminator.
   eachSseEvent("\n\n", buffer, handle);
 
-  if (failure)
-    throw new GatewayError("upstream", `Responses stream failed: ${failure}`);
+  if (failure) throw failure;
   if (options?.requireComplete && !completed)
     throw new GatewayError(
       "incomplete_response",
@@ -616,13 +641,17 @@ const extractImage = (data: Record<string, unknown>): { base64: string; mimeType
 export const streamChat = async (opts: {
   system: string;
   user: string;
+  candidates?: string[];
+  signal?: AbortSignal;
 }): Promise<{ body: ReadableStream<Uint8Array>; model: string }> => {
-  const { result, model } = await withModelFallback(TEXT_MODEL_CANDIDATES, async (model) => {
+  const { result, model } = await withModelFallback(opts.candidates ?? TEXT_MODEL_CANDIDATES, async (model) => {
+    opts.signal?.throwIfAborted();
     if (usesResponsesApi(model)) {
-      return responsesToChatFrames(await postResponsesStream(model, effectiveTextSystem(opts.system), opts.user), model);
+      return responsesToChatFrames(await postResponsesStream(model, effectiveTextSystem(opts.system), opts.user, opts.signal), model);
     }
 
     const response = await fetch(GATEWAY_URL, {
+      signal: opts.signal,
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey()}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -652,6 +681,11 @@ export const normalizeGeneratedStream = (upstream: ReadableStream<Uint8Array>): 
   const decoder = new TextDecoder(), encoder = new TextEncoder();
   let buffer = '';
   const handle = (controller: TransformStreamDefaultController<Uint8Array>) => (event: Record<string, unknown>) => {
+    const failure = storyStreamError(event);
+    if (failure) {
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({error:userFacingMessage(failure),code:failure.kind,...(failure.kind === 'content_policy' ? {finish_reason:'content_filter'} : {})})}\n\n`));
+      return;
+    }
     const choices = event.choices as Array<{ delta?: { content?: string } }> | undefined;
     for (const choice of choices ?? []) {
       if (typeof choice.delta?.content === 'string') choice.delta.content = normalizeGeneratedText(choice.delta.content);

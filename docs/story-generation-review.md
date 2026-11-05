@@ -1,5 +1,17 @@
 # Story and artwork direction
 
+## Ending policy-block recovery (2026-11-05)
+
+New ending clients send `endingStreamVersion:1`. On an explicit provider content-filter/refusal signal, `generate-ending` records the failed attempt and tries one different, non-graphic aftermath prompt on the same selected model. The rewrite keeps reviewed outcomes, individual fates, mission, quantities, notes and selected Play summary, while omitting inherited opening prose, descriptive biographies and killer/location descriptions. All harm remains off-screen; the prompt must not change the result or invent a rescue/survival to make it gentler. A second block stops with useful copy. Ordinary outages, rate limits, exhausted credits, length limits and missing completion never trigger this rewrite. No policy-driven provider switching or unchanged-prompt retry loop.
+
+The opt-in stream emits a single reset/status event before the rewrite. The reader discards the interrupted draft and says “Reframing the ending…”. Explicit successful completion is required before checkpointing, saving, narration or poster development. A failed update retains the previous completed checkpoint. Cancellation aborts the active provider stream and prevents later attempts. Legacy clients retain the original one-attempt protocol, so the backend can deploy first.
+
+Each attempt uses the existing private `story_evaluations` table, with its actual prompt/context/model and a distinct ID. Normal endings use prompt version `2026-11-05-ending-v3`, rewrites `2026-11-05-ending-aftermath-v1`; the game ID, prompt version and chronological sequence support per-game recovery review in an export. Policy failures keep `content_policy` / `content_filter`; raw provider error bodies are excluded. No database migration or new secret is needed. Evaluation-write failure does not prevent recovery.
+
+Verification uses real gateway/route/reader code with simulated provider responses: pre-stream and midstream refusals, same-model recovery, second refusal, non-policy failures, partial EOF, cancellation, telemetry outage, reviewed-fate preservation, prior-checkpoint protection and desktop/phone layout. It does not establish live provider refusal rates or prose quality. Production logs for the reported two failures could not be accessed through the connected project tools.
+
+Release: deploy `generate-ending` before publishing the frontend. Also deploy the shared gateway/evaluation consumers `generate-story`, `generate-death-scene`, `generate-visual-bible` and `generate-scene-image` for consistent typed error handling. `narrate-story`, Storage references and SQL are unchanged. Then live-check one normal ending and inspect the next recovered attempt's evaluation records; do not force a safety refusal or claim that successful simulated recovery proves production recovery.
+
 ## Recorded-evidence and prose follow-up (2026-11-04)
 
 The latest follow-up preserves consequential Play observations within the existing

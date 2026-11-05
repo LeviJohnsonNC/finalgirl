@@ -6,6 +6,7 @@ import { ENDING_SYSTEM, buildEndingUser } from "../_shared/storyPrompts.ts";
 import { statusFor, userFacingMessage } from "../_shared/aiGateway.ts";
 
 import { generateEvaluatedStory } from "../_shared/storyEvaluation.ts";
+import { generateEndingWithRecovery } from "../_shared/endingRecovery.ts";
 
 serve(async (req) => {
   const cors = getCorsHeaders(req.headers.get("origin"));
@@ -32,17 +33,24 @@ serve(async (req) => {
     }
 
     const systemPrompt = ENDING_SYSTEM;
-    const userPrompt = buildEndingUser(validation.data);
+    const {endingStreamVersion, ...context} = validation.data;
+    const userPrompt = buildEndingUser(context);
 
-    const { body: stream, model } = await generateEvaluatedStory({
+    const options = {
       guard,
-      kind: "ending",
+      kind: "ending" as const,
       request: body,
-      context: validation.data,
+      context,
       system: systemPrompt,
       user: userPrompt,
-    });
-    await guard.logUsage({ model, kind: "ending" });
+    };
+    let stream: ReadableStream<Uint8Array>;
+    if (endingStreamVersion === 1) stream = generateEndingWithRecovery(options,context,req.signal);
+    else {
+      const result = await generateEvaluatedStory(options);
+      stream = result.body;
+      await guard.logUsage({model:result.model,kind:'ending'});
+    }
 
     return new Response(stream, {
       status: 200,

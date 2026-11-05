@@ -267,7 +267,8 @@ test('all generated text rejects em dashes, including escaped and split SSE payl
   const normalized = await new Response(exports.normalizeGeneratedStream(upstream)).text();
   assert.doesNotMatch(normalized, /\u2014|\\u2014/);
   assert.match(normalized, /Café, still/);
-  assert.match(normalized, /"error":"interrupted"/);
+  assert.match(normalized, /"code":"upstream"/);
+  assert.doesNotMatch(normalized, /interrupted/);
   assert.match(normalized, /data: \[DONE\]/);
 });
 
@@ -329,4 +330,50 @@ test('death overrides using Responses require a completed stream and pass low re
     if(ending==='response.completed')assert.equal((await request).text,'The grease-stained counter was empty.');
     else await assert.rejects(request,/stream|completion/i);
   }
+});
+
+
+test('streaming policy signals use typed safe errors on Responses and chat routes',async()=>{
+ const responses=[
+  {type:'response.incomplete',response:{incomplete_details:{reason:'content_filter'}}},
+  {type:'response.refusal.delta',delta:'private refusal'},
+  {type:'response.completed',response:{output:[{content:[{type:'refusal',refusal:'private'}]}]}},
+ ];
+ const chat=[
+  {choices:[{finish_reason:'content_filter'}]},
+  {choices:[{finish_reason:'stop',native_finish_reason:'SAFETY'}]},
+  {choices:[{delta:{refusal:'private refusal'}}]},
+  {promptFeedback:{blockReason:'PROHIBITED_CONTENT'}},
+ ];
+ for(const [model,events] of [['openai/test',responses],['google/test',chat]]){
+  for(const event of events){
+   let calls=0;const exports={};
+   new Function('require','exports','Deno','fetch',compile('../supabase/functions/_shared/aiGateway.ts'))(
+    ()=>({TEXT_MODEL_CANDIDATES:[model,'backup'],usesResponsesApi:m=>m.startsWith('openai/')}),exports,{env:{get:()=> 'key'}},
+    async()=>{calls++;return new Response('data: '+JSON.stringify(event)+'\n\n');},
+   );
+   const wire=await new Response((await exports.streamChat({system:'Original fiction',user:'Facts'})).body).text();
+   assert.equal(calls,1);assert.match(wire,/"code":"content_policy"/);assert.doesNotMatch(wire,/private/);
+  }
+ }
+});
+
+test('HTTP policy errors retain the rejected model for one same-model aftermath rewrite',async()=>{
+ const exports={};let calls=0;
+ new Function('require','exports','Deno','fetch',compile('../supabase/functions/_shared/aiGateway.ts'))(
+  ()=>({TEXT_MODEL_CANDIDATES:['openai/test','backup'],usesResponsesApi:()=>true}),exports,{env:{get:()=> 'key'}},
+  async()=>{calls++;return new Response('{"error":{"code":"content_filter","message":"private"}}',{status:400});},
+ );
+ await assert.rejects(exports.streamChat({system:'Original fiction',user:'Facts'}),error=>error.kind==='content_policy'&&error.model==='openai/test');
+ assert.equal(calls,1);
+});
+
+test('an access block is not mistaken for a content-policy rejection',async()=>{
+ const exports={};let calls=0;
+ new Function('require','exports','Deno','fetch',compile('../supabase/functions/_shared/aiGateway.ts'))(
+  ()=>({TEXT_MODEL_CANDIDATES:['openai/test','backup'],usesResponsesApi:()=>true}),exports,{env:{get:()=> 'key'}},
+  async()=>{calls++;return new Response('Client IP blocked: access denied',{status:403});},
+ );
+ await assert.rejects(exports.streamChat({system:'Original fiction',user:'Facts'}),error=>error.kind==='upstream');
+ assert.equal(calls,1);
 });

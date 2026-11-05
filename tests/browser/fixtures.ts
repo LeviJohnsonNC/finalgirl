@@ -106,7 +106,7 @@ export class ArchiveMock {
         if (name === 'generate-story'  || name === 'generate-ending') {
           if (this.failStory) return json({ error: 'Generation temporarily unavailable' }, 503);
           const text = name === 'generate-story' ? this.storyText : this.endingText;
-          return route.fulfill({ headers: cors, contentType: 'text/event-stream', body: 'data: ' + JSON.stringify({ choices: [{ delta: { content: text } }] }) + '\n\ndata: [DONE]\n\n' });
+          return route.fulfill({ headers: cors, contentType: 'text/event-stream', body: 'data: ' + JSON.stringify({ choices: [{ delta: { content: text } }] }) + '\n\ndata: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n' });
         }
         if (name === 'generate-visual-bible') return json({ visualBible: 'Cold moonlight and worn red cabins.' });
         if (name === 'generate-scene-image') {
