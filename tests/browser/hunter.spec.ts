@@ -101,6 +101,7 @@ test('legacy Hunter stays unrecorded through expansion; Rules search finds print
  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();expect(await readLog(page)).toHaveLength(2);
  await panel.locator('.hunter-recovery > summary').filter({hasText:'Record current Hunter state'}).click();
  await panel.getByRole('combobox',{name:'Current Hunter model',exact:true}).click();await page.getByRole('option',{name:'Mark X',exact:true}).click();
+ await panel.getByRole('combobox',{name:'Current Mark V state',exact:true}).click();await page.getByRole('option',{name:'Repaired Ally',exact:true}).click();await panel.getByRole('spinbutton',{name:'Ally Health',exact:true}).fill('2');
  await panel.getByRole('button',{name:'Record observed state',exact:true}).click();
  expect(summarizePlay(await readLog(page)).killerHealth).toBe(9);
  await panel.locator('summary').filter({hasText:'Record existing Parts'}).click();await panel.getByRole('button',{name:'Record carried Part',exact:true}).click();

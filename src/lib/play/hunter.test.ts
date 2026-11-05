@@ -67,7 +67,7 @@ describe('Hunter photographed mechanics',()=>{
  it('keeps independent Ally cooldowns, prohibits repeat use, and permanently destroys at zero',()=>{
   const s=session();s.act({command:'damage',value:6});s.act({command:'pickup',part:1});s.act({command:'repair',part:1,value:4});
   const attack=s.act({command:'use',action:'attack'});s.act({command:'use',action:'quick-move'});
-  expect(s.next({command:'use',action:'attack'})).toBeUndefined();expect(canUndoHunter(s.log,attack.id)).toBe(false);
+  expect(s.next({command:'use',action:'attack'})).toBeUndefined();expect(canUndoHunter(s.log,attack.id)).toBe(false);s.act({command:'pickup',part:3});s.act({command:'repair',part:3,value:1});expect(s.state().cooldowns.attack).toBe(2);
   s.act({command:'upkeep'});expect(s.state().cooldowns).toMatchObject({attack:1,'quick-move':0});
   s.act({command:'upkeep'});expect(s.state().cooldowns.attack).toBe(0);
   const destroy=s.act({command:'ally-health',value:0});expect(s.state().ally).toBe('destroyed');s.act({command:'pickup',part:2});
@@ -88,7 +88,7 @@ describe('Hunter photographed mechanics',()=>{
   expect(s.next({command:'force-mark-x'})).toBeUndefined();
   s.act({command:'recover',phase:'mark-v',remaining:2,countdown:2,ally:'unrepaired',health:0});expect(s.state().remaining).toBe(2);expect(summarizePlay(s.log).killerHealth).toBe(9);
  });
- it('does not overwrite old Mark X Health when recording a legacy model',()=>{const s=session(false);s.log.push(newPlayEvent({kind:'state',field:'killerHealth',value:9}));s.act({command:'recover',phase:'mark-x',remaining:0,countdown:0,ally:'unrepaired',health:0});expect(summarizePlay(s.log).killerHealth).toBe(9);s.act({command:'record-part',status:'backpack'});s.act({command:'repair',part:1,value:2});expect(s.state()).toMatchObject({ally:'alive',allyHealth:2});s.act({command:'cooldown',action:'attack',value:0});s.act({command:'use',action:'attack'});expect(s.state().cooldowns.attack).toBe(2);expect(summarizePlay(s.log).killerHealth).toBe(9);});
+ it('does not overwrite old Mark X Health when recording a legacy model',()=>{const s=session(false);s.log.push(newPlayEvent({kind:'state',field:'killerHealth',value:9}));s.act({command:'recover',phase:'mark-x',remaining:0,countdown:0,ally:'unrepaired',health:0});expect(summarizePlay(s.log).killerHealth).toBe(9);s.act({command:'record-part',status:'backpack'});s.act({command:'repair',part:1,value:2});expect(s.state()).toMatchObject({ally:'alive',allyHealth:2});expect(s.state().cooldowns.attack).toBe(0);s.act({command:'use',action:'attack'});expect(s.state().cooldowns.attack).toBe(2);expect(summarizePlay(s.log).killerHealth).toBe(9);});
  it('freezes each new death model at its raw log prefix; legacy signatures do not acquire Hunter state',async()=>{
   const s=session();const selection={killer:HUNTER,location:'Maple Lane',finalGirl:'Ginny'};
   const legacy=newPlayEvent({kind:'killed',quantity:1});s.log.push(legacy);

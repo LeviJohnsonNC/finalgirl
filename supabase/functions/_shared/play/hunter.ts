@@ -134,7 +134,7 @@ export function resolveHunterAction(a:HunterAction,fields:Fields,entries:readonl
  case 'pickup':{const p=s.parts.find(p=>p.id===a.part);if(!p||p.status!=='on-board')return;p.status='backpack';break;}
  case 'drop':{const p=s.parts.find(p=>p.id===a.part);if(!p||p.status!=='backpack')return;p.status='on-board';break;}
  case 'repair':{const p=s.parts.find(p=>p.id===a.part);if(!p||p.status!=='backpack'||s.phase==='mark-v'||s.ally==='destroyed'||s.ally==='unknown'||s.allyHealth===null||s.allyHealth+a.value+(power===HUNTER_POWERS[0].name?1:0)>99)return;
- p.status='installed';p.health=a.value;s.ally='alive';s.allyHealth+=a.value+(power===HUNTER_POWERS[0].name?1:0);break;}
+ const firstRepair=s.ally==='unrepaired';p.status='installed';p.health=a.value;s.ally='alive';if(firstRepair)s.cooldowns=Object.fromEntries(HUNTER_ACTIONS.map(a=>[a.id,0]));s.allyHealth+=a.value+(power===HUNTER_POWERS[0].name?1:0);break;}
  case 'ally-health':if(s.ally!=='alive'||a.value===s.allyHealth)return;s.allyHealth=a.value;if(!a.value)s.ally='destroyed';break;
  case 'destroy-ally':if(s.phase==='mark-v'||s.ally==='destroyed'||s.ally==='unknown')return;s.ally='destroyed';s.allyHealth=0;break;
  case 'cooldown':if(s.ally!=='alive'||s.cooldowns[a.action]!==null)return;s.cooldowns[a.action]=a.value;break;
