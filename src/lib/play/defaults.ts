@@ -24,6 +24,7 @@ export function playStartingValues(
   };
   if (killer === INTRUDERS) return {finalGirlHealth:getFinalGirlHealth(finalGirl),finalHorrorLevel:INTRUDER_HORROR,bloodlust:0};
   if (killer === WOLF) return { finalGirlHealth: getFinalGirlHealth(finalGirl), ...WOLF_SETUP };
+  if(killer==='The Hunter')return {finalGirlHealth:getFinalGirlHealth(finalGirl),killerHealth:15,finalHorrorLevel:5,bloodlust:0};
   if(killer==='The Tormentor')return {finalGirlHealth:getFinalGirlHealth(finalGirl),killerHealth:7,finalHorrorLevel:3,bloodlust:0};
   return {
     finalGirlHealth: getFinalGirlHealth(finalGirl),
