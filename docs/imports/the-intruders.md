@@ -80,3 +80,8 @@ Open physical-rule boundary: the supplied pages demonstrate the standard single 
 - Local lint/typecheck, 934 unit tests, 126 Node edge adapter tests, the asset manifest gate, the production build, and native Deno checks of the changed shared modules passed. Native full edge entrypoint checks require the CI network for remote imports. GitHub final-head checks are the release gate.
 - The reviewed opening JPEG is staged at `supabase/reference-assets/the-intruders.jpg`. Exact key `opening-references/the-intruders-b40605eafc7a3b77.jpg`. SHA-256 `b40605eafc7a3b77b625a123301e54af1c4d0cce9cf44b43b4eb76d31b340519`. Private Storage could not be verified here, so the manifest entry is intentionally inactive. After authorized upload and digest verification, enable the fixed entry and verify a live opening and Reshoot. The module requires no SQL migration.
 - The shared graph reaches `generate-story`, `generate-ending`, `generate-visual-bible`, `generate-scene-image`, `generate-death-scene`, and `narrate-story`. Deploy compatible edge functions before the frontend on release.
+
+
+### Play tracker follow-up
+
+Tap a living portrait to make that Intruder active. The active portrait occupies half the image area, and the other two share the second column. Health uses the standard tracker controls. Reducing an Intruder to zero exposes any necessary outcome choice in that moment. An already downed portrait can reopen its pending result. Release the Beast retains all-living-active behavior and lets the player choose whose health to edit.

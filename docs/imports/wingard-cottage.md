@@ -95,3 +95,8 @@ The frontend and the Edge functions that consume the changed shared Play graph n
 | `npx playwright test tests/browser/wingard-cottage.spec.ts` | Six Chromium journeys passed, covering the Workbench, legacy and failed-save recovery, Undo, reload, Events, death replay, and fresh casting through opening, ending, archive and Rules. Generation responses used the existing browser mocks. |
 | Neighboring module regression | 42 Cottage, Woods and Warehouse Chromium journeys passed in the preceding compiled visual run. |
 | Rendered photo review | Reviewed 1280 × 640, 1366 × 768, 1440 × 900, 390 × 844 and 320 × 568 Workbench captures and both device classes in the death dialog. Loaded photographs and controls were inspected after compacting sparse grids and preserving the selected death photo. |
+
+
+### Play presentation follow-up
+
+The Workbench has separate links for recording recipes and crafted items. Both use a picture picker. Recorded cards keep their wide size when crafted. The card face shows and updates limited uses. Trap placement remains an explicit spatial observation. Supply art distinguishes carried and available materials. Active people get wide color portraits, with separate saved and non-graphic killed images. The Scooter and Getting Resourceful share the compact event tile proportions. The photo manifest now covers 51 sources and 102 bounded derivatives.

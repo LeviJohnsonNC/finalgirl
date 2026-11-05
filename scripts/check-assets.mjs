@@ -316,6 +316,9 @@ const wingardExpected=[
   'header','tools','nails','rope','wood','snare','slingshot','nail-bat','spear','disemboweler','nail-trap','nailgun',
   'sawed-off','porcupine','obliterator','snare-set','nail-trap-set','outsider','boyfriend','neighbor',
   'resourceful','alarm','alarm-active','scooter','scooter-with-you','boat','my-house','happening','random-attack','booby-traps','escape',
+  ...['tools','nails','rope','wood'].map(id=>id+'-held'),
+  ...['snare','slingshot','nail-bat','spear','disemboweler','nail-trap','nailgun','sawed-off','porcupine','obliterator'].map(id=>id+'-blueprint'),
+  ...['outsider','boyfriend','neighbor'].flatMap(id=>[id+'-saved',id+'-killed']),
 ];
 if(Object.keys(wingardManifest).length!==wingardExpected.length ||
   new Set(Object.values(wingardManifest).map(photo=>photo.sourceSha256)).size!==wingardExpected.length) {

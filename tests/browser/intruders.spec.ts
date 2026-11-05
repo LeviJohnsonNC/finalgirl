@@ -4,7 +4,7 @@ import {newPlayEvent,summarizePlay,validPlayLog,type PlayEvent} from '../../src/
 import {moduleState} from '../../src/lib/play/modules';
 const storageKey=`final-girl-active-game-v1:${userId}`;
 
-test('Intruders worked example, separate portrait focus, loaded artwork and finish',async({page,archive},info)=>{
+test('Intruders worked example, direct portrait activation, loaded artwork and finish',async({page,archive},info)=>{
   test.setTimeout(90000);
   archive.aiCastingArt=true;
   archive.autoImages=true;
@@ -15,33 +15,31 @@ test('Intruders worked example, separate portrait focus, loaded artwork and fini
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   const roster=page.getByRole('group',{name:'Intruder Killer Health tracker'});
   await expect(roster.getByText('6 HP',{exact:true})).toHaveCount(3);
-  await expect(roster.getByRole('button',{name:'View Trish health'})).toHaveAttribute('data-active','true');
-  await roster.getByRole('button',{name:'View Baghead health'}).click();
-  await expect(roster.getByRole('button',{name:'View Trish health'})).toHaveAttribute('data-active','true');
-  await roster.getByRole('button',{name:'Set Baghead active'}).click();
-  await expect(roster.getByRole('button',{name:'View Baghead health'})).toHaveAttribute('data-active','true');
-  await roster.getByRole('button',{name:'View Trish health'}).click();
-  await roster.getByRole('button',{name:'Set Trish active'}).click();
+  await expect(roster.getByRole('button',{name:'Trish',exact:true})).toHaveAttribute('data-active','true');
+  await roster.getByRole('button',{name:'Baghead',exact:true}).click();
+  await expect(roster.getByRole('button',{name:'Baghead',exact:true})).toHaveAttribute('data-active','true');
+  expect(await roster.getByRole('button',{name:'Baghead',exact:true}).evaluate(button=>button.getBoundingClientRect().height))
+    .toBeGreaterThan(await roster.getByRole('button',{name:'Trish',exact:true}).evaluate(button=>button.getBoundingClientRect().height));
+  await roster.getByRole('button',{name:'Trish',exact:true}).click();
   await roster.getByRole('button',{name:'Edit Trish health'}).click();
   await roster.getByRole('spinbutton',{name:'Set Trish health'}).fill('1');
   await roster.getByRole('button',{name:'Set',exact:true}).click();
   await expect(roster.getByText('+1 Horror die')).toBeVisible();
-  await roster.getByText('Final Health',{exact:true}).click();
-  await roster.getByRole('button',{name:'Mark down'}).click();
-  await expect(roster.getByText('Awaiting Final Health')).toBeVisible();
-  await expect(roster.getByRole('button',{name:'View Baghead health'})).toHaveAttribute('data-active','true');
-  await roster.getByRole('button',{name:'Shift Active Killer up'}).click();
-  await expect(roster.getByRole('button',{name:'View Zeke health'})).toHaveAttribute('data-active','true');
-  await roster.getByRole('button',{name:'Shift Active Killer up'}).click();
-  await expect(roster.getByRole('button',{name:'View Baghead health'})).toHaveAttribute('data-active','true');
-  await roster.getByRole('combobox',{name:'Resolve Trish Final Health'}).click();
+  await roster.getByRole('button',{name:'Decrease Trish health'}).click();
+  await expect(roster.getByRole('button',{name:'Trish',exact:true})).toContainText('Down');
+  await expect(roster.getByRole('button',{name:'Baghead',exact:true})).toHaveAttribute('data-active','true');
+  await roster.getByRole('button',{name:'Zeke',exact:true}).click();
+  await expect(roster.getByRole('button',{name:'Zeke',exact:true})).toHaveAttribute('data-active','true');
+  await roster.getByRole('button',{name:'Trish',exact:true}).click();
+  await roster.getByRole('combobox',{name:'Resolve Trish at zero health'}).click();
   await page.getByRole('option',{name:'Blank · confirm death',exact:true}).click();
-  await expect(roster.getByRole('button',{name:'View Trish health'})).toContainText('Dead');
+  await expect(roster.getByRole('button',{name:'Trish',exact:true})).toContainText('Dead');
   await undoLatestObservation(page);
-  await expect(roster.getByRole('combobox',{name:'Resolve Trish Final Health'})).toBeVisible();
-  await roster.getByRole('combobox',{name:'Resolve Trish Final Health'}).click();
+  await roster.getByRole('button',{name:'Trish',exact:true}).click();
+  await expect(roster.getByRole('combobox',{name:'Resolve Trish at zero health'})).toBeVisible();
+  await roster.getByRole('combobox',{name:'Resolve Trish at zero health'}).click();
   await page.getByRole('option',{name:'Returns with 2 HP',exact:true}).click();
-  await expect(roster.getByRole('button',{name:'View Trish health'})).toContainText('2 HP');
+  await expect(roster.getByRole('button',{name:'Trish',exact:true})).toContainText('2 HP');
   await openModule(page,'intruders');
   const panel=page.locator('.play-module-panel[data-module="intruders"]');
   await panel.locator('details.module-card-section > summary').click();
@@ -110,7 +108,7 @@ test('legacy Intruders save retains the scalar history and starts with unrecorde
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   const roster=page.getByRole('group',{name:'Intruder Killer Health tracker'});
   await expect(roster.getByText('? HP',{exact:true})).toHaveCount(3);
-  await expect(roster.getByText('Active Killer unrecorded',{exact:true})).toBeVisible();
+  await expect(roster.locator('button[aria-pressed=true]')).toHaveCount(0);
   const log:PlayEvent[]=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents,storageKey);
   expect(summarizePlay(log).killerHealth).toBe(9);
   expect(log).toHaveLength(2);
@@ -123,7 +121,6 @@ test('mixed-location death attribution, retry and cached playback use the record
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   const roster=page.getByRole('group',{name:'Intruder Killer Health tracker'});
   await expect(roster.getByText('6 HP',{exact:true})).toHaveCount(3);
-  await roster.getByRole('button',{name:'View Baghead health'}).click();
   await page.evaluate(()=>{
     const prior=Storage.prototype.setItem;
     Object.assign(window,{restoreIntruderStorage:()=>{Storage.prototype.setItem=prior;}});
@@ -132,12 +129,12 @@ test('mixed-location death attribution, retry and cached playback use the record
       prior.call(this,key,value);
     };
   });
-  await roster.getByRole('button',{name:'Set Baghead active'}).click();
+  await roster.getByRole('button',{name:'Baghead',exact:true}).click();
   await expect(roster.getByRole('alert')).toContainText('could not be saved');
-  await expect(roster.getByRole('button',{name:'View Trish health'})).toHaveAttribute('data-active','true');
+  await expect(roster.getByRole('button',{name:'Trish',exact:true})).toHaveAttribute('data-active','true');
   await page.evaluate(()=>(window as unknown as {restoreIntruderStorage:()=>void}).restoreIntruderStorage());
-  await roster.getByRole('button',{name:'Set Baghead active'}).click();
-  await expect(roster.getByRole('button',{name:'View Baghead health'})).toHaveAttribute('data-active','true');
+  await roster.getByRole('button',{name:'Baghead',exact:true}).click();
+  await expect(roster.getByRole('button',{name:'Baghead',exact:true})).toHaveAttribute('data-active','true');
 
   await page.getByRole('button',{name:'Record one victim killed',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'Gruesome Death',exact:true});
@@ -151,7 +148,7 @@ test('mixed-location death attribution, retry and cached playback use the record
   const log:PlayEvent[]=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents,storageKey);
   expect(log).toContainEqual(expect.objectContaining({kind:'killed',intruderReference:true}));
   expect(log).toContainEqual(expect.objectContaining({kind:'details',attacker:'Zeke'}));
-  await roster.getByRole('button',{name:'Shift Active Killer down'}).click();
+  await roster.getByRole('button',{name:'Zeke',exact:true}).click();
   await page.getByRole('button',{name:'Latest death scene',exact:true}).click();
   await expect(dialog.getByRole('region',{name:'Generated death scene'})).toContainText(archive.deathText);
   expect(archive.calls.filter(name=>name==='generate-death-scene')).toHaveLength(1);
