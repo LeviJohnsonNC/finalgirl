@@ -367,3 +367,13 @@ test('HTTP policy errors retain the rejected model for one same-model aftermath 
  await assert.rejects(exports.streamChat({system:'Original fiction',user:'Facts'}),error=>error.kind==='content_policy'&&error.model==='openai/test');
  assert.equal(calls,1);
 });
+
+test('an access block is not mistaken for a content-policy rejection',async()=>{
+ const exports={};let calls=0;
+ new Function('require','exports','Deno','fetch',compile('../supabase/functions/_shared/aiGateway.ts'))(
+  ()=>({TEXT_MODEL_CANDIDATES:['openai/test','backup'],usesResponsesApi:()=>true}),exports,{env:{get:()=> 'key'}},
+  async()=>{calls++;return new Response('Client IP blocked: access denied',{status:403});},
+ );
+ await assert.rejects(exports.streamChat({system:'Original fiction',user:'Facts'}),error=>error.kind==='upstream');
+ assert.equal(calls,1);
+});

@@ -79,7 +79,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const classify = (status: number, body: string): GatewayError => {
   if (status === 429) return new GatewayError("rate_limit", "Gateway rate limit", 429);
   if (status === 402) return new GatewayError("credits", "AI credits depleted", 402);
-  if ([400, 403, 422].includes(status) && /safety|content.?polic|content_filter|blocked/i.test(body)) {
+  if ([400, 403, 422].includes(status) && /safety|content.?polic|content_filter|prohibited_content/i.test(body)) {
     return new GatewayError("content_policy", "Prompt rejected by content policy", 400);
   }
   if (status === 404 || (status === 400 && /model/i.test(body))) {
