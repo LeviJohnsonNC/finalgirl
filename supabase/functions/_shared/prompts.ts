@@ -1,3 +1,4 @@
+import { INTRUDERS, INTRUDER_VISUAL } from "./play/intruders.ts";
 import {marrekOpeningGuidance,type MarrekOpening} from './play/marrekWarehouse.ts';
 import {tormentorOpeningGuidance,type TormentorOpening} from './play/tormentor.ts';
 import { WOLF, WOLF_VISUAL } from './play/bigBadWolf.ts';
@@ -33,7 +34,7 @@ export interface SceneContext {
 const block = (label: string, value?: string): string => value ? `\n${label}:\n${value}\n` : '';
 const isPoster = (ctx: SceneContext): boolean => ctx.sceneType ? ctx.sceneType === 'ending' : Boolean(ctx.outcome);
 const cast = (ctx: SceneContext): string => `FINAL GIRL: ${ctx.finalGirl}: ${resolveFinalGirlIdentity(ctx.finalGirl, ctx.finalGirlDescription) || 'Appearance unrecorded; do not substitute a famous character.'}
-THREAT: ${ctx.killer}: ${(ctx.killer === 'Grimlash' ? GRIMLASH_VISUAL : ctx.killer === WOLF ? WOLF_VISUAL : ctx.killerDescription) || 'Appearance unrecorded; follow established story facts.'}
+THREAT: ${ctx.killer}: ${(ctx.killer === INTRUDERS ? INTRUDER_VISUAL : ctx.killer === 'Grimlash' ? GRIMLASH_VISUAL : ctx.killer === WOLF ? WOLF_VISUAL : ctx.killerDescription) || 'Appearance unrecorded; follow established story facts.'}
 LOCATION: ${ctx.location}: ${ctx.locationDescription || 'Use the selected location, not the killer\'s home setting.'}`;
 const facts = (ctx: SceneContext): string => `${cast(ctx)}
 ${!isPoster(ctx)&&ctx.location==='Marrek Warehouse'?marrekOpeningGuidance(ctx.marrekOpening??'legacy-unknown'):''}
@@ -79,6 +80,7 @@ function visualContinuity(ctx: SceneContext): string | undefined {
   return JSON.stringify({ ...JSON.parse(parsed),
     ...(reviewedFinalGirlIdentity(ctx.finalGirl) ? { finalGirl: 'Use the current named cast identity above.' } : {}),
     ...(ctx.killer === 'Grimlash' ? { killer: 'Use the current approved full-pumpkin Grimlash identity above.' } : {}),
+    ...(ctx.killer === INTRUDERS ? { killer: 'Use the three distinct Intruder identities above.' } : {}),
     ...(ctx.killer === WOLF ? { killer: 'Use the current arrow-studded Wolf identity above.' } : {}),
   });
 }

@@ -1,3 +1,4 @@
+import { INTRUDER_VISUAL } from "./play/intruders.ts";
 import { WOODS_VISUAL } from "./play/storybookWoods.ts";
 import { GROVES_VISUAL } from "./play/groves.ts";
 import { INKANYAMBA_VISUAL } from "./play/inkanyamba.ts";
@@ -32,8 +33,7 @@ export const DEATH_KILLER_CUES: Record<string, string> = {
     "A grotesque, humanoid monstrosity standing roughly seven feet tall, with a massive, mutated physique that suggests a horrifying biological transformation. Its skin is a sickly, pale yellow-green, covered in weeping pustules, bulging cysts, and raw, red muscle tissue. The creature's most striking feature is a secondary, vertical maw splitting open its entire torso, lined with jagged, uneven teeth and filled with glistening, visceral gore. From its head and back, several slick, dark tentacles and fleshy, wing-like appendages protrude, writhing in the cold air.",
   'Big Bad Wolf':
     'A massive, heavily muscled grey wolf with a formidable and menacing presence. Its thick, matted coat is a mix of charcoal, slate grey, and muddy brown, heavily stained with dark, viscous blood. The wolf is riddled with several wooden arrows protruding at jagged angles from its shoulders, back, and forelimbs, indicating a state of severe injury that has only fueled its ferocity. Its face is contorted into a visceral snarl, with the upper lip curled back to expose long, sharp canines and pale gums. The most striking feature is its eyes—luminous, glowing red orbs that pierce through the gloom with an unnatural, predatory intensity.',
-  'The Intruders':
-    'A trio of menacing figures stands in a suburban street at night, projecting a predatory and cult-like presence. The group consists of three individuals of varying builds, each concealing their identity with disturbing, makeshift masks that suggest a ritualistic or horror-themed motivation. Their skin is mostly obscured, but their physical stances are aggressive and confrontational. The central figure is a woman with long, dark, tangled hair wearing a bleached deer skull with prominent antlers as a mask. She has an athletic build and holds a large felling axe with both hands.',
+  'The Intruders': INTRUDER_VISUAL,
   Slayer:
     'A menacing, humanoid reptilian creature with a powerful, athletic build and a highly aggressive, supernatural presence. It has thick, moss-green scaly skin that appears calcified and deeply textured, resembling cracked stone or aged bark. Its face is gaunt and skull-like, with a recessed nose and a grimacing mouth that reveals sharp, predatory teeth. The most prominent feature is its large, intensely glowing neon-blue eyes that radiate a brilliant, piercing light. Arcs of electric-blue lightning crackle violently across its chest and down its heavily muscled arms, terminating in sharp, three-fingered claws.',
   Birds:

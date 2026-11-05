@@ -1,3 +1,4 @@
+import { INTRUDER_VISUAL } from "@/lib/play/intruders";
 import { WOLF_VISUAL } from "@/lib/play/bigBadWolf";
 import {TORMENTOR_VISUAL} from '../../supabase/functions/_shared/play/tormentor';
 import {GRIMLASH_VISUAL} from '../../supabase/functions/_shared/play/grimlash';
@@ -61,15 +62,7 @@ The beast is hunched in a defensive yet aggressive stance amidst a blinding whit
   'Big Bad Wolf': WOLF_VISUAL,
 
   // A Knock at the Door
-  'The Intruders': `A trio of menacing figures stands in a suburban street at night, projecting a predatory and cult-like presence. The group consists of three individuals of varying builds, each concealing their identity with disturbing, makeshift masks that suggest a ritualistic or horror-themed motivation. Their skin is mostly obscured, but their physical stances are aggressive and confrontational.
-
-The central figure is a woman with long, dark, tangled hair wearing a bleached deer skull with prominent antlers as a mask. She has an athletic build and holds a large felling axe with both hands. She wears a tan tank top and has a dark sweater tied around her waist.
-
-To her left is a leaner man wearing a white, jagged-toothed "slasher" mask. He is dressed in a rugged denim jacket over a tan t-shirt and light-wash jeans, clutching a large hunting knife.
-
-To her right is a tall, broad-shouldered man wearing a burlap sack mask with crudely cut eye holes and a noose tied around the neck. He wears a heavy blue-and-tan plaid flannel shirt and dark jeans, holding a wooden club or bat.
-
-The clothing is practical and everyday—denim, flannel, and cotton—but appears worn and utilitarian. The expression of the group is unreadable due to the masks, but their collective body language is intimidating and predatory.`,
+  'The Intruders': INTRUDER_VISUAL,
 
   // The Falconwood Files
   'Slayer': `A menacing, humanoid reptilian creature with a powerful, athletic build and a highly aggressive, supernatural presence. It has thick, moss-green scaly skin that appears calcified and deeply textured, resembling cracked stone or aged bark. Its face is gaunt and skull-like, with a recessed nose and a grimacing mouth that reveals sharp, predatory teeth. The most prominent feature is its large, intensely glowing neon-blue eyes that radiate a brilliant, piercing light.

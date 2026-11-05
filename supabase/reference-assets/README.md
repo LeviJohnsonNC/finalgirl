@@ -13,3 +13,7 @@ Before deploying the new image/reference consumers, upload these exact bytes to 
 ## Big Bad Wolf
 
 `big-bad-wolf.jpg` is the exact JPEG derivative of the retained photographic identity. Its fixed key is `opening-references/big-bad-wolf-17a24c1b9e0f9fc3.jpg`, SHA-256 `17a24c1b9e0f9fc32f0fd7343c441fb7a76c1e9041c0bf9a6efc1299d4e3e612`. Upload to the private bucket and verify the retrieved bytes before deploying the updated scene-image manifest. See the [Wolf import record](../../docs/imports/big-bad-wolf.md) for the function rollout.
+
+## The Intruders
+
+`the-intruders.jpg` is staged from the approved trio casting portrait at `src/assets/casting-killers/the-intruders.webp`. The reserved private object is `opening-references/the-intruders-b40605eafc7a3b77.jpg`, with SHA-256 `b40605eafc7a3b77b625a123301e54af1c4d0cce9cf44b43b4eb76d31b340519`. The manifest entry remains inactive until the private object has been uploaded and its downloaded digest verified. Use this single group reference alongside the selected Final Girl when the scene calls for the Intruders.

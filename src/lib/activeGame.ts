@@ -27,6 +27,7 @@ export interface ActiveGame {
   marrekSetupVersion?: 1;
   tormentorSetupVersion?: 1;
   wolfSetupVersion?: 1;
+  intrudersSetupVersion?: 1;
   shadySetupVersion?: 1;
   grimlashSetupVersion?: 1;
   evomorphSetupVersion?: 1;
@@ -68,6 +69,7 @@ export function isActiveGame(value: unknown): value is ActiveGame {
       (game.woodsSetupVersion !== 1 || initialWoods(game.selection?.startingEvent)?.snapshot !== event.moduleData.changes?.snapshot))) return false;
   if(game.marrekSetupVersion!==undefined&&game.marrekSetupVersion!==1)return false;
   if(game.selection?.location!=='Marrek Warehouse'&&Array.isArray(game.playEvents)&&game.playEvents.some(e=>e.moduleData?.module==='marrek'))return false;
+  if (game.intrudersSetupVersion !== undefined && (game.intrudersSetupVersion !== 1 || game.selection?.killer !== "The Intruders")) return false;
   if (game.wolfSetupVersion !== undefined && (game.wolfSetupVersion !== 1 || game.selection?.killer !== "Big Bad Wolf")) return false;
   if (game.selection?.killer !== "Big Bad Wolf" && Array.isArray(game.playEvents) && game.playEvents.some(e => e?.moduleData?.module === "big-bad-wolf" || e?.wolfReference)) return false;
   if(game.tormentorSetupVersion!==undefined&&game.tormentorSetupVersion!==1)return false;

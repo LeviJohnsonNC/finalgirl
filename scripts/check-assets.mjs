@@ -269,3 +269,43 @@ if (woodsExpected.size || woodsFiles.size !== 22 || woodsRuntime.length !== wood
   throw new Error('Incomplete Storybook Woods runtime artwork mapping');
 }
 console.log('Verified 22 original Storybook Woods photographs with bounded derivatives and complete surface mapping.');
+
+const intruderFolder = 'src/assets/play/photos/intruders';
+const intruderCatalog = readFileSync('supabase/functions/_shared/play/intruders.ts', 'utf8');
+const intruderExpected = new Set(['header', ...[...intruderCatalog.matchAll(/\{id:'([a-z0-9-]+)',\s*name:/g)].map(match => match[1])]);
+const terrorIds = new Set([...intruderCatalog.matchAll(/\{id:'([a-z0-9-]+)',name:[^\n]+quantity:/g)].map(match => match[1]));
+const intruderPortraits = new Set(['trish','baghead','zeke']);
+const intruderPhotos = JSON.parse(readFileSync(join(intruderFolder, 'manifest.json'), 'utf8'));
+const intruderFiles = new Set();
+const intruderOriginals = new Set(intruderPhotos.map(photo => photo.originalSha256));
+if (intruderExpected.size !== 22 || intruderPhotos.length !== 22 || intruderOriginals.size !== 22) {
+  throw new Error('Incomplete or reused Intruder photography');
+}
+for (const photo of intruderPhotos) {
+  if (!intruderExpected.delete(photo.id) || !/^exec-[a-f0-9-]+\.png$/.test(photo.source) ||
+      !/^[a-f0-9]{64}$/.test(photo.originalSha256) ||
+      photo.width > photo.nativeWidth || photo.height > photo.nativeHeight) {
+    throw new Error('Invalid Intruder source: ' + photo.id);
+  }
+  const banner = photo.id === 'header';
+  const portrait = intruderPortraits.has(photo.id);
+  const thumb = !banner && !portrait && !terrorIds.has(photo.id);
+  if (thumb !== !!photo.thumbnail) throw new Error('Unexpected Intruder thumbnail mapping: ' + photo.id);
+  const variants = [{...photo, expected:banner?'src/assets/play/banners/intruders.webp':join(intruderFolder,photo.id+'.webp'),
+    dimensions:banner?[photo.width,photo.height]:portrait?[360,540]:[864,486], budget:160}];
+  if (thumb) variants.push({...photo.thumbnail,expected:join(intruderFolder,photo.id+'-thumb.webp'),dimensions:[288,162],budget:35});
+  for (const {file,expected,width,height,dimensions,budget,bytes,sha256} of variants) {
+    const source=readFileSync(file);
+    const [w,h]=konradWebpDimensions(source);
+    if (file!==expected||intruderFiles.has(file)||w!==width||h!==height||w!==dimensions[0]||h!==dimensions[1]||
+        source.length!==bytes||bytes>budget*1024||createHash('sha256').update(source).digest('hex')!==sha256) {
+      throw new Error('Invalid Intruder derivative: ' + file);
+    }
+    intruderFiles.add(file);
+  }
+}
+if (intruderExpected.size || intruderFiles.size !== 31 ||
+    images.some(file => file.startsWith(intruderFolder+'/') && !intruderFiles.has(file))) {
+  throw new Error('Unmapped Intruder runtime photograph');
+}
+console.log('Verified 22 independent Intruder photographs and 9 choice thumbnails.');

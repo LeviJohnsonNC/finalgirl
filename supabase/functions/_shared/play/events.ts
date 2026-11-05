@@ -1,6 +1,7 @@
 import { fitStoryFacts, fitStoryText } from './storyText.ts';
 import { storyTransitions } from './storyTransitions.ts';
 import { WOODS_MODULE, describeWoodsAction, isInitialWoods, resolveWoodsAction, validWoodsAction, woodsParent, type WoodsAction } from "./storybookWoods.ts";
+import { INTRUDER_MODULE, initialIntruders, intruderParent, resolveIntruderAction, sameIntruderChanges, validIntruderAction, type IntruderAction } from "./intruders.ts";
 import { wolfPowerMode, type WolfMode } from "./bigBadWolf.ts";
 import {resolveMarrekAction,validMarrekAction,isInitialMarrek,marrekParent,type MarrekAction} from './marrekWarehouse.ts';
 import {resolveTormentorAction,validTormentorAction,isInitialTormentor,tormentorParent,serializeTormentor,parseTormentor,type TormentorAction} from './tormentor.ts';
@@ -84,6 +85,8 @@ export interface PlayDetails {
   killerCard?: string;
 }
 export interface PlayEvent extends PlayDetails {
+  intruderAction?: IntruderAction;
+  intruderReference?: true;
   woodsAction?: WoodsAction;
   marrekAction?: MarrekAction;
   shadyAction?: ShadyAction;
@@ -129,7 +132,7 @@ export interface PlaySummary {
   killerHealthTracking?: boolean;
   finalHorrorLevel?: number;
   bloodlust?: number;
-  entries: Array<PlayEvent & { currentRound: number | null; wolfPowerMode?: WolfMode }>;
+  entries: Array<PlayEvent & { currentRound: number | null; wolfPowerMode?: WolfMode; intruderFinale?: string; intruderPower?: string }>;
   inactive: Set<string>;
 }
 const uuid =
@@ -162,6 +165,11 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if (e.intruderReference !== undefined && (e.kind !== 'killed' || e.intruderReference !== true)) return false;
+  if (e.intruderAction !== undefined && (e.kind !== 'module' || e.moduleData?.module !== INTRUDER_MODULE || !validIntruderAction(e.intruderAction))) return false;
+  if (e.moduleData?.module === INTRUDER_MODULE &&
+      (e.kind !== 'module' || !validModuleObservation(e.moduleData) ||
+       (!e.intruderAction && !sameIntruderChanges(e.moduleData.changes, initialIntruders())))) return false;
   if (e.woodsAction !== undefined && (e.kind !== "module" || e.moduleData?.module !== WOODS_MODULE || !validWoodsAction(e.woodsAction))) return false;
   if (e.moduleData?.module === WOODS_MODULE && (e.kind !== "module" || !validModuleObservation(e.moduleData) || (!e.woodsAction && !isInitialWoods(e.moduleData.changes)))) return false;
   if(e.marrekAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='marrek'||!validMarrekAction(e.marrekAction)))return false;
@@ -252,9 +260,37 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validWoodsHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validIntruderHistory(log) && validWoodsHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
+}
+export function canUndoIntruder(log:readonly PlayEvent[],target:string) {
+  const original=log.find(e=>e.id===target);
+  return original?.moduleData?.module!==INTRUDER_MODULE ||
+    !!original.intruderAction && intruderParent(summarizePlay(log).entries)===target;
+}
+export function validIntruderHistory(log:readonly PlayEvent[]) {
+  if (!log.some(e=>e.moduleData?.module===INTRUDER_MODULE)) return true;
+  for (const [index,event] of log.entries()) {
+    const target = event.kind==='undo'||event.kind==='restore' ? log.find(e=>e.id===event.target) : undefined;
+    if (event.moduleData?.module!==INTRUDER_MODULE && target?.moduleData?.module!==INTRUDER_MODULE) continue;
+    const prefix=log.slice(0,index);
+    const entries=summarizePlay(prefix).entries;
+    if (target) {
+      if (!prefix.includes(target) || !target.intruderAction) return false;
+      if (event.kind==='undo' && intruderParent(entries)!==target.id) return false;
+      if (event.kind==='restore') {
+        const restored=resolveIntruderAction(target.intruderAction,moduleState(entries,INTRUDER_MODULE),entries);
+        if (!restored||!sameIntruderChanges(restored,target.moduleData!.changes)) return false;
+      }
+    } else if (!event.intruderAction) {
+      if (prefix.some(e=>e.moduleData?.module===INTRUDER_MODULE) || !sameIntruderChanges(event.moduleData!.changes,initialIntruders())) return false;
+    } else {
+      const changes=resolveIntruderAction(event.intruderAction,moduleState(entries,INTRUDER_MODULE),entries);
+      if (!changes || !sameIntruderChanges(changes,event.moduleData!.changes)) return false;
+    }
+  }
+  return true;
 }
 function validWoodsHistory(log: readonly PlayEvent[]) {
   if (!log.some(event => event.moduleData?.module === WOODS_MODULE)) return true;
@@ -442,7 +478,11 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     if(original.moduleData?.module==='shady-acres'&&original.shadyAction&&!resolveShadyAction(original.shadyAction,moduleState(summary.entries,'shady-acres'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='grimlash'&&original.grimlashAction&&!resolveGrimlashAction(original.grimlashAction,moduleState(summary.entries,'grimlash'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='evomorph'&&original.evomorphAction&&!resolveEvomorphAction(original.evomorphAction,moduleState(summary.entries,'evomorph'),summary.entries)){summary.inactive.add(original.id);continue;}
-    const e: PlayEvent & { wolfPowerMode?: WolfMode } = { ...original };
+    const e: PlaySummary['entries'][number] = { ...original, currentRound: summary.round };
+    delete e.intruderFinale;
+    delete e.intruderPower;
+    const intruderReveal = e.kind==='moment' && (e.momentType==='finale' ? 'intruderFinale' : e.momentType==='dark-power' ? 'intruderPower' : undefined);
+    if (intruderReveal && e.killerCard) e[intruderReveal]=e.killerCard;
     // This field exists only in the derived summary. Read mode from card names,
     // even when an unversioned or externally supplied log carries extra fields.
     delete e.wolfPowerMode;
@@ -468,6 +508,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
             if (edit.detail !== undefined) e.detail = edit.detail;
             if (edit.killerCard !== undefined) {
               e.killerCard = edit.killerCard;
+              if (intruderReveal && edit.killerCard) e[intruderReveal]=edit.killerCard;
               // A clear changes the label alone. Retain the last known mode on
               // this reveal and recompute it from the accepted log on replay.
               if (wolfReveal && edit.killerCard) {

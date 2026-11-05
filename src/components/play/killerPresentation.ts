@@ -1,3 +1,5 @@
+import { INTRUDERS, INTRUDER_POWERS, INTRUDER_FINALES } from "@/lib/play/intruders";
+import { intruderArt } from "./intruderArt";
 import { WOLF, WOLF_POWERS, WOLF_FINALES } from "@/lib/play/bigBadWolf";
 import { wolfArt } from "./wolfArt";
 import {TORMENTOR_POWERS,TORMENTOR_FINALES} from '@/lib/play/tormentor';
@@ -62,6 +64,9 @@ export function illustratedKillerCards(
   type: "dark-power" | "finale",
 ): IllustratedKillerCard[] {
   const power = type === "dark-power";
+  if (killer===INTRUDERS) return [...(power?INTRUDER_POWERS:INTRUDER_FINALES)]
+    .map(card=>({...card,art:intruderArt(card.id,true),heroArt:intruderArt(card.id)}))
+    .sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === WOLF) {
     return [...(power ? WOLF_POWERS : WOLF_FINALES)]
       .map(card => ({ ...card, art: wolfArt(card.id, true), heroArt: wolfArt(card.id) }))

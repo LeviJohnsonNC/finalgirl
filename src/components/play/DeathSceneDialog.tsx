@@ -1,3 +1,6 @@
+import { INTRUDERS, INTRUDER_ROSTER, INTRUDER_TERRORS } from "@/lib/play/intruders";
+import { intruderArt } from "./intruderArt";
+import { PlaySelect } from "./PlaySelect";
 import { WOODS, woodsMoonSpace } from "../../../supabase/functions/_shared/play/storybookWoods";
 import { woodsArt } from "./woodsArt";
 import { WOLF, WOLF_TERRORS } from "@/lib/play/bigBadWolf";
@@ -333,7 +336,11 @@ const {characterImages}=useActiveImages();
                     }
                   }}
                 >
-                  {selection.killer === WOLF && cause === "killer" ? <ModuleArtwork art={wolfPortrait} />
+                  {selection.killer===INTRUDERS&&cause==='killer'
+                    ? <ModuleArtwork art={intruderArt(INTRUDER_ROSTER.find(p=>p.name===values.attacker)?.id??'header')} />
+                    : selection.killer===INTRUDERS&&cause==='terror'&&INTRUDER_TERRORS.some(c=>c.name===values.terrorCard)
+                      ? <ModuleArtwork art={intruderArt(INTRUDER_TERRORS.find(c=>c.name===values.terrorCard)!.id)} />
+                    : selection.killer === WOLF && cause === "killer" ? <ModuleArtwork art={wolfPortrait} />
                     : cause === "terror" && wolfTerror
                       ? <ModuleArtwork art={wolfArt(wolfTerror.id)} />
                       : cause === "event" && piperCause
@@ -352,6 +359,12 @@ const {characterImages}=useActiveImages();
           </div>}
           {!reading && values.cause !== "unspecified" && (
             <div className="play-death-fields">
+              {selection.killer===INTRUDERS&&(values.cause==='killer'||values.cause==='terror')&&(
+                <label>Who attacked? <PlaySelect aria-label="Death attacker" value={INTRUDER_ROSTER.some(p=>p.name===values.attacker)?values.attacker:''} onChange={event=>update('attacker',event.target.value)}>
+                  <option value="">Unknown</option>
+                  {INTRUDER_ROSTER.map(p=><option key={p.id} value={p.name}>{p.name}</option>)}
+                </PlaySelect></label>
+              )}
               {values.cause === "minion" && (
                 <label>
                   Who attacked?

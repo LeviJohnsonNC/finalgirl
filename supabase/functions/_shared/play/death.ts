@@ -6,6 +6,7 @@ import {
   type PlayEvent,
 } from "./events.ts";
 import { moduleContext, moduleState } from "./modules.ts";
+import { INTRUDERS, INTRUDER_MODULE, INTRUDER_ROSTER } from "./intruders.ts";
 import { WOLF } from "./bigBadWolf.ts";
 // The browser also budgets for up to 20 seconds of cloud sync plus endpoint
 // authorization, claiming and persistence. These are ceilings, not delays.
@@ -22,6 +23,7 @@ export function deathFacts(
   eventId: string,
 ) {
   if(!validPlayLog(events))return null;
+  if (selection.killer!==INTRUDERS && events.some(e=>e.moduleData?.module===INTRUDER_MODULE||e.intruderReference)) return null;
   if (selection.killer !== WOLF && events.some(e => e.moduleData?.module === "big-bad-wolf" || e.wolfReference)) return null;
   if (selection.location !== WOODS && events.some(event => event.moduleData?.module === WOODS_MODULE || event.woodsReference)) return null;
   if(selection.location!=='Marrek Warehouse'&&events.some(e=>e.moduleData?.module==='marrek'))return null;
@@ -37,7 +39,8 @@ export function deathFacts(
   if (!e) return null;
   const woodsDeath = selection.location === WOODS && e.woodsReference;
   const wolfDeath = selection.killer === WOLF && e.wolfReference;
-  const historical = woodsDeath || wolfDeath
+  const intruderDeath=selection.killer===INTRUDERS && e.intruderReference;
+  const historical = woodsDeath || wolfDeath || intruderDeath
     ? summarizePlay(events.slice(0, events.findIndex(event => event.id === eventId) + 1)).entries
     : [];
   // The death's own fields reflect deliberate edits. Only the surrounding
@@ -74,6 +77,13 @@ export function deathFacts(
       // Stable ordering across browser objects and JSONB reads.
       const sorted = Object.fromEntries(Object.entries(wolf).sort(([a], [b]) => a.localeCompare(b)));
       context = { ...context, "big-bad-wolf": sorted };
+    }
+  }
+  if (intruderDeath) {
+    const state=moduleState(historical,INTRUDER_MODULE);
+    if (Object.keys(state).length) {
+      const sorted=Object.fromEntries(Object.entries(state).sort(([a],[b])=>a.localeCompare(b)));
+      context={...context,intruders:sorted};
     }
   }
   return {
@@ -178,10 +188,11 @@ export function detailsForCause(
   killer: string,
 ): PlayDetails {
   const cause = details.cause ?? "unspecified";
+  const intruderAttribution=killer===INTRUDERS&&(cause==='killer'||cause==='terror');
   return {
     ...details,
     attacker:
-      cause === "killer"
+      intruderAttribution ? (INTRUDER_ROSTER.some(p=>p.name===details.attacker)?details.attacker:"") : cause === "killer"
         ? killer
         : cause === "minion"
           ? (details.attacker ?? "")

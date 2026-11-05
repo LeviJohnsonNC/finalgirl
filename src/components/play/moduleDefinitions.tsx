@@ -1,3 +1,6 @@
+import { INTRUDERS, INTRUDER_MODULE, INTRUDER_MINORS, intruderMinorField } from "@/lib/play/intruders";
+import { IntruderCards } from "./IntruderControls";
+import { intruderArt } from "./intruderArt";
 import { StorybookWoodsControls } from "./StorybookWoodsControls";
 import { woodsArt } from "./woodsArt";
 import { WOODS, WOODS_MODULE, woodsState, woodsBreadcrumbLabel } from "../../../supabase/functions/_shared/play/storybookWoods";
@@ -68,7 +71,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -94,6 +97,12 @@ const peopleSummary = (
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
 export const moduleDefinitions: Definition[] = [
+  {id:INTRUDER_MODULE,owner:'killer',match:INTRUDERS,title:INTRUDERS,art:intruderArt('header'),
+    capabilities:['reveals','minor-power'],
+    summary:state=>{
+      const count=INTRUDER_MINORS.filter(card=>Number(state[intruderMinorField(card.id)])>0).length;
+      return count ? `${count} active Minor ${count===1?'Power':'Powers'}` : 'Minor Powers · Dark Power · Finale';
+    }, Controls:IntruderCards},
   {id:WOODS_MODULE,owner:"location",match:WOODS,title:"Inside Storybook Woods",art:woodsArt("banner"),
     capabilities:["event","character"],summary:state=>{
       const woods=woodsState(state);

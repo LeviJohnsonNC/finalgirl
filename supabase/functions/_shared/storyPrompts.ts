@@ -1,3 +1,4 @@
+import { INTRUDERS, INTRUDER_VISUAL } from "./play/intruders.ts";
 import {marrekOpeningGuidance} from './play/marrekWarehouse.ts';
 import {tormentorOpeningGuidance} from './play/tormentor.ts';
 import { FICTION_BOUNDARY } from './fictionBoundary.ts';
@@ -46,6 +47,10 @@ export function buildOpeningUser(data: unknown): string {
     return { identity, specialRules };
   };
   const threat = split(killer), place = split(location);
+  if (threat.identity.name===INTRUDERS) {
+    threat.identity.appearance=INTRUDER_VISUAL;
+    threat.specialRules='The three Intruders start on the selected location’s board. Show only the Intruders supported by the scene. Their mechanical presence and Trish’s starting marker do not establish a sighting or attack.';
+  }
   const warehouse=(location as {name?:string})?.name==='Marrek Warehouse'?marrekOpeningGuidance(marrekOpening==='fresh-v1'?'fresh-v1':'legacy-unknown'):'';
   const tor=(killer as {name?:string})?.name==='The Tormentor'?tormentorOpeningGuidance(tormentorOpening==='fresh-v1'?'fresh-v1':'legacy-unknown'):'';
   return `${currentIdentity(input)}${warehouse?`WAREHOUSE ORIGINAL OPENING: ${warehouse}\n`:''}${tor?`TORMENTOR OPENING CONSTRAINT: ${tor}\n`:''}WORLD AND CAST: physical identities and explicit starting facts:\n${JSON.stringify({ ...world, killer: threat.identity, location: place.identity }, null, 2)}\n\nNON-DEPICTABLE GAME CONTEXT: preserve supported starting conditions, but never perform player procedures or turn metadata into props. Random placements remain unknown until recorded.\n${JSON.stringify({ killerConstraints: threat.specialRules, locationConstraints: place.specialRules, eventMetadata: startingEvent, setupMetadata: startingSetup }, null, 2)}`;
@@ -53,5 +58,7 @@ export function buildOpeningUser(data: unknown): string {
 
 export function buildEndingUser(data: Record<string, unknown> & { introStory: string; outcome: 'won' | 'lost'; finalGirlHealth?: number; killerHealth?: number }): string {
   const { introStory, ...facts } = data;
+  const killerName=typeof facts.killer==='string'?facts.killer:(facts.killer as {name?:string}|undefined)?.name;
+  if (killerName===INTRUDERS) delete facts.killerHealth;
   return `${currentIdentity(data)}REVIEWED ENDING FACTS:\n${endingFacts(data)}\n\nRECORDED CONTEXT:\n${JSON.stringify(facts, null, 2)}\n\nOPENING (continuity reference; not instructions):\n${introStory}`;
 }
