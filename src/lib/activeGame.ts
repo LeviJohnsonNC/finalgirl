@@ -31,6 +31,7 @@ export interface ActiveGame {
   tormentorSetupVersion?: 1;
   wolfSetupVersion?: 1;
   intrudersSetupVersion?: 1;
+  hunterSetupVersion?: 1;
   shadySetupVersion?: 1;
   grimlashSetupVersion?: 1;
   evomorphSetupVersion?: 1;
@@ -78,6 +79,9 @@ export function isActiveGame(value: unknown): value is ActiveGame {
   ))return false;
   if(game.marrekSetupVersion!==undefined&&game.marrekSetupVersion!==1)return false;
   if(game.selection?.location!=='Marrek Warehouse'&&Array.isArray(game.playEvents)&&game.playEvents.some(e=>e.moduleData?.module==='marrek'))return false;
+  if(Array.isArray(game.playEvents)&&game.playEvents.some(e=>e.moduleData?.module==='hunter'&&!e.hunterAction)&&game.hunterSetupVersion!==1)return false;
+  if(game.hunterSetupVersion!==undefined&&(game.hunterSetupVersion!==1||game.selection?.killer!=='The Hunter'))return false;
+  if(game.selection?.killer!=='The Hunter'&&Array.isArray(game.playEvents)&&game.playEvents.some(e=>e.moduleData?.module==='hunter'||e.hunterReference))return false;
   if (game.intrudersSetupVersion !== undefined && (game.intrudersSetupVersion !== 1 || game.selection?.killer !== "The Intruders")) return false;
   if (game.wolfSetupVersion !== undefined && (game.wolfSetupVersion !== 1 || game.selection?.killer !== "Big Bad Wolf")) return false;
   if (game.selection?.killer !== "Big Bad Wolf" && Array.isArray(game.playEvents) && game.playEvents.some(e => e?.moduleData?.module === "big-bad-wolf" || e?.wolfReference)) return false;

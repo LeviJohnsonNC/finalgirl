@@ -315,3 +315,16 @@ Deno.test('Warehouse opening provenance stays location-scoped and opening-only',
  assertEquals(VisualBibleRequestSchema.safeParse({killer:'Hans',location:'Marrek Warehouse',finalGirl:'Mandy',marrekOpening:'fresh-v1'}).success,true);
  assertEquals(VisualBibleRequestSchema.safeParse({killer:'Hans',location:'Maple Lane',finalGirl:'Mandy',marrekOpening:'fresh-v1'}).success,false);
 });
+
+Deno.test('Hunter model and Ally ending facts remain owner-specific and reject impossible repairs',()=>{
+ const hunterReview={phase:'mark-x',ally:'alive',allyHealth:3};
+ const ending={introStory:'An original opening long enough for the canonical ending request schema to accept.',outcome:'won',killer:{name:'The Hunter'},location:{name:'Maple Lane'},finalGirl:{name:'Ginny'},hunterReview};
+ assertEquals(EndingRequestSchema.safeParse(ending).success,true);
+ assertEquals(EndingRequestSchema.safeParse({...ending,killer:{name:'Hans'}}).success,false);
+ assertEquals(EndingRequestSchema.safeParse({...ending,hunterReview:{...hunterReview,phase:'mark-v'}}).success,false);
+ assertEquals(EndingRequestSchema.safeParse({...ending,hunterReview:{...hunterReview,ally:'destroyed'}}).success,false);
+ const image={story:ending.introStory,sceneType:'ending',killer:'The Hunter',location:'Maple Lane',finalGirl:'Ginny',hunterReview};
+ assertEquals(SceneImageRequestSchema.safeParse(image).success,true);
+ assertEquals(SceneImageRequestSchema.safeParse({...image,sceneType:'beginning'}).success,false);
+ assertEquals(SceneImageRequestSchema.safeParse({...image,killer:'Hans'}).success,false);
+});

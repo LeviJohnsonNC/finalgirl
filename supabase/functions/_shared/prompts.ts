@@ -1,3 +1,4 @@
+import { HUNTER, HUNTER_VISUAL, hunterReviewFacts, type HunterReview } from './play/hunter.ts';
 import { INTRUDERS, INTRUDER_VISUAL } from "./play/intruders.ts";
 import {marrekOpeningGuidance,type MarrekOpening} from './play/marrekWarehouse.ts';
 import {tormentorOpeningGuidance,type TormentorOpening} from './play/tormentor.ts';
@@ -11,6 +12,7 @@ import { NARRATIVE_QUANTITIES } from './narrativeStyle.ts';
 import { fallbackPosterDesign, parsePosterDesign, posterArtDirection, POSTER_DESIGN_MENU, type PosterDesign } from './posterDesign.ts';
 
 export interface SceneContext {
+  hunterReview?:HunterReview;
   tormentorReview?:{loss:import('./play/tormentor.ts').TormentorLoss};
   marrekOpening?:MarrekOpening;
   tormentorOpening?:import('./play/tormentor.ts').TormentorOpening;
@@ -34,9 +36,10 @@ export interface SceneContext {
 const block = (label: string, value?: string): string => value ? `\n${label}:\n${value}\n` : '';
 const isPoster = (ctx: SceneContext): boolean => ctx.sceneType ? ctx.sceneType === 'ending' : Boolean(ctx.outcome);
 const cast = (ctx: SceneContext): string => `FINAL GIRL: ${ctx.finalGirl}: ${resolveFinalGirlIdentity(ctx.finalGirl, ctx.finalGirlDescription) || 'Appearance unrecorded; do not substitute a famous character.'}
-THREAT: ${ctx.killer}: ${(ctx.killer === INTRUDERS ? INTRUDER_VISUAL : ctx.killer === 'Grimlash' ? GRIMLASH_VISUAL : ctx.killer === WOLF ? WOLF_VISUAL : ctx.killerDescription) || 'Appearance unrecorded; follow established story facts.'}
+THREAT: ${ctx.killer}: ${(ctx.killer === HUNTER ? HUNTER_VISUAL : ctx.killer === INTRUDERS ? INTRUDER_VISUAL : ctx.killer === 'Grimlash' ? GRIMLASH_VISUAL : ctx.killer === WOLF ? WOLF_VISUAL : ctx.killerDescription) || 'Appearance unrecorded; follow established story facts.'}
 LOCATION: ${ctx.location}: ${ctx.locationDescription || 'Use the selected location, not the killer\'s home setting.'}`;
 const facts = (ctx: SceneContext): string => `${cast(ctx)}
+${ctx.killer===HUNTER?(isPoster(ctx)&&ctx.hunterReview?hunterReviewFacts(ctx.hunterReview):isPoster(ctx)?'Hunter model is unrecorded; do not infer Mark X arrival or a repaired Ally.':'Mark V is the original hooded pursuer. Mark X has not arrived. No repaired Ally is established.'):''}
 ${!isPoster(ctx)&&ctx.location==='Marrek Warehouse'?marrekOpeningGuidance(ctx.marrekOpening??'legacy-unknown'):''}
 ${!isPoster(ctx)&&ctx.killer==='The Tormentor'?tormentorOpeningGuidance(ctx.tormentorOpening??'legacy-unknown'):''}
 ${block('MODULE VISUAL RULES', ctx.moduleVisualGuidance)}${block('NON-DEPICTABLE GAME CONSTRAINTS: never enact player procedures or render card titles', ctx.scenarioRules)}${block('MANDATORY MISSION', ctx.mission && `${ctx.mission.name}: ${ctx.mission.description}`)}

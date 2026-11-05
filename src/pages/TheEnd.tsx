@@ -1,3 +1,4 @@
+import { hunterReview, hunterReviewFacts } from '@/lib/play/hunter';
 import {tormentorState} from '@/lib/play/tormentor';
 import {konradState} from '@/lib/play/konrad';
 import { evomorphOpeningGuidance } from '../../supabase/functions/_shared/play/evomorph';
@@ -83,13 +84,14 @@ const TheEnd = ({
   const moduleContext = getModulePromptContext(result.killer, result.location);
 
   const evomorphGuidance=result.killer==='Evomorph'?evomorphOpeningGuidance(endingModuleState(endingSummary(result.playEvents).entries,'evomorph').stage,false):undefined;
+  const hunter=useMemo(()=>result.killer==='The Hunter'?hunterReview(endingModuleState(endingSummary(result.playEvents).entries,'hunter')):undefined,[result.killer,result.playEvents]);
   const endingVisualGuidance=[evomorphGuidance,moduleContext?.visualGuidance].filter(Boolean).join('\n');
   const isWin = result.outcome === 'won';
   const grimlashReview=useMemo(()=>result.killer==='Grimlash'?(formData.grimlashReview??{loss:(endingModuleState(endingSummary(result.playEvents).entries,'grimlash').loss??'unknown') as import('@/lib/play/grimlash').GrimlashLoss}):undefined,[result.killer,result.playEvents,formData.grimlashReview]);
   const shipReview=useMemo(()=>result.location==='USS Konrad'?{fate:konradState(endingModuleState(endingSummary(result.playEvents).entries,'konrad')).fate}:undefined,[result.location,result.playEvents]);
   const tormentorReview=useMemo(()=>result.killer==='The Tormentor'?(formData.tormentorReview??{loss:tormentorState(endingModuleState(endingSummary(result.playEvents).entries,'tormentor')).loss}):undefined,[result.killer,result.playEvents,formData.tormentorReview]);
   const fate = reviewedCharacterFate(formData.finalGirlHealth ?? undefined,shipReview,tormentorReview);
-  const endingKillerHealth = result.killer==='The Intruders'||isKillerUnkillable(result.killer) ? undefined : formData.killerHealth ?? undefined;
+  const endingKillerHealth = hunter&&hunter.phase!=='mark-x'||result.killer==='The Intruders'||isKillerUnkillable(result.killer) ? undefined : formData.killerHealth ?? undefined;
   const { locationImages } = useActiveImages();
   const background = locationImages[result.location] ?? nowPlayingBg;
   // Reserve the poster column while it develops, not just once it exists.
@@ -127,13 +129,14 @@ const TheEnd = ({
       finalGirlHealth: formData.finalGirlHealth ?? undefined,
       killerHealth: endingKillerHealth,
       mission: getMissionByName(result.mission),
-      scenarioRules: [result.killer==='The Intruders'||result.killer==='Big Bad Wolf'||result.killer==='The Tormentor'||result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='USS Konrad'||result.location==='Shady Acres'||result.location==='Storybook Woods'?playStoryBeats(result.playEvents,result):undefined, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
+      ...(hunter&&{hunterReview:hunter}),
+      scenarioRules: [hunter&&hunterReviewFacts(hunter),result.killer==='The Hunter'||result.killer==='The Intruders'||result.killer==='Big Bad Wolf'||result.killer==='The Tormentor'||result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='USS Konrad'||result.location==='Shady Acres'||result.location==='Storybook Woods'?playStoryBeats(result.playEvents,result):undefined, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
       gameId: result.id,
       previousImageUrl,
       draftPoster: true,
     });
     if (url && mounted.current) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
-  }, [isGenerating, error, awaitingRefresh, tormentorReview, shipReview, grimlashReview, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
+  }, [isGenerating, error, awaitingRefresh, hunter, tormentorReview, shipReview, grimlashReview, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
 
   // The poster develops on its own once the ending narration lands.
   //
@@ -209,6 +212,7 @@ const TheEnd = ({
         ...(formData.victimsKilled != null && { victimsKilled: formData.victimsKilled }),
         ...(formData.roundsPlayed != null && {roundsPlayed:formData.roundsPlayed}),
         ...(result.playEvents?.length && {playSummary:playStoryBeats(result.playEvents, result)}),
+        ...(hunter&&{hunterReview:hunter}),
         ...(shipReview&&{konradReview:shipReview}),
        ...(grimlashReview&&{grimlashReview}),
       ...(tormentorReview&&{tormentorReview}),

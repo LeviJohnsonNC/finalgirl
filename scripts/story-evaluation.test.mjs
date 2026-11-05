@@ -13,11 +13,13 @@ const compile = (path) =>
 function load(path, dependencies = {}) {
   const exports = {};
   new Function("exports", "require", compile(path))(exports, (name) => {
+    if(name==='./play/hunter.ts')return hunter;
     if (!(name in dependencies)) throw Error(`Missing ${name}`);
     return dependencies[name];
   });
   return exports;
 }
+const hunter=load('../supabase/functions/_shared/play/hunter.ts');
 const encoder = new TextEncoder();
 const frame = (value) =>
   `data: ${typeof value === "string" ? value : JSON.stringify(value)}\n\n`;

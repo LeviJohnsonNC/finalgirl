@@ -345,3 +345,19 @@ for(const id of wingardExpected) {
 if(images.filter(file=>file.startsWith(wingardFolder+'/')||file==='src/assets/play/banners/wingard.webp').some(file=>!wingardPaths.has(file))) {
   throw Error('Unmapped Wingard Cottage artwork');
 }
+
+// Hunter's distinct model states and named cards must all have independent originals.
+const hunterDirectory='src/assets/play/photos/hunter';
+const hunterPhotos=JSON.parse(readFileSync(join(hunterDirectory,'manifest.json'),'utf8'));
+const hunterExpected=['header','mark-v','mark-v-shutdown','mark-v-ally','mark-v-destroyed','mark-x','titanium-tissue','cybernetic-agility','reinforced-endoskeleton','minigun','relentless-pursuit','termination-mode','adaptive-ai','titanium-shield','advanced-ai','counter-measures','shock-awe'];
+if(hunterPhotos.length!==hunterExpected.length||new Set(hunterPhotos.map(p=>p.id)).size!==hunterExpected.length||hunterExpected.some(id=>!hunterPhotos.some(p=>p.id===id)))throw Error('Incomplete Hunter photograph manifest');
+const hunterFiles=new Set(),hunterSources=new Set();
+for(const p of hunterPhotos){
+ const b=readFileSync(p.file),[width,height]=konradWebpDimensions(b);
+ if(width!==p.width||height!==p.height||p.nativeWidth<width||p.nativeHeight<height||p.nativeWidth<1536||b.length>160*1024||b.length!==p.bytes||createHash('sha256').update(b).digest('hex')!==p.sha256)throw Error('Invalid Hunter photograph '+p.id);
+ if(!/^exec-[a-f0-9-]+\.png$/.test(p.source)||hunterSources.has(p.source)||!/^\w{64}$/.test(p.sourceSha256))throw Error('Missing independent Hunter original '+p.id);
+ hunterSources.add(p.source);hunterFiles.add(p.file);
+ if(p.thumbnail){const t=readFileSync(p.thumbnail.file);if(t.length>35*1024||t.length!==p.thumbnail.bytes||createHash('sha256').update(t).digest('hex')!==p.thumbnail.sha256||konradWebpDimensions(t).join()!=='288,162')throw Error('Invalid Hunter thumbnail '+p.id);hunterFiles.add(p.thumbnail.file);}
+}
+if(images.filter(p=>p.startsWith(hunterDirectory+'/')||p==='src/assets/play/banners/hunter.webp').some(p=>!hunterFiles.has(p)))throw Error('Unmapped Hunter photograph');
+console.log('Verified 17 independent Hunter photographs and 9 chooser thumbnails.');

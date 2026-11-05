@@ -1,3 +1,7 @@
+import { HUNTER, hunterState } from '@/lib/play/hunter';
+import { moduleState as hunterModuleState } from '@/lib/play/modules';
+import { summarizePlay as hunterSummary } from '@/lib/play/events';
+import { hunterArt } from './hunterArt';
 import { WINGARD, WINGARD_EVENTS, WINGARD_TERRORS } from '../../../supabase/functions/_shared/play/wingardCatalog';
 import { wingardArt } from './wingardArt';
 import { INTRUDERS, INTRUDER_ROSTER, INTRUDER_TERRORS } from "@/lib/play/intruders";
@@ -100,6 +104,8 @@ export function DeathSceneDialog({
 
 const {characterImages}=useActiveImages();
   const facts = deathFacts(selection, events, eventId);
+  const hunterDeathPhase=hunterState(hunterModuleState(hunterSummary(events.slice(0,events.findIndex(e=>e.id===eventId)+1)).entries,'hunter')).phase;
+  const hunterDeathPhoto={unknown:'header','mark-v':'mark-v',countdown:'mark-v-shutdown','mark-x':'mark-x'}[hunterDeathPhase];
   const initial: PlayDetails = {
     room: facts?.room ?? "",
     cause: facts?.cause ?? "unspecified",
@@ -342,7 +348,7 @@ const {characterImages}=useActiveImages();
                     }
                   }}
                 >
-                  {cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
+                  {selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
                     :cause==='event'&&cottageEvent ? <ModuleArtwork art={wingardArt(cottageEvent.id,true)} />
                     :selection.killer===INTRUDERS&&cause==='killer'
                     ? <ModuleArtwork art={intruderArt(INTRUDER_ROSTER.find(p=>p.name===values.attacker)?.id??'header')} />

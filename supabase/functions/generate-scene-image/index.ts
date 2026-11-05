@@ -67,9 +67,11 @@ serve(async (req) => {
     // present before anything is planned or generated. A portrait that cannot be served
     // exactly as stored refuses the shot instead of producing a generic picture.
     let references: Array<{ name: string; url: string }> = [];
-    if (!isPoster) {
+    if (!isPoster || body.killer==='The Hunter') {
       try {
-        references = await openingReferences(body.finalGirl, body.killer, downloadReference, !(body.killer==='The Tormentor'&&body.tormentorOpening==='fresh-v1'));
+        const referenceKiller=isPoster&&body.killer==='The Hunter'&&body.hunterReview?.phase==='mark-x'?'The Hunter · Mark X':body.killer;
+        references = await openingReferences(body.finalGirl, referenceKiller, downloadReference, !(body.killer==='The Tormentor'&&body.tormentorOpening==='fresh-v1'));
+        if(isPoster&&referenceKiller==='The Hunter · Mark X'&&body.hunterReview?.ally==='alive')references.push(...await openingReferences('', 'The Hunter', downloadReference));
       } catch (err) {
         console.error("Opening identity references unavailable:", err);
         return json({ error: "The cast references could not be loaded. Please try again." }, 503);
@@ -115,8 +117,8 @@ serve(async (req) => {
 
     const prompt = isPoster ? buildPosterPrompt(context) : buildBeginningPrompt(context);
     if (isPoster) console.info('Poster print plan', { status: posterPlanStatus, ...context.posterDesign });
-    const reference = isPoster ? ownedOpeningReference(body.referenceImageUrl, Deno.env.get("SUPABASE_URL") ?? '', user.id, body.gameId) : undefined;
-    const image = await generateImage(prompt, reference, isPoster ? undefined : {
+    const reference = isPoster && body.killer!=='The Hunter' ? ownedOpeningReference(body.referenceImageUrl, Deno.env.get("SUPABASE_URL") ?? '', user.id, body.gameId) : undefined;
+    const image = await generateImage(prompt, reference, isPoster ? (body.killer==='The Hunter'?{aspectRatio:'2:3',references}:undefined) : {
       aspectRatio: "16:9", references,
     });
 

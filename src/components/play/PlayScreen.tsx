@@ -1,3 +1,6 @@
+import { HunterCoreTracker } from './HunterCoreTracker';
+import { hunterState, hunterHasReveal } from '@/lib/play/hunter';
+import { hunterArt } from './hunterArt';
 import { IntruderRoster } from "./IntruderControls";
 import { INTRUDERS } from "@/lib/play/intruders";
 import { wolfPortrait } from "./wolfArt";
@@ -180,7 +183,8 @@ export function PlayScreen(props: PlayScreenProps) {
   const startingValues = playStartingValues(killer, finalGirl);
   const { characterImages, aiEnabled } = useActiveImages();
   const killerImage = characterImages[killer];
-  const killerPortrait = killer === "Evomorph"
+  const hunter=hunterState(moduleState(summary.entries,'hunter'));
+  const killerPortrait = killer === 'The Hunter' && hunter.phase==='mark-x' ? hunterArt('mark-x') : killer === "Evomorph"
     ? evomorphStageArt(moduleState(summary.entries, "evomorph").stage)
     : {
         src: killerImage,
@@ -195,6 +199,7 @@ export function PlayScreen(props: PlayScreenProps) {
   const [announcement, setAnnouncement] = useState("");
   const [finishOpen, setFinishOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [hunterRevealOpen,setHunterRevealOpen]=useState<"dark-power"|"finale"|null>(null);
   const [momentId, setMomentId] = useState<string | null>(null);
   const [editingState, setEditingState] = useState<StateField | null>(null);
   const [stateValue, setStateValue] = useState("");
@@ -257,12 +262,14 @@ export function PlayScreen(props: PlayScreenProps) {
   };
   const pickMoment = (choice: (typeof moments)[number]) => {
     if (!saveMoment()) return;
+    setHunterRevealOpen(null);
     const permanent = PERMANENT_MOMENTS.includes(choice.type);
     const existing = permanent && summary.entries.find(e => e.kind === "moment" && e.momentType === choice.type);
     if (existing) {
       if (choice.type === "ultimate-unlocked") return;
       setMomentId(existing.id); setMessage(""); return;
     }
+    if(killer==='The Hunter'&&hunterHasReveal(hunter,choice.type)&&(choice.type==='dark-power'||choice.type==='finale')){setMomentId(null);setHunterRevealOpen(choice.type);return;}
     if (permanent && pendingMoments.current.has(choice.type)) return;
     if (permanent) pendingMoments.current.add(choice.type);
     const e = commit({
@@ -437,6 +444,7 @@ export function PlayScreen(props: PlayScreenProps) {
         <div className="play-state-grid">
           {orderedStateFields.filter(field=>killer!=='Poltergeist'||field!=='killerHealth').map((field) => {
             if(field==="killerHealth"&&killer===INTRUDERS) return <IntruderRoster key={field} events={events} onEvent={onEvent} />;
+            if(field==='killerHealth'&&killer==='The Hunter'&&['mark-v','countdown'].includes(hunter.phase))return <HunterCoreTracker key={field} events={events}/>;
             const value = summary[field];
             const health = field === "finalGirlHealth" || field === "killerHealth";
             const critical = health && value !== undefined && value <= 2;
@@ -544,9 +552,9 @@ export function PlayScreen(props: PlayScreenProps) {
           Remember this <span>The moments that made your night</span>
         </h2>
         <div className="play-moment-choices">
-          {orderedMoments.filter(choice=>!(killer==='Poltergeist'||killer===INTRUDERS)||choice.type!=='killer-revived').map((choice) => {
+          {orderedMoments.filter(choice=>(!(killer==='Poltergeist'||killer===INTRUDERS)||choice.type!=='killer-revived')&&!(killer==='The Hunter'&&['mark-v','countdown'].includes(hunter.phase)&&choice.type==='killer-revived')).map((choice) => {
             const revealed = summary.entries.find(e => e.kind === "moment" && e.momentType === choice.type);
-            const active = PERMANENT_MOMENTS.includes(choice.type) && !!revealed;
+            const active = PERMANENT_MOMENTS.includes(choice.type) && (!!revealed || killer==='The Hunter'&&hunterHasReveal(hunter,choice.type));
             const selectedArt = active && (choice.type === 'dark-power' || choice.type === 'finale')
               ? illustratedKillerCards(killer, choice.type).find(card => card.name === revealed?.killerCard)?.art : undefined;
             const ultimate = choice.type === "ultimate-unlocked";
@@ -557,10 +565,11 @@ export function PlayScreen(props: PlayScreenProps) {
             </button>;
           })}
         </div>
+        {hunterRevealOpen&&hunterHasReveal(hunter,hunterRevealOpen)&&<div className="play-moment-editor"><KillerCards killer={killer} events={events} onEvent={onEvent} typeOnly={hunterRevealOpen}/><button onClick={()=>setHunterRevealOpen(null)}>Record</button></div>}
         {moment && (
           <div className="play-moment-editor">
             {isReveal && <KillerCards killer={killer} events={events} onEvent={onEvent} typeOnly={moment.momentType as "dark-power" | "finale"} />}
-            {isReveal && killer !== WOLF && killer !== INTRUDERS && momentCards.length > 0 && (
+            {isReveal && killer !== WOLF && killer !== INTRUDERS && killer !== 'The Hunter' && momentCards.length > 0 && (
               <label>
                 {moment.momentType === "dark-power"
                   ? "Which Dark Power?"

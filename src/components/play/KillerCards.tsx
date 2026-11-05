@@ -1,3 +1,4 @@
+import { HUNTER, hunterState, hunterHasReveal } from '@/lib/play/hunter';
 import { useState } from "react";
 import { WOLF } from "@/lib/play/bigBadWolf";
 import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
@@ -64,6 +65,7 @@ export function KillerCards({
 }) {
   const entries = summarizePlay(events).entries;
   const hans = moduleState(entries, "hans");
+  const hunter=killer===HUNTER?hunterState(moduleState(entries,'hunter')):undefined;
   const { record, message } = useModuleRecord(events, onEvent);
   const [editingSecond, setEditingSecond] = useState(false);
   const choose = (type: CardType, name: string) => {
@@ -113,18 +115,20 @@ export function KillerCards({
           const selected = cards.find(
             (card) => card.name === reveal?.killerCard,
           );
+          const autoRevealed=hunter&&hunterHasReveal(hunter,type);
           const label = type === "dark-power" ? "Dark Power" : "Finale";
           return (
             <section
               className="module-reveal-cards"
+              data-hunter-transferred={type==='dark-power'&&hunter&&hunter.phase!=='unknown'&&hunter.phase!=='mark-v'||undefined}
               data-wolf-cards={killer === WOLF || undefined}
               key={type}
               aria-label={`${label} selection`}
             >
               <h3>{label}</h3>
-              {reveal && !selected && (
+              {(reveal || autoRevealed) && !selected && (
                 <p className="module-control-help">
-                  {reveal.killerCard || "Card name not specified"}
+                  {reveal?.killerCard || "Card name not specified"}
                 </p>
               )}
               {selected && <RevealedCard card={selected} label={label} />}
@@ -141,14 +145,14 @@ export function KillerCards({
                   choose={(name) => choose(type, name)}
                 />
               )}
-              <button
+              {(reveal||!autoRevealed)&&<button
                 className="module-unnamed"
                 disabled={disabled}
                 onClick={() => choose(type, "")}
                 aria-label={`${reveal ? "Clear" : "Record"} ${label} card name`}
               >
                 {reveal ? "Clear card name" : "Reveal without a card name"}
-              </button>
+              </button>}
             </section>
           );
         },

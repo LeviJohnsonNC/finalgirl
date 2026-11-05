@@ -33,7 +33,7 @@ const KILLER_MAX_HP: Record<string, number> = {
 
   // Season 3
   'Slayer': 9,
-  'The Hunter': 8,
+  'The Hunter': 15,
   'Razorface': 9,
   'The Tormentor': 7,
   'The Eyeless': 8,

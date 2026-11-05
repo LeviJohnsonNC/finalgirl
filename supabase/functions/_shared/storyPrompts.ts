@@ -1,3 +1,4 @@
+import { HUNTER, HUNTER_VISUAL } from './play/hunter.ts';
 import { INTRUDERS, INTRUDER_VISUAL } from "./play/intruders.ts";
 import {marrekOpeningGuidance} from './play/marrekWarehouse.ts';
 import {tormentorOpeningGuidance} from './play/tormentor.ts';
@@ -47,6 +48,7 @@ export function buildOpeningUser(data: unknown): string {
     return { identity, specialRules };
   };
   const threat = split(killer), place = split(location);
+  if(threat.identity.name===HUNTER){threat.identity.appearance=HUNTER_VISUAL;threat.specialRules='The original pursuer is hooded Mark V. Mark X has not arrived and no repaired Ally is established. Do not foreshadow by depicting unobserved repairs, arrivals or extra attacks.';}
   if (threat.identity.name===INTRUDERS) {
     threat.identity.appearance=INTRUDER_VISUAL;
     threat.specialRules='The three Intruders start on the selected location’s board. Show only the Intruders supported by the scene. Their mechanical presence and Trish’s starting marker do not establish a sighting or attack.';

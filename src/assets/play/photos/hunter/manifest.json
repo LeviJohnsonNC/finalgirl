@@ -1,0 +1,268 @@
+[
+  {
+    "id": "mark-v-ally",
+    "source": "exec-7f4b6e61-0420-45d7-b559-abd2725d4ee8.png",
+    "sourceSha256": "84433340c7254cad12e7367cd786b1b4b8c50f25b894f39d4891bf24674379df",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/mark-v-ally.webp",
+    "width": 1120,
+    "height": 746,
+    "bytes": 61312,
+    "sha256": "e745517830d4fca6c02a548590edab9ebb868a74407421c8404a5b0032a7c429",
+    "focal": "50% 20%"
+  },
+  {
+    "id": "header",
+    "source": "exec-cca17739-8173-42da-8e4e-2da4ea127dae.png",
+    "sourceSha256": "8903c5f47213fdd3c050d0136e7f2ace5b737e4fabdd97cb89f0d7d4b8985f0c",
+    "nativeWidth": 2172,
+    "nativeHeight": 724,
+    "file": "src/assets/play/banners/hunter.webp",
+    "width": 1680,
+    "height": 560,
+    "bytes": 54278,
+    "sha256": "14356df8e43510a70d61735fdaac3e1ac14e4e799b2f83ee8a8d7770bd86f7bf",
+    "focal": "79% 0%"
+  },
+  {
+    "id": "mark-v-destroyed",
+    "source": "exec-ba0cd59d-1f91-496f-82e8-14578d80595e.png",
+    "sourceSha256": "d0b0ab23823be6d0499b2b01fc70bef136c55a7d6355536ca182c811b7ee8e20",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/mark-v-destroyed.webp",
+    "width": 1120,
+    "height": 746,
+    "bytes": 101614,
+    "sha256": "cc9e9c29876f13a8555cad04293bd43a3a1918c59ff017b0530663394cb721d2",
+    "focal": "50% 20%"
+  },
+  {
+    "id": "mark-v-shutdown",
+    "source": "exec-80eecec4-0271-4290-bf9a-4b8ef83720ff.png",
+    "sourceSha256": "79d58f566950c8711eef54867f840d91a0f71a49f71a13827d18384cfd0cf8c3",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/mark-v-shutdown.webp",
+    "width": 1120,
+    "height": 746,
+    "bytes": 59492,
+    "sha256": "17dea292980e2b30d2937231499933f8a49b26049aed04d17c5d00cd15a46b2e",
+    "focal": "50% 20%"
+  },
+  {
+    "id": "titanium-tissue",
+    "source": "exec-56a3426a-ad6e-4969-8c84-f70d52f44060.png",
+    "sourceSha256": "a3559bacb812b9c399f7935896c667e744d06f6654f5bd831c5765b4e415a9a4",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/titanium-tissue.webp",
+    "width": 1120,
+    "height": 630,
+    "bytes": 66160,
+    "sha256": "36862f83db68dd9ff39786e8c62374513aee9f75800639a77b7307abbea5c7c7",
+    "focal": "50% 20%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/hunter/titanium-tissue-thumb.webp",
+      "bytes": 6572,
+      "sha256": "65871695fd254b7b50df053b57565d7d3621bd1a7edc40b148f4a1d55e0c4bd3"
+    }
+  },
+  {
+    "id": "reinforced-endoskeleton",
+    "source": "exec-72c13b96-348e-451d-83c3-7dc2d821c7d4.png",
+    "sourceSha256": "1281fc983f60e37b8edc9373cb5d74de318880f3c8208bce42f3b77094dceea2",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/reinforced-endoskeleton.webp",
+    "width": 1120,
+    "height": 630,
+    "bytes": 53852,
+    "sha256": "b3d77ab84bf16851a7cce0ecd1fb5007d6707c55171b824e44314f558f1dbe0e",
+    "focal": "50% 20%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/hunter/reinforced-endoskeleton-thumb.webp",
+      "bytes": 6226,
+      "sha256": "84c094f7f72ec7e3fdc984e17d89b288b006f89b7941a0a6523e66d2385afe38"
+    }
+  },
+  {
+    "id": "cybernetic-agility",
+    "source": "exec-c11cde8f-7a35-4749-a779-b3310adc8d8b.png",
+    "sourceSha256": "e48b2ec8d432345897091d880a5cc9eb8ea485c20f5b80a76ba964b29e506102",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/cybernetic-agility.webp",
+    "width": 1120,
+    "height": 630,
+    "bytes": 67420,
+    "sha256": "4899086abe2c37427ac9401396b295c8aa90935ed43d6b8ab0a7b9107725b214",
+    "focal": "50% 20%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/hunter/cybernetic-agility-thumb.webp",
+      "bytes": 5604,
+      "sha256": "099fbe842378e960605ee201e434ac77808925862f0f9d3628e3c012f6217169"
+    }
+  },
+  {
+    "id": "termination-mode",
+    "source": "exec-2ce83906-f332-45e9-9f17-a82e62c8c60b.png",
+    "sourceSha256": "8d5f4127258b535f248a5bc08db92e0bc26be3099bd99424efd20766aea6fc60",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/termination-mode.webp",
+    "width": 1120,
+    "height": 630,
+    "bytes": 33894,
+    "sha256": "1db6d75e910094ee1de9d52f6d31c4de05cb384e8e5c1f65983760abece43b64",
+    "focal": "50% 20%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/hunter/termination-mode-thumb.webp",
+      "bytes": 4022,
+      "sha256": "746dc55f27a1fe48697380eebe8e0a649c66c0816f4ac3c4ce390e02297195a3"
+    }
+  },
+  {
+    "id": "adaptive-ai",
+    "source": "exec-ac6ab508-0cb4-4072-9fea-bc3df7522824.png",
+    "sourceSha256": "1c1005f9564234b74310dee2cd669a22698e14a908eef21b0afaf4f5698b5ee9",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/adaptive-ai.webp",
+    "width": 1120,
+    "height": 630,
+    "bytes": 42042,
+    "sha256": "402db26b74abafcbefbadcbae804154aa607060a32897cf4f571e40096c60637",
+    "focal": "50% 20%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/hunter/adaptive-ai-thumb.webp",
+      "bytes": 4748,
+      "sha256": "ff1958808ba8d0ce8ed690a9b6cc7bded4cc7fef44cebfc39a7fa2f90363c5da"
+    }
+  },
+  {
+    "id": "minigun",
+    "source": "exec-60e44ccd-b371-48e2-9cb2-f6b2348188ce.png",
+    "sourceSha256": "23f181ab28026644421c08b306414bbf62eb83a5aafeef2bacaf516310b57f77",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/minigun.webp",
+    "width": 1120,
+    "height": 630,
+    "bytes": 51920,
+    "sha256": "8d0d08eddcae915fcacb9cf70c5d1b79fb098cac5be1b29a19af7ef91207a576",
+    "focal": "50% 20%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/hunter/minigun-thumb.webp",
+      "bytes": 6002,
+      "sha256": "6226d23619b544b95b55d1728472a373d8715b899adb635e7c0e6a2d11f7a06f"
+    }
+  },
+  {
+    "id": "titanium-shield",
+    "source": "exec-f4df7e0c-ea3b-4285-947a-0478ab5f514f.png",
+    "sourceSha256": "3059bb3e56bd773a566947ac27272e39994ab2d25b641edf462f94c434152c55",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/titanium-shield.webp",
+    "width": 1120,
+    "height": 630,
+    "bytes": 94462,
+    "sha256": "e8fc43bdedf1b2ca25b70d7e2ff310014d9855621a7e841b54dde68702181cb7",
+    "focal": "50% 20%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/hunter/titanium-shield-thumb.webp",
+      "bytes": 7350,
+      "sha256": "9f5c26f58c5702b9cdb40bf57171f52fa597aaabf97337896e41b4db7355f8c9"
+    }
+  },
+  {
+    "id": "relentless-pursuit",
+    "source": "exec-450c0e1f-35ac-4ffd-886d-0eb3af5e3b15.png",
+    "sourceSha256": "6c25b0a1983b32cf171f8b34c88d2fb9369531a7394e320d3d588a37f8a2f7dd",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/relentless-pursuit.webp",
+    "width": 1120,
+    "height": 630,
+    "bytes": 49254,
+    "sha256": "a24fc310591a51ed2c5adb3198c4a16054068bb6e7a7f9849dba8f85f191f874",
+    "focal": "50% 20%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/hunter/relentless-pursuit-thumb.webp",
+      "bytes": 4802,
+      "sha256": "ab8e5b28c9eeede97d7104184ddee386fdfd7a2d763f24c7a1356db593a8de7d"
+    }
+  },
+  {
+    "id": "advanced-ai",
+    "source": "exec-e35048bf-e595-415a-aa9e-668c88e466ce.png",
+    "sourceSha256": "278a467be9422c10fe5b71bec9ea968974f54dd2cf2d1e8541092aa7fad8352f",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/advanced-ai.webp",
+    "width": 1120,
+    "height": 630,
+    "bytes": 49952,
+    "sha256": "23d0cd6dab18dd94a9c838f3a69a59b27e4bff748bf77838654626a0062402fc",
+    "focal": "50% 20%",
+    "thumbnail": {
+      "file": "src/assets/play/photos/hunter/advanced-ai-thumb.webp",
+      "bytes": 5392,
+      "sha256": "0ebe2e61f97421f0f45eaa328d1835db64ddb1eb9c967b755a73c2adf99814dd"
+    }
+  },
+  {
+    "id": "counter-measures",
+    "source": "exec-ac10f509-9a73-4387-b3c6-68a9be0861e2.png",
+    "sourceSha256": "a78562432174ceaac70d595be15b0f36e1720afa97ee296b6503d7f24910bd53",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/counter-measures.webp",
+    "width": 1120,
+    "height": 630,
+    "bytes": 45006,
+    "sha256": "f207fc3e44b5c5ad972ec632c38278384e743cf1ee62db957e3ec21f652beaeb",
+    "focal": "50% 20%"
+  },
+  {
+    "id": "shock-awe",
+    "source": "exec-77f0aedd-b4e2-4e47-943d-fdc4c423629f.png",
+    "sourceSha256": "4b7f28d86ccc670717eaf5da21a665f1466b3e05df351fa0f6b9a029b3bdaaed",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/shock-awe.webp",
+    "width": 1120,
+    "height": 630,
+    "bytes": 54936,
+    "sha256": "2733f29d3665d1e22aa9a5c0d5d0888449cbca3d6b105136b28ddc1c09791f96",
+    "focal": "50% 20%"
+  },
+  {
+    "id": "mark-v",
+    "source": "exec-fd6dd23d-de62-4499-959d-4e45bbfb1440.png",
+    "sourceSha256": "41878673382565a1e1d09d01f5ecffa774745b219fa6456f294978121096a133",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/mark-v.webp",
+    "width": 1120,
+    "height": 746,
+    "bytes": 74074,
+    "sha256": "20606987be07f456fd7f0c8c9c78f20db6533a6961611d31fa1105409568aac7",
+    "focal": "50% 20%"
+  },
+  {
+    "id": "mark-x",
+    "source": "exec-dad9b8fc-64b2-4042-ae39-5a65e6685d73.png",
+    "sourceSha256": "dd0656dcee9dad93863323fe0bd348dcfe2a8f03e0aa424f31e5b04ddaca0ba2",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
+    "file": "src/assets/play/photos/hunter/mark-x.webp",
+    "width": 1120,
+    "height": 746,
+    "bytes": 39336,
+    "sha256": "b57c0e35c24454e5d8fd57701a63053f421a76f8289e8750c37406faf721fd68",
+    "focal": "50% 20%"
+  }
+]

@@ -1,3 +1,4 @@
+import { HUNTER, HUNTER_MODULE, HUNTER_POWERS, HUNTER_FINALES, validHunterField, hunterFacts } from './hunter.ts';
 import { WINGARD, WINGARD_MODULE, WINGARD_ITEMS, WINGARD_VISUAL } from './wingardCatalog.ts';
 import { wingardState, wingardFacts, validWingardField } from './wingardCottage.ts';
 import { fitStoryText, storyVictimStatus } from './storyText.ts';
@@ -61,7 +62,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -83,6 +84,7 @@ type ObservedEvent = {
 
 /** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
 export function killerMomentCards(killer: string, type: string) {
+  if (killer === HUNTER) return [...(type==="dark-power"?HUNTER_POWERS:type==="finale"?HUNTER_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === INTRUDERS) return [...(type==="dark-power"?INTRUDER_POWERS:type==="finale"?INTRUDER_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === WOLF) return [...(type === "dark-power" ? WOLF_POWERS : type === "finale" ? WOLF_FINALES : [])].sort((a,b) => a.name.localeCompare(b.name));
   if(killer==='The Tormentor')return [...(type==='dark-power'?TORMENTOR_POWERS:type==='finale'?TORMENTOR_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
@@ -174,6 +176,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === HUNTER_MODULE) return validHunterField(key,value);
   if (module === INTRUDER_MODULE) return validIntruderField(key,value);
   if (module === "big-bad-wolf") return validWolfField(key, value);
   if (module === 'shady-acres') return validShadyField(key,value);
@@ -300,7 +303,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    ![WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    ![HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -517,6 +520,9 @@ export function describeModule(observation: ModuleObservation) {
       return minor?`${minor.name}: ${value??'unrecorded'} Health`:`${names[id]} ${field}: ${value??'unrecorded'}`;
     }).join(' · ');
   }
+  if (observation.module === HUNTER_MODULE) {
+    return observation.changes.snapshot ? hunterFacts(observation.changes) : Object.entries(observation.changes).map(([key,value])=>`${key}: ${value??'unrecorded'}`).join('; ');
+  }
   if (observation.module === "big-bad-wolf") {
     return Object.entries(observation.changes).map(([key, value]) => {
       if (key === "mode") return wolfModeLabel(value);
@@ -550,6 +556,9 @@ export function moduleContext(
   includeWolf = true,
 ) {
   const context: Record<string, ModuleState> = {};
+  if (selection.killer === HUNTER && entries.some(e=>e.moduleData?.module===HUNTER_MODULE)) {
+    context.hunter={facts:hunterFacts(moduleState(entries,HUNTER_MODULE),entries)};
+  }
   if (includeWolf && selection.killer === WOLF) {
     const wolf = moduleState(entries, "big-bad-wolf");
     if (Object.keys(wolf).length) context["big-bad-wolf"] = wolf;
@@ -628,6 +637,12 @@ export function moduleStoryBeats(
   selection: ModuleSelection,
   entries: readonly ObservedEvent[],
 ): string {
+  if(selection.killer===HUNTER) {
+    const fields=moduleState(entries,HUNTER_MODULE);
+    const threat=hunterFacts(fields,entries);
+    const place=moduleStoryBeats({...selection,killer:''},entries);
+    return [fitStoryText(threat,place?440:880),fitStoryText(place,440)].filter(Boolean).join('\n');
+  }
   if(selection.location===WINGARD){
     const threat = moduleStoryBeats({...selection,location:''},entries);
     const cottage = wingardFacts(wingardState(moduleState(entries,WINGARD_MODULE))).join(' ');
@@ -912,6 +927,7 @@ export function moduleReferences(
   mechanism?: string,
 ) {
   const refs = buddylandReferences(selection, context, attacker);
+  if(selection.killer===HUNTER&&typeof context?.hunter?.facts==='string')refs.push({name:'Hunter model and Ally observations',effect:context.hunter.facts});
     if(selection.killer==='The Tormentor'){const trap=TORMENTOR_TRAPS.find(c=>c.name===mechanism);if(trap)refs.push({name:trap.name,effect:`${trap.deck==='girl'?'Final Girl':'Victim'} Death Trap. Tasks: ${trap.tasks.join('; ')}. Progress: ${trap.checkpoints.join(' → ')}. ${trap.fail} Only this recorded death is established; costs and other casualties are not inferred.`});}
   if(selection.location === "USS Konrad" && context?.konrad) for(const effect of konradFacts(context.konrad)) refs.push({name:"USS Konrad observation",effect});
   if (selection.location === "Sacred Groves") {

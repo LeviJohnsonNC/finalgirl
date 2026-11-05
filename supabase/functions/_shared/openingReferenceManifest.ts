@@ -46,6 +46,8 @@
 // maureen.png SHA-256: 9bd680a9c0e83efc9c9f7bd2756f4e7a1fb1daf85c36c4272f1bc88e00c9f087
 // the-tormentor.png SHA-256: 55e22335ed5f3c3e8b70cda0633f0adf372346a3250734c13fbc10e5598d18d3
 // big-bad-wolf.png SHA-256: 8f41e3b971858fc6d27cca84628cd284f33462fbae3abdf95222048d440368a4
+// the-hunter.png SHA-256: 99eec4700d235a45cfa8553fe8cd7a1420dcda5081f9b71de9262b7d044e60fb
+// ../play/photos/hunter/mark-x.webp.png SHA-256: b57c0e35c24454e5d8fd57701a63053f421a76f8289e8750c37406faf721fd68
 export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: string }> = {
   "Billy the Bear": {
     "path": "billy-the-bear.jpg",
@@ -226,5 +228,13 @@ export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: 
   "Big Bad Wolf": {
     "path": "big-bad-wolf-17a24c1b9e0f9fc3.jpg",
     "sha256": "17a24c1b9e0f9fc32f0fd7343c441fb7a76c1e9041c0bf9a6efc1299d4e3e612"
+  },
+  "The Hunter": {
+    "path": "the-hunter-4eb181874615d107.jpg",
+    "sha256": "4eb181874615d107591223ec01c3e645b63e2266c64d68e01d150319542cf923"
+  },
+  "The Hunter · Mark X": {
+    "path": "the-hunter-mark-x-3817e003568b748d.jpg",
+    "sha256": "3817e003568b748d6d6cefb73eca931080e320f6ba80a7c35e333334eeede219"
   }
 };
