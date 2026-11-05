@@ -10,6 +10,8 @@ Reuse Groves' presentation and interactions for equivalent operations. Build new
 
 Historical polish notes are in [history](history/README.md). They explain earlier iterations and are not instructions to restore retired controls or illustration treatments. Update these current guides in place when a reusable preference changes; keep chronology in history or the owner record.
 
+The Tormentor/Warehouse, Big Bad Wolf/Storybook Woods and Intruders/Wingard Cottage follow-ups establish the refinements below. Groves remains the presentation baseline; the latest owner records govern their specific mechanics. Do not copy superseded intermediate layouts or treat a module-specific control as a universal requirement.
+
 ## Product and interaction defaults
 
 The app is a cinematic companion to the physical game. Play foregrounds useful current state and actions; physical cards and the Rules page carry detailed rules. Do not fill a panel with setup references, Unleash tables, duplicate summaries, routine success messages or procedural reminders. Keep required choices, meaningful errors, unknown states and consequential linked-action previews reachable. Existing rule-specific consequences can remain where needed; document the reason.
@@ -31,9 +33,15 @@ Minor Power health uses the original jeweled live/spent heart pair from `src/ass
 
 Use [shared controls](module-controls.md) rather than reimplementing these patterns. Clearing an observation/card name is not deletion of immutable history. Preserve existing safeguards for genuinely destructive session/case deletion.
 
+For each proposed tracker or input, identify the decision it helps the player make. Track the smallest useful observation: presence can be known while endpoints, location or token detail remain unrecorded. Keep physical-board details in Rules unless a tracked consequence genuinely needs them. Prefer an existing picture toggle, clickable task/checkpoint, use counter or quiet action over a second correction form. Entry actions should carry their intent directly; do not ask the player to repeat it in a dropdown. Preserve necessary linked choices and safe correction/Undo semantics.
+
+New special-person controls should keep Saved/Killed/Left play outcomes correctable without repeating effects. Left play restores through the portrait; Saved/Killed require explicit correction. Inactive/left portraits are grey, present portraits are in color, and saved/killed states use distinct identity-consistent photos. Keep the recorded character or apparatus visible after an outcome when it remains useful to the player, with an honest state label; this is not proof it remains on the physical board. Do not add a character or outcome unsupported by the source.
+
 ## Composition and photography
 
 Use deliberate internal padding, restrained framing, readable type hierarchy and dark text scrims. Titles dominate; supporting text stays subordinate. Names/status/actions remain HTML, with keyboard focus and touch targets at least 44px. The normal laptop dashboard stays compact; expanded modules may scroll. Do not clip content or shrink controls to force every expanded panel onto one screen. Respect reduced motion; prevent 320px horizontal overflow.
+
+Tracked people, crafted items and comparable scene cards use generous, consistent responsive sizing, normally two columns on laptop and fewer/more as space permits. A dim inactive or resolved card keeps the same image area as its active state. Equivalent adjacent cards share proportions. Preserve the explicitly small unselected Power/Finale/Minor choices. For a multi-figure roster, plan stable order, per-figure crops and simultaneous-active states; activation must not unexpectedly rearrange figures. Avoid repeating a health value over a portrait when the health strip already provides it.
 
 The four core tracker strips follow Levi's 2026-10-28 reference, with always-on tracking and no × approved on 2026-11-01, recorded in [tracker control-bar verification](verification/tracker-control-bars.md). Keep title/status/control text outside the image area. Narrow screens can stack cards to preserve one control row and 44px targets. This does not change other module tracks or their controls.
 
@@ -42,6 +50,8 @@ New identity, module-header, Power/Finale/Minor and meaningful environmental/tra
 Retained artwork is not a global replacement request: Divine Wrath/Fickleness and other approved retained UI art keep their treatment; ending posters keep their painted/composited medium. Unusual subjects retain their verified design with physically convincing materials/light; do not force every killer into a generic human costume.
 
 Plan ratio, native resolution, display crop and dark space **before generation**. Use wide images for wide cards/headers. Avoid stretching/upscaling, blurry contact-sheet crops and neighboring-cell bleed. Review actual laptop/phone crops with controls over them. Use separate images or a verified atlas only when the native source supports the rendered size. Record source identifiers, ordering, focal positions, derivatives and budgets in the artwork README. Current examples: [card/state photos](../src/assets/play/photos/README.md), [headers](../src/assets/play/banners/README.md), [Bloodlust](../src/assets/play/bloodlust/README.md), [Killer Wrath](../src/assets/play/inkanyamba/README.md).
+
+Storyboard the complete visible state set before bulk generation: for example held/available materials, recipe/crafted item, saved/killed person, and active/deactivated/sprung apparatus where applicable. Dimming indicates inactivity; it cannot substitute for a requested meaningful physical change. Preserve faces, costumes, object construction and landmarks across variants. Reusable location assets standing in for the Final Girl must show female hands/body while keeping her face out of frame for mixed casting. Recipe blueprints belong to Wingard's mechanic, not every location.
 
 Progressive track art matches verified physical positions and stays distinct at every required step. Verify board ranges; an app input limit or location strip does not establish a killer maximum. Label unverified mappings honestly and preserve older saved values. Presentation never resolves effects or changes observed numbers.
 
@@ -58,6 +68,8 @@ Killer and location ownership remain separate in mixed casting. Preserve immutab
 The source-reviewed plan identifies shared controls, actual new mechanics, visible states/transitions, required versus omitted UI, and an artwork manifest. After implementation approval, build the hardest genuinely new interaction first and compare its rendered form with this baseline before producing remaining artwork. Continue routine work autonomously within approved scope; ask only for a consequential new decision or real source blocker. This is not another mandatory approval gate.
 
 Completion requires source reconciliation, all in-scope integrations, meaningful state/mixed-owner/failure/Undo/reload journeys and actual visual inspection. Check 1280×640, 1366×768, 1440×900, 390×844 and 320×568 where applicable. Include quiet/unselected/active/depleted/unknown/combined states, long labels and loaded images. Passing tests alone does not establish realism, likeness or crop quality.
+
+The first interaction/photo pilot does not replace the final visual pass. Review every distinct image in its actual named surfaces on laptop and phone, including mode tracks, headers, reveal/Minor cards and shallow death tiles where used. Verify the identifying features and props remain visible under captions, scrims and disclosure buttons. Check card/control bounds inside the panel as well as document overflow: a clipped grid column can pass a page-overflow assertion. Before handoff, review the complete populated panel for duplicate controls, unnecessary inputs, tiny images and state-dependent resizing; fix these within the authorized scope using existing captures/tests, without adding another approval stage.
 
 Run appropriate existing checks and wait for the **final PR head's required CI checks** before the completed handoff. Update related starting-event/integration expectations when a shared interaction changes. Distinguish CI mocks from authorized live generation/audio and production smoke tests; do not claim live quality/deployment from mocks.
 

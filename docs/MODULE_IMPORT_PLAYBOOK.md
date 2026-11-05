@@ -16,6 +16,15 @@ Keep the current cinematic horror presentation and interaction language. Give ne
 4. Audit existing support. A selectable film can have generic lore, partial rules or name-only cards without verified effects or Play controls. Identify what is already correct, what the photos correct, what must be added and what remains unknown.
 5. Briefly state consequential uncertainties and the intended integration. Continue authorized independent work; request only the particular missing photo/crop or decision needed to resolve a real blocker. Do not repeatedly seek approval for routine implementation choices.
 
+## Presentation decisions to settle in the plan
+
+Apply the [standard's latest refinements](MODULE_STANDARD.md), using the recent [Tormentor](imports/tormentor.md)/[Warehouse](imports/marrek-warehouse.md), [Wolf](imports/big-bad-wolf.md)/[Woods](imports/storybook-woods.md) and [Intruders](imports/the-intruders.md)/[Cottage](imports/wingard-cottage.md) records as relevant examples. Preserve source-specific mechanics; do not copy intermediate designs or add a new workflow framework.
+
+- For each visible control, state its player purpose, smallest useful recorded fact and direct interaction. Name the details deliberately left on the physical board. Do not require endpoints, optional names, locations or a second status dropdown merely because the catalog/domain can store them. Keep genuinely necessary consequences and choices.
+- Plan the whole card lifecycle, including inactive, unknown, active, multiple-active, resolved and restored states where legal. Specify stable responsive size/order, explicit outcome corrections and click-to-return from Left play. Resolve label/control duplication before coding.
+- Plan all meaningful image variants and identity constraints before generating the set. Include held/available, saved/killed, or apparatus outcome variants where applicable, with distinct state art and the correct female hands/body for a Final Girl. Preserve the selected identity and mixed-casting boundaries. Wingard's blueprint/craft/use flow is a mechanic-specific example, not a general inventory requirement.
+- Keep the existing hardest-interaction pilot, then inspect the complete populated panel and every actual image crop before handoff. The owner record names the reviewed states/surfaces and fixes; generated files, asset hashes, a pilot screenshot and passing overflow tests alone do not establish finished visual quality.
+
 ## Source verification and corrections
 
 Use the supplied physical components as evidence for their edition and mode. Check both sides where relevant: killer board and pre-Finale action line, special rules/setup, regular and Epic Dark Powers, Finales, Minor Powers, Terror cards, location board and named spaces, Setups, Events, Items, special tokens/characters and reference cards. Include Final Girl facts only when part of the requested import. Standard mode is the default; distinguish any supplied Extreme Horror, scenario or variant content explicitly.

@@ -54,8 +54,8 @@ Mark each row done with evidence, inapplicable with a reason, or partial/blocked
 
 - Shared controls/capabilities used:
 - Mechanic-specific exceptions and rules justification:
-- Meaningful visible states, corrections and Undo behavior:
-- Required consequences/linked previews retained and reason; redundant Rules/setup/reminders omitted:
+- Whole-card lifecycle: legal inactive/unknown/active/multiple/resolved/restored states, stable size/order, explicit outcome corrections, Left play restoration and Undo:
+- Player purpose and minimum useful observation for each tracker; required consequences/linked previews retained and reason; board details, redundant inputs/Rules/setup/reminders omitted:
 - Assets/atlas mapping and reviewed crops (link art README):
 - Fit with the current card, death-dialog and ending standards:
 
@@ -80,7 +80,8 @@ Link the owner's asset README; use rows for every required image/state or unambi
 
 - Verified physical track range and state-image mapping; unverified fallback/legacy handling:
 - Existing art deliberately retained and reason:
-- Actual loaded laptop/phone comparison to the approved pack; fixes and remaining gaps:
+- Complete visible state-art set (as applicable: held/available, recipe/crafted, saved/killed, active/deactivated/sprung); identity continuity and female Final Girl hands/body constraints:
+- Actual loaded laptop/phone comparison to the approved pack: every distinct image in each named surface, including shallow crops; complete-panel review for tiny images, duplicate controls, inconsistent sizing and clipped internal bounds; fixes and remaining gaps:
 
 ## Verification evidence
 
