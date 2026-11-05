@@ -350,7 +350,7 @@ it('Evomorph legacy visibility stays unknown until explicitly observed, without 
 it('compact character pictures activate and reactivate Left play, preserve terminal outcomes, and omit status editors',()=>{
  const observe=vi.fn();
  const states=[{value:'in-play',label:'In play'},{value:'saved',label:'Saved'},{value:'killed',label:'Killed'},{value:'left',label:'Not in play'}];
- const props={name:'Crew',present:'in-play',states,art,onChange:observe,outcomes:['saved','killed','left'],showRules:false,showStatusEditor:false,reactivateFrom:['left']};
+ const props={name:'Crew',present:'in-play',states,art,onChange:observe,outcomes:['saved','killed','left'],showRules:false,showStatusEditor:false};
  const view=render(<CharacterControl {...props}/>);
  fireEvent.click(screen.getByRole('button',{name:'Add Crew'}));expect(observe).toHaveBeenLastCalledWith('in-play');
  for(const value of ['saved','killed']){

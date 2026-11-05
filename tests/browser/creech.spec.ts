@@ -82,3 +82,30 @@ test('legacy Rope Ladder stays unknown until clicked, and hunter disclosure does
  await expect(page.getByRole('button',{name:'Save one victim',exact:true})).toContainText('2');await expect(page.getByRole('button',{name:'Record one victim killed',exact:true})).toContainText('3');
  await undoLatestObservation(page);await expect(panel.getByRole('button',{name:'View Blue Ghost Hunter',exact:true})).toContainText('In play');
 });
+
+
+test('a hunter who left play returns by portrait without resetting group history or victim totals',async({page,archive},info)=>{
+ await archive.install(page,{draft});await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'creech');
+ const panel=page.locator('[data-module="creech"]');
+ await panel.getByRole('button',{name:'View Ghost Hunters',exact:true}).click();
+ await panel.getByRole('button',{name:'Record participating hunters',exact:true}).click();
+ await panel.getByRole('button',{name:'View Orange Ghost Hunter',exact:true}).click();
+ await panel.getByText('Correct hunter status',{exact:true}).click();
+ await panel.getByRole('combobox',{name:'Orange Ghost Hunter status',exact:true}).click();
+ await page.getByRole('option',{name:'Left play',exact:true}).click();
+ const restore=panel.getByRole('button',{name:'Restore Orange Ghost Hunter',exact:true});
+ await expect(restore).toContainText('Left play');
+ await expect(restore.locator('.play-module-art')).toHaveCSS('filter',/grayscale\(1\)/);
+ const before=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents,key);
+ await restore.click();
+ await expect(panel.getByRole('button',{name:'View Orange Ghost Hunter',exact:true})).toContainText('In play');
+ const after=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents,key);
+ expect(after).toHaveLength(before.length+1);
+ expect(after.at(-1).moduleData).toEqual({module:'creech',changes:{'hunter.orange':'in-play'}});
+ await undoLatestObservation(page);await expect(restore).toContainText('Left play');
+ await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'creech');
+ await settled(page);await panel.getByRole('region',{name:'Ghost Hunters',exact:true}).screenshot({path:info.outputPath('hunter-left-play.png'),animations:'disabled',style:'.app-footer{visibility:hidden}'});
+ await restore.press('Enter');
+ await expect(panel.getByRole('button',{name:'View Orange Ghost Hunter',exact:true})).toContainText('In play');
+ await expect(panel.getByRole('button',{name:'View Ghost Hunters',exact:true})).toContainText('Will not follow yet');
+});

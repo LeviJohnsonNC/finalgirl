@@ -63,7 +63,7 @@ export function IntruderRoster({events,onEvent}:{events:PlayEvent[];onEvent:Cont
               setInput(undefined);
             }}>
             <img src={intruderArt(id).src} alt="" />
-            <span className="intruder-portrait-label"><strong>{name}</strong><small>{fate}</small></span>
+            <span className="intruder-portrait-label"><strong>{name}</strong>{out&&<small>{fate}</small>}</span>
           </button>;
         })}
       </div>

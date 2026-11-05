@@ -8,7 +8,7 @@ export interface CharacterState {
   value: string;
   label: string;
 }
-/** Portraits add or disclose. Outcomes and corrections are deliberate actions. */
+/** Portraits add, restore Left play, or disclose. Outcomes remain explicit. */
 export function CharacterControl({
   name,
   value,
@@ -51,7 +51,7 @@ export function CharacterControl({
   const id = useId();
   const current = states.find((state) => state.value === value);
   const active = value === present;
-  const addable = !value || reactivateFrom.includes(value);
+  const addable = !value || ["left", "left-play", "away"].includes(value) || reactivateFrom.includes(value);
   const outcomesEnabled = active || (allowOutcomeCorrections && outcomes.includes(value ?? ""));
   const discloses = !addable && showStatusEditor;
   return (
