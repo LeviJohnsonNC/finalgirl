@@ -98,7 +98,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   'The Hunter': {
     narrativeNote:
-      'A cold, futuristic assassin from another time who uses advanced tech and a targeting visor. Methodical and relentless — it does not feel fear or pain in the conventional sense.',
+      'The Hunter begins as Mark V, a red-hooded, blue-jacketed cybernetic assassin. Its three initial cybernetic parts are damaged and removed instead of ordinary Health. When shut down it leaves recoverable parts and a two-token countdown before the female android Mark X arrives. Mark V can be repaired as an Ally; if that Ally is permanently destroyed it cannot be repaired again. Mark X has the 15-Health track. Keep the two models, their identities, reveal paths, recorded damage and fates distinct. Never invent an arrival, part recovery, repair, attack, or injury.',
   },
 
   'Razorface': {
