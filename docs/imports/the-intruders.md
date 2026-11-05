@@ -85,3 +85,8 @@ Open physical-rule boundary: the supplied pages demonstrate the standard single 
 ### Play tracker follow-up
 
 Tap a living portrait to make that Intruder active. The active portrait occupies half the image area, and the other two share the second column. Health uses the standard tracker controls. Reducing an Intruder to zero exposes any necessary outcome choice in that moment. An already downed portrait can reopen its pending result. Release the Beast retains all-living-active behavior and lets the player choose whose health to edit.
+
+
+### Fixed portrait row
+
+The three Intruders keep their canonical order in equal columns. Only active living Intruders are in color, including all eligible figures under Release the Beast. Inactive and downed figures are grey. Per-person focal positions preserve the masks in the narrow crops. The health editor continues to follow the chosen figure in all-active mode.

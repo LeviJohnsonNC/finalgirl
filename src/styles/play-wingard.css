@@ -29,8 +29,8 @@
   .wingard-heading:has(.wingard-recipe-links) { flex-wrap:wrap; }
   .wingard-recipe-links { justify-content:flex-start; }
 }
-.wingard-recorded { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr)); gap:.75rem; margin-top:.65rem; }
-.wingard-recipe-card { min-width:0; width:100%; max-width:465px; }
+.wingard-recorded,.wingard-events { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,380px),1fr)); gap:.75rem; margin-top:.65rem; align-items:start; }
+.wingard-recipe-card,.wingard-events > article { min-width:0; width:100%; }
 .wingard-controls .wingard-recipe-card .play-illustrated-tile:disabled,
 .wingard-controls .wingard-person .play-illustrated-tile:disabled { opacity:1; }
 .wingard-controls .wingard-recipe-card .play-tile-caption { bottom:26px; }
@@ -39,9 +39,10 @@
 .wingard-controls .wingard-craft-action { font-size:.82rem; }
 .wingard-space-choices { max-height:155px; overflow:auto; align-content:start; }
 .wingard-controls .wingard-recipes { align-items:start; }
-.wingard-controls .wingard-person[data-state=present] { grid-column:1/-1; width:100%; max-width:465px; }
 .wingard-controls .wingard-person:is([data-state=present],[data-state=saved],[data-state=killed]) .play-module-art { filter:none; }
 .wingard-controls .wingard-person:is([data-state=unrecorded],[data-state=left]) .play-module-art { filter:grayscale(1) brightness(.55); }
 .wingard-scooter { position:relative; }
 .wingard-scooter-clear { position:absolute; top:0; right:0; padding:0 .5rem; background:#150f0dd9; }
 .play-module-content .wingard-controls .module-control-tile > img[src*="slingshot-blueprint"] { background:#102631; }
+
+.play-module-content .wingard-controls .wingard-events .module-control-tile { height:auto; min-height:82px; aspect-ratio:16/9; }

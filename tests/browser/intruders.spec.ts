@@ -18,8 +18,13 @@ test('Intruders worked example, direct portrait activation, loaded artwork and f
   await expect(roster.getByRole('button',{name:'Trish',exact:true})).toHaveAttribute('data-active','true');
   await roster.getByRole('button',{name:'Baghead',exact:true}).click();
   await expect(roster.getByRole('button',{name:'Baghead',exact:true})).toHaveAttribute('data-active','true');
-  expect(await roster.getByRole('button',{name:'Baghead',exact:true}).evaluate(button=>button.getBoundingClientRect().height))
-    .toBeGreaterThan(await roster.getByRole('button',{name:'Trish',exact:true}).evaluate(button=>button.getBoundingClientRect().height));
+  const portraits=roster.locator('.intruder-portraits > button');
+  expect(await portraits.evaluateAll(buttons=>buttons.map(button=>button.getAttribute('aria-label')))).toEqual(['Trish','Baghead','Zeke']);
+  const boxes=await portraits.evaluateAll(buttons=>buttons.map(button=>{const box=button.getBoundingClientRect();return {top:box.top,width:box.width};}));
+  expect(new Set(boxes.map(box=>box.top)).size).toBe(1);
+  expect(Math.max(...boxes.map(box=>box.width))-Math.min(...boxes.map(box=>box.width))).toBeLessThan(1);
+  await expect(roster.getByRole('button',{name:'Baghead',exact:true}).locator('img')).toHaveCSS('filter','none');
+  await expect(roster.getByRole('button',{name:'Trish',exact:true}).locator('img')).toHaveCSS('filter',/grayscale\(1\)/);
   await roster.getByRole('button',{name:'Trish',exact:true}).click();
   await roster.getByRole('button',{name:'Edit Trish health'}).click();
   await roster.getByRole('spinbutton',{name:'Set Trish health'}).fill('1');
@@ -55,6 +60,7 @@ test('Intruders worked example, direct portrait activation, loaded artwork and f
   await expect(panel.getByRole('region',{name:'Dark Power selection',exact:true})).toContainText('Won’t Stay Down');
   await expect(remember.getByRole('combobox',{name:'Dark Power card'})).toHaveCount(0);
   await expect(roster.getByText('All Killers Active')).toBeVisible();
+  for(const name of ['Trish','Baghead','Zeke'])await expect(roster.getByRole('button',{name,exact:true}).locator('img')).toHaveCSS('filter','none');
   await expect(roster.getByRole('button',{name:'Shift Active Killer up'})).toHaveCount(0);
   for(const [width,height] of info.project.name==='mobile'?[[390,844],[320,568]]:[[1280,640],[1366,768],[1440,900]]){
     await page.setViewportSize({width,height});

@@ -6,8 +6,7 @@
 }
 .intruder-portraits {
   display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
-  grid-template-rows: repeat(2,minmax(0,1fr));
+  grid-template-columns: repeat(3,minmax(0,1fr));
   min-height: 164px;
   gap: 2px;
   flex: 1 0 auto;
@@ -24,9 +23,10 @@
   color: #f5e8d5;
   text-align: left;
 }
-.intruder-portraits button:first-child { grid-row: span 2; }
 .intruder-portraits button:focus-visible { outline: 2px solid #e2c592; outline-offset: -2px; }
-.intruder-portraits button[data-out=true] img { filter: grayscale(.85) brightness(.55); }
+.intruder-portraits button[data-active=false] img { filter: grayscale(1) brightness(.55); }
+.intruder-portraits button[data-active=true] img { filter: none; }
+.intruder-portraits button[data-out=true] img { filter: grayscale(1) brightness(.4); }
 .intruder-portraits img {
   position: absolute;
   z-index: -2;
@@ -36,7 +36,9 @@
   object-fit: cover;
   object-position: center 33%;
 }
-.intruder-portraits button:first-child img { object-position: center 28%; }
+.intruder-portraits [data-intruder=trish] img { object-position: 50% 21%; }
+.intruder-portraits [data-intruder=baghead] img { object-position: 52% 30%; }
+.intruder-portraits [data-intruder=zeke] img { object-position: 49% 29%; }
 .intruder-portraits button::before {
   content: '';
   position: absolute;

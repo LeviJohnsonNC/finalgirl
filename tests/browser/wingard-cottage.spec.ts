@@ -89,13 +89,17 @@ test('Wingard legacy state, retry, Undo, live Events and death replay',async({pa
   const neighbor=panel.locator('.wingard-person').filter({hasText:'Neighbor'});
   const inactiveWidth=(await neighbor.boundingBox())!.width;
   await panel.getByRole('button',{name:'Add Neighbor',exact:true}).click();
-  expect((await neighbor.boundingBox())!.width).toBeGreaterThan(inactiveWidth);
+  expect((await neighbor.boundingBox())!.width).toBeCloseTo(inactiveWidth);
   await expect(neighbor.locator('img')).toHaveCSS('filter','none');
   await panel.getByRole('button',{name:/Boat.*At the lake/}).click();
   await statusPick(page,panel.getByRole('combobox',{name:'Boat party size including the Neighbor'}),'4');
   await panel.getByRole('button',{name:'Record boat escape',exact:true}).click();
   await expect(panel.getByRole('button',{name:/Boat escape/})).toContainText('4 saved');
   await expect(neighbor.locator('img')).toHaveAttribute('src',/neighbor-saved/);
+  expect((await neighbor.boundingBox())!.width).toBeCloseTo(inactiveWidth);
+  const outsider=panel.locator('.wingard-person').filter({hasText:'Outsider'});
+  expect((await outsider.boundingBox())!.width).toBeCloseTo(inactiveWidth);
+  await panel.screenshot({path:info.outputPath('wingard-event-grid.jpg'),animations:'disabled',style:'.app-footer{visibility:hidden}'});
   await expect(alarm).toContainText('1/3 blocked');
   await page.reload();
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
