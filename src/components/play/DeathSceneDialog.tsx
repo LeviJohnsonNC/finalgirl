@@ -104,6 +104,8 @@ export function DeathSceneDialog({
 
 const {characterImages}=useActiveImages();
   const facts = deathFacts(selection, events, eventId);
+  const hunterDeathPhase=hunterState(hunterModuleState(hunterSummary(events.slice(0,events.findIndex(e=>e.id===eventId)+1)).entries,'hunter')).phase;
+  const hunterDeathPhoto={unknown:'header','mark-v':'mark-v',countdown:'mark-v-shutdown','mark-x':'mark-x'}[hunterDeathPhase];
   const initial: PlayDetails = {
     room: facts?.room ?? "",
     cause: facts?.cause ?? "unspecified",
@@ -346,7 +348,7 @@ const {characterImages}=useActiveImages();
                     }
                   }}
                 >
-                  {selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterState(hunterModuleState(hunterSummary(events.slice(0,events.findIndex(e=>e.id===eventId)+1)).entries,'hunter')).phase==='mark-x'?'mark-x':'mark-v')}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
+                  {selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
                     :cause==='event'&&cottageEvent ? <ModuleArtwork art={wingardArt(cottageEvent.id,true)} />
                     :selection.killer===INTRUDERS&&cause==='killer'
                     ? <ModuleArtwork art={intruderArt(INTRUDER_ROSTER.find(p=>p.name===values.attacker)?.id??'header')} />

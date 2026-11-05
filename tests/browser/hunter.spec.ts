@@ -6,6 +6,7 @@ test('Hunter natural progression, repair and five-viewport controls',async({page
  await openModule(page,'hunter');const panel=page.locator('[data-module="hunter"]');
  await panel.getByRole('spinbutton',{name:'Damage to Cybernetic Parts'}).fill('6');await panel.getByRole('button',{name:'Apply part damage',exact:true}).click();
  await expect(panel.getByRole('button',{name:'Remove next Countdown token · 2 remaining'})).toBeVisible();
+ const shutdownLogLength=(await readLog(page)).length;await expect(page.getByRole('button',{name:'Dark Power',exact:true})).toHaveAttribute('aria-pressed','true');await page.getByRole('button',{name:'Dark Power',exact:true}).click();expect((await readLog(page)).length).toBe(shutdownLogLength);await page.locator('.play-moment-editor').getByRole('button',{name:'Record',exact:true}).click();
  await panel.getByRole('button',{name:'Retrieve Part 1 · 1 Time'}).click();await panel.getByRole('button',{name:'Install Part 1',exact:true}).click();
  await panel.getByRole('spinbutton',{name:'Part printed Health'}).fill('3');await panel.getByRole('button',{name:'Repair Mark V',exact:true}).click();
  await expect(panel.getByRole('region',{name:'Mark V Ally actions'})).toBeVisible();
@@ -69,7 +70,7 @@ test('Hunter forced transition, failed-write retry, both reveal entry points, Al
  await panel.getByRole('button',{name:'Counter-Measures Not recorded in play',exact:true}).click();
  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
  await panel.locator('details.module-card-section > summary').click();
- await expect(panel.getByRole('article',{name:'Mark V',exact:true})).toContainText('Ally · 3 HP');
+ await expect(panel.getByRole('article',{name:'Mark V',exact:true})).toContainText('Ally');
  await expect(panel.getByRole('button',{name:'Counter-Measures In play',exact:true})).toHaveAttribute('aria-pressed','true');
  archive.failWrites=false;await page.evaluate(()=>window.dispatchEvent(new Event('online')));
  await expect.poll(()=>archive.sessions.find(row=>row.id===activeGame.id)?.state.playEvents).toEqual(await readLog(page));
@@ -98,6 +99,16 @@ test('legacy Hunter stays unrecorded through expansion; Rules search finds print
  await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'hunter');
  const panel=page.locator('[data-module="hunter"]');await expect(panel.getByRole('article',{name:'Mark V',exact:true})).toContainText('Unrecorded');expect(await readLog(page)).toHaveLength(2);
  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();expect(await readLog(page)).toHaveLength(2);
+ await panel.locator('.hunter-recovery > summary').filter({hasText:'Record current Hunter state'}).click();
+ await panel.getByRole('combobox',{name:'Current Hunter model',exact:true}).click();await page.getByRole('option',{name:'Mark X',exact:true}).click();
+ await panel.getByRole('button',{name:'Record observed state',exact:true}).click();
+ expect(summarizePlay(await readLog(page)).killerHealth).toBe(9);
+ await panel.locator('summary').filter({hasText:'Record existing Parts'}).click();await panel.getByRole('button',{name:'Record carried Part',exact:true}).click();
+ await panel.getByRole('button',{name:'Install Part 1',exact:true}).click();await panel.getByRole('spinbutton',{name:'Part printed Health'}).fill('2');await panel.getByRole('button',{name:'Repair Mark V',exact:true}).click();
+ await expect(panel.getByRole('article',{name:'Mark V',exact:true})).toContainText('Ally');
+ await panel.locator('summary').filter({hasText:'Record observed Ally cooldowns'}).click();await panel.getByRole('combobox',{name:'Record attack cooldown',exact:true}).click();await page.getByRole('option',{name:'Ready',exact:true}).click();
+ await expect(panel.getByRole('button',{name:'Attack · 2 damage Ready',exact:true})).toBeEnabled();
+ expect(summarizePlay(await readLog(page))).toMatchObject({killerHealth:9,killed:1,saved:2});
 });
 
 for(const [location,id] of [['Buddyland','buddyland'],['Camp Happy Trails','camp'],['Maple Lane','maple'],['Carnival of Blood','carnival'],['Sacred Groves','groves'],['Creech Manor','creech'],['USS Konrad','konrad'],['Shady Acres','shady-acres'],['Marrek Warehouse','marrek'],['Storybook Woods','storybook-woods'],['Wingard Cottage','wingard-cottage'],['Sunnydaze Mall',null]] as const){

@@ -1,4 +1,4 @@
-import { HUNTER, hunterState } from '@/lib/play/hunter';
+import { HUNTER, hunterState, hunterHasReveal } from '@/lib/play/hunter';
 import { useState } from "react";
 import { WOLF } from "@/lib/play/bigBadWolf";
 import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
@@ -115,7 +115,7 @@ export function KillerCards({
           const selected = cards.find(
             (card) => card.name === reveal?.killerCard,
           );
-          const forced=type==='finale'&&hunter?.forced;
+          const autoRevealed=hunter&&hunterHasReveal(hunter,type);
           const label = type === "dark-power" ? "Dark Power" : "Finale";
           return (
             <section
@@ -126,7 +126,7 @@ export function KillerCards({
               aria-label={`${label} selection`}
             >
               <h3>{label}</h3>
-              {(reveal || forced) && !selected && (
+              {(reveal || autoRevealed) && !selected && (
                 <p className="module-control-help">
                   {reveal?.killerCard || "Card name not specified"}
                 </p>
@@ -145,14 +145,14 @@ export function KillerCards({
                   choose={(name) => choose(type, name)}
                 />
               )}
-              <button
+              {(reveal||!autoRevealed)&&<button
                 className="module-unnamed"
                 disabled={disabled}
                 onClick={() => choose(type, "")}
                 aria-label={`${reveal ? "Clear" : "Record"} ${label} card name`}
               >
                 {reveal ? "Clear card name" : "Reveal without a card name"}
-              </button>
+              </button>}
             </section>
           );
         },

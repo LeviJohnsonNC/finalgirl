@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {HUNTER,HUNTER_TERRORS,HUNTER_MINORS,HUNTER_POWERS,HUNTER_FINALES,HUNTER_ACTIONS,initialHunter,hunterState,hunterParent,resolveHunterAction,hunterReview,hunterReviewFacts,type HunterAction} from './hunter';
+import {HUNTER,HUNTER_TERRORS,HUNTER_MINORS,HUNTER_POWERS,HUNTER_FINALES,HUNTER_ACTIONS,hunterHasReveal,initialHunter,hunterState,hunterParent,resolveHunterAction,hunterReview,hunterReviewFacts,type HunterAction} from './hunter';
 import {newPlayEvent,summarizePlay,validPlayLog,canUndoHunter,playStoryBeats,type PlayEvent} from './events';
 import {moduleState,moduleStoryBeats,validModuleObservation,killerMomentCards} from './modules';
 import {deathFacts,deathSignature} from './death';
@@ -26,11 +26,12 @@ describe('Hunter photographed mechanics',()=>{
   expect(killerMomentCards(HUNTER,'dark-power')).toHaveLength(4);
   expect(applicablePlayCards({killer:HUNTER,location:'Maple Lane'},'terror').filter(c=>c.killer===HUNTER)).toHaveLength(HUNTER_TERRORS.length);
  });
+ it('pins the photographed conditional Terror order and distinct roll targets',()=>{const card=(id:string)=>HUNTER_TERRORS.find(c=>c.id===id)!.effect;expect(card('impersonation-mode')).toContain('Make a Horror roll');expect(card('impersonation-mode')).toContain('move yourself');expect(card('move-or-be-eliminated')).toContain('move twice');expect(card('terminate-obstacles')).toContain('Then target the Final Girl and move');expect(card('counter-measures')).toContain('a Victim');expect(card('terminate-mark-v')).toContain('After that movement');expect(card('hunter-mark-x')).toContain('before discarding');expect(HUNTER_FINALES[0].effect).toContain('recover one Health');});
  it('combines damage within a phase, clears partial damage, shuts down and arrives naturally without Finale',()=>{
   const s=session();s.act({command:'damage',value:1});expect(s.state().remaining).toBe(3);s.act({command:'end-action'});
   expect(s.state().damage).toBe(0);s.act({command:'damage',value:3});expect(s.state()).toMatchObject({remaining:2,damage:1});
   s.act({command:'damage',value:3});expect(s.state()).toMatchObject({phase:'countdown',remaining:0,countdown:2});
-  expect(s.state().parts).toHaveLength(3);expect(s.next({command:'damage',value:1})).toBeUndefined();
+  expect(hunterHasReveal(s.state(),'dark-power')).toBe(true);expect(s.state().parts).toHaveLength(3);expect(s.next({command:'damage',value:1})).toBeUndefined();
   s.act({command:'countdown'});expect(s.state().phase).toBe('countdown');
   const arrival=s.act({command:'countdown'});expect(s.state()).toMatchObject({phase:'mark-x',countdown:0,forced:false});
   expect(summarizePlay(s.log)).toMatchObject({bloodlust:2,killerHealth:15,killed:0,saved:0});
@@ -87,7 +88,7 @@ describe('Hunter photographed mechanics',()=>{
   expect(s.next({command:'force-mark-x'})).toBeUndefined();
   s.act({command:'recover',phase:'mark-v',remaining:2,countdown:2,ally:'unrepaired',health:0});expect(s.state().remaining).toBe(2);expect(summarizePlay(s.log).killerHealth).toBe(9);
  });
- it('does not overwrite old Mark X Health when recording a legacy model',()=>{const s=session(false);s.log.push(newPlayEvent({kind:'state',field:'killerHealth',value:9}));s.act({command:'recover',phase:'mark-x',remaining:0,countdown:0,ally:'unrepaired',health:0});expect(summarizePlay(s.log).killerHealth).toBe(9);});
+ it('does not overwrite old Mark X Health when recording a legacy model',()=>{const s=session(false);s.log.push(newPlayEvent({kind:'state',field:'killerHealth',value:9}));s.act({command:'recover',phase:'mark-x',remaining:0,countdown:0,ally:'unrepaired',health:0});expect(summarizePlay(s.log).killerHealth).toBe(9);s.act({command:'record-part',status:'backpack'});s.act({command:'repair',part:1,value:2});expect(s.state()).toMatchObject({ally:'alive',allyHealth:2});s.act({command:'cooldown',action:'attack',value:0});s.act({command:'use',action:'attack'});expect(s.state().cooldowns.attack).toBe(2);expect(summarizePlay(s.log).killerHealth).toBe(9);});
  it('freezes each new death model at its raw log prefix; legacy signatures do not acquire Hunter state',async()=>{
   const s=session();const selection={killer:HUNTER,location:'Maple Lane',finalGirl:'Ginny'};
   const legacy=newPlayEvent({kind:'killed',quantity:1});s.log.push(legacy);

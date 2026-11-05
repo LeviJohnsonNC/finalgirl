@@ -10,7 +10,7 @@ export const HUNTER_POWERS = [
  {id:'minigun',name:'M134 Minigun Armament',epic:true,effect:'Mark V attacks at range 0–1; Reaction cards cannot be played against attacks at range 1. Ally: attacks deal one additional damage and have range 0–1.'},
 ] as const;
 export const HUNTER_FINALES = [
- {id:'relentless-pursuit',name:'Relentless Pursuit',effect:'On reveal, increase Bloodlust by 6. Target the Final Girl, move, then attack.'},
+ {id:'relentless-pursuit',name:'Relentless Pursuit',effect:'On reveal, increase Bloodlust by 6. Killer action: recover one Health, then target the Final Girl, move and attack.'},
  {id:'termination-mode',name:'“Termination Mode... Active”',effect:'Increase Bloodlust by 1. Target the Final Girl, move, then attack twice.'},
  {id:'adaptive-ai',name:'Adaptive A.I.',effect:'Increase Bloodlust by 1. Target the Final Girl, move, then attack. Mark X attacks deal one additional damage. Damage from Mark V to Mark X is reduced by one, to a minimum of one.'},
 ] as const;
@@ -20,18 +20,18 @@ export const HUNTER_MINORS = [
 ] as const;
 const chase='Target the Final Girl, move, then attack.';
 export const HUNTER_TERRORS = [
- {id:'target-acquired',name:'“Target Acquired”',quantity:3,effect:'Increase Horror by 1. '+chase},
+ {id:'target-acquired',name:'“Target Acquired!”',quantity:3,effect:'Increase Horror by 1. '+chase},
  {id:'intimidation-mode',name:'“Intimidation Mode... Active!”',quantity:2,effect:'Target the Final Girl, move twice, then increase Horror by 2.'},
  {id:'system-reboot',name:'System Reboot',quantity:1,effect:'If Mark V is the Active Killer, add one Cybernetic Part to the Finale stack. If Mark X is the Active Killer, it recovers four Health.'},
- {id:'move-or-be-eliminated',name:'“Move or Be Eliminated”',quantity:1,effect:'Target the Final Girl and move. Kill one Victim in each space passed through, including the starting and ending spaces. Increase Bloodlust once per Victim killed, at most twice.'},
- {id:'terminate-obstacles',name:'“Eliminate All Obstacles”',quantity:1,effect:'Target the closest Final Girl, Victim or Ally and attack. Kill one Victim in each adjacent space. Increase Bloodlust once per Victim killed, at most twice.'},
- {id:'impersonation-mode',name:'“Impersonation Mode... Active”',quantity:1,effect:'Roll a die. On 1–2 deal one damage; on 3–4 move all Victims one space closer to the Hunter; on 5–6 move all Victims two spaces closer. Victims do not follow during either movement. Target the Final Girl and attack.'},
- {id:'counter-measures',name:'“Deploy Counter-Measures”',quantity:1,effect:'Put a Counter-Measure token in each adjacent space. Entering a token’s space causes you or an Ally to lose one Health, then discard that token. Increase Horror by 1.'},
+ {id:'move-or-be-eliminated',name:'“Move or Be Eliminated!”',quantity:1,effect:'Target the Final Girl and move twice. Kill one Victim in each space passed through, including the starting and ending spaces. Increase Bloodlust once per Victim killed, at most twice.'},
+ {id:'terminate-obstacles',name:'“Eliminate All Obstacles!”',quantity:1,effect:'Target the closest Final Girl, Victim or Ally and attack. Kill one Victim in each adjacent space. Increase Bloodlust once per Victim killed, at most twice. Then target the Final Girl and move.'},
+ {id:'impersonation-mode',name:'“Impersonation Mode... Active”',quantity:1,effect:'Make a Horror roll. With two or more successes, decrease Horror by one. With one success, move yourself one space closer to the Hunter; with no successes, move yourself two spaces closer. Victims do not follow either movement. Then target the Final Girl and attack.'},
+ {id:'counter-measures',name:'“Deploy Counter-Measures!”',quantity:1,effect:'Put a Counter-Measure token in each adjacent space. Entering a token’s space causes you, an Ally or a Victim to lose one Health, then discard that token. Increase Horror by 1.'},
  {id:'seen-this-person',name:'“Have You Seen This Person?”',quantity:1,effect:'If there are no Victims, discard this and draw the next Terror. Otherwise target the closest Victim and move twice. For each Victim in the Hunter’s space, lose one Time and increase Horror by 1.'},
  {id:'shock-awe',name:'Shock & Awe',quantity:1,effect:'Roll one fewer Horror die, to a minimum of one, for Reaction cards. '+chase},
- {id:'terminate-mark-v',name:'“Terminate Mark V”',quantity:1,effect:'If either model is not on the board, discard and draw the next Terror. If Mark X shares a space with unrepaired Mark V, remove Mark V and discard its Ally card. Otherwise Mark X targets Mark V, moves twice and attacks twice.'},
- {id:'analyze-weaknesses',name:'“Analyze... Targeting Weaknesses”',quantity:1,effect:chase+' For each damage you take, discard a random Action card from your hand.'},
- {id:'hunter-mark-x',name:'Hunter Mark X',quantity:1,special:true,effect:'If Mark V is active, immediately shut it down, raise Bloodlust to the top, drop all remaining Parts in its space and put its Dark Power beneath its Ally card; Minor Powers transfer to Mark X. If Mark X is absent, discard remaining Countdown tokens, draw a new Setup and place Mark X in its Killer starting space. Discard all remaining Terror cards and reveal the Finale.'},
+ {id:'terminate-mark-v',name:'“Terminate Mark V!”',quantity:1,effect:'If either model is not on the board, discard and draw the next Terror. Otherwise Mark X targets Mark V and moves twice. After that movement, if it shares a space with unrepaired Mark V, remove Mark V and discard its Ally card; otherwise Mark X targets Mark V and attacks twice.'},
+ {id:'analyze-weaknesses',name:'“Analyze... Targeting Weaknesses!”',quantity:1,effect:chase+' For each damage you take, discard a random Action card from your hand.'},
+ {id:'hunter-mark-x',name:'Hunter Mark X',quantity:1,special:true,effect:'If an effect would discard this card, resolve its effects before discarding it. If Mark V is active, immediately shut it down, raise Bloodlust to the top, drop all remaining Parts in its space and put its Dark Power beneath its Ally card; Minor Powers transfer to Mark X. If Mark X is absent, discard remaining Countdown tokens, draw a new Setup and place Mark X in its Killer starting space. Discard all remaining Terror cards and reveal the Finale.'},
 ] as const;
 export const HUNTER_BLOODLUST = [[1,1,'Start'],[1,1,''],[2,1,'Reveal Dark Power'],[2,1,'Increase Horror by 1'],[2,1,''],[2,1,'Increase Horror by 1'],[3,2,''],[3,2,'Increase Horror by 1'],[4,2,''],[5,2,'Increase Horror by 1'],[5,3,'']] as const;
 export const HUNTER_ACTIONS = [
@@ -68,14 +68,17 @@ export function parseHunter(value:unknown):HunterState|null {
 export const hunterState=(fields:Fields):HunterState=>parseHunter(fields.snapshot)??unknownHunter();
 export const hunterParent=(entries:readonly Entry[])=>[...entries].reverse().find(e=>e.moduleData?.module===HUNTER_MODULE)?.id??'root';
 export function hunterCard(entries:readonly Entry[],type:'dark-power'|'finale') {return entries.find(e=>e.kind==='moment'&&e.momentType===type)?.killerCard;}
+export const hunterHasReveal=(s:HunterState,type:string)=>type==='dark-power'&&['countdown','mark-x'].includes(s.phase)||type==='finale'&&s.forced;
 export const hunterMinorField=(id:string)=>`minor.${id}`;
 export function validHunterField(key:string,value:unknown) {
  if(key==='snapshot')return parseHunter(value)!==null;
+ if(key==='recovered')return value===true;
  if(key==='rebootCount')return n(value,1,999);
  return HUNTER_MINORS.some(c=>key===hunterMinorField(c.id)&&(value===null||n(value,0,c.health))) || ['counterMeasures','shockAwe'].includes(key)&&(value===null||typeof value==='boolean');
 }
 export type HunterAction={parent:string}&(
  |{command:'damage';value:number}
+ |{command:'record-part';status:'on-board'|'backpack'}
  |{command:'end-action'|'countdown'|'force-mark-x'|'reboot'|'upkeep'|'destroy-ally'}
  |{command:'pickup'|'drop';part:number}
  |{command:'repair';part:number;value:number}
@@ -90,6 +93,7 @@ export function validHunterAction(v:unknown):v is HunterAction {
  if(!v||typeof v!=='object')return false;const a=v as HunterAction;
  if(typeof a.parent!=='string'||! /^(root|[\da-f-]{36})$/i.test(a.parent))return false;
  switch(a.command){
+ case 'record-part':return a.status==='on-board'||a.status==='backpack';
  case 'damage':return n(a.value,1);
  case 'repair':return n(a.part,1)&&n(a.value,1);
  case 'pickup':case 'drop':return n(a.part,1);
@@ -114,6 +118,7 @@ export function resolveHunterAction(a:HunterAction,fields:Fields,entries:readonl
   Object.assign(s,{phase:a.phase,remaining:a.remaining,countdown:a.countdown,damage:0,ally:a.ally,allyHealth:a.ally==='alive'?a.health:0});
   if(a.ally==='alive'&&!a.health)return;
   break;
+ case 'record-part':if(fields.recovered!==true||s.phase==='unknown'||s.parts.length>=20)return;s.parts.push({id:Math.max(0,...s.parts.map(p=>p.id))+1,status:a.status,health:null});break;
  case 'damage':{
   if(s.phase!=='mark-v'||s.remaining===null||s.remaining<1||s.damage===null)return;
   const threshold=power===HUNTER_POWERS[0].name?3:2;
@@ -138,7 +143,7 @@ export function resolveHunterAction(a:HunterAction,fields:Fields,entries:readonl
  }
  if(s.parts.length>20)return;
  const snapshot=JSON.stringify(s);if(!parseHunter(snapshot))return;
- return {snapshot};
+ return {snapshot,...(a.command==='recover'?{recovered:true}:{})};
 }
 export type HunterReview=Pick<HunterState,'phase'|'ally'|'allyHealth'>;
 export function hunterReview(fields:Fields):HunterReview {const s=hunterState(fields);return {phase:s.phase,ally:s.ally,allyHealth:s.allyHealth};}
@@ -153,7 +158,7 @@ export function hunterFacts(fields:Fields,entries:readonly Entry[]=[]) {
  `Hunter: ${s.phase==='mark-v'?'Mark V active':s.phase==='countdown'?'Mark V shut down; Mark X absent':'Mark X active'}.`,
  s.phase==='mark-v'?`${s.remaining??'Unknown'} Cybernetic Parts remain.`:s.phase==='countdown'?`${s.countdown??'Unknown'} Countdown tokens remain.`:'',
  s.ally==='alive'?`Mark V is a repaired Ally with ${s.allyHealth} Health.`:s.ally==='destroyed'?'Mark V is permanently destroyed.':s.phase!=='mark-v'?'Mark V remains unrepaired.':'',
- power?`Mark V ${s.phase==='mark-v'?'Dark Power':'Ally ability'}: ${power}.`:'',finale?`Finale: ${finale}.`:s.forced?'Finale revealed; name unrecorded.':'',
+ power?`Mark V ${s.phase==='mark-v'?'Dark Power':'Ally ability'}: ${power}.`:s.phase!=='mark-v'?'Mark V Dark Power revealed; name unrecorded.':'',finale?`Finale: ${finale}.`:s.forced?'Finale revealed; name unrecorded.':'',
  ...HUNTER_MINORS.flatMap(c=>typeof fields[hunterMinorField(c.id)]==='number'?[`${c.name}: ${fields[hunterMinorField(c.id)]} Health.`]:[]),
  fields.counterMeasures===true?'Counter-Measures recorded on board.':'',fields.shockAwe===true?'Shock & Awe recorded in play.':'',
  ].filter(Boolean).join(' ');
@@ -162,8 +167,9 @@ export function hunterFacts(fields:Fields,entries:readonly Entry[]=[]) {
 export function describeHunterAction(a:HunterAction,fields:Fields):string {
  const s=hunterState(fields);
  switch(a.command){
+ case 'record-part':return `Recorded an existing Cybernetic Part · ${a.status}`;
  case 'damage':return `Applied ${a.value} damage to Mark V Parts${s.phase==='countdown'?' · Mark V shut down':''}`;
- case 'end-action':return 'Ended Action phase · cleared unfinished Part damage';
+ case 'end-action':return 'Ended phase · cleared unfinished Part damage';
  case 'countdown':return s.phase==='mark-x'?'Removed last Countdown token · Mark X arrived':'Removed one Countdown token';
  case 'force-mark-x':return 'Resolved Hunter Mark X Terror · Finale revealed';
  case 'pickup':return `Retrieved Cybernetic Part ${a.part}`;
