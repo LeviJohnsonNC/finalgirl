@@ -1,3 +1,4 @@
+import { WINGARD_VISUAL } from '../../supabase/functions/_shared/play/wingardCatalog';
 import { WOODS_VISUAL } from "../../supabase/functions/_shared/play/storybookWoods";
 import { GROVES_VISUAL } from "../../supabase/functions/_shared/play/groves";
 import { CARNIVAL_VISUAL } from '../../supabase/functions/_shared/play/carnival';
@@ -109,15 +110,7 @@ Key elements: Arctic or Antarctic tundra setting with heavy snow. Insulated modu
   
   // Once Upon a Full Moon
   "Storybook Woods": WOODS_VISUAL,
-  'Wingard Cottage': `A cozy, rustic stone and log cabin perched on a rocky shoreline, overlooking a glass-calm lake at dawn. The cabin is small and sturdy, featuring a prominent fieldstone chimney with a gentle wisp of white smoke trailing into the cool, overcast sky. The architecture is traditional and inviting, with cedar-shingle roofing and small, warm-lit windows that suggest a quiet life inside.
-
-In the foreground, a weathered wooden dock extends into the still water, holding an overturned aluminum rowboat that sits ready for a morning paddle. The lake's surface is perfectly reflective, marred only by a thin, ethereal layer of morning mist that clings to the waterline and the distant evergreen silhouettes.
-
-The surrounding environment is a dense, temperate coniferous forest. Ancient, moss-covered trees frame the scene, their branches draped in vibrant green lichen, highlighting the damp, fresh atmosphere of the Pacific Northwest or a similar boreal wilderness. The ground is a mix of rugged grey rock and soft forest floor, emphasizing the cabin's isolation and its harmony with the rugged landscape.
-
-The overall mood is one of profound stillness, solitude, and "hygge"—a sanctuary tucked away from the modern world, where the only sounds are the crackle of a hearth and the soft lap of water against the pier.
-
-Key elements: Isolated lakeside setting with heavy morning mist. Rustic stone and log cabin with a smoking chimney. Wooden dock with an overturned silver rowboat. Moss-draped evergreen forest framing the composition. Still, reflective water doubling the treeline and sky.`,
+  'Wingard Cottage': WINGARD_VISUAL,
 
   // The Falconwood Files
   'Falconwood': `A quiet, mid-century suburban cul-de-sac called Falconwood, where the architecture consists of modest two-story homes with vinyl siding, dark shutters, and neatly manicured lawns. The neighborhood feels settled and routine, frozen in a state of perpetual late-afternoon gloom under a heavy, overcast sky.

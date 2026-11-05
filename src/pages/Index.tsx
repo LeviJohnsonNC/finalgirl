@@ -152,6 +152,7 @@ const IndexContent = () => {
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
       coreTrackersVersion: 1,
       ...(selection.location === WOODS && {woodsSetupVersion:1 as const}),
+      ...(selection.location === 'Wingard Cottage' && {wingardSetupVersion:1 as const}),
       ...(selection.location === 'Marrek Warehouse' && {marrekSetupVersion:1 as const}),
       ...(selection.location === 'Shady Acres' && {shadySetupVersion:1 as const}),
       ...(selection.location === 'USS Konrad' && {konradSetupVersion:1 as const}),

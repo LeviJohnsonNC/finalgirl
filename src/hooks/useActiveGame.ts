@@ -1,3 +1,5 @@
+import { WINGARD, WINGARD_MODULE } from '../../supabase/functions/_shared/play/wingardCatalog';
+import { initialWingard, resolveWingardAction, wingardParent } from '../../supabase/functions/_shared/play/wingardCottage';
 import { WOODS, WOODS_MODULE, initialWoods, resolveWoodsAction, woodsParent } from "../../supabase/functions/_shared/play/storybookWoods";
 import { INTRUDERS, INTRUDER_MODULE, initialIntruders, intruderParent, resolveIntruderAction, sameIntruderChanges } from "@/lib/play/intruders";
 import { canUndoIntruder, validIntruderHistory } from "@/lib/play/events";
@@ -14,7 +16,7 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 import { readStoredValue, useLocalStorage } from './useLocalStorage';
-import { validPlayLog, canUndoMarrek, canUndoTormentor, canUndoShady, canUndoGrimlash, canUndoKonrad, canUndoEvomorph, canChangeDeathCount, isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
+import { validPlayLog, canUndoWingard, canUndoMarrek, canUndoTormentor, canUndoShady, canUndoGrimlash, canUndoKonrad, canUndoEvomorph, canChangeDeathCount, isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
 import { ActiveGame, isActiveGame } from '@/lib/activeGame';
 import { resolveCreechAction } from '../../supabase/functions/_shared/play/creech';
 import { mapleLinkedChange } from '../../supabase/functions/_shared/play/maple';
@@ -59,6 +61,9 @@ export function useActiveGame() {
       // owns uniqueness, including two taps arriving before React renders.
       if (isPermanentMoment(event) && summarizePlay(previous.playEvents).entries.some(entry => entry.kind === 'moment' && entry.momentType === event.momentType)) return previous;
       const log = previous.playEvents ?? [];
+      if(event.kind==='undo'&&!canUndoWingard(log,event.target!))return previous;
+      if(event.moduleData?.module===WINGARD_MODULE && (previous.selection.location!==WINGARD || !event.wingardAction))return previous;
+      if(event.wingardReference && previous.selection.location!==WINGARD)return previous;
       if(event.kind==='undo'&&!canUndoMarrek(log,event.target!))return previous;
       if (event.moduleData?.module === WOODS_MODULE && (previous.selection.location !== WOODS || !event.woodsAction)) return previous;
       if (event.woodsReference && previous.selection.location !== WOODS) return previous;
@@ -92,6 +97,7 @@ export function useActiveGame() {
       let accepted = event.kind === "killed"
         ? {...event,...(isIntruders && {intruderReference:true as const}),...(isWolf && {wolfReference:true as const}),...(previous.selection.location === WOODS && {woodsReference:true as const})}
         : event;
+      if(event.kind==='killed' && previous.selection.location===WINGARD)accepted={...accepted,wingardReference:true};
       if(previous.selection.killer==='Poltergeist' && ((event.kind==='state'&&event.field==='killerHealth') || (event.kind==='moment'&&event.momentType==='killer-revived'))) return previous;
       if (event.moduleData?.module === 'groves' && previous.selection.location !== 'Sacred Groves') return previous;
       if (event.linkedModule && !(event.moduleData?.module==='groves'&&previous.selection.location==='Sacred Groves'&&previous.selection.killer==='Inkanyamba') && !(event.moduleData?.module==='creech'&&previous.selection.location==='Creech Manor'&&previous.selection.killer==='Poltergeist')) return previous;
@@ -122,6 +128,9 @@ export function useActiveGame() {
       if (log.length === 0 && previous.woodsSetupVersion === 1 && previous.selection.location === WOODS) {
         const changes = initialWoods(previous.selection.startingEvent);
         if (changes) setup.push(newPlayEvent({kind:"module",moduleData:{module:WOODS_MODULE,changes}}));
+      }
+      if(log.length===0 && previous.wingardSetupVersion===1 && previous.selection.location===WINGARD) {
+        setup.push(newPlayEvent({kind:'module',moduleData:{module:WINGARD_MODULE,changes:initialWingard(previous.selection.startingEvent)}}));
       }
       // Only genuinely new sessions get starting tracker observations. Include
       // them in the first durable write; legacy unknowns and Undo stay unknown.
@@ -191,6 +200,13 @@ export function useActiveGame() {
         if (!changes) return previous;
         accepted = {...event,woodsAction:action,moduleData:{module:WOODS_MODULE,changes}};
       }
+      if(event.wingardAction) {
+        const entries=summarizePlay([...log,...baseline,...setup]).entries;
+        const action=log.length===0 && event.wingardAction.parent==='root' ? {...event.wingardAction,parent:wingardParent(entries)} : event.wingardAction;
+        const changes=resolveWingardAction(action,moduleState(entries,WINGARD_MODULE),entries);
+        if(!changes)return previous;
+        accepted={...event,wingardAction:action,moduleData:{module:WINGARD_MODULE,changes}};
+      }
       if(event.marrekAction){const entries=summarizePlay([...log,...baseline,...setup]).entries;const request=log.length===0&&event.marrekAction.parent==='root'?{...event.marrekAction,parent:marrekParent(entries)}:event.marrekAction;const changes=resolveMarrekAction(request,moduleState(entries,'marrek'),entries);if(!changes)return previous;accepted={...event,marrekAction:request,moduleData:{module:'marrek',changes}};}
       if(event.shadyAction){const entries=summarizePlay([...log,...baseline,...setup]).entries;const request=log.length===0&&event.shadyAction.parent==='root'?{...event.shadyAction,parent:shadyParent(entries)}:event.shadyAction;const changes=resolveShadyAction(request,moduleState(entries,'shady-acres'),entries);if(!changes)return previous;accepted={...event,shadyAction:request,moduleData:{module:'shady-acres',changes}};}
       if(event.grimlashAction) {const entries=summarizePlay([...log,...baseline,...setup]).entries;const request=log.length===0&&event.grimlashAction.parent==='root'?{...event.grimlashAction,parent:grimlashParent(entries)}:event.grimlashAction;const changes=resolveGrimlashAction(request,moduleState(entries,'grimlash'),entries);if(!changes)return previous;accepted={...event,grimlashAction:request,moduleData:{module:'grimlash',changes}};}
@@ -218,7 +234,7 @@ export function useActiveGame() {
       if (isIntruders && event.kind==='restore' && !validIntruderHistory([...log,...additions])) return previous;
       if ((event.moduleData?.module === WOODS_MODULE || event.kind === "undo" || event.kind === "restore") &&
           previous.selection.location === WOODS && !validPlayLog([...log,...additions])) return previous;
-      if([...log,...additions].some(e=>e.moduleData?.module==='marrek')&&!validPlayLog([...log,...additions]))return previous;
+      if([...log,...additions].some(e=>e.moduleData?.module==='marrek'||e.moduleData?.module===WINGARD_MODULE)&&!validPlayLog([...log,...additions]))return previous;
       if([...log,...additions].some(e=>e.moduleData?.module==='tormentor')&&!validPlayLog([...log,...additions]))return previous;
       if([...log,...additions].some(e=>e.moduleData?.module==='shady-acres')&&!validPlayLog([...log,...additions]))return previous;
       if([...log,...additions].some(e=>e.moduleData?.module==='grimlash')&&!validPlayLog([...log,...additions]))return previous;

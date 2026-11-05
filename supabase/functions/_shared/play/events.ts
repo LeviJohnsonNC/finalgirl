@@ -1,3 +1,5 @@
+import { WINGARD_MODULE } from './wingardCatalog.ts';
+import { isInitialWingard, resolveWingardAction, validWingardAction, wingardParent, describeWingardAction, type WingardAction } from './wingardCottage.ts';
 import { fitStoryFacts, fitStoryText } from './storyText.ts';
 import { storyTransitions } from './storyTransitions.ts';
 import { WOODS_MODULE, describeWoodsAction, isInitialWoods, resolveWoodsAction, validWoodsAction, woodsParent, type WoodsAction } from "./storybookWoods.ts";
@@ -89,6 +91,8 @@ export interface PlayEvent extends PlayDetails {
   intruderReference?: true;
   woodsAction?: WoodsAction;
   marrekAction?: MarrekAction;
+  wingardAction?: WingardAction;
+  wingardReference?: true;
   shadyAction?: ShadyAction;
   tormentorAction?: TormentorAction;
   grimlashAction?: GrimlashAction;
@@ -172,6 +176,9 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
        (!e.intruderAction && !sameIntruderChanges(e.moduleData.changes, initialIntruders())))) return false;
   if (e.woodsAction !== undefined && (e.kind !== "module" || e.moduleData?.module !== WOODS_MODULE || !validWoodsAction(e.woodsAction))) return false;
   if (e.moduleData?.module === WOODS_MODULE && (e.kind !== "module" || !validModuleObservation(e.moduleData) || (!e.woodsAction && !isInitialWoods(e.moduleData.changes)))) return false;
+  if(e.wingardReference!==undefined && (e.kind!=='killed' || e.wingardReference!==true))return false;
+  if(e.wingardAction!==undefined && (e.kind!=='module' || e.moduleData?.module!==WINGARD_MODULE || !validWingardAction(e.wingardAction)))return false;
+  if(e.moduleData?.module===WINGARD_MODULE && (e.kind!=='module' || !validModuleObservation(e.moduleData) || (!e.wingardAction && !isInitialWingard(e.moduleData.changes))))return false;
   if(e.marrekAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='marrek'||!validMarrekAction(e.marrekAction)))return false;
   if (e.woodsReference !== undefined && (e.kind !== "killed" || e.woodsReference !== true)) return false;
   if (e.moduleData?.module === "big-bad-wolf" && e.kind !== "module") return false;
@@ -260,7 +267,7 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validIntruderHistory(log) && validWoodsHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
 }
@@ -310,6 +317,28 @@ function validWoodsHistory(log: readonly PlayEvent[]) {
       const changes = resolveWoodsAction(event.woodsAction, moduleState(entries, WOODS_MODULE), entries);
       if (!changes || changes.snapshot !== event.moduleData!.changes.snapshot) return false;
     }
+  }
+  return true;
+}
+export function canUndoWingard(log:readonly PlayEvent[],target:string) {
+  const entries=summarizePlay(log).entries;
+  const event=entries.find(entry=>entry.id===target);
+  return event?.moduleData?.module!==WINGARD_MODULE || (!!event.wingardAction && wingardParent(entries)===target);
+}
+function validWingardHistory(log:readonly PlayEvent[]) {
+  if (!log.some(event=>event.moduleData?.module===WINGARD_MODULE)) return true;
+  for (const [index,event] of log.entries()) {
+    const prefix=log.slice(0,index);
+    const target=event.kind==='undo'||event.kind==='restore' ? prefix.find(entry=>entry.id===event.target) : undefined;
+    if(event.moduleData?.module!==WINGARD_MODULE && target?.moduleData?.module!==WINGARD_MODULE)continue;
+    const entries=summarizePlay(prefix).entries;
+    if(target) {
+      if(!target.wingardAction)return false;
+      const expected=event.kind==='undo'?target.id:target.wingardAction.parent;
+      if(wingardParent(entries)!==expected)return false;
+    } else if(!event.wingardAction) {
+      if(prefix.some(entry=>entry.moduleData?.module===WINGARD_MODULE) || !isInitialWingard(event.moduleData!.changes))return false;
+    } else if(resolveWingardAction(event.wingardAction,moduleState(entries,WINGARD_MODULE),entries)?.snapshot!==event.moduleData!.changes.snapshot) return false;
   }
   return true;
 }
@@ -472,7 +501,12 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       summary.inactive.add(original.id);
       continue;
     }
-    if(original.moduleData?.module==='marrek'&&original.marrekAction&&!resolveMarrekAction(original.marrekAction,moduleState(summary.entries,'marrek'),summary.entries)){summary.inactive.add(original.id);continue;}
+    if(original.moduleData?.module===WINGARD_MODULE && original.wingardAction &&
+        !resolveWingardAction(original.wingardAction,moduleState(summary.entries,WINGARD_MODULE),summary.entries)) {
+      summary.inactive.add(original.id);
+      continue;
+    }
+    if(original.moduleData?.module==='marrek' &&original.marrekAction&&!resolveMarrekAction(original.marrekAction,moduleState(summary.entries,'marrek'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='tormentor'&&original.tormentorAction&&!resolveTormentorAction(original.tormentorAction,moduleState(summary.entries,'tormentor'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='konrad'&&original.konradAction&&!resolveKonradAction(original.konradAction,moduleState(summary.entries,'konrad'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='shady-acres'&&original.shadyAction&&!resolveShadyAction(original.shadyAction,moduleState(summary.entries,'shady-acres'),summary.entries)){summary.inactive.add(original.id);continue;}
@@ -626,6 +660,7 @@ export function describeEvent(e: PlayEvent): string {
       return `${e.text}${e.killerCard ? `: ${e.killerCard}` : ""}${e.detail ? `${e.killerCard ? ". " : ": "}${e.detail}` : ""}`;
     case "module":
       if (e.woodsAction) return describeWoodsAction(e.woodsAction);
+      if (e.wingardAction) return describeWingardAction(e.wingardAction);
       return e.moduleData ? [describeModule(e.moduleData), e.linkedModule && describeModule(e.linkedModule)].filter(Boolean).join("; ") : "";
     default:
       return "";
@@ -663,6 +698,8 @@ export function playStoryBeats(
       (/^item\..+\.status$/.test(key) && value === 'carried') ||
       (/^buddy\..+\.status$/.test(key) && value === 'defeated') ||
       (/^victim\./.test(key) && value === 'killed'))) priority = 65;
+    if(e.wingardAction && ['craft','trigger'].includes(e.wingardAction.command)) priority=65;
+    if(e.wingardAction?.command==='person' && e.wingardAction.boatSaved)priority=75;
     const text = describeEvent(e).replace(/[—–]/g, ',');
     // A late qualification can reverse a note's meaning. Include it whole or omit it.
     return { index, priority, line: `${e.currentRound ? `Round ${e.currentRound}: ` : ''}${text}` };

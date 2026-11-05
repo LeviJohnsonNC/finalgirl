@@ -1,3 +1,4 @@
+import { WINGARD, WINGARD_EVENTS, WINGARD_TERRORS, WINGARD_ITEMS, WINGARD_PEOPLE, WINGARD_SPACES, WINGARD_SOURCE } from './wingardCatalog.ts';
 import { WOODS, WOODS_SOURCE, WOODS_EVENTS, WOODS_TERRORS, WOODS_ITEMS, WOODS_PEOPLE, WOODS_SPACES } from "./storybookWoods.ts";
 import { INTRUDERS, INTRUDER_SOURCE, INTRUDER_TERRORS } from "./intruders.ts";
 import { WOLF, WOLF_SOURCE, WOLF_TERRORS } from "./bigBadWolf.ts";
@@ -50,6 +51,8 @@ export const PLAY_CARDS: readonly PlayCard[] = [
   ...WOLF_TERRORS.map(card => ({ ...card, kind: "terror" as const, killer: WOLF, source: WOLF_SOURCE })),
  ...WOODS_TERRORS.map(card => ({...card,kind:"terror" as const,location:WOODS,source:WOODS_SOURCE})),
  ...WOODS_EVENTS.map(card => ({...card,kind:"event" as const,location:WOODS,source:WOODS_SOURCE})),
+ ...WINGARD_TERRORS.map(({fatal:_fatal,...card})=>({...card,kind:'terror' as const,location:WINGARD,source:WINGARD_SOURCE})),
+ ...WINGARD_EVENTS.map(card=>({...card,kind:'event' as const,location:WINGARD,source:WINGARD_SOURCE})),
  ...MARREK_TERRORS.map(c=>({...c,kind:'terror' as const})),
  ...MARREK_EVENTS.map(c=>({...c,kind:'event' as const,location:'Marrek Warehouse',source:MARREK_SOURCE})),
  ...SHADY_TERRORS.map(c=>({...c,kind:'terror' as const})),
@@ -197,8 +200,13 @@ export function findPlayCard(
 }
 /** Context-only Woods cards stay searchable as rules and accept historical free text. */
 export function suggestedDeathCards(selection: {killer:string;location:string}, kind: "terror" | "event") {
-  return applicablePlayCards(selection, kind).filter(card => card.location !== WOODS ||
-    (kind === "event" ? card.name === "Pied Piper" : WOODS_TERRORS.some(terror => "death" in terror && terror.name === card.name)));
+  return applicablePlayCards(selection, kind).filter(card => {
+    if(card.location===WINGARD)return kind==='event'
+      ? ['Booby Traps','Escape Attempt','Marked for Death','Loser Boyfriend'].includes(card.name)
+      : WINGARD_TERRORS.some(terror=>terror.fatal && terror.name===card.name);
+    if(card.location===WOODS)return kind==='event' ? card.name==='Pied Piper' : WOODS_TERRORS.some(terror=>'death' in terror && terror.name===card.name);
+    return true;
+  });
 }
 export function playCardContext(
   selection: { killer: string; location: string },
@@ -217,6 +225,7 @@ export function playCardContext(
 }
 export const PLAY_ROOMS: Record<string, readonly string[]> = {
  [WOODS]: WOODS_SPACES.map(space => space.name),
+ [WINGARD]:WINGARD_SPACES,
  'Marrek Warehouse':MARREK_SPACES.map(s=>s.name),
  'Shady Acres':SHADY_SPACES.map(s=>s.name),
   "Sacred Groves": GROVES_SPACES.filter(s=>s.type === "sacred" || s.type === "search").map(s=>s.name),
@@ -278,14 +287,14 @@ export function playMechanisms(selection: {
 export function playItems(
   location: string,
 ): readonly { name: string; effect: string }[] {
-  return location === WOODS ? WOODS_ITEMS : location === "Marrek Warehouse" ? MARREK_ITEMS : location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
+  return location === WOODS ? WOODS_ITEMS : location === WINGARD ? WINGARD_ITEMS : location === "Marrek Warehouse" ? MARREK_ITEMS : location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
     ? CAMP_ITEMS
     : location === "Buddyland"
       ? BUDDYLAND_ITEMS
       : [];
 }
 export function playVictims(location: string): readonly { name: string }[] {
-  return location === WOODS ? WOODS_PEOPLE : location === "Marrek Warehouse" ? MARREK_PEOPLE : location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
+  return location === WOODS ? WOODS_PEOPLE : location === WINGARD ? WINGARD_PEOPLE : location === "Marrek Warehouse" ? MARREK_PEOPLE : location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
     ? CAMP_VICTIMS
     : location === "Buddyland"
       ? SPECIAL_VICTIMS

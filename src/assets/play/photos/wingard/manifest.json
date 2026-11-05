@@ -1,0 +1,872 @@
+{
+  "header": {
+    "source": "exec-36b9bfd9-cdb1-4b86-b78f-82e17c8adce3.png",
+    "sourceSize": [
+      1699,
+      926
+    ],
+    "sourceSha256": "5e57c023b1fe1fe4b1b8c04736fcb2bef1766845e29493888bb002fef45699d9",
+    "hero": {
+      "file": "../../banners/wingard.webp",
+      "size": [
+        1500,
+        500
+      ],
+      "bytes": 87958,
+      "sha256": "7cade8af2eb32abfc2d6b6a09eafa6986cba63f1781d0b68c7504bb93c71b540"
+    },
+    "tile": {
+      "file": "header-tile.webp",
+      "size": [
+        400,
+        133
+      ],
+      "bytes": 9850,
+      "sha256": "a97f114b1cea43ae90b846da9951923c830fd60d9e1493350338b673b79f79e3"
+    },
+    "prompt": "1980s consumer 35mm snapshot of the timber and stone Wingard Cottage at blue hour across the lake. Real conifers and warm tungsten windows, cottage right of center. Existing Wingard location photo for architecture and approved Inkanyamba photo for realism.",
+    "focalPosition": "62% 48%"
+  },
+  "nails": {
+    "source": "exec-dc0e2273-e818-4088-bfce-a8d91b275126.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "14fd959d49af0be3612b688df07dc1b15f79f2ec4182a55d142accdc0f755abc",
+    "hero": {
+      "file": "nails.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 154830,
+      "sha256": "3a1bfe9be1595954399597097b1bfe22a4f2ffd22705aad19c81d706e898390f"
+    },
+    "tile": {
+      "file": "nails-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 24738,
+      "sha256": "e46727bb28cef005059ad08a4cb92adfc42d94e60b8400dcca7dc95b1e44a3b0"
+    },
+    "prompt": "1980s 35mm close photograph of a small rusty hinged tin of nails on a scratched cottage shed bench, with practical window light and readable shapes.",
+    "focalPosition": "center"
+  },
+  "nail-bat": {
+    "source": "exec-5306fd54-aa3f-4732-b9a7-da6d3c066681.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "c40559ec159f68937264a95f5fde78f5e564ec1e60e1de921a626a0611385962",
+    "hero": {
+      "file": "nail-bat.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 137218,
+      "sha256": "cc63896f3212ad1e3fa11151eab090968c6f35fa0b9b623a418467ae56a7db6c"
+    },
+    "tile": {
+      "file": "nail-bat-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 26378,
+      "sha256": "8aef903d1e8407a1373788af094bc813212519cc366354cb435a21feef658070"
+    },
+    "prompt": "Ordinary 1980s 35mm snapshot of a weathered wooden baseball bat resting diagonally on a workbench beside an open rusty tin of loose nails. Soft tungsten utility lamp. Original recipe ingredient photograph.",
+    "focalPosition": "center"
+  },
+  "alarm-active": {
+    "source": "exec-f4f35141-09c0-48b4-9a36-55fb93ab0a22.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "003f6b11da8f610a009270a4d9da65a6408ba01368bd97a71c9149624a2f3073",
+    "hero": {
+      "file": "alarm-active.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 61638,
+      "sha256": "8afebc52aecf6fc13009017d2cc5c987ebd3cd86cc7931ad7136cf5c66090ddf"
+    },
+    "tile": {
+      "file": "alarm-active-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 10810,
+      "sha256": "7791cf5a0395d81c9a526f61cc44d5119765dc6b5ca315d5ff7893aefb27a29a"
+    },
+    "prompt": "Same door, latch and alarm in a reference-based edit. Change only the small indicator to a modest illuminated red LED.",
+    "focalPosition": "center",
+    "reference": "alarm"
+  },
+  "scooter-with-you": {
+    "source": "exec-ba076ad9-3352-4cf6-a462-d60525cc68c5.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "6c952652915caa0454c05ded0722c82fa2f2d5b56c75bcc1e83bdc923cd026db",
+    "hero": {
+      "file": "scooter-with-you.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 148140,
+      "sha256": "e932dfd4f258a9cb6a9f16302bba448bc4f4bd826b2b6b704d6ff579be04f91e"
+    },
+    "tile": {
+      "file": "scooter-with-you-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 24104,
+      "sha256": "eb7901dc42e4b840ad25e840dccc4a5d065cb137b217894927eb6a615fe33a94"
+    },
+    "prompt": "The same vintage silver and green kick scooter upright on a damp gravel lane beside the cottage. Real 1980s 35mm snapshot, centered object, daylight and no visible person.",
+    "focalPosition": "center",
+    "reference": "scooter"
+  },
+  "tools": {
+    "source": "exec-9b57bf62-0e25-4853-9397-b61c9d0f119f.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "52910ac07f7f3520bc0a2a3e88780a39784a3a2b5941e07e5f5f732adaa0ba31",
+    "hero": {
+      "file": "tools.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 126870,
+      "sha256": "e65581d502cf98a16a1c9f7328a59e4b21c43061767ca796ea4ab7f654c5830d"
+    },
+    "tile": {
+      "file": "tools-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 18926,
+      "sha256": "2fe8591a2664d7c43fd5fdd92e12914bd213562efe0f3ad64200b05f1b7d6430"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. A few old discarded hand tools and a worn green toolbox on a garage shelf, seen through the partly open door in dusty afternoon light. Emphasize rusty wrench, old pliers and toolbox.",
+    "focalPosition": "center"
+  },
+  "rope": {
+    "source": "exec-d44db754-1cb4-4d9d-b97b-36eebdbb46e2.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "20ecbddb5224131d2214dc4cee1664255248487c11ad634d5d6406424f4ec7b7",
+    "hero": {
+      "file": "rope.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 93314,
+      "sha256": "333f7cd407ee3a33c226ef46c0d67f0014fec8d85e8699e10ad9034e2aa761d9"
+    },
+    "tile": {
+      "file": "rope-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 17500,
+      "sha256": "a4c6660b3f8e740d7cfa0f56e5fa423a8b641b2c7e265f60f499c8b318937c3b"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. A coil of coarse tan rope on a real lakeside boathouse post, cloudy lake behind, light glancing across twisted fibers.",
+    "focalPosition": "center"
+  },
+  "wood": {
+    "source": "exec-a69b545f-3fd7-4600-93ef-658a7edaf098.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "c07652d6325a219949128e8e7f89b6d34d39a29c31a7ca533bf9a0c7184aafe2",
+    "hero": {
+      "file": "wood.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 156692,
+      "sha256": "3b698c68425eaefb3e34d9cc523f3ae809e15cf78ac9e607aa4aac77ef079754"
+    },
+    "tile": {
+      "file": "wood-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 33750,
+      "sha256": "71e15d77c3275f394f0dcb2e377473952cb199abfd5940cecdb8fda24d0217ad"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. A small irregular pile of dry wood offcuts in grass by the cottage garden, dewy ground and filtered morning light, real split grain.",
+    "focalPosition": "center"
+  },
+  "snare": {
+    "source": "exec-80b138e3-8bb1-4eab-a3dd-cfcba8e0eb21.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "5c7c8811573638b48a5d0afe8f28b13d284866e693cdf36b8925973d5727bdd8",
+    "hero": {
+      "file": "snare.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 124290,
+      "sha256": "2be01a6b8ecaaf249cdee377e1280ba8c71eb99ab255e22c3abab0b362dca36f"
+    },
+    "tile": {
+      "file": "snare-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 22886,
+      "sha256": "523aefda75319eda28115498048fa2619bc85b9c0d16e383f86a76836ff631d6"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. A loose loop of thin tan cord with a simple knot laid flat on a cottage workbench next to a short wood offcut, still life.",
+    "focalPosition": "center"
+  },
+  "slingshot": {
+    "source": "exec-08ad20cf-8ccd-4805-a3a8-568ab8bf0de4.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "23f3321a192b8755edb1c4734fcec1ad377e07048e19116278097e0e6a3ba71f",
+    "hero": {
+      "file": "slingshot.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 124516,
+      "sha256": "c0ff6f0db6ccbb327b9db36572b83d1651eedfb1e8de0137d2d32ffaae1f49fa"
+    },
+    "tile": {
+      "file": "slingshot-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 18992,
+      "sha256": "10cd45d2597651e89bdea039cbaa5b9559fe377b30fb40edf5024c2663f370ac"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. A simple forked wooden slingshot with worn elastic and an open tin of small steel fasteners separately arranged on a garage shelf, soft window light, still life.",
+    "focalPosition": "center"
+  },
+  "spear": {
+    "source": "exec-03dd1b4c-cf88-4394-93ad-59790907284f.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "3552aac4c93143247b07dc44b5748afc72a08f62e7ba494933bc061be61bf9e8",
+    "hero": {
+      "file": "spear.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 124850,
+      "sha256": "fc36ea0e957aa959d5bcaf2a9bdc56cc3bc5a48a79b9584b0d4277651b3608ca"
+    },
+    "tile": {
+      "file": "spear-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 23908,
+      "sha256": "da79c2f7cfd530c23c723306fc6451f4ea4239879fef150c4aebdef174503dd7"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. A long rough wooden pole and a closed folding pocketknife next to a length of binding material on a broad cottage workbench. A rustic still life of separate objects, daylight from right.",
+    "focalPosition": "center"
+  },
+  "disemboweler": {
+    "source": "exec-5b12ffcd-b7e0-449d-a407-83341993e846.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "aec228f15329cce2c38960067f19594a396572e7d38a34da071cb5ea8e3de4a9",
+    "hero": {
+      "file": "disemboweler.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 155984,
+      "sha256": "a7d67af5fc0b1a9b9dc7a97bc8ce789005c64c870a50377c1164cbcce4ab371c"
+    },
+    "tile": {
+      "file": "disemboweler-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 20300,
+      "sha256": "c50489fb44990c7aa5e29b9943a7a1a173ffb6897d5a5f84b67a8749b384e443"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. An old wooden baseball bat, closed pocketknife, and a length of coarse rope arranged separately on a weathered laundry counter by a cold window. Peaceful still life of components.",
+    "focalPosition": "center"
+  },
+  "nail-trap": {
+    "source": "exec-42aff881-0545-40e7-b2fc-48555575fb14.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "dccc95eabdcdbe89ea5e3ad73de8584747a9ffe08e99c7a220be0dce034ab59b",
+    "hero": {
+      "file": "nail-trap.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 116912,
+      "sha256": "146be6a191b7047fb81db4549bdd3d4c28cb6d3f3b829a865cbaeaaf2101fef1"
+    },
+    "tile": {
+      "file": "nail-trap-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 20296,
+      "sha256": "6ea77c7c05aa87a4793487a5a19511b1ed4792e0324a576b21e4af3191d2a4fb"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. A worn board with an open tin of loose carpentry nails and an old hammer on a cottage workbench. Shallow diagonal composition, no threatening action.",
+    "focalPosition": "center"
+  },
+  "nailgun": {
+    "source": "exec-96c8aa26-4643-4706-b1d4-19abbd30aaf8.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "329ffbe3800f29cbe44f0ae337815b0e6a3ad360b1550a4b8e334f72a32ea7d8",
+    "hero": {
+      "file": "nailgun.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 146218,
+      "sha256": "5d0c334ae0a4a371b5ac14392061e5d4c88bf156a637fd6d79188dbd755a3a5d"
+    },
+    "tile": {
+      "file": "nailgun-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 20384,
+      "sha256": "c123a2b6377c5ec452b7db61fdeaf335b632588b29c1a95ce770b7aee84485ce"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. A classic orange pneumatic woodworking nailer resting on its side near scattered sawdust on a shed shelf, ordinary daylight, scuffed practical construction equipment, no hands.",
+    "focalPosition": "center"
+  },
+  "sawed-off": {
+    "source": "exec-4d2dd6f0-e132-40ad-b762-f081adaa33f8.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "c462db66a425f960ac703b2a94ebee7e184e3daf48073fcc04d9f09f3922dbe8",
+    "hero": {
+      "file": "sawed-off.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 128038,
+      "sha256": "a5a66522c8ea1fb1f14f9c4c2fe9d63fd9b7a0374f8deb976924c3d87a0c7604"
+    },
+    "tile": {
+      "file": "sawed-off-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 16780,
+      "sha256": "d4859673a94b8bb79872a8f060676ce0d3c5d6d489ab35c92a95221d7cbf2c42"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. A closed, worn, compact old sporting equipment case on a wooden rack alongside a few loose brass sporting cartridges and an unused toolbox. Quiet object study, no firearm visible, no action or people.",
+    "focalPosition": "center"
+  },
+  "porcupine": {
+    "source": "exec-8ac9fc67-0330-4fae-91db-c091f1781028.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "73e08af75ad2d04865bb84697f54157ec08bb1e3db2c362ada99fddae14d98ab",
+    "hero": {
+      "file": "porcupine.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 130660,
+      "sha256": "8795ab435fd7e21da7eeb8dec62d7103293a64a1ae57777e6d954bd2a7b6b775"
+    },
+    "tile": {
+      "file": "porcupine-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 18082,
+      "sha256": "6e4075765c40a1485512a08f1be1ba9eaa464a68ae547193a4d55b4c1bb54b32"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. An old round galvanized metal trashcan lid with an arch handle beside a few loose steel nails on a concrete garage floor, side daylight brings out the dings, still life.",
+    "focalPosition": "center"
+  },
+  "obliterator": {
+    "source": "exec-8dc3a853-fdc3-4785-9da3-c5eae3af7fd2.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "bf76b152c27de4a9951924539f9f40ce7d2c1e4a9316c824e784075a40f78e34",
+    "hero": {
+      "file": "obliterator.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 155560,
+      "sha256": "a6665c5716d6a7890b440e8eaf0a608a60f59e50713bcdf37bcfb1503fa00365"
+    },
+    "tile": {
+      "file": "obliterator-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 23488,
+      "sha256": "4ea4cf69ac091bd986dfc785ea6e96a618172a21e922931c4878634d1c672e69"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. Weathered rough wooden offcuts tied together in a large crooked cross-brace with thick rope, next to a small metal tool tin. Close still life of improvised carpentry, warm work lamp.",
+    "focalPosition": "center"
+  },
+  "snare-set": {
+    "source": "exec-3119ed55-7858-429e-a5df-129ee599202b.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "a2209645ec1bf4e6fbfe88f7a653b28dc537dda2f5e77a9498a73f44231853ed",
+    "hero": {
+      "file": "snare-set.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 94146,
+      "sha256": "f7a7d325af570fa7f48d45d48a8ffa63142c8fb438b1a370ba2ccd6a33af8051"
+    },
+    "tile": {
+      "file": "snare-set-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 17462,
+      "sha256": "b9d8ef156340ab76b5d7303f3da06602d6a9b58930c83a7e75432c2496f357a8"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. From floor height, a loose natural fiber rope loop lies in the foreground of a quiet cottage porch under a real timber doorway, shallow focus, warm porch bulb.",
+    "focalPosition": "center"
+  },
+  "nail-trap-set": {
+    "source": "exec-7dfffa5a-8d46-4a75-93f2-9e5496f913b1.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "d3fc88c962a0e55ef6fad7bb8670c3b201b174de9f0d6a6928c1df65fa2ad07e",
+    "hero": {
+      "file": "nail-trap-set.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 109656,
+      "sha256": "5f9181bbe6daa50588a99b11fb3a856f6735f460b988d19b3297feb45da4b2b8"
+    },
+    "tile": {
+      "file": "nail-trap-set-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 15786,
+      "sha256": "b265bc0367c3ec0083b2e2e185b5d59aeec90b3e0e9a9c9e2e5e4461983b6fc3"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. From floor height, a short wooden plank and a few visible nail heads rest on the sill of a quiet old shed doorway, dim slanting daylight on rough floorboards, safe empty prop scene.",
+    "focalPosition": "center"
+  },
+  "outsider": {
+    "source": "exec-3db1100b-810c-4f39-8c85-7c59591e7f9f.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "4e0fb7af2bb92bb72c25252e39171a3ea6ca65f150893b606cc2ff110dfce388",
+    "hero": {
+      "file": "outsider.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 87716,
+      "sha256": "4bad1a7510f258fa2bc1f64c12de116e3d89fbb46ce09ecc5093971692736ada"
+    },
+    "tile": {
+      "file": "outsider-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 14664,
+      "sha256": "74dd36c81ec9a539bd57498a1bd1841afb4143b5d1b409acdde8ac336866b099"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. Candid adult woman with short dark hair and denim shirt quietly standing near a faded bathroom mirror in a family cottage, practical single sconce light, concerned expression, upper body and face centered.",
+    "focalPosition": "center"
+  },
+  "boyfriend": {
+    "source": "exec-7f323e46-126a-40b3-8d52-735bfd85110a.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "ae9f4440dbb09bdf48f5019848ff0f577d88c146261184c19cb18bc89ab7fe80",
+    "hero": {
+      "file": "boyfriend.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 83288,
+      "sha256": "52c4fa5eff370f767eaac9d84f19c7e605c2f361a48b1d6c2d3564cb4a5a07cb"
+    },
+    "tile": {
+      "file": "boyfriend-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 14154,
+      "sha256": "2854d116c0e932c390861daa4f6ba8a153ec52edde1d6dfe314a6c71f3ff62ea"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. Candid ordinary adult man with sandy hair and muted rust windbreaker sitting by an empty cottage kitchen window, guarded neutral expression, plausible dim side light, upper body and face centered.",
+    "focalPosition": "center"
+  },
+  "neighbor": {
+    "source": "exec-b6a31ac6-4cc7-4c6d-ab86-2ba814b3bfcc.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "3d9afa473f070f51a62bcfb585fb1439903e1338d405d4b9b28c64710d374c91",
+    "hero": {
+      "file": "neighbor.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 100828,
+      "sha256": "2d98a24336ae3248902fc7f458f4c9a2b177b21ee44ddde0e60a6cb44fd2225e"
+    },
+    "tile": {
+      "file": "neighbor-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 18804,
+      "sha256": "2973588a1f1be3f29fc5e661bf9b30ed8462967fcf5e947a27a5d514298e3ab8"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. Candid older adult woman in navy wool cardigan and round glasses, holding plain boat keys loosely beside a lived-in family room window, centered upper body, mundane tungsten light.",
+    "focalPosition": "center"
+  },
+  "resourceful": {
+    "source": "exec-398f2be8-6c39-4aa2-bfa3-c0dd129344c1.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "00de06556c7079571715fca9207fb197bb7fa911fca6579fa6b4d2851b9c2da3",
+    "hero": {
+      "file": "resourceful.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 103082,
+      "sha256": "65e4749fb8d8bf824794e19d2f455c333772c78dac9558a021ce51c28f65850a"
+    },
+    "tile": {
+      "file": "resourceful-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 17290,
+      "sha256": "8e977dc8f5d401fc7d716a79dd646951f3a90c94f7ec5c970de1a0fccc65c917"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. An open handmade sketchbook showing a few abstract pencil shapes with no writing, surrounded by woodworking clamps and offcuts, tucked under a practical task lamp at the cottage.",
+    "focalPosition": "center"
+  },
+  "alarm": {
+    "source": "exec-d36b186d-b2c5-4e55-8647-dccc2a042b19.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "5eea109cfbdbd8139dd28fecdb2b0a69d07d09d7eb455058cf20377babcc3501",
+    "hero": {
+      "file": "alarm.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 67908,
+      "sha256": "63aab2da51c6abfe42df93fca638c47ef7874094836b3e721342ec21fb5fb0a8"
+    },
+    "tile": {
+      "file": "alarm-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 10746,
+      "sha256": "dcc6344531347763508ec4200654a7205dc5cdaaa4e0c6170aa906a35a20c155"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. A simple period house alarm indicator and latch on the inside of a cottage entrance, unlit small indicator, straight view of worn ivory door and brass, real household tungsten lighting.",
+    "focalPosition": "center"
+  },
+  "scooter": {
+    "source": "exec-45445854-47b2-4404-8fcc-44b294d22b3d.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "6e0ba5344773bb86ad07df028701061bd985ae6e32f365d0241f3f40e2008929",
+    "hero": {
+      "file": "scooter.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 159358,
+      "sha256": "c1322ffafb13ec7852dfddabe4daeb5343c2f9f329ef8bdd517d59aee9aaa06e"
+    },
+    "tile": {
+      "file": "scooter-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 20214,
+      "sha256": "86bc99cb6401c8dc3f92fc893f337ec5791abc8be14effffe3fe16e834d0ddf0"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. An ordinary silver and dark-green kick scooter with two small wheels, parked against the damp weathered timber of a lakeside cottage porch, cold morning ambient light.",
+    "focalPosition": "center"
+  },
+  "boat": {
+    "source": "exec-2af765a4-03a6-43a0-9420-13f9969d0dd7.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "74db4b0216026b612fc957f9af2755abb3a1935689856941cb146fdec14b3966",
+    "hero": {
+      "file": "boat.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 90832,
+      "sha256": "20babd6fea4462a371d394d4abf8e64698ce0ed1542ece84bb8074f6fb6e647b"
+    },
+    "tile": {
+      "file": "boat-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 16484,
+      "sha256": "ecbf4f5ee3d097fca96b1f7ed42bc9ee9c482b41c0d812b37c5f0e677f56df82"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. A small aluminum rowboat afloat close to the low shore at Lakefront, light ripples, one dull green oar and a dark boathouse in soft evening haze.",
+    "focalPosition": "center"
+  },
+  "my-house": {
+    "source": "exec-d4e6ddeb-6b88-481a-8db6-44b9fc5e4d62.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "13c2b134e2c9eb1eed4c232a90ae9a416c93ba874b588cd754ca5bbce72e8b3d",
+    "hero": {
+      "file": "my-house.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 74550,
+      "sha256": "d3a256e10e12026d335437f54a1b6f60a0da7b7133331a734ec62bd4fdd63919"
+    },
+    "tile": {
+      "file": "my-house-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 10038,
+      "sha256": "0faa535be1fa63ac9298b55d60e47f55f23cd7bb7b99ba4131a52474b1fda985"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. From inside an ordinary cottage foyer, an open front door admits cold evening air and a sliver of warm porch light. A chair lies askew near the doorway. Empty, tense photo with no people.",
+    "focalPosition": "center"
+  },
+  "happening": {
+    "source": "exec-6083a38a-7e60-4432-ae52-1cf50963a7ca.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "fc81f28f956d416e754ccda0d81e0f28305224ea9bc6e398b2daa815859a2186",
+    "hero": {
+      "file": "happening.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 91824,
+      "sha256": "93ba3005562cf5588dd8ffa0a0c1977d4c26487d7b24ca5faa98e62b9c496a3e"
+    },
+    "tile": {
+      "file": "happening-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 15648,
+      "sha256": "e6ae2e4cc9e13df8299d16a1eec106e0bc7107c05d8f0dec05847561dcbe4544"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. A real empty rural kitchen at night with a chair knocked sideways, telephone receiver dangling, and warm light from one lamp. The frame is hurried and subtly imperfect.",
+    "focalPosition": "center"
+  },
+  "random-attack": {
+    "source": "exec-92dc2cfb-6dc7-4b38-ad3a-ef1809cc4d38.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "48135436b8559f33c52a47fe2646e7a878cb7f9efd638845722f4e79ccf6ed71",
+    "hero": {
+      "file": "random-attack.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 48942,
+      "sha256": "769d709ba708d3ca0b22bd87fefa087bd3460787329b08596b56a65360cd7ddf"
+    },
+    "tile": {
+      "file": "random-attack-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 6516,
+      "sha256": "a8bf01b2b635066bf4e2b3b6afbe527a6f01bc27eb305016373cb5e15d787ce1"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. Deep narrow view through three open ordinary cottage doorways, a broken porch pane in the distance and shattered glass only on an empty wooden floor, cold natural predawn light.",
+    "focalPosition": "center"
+  },
+  "booby-traps": {
+    "source": "exec-4a88c0a2-66e4-4416-bcf9-eb427d6ed1bc.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "c5bb2f83c215a7e62df6c2d976f1e470ebb17bb480e5fe5baa0c1c89ed3b2cbe",
+    "hero": {
+      "file": "booby-traps.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 117918,
+      "sha256": "6a17bec6a223db4f5a7bfb9f966fe07f135fcc2bf326e16f21586182ad15bcc7"
+    },
+    "tile": {
+      "file": "booby-traps-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 19078,
+      "sha256": "82e72eaec26060bf82cb8bf46302c49db92d660af50910af3dd63e316a343299"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. Empty close view of a cottage doorway, a knocked-over chair and a taut line across the bottom of the threshold. Atmosphere of a practical movie set, nobody present.",
+    "focalPosition": "center"
+  },
+  "escape": {
+    "source": "exec-2c5c22b3-c734-4904-8c8a-9eddf0caea29.png",
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "sourceSha256": "14da5932d0aed1e35a8ae95ab5b54c5b03e8362a1ab5d80758f572e832583bea",
+    "hero": {
+      "file": "escape.webp",
+      "size": [
+        1280,
+        853
+      ],
+      "bytes": 158526,
+      "sha256": "52d0378546f88c48c03685b718422a4f3296f537a00e6c463669f035511a7066"
+    },
+    "tile": {
+      "file": "escape-tile.webp",
+      "size": [
+        400,
+        267
+      ],
+      "bytes": 28192,
+      "sha256": "ef9bf3b2cf3567f7b5eb8caa52b76059f767479ae3c946b294372c83f3c4482c"
+    },
+    "prompt": "Original 3:2 landscape photograph for a lakeside cottage game companion. Candid 1980s consumer 35mm color print, practical ordinary lighting, subtle grain, true materials, quiet unposed composition, one clear subject in the center-safe crop. No lettering, graphic design, people unless specified, or gore. A long damp gravel driveway seen at low eye level toward the trees, headlights far away reflected in puddles, no people or vehicles in foreground.",
+    "focalPosition": "center"
+  }
+}

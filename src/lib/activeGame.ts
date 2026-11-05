@@ -1,3 +1,5 @@
+import { WINGARD, WINGARD_MODULE } from '../../supabase/functions/_shared/play/wingardCatalog';
+import { initialWingard } from '../../supabase/functions/_shared/play/wingardCottage';
 import { WOODS, WOODS_MODULE, initialWoods } from "../../supabase/functions/_shared/play/storybookWoods";
 import { validPlayLog, validPlayDetails, type PlayEvent, type PlayDetails } from './play/events';
 import type { GameResult } from '@/hooks/useGameHistory';
@@ -25,6 +27,7 @@ export interface ActiveGame {
   coreTrackersVersion?: 1;
   woodsSetupVersion?: 1;
   marrekSetupVersion?: 1;
+  wingardSetupVersion?: 1;
   tormentorSetupVersion?: 1;
   wolfSetupVersion?: 1;
   intrudersSetupVersion?: 1;
@@ -67,6 +70,12 @@ export function isActiveGame(value: unknown): value is ActiveGame {
     (event?.woodsReference || event?.moduleData?.module === WOODS_MODULE) && game.selection?.location !== WOODS ||
     event?.moduleData?.module === WOODS_MODULE && !event.woodsAction &&
       (game.woodsSetupVersion !== 1 || initialWoods(game.selection?.startingEvent)?.snapshot !== event.moduleData.changes?.snapshot))) return false;
+  if(game.wingardSetupVersion!==undefined && (game.wingardSetupVersion!==1 || game.selection?.location!==WINGARD))return false;
+  if(Array.isArray(game.playEvents) && game.playEvents.some(event=>
+    (event?.wingardReference || event?.moduleData?.module===WINGARD_MODULE) && game.selection?.location!==WINGARD ||
+    event?.moduleData?.module===WINGARD_MODULE && !event.wingardAction &&
+    (game.wingardSetupVersion!==1 || event.moduleData.changes?.snapshot!==initialWingard(game.selection?.startingEvent).snapshot)
+  ))return false;
   if(game.marrekSetupVersion!==undefined&&game.marrekSetupVersion!==1)return false;
   if(game.selection?.location!=='Marrek Warehouse'&&Array.isArray(game.playEvents)&&game.playEvents.some(e=>e.moduleData?.module==='marrek'))return false;
   if (game.intrudersSetupVersion !== undefined && (game.intrudersSetupVersion !== 1 || game.selection?.killer !== "The Intruders")) return false;

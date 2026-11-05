@@ -1,3 +1,5 @@
+import { WINGARD, WINGARD_EVENTS, WINGARD_TERRORS } from '../../../supabase/functions/_shared/play/wingardCatalog';
+import { wingardArt } from './wingardArt';
 import { INTRUDERS, INTRUDER_ROSTER, INTRUDER_TERRORS } from "@/lib/play/intruders";
 import { intruderArt } from "./intruderArt";
 import { PlaySelect } from "./PlaySelect";
@@ -248,6 +250,9 @@ const {characterImages}=useActiveImages();
   const woodsTerror = selection.location === WOODS ? findPlayCard(selection, "terror", values.terrorCard) : undefined;
   const woodsTerrorImage = woodsTerror?.location === WOODS ? woodsDeathImage(woodsTerror.name, values.room) : undefined;
   const piperCause = selection.location === WOODS && findPlayCard(selection, "event", values.eventCard)?.name === "Pied Piper";
+  const cottageTerror=selection.location===WINGARD ? WINGARD_TERRORS.find(card=>card.name===values.terrorCard && card.fatal) : undefined;
+  const cottageEvent=selection.location===WINGARD && suggestedDeathCards(selection,'event').some(card=>card.name===values.eventCard)
+    ? WINGARD_EVENTS.find(card=>card.name===values.eventCard) : undefined;
   const eventNames = Array.from(
     new Set([
       ...suggestedDeathCards(selection, "event").map((c) => c.name),
@@ -324,6 +329,7 @@ const {characterImages}=useActiveImages();
                   key={cause}
                   className={`play-cause-tile play-cause-tile--${cause}`}
                   aria-pressed={values.cause === cause}
+                  data-wingard-photo={(cause==='terror' && !!cottageTerror || cause==='event' && !!cottageEvent) || undefined}
                   data-woods-photo={(cause === "terror" && !!woodsTerrorImage || cause === "event" && piperCause) || undefined}
                   data-wolf-photo={selection.killer === WOLF && (cause === "killer" || (cause === "terror" && !!wolfTerror)) || undefined}
                   disabled={scenes.busy}
@@ -336,7 +342,9 @@ const {characterImages}=useActiveImages();
                     }
                   }}
                 >
-                  {selection.killer===INTRUDERS&&cause==='killer'
+                  {cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
+                    :cause==='event'&&cottageEvent ? <ModuleArtwork art={wingardArt(cottageEvent.id,true)} />
+                    :selection.killer===INTRUDERS&&cause==='killer'
                     ? <ModuleArtwork art={intruderArt(INTRUDER_ROSTER.find(p=>p.name===values.attacker)?.id??'header')} />
                     : selection.killer===INTRUDERS&&cause==='terror'&&INTRUDER_TERRORS.some(c=>c.name===values.terrorCard)
                       ? <ModuleArtwork art={intruderArt(INTRUDER_TERRORS.find(c=>c.name===values.terrorCard)!.id)} />

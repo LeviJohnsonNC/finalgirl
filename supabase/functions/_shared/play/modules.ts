@@ -1,3 +1,5 @@
+import { WINGARD, WINGARD_MODULE, WINGARD_ITEMS, WINGARD_VISUAL } from './wingardCatalog.ts';
+import { wingardState, wingardFacts, validWingardField } from './wingardCottage.ts';
 import { fitStoryText, storyVictimStatus } from './storyText.ts';
 import { WOODS, WOODS_MODULE, WOODS_VISUAL, parseWoods, woodsFacts, woodsState } from "./storybookWoods.ts";
 import { INTRUDERS, INTRUDER_MODULE, INTRUDER_POWERS, INTRUDER_FINALES, INTRUDER_MINORS, intruderFacts, intruderMode, validIntruderField } from "./intruders.ts";
@@ -59,7 +61,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -176,6 +178,7 @@ function validField(
   if (module === "big-bad-wolf") return validWolfField(key, value);
   if (module === 'shady-acres') return validShadyField(key,value);
   if (module === WOODS_MODULE) return key === "snapshot" && parseWoods(value) !== null;
+  if(module===WINGARD_MODULE)return validWingardField(key,value);
   if(module==='marrek')return validMarrekField(key,value);
   if(module==='tormentor')return validTormentorField(key,value);
   if (module === "grimlash") return validGrimlashField(key,value);
@@ -297,7 +300,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    ![WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -522,6 +525,7 @@ export function describeModule(observation: ModuleObservation) {
     }).join(", ");
   }
   if (observation.module === WOODS_MODULE) return woodsFacts(woodsState(observation.changes)).join(" ") || "Storybook Woods observations recorded";
+  if(observation.module===WINGARD_MODULE)return wingardFacts(wingardState(observation.changes)).join(' ') || 'Cottage workbench updated';
   if(observation.module==='marrek')return marrekFacts(marrekState(observation.changes)).join(' ');
   if(observation.module==='tormentor')return tormentorFacts(tormentorState(observation.changes));
   if(observation.module==='shady-acres')return shadyFacts(shadyState(observation.changes)).join(' ')||'Shady Acres observations recorded';
@@ -624,6 +628,11 @@ export function moduleStoryBeats(
   selection: ModuleSelection,
   entries: readonly ObservedEvent[],
 ): string {
+  if(selection.location===WINGARD){
+    const threat = moduleStoryBeats({...selection,location:''},entries);
+    const cottage = wingardFacts(wingardState(moduleState(entries,WINGARD_MODULE))).join(' ');
+    return [fitStoryText(cottage,threat?520:895),fitStoryText(threat,370)].filter(Boolean).join('\n');
+  }
   if (selection.killer===INTRUDERS) {
     const state=moduleState(entries,INTRUDER_MODULE);
     const threat=Object.keys(state).length ? intruderFacts(state) : '';
@@ -836,6 +845,7 @@ export function buddylandReferences(
     const state = context?.[WOODS_MODULE];
     if (state) refs.push({name:"Storybook Woods observations",effect:woodsFacts(woodsState(state)).join(" ")});
   }
+  if(selection.location===WINGARD) refs.push({name:WINGARD,effect:WINGARD_VISUAL});
   if(selection.location==='Marrek Warehouse'){refs.push({name:'Marrek Warehouse',effect:MARREK_VISUAL});if(context?.marrek)refs.push({name:'Warehouse observations',effect:marrekFacts(marrekState(context.marrek)).join(' ')});}
   if(selection.killer===INTRUDERS && context?.intruders) refs.push({name:'Intruder observations',effect:intruderFacts(context.intruders)});
   if(selection.killer==='The Tormentor'&&context?.tormentor){refs.push({name:'Tormentor observations',effect:tormentorFacts(tormentorState(context.tormentor))});for(const card of [...TORMENTOR_POWERS,...TORMENTOR_FINALES])if(card.name===context.tormentor.power||card.name===context.tormentor.finale)refs.push({name:card.name,effect:card.effect+' Recording the reveal does not prove its actions or consequences occurred.'});}
@@ -1060,7 +1070,7 @@ export function moduleItemBeats(
   entries: readonly ObservedEvent[],
 ) {
   const locationCatalog =
-    selection.location === "Marrek Warehouse" ? MARREK_ITEMS : selection.location === "Shady Acres" ? SHADY_ITEMS : selection.location === "USS Konrad" ? KONRAD_ITEMS : selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
+    selection.location === WINGARD ? WINGARD_ITEMS : selection.location === "Marrek Warehouse" ? MARREK_ITEMS : selection.location === "Shady Acres" ? SHADY_ITEMS : selection.location === "USS Konrad" ? KONRAD_ITEMS : selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
       ? CAMP_ITEMS
       : selection.location === "Carnival of Blood"
         ? CARNIVAL_ITEMS

@@ -1,0 +1,25 @@
+.wingard-controls { display:grid; gap:1rem; }
+.wingard-heading { display:flex; justify-content:space-between; align-items:center; gap:.6rem; }
+.wingard-heading h3 { font-size:1.1rem; color:#eadcc5; }
+.wingard-supplies,.wingard-recipes { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%, 160px),1fr)); gap:.65rem; }
+.wingard-recipes { grid-template-columns:repeat(auto-fill,minmax(min(100%, 205px),1fr)); margin-top:.65rem; }
+.wingard-recipes > article:has(> button[aria-expanded="true"]) { grid-column:1/-1; width:100%; max-width:465px; }
+.wingard-controls .play-tile-caption strong { font-size:clamp(.86rem,1.8vw,1.3rem); }
+.wingard-recipes > *,.wingard-supplies > * { min-width:0; }
+.wingard-controls .play-illustrated-tile { width:100%; aspect-ratio:16/9; min-height:82px; }
+.wingard-controls .play-illustrated-tile:is([data-state="unknown"],[data-state="unrecorded"],[data-state="left"]) img { filter:brightness(.55) saturate(.55); }
+.wingard-actions { display:flex; align-items:center; flex-wrap:wrap; gap:.45rem; padding:.45rem 0; }
+.wingard-actions > span { flex-basis:100%; color:#d9cab2; font-size:.8rem; }
+.wingard-actions > button:not(.module-quiet-link) { border:1px solid #665440; border-radius:.25rem; background:#292017; padding:0 .6rem; }
+.wingard-controls button,.wingard-controls [role="combobox"] { min-height:44px; }
+.wingard-actions .play-select-trigger { max-width:100%; }
+@media(max-width:480px) {
+  .wingard-supplies,.wingard-recipes { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .wingard-recipes > article:has([aria-expanded="true"]) { grid-column:1/-1; }
+}
+.play-death-modal--illustrated .play-cause-tile[data-wingard-photo][aria-pressed="true"]::before {
+  background:linear-gradient(0deg,#120c0bf2,transparent 85%);
+}
+.play-death-modal--illustrated .play-cause-tile[data-wingard-photo][aria-pressed="true"] > img { opacity:1; }
+.wingard-controls .module-outcomes { flex-wrap:wrap; }
+.wingard-controls .module-outcomes > button { min-width:44px; padding-inline:5px; }
