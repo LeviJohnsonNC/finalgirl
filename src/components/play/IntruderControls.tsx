@@ -38,7 +38,6 @@ export function IntruderRoster({events,onEvent}:{events:PlayEvent[];onEvent:Cont
   const mode=intruderMode(entries);
   const focusToken=focus?intruderFigure(state,focus).token:undefined;
   const who=(mode==='all'||focusToken==='pending'?focus??active:active)??'trish';
-  const hero=(mode==='all'?focus??active:active??focus)??'trish';
   const person=INTRUDER_ROSTER.find(p=>p.id===who)!;
   const {health,token}=intruderFigure(state,who);
   const epic=intruderEpicReady(state,entries);
@@ -48,17 +47,16 @@ export function IntruderRoster({events,onEvent}:{events:PlayEvent[];onEvent:Cont
   });
   const resolve=(command:Command)=>{if(send(command))setInput(undefined);};
   const zero:Command={command:token==='white'?(epic?'epic':'dead'):'down',who};
-  const portraits=[INTRUDER_ROSTER.find(p=>p.id===hero)!,...INTRUDER_ROSTER.filter(p=>p.id!==hero)];
   return (
     <div className="play-state play-state--intruders" role="group" aria-label="Intruder Killer Health tracker">
       <div className="intruder-portraits">
-        {portraits.map(({id,name})=>{
+        {INTRUDER_ROSTER.map(({id,name})=>{
           const figure=intruderFigure(state,id);
           const out=figure.token==='dead'||figure.token==='pending';
           const isActive=mode==='all'?!out&&(figure.health!==undefined||figure.token!==undefined):active===id;
           const fate=figure.token==='pending'?'Down':figure.token==='dead'?'Dead':`${figure.health??'?'} HP`;
           return <button type="button" key={id} aria-pressed={isActive} aria-label={name}
-            aria-description={`${fate}${isActive?', Active':''}`} data-active={isActive} data-out={out} disabled={figure.token==='dead'}
+            aria-description={`${fate}${isActive?', Active':''}`} data-active={isActive} data-intruder={id} data-out={out} disabled={figure.token==='dead'}
             onClick={()=>{
               if(!out&&mode!=='all'&&id!==active&&!send({command:'activate',who:id}))return;
               setFocus(id);

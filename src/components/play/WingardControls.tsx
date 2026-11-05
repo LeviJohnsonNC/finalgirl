@@ -129,9 +129,9 @@ export function WingardControls({events, onEvent, blocked}:ControlsProps) {
     </section>
     <section aria-label="Cottage events">
       <div className="wingard-heading"><h3>Events</h3><button type="button" className="module-quiet-link" aria-expanded={showEvents} onClick={()=>setShowEvents(!showEvents)}>{showEvents?'Hide unrecorded':'Record an event'}</button></div>
-      <div className="wingard-recipes">
+      <div className="wingard-events">
         {people.map(person=><CharacterControl key={person.id} name={person.name} className={showEvents||state.people[person.id]?'wingard-person':'hidden'}
-          art={wingardArt(state.people[person.id]==='saved'||state.people[person.id]==='killed'?`${person.id}-${state.people[person.id]}`:person.id,state.people[person.id]!=='present')} present="present" states={outcomes} value={state.people[person.id]} showRules={false} showStatusEditor={false} allowOutcomeCorrections
+          art={wingardArt(state.people[person.id]==='saved'||state.people[person.id]==='killed'?`${person.id}-${state.people[person.id]}`:person.id)} present="present" states={outcomes} value={state.people[person.id]} showRules={false} showStatusEditor={false} allowOutcomeCorrections
           outcomes={['saved','killed','left']}
           onChange={value=>commit({command:'person',id:person.id,value:value as typeof outcomes[number]['value'] | null})}/>)}
         <EventControl name="Getting Resourceful" value={state.resourceful?'active':undefined} art={wingardArt('resourceful',true)}

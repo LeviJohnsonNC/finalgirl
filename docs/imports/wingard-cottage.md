@@ -100,3 +100,10 @@ The frontend and the Edge functions that consume the changed shared Play graph n
 ### Play presentation follow-up
 
 The Workbench has separate links for recording recipes and crafted items. Both use a picture picker. Recorded cards keep their wide size when crafted. The card face shows and updates limited uses. Trap placement remains an explicit spatial observation. Supply art distinguishes carried and available materials. Active people get wide color portraits, with separate saved and non-graphic killed images. The Scooter and Getting Resourceful share the compact event tile proportions. The photo manifest now covers 51 sources and 102 bounded derivatives.
+
+
+### Consistent large event cards
+
+Event and recipe cards use the same responsive grid sizing. People keep their card size across unrecorded, present, saved, killed and left states. Full-size portrait assets serve every state. All four held-material photographs were edited to show a woman carrying the material, with faces excluded for mixed Final Girl casting. Source and edit-reference digests are recorded in the photo manifest.
+
+The follow-up passed the 14 focused desktop/mobile Cottage and Intruder browser journeys, typecheck, asset checks and production build. Actual screenshot review covered the five approved viewport sizes and the large Event grid. The large cards keep their columns when outcomes change.

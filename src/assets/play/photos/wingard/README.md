@@ -7,7 +7,7 @@
 | Surface | Photographs |
 | --- | --- |
 | Location header | Cottage exterior across the lake, dusk |
-| Supplies | Garage tools, shed nails, boathouse rope and outdoor wood. Each has a distinct carried photograph. |
+| Supplies | Garage tools, shed nails, boathouse rope and outdoor wood. Each has a distinct carried photograph showing a woman in a cream shirt, with her face outside the frame. |
 | Workbench | Ten crafted-item stills and ten individual cyanotype recipe prints. The Spear, Slingshot and Sawed-off Shotgun prints depict representative components or a sporting case. |
 | Placed traps | Rope on porch boards and the plank at a shed threshold |
 | Ongoing events | Same Home Security latch and indicator off and on, matching Scooter at rest and outdoors ready to move, lake Boat, three role portraits with separate saved and non-graphic killed variants, and the Resourceful workbench |

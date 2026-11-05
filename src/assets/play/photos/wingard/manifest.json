@@ -870,20 +870,22 @@
     "focalPosition": "center"
   },
   "tools-held": {
-    "source": "exec-22d5707a-d726-479d-aaf8-2502b04937f3.png",
+    "source": "exec-812dc8ce-4d65-4410-8990-798fa1fa1784.png",
     "sourceSize": [
       1536,
       1024
     ],
-    "sourceSha256": "e0d0be78f16ac4587a2ea6bf587ce233df7968dfbe575c1bc0d60a4dbaf4ff74",
+    "sourceSha256": "9ae6433312dd97f6ea20cb39f7294d84afbf6a5cfafd28f01b6ebf36093f8835",
+    "prompt": "Edit this existing 1980s cottage photograph. A woman's hand and slim wrist lifting the same green toolbox. Her rolled sleeve is simple cream cotton. Preserve the material's shape, amount and wear, the same setting, natural lighting, composition and photographic realism. The carrier is clearly a woman. Keep her face outside the frame to make this usable with any selected Final Girl. No text.",
+    "focalPosition": "center",
     "hero": {
       "file": "tools-held.webp",
       "size": [
         1280,
         853
       ],
-      "bytes": 151746,
-      "sha256": "0409c94b11617d037fc9634106a07aeade82881a76bb37a4d7777634be72a9f6"
+      "bytes": 147038,
+      "sha256": "f1b81177d40ed685dc2faa8a598b28dbc57c1c791f8f402653b95a23ca09d029"
     },
     "tile": {
       "file": "tools-held-tile.webp",
@@ -891,28 +893,28 @@
         400,
         267
       ],
-      "bytes": 22888,
-      "sha256": "fdef02ff6f9f01a229629e1a7dba649dfdcb99bc7cbd263ebf5d49e2d2500e1e"
+      "bytes": 21538,
+      "sha256": "bd529efc77099c8f0303f05ce4fbb53a015bffb0b98c24cc4ff1d02aa57445b0"
     },
-    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. a hand lifting a faded green toolbox by its handle in the cottage garage. A clear material centered in the frame with readable shape and distinct carrying action. Use the source only to match the material.",
-    "focalPosition": "center",
-    "reference": "tools"
+    "editReferenceSha256": "0409c94b11617d037fc9634106a07aeade82881a76bb37a4d7777634be72a9f6"
   },
   "nails-held": {
-    "source": "exec-40b4969a-d08e-4081-8a1c-01d09c3b64ec.png",
+    "source": "exec-5ce31ec3-4edd-4b05-8caa-db84342d27a9.png",
     "sourceSize": [
       1536,
       1024
     ],
-    "sourceSha256": "a330948f3e75aaf4aca5ea187c06998733e578a9b875833a98926b75c56eb005",
+    "sourceSha256": "61e121a109ed2df61e0f17b5101f0e2b45a2060d91d69d4fb9efaade74aba037",
+    "prompt": "Edit this existing 1980s cottage photograph. A woman's hand, with unpainted short nails and a cream cotton sleeve, carrying the same open tin of nails. Preserve the material's shape, amount and wear, the same setting, natural lighting, composition and photographic realism. The carrier is clearly a woman. Keep her face outside the frame to make this usable with any selected Final Girl. No text.",
+    "focalPosition": "center",
     "hero": {
       "file": "nails-held.webp",
       "size": [
         1280,
         853
       ],
-      "bytes": 144042,
-      "sha256": "725f7c35608bb4ba8c16d03c9e9079a0a028de0f647e4a30c60fb87148498590"
+      "bytes": 134878,
+      "sha256": "1ec68542bddc5fe65f794abb6576cd13bbdc040a13e7303caa036e77ee43ad11"
     },
     "tile": {
       "file": "nails-held-tile.webp",
@@ -920,28 +922,28 @@
         400,
         267
       ],
-      "bytes": 23650,
-      "sha256": "5f1ebf3ab4db457325c014e7a913004898b400cfcefb5db71536d188f76ef55c"
+      "bytes": 22468,
+      "sha256": "6329bd9eb016fc78b6eb7fa24f315ae106f9429d892a04a696771a2a8a1931f5"
     },
-    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. one hand carrying the small rusty hinged tin open, nails visible, at the cottage workshop. A clear material centered in the frame with readable shape and distinct carrying action. Use the source only to match the material.",
-    "focalPosition": "center",
-    "reference": "nails"
+    "editReferenceSha256": "725f7c35608bb4ba8c16d03c9e9079a0a028de0f647e4a30c60fb87148498590"
   },
   "rope-held": {
-    "source": "exec-3a1805bb-b152-417d-9a72-925b02ef982a.png",
+    "source": "exec-01651dc5-1b34-47b0-8747-3957783122d0.png",
     "sourceSize": [
       1536,
       1024
     ],
-    "sourceSha256": "d4dbee6ef0996124ef74d4c7fa096d2ee9266106f0309ab1bad23e4ac3925e35",
+    "sourceSha256": "933066fbbd96352b1a39304294eca031aa8b3a67ef7df7c993186baf48a29dcf",
+    "prompt": "Edit this existing 1980s cottage photograph. An adult woman viewed from behind, wearing a simple cream long-sleeved cotton shirt and worn jeans, carrying the same rope coil on the same dock. Long dark hair tied loosely back. Preserve the material's shape, amount and wear, the same setting, natural lighting, composition and photographic realism. The carrier is clearly a woman. Keep her face outside the frame to make this usable with any selected Final Girl. No text.",
+    "focalPosition": "center",
     "hero": {
       "file": "rope-held.webp",
       "size": [
         1280,
         853
       ],
-      "bytes": 120412,
-      "sha256": "6d5dd357446f5b2c42ad16fe8733b21f1a3b7d6133db893f6a599c023b1583b6"
+      "bytes": 115806,
+      "sha256": "a9b3f23bfca52f36159a26bbfc11f5d7ecc50f635e60010397172b66de7f95bb"
     },
     "tile": {
       "file": "rope-held-tile.webp",
@@ -949,28 +951,28 @@
         400,
         267
       ],
-      "bytes": 19454,
-      "sha256": "48573cf93b19150b5b4f7f7bf5b46337657704aba04ff86588bbbfd5b48cd270"
+      "bytes": 18442,
+      "sha256": "eb8a2450400683cd2118064d29516a210fa41be9ed232a2639f3cde2f2c2e793"
     },
-    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. a hand carrying a neatly coiled coarse tan rope away from the lakeside boathouse. A clear material centered in the frame with readable shape and distinct carrying action. Use the source only to match the material.",
-    "focalPosition": "center",
-    "reference": "rope"
+    "editReferenceSha256": "6d5dd357446f5b2c42ad16fe8733b21f1a3b7d6133db893f6a599c023b1583b6"
   },
   "wood-held": {
-    "source": "exec-f5964cae-fa61-42c2-95ae-fb7dd4e8f4f3.png",
+    "source": "exec-00dc1b2a-5fcd-4293-8eac-e35a73f83ffd.png",
     "sourceSize": [
       1536,
       1024
     ],
-    "sourceSha256": "27976e4ccd1f52c262ddf0c926466eb3daee573e8ed7ff1c8faa9d011bbd93f8",
+    "sourceSha256": "0ed25007847a63c78605f06f92a0fa7b663a6b3218c4b9f2aa680475afc1758f",
+    "prompt": "Edit this existing 1980s cottage photograph. An adult woman's arms and waist, wearing a simple cream cotton shirt and worn jeans, carrying the same wood offcuts. Preserve the material's shape, amount and wear, the same setting, natural lighting, composition and photographic realism. The carrier is clearly a woman. Keep her face outside the frame to make this usable with any selected Final Girl. No text.",
+    "focalPosition": "center",
     "hero": {
       "file": "wood-held.webp",
       "size": [
         1280,
         853
       ],
-      "bytes": 147384,
-      "sha256": "7bea39c1fef60239ad21ffde1e29cf4aa7285e7f4a32b3b2eec60c2ee7a6126e"
+      "bytes": 137770,
+      "sha256": "ab1f8d9ec456db5b5ae4c29e5aaa74e93a862d1e816140a3ddc07d3094919ae6"
     },
     "tile": {
       "file": "wood-held-tile.webp",
@@ -978,12 +980,10 @@
         400,
         267
       ],
-      "bytes": 31124,
-      "sha256": "a28b9604c45be2af67732c5549b029d73bec9512e456bbdd57100718af52a9cc"
+      "bytes": 29342,
+      "sha256": "8494bb9d6c1b18663dcd3f6840f472cf799bed8bd97de6cdb90d8985d3fc5727"
     },
-    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. a cropped arm carrying an armful of split dry wooden offcuts across the garden. A clear material centered in the frame with readable shape and distinct carrying action. Use the source only to match the material.",
-    "focalPosition": "center",
-    "reference": "wood"
+    "editReferenceSha256": "7bea39c1fef60239ad21ffde1e29cf4aa7285e7f4a32b3b2eec60c2ee7a6126e"
   },
   "snare-blueprint": {
     "source": "exec-582f3302-68ef-49f0-8a04-c47130ccc7c3.png",
