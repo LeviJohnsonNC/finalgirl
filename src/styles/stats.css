@@ -394,31 +394,6 @@ body:has(.stats-page) main { padding-bottom: calc(var(--app-footer-h, 64px) + 24
   .style-finding-actions button, .style-cases button { min-height: 44px; padding-block: 13px; }
 }
 
-.stats-saved-case {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-  width: min(90%, 1100px);
-  margin: 0 auto 20px;
-  padding: 14px 18px;
-  background: #101b1aeF;
-  color: #e4eddf;
-  border: 1px solid #77aaa278;
-}
-.stats-saved-case strong { font-size: 18px; }
-.stats-saved-case p { color: #becfc5; font-size: 14px; }
-.stats-saved-case-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.stats-saved-case button {
-  min-height: 44px;
-  padding-inline: 12px;
-  border: 1px solid #77aaa2;
-  color: #c2f2e6;
-}
-.stats-saved-case button:hover { background: #253d37; }
-
 /* A small, factual comparison within the existing scouting report. */
 .performance-trend { margin-top: 1.6rem; padding-top: 1.4rem; border-top: 1px solid rgba(160,205,204,.2); color: #c4d0ce; }
 .performance-trend h4 { color: #ede5cd; font-size: 1.15rem; line-height: 1.4; margin: .4rem 0 1rem; }

@@ -74,8 +74,6 @@ const IndexContent = () => {
   // other route into the scrapbooks clears it, so they start on the covers.
   const [scrapbookFocusId, setScrapbookFocusId] = useState<string | null>(null);
 
-  const [savedCaseId, setSavedCaseId] = useState<string | null>(null);
-
   const goToScrapbooks = (focusGameId: string | null = null) => {
     setScrapbookFocusId(focusGameId);
     setCurrentPage('scrapbooks');
@@ -257,13 +255,12 @@ const IndexContent = () => {
     if (game && checkpoint(game.id, { phase: 'outcome' })) setCurrentPage('outcome', { replace: true });
   };
 
-  const finishSavedCase = (id: string) => {
+  const finishSavedCase = () => {
     if (!cloudPlay.close()) {
       toast.error(cloudPlay.conflict ? 'Resolve the cloud version before closing this game.' : 'Could not close this game on this device. Keep it open and retry.');
       return;
     }
     if (saveActiveGame(null)) {
-      setSavedCaseId(id);
       setCurrentPage('stats', { replace: true, omit: ['nowPlaying', 'outcome', 'ending'] });
     }
   };
@@ -275,7 +272,7 @@ const IndexContent = () => {
         endingNarration: endingNarration || null,
         posterImageUrl: endingNarration ? posterImageUrl ?? null : null,
       });
-      finishSavedCase(lastGameResult.id);
+      finishSavedCase();
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save the ending.'); }
   };
 
@@ -283,7 +280,7 @@ const IndexContent = () => {
     if (!lastGameResult) return;
     try {
       saveReviewedResult(formData, 'outcome');
-      finishSavedCase(lastGameResult.id);
+      finishSavedCase();
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save your result.'); }
   };
 
@@ -442,10 +439,7 @@ const IndexContent = () => {
           />
         );
       case 'stats':
-        return <Stats savedCaseId={savedCaseId} onOpenSession={(gameId) => {
-          setSavedCaseId(null);
-          goToScrapbooks(gameId);
-        }} />;
+        return <Stats onOpenSession={goToScrapbooks} />;
       case 'rules':
         return <Rules />;
       default:
