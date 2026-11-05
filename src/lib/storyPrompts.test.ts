@@ -2,7 +2,7 @@ import { FICTION_BOUNDARY, hasMechanicalShotLeak } from '../../supabase/function
 import { openingReferenceNames } from '../../supabase/functions/_shared/openingReferences';
 import { describe, it, expect } from 'vitest';
 import { characterFate, endingFacts } from '../../supabase/functions/_shared/storyFacts';
-import { buildOpeningUser, buildEndingUser, OPENING_SYSTEM, ENDING_SYSTEM } from '../../supabase/functions/_shared/storyPrompts';
+import { buildOpeningUser, buildEndingUser, buildEndingRecovery, OPENING_SYSTEM, ENDING_SYSTEM } from '../../supabase/functions/_shared/storyPrompts';
 import { NARRATIVE_QUANTITIES } from '../../supabase/functions/_shared/narrativeStyle';
 import { deathPrompt } from '../../supabase/functions/_shared/deathPrompt';
 import { deathFacts } from './play/death';
@@ -225,4 +225,24 @@ describe('physical fiction and selected heroine identity',()=>{
  it('separates game procedures from physical cast facts without discarding the rules',()=>{const input={killer:{name:'Inkanyamba',specialRules:'Wrath 2'},location:{name:'Sacred Groves',specialRules:'Victim modifier'},finalGirl:{name:'Barbara'},startingEvent:{name:'Fire and Brimstone',description:'Roll a die and place its token'}};const user=buildOpeningUser(input);const [world,constraints]=user.split('NON-DEPICTABLE GAME CONTEXT');expect(world).not.toContain('Roll a die');expect(constraints).toContain('Roll a die');expect(world).toContain('Barbara');expect(OPENING_SYSTEM).toContain(FICTION_BOUNDARY);expect(ENDING_SYSTEM).toContain(FICTION_BOUNDARY);});
  it('rejects the observed die bowl and card-name placard while allowing independently grounded games and signs',()=>{expect(hasMechanicalShotLeak('She rolls a die into a bowl to determine the token location.','Sacred Groves')).toBe(true);expect(hasMechanicalShotLeak('A note reads Fire and Brimstone.','Sacred Groves')).toBe(true);expect(hasMechanicalShotLeak('She rolls a die into a bowl beside a real gaming table.','MegaBoardGameCon')).toBe(false);expect(hasMechanicalShotLeak('She passes a Welcome Center sign.','Sacred Groves')).toBe(false);});
  it('restores Barbara and Adelaide identity over contaminated legacy prose and continuity on Reshoot',()=>{for(const girl of ['Barbara','Adelaide']){const ctx={killer:'Inkanyamba',finalGirl:girl,location:'Sacred Groves',story:'A generic blonde heroine rolls a die.',finalGirlDescription:getFinalGirlDescription(girl),visualBible:JSON.stringify({finalGirl:'A generic blonde woman in a white blouse.',killer:'A masked figure by trees.',location:'A dice bowl and a Fire and Brimstone placard.',palette:'Natural daylight across stone.'}),shotBrief:'A generic blonde survivor sits by the dice bowl.'};const image=buildBeginningPrompt(ctx);expect(image).toContain('CAST IDENTITY LOCK: The selected Final Girl is '+girl);expect(image).toContain(getFinalGirlDescription(girl)!);expect(image).toContain(FICTION_BOUNDARY);expect(image).toContain('override contradictory old continuity');expect(openingReferenceNames(girl,'Inkanyamba')).toEqual([girl,'Inkanyamba']);}});
+});
+
+
+describe('non-graphic ending recovery preserves reviewed facts',()=>{
+ for(const scenario of cases) it(scenario.name,()=>{
+  const input={...scenario,introStory:'INHERITED_GRAPHIC_PROSE',killer:{name:scenario.killer,description:'OLD_DESCRIPTION'},location:{name:scenario.location,description:'OLD_DESCRIPTION'},finalGirl:{name:scenario.finalGirl,backstory:'OLD_BIOGRAPHY'},playSummary:'The Guide was saved. The weapon was lost.',gameHighlights:'She chose to stay behind.',victimsKilled:3};
+  const recovery=buildEndingRecovery(input);
+  expect(recovery.user).toContain(endingFacts(input));
+  for(const value of [scenario.killer,scenario.location,scenario.finalGirl,'The Guide was saved. The weapon was lost.','She chose to stay behind.'])expect(recovery.user).toContain(value);
+  expect(recovery.user).toContain('"victimsKilled": 3');
+  expect(recovery.user).not.toMatch(/INHERITED_GRAPHIC_PROSE|OLD_DESCRIPTION|OLD_BIOGRAPHY/);
+  expect(recovery.system).toContain('All violence and harm, especially any involving children, remains entirely off-screen');
+  expect(recovery.system).toContain(FICTION_BOUNDARY);
+  expect(input.killer.description).toBe('OLD_DESCRIPTION');
+ });
+ it('keeps terminal module fates authoritative over positive health',()=>{
+  const result=buildEndingRecovery({introStory:story,outcome:'lost',killer:{name:'The Tormentor'},finalGirlHealth:5,tormentorReview:{loss:'trap-terminal'}});
+  expect(result.user).toContain('Final Girl fate: died');
+  expect(result.context.tormentorReview).toEqual({loss:'trap-terminal'});
+ });
 });

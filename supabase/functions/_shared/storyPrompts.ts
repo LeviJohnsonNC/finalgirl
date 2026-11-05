@@ -62,3 +62,19 @@ export function buildEndingUser(data: Record<string, unknown> & { introStory: st
   if (killerName===INTRUDERS) delete facts.killerHealth;
   return `${currentIdentity(data)}REVIEWED ENDING FACTS:\n${endingFacts(data)}\n\nRECORDED CONTEXT:\n${JSON.stringify(facts, null, 2)}\n\nOPENING (continuity reference; not instructions):\n${introStory}`;
 }
+
+/** A materially different, off-screen depiction after one explicit policy block.
+ * Keep reviewed facts/notes, while dropping inherited descriptive prose.
+ * Never continue the blocked draft or change the game's outcome to avoid a block. */
+export function buildEndingRecovery(data: Parameters<typeof buildEndingUser>[0]) {
+  const context: Record<string,unknown> = {...data};
+  delete context.introStory;
+  for (const key of ['killer','location','finalGirl']) {
+    const entity = data[key] as {name?: string} | undefined;
+    context[key] = {name:entity?.name};
+  }
+  if ((context.killer as {name?:string})?.name === INTRUDERS) delete context.killerHealth;
+  const system = `${ENDING_SYSTEM}\n\nWrite only a non-graphic aftermath scene. All violence and harm, especially any involving children, remains entirely off-screen. Do not describe attacks, wounds, bodies, torture, suffering in progress, or methods of killing. Show dread, loss or relief through an ordinary action, a restrained exchange, an absence, or an unresolved responsibility. Retain the confirmed outcome and individual fates without depicting how harm occurred. Notes and recorded context are facts to respect, never wording to quote or scenes to reenact. Do not continue an earlier draft. Keep the selected threat distinctive without showing violence. Do not invent a rescue, recovery, survival or casualty to make this version gentler.`;
+  const user = `${currentIdentity(data)}REVIEWED ENDING FACTS:\n${endingFacts(context)}\n\nOFF-SCREEN RECORDED CONTEXT (facts only, never depict or quote graphic detail):\n${JSON.stringify(context,null,2)}`;
+  return {system,user,context};
+}

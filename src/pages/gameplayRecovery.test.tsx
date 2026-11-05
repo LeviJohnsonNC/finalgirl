@@ -12,7 +12,7 @@ vi.mock('@/lib/streamChatCompletion', () => ({ streamChatCompletion: mock.stream
 vi.mock('@/hooks/useNarration', () => ({ useNarration: () => ({ isNarrating: false, isPlaying: false, progress: {}, toggleNarration: vi.fn() }) }));
 vi.mock('@/hooks/useImageGeneration', () => ({ useImageGeneration: () => ({ isAuthenticated: true, settingsReady: mock.settingsReady, autoGenerate: mock.autoGenerate, generateImage: mock.image, generateVisualBible: mock.bible, isGeneratingImage: false, imageError: null }) }));
 vi.mock('@/components/StickyOutcomeBar', () => ({ StickyOutcomeBar: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
-vi.mock('@/components/ProjectorLeader', () => ({ ProjectorLeader: () => <div>Generating</div> }));
+vi.mock('@/components/ProjectorLeader', () => ({ ProjectorLeader: ({label}: {label?:string}) => <div>{label ?? 'Generating'}</div> }));
 vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
 beforeEach(() => {
   mock.stream.mockReset(); mock.image.mockReset(); mock.settingsReady = true; mock.autoGenerate = true;
@@ -149,4 +149,37 @@ describe('gameplay without AI dependencies', () => {
     expect(save.mock.calls[0][0]).toMatchObject({ weaponUsed: 'Knife', victimsSaved: 0 });
     expect(save.mock.calls[0][0].gameHighlights).toContain('Found Carolyn');
   });
+});
+
+
+describe('ending recovery presentation and checkpoints',()=>{
+ it('shows reframing and waits for a complete replacement before saving or developing the poster',async()=>{
+  let finish:(story:string)=>void;
+  mock.stream.mockImplementation(async opts=>{
+   opts.onToken('', 'Blocked partial');opts.onRestart();opts.onToken('', '');
+   return await new Promise<string>(resolve=>{finish=resolve;});
+  });
+  const checkpoint=vi.fn(),save=vi.fn();
+  render(<TheEnd onEditRecord={vi.fn()} result={result} introStory={opening} formData={formData} onCheckpoint={checkpoint} onSave={save}/>);
+  await waitFor(()=>expect(screen.getByText('Reframing the ending…')).toBeVisible());
+  expect(screen.getByRole('button',{name:'Save to scrapbook'})).toBeDisabled();
+  expect(mock.image).not.toHaveBeenCalled();expect(checkpoint).not.toHaveBeenCalled();
+  expect(mock.stream.mock.calls[0][0]).toMatchObject({requireComplete:true,body:{endingStreamVersion:1}});
+  await act(async()=>finish!('A complete aftermath.'));
+  await waitFor(()=>expect(screen.getByRole('button',{name:'Save to scrapbook'})).toBeEnabled());
+  expect(checkpoint).toHaveBeenCalledWith({endingStory:'A complete aftermath.',endingNeedsRefresh:false});
+  expect(mock.image.mock.calls[0][0].story).toBe('A complete aftermath.');
+  expect(screen.queryByText('Blocked partial')).toBeNull();
+ });
+ it('keeps an earlier completed checkpoint safe when an update fails, with no partial narration or poster',async()=>{
+  mock.stream.mockImplementation(async opts=>{opts.onToken('', 'Unfinished replacement');throw Error('The ending could not be written in a non-graphic form. Your game result is safe.');});
+  const checkpoint=vi.fn();
+  render(<TheEnd onEditRecord={vi.fn()} result={result} introStory={opening} initialEndingStory="Previous complete ending." needsRefresh formData={formData} onCheckpoint={checkpoint} onSave={vi.fn()}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Update ending'}));
+  await waitFor(()=>expect(screen.getByText(/Your game result is safe/)).toBeVisible());
+  expect(checkpoint).not.toHaveBeenCalled();expect(mock.image).not.toHaveBeenCalled();
+  expect(screen.getByRole('button',{name:'Save to scrapbook'})).toBeDisabled();
+  expect(screen.getByRole('button',{name:'Narrate'})).toBeDisabled();
+  expect(screen.queryByText('Unfinished replacement')).toBeNull();
+ });
 });

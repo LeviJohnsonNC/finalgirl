@@ -60,6 +60,8 @@ const TheEnd = ({
 }: TheEndProps) => {
   const [endingStory, setEndingStory] = useState<string | null>(initialEndingStory ?? null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isReframing, setIsReframing] = useState(false);
+  const completedStoryRef = useRef(initialEndingStory ?? null);
   const [awaitingRefresh, setAwaitingRefresh] = useState(Boolean(needsRefresh));
   const [error, setError] = useState<string | null>(null);
   const [posterImageUrl, setPosterImageUrl] = useState<string>(initialPosterImageUrl ?? '');
@@ -103,9 +105,9 @@ const TheEnd = ({
   }, [result.id]);
 
   const developPoster = useCallback(async (previousImageUrl?: string) => {
-    if (!endingStory) return;
+    if (!completedStoryRef.current || isGenerating || error || awaitingRefresh) return;
     const url = await generateImage({
-      story: endingStory,
+      story: completedStoryRef.current,
       killer: result.killer,
       killerDescription: evomorphGuidance ?? getKillerDescription(result.killer),
       finalGirl: result.finalGirl,
@@ -131,7 +133,7 @@ const TheEnd = ({
       draftPoster: true,
     });
     if (url && mounted.current) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
-  }, [endingStory, tormentorReview, shipReview, grimlashReview, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
+  }, [isGenerating, error, awaitingRefresh, tormentorReview, shipReview, grimlashReview, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
 
   // The poster develops on its own once the ending narration lands.
   //
@@ -139,12 +141,12 @@ const TheEnd = ({
   // updates the story on every token, and a poster built from the first
   // half-sentence would be worse than no poster.
   useEffect(() => {
-    if (!endingStory || isGenerating || error) return;
+    if (!endingStory || isGenerating || error || awaitingRefresh) return;
     if (!settingsReady || posterImageUrl || !isAuthenticated || !autoGenerate) return;
     if (autoGenerateTriggered.current) return;
     autoGenerateTriggered.current = true;
     developPoster();
-  }, [endingStory, isGenerating, error, isAuthenticated, autoGenerate, settingsReady, posterImageUrl, developPoster]);
+  }, [endingStory, isGenerating, error, awaitingRefresh, isAuthenticated, autoGenerate, settingsReady, posterImageUrl, developPoster]);
 
   const generateEnding = async () => {
     setAwaitingRefresh(false);
@@ -158,6 +160,8 @@ const TheEnd = ({
     streamAbortRef.current = abortController;
 
     setIsGenerating(true);
+    setIsReframing(false);
+    setEndingStory(null);
     setError(null);
 
     // Play projector sound effect
@@ -218,6 +222,7 @@ const TheEnd = ({
         functionName: 'generate-ending',
         body: {
           ...payload,
+          endingStreamVersion: 1,
           evaluation: {
             gameId: result.id,
             context: {
@@ -231,11 +236,15 @@ const TheEnd = ({
             },
           },
         },
-        onToken: (_delta, accumulated) => setEndingStory(accumulated),
+        onToken: (_delta, accumulated) => { if (!abortController.signal.aborted) setEndingStory(accumulated); },
+        requireComplete: true,
+        onRestart: () => { if (!abortController.signal.aborted) setIsReframing(true); },
         signal: abortController.signal,
       });
 
+      if (abortController.signal.aborted) return;
       if (!full) throw new Error('No ending returned from the generator');
+      completedStoryRef.current = full;
       checkpointRef.current({ endingStory: full, endingNeedsRefresh: false });
       setEndingStory(full);
 
@@ -244,12 +253,13 @@ const TheEnd = ({
       if (abortController.signal.aborted) return;
       console.error('Ending generation error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to generate ending';
+      setEndingStory(completedStoryRef.current);
       setError(errorMessage);
       toast.error('Ending generation failed', {
         description: errorMessage,
       });
     } finally {
-      if (!abortController.signal.aborted) setIsGenerating(false);
+      if (!abortController.signal.aborted) { setIsGenerating(false); setIsReframing(false); }
     }
   };
 
@@ -261,7 +271,7 @@ const TheEnd = ({
       filmId: getFilmIdByLocation(result.location),
     });
 
-  const canSaveEnding = Boolean(endingStory && !isGenerating && !error && !awaitingRefresh);
+  const canSaveEnding = Boolean(endingStory && endingStory === completedStoryRef.current && !isGenerating && !error && !awaitingRefresh);
 
   return (
     <NarrationLayout
@@ -277,7 +287,7 @@ const TheEnd = ({
             ? <button onClick={generateEnding} className="narration-button narration-button--primary">Update ending</button>
             : <button disabled={!canSaveEnding} onClick={() => onSave(endingStory!, posterImageUrl || undefined)}
                 className="narration-button narration-button--primary">Save to scrapbook</button>}
-          {endingStory && <button onClick={handleNarrate} disabled={isNarrating || isGenerating} className="narration-button narration-button--narrate">
+          {endingStory && <button onClick={handleNarrate} disabled={isNarrating || isGenerating || Boolean(error)} className="narration-button narration-button--narrate">
             {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : isPlaying ? <VolumeX className="w-4 h-4" aria-hidden="true" /> : <Volume2 className="w-4 h-4" aria-hidden="true" />}
             {isNarrating ? 'Generating...' : isPlaying ? 'Stop' : 'Narrate'}
           </button>}
@@ -293,7 +303,7 @@ const TheEnd = ({
     >
       {awaitingRefresh
         ? <p className="ending-review-message" role="status">The record changed. Update the ending to reflect the new details.</p>
-        : <NarrationReader kind="ending" story={endingStory} isGenerating={isGenerating} error={error} onRetry={generateEnding} />}
+        : <NarrationReader kind="ending" story={endingStory} isGenerating={isGenerating} generatingLabel={isReframing ? 'Reframing the ending…' : undefined} error={error} onRetry={generateEnding} />}
     </NarrationLayout>
   );
 };

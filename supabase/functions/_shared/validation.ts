@@ -92,6 +92,7 @@ export const NarrationRequestSchema = z.object({
 
 // Schema for generate-ending endpoint
 export const EndingRequestSchema = z.object({
+  endingStreamVersion: z.literal(1).optional(),
   tormentorReview:TormentorReviewSchema.optional(),
   grimlashReview:GrimlashReviewSchema.optional(),
   mission: MissionSchema.optional(),

@@ -73,12 +73,13 @@ interface NarrationReaderProps {
   kind: 'opening' | 'ending';
   story: string | null;
   isGenerating: boolean;
+  generatingLabel?: string;
   error: string | null;
   onRetry: () => void;
   actions?: ReactNode;
 }
 
-export const NarrationReader = ({ kind, story, isGenerating, error, onRetry, actions }: NarrationReaderProps) => {
+export const NarrationReader = ({ kind, story, isGenerating, generatingLabel, error, onRetry, actions }: NarrationReaderProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const scroll = scrollRef.current;
@@ -105,7 +106,7 @@ export const NarrationReader = ({ kind, story, isGenerating, error, onRetry, act
     <div className="narration-reader-edge" aria-hidden="true" />
     <div ref={scrollRef} className="narration-reader-scroll" role="region" aria-label={kind === 'opening' ? 'Opening narration' : 'Ending narration'} aria-busy={isGenerating} tabIndex={0}>
       {isGenerating ? (
-        <div className="narration-reader-state"><ProjectorLeader label="The projector is warming up" /></div>
+        <div className="narration-reader-state" role={generatingLabel ? 'status' : undefined}><ProjectorLeader size={generatingLabel ? 'sm' : 'lg'} label={generatingLabel ?? 'The projector is warming up'} /></div>
       ) : error ? (
         <div className="narration-reader-state" role="status">
           <p>{error}</p>
