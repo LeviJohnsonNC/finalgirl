@@ -92,7 +92,7 @@ interface GatewayCall {
   model: string;
   messages: Array<{ role: string; content: unknown }>;
   modalities?: string[];
-  image_config?: { aspect_ratio: "16:9" };
+  image_config?: { aspect_ratio: "16:9" | "2:3" };
   max_tokens?: number;
   temperature?: number;
   reasoning_effort?: "low";

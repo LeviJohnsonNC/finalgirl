@@ -65,11 +65,14 @@ test('Hunter forced transition, failed-write retry, both reveal entry points, Al
  for(let i=0;i<4;i++)await panel.getByRole('button',{name:'Remove one Titanium Shield health, heart 1',exact:true}).click();
  await expect(panel.getByRole('article',{name:'Titanium Shield',exact:true})).toContainText('Removed · 0/4 health');
  await panel.getByRole('button',{name:'Add another Minor Power',exact:true}).click();await panel.getByRole('button',{name:'Reveal Advanced A.I.',exact:true}).click();
+ archive.failWrites=true;
  await panel.getByRole('button',{name:'Counter-Measures Not recorded in play',exact:true}).click();
  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
  await panel.locator('details.module-card-section > summary').click();
  await expect(panel.getByRole('article',{name:'Mark V',exact:true})).toContainText('Ally · 3 HP');
  await expect(panel.getByRole('button',{name:'Counter-Measures In play',exact:true})).toHaveAttribute('aria-pressed','true');
+ archive.failWrites=false;await page.evaluate(()=>window.dispatchEvent(new Event('online')));
+ await expect.poll(()=>archive.sessions.find(row=>row.id===activeGame.id)?.state.playEvents).toEqual(await readLog(page));
  log=await readLog(page);expect(validPlayLog(log)).toBe(true);expect(hunterState(moduleState(summarizePlay(log).entries,'hunter'))).toMatchObject({phase:'mark-x',ally:'alive',allyHealth:3});
  for(const [width,height] of info.project.name==='mobile'?[[390,844],[320,568]]:[[1280,640],[1366,768],[1440,900]]) {
  await page.setViewportSize({width,height});await panel.locator('img').evaluateAll(async imgs=>Promise.all(imgs.map(img=>{(img as HTMLImageElement).loading='eager';return (img as HTMLImageElement).decode();})));

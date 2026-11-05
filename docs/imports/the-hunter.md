@@ -55,7 +55,17 @@ Expected behaviors were derived from H1–H6 before testing. `src/lib/play/hunte
 
 `tests/browser/hunter.spec.ts` exercises real fresh/resumed controls, durable failure/retry, normal and forced progression, shared reveal paths, full/depleted Minor states, no-write expansion, cooldowns, reload, death generation/cached replay/narration and ending/poster requests. The location matrix includes Buddyland, Camp, Maple Lane, Carnival, Groves, Creech, Konrad, Shady Acres, Marrek, Storybook Woods, Wingard Cottage and existing Sunnydaze Mall support. The latter does not claim to implement an unprovided location batch.
 
-Visual journeys cover 1280×640, 1366×768, 1440×900, 390×844 and 320×568, all named card photos, header, core/model states, active/inactive ongoing effects and long labels. They assert decoded images, document overflow and internal control bounds. Manual rendered screenshot findings and final gate results are recorded here after the final pass. Browser provider calls are mocked; no paid live story/audio/production claim is made.
+Visual journeys cover 1280×640, 1366×768, 1440×900, 390×844 and 320×568, all named card photos, header, core/model states, active/inactive ongoing effects and long labels. They assert decoded images, document overflow and internal control bounds. Manual visual findings: the first header crop clipped Mark V’s visor and was regenerated at the correct shallow composition; the finish review needed its owner gate enabled; four depleted Shield hearts clipped inside the 320px compact card and now wrap at full 44px targets. Inspected the complete populated panel and all distinct named photos/physical model states on laptop and phone. Faces, Minigun barrel cluster, mechanical details and paired-model Finale composition remain visible; labels/controls fit inside the panel. The forced Finale naming entry no longer creates a duplicate reveal.
+
+| Local gate / evidence | Result |
+| --- | --- |
+| `npm run check` | 975 frontend/domain tests plus 141 Node edge-harness tests passed; lint/typecheck passed (11 pre-existing fast-refresh warnings). |
+| `npm run check:assets` | 17 distinct originals, 9 thumbnails, dimensions, digests and byte budgets passed; 1,049,722 runtime photo/thumbnail bytes total. |
+| `npm run build` | Production bundle passed; existing bundle-size advisory retained. |
+| Hunter Chromium desktop / mobile | 17 journeys per project passed, five required viewports; all 12 location pairings passed. Cloud failure/reload/reconnect is explicitly included in the final composed journey. |
+| Full native edge/database/browser CI | Tracked on [PR #186](https://github.com/LeviJohnsonNC/finalgirl/pull/186); wait for the final head. Native Deno caught the lower-level gateway ratio type and it was updated to match the tested 2:3 poster path. |
+
+The published implementation tree was compared byte-for-byte with the locally verified tree during upload. Browser provider calls are mocked; no paid live story/audio/production claim is made.
 
 ## Release / deployment
 
