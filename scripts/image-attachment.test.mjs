@@ -6,6 +6,8 @@ import ts from 'typescript';
 const compile = path => ts.transpileModule(readFileSync(new URL(path, import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
 const fiction = {};
 new Function('exports', compile('../supabase/functions/_shared/fictionBoundary.ts'))(fiction);
+const hunterIdentity={};
+new Function('exports',compile('../supabase/functions/_shared/play/hunter.ts'))(hunterIdentity);
 const storyFacts = {}, prompts = {}, narrativeStyle = {};
 const posterDesign = {};
 new Function('exports', compile('../supabase/functions/_shared/posterDesign.ts'))(posterDesign);
@@ -25,7 +27,7 @@ function openingWith(entries) {
 }
 new Function('require', 'exports', compile('../supabase/functions/_shared/openingReferences.ts'))(
   name => { if (name === './openingReferenceManifest.ts') return manifest; throw new Error('Unexpected opening import: ' + name); }, opening);
-new Function('exports', compile('../supabase/functions/_shared/storyFacts.ts'))(storyFacts);
+new Function('require','exports', compile('../supabase/functions/_shared/storyFacts.ts'))(name=>{assert.equal(name,'./play/hunter.ts');return hunterIdentity;},storyFacts);
 new Function('exports', compile('../supabase/functions/_shared/narrativeStyle.ts'))(narrativeStyle);
 const marrekIdentity = {};
 new Function('exports', compile('../supabase/functions/_shared/play/marrekWarehouse.ts'))(marrekIdentity);
@@ -38,6 +40,7 @@ new Function('exports', compile('../supabase/functions/_shared/play/grimlash.ts'
 const intrudersIdentity = {};
 new Function('exports', compile('../supabase/functions/_shared/play/intruders.ts'))(intrudersIdentity);
 new Function('require', 'exports', compile('../supabase/functions/_shared/prompts.ts'))(name => {
+  if (name === './play/hunter.ts') return hunterIdentity;
   if (name === './play/intruders.ts') return intrudersIdentity;
   if (name === './play/marrekWarehouse.ts') return marrekIdentity;
   if (name === './play/tormentor.ts') return tormentorIdentity;
@@ -389,4 +392,22 @@ test('the Wolf opening uses the staged immutable JPEG and keeps the Final Girl r
   });
   assert.equal(refs[0].name, 'Big Bad Wolf');
   await assert.rejects(() => opening.openingReferences('Unknown', 'Big Bad Wolf', async () => { throw Error('object unavailable'); }), /object unavailable/);
+});
+
+test('Hunter fixed references verify both digests and model-aware posters use distinct identities',async()=>{
+ for(const [name,file] of [['The Hunter','the-hunter'],['The Hunter · Mark X','the-hunter-mark-x']]){
+  const bytes=readFileSync(new URL(`../supabase/reference-assets/${file}.jpg`,import.meta.url));
+  const sha256=createHash('sha256').update(bytes).digest('hex');
+  assert.deepEqual(REFERENCE_MANIFEST[name],{path:`${file}-${sha256.slice(0,16)}.jpg`,sha256});
+  const refs=await opening.openingReferences('Unknown',name,async path=>{assert.equal(path,REFERENCE_MANIFEST[name].path);return bytes;});assert.equal(refs[0].name,name);
+ }
+ for(const [phase,ally,expected] of [['mark-v','unrepaired',[['Ginny','The Hunter']]],['mark-x','unrepaired',[['Ginny','The Hunter · Mark X']]],['mark-x','alive',[['Ginny','The Hunter · Mark X'],['','The Hunter']]]]){
+  const f=imageHandler();const body={...await request().json(),killer:'The Hunter',finalGirl:'Ginny',hunterReview:{phase,ally,allyHealth:ally==='alive'?3:0}};
+  assert.equal((await f.handler(new Request('https://example.test',{method:'POST',body:JSON.stringify(body)}))).status,200);
+  assert.deepEqual(f.openingCalls,expected);assert.equal(f.imageCalls[0][1],undefined);assert.equal(f.imageCalls[0][2].aspectRatio,'2:3');
+  assert.match(f.imageCalls[0][0],new RegExp(`Hunter reviewed model: ${phase}`));
+  assert.match(f.imageCalls[0][0],/Paint the ART ONLY/);
+ }
+ const f=imageHandler({referenceError:true});const body={...await request().json(),killer:'The Hunter',hunterReview:{phase:'mark-x',ally:'destroyed',allyHealth:0}};
+ assert.equal((await f.handler(new Request('https://example.test',{method:'POST',body:JSON.stringify(body)}))).status,503);assert.equal(f.imageCalls.length,0);
 });

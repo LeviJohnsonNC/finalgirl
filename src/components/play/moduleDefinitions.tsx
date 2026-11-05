@@ -1,3 +1,6 @@
+import { HunterControls } from './HunterControls';
+import { hunterArt } from './hunterArt';
+import { hunterState } from '@/lib/play/hunter';
 import { WINGARD, WINGARD_MODULE } from '../../../supabase/functions/_shared/play/wingardCatalog';
 import { wingardState } from '../../../supabase/functions/_shared/play/wingardCottage';
 import { WingardControls } from './WingardControls';
@@ -75,7 +78,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -101,6 +104,7 @@ const peopleSummary = (
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
 export const moduleDefinitions: Definition[] = [
+ {id:'hunter',owner:'killer',match:'The Hunter',title:'The Hunter',art:hunterArt('header'),capabilities:['reveals','minor-power'],Controls:HunterControls,summary:fields=>{const s=hunterState(fields);return s.phase==='unknown'?'Model not recorded':s.phase==='mark-v'?`Mark V · ${s.remaining??'?'} Parts`:s.phase==='countdown'?`Mark V shut down · Countdown ${s.countdown??'?'}`:`Mark X active · Mark V ${s.ally==='alive'?'Ally':s.ally}`;}},
   {id:WINGARD_MODULE,owner:'location',match:WINGARD,title:'Inside Wingard Cottage',
     art:wingardArt('header'),capabilities:['character','event'],Controls:WingardControls,
     summary:fields=>{

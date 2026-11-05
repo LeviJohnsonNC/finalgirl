@@ -14,11 +14,13 @@ const code = (path) =>
 const load = (path, imports) => {
   const ex = {};
   new Function('require', 'exports', code(path))((name) => {
+    if(name==='./hunter.ts'||name==='./play/hunter.ts')return hunter;
     if (imports[name]) return imports[name];
     throw new Error(name);
   }, ex);
   return ex;
 };
+const hunter=load('../supabase/functions/_shared/play/hunter.ts',{});
 const buddyland = load('../supabase/functions/_shared/play/buddyland.ts', {});
 const camp = load('../supabase/functions/_shared/play/camp.ts', {});
 const geppetto = load('../supabase/functions/_shared/play/geppetto.ts', {});

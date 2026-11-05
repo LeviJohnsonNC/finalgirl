@@ -1,3 +1,4 @@
+import { HUNTER, hunterState } from '@/lib/play/hunter';
 import { useState } from "react";
 import { WOLF } from "@/lib/play/bigBadWolf";
 import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
@@ -64,6 +65,7 @@ export function KillerCards({
 }) {
   const entries = summarizePlay(events).entries;
   const hans = moduleState(entries, "hans");
+  const hunter=killer===HUNTER?hunterState(moduleState(entries,'hunter')):undefined;
   const { record, message } = useModuleRecord(events, onEvent);
   const [editingSecond, setEditingSecond] = useState(false);
   const choose = (type: CardType, name: string) => {
@@ -113,18 +115,20 @@ export function KillerCards({
           const selected = cards.find(
             (card) => card.name === reveal?.killerCard,
           );
+          const forced=type==='finale'&&hunter?.forced;
           const label = type === "dark-power" ? "Dark Power" : "Finale";
           return (
             <section
               className="module-reveal-cards"
+              data-hunter-transferred={type==='dark-power'&&hunter&&hunter.phase!=='unknown'&&hunter.phase!=='mark-v'||undefined}
               data-wolf-cards={killer === WOLF || undefined}
               key={type}
               aria-label={`${label} selection`}
             >
               <h3>{label}</h3>
-              {reveal && !selected && (
+              {(reveal || forced) && !selected && (
                 <p className="module-control-help">
-                  {reveal.killerCard || "Card name not specified"}
+                  {reveal?.killerCard || "Card name not specified"}
                 </p>
               )}
               {selected && <RevealedCard card={selected} label={label} />}

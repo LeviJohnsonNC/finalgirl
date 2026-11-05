@@ -1,3 +1,4 @@
+import { HUNTER, HUNTER_MODULE, hunterFacts } from './hunter.ts';
 import { WINGARD, WINGARD_MODULE } from './wingardCatalog.ts';
 import { wingardFacts, wingardState } from './wingardCottage.ts';
 import { WOODS, WOODS_MODULE } from "./storybookWoods.ts";
@@ -25,6 +26,7 @@ export function deathFacts(
   eventId: string,
 ) {
   if(!validPlayLog(events))return null;
+  if(selection.killer!==HUNTER&&events.some(e=>e.moduleData?.module===HUNTER_MODULE||e.hunterReference))return null;
   if (selection.killer!==INTRUDERS && events.some(e=>e.moduleData?.module===INTRUDER_MODULE||e.intruderReference)) return null;
   if (selection.killer !== WOLF && events.some(e => e.moduleData?.module === "big-bad-wolf" || e.wolfReference)) return null;
   if (selection.location !== WOODS && events.some(event => event.moduleData?.module === WOODS_MODULE || event.woodsReference)) return null;
@@ -44,7 +46,8 @@ export function deathFacts(
   const wolfDeath = selection.killer === WOLF && e.wolfReference;
   const intruderDeath=selection.killer===INTRUDERS && e.intruderReference;
   const wingardDeath = selection.location===WINGARD && e.wingardReference;
-  const historical = woodsDeath || wolfDeath || intruderDeath || wingardDeath
+  const hunterDeath=selection.killer===HUNTER&&e.hunterReference;
+  const historical = hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath
     ? summarizePlay(events.slice(0, events.findIndex(event => event.id === eventId) + 1)).entries
     : [];
   // The death's own fields reflect deliberate edits. Only the surrounding
@@ -75,6 +78,9 @@ export function deathFacts(
     ),
     false,
   );
+  if(context?.hunter)delete context.hunter;
+  if(hunterDeath&&historical.some(e=>e.moduleData?.module===HUNTER_MODULE))context={...context,hunter:{facts:hunterFacts(moduleState(historical,HUNTER_MODULE),historical)}};
+  if(context&&!Object.keys(context).length)context=undefined;
   if(wingardDeath) {
     const state=moduleState(historical,WINGARD_MODULE);
     const facts=wingardFacts(wingardState(state)).join(' ');

@@ -1,3 +1,4 @@
+import { hunterState, hunterFacts } from '@/lib/play/hunter';
 import { INTRUDER_MODULE, INTRUDER_ROSTER, intruderFacts } from "@/lib/play/intruders";
 import {tormentorState,type TormentorLoss} from '@/lib/play/tormentor';
 import {shadyState,shadyChildrenCount} from '@/lib/play/shadyAcres';
@@ -93,7 +94,7 @@ export const GameOutcomeForm = ({
   );
   // Get killer-specific HP and flags
   const maxKillerHealth = useMemo(
-    () => ['Geppetto', 'Inkanyamba'].includes(result.killer) ? Math.max(getKillerMaxHealth(result.killer), result.killerHealth ?? 0, Number(initialDraft?.killerHealth) || 0) : getKillerMaxHealth(result.killer),
+    () => ['Geppetto', 'Inkanyamba', 'The Hunter'].includes(result.killer) ? Math.max(getKillerMaxHealth(result.killer), result.killerHealth ?? 0, Number(initialDraft?.killerHealth) || 0) : getKillerMaxHealth(result.killer),
     [result.killer, result.killerHealth, initialDraft?.killerHealth],
   );
   const killerIsUnkillable = useMemo(
@@ -119,7 +120,7 @@ export const GameOutcomeForm = ({
   const isFalconwood = result.location === 'Falconwood';
   const isSlayer = result.killer === 'Slayer';
   const hasKillerDetails = (isWin && (isPoltergeist || isBerith)) || (!isWin && isOrganism)
-    || isEvomorph || isRatchetLady || isBigBadWolf || isIntruders || isBilly || isGrimlash
+    || result.killer==='The Hunter' || isEvomorph || isRatchetLady || isBigBadWolf || isIntruders || isBilly || isGrimlash
     || isShriek || isSlayer || result.killer === 'The Tormentor';
   const hasLocationDetails = result.location === 'USS Konrad' || result.location === 'Shady Acres' || isFalconwood || isAbbey;
 
@@ -495,7 +496,7 @@ export const GameOutcomeForm = ({
               preserveObservedExcess={isGrimlash}
               variant={finalGirlHealth === 0 ? "killed" : "saved"}
             />
-            {!killerIsUnkillable && !isIntruders && (
+            {!killerIsUnkillable && !isIntruders && (result.killer!=='The Hunter'||hunterState(moduleState(entries,'hunter')).phase==='mark-x') && (
               <OutcomeNumberField
                 label={`Killer health (0–${maxKillerHealth})`}
                 accessibleLabel="Killer Health"
@@ -594,6 +595,7 @@ export const GameOutcomeForm = ({
               onChange={value => setWolfMode(value as typeof wolfMode)} options={[["TRACK", "Track"], ["SLAY", "Slay"], ["Killing Machine", "Track and Slay"]]} />
           </section>}
 
+          {result.killer==='The Hunter'&&<section className="outcome-panel outcome-module" aria-label="Hunter ending review"><h3>Hunter at the finish</h3><p>{hunterFacts(moduleState(entries,'hunter'),entries)}</p></section>}
           {isIntruders && <section className="outcome-panel outcome-module" aria-label="Intruders ending review">
             <h3>Intruders at the finish</h3>
             <p>{intruderFacts(intruderEnding)}</p>

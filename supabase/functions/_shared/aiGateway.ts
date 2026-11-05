@@ -547,7 +547,7 @@ const imageCanFallback = (error: unknown): boolean => error instanceof GatewayEr
 export const generateImage = async (
   prompt: string,
   referenceImageUrl?: string,
-  options?: { aspectRatio: "16:9"; references?: Array<{ name: string; url: string }> },
+  options?: { aspectRatio: "16:9" | "2:3"; references?: Array<{ name: string; url: string }> },
 ): Promise<{ base64: string; mimeType: string; model: string }> => {
   // Match the theater at generation time rather than cropping saved artwork.
   const dimensions = options ? { image_config: { aspect_ratio: options.aspectRatio } } : {};
@@ -573,7 +573,7 @@ export const generateImage = async (
         { type: "text", text: `${prompt}\nThe attached opening photograph is an IDENTITY reference only: match cast appearance, clothing, architecture and palette where consistent with the current named cast description. The current named cast identity overrides a contradictory person or clothing in an older generated opening. Make a new composition from the ending; translate into the requested painted medium. Do not copy the opening's pose, action or fate.` },
         { type: "image_url", image_url: { url: referenceImageUrl } },
       ] : options?.references?.length ? [
-        { type: "text", text: `${prompt}\nThe attached photographs are cast IDENTITY references: preserve the named person's face, skin tone, hair colour/texture/style and clothing; this named identity overrides contradictory continuity or shot descriptions. Incidental wounds, blood and held props in a reference do not establish injuries or possessions in this session. Preserve the named creature's physical construction. Photograph them together in the new shot under its available light, exposure and white balance. Match identity, not the reference's rendering style, skin processing, grain, grading or lighting. Translate stylized anatomy and materials into physically credible forms without changing the identity. Do not copy the portraits' poses, backgrounds or framing, or introduce another cast member.` },
+        { type: "text", text: `${prompt}\nThe attached photographs are cast IDENTITY references: preserve the named person's face, skin tone, hair colour/texture/style and clothing; this named identity overrides contradictory continuity or shot descriptions. Incidental wounds, blood and held props in a reference do not establish injuries or possessions in this session. Preserve the named creature's physical construction. ${options?.aspectRatio==='2:3'?'Translate their identities into the requested painted poster medium, with a new composition.':'Photograph them together in the new shot under its available light, exposure and white balance.'} Match identity, not the reference's rendering style, skin processing, grain, grading or lighting. Translate stylized anatomy and materials into physically credible forms without changing the identity. Do not copy the portraits' poses, backgrounds or framing, or introduce another cast member.` },
         ...options.references.flatMap(reference => [
           { type: "text", text: `Identity photograph: ${reference.name}` },
           { type: "image_url", image_url: { url: reference.url } },

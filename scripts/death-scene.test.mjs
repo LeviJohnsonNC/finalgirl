@@ -14,11 +14,13 @@ const code = (path) =>
 function moduleAt(path, imports) {
   const ex = {};
   new Function("require", "exports", code(path))((name) => {
+    if(name==='./hunter.ts'||name==='./play/hunter.ts')return hunter;
     if (imports[name]) return imports[name];
     throw new Error("Unexpected import " + name);
   }, ex);
   return ex;
 }
+const hunter=moduleAt('../supabase/functions/_shared/play/hunter.ts',{});
 const buddyland = moduleAt(
   "../supabase/functions/_shared/play/buddyland.ts",
   {},

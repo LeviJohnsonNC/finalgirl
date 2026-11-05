@@ -1,3 +1,4 @@
+import { HUNTER_MODULE, describeHunterAction, initialHunter, resolveHunterAction, validHunterAction, hunterParent, hunterState, type HunterAction } from './hunter.ts';
 import { WINGARD_MODULE } from './wingardCatalog.ts';
 import { isInitialWingard, resolveWingardAction, validWingardAction, wingardParent, describeWingardAction, type WingardAction } from './wingardCottage.ts';
 import { fitStoryFacts, fitStoryText } from './storyText.ts';
@@ -87,6 +88,8 @@ export interface PlayDetails {
   killerCard?: string;
 }
 export interface PlayEvent extends PlayDetails {
+  hunterAction?: HunterAction;
+  hunterReference?: true;
   intruderAction?: IntruderAction;
   intruderReference?: true;
   woodsAction?: WoodsAction;
@@ -169,6 +172,9 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if (e.hunterReference !== undefined && (e.kind!=='killed'||e.hunterReference!==true))return false;
+  if(e.hunterAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!==HUNTER_MODULE||!validHunterAction(e.hunterAction)))return false;
+  if(e.moduleData?.module===HUNTER_MODULE&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.hunterAction&&e.moduleData.changes.snapshot!==initialHunter().snapshot)))return false;
   if (e.intruderReference !== undefined && (e.kind !== 'killed' || e.intruderReference !== true)) return false;
   if (e.intruderAction !== undefined && (e.kind !== 'module' || e.moduleData?.module !== INTRUDER_MODULE || !validIntruderAction(e.intruderAction))) return false;
   if (e.moduleData?.module === INTRUDER_MODULE &&
@@ -267,9 +273,38 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validHunterHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
+}
+export function canUndoHunter(log:readonly PlayEvent[],target:string) {
+ const e=log.find(e=>e.id===target);
+ return e?.moduleData?.module!==HUNTER_MODULE || !!e.hunterAction&&hunterParent(summarizePlay(log).entries)===target;
+}
+export function validHunterHistory(log:readonly PlayEvent[]) {
+ if(!log.some(e=>e.moduleData?.module===HUNTER_MODULE))return true;
+ for(const [index,event] of log.entries()) {
+  const prefix=log.slice(0,index);const target=(event.kind==='undo'||event.kind==='restore')?prefix.find(e=>e.id===event.target):undefined;
+  if(event.moduleData?.module!==HUNTER_MODULE&&target?.moduleData?.module!==HUNTER_MODULE)continue;
+  const entries=summarizePlay(prefix).entries;
+  if(target) {
+   if(!target.hunterAction)return false;
+   if(event.kind==='undo'&&!canUndoHunter(prefix,target.id))return false;
+   if(event.kind==='restore') {
+    const expected=resolveHunterAction(target.hunterAction,moduleState(entries,HUNTER_MODULE),entries);
+    if(!expected||!sameHunterChanges(expected,target.moduleData!.changes))return false;
+   }
+  } else if(!event.hunterAction) {
+   if(prefix.some(e=>e.moduleData?.module===HUNTER_MODULE)||!sameHunterChanges(event.moduleData!.changes,initialHunter()))return false;
+  } else {
+   const expected=resolveHunterAction(event.hunterAction,moduleState(entries,HUNTER_MODULE),entries);
+   if(!expected||!sameHunterChanges(expected,event.moduleData!.changes))return false;
+  }
+ }
+ return true;
+}
+export function sameHunterChanges(a:Record<string,unknown>,b:Record<string,unknown>) {
+ return Object.keys(a).length===Object.keys(b).length&&Object.entries(a).every(([k,v])=>v===b[k]);
 }
 export function canUndoIntruder(log:readonly PlayEvent[],target:string) {
   const original=log.find(e=>e.id===target);
@@ -577,6 +612,14 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     if (deltas.has(e.id)) summary.killed = Math.max(0, Math.min(999, summary.killed! + deltas.get(e.id)!));
     if (e.kind === "round")
       summary.round = Math.min(999, (summary.round ?? 0) + 1);
+    if(e.kind==='module'&&e.hunterAction) {
+      const before=hunterState(moduleState(summary.entries,HUNTER_MODULE));
+      const after=hunterState({...moduleState(summary.entries,HUNTER_MODULE),...e.moduleData!.changes});
+      if(before.phase!=='mark-x'&&after.phase==='mark-x'&&['countdown','force-mark-x'].includes(e.hunterAction.command))summary.killerHealth=15;
+      if(e.hunterAction.command==='countdown'&&summary.bloodlust!==undefined)summary.bloodlust=Math.min(10,summary.bloodlust+1);
+      if(e.hunterAction.command==='reboot'&&before.phase==='mark-x'&&summary.killerHealth!==undefined)summary.killerHealth=Math.min(99,summary.killerHealth+4);
+      if(e.hunterAction.command==='force-mark-x'&&before.phase==='mark-v')summary.bloodlust=10;
+    }
     if(e.kind==='module'&&e.creechAction?.kind==='hunter'&&e.creechAction.bloodlust!==undefined)summary.bloodlust=e.creechAction.bloodlust;
     if(e.kind==='module' && e.moduleData?.module==='evomorph' && (e.moduleData.changes.initialized===true || (e.evomorphAction?.command==='evolve'&&e.moduleData.changes.stage==='adult'))) {
       const visible=summary.killerHealthTracking ?? summary.killerHealth!==undefined;
@@ -659,6 +702,7 @@ export function describeEvent(e: PlayEvent): string {
     case "moment":
       return `${e.text}${e.killerCard ? `: ${e.killerCard}` : ""}${e.detail ? `${e.killerCard ? ". " : ": "}${e.detail}` : ""}`;
     case "module":
+      if(e.hunterAction)return describeHunterAction(e.hunterAction,e.moduleData!.changes);
       if (e.woodsAction) return describeWoodsAction(e.woodsAction);
       if (e.wingardAction) return describeWingardAction(e.wingardAction);
       return e.moduleData ? [describeModule(e.moduleData), e.linkedModule && describeModule(e.linkedModule)].filter(Boolean).join("; ") : "";
@@ -698,6 +742,7 @@ export function playStoryBeats(
       (/^item\..+\.status$/.test(key) && value === 'carried') ||
       (/^buddy\..+\.status$/.test(key) && value === 'defeated') ||
       (/^victim\./.test(key) && value === 'killed'))) priority = 65;
+    if(e.hunterAction&&(['repair','force-mark-x','destroy-ally'].includes(e.hunterAction.command)||e.hunterAction.command==='countdown'&&hunterState(e.moduleData!.changes).phase==='mark-x'||e.hunterAction.command==='ally-health'&&e.hunterAction.value===0))priority=65;
     if(e.wingardAction && ['craft','trigger'].includes(e.wingardAction.command)) priority=65;
     if(e.wingardAction?.command==='person' && e.wingardAction.boatSaved)priority=75;
     const text = describeEvent(e).replace(/[—–]/g, ',');
