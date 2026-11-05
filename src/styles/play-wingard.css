@@ -23,7 +23,12 @@
 .play-death-modal--illustrated .play-cause-tile[data-wingard-photo][aria-pressed="true"] > img { opacity:1; }
 .wingard-controls .module-outcomes { flex-wrap:wrap; }
 .wingard-controls .module-outcomes > button { min-width:44px; padding-inline:5px; }
-.wingard-recipe-links { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.65rem; }
+.wingard-recipe-links { display:flex; justify-content:flex-end; gap:.65rem; }
+.wingard-recipe-links > button { white-space:nowrap; }
+@media(max-width:360px) {
+  .wingard-heading:has(.wingard-recipe-links) { flex-wrap:wrap; }
+  .wingard-recipe-links { justify-content:flex-start; }
+}
 .wingard-recorded { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr)); gap:.75rem; margin-top:.65rem; }
 .wingard-recipe-card { min-width:0; width:100%; max-width:465px; }
 .wingard-controls .wingard-recipe-card .play-illustrated-tile:disabled,
