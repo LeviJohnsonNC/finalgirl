@@ -1,3 +1,4 @@
+import {INTRUDERS,INTRUDER_ROSTER} from "./intruders.ts";
 import type { PlaySummary } from './events.ts';
 import type { ModuleSelection } from './modules.ts';
 import { parseTormentor, TORMENTOR_TRAPS } from './tormentor.ts';
@@ -7,10 +8,16 @@ export interface StoryTransition { index: number; priority: number; line: string
 
 /** Only explicit, effective observations. Toggling a system never proves its effects. */
 export function storyTransitions(entries: PlaySummary['entries'], selection?: ModuleSelection): StoryTransition[] {
+  const intruderReturns:StoryTransition[]=[];
   const escapes = new Map<string, StoryTransition>();
   const systems = new Map<string, Array<{ index: number; round: number | null; active: boolean }>>();
   let traps = parseTormentor(undefined);
   entries.forEach((e, index) => {
+    const intruder=e.intruderAction;
+    if (selection?.killer===INTRUDERS && (intruder?.command==='return'||intruder?.command==='epic')) {
+      const name=INTRUDER_ROSTER.find(person=>person.id===intruder.who)!.name;
+      intruderReturns.push({index,priority:95,line:`${e.currentRound?`Round ${e.currentRound}: `:''}${name} returned ${intruder.command==='epic'?'through Won’t Stay Down':'after revealing Final Health'}.`});
+    }
     if (selection?.killer === 'The Tormentor' && e.moduleData?.module === 'tormentor') {
       const next = parseTormentor(e.moduleData.changes.snapshot);
       if (!next) return;
@@ -42,7 +49,7 @@ export function storyTransitions(entries: PlaySummary['entries'], selection?: Mo
       systems.set(id, history.slice(-2));
     }
   });
-  return [...escapes.values(), ...[...systems].map(([id, observations]) => ({
+  return [...intruderReturns,...escapes.values(), ...[...systems].map(([id, observations]) => ({
     index: observations[observations.length - 1].index, priority: 85,
     line: `${KONRAD_FUNCTIONS.find(f => f.id === id)!.name}: ${observations.map(o => `observed ${o.active ? 'on' : 'off'}${o.round ? ` in round ${o.round}` : ''}`).join(', then ')}. Cause and effects unrecorded by these switches.`,
   }))];

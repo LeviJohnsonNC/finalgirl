@@ -532,3 +532,27 @@ it('Konrad setup, atomic linked cancellation, failed-write retry, stale taps, Un
  first.unmount();const second=renderHook(useActiveGame);expect(konradState(moduleState(summarizePlay(second.result.current.activeGame!.playEvents).entries,'konrad')).tokens['shaft:upper-left']).toBe(2);
  act(()=>second.result.current.save({...game,id:'foreign'}));act(()=>expect(second.result.current.appendPlayEvent('foreign',{...e,id:crypto.randomUUID()})).toBe(false));
 });
+
+it('initializes the Intruder roster once and preserves empty legacy games',()=>{
+  const {result}=renderHook(useActiveGame);
+  const intruders={...game,coreTrackersVersion:1 as const,selection:{...game.selection,killer:'The Intruders'}};
+  const begin=()=>newPlayEvent({kind:'start',round:1,saved:0,killed:0});
+  act(()=>{
+    result.current.save(intruders);
+    expect(result.current.appendPlayEvent(game.id,begin())).toBe(true);
+  });
+  let summary=summarizePlay(result.current.activeGame.playEvents);
+  expect(moduleState(summary.entries,'intruders')).toEqual({});
+  expect(summary.finalHorrorLevel).toBeUndefined();
+  act(()=>{
+    result.current.save({...intruders,intrudersSetupVersion:1});
+    expect(result.current.appendPlayEvent(game.id,begin())).toBe(true);
+    expect(result.current.appendPlayEvent(game.id,begin())).toBe(false);
+  });
+  summary=summarizePlay(result.current.activeGame.playEvents);
+  expect(summary).toMatchObject({finalHorrorLevel:3,bloodlust:0});
+  expect(summary.killerHealth).toBeUndefined();
+  expect(moduleState(summary.entries,'intruders')).toMatchObject({
+    active:'trish','trish.health':6,'baghead.health':6,'zeke.health':6,
+  });
+});

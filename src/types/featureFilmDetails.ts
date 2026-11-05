@@ -507,7 +507,7 @@ Many special events and relaxing getaways have been hosted here. Unfortunately, 
       name: 'The Intruders',
       description: `The news channels are all reporting the same thing: another couple has been found dead in their homes, bodies ravaged and mutilated. The channels are tying them back to the other cult killings that have occurred in the past few months. Rumors say it might even be the same killers from the last set of murders that occurred years ago. If that's true, these killers have been at large for a long-ass time.
 
-The Intruders are a "horde" type Killer consisting of three distinct slashers: Baghead, Redhood, and Zeke. Unlike other killers, their power is split between three individuals, each bringing their own brand of terror to Wingard Cottage.`
+The Intruders are a "horde" type Killer consisting of three distinct slashers: Trish, Baghead, and Zeke. Unlike other killers, their power is split between three individuals, each bringing their own brand of terror to Wingard Cottage.`
     }
   },
   's3-falconwood-files': {

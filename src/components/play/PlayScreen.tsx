@@ -1,3 +1,5 @@
+import { IntruderRoster } from "./IntruderControls";
+import { INTRUDERS } from "@/lib/play/intruders";
 import { wolfPortrait } from "./wolfArt";
 import { WOODS, WOODS_EVENTS } from "../../../supabase/functions/_shared/play/storybookWoods";
 import { evomorphStageArt } from './evomorphArt';
@@ -186,7 +188,7 @@ export function PlayScreen(props: PlayScreenProps) {
       };
   const finalGirlMaxHealth = observedFinalGirlMaxHealth(finalGirl, events, props.finalGirlStartingHealth, killer);
   // Legacy sessions can use the catalog to bound new input without backfilling observations.
-  const trackerLimits = { ...stateLimits, finalGirlHealth: observedFinalGirlMaxHealth(
+  const trackerLimits = { ...stateLimits, ...(killer===INTRUDERS&&{bloodlust:10}), finalGirlHealth: observedFinalGirlMaxHealth(
     finalGirl, events, props.finalGirlStartingHealth ?? startingValues.finalGirlHealth, killer,
   ) ?? stateLimits.finalGirlHealth };
   const [message, setMessage] = useState("");
@@ -434,6 +436,7 @@ export function PlayScreen(props: PlayScreenProps) {
         {killer==='Grimlash'&&summary.finalGirlHealth!==undefined&&finalGirlMaxHealth!==undefined&&summary.finalGirlHealth>finalGirlMaxHealth&&<p role="status" className="grim-health-discrepancy">Recorded Health {summary.finalGirlHealth} exceeds the current maximum {finalGirlMaxHealth}.</p>}
         <div className="play-state-grid">
           {orderedStateFields.filter(field=>killer!=='Poltergeist'||field!=='killerHealth').map((field) => {
+            if(field==="killerHealth"&&killer===INTRUDERS) return <IntruderRoster key={field} events={events} onEvent={onEvent} />;
             const value = summary[field];
             const health = field === "finalGirlHealth" || field === "killerHealth";
             const critical = health && value !== undefined && value <= 2;
@@ -504,7 +507,7 @@ export function PlayScreen(props: PlayScreenProps) {
                     <div className="play-state-stepper">
                       <button
                         aria-label={`Decrease ${stateLabels[field]}`}
-                        disabled={value === undefined || value <= 0}
+                        disabled={value === undefined || value <= 0 || (killer===INTRUDERS&&field==="bloodlust"&&value>10)}
                         onClick={() => value !== undefined && setState(field, killer==='Grimlash'&&field==='finalGirlHealth'?value-1:Math.min(trackerLimits[field],value-1))}
                       >
                         <Minus size={16} />
@@ -541,7 +544,7 @@ export function PlayScreen(props: PlayScreenProps) {
           Remember this <span>The moments that made your night</span>
         </h2>
         <div className="play-moment-choices">
-          {orderedMoments.filter(choice=>killer!=='Poltergeist'||choice.type!=='killer-revived').map((choice) => {
+          {orderedMoments.filter(choice=>!(killer==='Poltergeist'||killer===INTRUDERS)||choice.type!=='killer-revived').map((choice) => {
             const revealed = summary.entries.find(e => e.kind === "moment" && e.momentType === choice.type);
             const active = PERMANENT_MOMENTS.includes(choice.type) && !!revealed;
             const selectedArt = active && (choice.type === 'dark-power' || choice.type === 'finale')
@@ -557,7 +560,7 @@ export function PlayScreen(props: PlayScreenProps) {
         {moment && (
           <div className="play-moment-editor">
             {isReveal && <KillerCards killer={killer} events={events} onEvent={onEvent} typeOnly={moment.momentType as "dark-power" | "finale"} />}
-            {isReveal && killer !== WOLF && momentCards.length > 0 && (
+            {isReveal && killer !== WOLF && killer !== INTRUDERS && momentCards.length > 0 && (
               <label>
                 {moment.momentType === "dark-power"
                   ? "Which Dark Power?"

@@ -1,3 +1,4 @@
+import { INTRUDER_MODULE, INTRUDER_ROSTER, intruderFacts } from "@/lib/play/intruders";
 import {tormentorState,type TormentorLoss} from '@/lib/play/tormentor';
 import {shadyState,shadyChildrenCount} from '@/lib/play/shadyAcres';
 import {grimlashFatal,harvestLevel,type GrimlashLoss} from '@/lib/play/grimlash';
@@ -211,10 +212,10 @@ export const GameOutcomeForm = ({
   const [wolfMode, setWolfMode] = useDraftField<
     '' | 'TRACK' | 'SLAY' | 'Killing Machine'
   >('wolfMode', observed.wolf === 'track' ? 'TRACK' : observed.wolf === 'slay' ? 'SLAY' : observed.wolf === 'both' ? 'Killing Machine' : '', initialDraft, onDraftChange);
-  // The Intruders - active killer at game end
-  const [activeIntruder, setActiveIntruder] = useDraftField<
-    '' | 'Trish' | 'Baghead' | 'Zeke'
-  >('activeIntruder', '', initialDraft, onDraftChange);
+  const intruderEnding = isIntruders ? moduleState(entries, INTRUDER_MODULE) : {};
+  const legacyIntruder = isIntruders && intruderEnding.active===undefined && intruderEnding.mode!=='all'
+    ? INTRUDER_ROSTER.find(person=>person.name===initialDraft?.activeIntruder)?.name
+    : undefined;
   // Buddyland - Buddies + power supplies
   const [buddiesInPlay, setBuddiesInPlay] = useDraftField<number | null>(
     'buddiesInPlay',
@@ -298,6 +299,9 @@ export const GameOutcomeForm = ({
   const buildFormData = (): EndingFormData => {
     // Augment gameHighlights with killer-specific conditions so the LLM gets full context
     let highlights = gameHighlights || '';
+    if (legacyIntruder && !highlights.includes('Active Intruder at end:')) {
+      highlights = [highlights,`Active Intruder at end: ${legacyIntruder}`].filter(Boolean).join('. ');
+    }
     if (isPoltergeist && isWin) {
       const parts = [];
       if(initialDraft?.foundCarolyn===true&&!foundCarolyn)parts.push('Found Carolyn earlier; escape not confirmed');
@@ -330,11 +334,6 @@ export const GameOutcomeForm = ({
       highlights = highlights
         ? `${highlights}. Wolf mode at end: ${wolfMode}`
         : `Wolf mode at end: ${wolfMode}`;
-    }
-    if (isIntruders && activeIntruder) {
-      highlights = highlights
-        ? `${highlights}. Active Intruder at end: ${activeIntruder}`
-        : `Active Intruder at end: ${activeIntruder}`;
     }
     if (isBilly) {
       const buddyParts: string[] = [];
@@ -400,7 +399,7 @@ export const GameOutcomeForm = ({
       outcome: isWin ? 'won' : 'lost',
       finalHorrorLevel,
       finalGirlHealth,
-      killerHealth: killerIsUnkillable ? null : killerHealth,
+      killerHealth: isIntruders ? result.killerHealth ?? null : killerIsUnkillable ? null : killerHealth,
       weaponUsed: weaponUsed || '',
       victimsSaved,
       victimsKilled,
@@ -496,7 +495,7 @@ export const GameOutcomeForm = ({
               preserveObservedExcess={isGrimlash}
               variant={finalGirlHealth === 0 ? "killed" : "saved"}
             />
-            {!killerIsUnkillable && (
+            {!killerIsUnkillable && !isIntruders && (
               <OutcomeNumberField
                 label={`Killer health (0–${maxKillerHealth})`}
                 accessibleLabel="Killer Health"
@@ -595,9 +594,11 @@ export const GameOutcomeForm = ({
               onChange={value => setWolfMode(value as typeof wolfMode)} options={[["TRACK", "Track"], ["SLAY", "Slay"], ["Killing Machine", "Track and Slay"]]} />
           </section>}
 
-          {isIntruders && <section className="outcome-panel outcome-module">
-            <OutcomeChoices label="Active Intruder at finish" value={activeIntruder}
-              onChange={value => setActiveIntruder(value as typeof activeIntruder)} options={[["Trish", "Trish"], ["Baghead", "Baghead"], ["Zeke", "Zeke"]]} />
+          {isIntruders && <section className="outcome-panel outcome-module" aria-label="Intruders ending review">
+            <h3>Intruders at the finish</h3>
+            <p>{intruderFacts(intruderEnding)}</p>
+            {legacyIntruder&&<small className="block">Legacy active marker entry: {legacyIntruder}</small>}
+            {result.killerHealth!=null&&<small className="block">Legacy Killer Health entry: {result.killerHealth}</small>}
           </section>}
 
           {/* Section: Buddyland - Buddies + power supplies */}

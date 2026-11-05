@@ -41,9 +41,10 @@ const marrek=moduleAt('../supabase/functions/_shared/play/marrekWarehouse.ts',{}
 const tormentor=moduleAt('../supabase/functions/_shared/play/tormentor.ts',{});
 const woods = moduleAt('../supabase/functions/_shared/play/storybookWoods.ts', {});
 const wolf = moduleAt('../supabase/functions/_shared/play/bigBadWolf.ts', {});
+const intruders = moduleAt('../supabase/functions/_shared/play/intruders.ts', {});
 const storyText = moduleAt('../supabase/functions/_shared/play/storyText.ts', {});
-const storyTransitions = moduleAt('../supabase/functions/_shared/play/storyTransitions.ts', {'./tormentor.ts':tormentor,'./konradCatalog.ts':konradCatalog});
-const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", { "./storyText.ts": storyText, './storybookWoods.ts': woods, './bigBadWolf.ts': wolf,
+const storyTransitions = moduleAt('../supabase/functions/_shared/play/storyTransitions.ts', { './intruders.ts': intruders,'./tormentor.ts':tormentor,'./konradCatalog.ts':konradCatalog});
+const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", { './intruders.ts': intruders, "./storyText.ts": storyText, './storybookWoods.ts': woods, './bigBadWolf.ts': wolf,
   './marrekWarehouse.ts':marrek,'./tormentor.ts':tormentor,'./konrad.ts':konrad,'./konradCatalog.ts':konradCatalog,
   './shadyAcres.ts':shady,"./grimlash.ts":grimlash,"./evomorph.ts": evomorph,
   "./creech.ts": creech,
@@ -57,7 +58,7 @@ const modules = moduleAt("../supabase/functions/_shared/play/modules.ts", { "./s
   "./carnival.ts": carnival,
   "./fright.ts": fright,
 });
-const events = moduleAt("../supabase/functions/_shared/play/events.ts", { "./storyText.ts": storyText, "./storyTransitions.ts": storyTransitions, './storybookWoods.ts': woods, './bigBadWolf.ts': wolf,
+const events = moduleAt("../supabase/functions/_shared/play/events.ts", { './intruders.ts': intruders, "./storyText.ts": storyText, "./storyTransitions.ts": storyTransitions, './storybookWoods.ts': woods, './bigBadWolf.ts': wolf,
   './marrekWarehouse.ts':marrek,'./tormentor.ts':tormentor,'./konrad.ts':konrad,'./konradCatalog.ts':konradCatalog,
   "./shadyAcres.ts":shady,"./grimlash.ts":grimlash,"./evomorph.ts": evomorph,
   "./creech.ts": creech,
@@ -66,7 +67,7 @@ const events = moduleAt("../supabase/functions/_shared/play/events.ts", { "./sto
   "./modules.ts": modules,
   "./fright.ts": fright,
 });
-const death = moduleAt("../supabase/functions/_shared/play/death.ts", { './storybookWoods.ts': woods, './bigBadWolf.ts': wolf,
+const death = moduleAt("../supabase/functions/_shared/play/death.ts", { './intruders.ts': intruders, './storybookWoods.ts': woods, './bigBadWolf.ts': wolf,
   "./events.ts": events,
   "./groves.ts": groves,
   "./modules.ts": modules,

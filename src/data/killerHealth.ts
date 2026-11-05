@@ -30,7 +30,6 @@ const KILLER_MAX_HP: Record<string, number> = {
   'The Organism': 10,
   'Ratchet Lady': 8,
   'Big Bad Wolf': 9,
-  'The Intruders': 9,
 
   // Season 3
   'Slayer': 9,

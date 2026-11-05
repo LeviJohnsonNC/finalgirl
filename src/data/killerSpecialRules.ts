@@ -1,3 +1,4 @@
+import { INTRUDER_PROMPT_CONTEXT } from "./rules/intruderRules";
 /**
  * Special gameplay rules for each killer in Final Girl.
  * These are passed to the AI so generated stories respect actual game mechanics.
@@ -77,10 +78,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
       'A massive arrow-studded gray wolf whose patience gives way to attack. Use the selected location and observed events. A reveal or mode alone establishes no injury, attack or casualty.',
   },
 
-  'The Intruders': {
-    narrativeNote:
-      'Three coordinated home invaders — Trish (Red, often in a red hood), Baghead (Gray, burlap-sack mask), and Zeke (Black) — stalking Wingard Cottage together. Only one is the "Active" killer at any moment, but all three are present on the board: they hand off pursuit, flank, and cut off escape routes. Downed Intruders can be revived by their Final Health tokens, so a "kill" is not always final. Minor Dark Powers apply to all three. Never portray them as a single lone slasher.',
-  },
+  'The Intruders': { narrativeNote: INTRUDER_PROMPT_CONTEXT.narrativeGuidance },
 
   // ── Season 2 Vignette ────────────────────────────────────────────────────
 

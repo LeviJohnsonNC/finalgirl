@@ -1,4 +1,5 @@
 import { WOODS, WOODS_SOURCE, WOODS_EVENTS, WOODS_TERRORS, WOODS_ITEMS, WOODS_PEOPLE, WOODS_SPACES } from "./storybookWoods.ts";
+import { INTRUDERS, INTRUDER_SOURCE, INTRUDER_TERRORS } from "./intruders.ts";
 import { WOLF, WOLF_SOURCE, WOLF_TERRORS } from "./bigBadWolf.ts";
 import {MARREK_TERRORS,MARREK_EVENTS,MARREK_ITEMS,MARREK_PEOPLE,MARREK_SPACES,MARREK_SOURCE} from './marrekWarehouse.ts';
 import {TORMENTOR_TERRORS,TORMENTOR_TRAPS,TORMENTOR_SOURCE} from './tormentor.ts';
@@ -45,6 +46,7 @@ const station = wiki("Station_2891");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+  ...INTRUDER_TERRORS.map(card => ({...card, kind:"terror" as const, killer:INTRUDERS, source:INTRUDER_SOURCE})),
   ...WOLF_TERRORS.map(card => ({ ...card, kind: "terror" as const, killer: WOLF, source: WOLF_SOURCE })),
  ...WOODS_TERRORS.map(card => ({...card,kind:"terror" as const,location:WOODS,source:WOODS_SOURCE})),
  ...WOODS_EVENTS.map(card => ({...card,kind:"event" as const,location:WOODS,source:WOODS_SOURCE})),

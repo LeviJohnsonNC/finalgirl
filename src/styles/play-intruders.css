@@ -1,0 +1,114 @@
+.play-workspace .play-state--intruders {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #170e0f;
+}
+.intruder-portraits {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 2px;
+  flex: 1;
+}
+.intruder-portraits button {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  align-content: end;
+  min-width: 0;
+  min-height: 112px;
+  padding: 24px 2px 5px;
+  overflow: hidden;
+  color: #f5e8d5;
+  text-align: center;
+  box-shadow: inset 0 0 0 1px #786052;
+}
+.intruder-portraits button[data-focus=true] { box-shadow: inset 0 0 0 2px #e2c592; }
+.intruder-portraits button[data-out=true] img { filter: grayscale(.8) brightness(.55); }
+.intruder-portraits img {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 34%;
+}
+.intruder-portraits button::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(0deg,#100808 2%,transparent 58%);
+}
+.intruder-portrait-label strong,.intruder-portrait-label small { display: block; }
+.intruder-portrait-label strong { font-size: .75rem; }
+.intruder-marker-tag {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  background: #211715;
+  font-size: .63rem;
+}
+[data-active=true] .intruder-marker-tag { background: #9a372c; color: #fff6e4; }
+.intruder-actions { padding: 3px 6px 5px; color: #f5e8d5; }
+.intruder-marker-row,.intruder-health-row,.intruder-health-stepper,.intruder-health-row form {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.intruder-marker-row { justify-content: center; gap: 3px; }
+.intruder-health-row { gap: 4px; }
+.intruder-actions button,.intruder-fate summary { min-height: 44px; min-width: 44px; padding: 0 4px; }
+.intruder-actions button:enabled:hover { background: #48302a; }
+.intruder-actions button:disabled { opacity: .36; }
+.intruder-health-row input { min-width: 30px; width: 3em; color: #f5e8d5; background: #241717; }
+.intruder-health-row form button { min-width: 34px; }
+.intruder-fate { display: block; font-size: .75rem; }
+.intruder-fate summary { cursor: pointer; padding-top: 12px; color: #d8ba9c; }
+.intruder-fate select { width: 100%; min-height: 44px; }
+.intruder-bonus { color: #e2c592; }
+.intruder-portraits { min-height: 112px; }
+.intruder-marker-unknown { display: block; text-align: center; color: #ddbea2; }
+.intruder-portraits button[data-focus=true]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid #dfc59d;
+  pointer-events: none;
+}
+.intruder-fate .play-select-trigger { min-height: 44px; }
+@media (max-width: 639px) {
+  .intruder-portraits { min-height: 145px; }
+}
+
+/* Keep the three complete masks within the shallow module header. */
+.play-module-panel[data-module="intruders"] > summary > .play-module-art {
+  left: auto;
+  right: 5%;
+  width: clamp(240px, 39%, 410px);
+}
+.play-module-panel[data-module="intruders"] > summary::after {
+  background: linear-gradient(90deg,#10090c 8%,#10090c 55%,transparent 73%,#10090c30 91%,#10090c);
+}
+@media (max-width: 639px) {
+  .play-module-panel[data-module="intruders"] > summary > .play-module-art {
+    right: 0;
+    width: 59%;
+    object-position: 50% 30% !important;
+  }
+  .play-module-panel[data-module="intruders"] > summary::after {
+    background: linear-gradient(90deg,#10090c 22%,#10090c 41%,transparent 57%,transparent 94%,#10090c80);
+  }
+  .play-module-panel[data-module="intruders"] > summary .play-module-heading { max-width: 44%; }
+  .play-module-panel[data-module="intruders"] > summary .play-module-summary { max-width: 13ch; }
+  .play-module-panel[data-module="intruders"] > summary .play-module-disclosure {
+    position: absolute;
+    right: 11px;
+    bottom: 11px;
+    width: 28px;
+    height: 28px;
+  }
+}

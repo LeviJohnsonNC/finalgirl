@@ -155,6 +155,7 @@ const IndexContent = () => {
       ...(selection.location === 'Marrek Warehouse' && {marrekSetupVersion:1 as const}),
       ...(selection.location === 'Shady Acres' && {shadySetupVersion:1 as const}),
       ...(selection.location === 'USS Konrad' && {konradSetupVersion:1 as const}),
+      ...(selection.killer === 'The Intruders' && {intrudersSetupVersion:1 as const}),
       ...(selection.killer === 'Big Bad Wolf' && { wolfSetupVersion: 1 as const }),
       ...(selection.killer === 'The Tormentor' && {tormentorSetupVersion:1 as const}),
       ...(selection.killer === 'Grimlash' && {grimlashSetupVersion:1 as const}),

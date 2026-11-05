@@ -1,5 +1,6 @@
 import { fitStoryText, storyVictimStatus } from './storyText.ts';
 import { WOODS, WOODS_MODULE, WOODS_VISUAL, parseWoods, woodsFacts, woodsState } from "./storybookWoods.ts";
+import { INTRUDERS, INTRUDER_MODULE, INTRUDER_POWERS, INTRUDER_FINALES, INTRUDER_MINORS, intruderFacts, intruderMode, validIntruderField } from "./intruders.ts";
 import { WOLF, WOLF_MINORS, WOLF_POWERS, WOLF_FINALES, WOLF_VISUAL, validWolfField, wolfFacts, wolfMinorField, wolfModeLabel, wolfPowerMode, type WolfMode } from "./bigBadWolf.ts";
 import {initialMarrek,validMarrekField,marrekState,marrekFacts,marrekExits,MARREK_EXITS,MARREK_VISUAL,MARREK_ITEMS} from './marrekWarehouse.ts';
 import {TORMENTOR_POWERS,TORMENTOR_FINALES,TORMENTOR_TRAPS,initialTormentor,validTormentorField,tormentorState,tormentorFacts,serializeTormentor,tormentorCard} from './tormentor.ts';
@@ -58,11 +59,13 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
   wolfPowerMode?: WolfMode;
+  intruderFinale?: string;
+  intruderPower?: string;
   inkanyambaReference?: true;
   grovesReference?: true;
   linkedModule?: ModuleObservation;
@@ -78,6 +81,7 @@ type ObservedEvent = {
 
 /** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
 export function killerMomentCards(killer: string, type: string) {
+  if (killer === INTRUDERS) return [...(type==="dark-power"?INTRUDER_POWERS:type==="finale"?INTRUDER_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === WOLF) return [...(type === "dark-power" ? WOLF_POWERS : type === "finale" ? WOLF_FINALES : [])].sort((a,b) => a.name.localeCompare(b.name));
   if(killer==='The Tormentor')return [...(type==='dark-power'?TORMENTOR_POWERS:type==='finale'?TORMENTOR_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if(killer==='Grimlash')return [...(type==='dark-power'?GRIMLASH_POWERS:type==='finale'?GRIMLASH_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
@@ -168,6 +172,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === INTRUDER_MODULE) return validIntruderField(key,value);
   if (module === "big-bad-wolf") return validWolfField(key, value);
   if (module === 'shady-acres') return validShadyField(key,value);
   if (module === WOODS_MODULE) return key === "snapshot" && parseWoods(value) !== null;
@@ -292,7 +297,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    !["intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -315,6 +320,21 @@ export function moduleState(
 ): ModuleState {
   if (module === "fright") { const state=frightState(entries); if(!state) return {}; const {eventId:_id,...snapshot}=state; return {snapshot:JSON.stringify(snapshot),sleep:state.sleep,mode:state.mode,progress:state.path.length,...frightPublic(entries)}; }
   const state: ModuleState = {};
+  if (module === INTRUDER_MODULE) {
+    for (const event of entries) {
+      if (event.moduleData?.module !== module) continue;
+      for (const [key,value] of Object.entries(event.moduleData.changes)) {
+        if (value===null) delete state[key];
+        else state[key]=value;
+      }
+    }
+    const finale=entries.find(e=>e.kind==='moment'&&e.momentType==='finale');
+    const power=entries.find(e=>e.kind==='moment'&&e.momentType==='dark-power');
+    if (finale || Object.keys(state).length) state.mode=intruderMode(entries);
+    if (INTRUDER_FINALES.some(c=>c.name===finale?.killerCard)) state.finale=finale!.killerCard!;
+    if (INTRUDER_POWERS.some(c=>c.name===power?.killerCard)) state.power=power!.killerCard!;
+    return state;
+  }
   if (module === "big-bad-wolf") {
     for (const event of entries) {
       if (event.moduleData?.module !== module) continue;
@@ -484,6 +504,16 @@ function valueLabel(key: string, value: ModuleValue) {
   return String(value);
 }
 export function describeModule(observation: ModuleObservation) {
+  if (observation.module === INTRUDER_MODULE) {
+    const names:Record<string,string>={trish:'Trish',baghead:'Baghead',zeke:'Zeke',none:'None'};
+    return Object.entries(observation.changes).map(([key,value])=>{
+      if (key==='active') return `Active Killer: ${names[String(value)] ?? 'unrecorded'}`;
+      if (key==='spent') return 'Won’t Stay Down used';
+      const [id,field]=key.split('.');
+      const minor=INTRUDER_MINORS.find(card=>card.id===field);
+      return minor?`${minor.name}: ${value??'unrecorded'} Health`:`${names[id]} ${field}: ${value??'unrecorded'}`;
+    }).join(' · ');
+  }
   if (observation.module === "big-bad-wolf") {
     return Object.entries(observation.changes).map(([key, value]) => {
       if (key === "mode") return wolfModeLabel(value);
@@ -594,6 +624,12 @@ export function moduleStoryBeats(
   selection: ModuleSelection,
   entries: readonly ObservedEvent[],
 ): string {
+  if (selection.killer===INTRUDERS) {
+    const state=moduleState(entries,INTRUDER_MODULE);
+    const threat=Object.keys(state).length ? intruderFacts(state) : '';
+    const place=moduleStoryBeats({...selection,killer:''},entries);
+    return [threat,fitStoryText(place,895-threat.length)].filter(Boolean).join('\n');
+  }
   const context = moduleContext(selection, entries);
   if (context?.[WOODS_MODULE]) {
     const place = woodsFacts(woodsState(context[WOODS_MODULE])).join(" ");
@@ -801,6 +837,7 @@ export function buddylandReferences(
     if (state) refs.push({name:"Storybook Woods observations",effect:woodsFacts(woodsState(state)).join(" ")});
   }
   if(selection.location==='Marrek Warehouse'){refs.push({name:'Marrek Warehouse',effect:MARREK_VISUAL});if(context?.marrek)refs.push({name:'Warehouse observations',effect:marrekFacts(marrekState(context.marrek)).join(' ')});}
+  if(selection.killer===INTRUDERS && context?.intruders) refs.push({name:'Intruder observations',effect:intruderFacts(context.intruders)});
   if(selection.killer==='The Tormentor'&&context?.tormentor){refs.push({name:'Tormentor observations',effect:tormentorFacts(tormentorState(context.tormentor))});for(const card of [...TORMENTOR_POWERS,...TORMENTOR_FINALES])if(card.name===context.tormentor.power||card.name===context.tormentor.finale)refs.push({name:card.name,effect:card.effect+' Recording the reveal does not prove its actions or consequences occurred.'});}
   if (selection.location === "Sacred Groves") {
     refs.push({name:"Sacred Groves",effect:GROVES_VISUAL});

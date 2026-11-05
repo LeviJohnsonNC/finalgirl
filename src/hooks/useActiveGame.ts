@@ -1,4 +1,6 @@
 import { WOODS, WOODS_MODULE, initialWoods, resolveWoodsAction, woodsParent } from "../../supabase/functions/_shared/play/storybookWoods";
+import { INTRUDERS, INTRUDER_MODULE, initialIntruders, intruderParent, resolveIntruderAction, sameIntruderChanges } from "@/lib/play/intruders";
+import { canUndoIntruder, validIntruderHistory } from "@/lib/play/events";
 import { WOLF } from '@/lib/play/bigBadWolf';
 import {marrekParent,resolveMarrekAction} from '@/lib/play/marrekWarehouse';
 import {tormentorParent,resolveTormentorAction} from '@/lib/play/tormentor';
@@ -72,6 +74,13 @@ export function useActiveGame() {
       if(event.moduleData?.module==='konrad'&&(previous.selection.location!=='USS Konrad'||!event.konradAction))return previous;
       if(event.kind==='undo'&&!canUndoEvomorph(log,event.target!))return previous;
       if (event.kind === 'death-count' && !canChangeDeathCount(log, event)) return previous;
+      const isIntruders=previous.selection.killer===INTRUDERS;
+      if (event.intruderReference && !isIntruders) return previous;
+      if (event.moduleData?.module===INTRUDER_MODULE && (!isIntruders || !event.intruderAction)) return previous;
+      if (isIntruders && event.kind==='undo' && !canUndoIntruder(log,event.target!)) return previous;
+      if (isIntruders && (event.kind==='state' && event.field==='killerHealth' ||
+          event.kind==='moment' && event.momentType==='killer-revived')) return previous;
+      if (isIntruders && event.kind==='state' && event.field==='bloodlust' && typeof event.value==='number' && event.value>10) return previous;
       const isWolf = previous.selection.killer === WOLF;
       if (!isWolf && (event.moduleData?.module === "big-bad-wolf" || event.wolfReference)) return previous;
       if (event.moduleData?.module === "big-bad-wolf") {
@@ -81,7 +90,7 @@ export function useActiveGame() {
         if (Object.entries(changes).every(([key, value]) => state[key] === (value ?? undefined))) return previous;
       }
       let accepted = event.kind === "killed"
-        ? {...event,...(isWolf && {wolfReference:true as const}),...(previous.selection.location === WOODS && {woodsReference:true as const})}
+        ? {...event,...(isIntruders && {intruderReference:true as const}),...(isWolf && {wolfReference:true as const}),...(previous.selection.location === WOODS && {woodsReference:true as const})}
         : event;
       if(previous.selection.killer==='Poltergeist' && ((event.kind==='state'&&event.field==='killerHealth') || (event.kind==='moment'&&event.momentType==='killer-revived'))) return previous;
       if (event.moduleData?.module === 'groves' && previous.selection.location !== 'Sacred Groves') return previous;
@@ -120,7 +129,9 @@ export function useActiveGame() {
       if (log.length === 0 && freshWolf) {
         setup.push(newPlayEvent({ kind: "module", moduleData: { module: "big-bad-wolf", changes: { mode: "track" } } }));
       }
-      if (log.length === 0 && previous.coreTrackersVersion === 1 && (!isWolf || freshWolf)) {
+      const freshIntruders=isIntruders && previous.intrudersSetupVersion===1;
+      if (!log.length && freshIntruders) setup.push(newPlayEvent({kind:'module',moduleData:{module:INTRUDER_MODULE,changes:initialIntruders()}}));
+      if (log.length === 0 && (!isIntruders||freshIntruders) && previous.coreTrackersVersion === 1 && (!isWolf || freshWolf)) {
         const values = playStartingValues(previous.selection.killer, previous.selection.finalGirl);
         values.finalGirlHealth = previous.selection.finalGirlStartingHealth ?? values.finalGirlHealth;
         for (const field of ['finalGirlHealth', 'killerHealth', 'bloodlust', 'finalHorrorLevel'] as const) {
@@ -194,8 +205,17 @@ export function useActiveGame() {
         accepted={...event,evomorphAction:request,moduleData:{module:'evomorph',changes}};
         if(request.command==='evolve'&&changes.stage==='adult'&&!entries.some(e=>e.kind==='moment'&&e.momentType==='dark-power'))reveal.push(newPlayEvent({kind:'moment',momentType:'dark-power',permanent:true,text:'Dark Power revealed'}));
       }
+      if (event.intruderAction) {
+        const entries=summarizePlay([...log,...baseline,...setup]).entries;
+        const action=!log.length && freshIntruders && event.intruderAction.parent==='root'
+          ? {...event.intruderAction,parent:intruderParent(entries)} : event.intruderAction;
+        const changes=resolveIntruderAction(action,moduleState(entries,INTRUDER_MODULE),entries);
+        if (!changes || (log.length && !sameIntruderChanges(changes,event.moduleData!.changes))) return previous;
+        accepted={...event,intruderAction:action,moduleData:{module:INTRUDER_MODULE,changes}};
+      }
       const additions = event.kind === 'start' ? [accepted, ...setup] : [...baseline, ...setup, ...reveal, accepted];
       if (log.length + additions.length > 1000) return previous;
+      if (isIntruders && event.kind==='restore' && !validIntruderHistory([...log,...additions])) return previous;
       if ((event.moduleData?.module === WOODS_MODULE || event.kind === "undo" || event.kind === "restore") &&
           previous.selection.location === WOODS && !validPlayLog([...log,...additions])) return previous;
       if([...log,...additions].some(e=>e.moduleData?.module==='marrek')&&!validPlayLog([...log,...additions]))return previous;
