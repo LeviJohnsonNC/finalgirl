@@ -1,3 +1,7 @@
+import { WINGARD, WINGARD_MODULE } from '../../../supabase/functions/_shared/play/wingardCatalog';
+import { wingardState } from '../../../supabase/functions/_shared/play/wingardCottage';
+import { WingardControls } from './WingardControls';
+import { wingardArt } from './wingardArt';
 import { INTRUDERS, INTRUDER_MODULE, INTRUDER_MINORS, intruderMinorField } from "@/lib/play/intruders";
 import { IntruderCards } from "./IntruderControls";
 import { intruderArt } from "./intruderArt";
@@ -71,7 +75,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -97,6 +101,14 @@ const peopleSummary = (
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
 export const moduleDefinitions: Definition[] = [
+  {id:WINGARD_MODULE,owner:'location',match:WINGARD,title:'Inside Wingard Cottage',
+    art:wingardArt('header'),capabilities:['character','event'],Controls:WingardControls,
+    summary:fields=>{
+      const state=wingardState(fields);
+      const crafted=Object.values(state.recipes).filter(item=>item.status==='crafted').length;
+      const offers=Object.values(state.recipes).filter(item=>item.status==='offered').length;
+      return crafted||offers ? `${offers} offers · ${crafted} crafted` : 'Workbench · Cottage Events';
+    }},
   {id:INTRUDER_MODULE,owner:'killer',match:INTRUDERS,title:INTRUDERS,art:intruderArt('header'),
     capabilities:['reveals','minor-power'],
     summary:state=>{

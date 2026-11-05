@@ -1,3 +1,5 @@
+import { WINGARD, WINGARD_MODULE } from './wingardCatalog.ts';
+import { wingardFacts, wingardState } from './wingardCottage.ts';
 import { WOODS, WOODS_MODULE } from "./storybookWoods.ts";
 import {
   summarizePlay,
@@ -26,6 +28,7 @@ export function deathFacts(
   if (selection.killer!==INTRUDERS && events.some(e=>e.moduleData?.module===INTRUDER_MODULE||e.intruderReference)) return null;
   if (selection.killer !== WOLF && events.some(e => e.moduleData?.module === "big-bad-wolf" || e.wolfReference)) return null;
   if (selection.location !== WOODS && events.some(event => event.moduleData?.module === WOODS_MODULE || event.woodsReference)) return null;
+  if(selection.location!==WINGARD && events.some(event=>event.wingardReference || event.moduleData?.module===WINGARD_MODULE))return null;
   if(selection.location!=='Marrek Warehouse'&&events.some(e=>e.moduleData?.module==='marrek'))return null;
   if(selection.killer!=='The Tormentor'&&events.some(e=>e.moduleData?.module==='tormentor'))return null;
   if(selection.location!=='Shady Acres'&&events.some(e=>e.moduleData?.module==='shady-acres'))return null;
@@ -40,7 +43,8 @@ export function deathFacts(
   const woodsDeath = selection.location === WOODS && e.woodsReference;
   const wolfDeath = selection.killer === WOLF && e.wolfReference;
   const intruderDeath=selection.killer===INTRUDERS && e.intruderReference;
-  const historical = woodsDeath || wolfDeath || intruderDeath
+  const wingardDeath = selection.location===WINGARD && e.wingardReference;
+  const historical = woodsDeath || wolfDeath || intruderDeath || wingardDeath
     ? summarizePlay(events.slice(0, events.findIndex(event => event.id === eventId) + 1)).entries
     : [];
   // The death's own fields reflect deliberate edits. Only the surrounding
@@ -71,6 +75,11 @@ export function deathFacts(
     ),
     false,
   );
+  if(wingardDeath) {
+    const state=moduleState(historical,WINGARD_MODULE);
+    const facts=wingardFacts(wingardState(state)).join(' ');
+    if(facts)context={...context,[WINGARD_MODULE]:{facts}};
+  }
   if (wolfDeath) {
     const wolf = moduleState(historical, "big-bad-wolf");
     if (Object.keys(wolf).length) {

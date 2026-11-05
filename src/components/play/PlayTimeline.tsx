@@ -1,3 +1,5 @@
+import { WINGARD_MODULE } from '../../../supabase/functions/_shared/play/wingardCatalog';
+import { wingardParent } from '../../../supabase/functions/_shared/play/wingardCottage';
 import {INTRUDER_MODULE,intruderParent,resolveIntruderAction,sameIntruderChanges} from "@/lib/play/intruders";
 import {moduleState} from "@/lib/play/modules";
 import {canUndoIntruder} from "@/lib/play/events";
@@ -67,6 +69,8 @@ export function PlayTimeline({
               : !canUndoIntruder(events,original.id)));
           const woodsBlocked = original.moduleData?.module === WOODS_MODULE &&
             woodsParent(summary.entries) !== (undone ? (original.woodsAction?.parent ?? "root") : original.id);
+          const wingardBlocked=original.moduleData?.module===WINGARD_MODULE &&
+            (!original.wingardAction || wingardParent(summary.entries)!==(undone?original.wingardAction.parent:original.id));
           const marrekBlocked=original.moduleData?.module==='marrek'&&(undone?marrekParent(summary.entries)!==(original.marrekAction?.parent??'root'):!canUndoMarrek(events,original.id));
           const laterWarehouse=summary.entries.some(e=>e.moduleData?.module==='marrek'&&e.marrekAction&&events.findIndex(x=>x.id===e.id)>events.findIndex(x=>x.id===original.id));
           const tormentorBlocked=original.moduleData?.module==='tormentor'&&(undone?laterWarehouse||tormentorParent(summary.entries)!==(original.tormentorAction?.parent??'root'):!canUndoTormentor(events,original.id));
@@ -95,8 +99,8 @@ export function PlayTimeline({
                 {onToggle && entry.kind !== "start" && !isPermanentMoment(entry) && !isLockedPlayEvent(entry) && (
                   <button
                     type="button"
-                    disabled={intruderBlocked||woodsBlocked||marrekBlocked||tormentorBlocked||shadyBlocked||konradBlocked||grimlashBlocked}
-                    title={intruderBlocked?"Resolve intervening Intruder observations first":woodsBlocked?"Undo or restore intervening Storybook Woods observations first":marrekBlocked?'Undo or restore intervening Warehouse/Tormentor observations first':tormentorBlocked?'Undo or restore intervening Tormentor observations first':shadyBlocked?'Undo or restore the intervening Shady Acres observations first':grimlashBlocked?'Undo or restore the intervening Grimlash observations first':konradBlocked?"Undo or restore the intervening USS Konrad observations first":undefined}
+                    disabled={wingardBlocked||intruderBlocked||woodsBlocked||marrekBlocked||tormentorBlocked||shadyBlocked||konradBlocked||grimlashBlocked}
+                    title={wingardBlocked?"Resolve intervening Cottage observations first":intruderBlocked?"Resolve intervening Intruder observations first":woodsBlocked?"Undo or restore intervening Storybook Woods observations first":marrekBlocked?'Undo or restore intervening Warehouse/Tormentor observations first':tormentorBlocked?'Undo or restore intervening Tormentor observations first':shadyBlocked?'Undo or restore the intervening Shady Acres observations first':grimlashBlocked?'Undo or restore the intervening Grimlash observations first':konradBlocked?"Undo or restore the intervening USS Konrad observations first":undefined}
                     onClick={() => onToggle(original, undone)}
                     className="type-caption underline text-muted-foreground hover:text-foreground min-h-[44px]"
                   >

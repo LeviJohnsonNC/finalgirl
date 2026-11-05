@@ -1,3 +1,4 @@
+import { WINGARD_VISUAL } from './play/wingardCatalog.ts';
 import { INTRUDER_VISUAL } from "./play/intruders.ts";
 import { WOODS_VISUAL } from "./play/storybookWoods.ts";
 import { GROVES_VISUAL } from "./play/groves.ts";
@@ -71,8 +72,7 @@ export const DEATH_LOCATION_CUES: Record<string, string> = {
   'Station 2891':
     'A remote, high-arctic research outpost situated in a vast, frozen wasteland, characterized by a series of low-profile, modular industrial buildings heavily insulated against extreme cold. The station appears utilitarian and high-stakes—structures are wrapped in thick, quilted thermal blankets and reinforced panels, with plumes of steam or exhaust rising from vents into the frigid air.',
   "Storybook Woods": WOODS_VISUAL,
-  'Wingard Cottage':
-    'A cozy, rustic stone and log cabin perched on a rocky shoreline, overlooking a glass-calm lake at dawn. The cabin is small and sturdy, featuring a prominent fieldstone chimney with a gentle wisp of white smoke trailing into the cool, overcast sky. The architecture is traditional and inviting, with cedar-shingle roofing and small, warm-lit windows that suggest a quiet life inside. In the foreground, a weathered wooden dock extends into the still water, holding an overturned aluminum rowboat that sits ready for a morning paddle.',
+  'Wingard Cottage': WINGARD_VISUAL,
   Falconwood:
     'A quiet, mid-century suburban cul-de-sac called Falconwood, where the architecture consists of modest two-story homes with vinyl siding, dark shutters, and neatly manicured lawns. The neighborhood feels settled and routine, frozen in a state of perpetual late-afternoon gloom under a heavy, overcast sky. At the entrance of the street stands a weathered wooden sign welcoming visitors to Falconwood, established in 1952.',
   MegaBGCon:

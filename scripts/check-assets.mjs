@@ -309,3 +309,36 @@ if (intruderExpected.size || intruderFiles.size !== 31 ||
   throw new Error('Unmapped Intruder runtime photograph');
 }
 console.log('Verified 22 independent Intruder photographs and 9 choice thumbnails.');
+
+const wingardFolder='src/assets/play/photos/wingard';
+const wingardManifest=JSON.parse(readFileSync(join(wingardFolder,'manifest.json'),'utf8'));
+const wingardExpected=[
+  'header','tools','nails','rope','wood','snare','slingshot','nail-bat','spear','disemboweler','nail-trap','nailgun',
+  'sawed-off','porcupine','obliterator','snare-set','nail-trap-set','outsider','boyfriend','neighbor',
+  'resourceful','alarm','alarm-active','scooter','scooter-with-you','boat','my-house','happening','random-attack','booby-traps','escape',
+];
+if(Object.keys(wingardManifest).length!==wingardExpected.length ||
+  new Set(Object.values(wingardManifest).map(photo=>photo.sourceSha256)).size!==wingardExpected.length) {
+  throw Error('Incomplete or duplicate Wingard Cottage photography');
+}
+const wingardPaths=new Set();
+for(const id of wingardExpected) {
+  const shot=wingardManifest[id];
+  if(!shot || !shot.prompt || !/^[a-f0-9]{64}$/.test(shot.sourceSha256)) throw Error('Missing Wingard Cottage photo provenance: '+id);
+  for(const [kind,maxBytes] of [['hero',160*1024],['tile',35*1024]]) {
+    const expected=kind==='tile'?`${id}-tile.webp`:id==='header'?'../../banners/wingard.webp':`${id}.webp`;
+    const derivative=shot[kind];
+    if(derivative.file!==expected) throw Error('Wrong Wingard Cottage artwork mapping: '+id);
+    const file=join(wingardFolder,derivative.file);
+    const bytes=readFileSync(file);
+    const [width,height]=konradWebpDimensions(bytes);
+    if(width!==derivative.size[0] || height!==derivative.size[1] || width>shot.sourceSize[0] || height>shot.sourceSize[1] ||
+      bytes.length!==derivative.bytes || bytes.length>maxBytes || createHash('sha256').update(bytes).digest('hex')!==derivative.sha256) {
+      throw Error('Invalid Wingard Cottage derivative: '+file);
+    }
+    wingardPaths.add(file);
+  }
+}
+if(images.filter(file=>file.startsWith(wingardFolder+'/')||file==='src/assets/play/banners/wingard.webp').some(file=>!wingardPaths.has(file))) {
+  throw Error('Unmapped Wingard Cottage artwork');
+}

@@ -1,3 +1,4 @@
+import { WINGARD, WINGARD_CRAFTS, WINGARD_EVENTS, WINGARD_STANDARD_ITEMS, WINGARD_SETUPS, WINGARD_SUPPLIES, WINGARD_TERRORS, WINGARD_VISUAL, wingardIngredients, wingardSetupDescription } from '../../../supabase/functions/_shared/play/wingardCatalog';
 import { intruderRules, INTRUDER_PROMPT_CONTEXT } from './intruderRules';
 import { WOODS, WOODS_SOURCE, WOODS_BRIDGES, WOODS_SPACES, WOODS_EVENTS, WOODS_TERRORS, WOODS_ITEMS, WOODS_SETUPS, woodsSpaceName, woodsSetupDescription } from "../../../supabase/functions/_shared/play/storybookWoods";
 import { bigBadWolfRules, WOLF_PROMPT_CONTEXT } from "./bigBadWolfRules";
@@ -271,7 +272,7 @@ const megaBgCon: EntityRuleModule = {
 
 // ─── Wingard Cottage (Location) — A Knock at the Door ─────────────────────
 const wingardCottage: EntityRuleModule = {
-  entity: 'Wingard Cottage',
+  entity: WINGARD,
   kind: 'location',
   filmId: 's2-knock-at-door',
   source: 'A Knock at the Door — Location Sheet',
@@ -289,6 +290,7 @@ const wingardCottage: EntityRuleModule = {
         'Shuffle the Crafted Item cards together and deal out four faceup cards in the play area.',
       ],
     },
+    ...WINGARD_SETUPS.map(card=>({type:'example' as const,title:card.name,text:wingardSetupDescription(card)})),
   ],
   rules: [
     { type: 'heading', level: 3, text: 'Definitions' },
@@ -319,6 +321,16 @@ const wingardCottage: EntityRuleModule = {
       title: 'Crafting Example',
       text: 'Ava has a Wooden Bat and Nails. She spends 2 Time to craft the Nail Bat, taking it into her hand. Finally, she discards the Wooden Bat and returns the Nails faceup next to the other Supply Item cards.',
     },
+    {type:'heading',level:3,text:'Supply pickup spaces'},
+    {type:'list',items:WINGARD_SUPPLIES.map(card=>`${card.name} — ${card.spaces.join(' or ')}`)},
+    {type:'heading',level:3,text:'Recipes'},
+    ...WINGARD_CRAFTS.map(card=>({type:'example' as const,title:card.name,text:`${wingardIngredients(card).join(' + ')} · ${card.time} Time. ${card.effect}`})),
+    {type:'heading',level:3,text:'Events'},
+    ...WINGARD_EVENTS.map(card=>({type:'example' as const,title:card.name,text:card.effect})),
+    {type:'heading',level:3,text:'Terror cards'},
+    ...WINGARD_TERRORS.map(card=>({type:'example' as const,title:card.name,text:card.effect})),
+    {type:'heading',level:3,text:'Standard Items'},
+    ...WINGARD_STANDARD_ITEMS.map(card=>({type:'example' as const,title:card.count>1?`${card.name} ×${card.count}`:card.name,text:card.effect})),
   ],
 };
 
@@ -515,10 +527,10 @@ const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
     rulesSummary: 'Victims will not willingly follow from Exhibit Areas into General Areas and often need to be panicked out. Every space can be searched, with the item deck determined by area type. Booth cards and Booth Events trigger during Upkeep, and hallway/dock movement can be faster.',
   },
   'The Intruders': INTRUDER_PROMPT_CONTEXT,
-  'Wingard Cottage': {
-    narrativeGuidance: 'Wingard Cottage is a lakeside family getaway with a long, buried history of tragedy. The story should move between INDOOR spaces (Kitchen, Bedrooms, Bathroom, Family Room, Foyer, Laundry Room, Garage, Shed, Boathouse) and OUTDOOR spaces (yard, dock, woods\' edge, driveway). Emphasize scavenging for supplies (Discarded Tools, Nails, Rope, Wood) and improvising crafted weapons (e.g. a Nail Bat from a Wooden Bat + Nails, a Sawed-off Shotgun, a Porcupine from a Trashcan Lid). The cottage feels charming on the surface but hides generations of violence.',
-    visualGuidance: 'Depict a rustic wooden cottage on the edge of a pristine lake at night: warm yellow interior windows, a shed and boathouse, a dock, surrounding pine woods, and a violet/purple sky. Interiors show a lived-in family kitchen, bedrooms, and family room with makeshift weapons (nail-studded bats, sawed-off shotguns, trashcan lids). Include stashes of Supply Items (piles of nails, rope, wood, discarded tools).',
-    rulesSummary: 'Spaces are classified as HOUSE, INDOORS (house + shed + boathouse), or OUTDOOR. Four Supply Item types (Discarded Tools, Nails, Rope, Wood) can be gathered from marked spaces at the cost of 1 Time and stored in a Backpack. Crafted Items are built by discarding required Items/Supply Items and spending Time; discarded Crafted and Supply Item cards return to the play area to be gained/crafted again. Limited-use Item charges carry over into their Crafted upgrades.',
+  [WINGARD]: {
+    narrativeGuidance:'A lakeside family retreat with a buried history. Use the selected scenario and recorded events. Scavenging or improvised equipment may enter the story when observed.',
+    visualGuidance:WINGARD_VISUAL,
+    rulesSummary:'Supply cards come from marked spaces. A completed craft exchanges the listed ingredients and Time for the item. Placed traps remain separate from their cards.',
   },
   Slayer: {
     narrativeGuidance: 'Slayer hunts from the Mirror Dimension — a dark, drained reflection of Falconwood laid over the same streets. It has a mental connection to the Final Girl and can always sense her, but can only sense other victims once they are dragged through a rift. Emphasize rifts opening, people vanishing mid-sentence, static, and the toll of staying too long on the other side (it drains her health). Slayer can be fought only when she stands in the same dimension it does.',
