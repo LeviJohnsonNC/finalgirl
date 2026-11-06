@@ -1,5 +1,5 @@
 import { MALL_MODULE, describeMallAction, initialMall, isInitialMall, resolveMallAction, validMallAction, mallParent, mallState, type MallAction } from './sunnydaze.ts';
-import { HUNTER_MODULE, describeHunterAction, initialHunter, resolveHunterAction, validHunterAction, hunterParent, hunterState, type HunterAction } from './hunter.ts';
+import { HUNTER_MODULE, describeHunterAction, initialHunter, resolveHunterAction, validHunterAction, hunterParent, hunterState, hunterCountdownReversal, type HunterAction } from './hunter.ts';
 import { WINGARD_MODULE } from './wingardCatalog.ts';
 import { isInitialWingard, resolveWingardAction, validWingardAction, wingardParent, describeWingardAction, type WingardAction } from './wingardCottage.ts';
 import { fitStoryFacts, fitStoryText } from './storyText.ts';
@@ -311,6 +311,7 @@ export function validMallHistory(log:readonly PlayEvent[]) {
 }
 export function canUndoHunter(log:readonly PlayEvent[],target:string) {
  const e=log.find(e=>e.id===target);
+  if(e?.hunterAction&&['countdown','force-mark-x'].includes(e.hunterAction.command)&&hunterState(e.moduleData!.changes).phase==='mark-x'&&log.slice(log.indexOf(e)+1).some(later=>later.kind==='state'&&later.field==='killerHealth'||later.hunterReference))return false;
  return e?.moduleData?.module!==HUNTER_MODULE || !!e.hunterAction&&hunterParent(summarizePlay(log).entries)===target;
 }
 export function validHunterHistory(log:readonly PlayEvent[]) {
@@ -650,6 +651,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       const after=hunterState({...moduleState(summary.entries,HUNTER_MODULE),...e.moduleData!.changes});
       if(before.phase!=='mark-x'&&after.phase==='mark-x'&&['countdown','force-mark-x'].includes(e.hunterAction.command))summary.killerHealth=15;
       if(e.hunterAction.command==='countdown'&&summary.bloodlust!==undefined)summary.bloodlust=Math.min(10,summary.bloodlust+1);
+      if(e.hunterAction.command==='countdown-back'&&summary.bloodlust!==undefined){const delta=hunterCountdownReversal(summary.entries)?.delta;if(delta!==undefined)summary.bloodlust=Math.max(0,summary.bloodlust-delta);}
       if(e.hunterAction.command==='reboot'&&before.phase==='mark-x'&&summary.killerHealth!==undefined)summary.killerHealth=Math.min(99,summary.killerHealth+4);
       if(e.hunterAction.command==='force-mark-x'&&before.phase==='mark-v')summary.bloodlust=10;
     }

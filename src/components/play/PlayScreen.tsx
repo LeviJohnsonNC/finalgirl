@@ -445,7 +445,7 @@ export function PlayScreen(props: PlayScreenProps) {
         <div className="play-state-grid">
           {orderedStateFields.filter(field=>killer!=='Poltergeist'||field!=='killerHealth').map((field) => {
             if(field==="killerHealth"&&killer===INTRUDERS) return <IntruderRoster key={field} events={events} onEvent={onEvent} />;
-            if(field==='killerHealth'&&killer==='The Hunter'&&['mark-v','countdown'].includes(hunter.phase))return <HunterCoreTracker key={field} events={events}/>;
+            if(field==='killerHealth'&&killer==='The Hunter'&&['mark-v','countdown'].includes(hunter.phase))return <HunterCoreTracker key={field} events={events} onEvent={onEvent}/>;
             const value = summary[field];
             const health = field === "finalGirlHealth" || field === "killerHealth";
             const critical = health && value !== undefined && value <= 2;

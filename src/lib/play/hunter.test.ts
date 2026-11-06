@@ -105,4 +105,50 @@ describe('Hunter photographed mechanics',()=>{
   expect(hunterReviewFacts(hunterReview(s.fields()))).toContain('Mark V Ally state: alive, 3 Health');
   expect(isActiveGame({version:1,id:crypto.randomUUID(),selection:{killer:'Hans',location:'Maple Lane',finalGirl:'Ginny'},playEvents:s.log})).toBe(false);
  });
+ it('direct removals preserve detached Parts when Reboot exceeds three',()=>{
+  const s=session();s.act({command:'remove-part'});s.act({command:'pickup',part:1});
+  s.act({command:'reboot'});s.act({command:'reboot'});
+  expect(s.state().remaining).toBe(4);expect(s.state().parts).toEqual([{id:1,status:'backpack',health:null}]);
+  for(let i=0;i<4;i++)s.act({command:'remove-part'});
+  expect(s.state()).toMatchObject({phase:'countdown',remaining:0,countdown:2});expect(s.state().parts).toHaveLength(5);
+  expect(summarizePlay(s.log).bloodlust).toBe(0);
+ });
+ it('restores countdown and only its applied Bloodlust delta, preserving repairs',()=>{
+  const s=session();for(let i=0;i<3;i++)s.act({command:'remove-part'});
+  s.act({command:'countdown'});s.act({command:'pickup',part:1});s.act({command:'repair',part:1,value:2});
+  s.log.push(newPlayEvent({kind:'state',field:'bloodlust',value:6}));s.act({command:'countdown-back'});
+  expect(s.state()).toMatchObject({countdown:2,ally:'alive',allyHealth:2});expect(summarizePlay(s.log).bloodlust).toBe(5);
+  expect(s.next({command:'countdown-back'})).toBeUndefined();
+  s.act({command:'countdown'});expect(summarizePlay(s.log).bloodlust).toBe(6);
+ });
+ it('countdown correction at the cap does not subtract Bloodlust that was never added',()=>{
+  const s=session();s.act({command:'damage',value:6});s.log.push(newPlayEvent({kind:'state',field:'bloodlust',value:10}));
+  s.act({command:'countdown'});s.act({command:'countdown-back'});expect(summarizePlay(s.log).bloodlust).toBe(10);
+ });
+ it('keeps unknown Bloodlust unknown and rejects invented legacy countdown reversals',()=>{
+  const s=session();s.act({command:'damage',value:6});s.log.push(newPlayEvent({kind:'state',field:'bloodlust',value:null}));
+  s.act({command:'countdown'});s.act({command:'countdown-back'});expect(summarizePlay(s.log).bloodlust).toBeUndefined();
+  const old=session(false);old.act({command:'recover',phase:'countdown',remaining:0,countdown:1,ally:'unrepaired',health:0});
+  expect(old.next({command:'countdown-back'})).toBeUndefined();
+ });
+ it('installs a blank token without activating or permanently destroying Mark V',()=>{
+  const s=session();s.act({command:'damage',value:6});s.act({command:'pickup',part:1});const blank=s.act({command:'repair',part:1,value:0});
+  expect(s.state()).toMatchObject({ally:'unrepaired',allyHealth:0});expect(s.state().parts[0]).toMatchObject({status:'installed',health:0});
+  expect(s.next({command:'repair',part:1,value:1})).toBeUndefined();expect(s.next({command:'use',action:'attack'})).toBeUndefined();
+  s.log.push(newPlayEvent({kind:'undo',target:blank.id}));expect(validPlayLog(s.log)).toBe(true);expect(s.state().parts[0].status).toBe('backpack');
+  s.log.push(newPlayEvent({kind:'restore',target:blank.id}));expect(validPlayLog(s.log)).toBe(true);
+  s.act({command:'pickup',part:2});s.act({command:'repair',part:2,value:3});expect(s.state()).toMatchObject({ally:'alive',allyHealth:3});
+  s.act({command:'ally-health',value:0});s.act({command:'pickup',part:3});expect(s.next({command:'repair',part:3,value:3})).toBeUndefined();
+ });
+ it('Bio Tissue activates Mark V even when the printed token is blank',()=>{
+  const s=session();s.power(0);s.act({command:'damage',value:9});s.act({command:'pickup',part:1});s.act({command:'repair',part:1,value:0});
+  expect(s.state()).toMatchObject({ally:'alive',allyHealth:1});
+ });
+ it('arrival Undo cannot reset later Mark X Health or invalidate a historical death',()=>{
+  const s=session();s.act({command:'damage',value:6});s.act({command:'countdown'});const arrival=s.act({command:'countdown'});
+  expect(canUndoHunter(s.log,arrival.id)).toBe(true);s.log.push(newPlayEvent({kind:'state',field:'killerHealth',value:7}));
+  expect(canUndoHunter(s.log,arrival.id)).toBe(false);expect(validPlayLog([...s.log,newPlayEvent({kind:'undo',target:arrival.id})])).toBe(false);
+  expect(summarizePlay(s.log).killerHealth).toBe(7);
+ });
+
 });
