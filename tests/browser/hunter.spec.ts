@@ -10,7 +10,7 @@ test('Hunter natural progression, repair and five-viewport controls',async({page
  await panel.getByRole('button',{name:'Collect Part 1'}).click();await panel.getByRole('button',{name:'Install Part 1',exact:true}).click();
  await panel.getByRole('spinbutton',{name:'Part printed Health'}).fill('3');await panel.getByRole('button',{name:'Install part',exact:true}).click();
  await expect(panel.getByRole('region',{name:'Mark V Ally actions'})).toBeVisible();
- await panel.getByRole('button',{name:'Attack · Ready',exact:true}).click();
+ await panel.getByRole('button',{name:'Attack',exact:true}).click();
  for(const [width,height] of [[1280,640],[1366,768],[1440,900],[390,844],[320,568]]) {
  await page.setViewportSize({width,height});await panel.locator('img').evaluateAll(async imgs=>Promise.all(imgs.map(img=>{(img as HTMLImageElement).loading='eager';return (img as HTMLImageElement).decode();})));
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
@@ -30,7 +30,7 @@ import {moduleState} from '../../src/lib/play/modules';
 const storageKey=`final-girl-active-game-v1:${userId}`;
 const readLog=(page:import('@playwright/test').Page):Promise<PlayEvent[]>=>page.evaluate(key=>JSON.parse(localStorage.getItem(key)!).playEvents,storageKey);
 
-test('Hunter forced transition, failed-write retry, both reveal entry points, Ally cooldowns, reload, death and ending',async({page,archive},info)=>{
+test('Hunter forced transition, failed-write retry, both reveal entry points, Ally actions, reload, death and ending',async({page,archive},info)=>{
  test.setTimeout(90000);page.setDefaultTimeout(10000);archive.aiCastingArt=true;archive.autoImages=true;
  await archive.install(page,{draft:{...activeGame,playMode:true,coreTrackersVersion:1,hunterSetupVersion:1,selection:{...activeGame.selection,killer:'The Hunter',location:'Maple Lane',finalGirl:'Ginny'},playEvents:[]}});
  await page.route('https://example.test/poster.png',route=>route.fulfill({contentType:'image/png',path:'src/assets/scrapbooks/final-girl-cover.png'}));
@@ -57,10 +57,10 @@ test('Hunter forced transition, failed-write retry, both reveal entry points, Al
 
  await panel.getByRole('button',{name:'Resolve Mark X Terror',exact:true}).click();
  await panel.getByRole('button',{name:'Collect Part 1'}).click();await panel.getByRole('button',{name:'Install Part 1',exact:true}).click();await panel.getByRole('spinbutton',{name:'Part printed Health'}).fill('3');await panel.getByRole('button',{name:'Install part',exact:true}).click();
- await panel.getByRole('button',{name:'Attack · Ready',exact:true}).click();
- await expect(panel.getByRole('button',{name:'Attack · 2 Upkeeps remaining',exact:true})).toBeDisabled();
- await panel.getByRole('button',{name:'Ally Upkeep · advance cooldowns',exact:true}).click();await panel.getByRole('button',{name:'Ally Upkeep · advance cooldowns',exact:true}).click();
- await expect(panel.getByRole('button',{name:'Attack · Ready',exact:true})).toBeEnabled();
+ await panel.getByRole('button',{name:'Attack',exact:true}).click();
+ await panel.getByRole('button',{name:'Attack',exact:true}).click();
+ await expect(panel.getByRole('button',{name:'Attack',exact:true})).toHaveAttribute('aria-pressed','true');
+ await expect(panel.getByRole('button',{name:'Attack',exact:true})).toBeEnabled();
  await chooseKillerCard(panel,'Finale','Adaptive A.I.');
  await panel.getByRole('button',{name:'Reveal Titanium Shield',exact:true}).click();
  for(let i=0;i<4;i++)await panel.getByRole('button',{name:'Remove one Titanium Shield health, heart 1',exact:true}).click();
@@ -107,8 +107,7 @@ test('legacy Hunter stays unrecorded through expansion; Rules search finds print
  await panel.locator('summary').filter({hasText:'Record existing Parts'}).click();await panel.getByRole('button',{name:'Record carried Part',exact:true}).click();
  await panel.getByRole('button',{name:'Install Part 1',exact:true}).click();await panel.getByRole('spinbutton',{name:'Part printed Health'}).fill('2');await panel.getByRole('button',{name:'Install part',exact:true}).click();
  await expect(panel.getByRole('article',{name:'Mark V Ally',exact:true})).toContainText('Ally');
- await panel.locator('summary').filter({hasText:'Record observed Ally cooldowns'}).click();await panel.getByRole('combobox',{name:'Record attack cooldown',exact:true}).click();await page.getByRole('option',{name:'Ready',exact:true}).click();
- await expect(panel.getByRole('button',{name:'Attack · Ready',exact:true})).toBeEnabled();
+ await expect(panel.getByRole('button',{name:'Attack',exact:true})).toBeEnabled();
  expect(summarizePlay(await readLog(page))).toMatchObject({killerHealth:9,killed:1,saved:2});
 });
 
@@ -182,12 +181,12 @@ test('Hunter photographic counters, Reboot extra, blank repairs and persistent a
  await page.getByRole('button',{name:'Increase Hunter Countdown',exact:true}).click();expect(summarizePlay(await readLog(page)).bloodlust).toBe(bloodlust);
  const actionSources=[];
  for(const [action,image] of [['Attack','ally-attack'],['Move','ally-move'],['Block','ally-block']] as const){
-  await panel.getByRole('button',{name:`${action} · Ready`,exact:true}).click();await expect(ally.locator('img')).toHaveAttribute('src',new RegExp(image));
+  await panel.getByRole('button',{name:action,exact:true}).click();await expect(ally.locator('img')).toHaveAttribute('src',new RegExp(image));
   actionSources.push(await ally.locator('img').getAttribute('src'));await capture(image,ally);
  }
  expect(new Set(actionSources).size).toBe(3);
  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await expect(ally.locator('img')).toHaveAttribute('src',/ally-block/);
- await panel.getByRole('button',{name:'Ally Upkeep · advance cooldowns',exact:true}).click();await expect(ally.locator('img')).toHaveAttribute('src',/ally-block/);
+ await expect(panel.getByText('Spend 1 Time')).toHaveCount(0);await expect(panel.getByText(/advance cooldowns/)).toHaveCount(0);await undoLatestObservation(page);await expect(ally.locator('img')).toHaveAttribute('src',/ally-move/);await panel.getByRole('button',{name:'Block',exact:true}).click();
  await panel.getByRole('button',{name:'Collect Part 3',exact:true}).click();await panel.getByRole('button',{name:'Install Part 3',exact:true}).click();await panel.getByRole('spinbutton',{name:'Part printed Health'}).fill('3');await panel.getByRole('button',{name:'Install part',exact:true}).click();
  expect(hunterState(moduleState(summarizePlay(await readLog(page)).entries,'hunter')).allyHealth).toBe(5);
  for(const [width,height] of info.project.name==='desktop'?[[1280,640],[1366,768],[1440,900]]:[[390,844],[320,568]]){

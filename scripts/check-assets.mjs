@@ -365,9 +365,9 @@ console.log('Verified 32 independent Hunter photographs and 9 chooser thumbnails
 // Sunnydaze has independent state photographs, never a generic mall fallback.
 const mallDirectory='src/assets/play/photos/sunnydaze';
 const mallPhotos=JSON.parse(readFileSync(join(mallDirectory,'manifest.json'),'utf8'));
-const mallExpected=['savior','header','bart','girl','twisted-bond','lockdown','wet-floors','food-fight','escalators','nerds','chopper-parked','savior-exited','savior-lost','bart-saved','bart-killed','girl-saved','girl-killed','chopper-riding','chopper-destroyed'];
-if(mallPhotos.length!==mallExpected.length||new Set(mallPhotos.map(p=>p.id)).size!==19||mallExpected.some(id=>!mallPhotos.some(p=>p.id===id)))throw Error('Incomplete Mall photographs');
+const mallExpected=['savior','header','bart','girl','twisted-bond','lockdown','wet-floors','food-fight','escalators','nerds','chopper-parked','savior-exited','savior-lost','bart-saved','bart-killed','girl-saved','girl-killed','chopper-riding','chopper-destroyed',...Array.from({length:4},(_,t)=>['idle','ignore-terror','move-a','recover','react'].map(a=>`savior-trust-${t}-${a}`)).flat(),...['surplus','boards','zap','joystick','sporting','smokin'].flatMap(id=>Array.from({length:['surplus','smokin'].includes(id)?2:4},(_,mask)=>`store-${id}-${mask}`))];
+if(mallPhotos.length!==mallExpected.length||new Set(mallPhotos.map(p=>p.id)).size!==mallExpected.length||mallExpected.some(id=>!mallPhotos.some(p=>p.id===id)))throw Error('Incomplete Mall photographs');
 const mallFiles=new Set(),mallSources=new Set();
 for(const p of mallPhotos){const b=readFileSync(p.file);if(konradWebpDimensions(b).join()!==[p.width,p.height].join()||p.bytes!==b.length||b.length>160*1024||p.nativeWidth<p.width||p.nativeHeight<p.height||createHash('sha256').update(b).digest('hex')!==p.sha256||!/^exec-[a-f0-9-]+\.png$/.test(p.source)||!/^\w{64}$/.test(p.sourceSha256)||mallSources.has(p.source))throw Error('Invalid independent Mall photo '+p.id);mallSources.add(p.source);mallFiles.add(p.file);}
 if(images.filter(p=>p.startsWith(mallDirectory+'/')||p==='src/assets/play/banners/sunnydaze.webp').some(p=>!mallFiles.has(p)))throw Error('Unmapped Mall artwork');
-console.log('Verified 19 independent Sunnydaze Mall photographs.');
+console.log('Verified 59 independent Sunnydaze Mall photographs, including 20 Trust/action and 20 store-wall states.');

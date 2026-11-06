@@ -92,6 +92,7 @@ export const hunterMinorField=(id:string)=>`minor.${id}`;
 export function validHunterField(key:string,value:unknown) {
  if(key==='snapshot')return parseHunter(value)!==null;
  if(key==='recovered')return value===true;
+ if(key==='actionCount')return n(value,1,999);
  if(key==='rebootCount')return n(value,1,999);
  return HUNTER_MINORS.some(c=>key===hunterMinorField(c.id)&&(value===null||n(value,0,c.health))) || ['counterMeasures','shockAwe'].includes(key)&&(value===null||typeof value==='boolean');
 }
@@ -103,6 +104,7 @@ export type HunterAction={parent:string}&(
  |{command:'repair';part:number;value:number}
  |{command:'ally-health';value:number}
  |{command:'use';action:string}
+ |{command:'observe-action';action:'attack'|'move'|'react'}
  |{command:'cooldown';action:string;value:number}
  |{command:'minor';card:string;value:number|null}
  |{command:'effect';key:'counterMeasures'|'shockAwe';value:boolean}
@@ -118,6 +120,7 @@ export function validHunterAction(v:unknown):v is HunterAction {
  case 'pickup':case 'drop':return n(a.part,1);
  case 'ally-health':return n(a.value);
  case 'cooldown':return HUNTER_ACTIONS.some(c=>c.id===a.action&&n(a.value,0,c.cooldown));
+ case 'observe-action':return ['attack','move','react'].includes(a.action);
  case 'use':return HUNTER_ACTIONS.some(c=>c.id===a.action);
  case 'minor':return HUNTER_MINORS.some(c=>c.id===a.card&&(a.value===null||n(a.value,0,c.health)));
  case 'effect':return ['counterMeasures','shockAwe'].includes(a.key)&&typeof a.value==='boolean';
@@ -127,7 +130,9 @@ export function validHunterAction(v:unknown):v is HunterAction {
 }
 export function resolveHunterAction(a:HunterAction,fields:Fields,entries:readonly Entry[]):Fields|undefined {
  if(!validHunterAction(a)||a.parent!==hunterParent(entries))return;
- const s=hunterState(fields);const power=hunterCard(entries,'dark-power');
+ const s=hunterState(fields);
+ if(a.command==='observe-action')return s.ally==='alive'&&Number(fields.actionCount??0)<999?{actionCount:Number(fields.actionCount??0)+1}:undefined;
+ const power=hunterCard(entries,'dark-power');
  if(a.command==='minor')return (fields[hunterMinorField(a.card)]??null)===a.value?undefined:{[hunterMinorField(a.card)]:a.value};
  if(a.command==='effect')return fields[a.key]===a.value?undefined:{[a.key]:a.value};
  const drop=()=>{if(s.remaining===null)return false;for(let i=0;i<s.remaining;i++)s.parts.push({id:Math.max(0,...s.parts.map(p=>p.id))+1,status:'on-board',health:null});s.remaining=0;s.damage=0;return true;};
@@ -206,6 +211,7 @@ export function describeHunterAction(a:HunterAction,fields:Fields):string {
  case 'destroy-ally':return 'Unrepaired Mark V permanently removed';
  case 'reboot':return 'Resolved System Reboot';
  case 'upkeep':return 'Advanced Mark V Ally cooldowns';
+ case 'observe-action':return `Mark V Ally: ${a.action==='attack'?'Attack':a.action==='move'?'Move':'Block'}`;
  case 'use':return `Mark V Ally: ${HUNTER_ACTIONS.find(c=>c.id===a.action)?.name??a.action}`;
  case 'cooldown':return `Recorded Mark V ${a.action} cooldown: ${a.value}`;
  case 'minor':return `${HUNTER_MINORS.find(c=>c.id===a.card)?.name}: ${a.value===null?'record cleared':a.value+' Health'}`;

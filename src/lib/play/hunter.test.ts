@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
 import {HUNTER,HUNTER_TERRORS,HUNTER_MINORS,HUNTER_POWERS,HUNTER_FINALES,HUNTER_ACTIONS,hunterHasReveal,initialHunter,hunterState,hunterParent,resolveHunterAction,hunterReview,hunterReviewFacts,type HunterAction} from './hunter';
-import {newPlayEvent,summarizePlay,validPlayLog,canUndoHunter,playStoryBeats,type PlayEvent} from './events';
+import {newPlayEvent,describeEvent,summarizePlay,validPlayLog,canUndoHunter,playStoryBeats,type PlayEvent} from './events';
 import {moduleState,moduleStoryBeats,validModuleObservation,killerMomentCards} from './modules';
 import {deathFacts,deathSignature} from './death';
 import {isActiveGame} from '../activeGame';
@@ -157,4 +157,9 @@ describe('Hunter photographed mechanics',()=>{
   expect(summarizePlay(s.log).killerHealth).toBe(7);
  });
 
+});
+
+describe('Hunter manual Ally actions',()=>{
+ it('records repeated choices with no cooldown, Health or killer side effects',()=>{const s=session();for(let i=0;i<3;i++)s.act({command:'remove-part'});s.act({command:'pickup',part:1});s.act({command:'repair',part:1,value:3});s.act({command:'use',action:'attack'});const before=s.state();for(const action of ['attack','attack','move','react'] as const)s.act({command:'observe-action',action});expect(s.state()).toEqual(before);expect(s.fields().actionCount).toBe(4);expect(describeEvent(s.log[s.log.length-1]!)).toBe('Mark V Ally: Block');const last=s.log[s.log.length-1]!;s.log.push(newPlayEvent({kind:'undo',target:last.id}));expect(validPlayLog(s.log)).toBe(true);expect(s.fields().actionCount).toBe(3);s.act({command:'ally-health',value:0});expect(s.next({command:'observe-action',action:'attack'})).toBeUndefined();});
+ it('does not let a blank installed Part reveal or use the Ally',()=>{const s=session();for(let i=0;i<3;i++)s.act({command:'remove-part'});s.act({command:'pickup',part:1});s.act({command:'repair',part:1,value:0});expect(s.next({command:'observe-action',action:'attack'})).toBeUndefined();});
 });

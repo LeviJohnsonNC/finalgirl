@@ -65,3 +65,20 @@ export const MALL_ITEMS=[
  {id:'walkie',name:'Walkie-Talkie',quantity:1,effect:'Two uses: play Build Trust while not in the same space as the Savior.'},
  {id:'jacket',name:'Leather Jacket',quantity:1,effect:'Reroll any dice once when resolving Build Trust. Discard to ignore up to two damage.'}
 ] as const;
+
+/** Board adjacency, excluding exterior walls and existing movement openings. */
+export const MALL_WALLS=[
+ {id:'boards-concourse',a:'boards',b:null,destination:'Northwest Concourse'},
+ {id:'boards-surplus',a:'boards',b:'surplus',destination:null},
+ {id:'zap-service',a:'zap',b:null,destination:'Service Entrance'},
+ {id:'zap-joystick',a:'zap',b:'joystick',destination:null},
+ {id:'joystick-security',a:'joystick',b:null,destination:'Security'},
+ {id:'sporting-security',a:'sporting',b:null,destination:'Security'},
+ {id:'sporting-smokin',a:'sporting',b:'smokin',destination:null},
+] as const;
+export const MALL_OBSERVED_ACTIONS=[{id:'ignore-terror',title:'Ignore Terror'},{id:'move-a',title:'Move'},{id:'recover',title:'Recover'},{id:'react',title:'Block'}] as const;
+export const mallStoreWalls=(id:string)=>MALL_WALLS.filter(w=>w.a===id||w.b===id);
+export const mallWallDestination=(wall:typeof MALL_WALLS[number],store:string)=>wall.destination??MALL_STORES.find(s=>s.id===(wall.a===store?wall.b:wall.a))!.name;
+export const mallStoreMask=(fields:Record<string,unknown>,id:string)=>mallStoreWalls(id).reduce((mask,w,i)=>mask+(fields[`wall.${w.id}`]===true?2**i:0),0);
+
+export const mallWallLabel=(id:string)=>{const w=MALL_WALLS.find(w=>w.id===id)!;return `${MALL_STORES.find(s=>s.id===w.a)!.name} ↔ ${mallWallDestination(w,w.a)}`;};
