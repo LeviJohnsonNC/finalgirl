@@ -1,3 +1,4 @@
+import { MALL_MODULE, describeMallAction, initialMall, isInitialMall, resolveMallAction, validMallAction, mallParent, mallState, type MallAction } from './sunnydaze.ts';
 import { HUNTER_MODULE, describeHunterAction, initialHunter, resolveHunterAction, validHunterAction, hunterParent, hunterState, type HunterAction } from './hunter.ts';
 import { WINGARD_MODULE } from './wingardCatalog.ts';
 import { isInitialWingard, resolveWingardAction, validWingardAction, wingardParent, describeWingardAction, type WingardAction } from './wingardCottage.ts';
@@ -88,6 +89,8 @@ export interface PlayDetails {
   killerCard?: string;
 }
 export interface PlayEvent extends PlayDetails {
+  mallAction?: MallAction;
+  mallReference?: true;
   hunterAction?: HunterAction;
   hunterReference?: true;
   intruderAction?: IntruderAction;
@@ -172,6 +175,9 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if(e.mallReference!==undefined&&(e.kind!=='killed'||e.mallReference!==true))return false;
+  if(e.mallAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!==MALL_MODULE||!validMallAction(e.mallAction)))return false;
+  if(e.moduleData?.module===MALL_MODULE&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.mallAction&&!isInitialMall(e.moduleData.changes))))return false;
   if (e.hunterReference !== undefined && (e.kind!=='killed'||e.hunterReference!==true))return false;
   if(e.hunterAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!==HUNTER_MODULE||!validHunterAction(e.hunterAction)))return false;
   if(e.moduleData?.module===HUNTER_MODULE&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.hunterAction&&e.moduleData.changes.snapshot!==initialHunter().snapshot)))return false;
@@ -273,9 +279,35 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validHunterHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validMallHistory(log) && validHunterHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
+}
+export function canUndoMall(log:readonly PlayEvent[],target:string) {
+ const e=log.find(e=>e.id===target);
+ return e?.moduleData?.module!==MALL_MODULE || !!e.mallAction&&mallParent(summarizePlay(log).entries)===target;
+}
+export function validMallHistory(log:readonly PlayEvent[]) {
+ if(!log.some(e=>e.moduleData?.module===MALL_MODULE))return true;
+ for(const [index,event] of log.entries()) {
+  const prefix=log.slice(0,index);const target=(event.kind==='undo'||event.kind==='restore')?prefix.find(e=>e.id===event.target):undefined;
+  if(event.moduleData?.module!==MALL_MODULE&&target?.moduleData?.module!==MALL_MODULE)continue;
+  const entries=summarizePlay(prefix).entries;
+  if(target) {
+   if(!target.mallAction)return false;
+   if(event.kind==='undo'&&!canUndoMall(prefix,target.id))return false;
+   if(event.kind==='restore') {
+    const expected=resolveMallAction(target.mallAction,moduleState(entries,MALL_MODULE),entries);
+    if(!expected||!sameHunterChanges(expected,target.moduleData!.changes))return false;
+   }
+  } else if(!event.mallAction) {
+   if(prefix.some(e=>e.moduleData?.module===MALL_MODULE)||!isInitialMall(event.moduleData!.changes))return false;
+  } else {
+   const expected=resolveMallAction(event.mallAction,moduleState(entries,MALL_MODULE),entries);
+   if(!expected||!sameHunterChanges(expected,event.moduleData!.changes))return false;
+  }
+ }
+ return true;
 }
 export function canUndoHunter(log:readonly PlayEvent[],target:string) {
  const e=log.find(e=>e.id===target);
@@ -612,6 +644,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     if (deltas.has(e.id)) summary.killed = Math.max(0, Math.min(999, summary.killed! + deltas.get(e.id)!));
     if (e.kind === "round")
       summary.round = Math.min(999, (summary.round ?? 0) + 1);
+    if(e.kind==='module'&&e.mallAction?.command==='person'&&e.mallAction.id==='girl'&&e.mallAction.value==='killed'&&e.mallAction.resolve&&mallState(moduleState(summary.entries,MALL_MODULE)).people.girl==='present'&&summary.finalHorrorLevel!==undefined)summary.finalHorrorLevel=Math.min(6,summary.finalHorrorLevel+1);
     if(e.kind==='module'&&e.hunterAction) {
       const before=hunterState(moduleState(summary.entries,HUNTER_MODULE));
       const after=hunterState({...moduleState(summary.entries,HUNTER_MODULE),...e.moduleData!.changes});
@@ -702,6 +735,7 @@ export function describeEvent(e: PlayEvent): string {
     case "moment":
       return `${e.text}${e.killerCard ? `: ${e.killerCard}` : ""}${e.detail ? `${e.killerCard ? ". " : ": "}${e.detail}` : ""}`;
     case "module":
+      if(e.mallAction)return describeMallAction(e.mallAction);
       if(e.hunterAction)return describeHunterAction(e.hunterAction,e.moduleData!.changes);
       if (e.woodsAction) return describeWoodsAction(e.woodsAction);
       if (e.wingardAction) return describeWingardAction(e.wingardAction);

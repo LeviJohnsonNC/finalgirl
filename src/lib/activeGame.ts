@@ -1,3 +1,4 @@
+import {MALL,MALL_MODULE,initialMall} from './play/sunnydaze';
 import { WINGARD, WINGARD_MODULE } from '../../supabase/functions/_shared/play/wingardCatalog';
 import { initialWingard } from '../../supabase/functions/_shared/play/wingardCottage';
 import { WOODS, WOODS_MODULE, initialWoods } from "../../supabase/functions/_shared/play/storybookWoods";
@@ -31,6 +32,7 @@ export interface ActiveGame {
   tormentorSetupVersion?: 1;
   wolfSetupVersion?: 1;
   intrudersSetupVersion?: 1;
+  mallSetupVersion?:1;
   hunterSetupVersion?: 1;
   shadySetupVersion?: 1;
   grimlashSetupVersion?: 1;
@@ -65,6 +67,8 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if(game.mallSetupVersion!==undefined&&(game.mallSetupVersion!==1||game.selection?.location!==MALL))return false;
+  if(game.playEvents?.some(e=>(e.mallReference||e.moduleData?.module===MALL_MODULE)&&game.selection?.location!==MALL||e.moduleData?.module===MALL_MODULE&&!e.mallAction&&(game.mallSetupVersion!==1||e.moduleData.changes.snapshot!==initialMall(game.selection?.startingEvent).snapshot)))return false;
   if(game.coreTrackersVersion!==undefined&&game.coreTrackersVersion!==1)return false;
   if (game.woodsSetupVersion !== undefined && (game.woodsSetupVersion !== 1 || game.selection?.location !== WOODS)) return false;
   if (Array.isArray(game.playEvents) && game.playEvents.some(event =>

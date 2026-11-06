@@ -1,3 +1,4 @@
+import {mallUnlocksUltimate} from '@/lib/play/sunnydaze';
 import { HunterCoreTracker } from './HunterCoreTracker';
 import { hunterState, hunterHasReveal } from '@/lib/play/hunter';
 import { hunterArt } from './hunterArt';
@@ -304,7 +305,7 @@ export function PlayScreen(props: PlayScreenProps) {
         <div>
           <div className="play-character-heading">
             <p className="play-eyebrow">PLAY MODE</p>
-            <LoreInfoModal type="finalGirl" name={finalGirl} namedTrigger ultimate={summary.entries.some(event => event.kind === 'moment' && event.momentType === 'ultimate-unlocked')}/>
+            <LoreInfoModal type="finalGirl" name={finalGirl} namedTrigger ultimate={mallUnlocksUltimate(summary.entries)||summary.entries.some(event => event.kind === 'moment' && event.momentType === 'ultimate-unlocked')}/>
           </div>
           <h1>{location}</h1>
         </div>
@@ -554,7 +555,7 @@ export function PlayScreen(props: PlayScreenProps) {
         <div className="play-moment-choices">
           {orderedMoments.filter(choice=>(!(killer==='Poltergeist'||killer===INTRUDERS)||choice.type!=='killer-revived')&&!(killer==='The Hunter'&&['mark-v','countdown'].includes(hunter.phase)&&choice.type==='killer-revived')).map((choice) => {
             const revealed = summary.entries.find(e => e.kind === "moment" && e.momentType === choice.type);
-            const active = PERMANENT_MOMENTS.includes(choice.type) && (!!revealed || killer==='The Hunter'&&hunterHasReveal(hunter,choice.type));
+            const active = PERMANENT_MOMENTS.includes(choice.type) && (!!revealed || choice.type==='ultimate-unlocked'&&mallUnlocksUltimate(summary.entries) || killer==='The Hunter'&&hunterHasReveal(hunter,choice.type));
             const selectedArt = active && (choice.type === 'dark-power' || choice.type === 'finale')
               ? illustratedKillerCards(killer, choice.type).find(card => card.name === revealed?.killerCard)?.art : undefined;
             const ultimate = choice.type === "ultimate-unlocked";

@@ -328,3 +328,16 @@ Deno.test('Hunter model and Ally ending facts remain owner-specific and reject i
  assertEquals(SceneImageRequestSchema.safeParse({...image,sceneType:'beginning'}).success,false);
  assertEquals(SceneImageRequestSchema.safeParse({...image,killer:'Hans'}).success,false);
 });
+
+Deno.test('Sunnydaze Savior review is location-scoped, loss-authoritative and independent of Final Girl fate',()=>{
+ const mallReview={savior:'killed',health:0,trust:1,exitReward:null};
+ const base={introStory:'An original opening with enough detail to satisfy the minimum request length.',outcome:'lost',killer:{name:'Hans'},location:{name:'Sunnydaze Mall'},finalGirl:{name:'Ginny'},finalGirlHealth:3,mallReview};
+ assertEquals(EndingRequestSchema.safeParse(base).success,true);
+ assertEquals(EndingRequestSchema.safeParse({...base,outcome:'won'}).success,false);
+ assertEquals(EndingRequestSchema.safeParse({...base,location:{name:'Maple Lane'}}).success,false);
+ assertEquals(EndingRequestSchema.safeParse({...base,mallReview:{...mallReview,health:2}}).success,false);
+ const poster={story:base.introStory,outcome:'lost',sceneType:'ending',killer:'Hans',location:'Sunnydaze Mall',finalGirl:'Ginny',mallReview};
+ assertEquals(SceneImageRequestSchema.safeParse(poster).success,true);
+ assertEquals(SceneImageRequestSchema.safeParse({...poster,sceneType:'beginning'}).success,false);
+ assertEquals(SceneImageRequestSchema.safeParse({...poster,outcome:'won'}).success,false);
+});

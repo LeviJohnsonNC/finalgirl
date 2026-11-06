@@ -1,3 +1,4 @@
+import {MALL,MALL_EVENTS,MALL_TERRORS,MALL_ITEMS,MALL_SPACES,MALL_SOURCE} from './sunnydazeCatalog.ts';
 import { HUNTER, HUNTER_SOURCE, HUNTER_TERRORS } from './hunter.ts';
 import { WINGARD, WINGARD_EVENTS, WINGARD_TERRORS, WINGARD_ITEMS, WINGARD_PEOPLE, WINGARD_SPACES, WINGARD_SOURCE } from './wingardCatalog.ts';
 import { WOODS, WOODS_SOURCE, WOODS_EVENTS, WOODS_TERRORS, WOODS_ITEMS, WOODS_PEOPLE, WOODS_SPACES } from "./storybookWoods.ts";
@@ -48,6 +49,8 @@ const station = wiki("Station_2891");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+ ...MALL_EVENTS.map(card=>({...card,kind:"event" as const,location:MALL,source:MALL_SOURCE})),
+ ...MALL_TERRORS.map(card=>({...card,kind:"terror" as const,location:MALL,source:MALL_SOURCE})),
   ...HUNTER_TERRORS.map(card=>({...card,kind:"terror" as const,killer:HUNTER,source:HUNTER_SOURCE})),
   ...INTRUDER_TERRORS.map(card => ({...card, kind:"terror" as const, killer:INTRUDERS, source:INTRUDER_SOURCE})),
   ...WOLF_TERRORS.map(card => ({ ...card, kind: "terror" as const, killer: WOLF, source: WOLF_SOURCE })),
@@ -155,14 +158,6 @@ export const PLAY_CARDS: readonly PlayCard[] = [
     location: "Camp Happy Trails",
     source: "Owner photo IMG_9324.jpg",
   })),
-  {
-    name: "Fire Sale!",
-    kind: "event",
-    location: "Sunnydaze Mall",
-    effect:
-      "Move Victims adjacent to a store inside it. You, Allies and Enemies sharing a store with a Victim lose one health. Discard the Event.",
-    source: wiki("Fire_Sale%21"),
-  },
   // One sample is visible in the published rulebook; icons beyond the quoted
   // conditional are not inferred from incomplete PDF text extraction.
   {
@@ -227,6 +222,7 @@ export function playCardContext(
 }
 export const PLAY_ROOMS: Record<string, readonly string[]> = {
  [WOODS]: WOODS_SPACES.map(space => space.name),
+ [MALL]:MALL_SPACES,
  [WINGARD]:WINGARD_SPACES,
  'Marrek Warehouse':MARREK_SPACES.map(s=>s.name),
  'Shady Acres':SHADY_SPACES.map(s=>s.name),
@@ -280,6 +276,7 @@ export function playMechanisms(selection: {
     ...(selection.location === "Maple Lane" ? ["Fire", "Booby Trap", "Street traffic"] : []),
     ...(selection.location==='USS Konrad'?['Crusher','Incinerator','Airlock','Self Destruct','Hull breach','Gas leak','Faulty Wiring','Garbage Day']:[]),
     ...(selection.location==='Creech Manor'?['Attic Skull','Window fall','Living trees']:[]),
+    ...(selection.location===MALL?['Railing fall','Store wall knockback','Escalator']:[]),
     "Location hazard",
     "Other",
   ];
@@ -289,14 +286,14 @@ export function playMechanisms(selection: {
 export function playItems(
   location: string,
 ): readonly { name: string; effect: string }[] {
-  return location === WOODS ? WOODS_ITEMS : location === WINGARD ? WINGARD_ITEMS : location === "Marrek Warehouse" ? MARREK_ITEMS : location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
+  return location === MALL ? MALL_ITEMS : location === WOODS ? WOODS_ITEMS : location === WINGARD ? WINGARD_ITEMS : location === "Marrek Warehouse" ? MARREK_ITEMS : location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
     ? CAMP_ITEMS
     : location === "Buddyland"
       ? BUDDYLAND_ITEMS
       : [];
 }
 export function playVictims(location: string): readonly { name: string }[] {
-  return location === WOODS ? WOODS_PEOPLE : location === WINGARD ? WINGARD_PEOPLE : location === "Marrek Warehouse" ? MARREK_PEOPLE : location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
+  return location===MALL?[{name:'Bart the Mall Cop'},{name:'The Savior’s Girl'}]:location === WOODS ? WOODS_PEOPLE : location === WINGARD ? WINGARD_PEOPLE : location === "Marrek Warehouse" ? MARREK_PEOPLE : location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
     ? CAMP_VICTIMS
     : location === "Buddyland"
       ? SPECIAL_VICTIMS
