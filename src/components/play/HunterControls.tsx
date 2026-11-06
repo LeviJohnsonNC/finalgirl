@@ -1,5 +1,6 @@
+import '@/styles/play-ally-actions.css';
 import { useState } from 'react';
-import { HUNTER, HUNTER_MINORS, HUNTER_ACTIONS, HUNTER_POWERS, hunterCard, hunterMinorField } from '@/lib/play/hunter';
+import { HUNTER, HUNTER_MINORS, hunterMinorField } from '@/lib/play/hunter';
 import { ModuleArtwork } from './ModuleArtwork';
 import { MinorPowerControl } from './MinorPowerControl';
 import { MinorPowerGroup } from './MinorPowerGroup';
@@ -16,10 +17,9 @@ export function HunterControls({events,onEvent,blocked}:ControlsProps) {
  const [legacyPhase,setLegacyPhase]=useState<'mark-v'|'countdown'|'mark-x'>('mark-v');
  const [legacyParts,setLegacyParts]=useState(''),[legacyCountdown,setLegacyCountdown]=useState(''),[legacyHealth,setLegacyHealth]=useState('0');
  const [legacyAlly,setLegacyAlly]=useState<'unrepaired'|'alive'|'destroyed'>('unrepaired');
- const power=hunterCard(entries,'dark-power');
- const attackDamage=Math.max(1,(power===HUNTER_POWERS[3].name?3:2)-(hunterCard(entries,'finale')==='Adaptive A.I.'&&s.phase==='mark-x'?1:0));
- const lastAction=[...entries].reverse().find(e=>e.hunterAction?.command==='use')?.hunterAction;
- const allyPhoto=lastAction?.command==='use'?lastAction.action==='attack'?'ally-attack':lastAction.action==='react'?'ally-block':'ally-move':'ally-idle';
+ const lastAction=[...entries].reverse().find(e=>e.hunterAction?.command==='use'||e.hunterAction?.command==='observe-action')?.hunterAction;
+ const allyAction=lastAction&&(lastAction.command==='use'||lastAction.command==='observe-action')?(lastAction.action==='quick-move'?'move':lastAction.action):undefined;
+ const allyPhoto=allyAction==='attack'?'ally-attack':allyAction==='react'?'ally-block':allyAction?'ally-move':'ally-idle';
  return <section className="play-hunter" aria-label="Hunter tracking">
   <article aria-label={s.phase==='mark-x'?'Mark X':'Mark V'} className="hunter-model">
    <div className="hunter-model-photo"><ModuleArtwork art={hunterModelArt(s)}/></div>
@@ -47,7 +47,6 @@ export function HunterControls({events,onEvent,blocked}:ControlsProps) {
      {collected&&<button className="module-unnamed" disabled={blocked} onClick={()=>act({command:'drop',part:p.id})}>Drop Part {p.id}</button>}
      {repairPart===p.id&&canInstall&&<form className="hunter-repair" onSubmit={e=>{e.preventDefault();if(repairValue!==''&&act({command:'repair',part:p.id,value:Number(repairValue)}))setRepairPart(undefined);}}>
       <label>Printed Health<input aria-label="Part printed Health" type="number" min="0" max="99" required value={repairValue} onChange={e=>setRepairValue(e.target.value)} autoFocus/></label>
-      <p>Spend 1 Time{power===HUNTER_POWERS[0].name?' · Bio Tissue adds 1 Health':''}</p>
       <button className="hunter-action" disabled={blocked}>Install part</button><button type="button" className="module-unnamed" onClick={()=>setRepairPart(undefined)}>Cancel</button>
      </form>}
     </article>;
@@ -59,9 +58,7 @@ export function HunterControls({events,onEvent,blocked}:ControlsProps) {
       <div className="play-state-stepper"><button aria-label="Decrease Mark V Ally Health" disabled={blocked||s.ally!=='alive'} onClick={()=>act({command:'ally-health',value:s.allyHealth!-1})}>−</button><strong aria-live="polite">{s.allyHealth}</strong><button aria-label="Increase Mark V Ally Health" disabled={blocked||s.ally!=='alive'||s.allyHealth===99} onClick={()=>act({command:'ally-health',value:s.allyHealth!+1})}>+</button></div>
      </div>
     </article>
-    <div className="hunter-cooldowns">{HUNTER_ACTIONS.map(a=><button className="hunter-action" key={a.id} aria-label={`${a.id==='attack'?'Attack':a.id==='react'?'Block':a.id==='quick-move'?'Move fast':'Move'} · ${s.cooldowns[a.id]===0?'Ready':`${s.cooldowns[a.id]??'?'} Upkeeps remaining`}`} disabled={blocked||s.ally!=='alive'||s.cooldowns[a.id]!==0} onClick={()=>act({command:'use',action:a.id})}><strong>{a.id==='attack'?'Attack':a.id==='react'?'Block':'Move'}</strong><span>{a.id==='attack'?`${attackDamage} damage`:a.id==='react'?'−1 incoming · 1 counterattack':`1 space · ${a.cooldown} Upkeep cooldown`}</span><small>{s.cooldowns[a.id]===0?'Ready':s.cooldowns[a.id]===null?'Cooldown unrecorded':`${s.cooldowns[a.id]} Upkeeps remaining`}</small></button>)}</div>
-    {Object.values(s.cooldowns).some(v=>v===null)&&<details className="hunter-recovery"><summary>Record observed Ally cooldowns</summary>{HUNTER_ACTIONS.filter(a=>s.cooldowns[a.id]===null).map(a=><label key={a.id}>{a.name}<PlaySelect aria-label={`Record ${a.id} cooldown`} disabled={blocked} value="" onChange={e=>act({command:'cooldown',action:a.id,value:Number(e.target.value)})}><option value="" disabled>Unrecorded</option>{Array.from({length:a.cooldown+1},(_,n)=><option key={n} value={String(n)}>{n===0?'Ready':`${n} Upkeep${n===1?'':'s'} remaining`}</option>)}</PlaySelect></label>)}</details>}
-    <button className="hunter-action" disabled={blocked||s.ally!=='alive'||!Object.values(s.cooldowns).some(v=>typeof v==='number'&&v>0)} onClick={()=>act({command:'upkeep'})}>Ally Upkeep · advance cooldowns</button>
+    <div className="ally-observation-actions" role="group" aria-label="Mark V actions">{([{id:'attack',title:'Attack'},{id:'move',title:'Move'},{id:'react',title:'Block'}] as const).map(a=><button key={a.id} aria-pressed={allyAction===a.id} disabled={blocked||s.ally!=='alive'} onClick={()=>act({command:'observe-action',action:a.id})}>{a.title}</button>)}</div>
    </section>}
    {s.phase!=='mark-v'&&s.ally==='unrepaired'&&<button className="module-unnamed" disabled={blocked} onClick={()=>act({command:'destroy-ally'})}>Terminate Mark V · remove unrepaired model</button>}
   </>}

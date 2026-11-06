@@ -410,16 +410,17 @@
   },
   {
     "id": "ally-block",
-    "source": "exec-68ba721b-df13-42d7-812c-f2ddacd02e29.png",
-    "sourceSha256": "6a40ebbdf95ad430531a5d339f0b3256b52a4d23cf65b4e9e9de29e24fce9764",
+    "source": "exec-7757c0fd-5519-47aa-96b9-0a980a5d8c27.png",
+    "sourceSha256": "c729940fe1535fa6c1c8698ce07b9dabf76b1f1c6f33d4a56d5f785bfea3927e",
     "nativeWidth": 1672,
     "nativeHeight": 941,
     "file": "src/assets/play/photos/hunter/ally-block.webp",
     "width": 1120,
     "height": 630,
-    "bytes": 55230,
-    "sha256": "7496b6d11f26435dc927f417e0ba0f79993531620d2399e56386636586ff6eba",
-    "focal": "50% 35%"
+    "bytes": 54788,
+    "sha256": "0a8bffd8e95d787c4bbfac848a46fa991aaf81933cf926ea2fd7ab167fb694db",
+    "focal": "50% 35%",
+    "prompt": "Exact burgundy hood/opaque visor/blue-black leather Mark V reference. Formidable planted defensive guard, bent mechanical forearm horizontally across upper chest, other hand low. No stop gesture, firearm, hologram, energy shield, opponent or wounds. Independent wide candid1980s35mm practical-effects photograph."
   },
   {
     "id": "part-4",

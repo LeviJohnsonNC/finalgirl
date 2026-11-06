@@ -53,3 +53,26 @@ Pilot: independent original photographic Savior in a dark sleeveless hoodie/grey
 No SQL migration planned. Changes to shared Play validation/facts require compatible `generate-death-scene` and `narrate-story`; opening/ending/visual prompts also require `generate-story`, `generate-ending`, `generate-scene-image`, `generate-visual-bible`. No reference manifest/private Storage objects change in this import. No new identity uploads are required. Shared TypeScript function source totals about 1.21 MB; Mall shared source is about 23 KB, with no embedded image collection or arbitrary reference URLs. Native Deno type checks run in CI; production packaging/deployed-bundle verification remains a release check. Deploy backends before publishing new callers in Lovable. No deployment or live provider verification claimed. Final deployment and signed-in mixed-game smoke remain separate.
 
 Release order: (1) deploy compatible six function bundles; (2) publish the frontend in Lovable; (3) signed-in mixed-game smoke covering opening, save/reload, both Allies, Savior exit/death, contextual death/cache/audio and prose/painted poster. No merge, deployment or paid provider generation was performed by this implementation task. No SQL migration or new Storage upload. Existing Hunter reference uploads from its own import remain a separate precondition if not already released.
+
+## Approved compact ally and wall refinement — 2026-11-06
+
+This section supersedes the action-cube UI and untracked-wall scope above. Physical rules are unchanged; the player resolves Trust requirements, cubes, healing, movement, knockback and extra damage on the board.
+
+- Trust has four title-only styled choices. Twenty independent photographs cover each Trust's idle, Ignore Terror, Move, Recover and Block poses, preserving the approved Savior identity. Trust selection resets to that level's idle photograph; other observations retain the action photograph. Escaped/dead/unknown state artwork stays explicit. Both physical Move rows share one observation button because the app no longer manages cubes.
+- Four title-only action buttons record accepted observations without Trust/cube gates, automatic Health changes or movement. Repeated choices remain individually recordable. Legacy `use`/Upkeep/cube logs retain their original replay semantics and unknown values; new observations do not rewrite them. Accepted history selects artwork, so failed writes, Undo and reload agree with the recorded action.
+- Chopper uses the special-character card dimensions. Riding is a person-free close-up of the moving wheel/tank with photographic motion blur. Destroyed uses its vivid wreck photograph, without disabled-state dimming; Park/Ride corrections remain available.
+- Six store cards use special-character dimensions and destination dropdowns. M1's actual board and M4's eligible-wall rule were re-inspected before coding. Exterior walls, existing openings and non-store locations are excluded. Seven canonical wall fields are shared across their endpoints, so one observation updates both adjoining stores atomically. The dropdown changes Break to Restore for correction. No damage, movement, casualty or Time is inferred.
+
+| Canonical wall | Store-card endpoints |
+| --- | --- |
+| Boards ’N Bones north ↔ Northwest Concourse | Boards |
+| Boards ’N Bones south ↔ Military Surplus ’R Us north | Boards + Surplus |
+| Zap Shack west ↔ Service Entrance east | Zap |
+| Zap Shack east ↔ Joystick Heroes west | Zap + Joystick |
+| Joystick Heroes east ↔ Security west | Joystick |
+| Stan’s Sporting Goods west (above its existing doorway) ↔ Security east | Sporting |
+| Stan’s Sporting Goods south ↔ Smokin’ Subject north | Sporting + Smokin |
+
+Twenty independent store photographs cover every intact/single-wall/two-wall combination, preserving each store's camera and inventory. Image left/right slots follow each store's canonical incident-wall order, not a compass diagram. Missing legacy wall fields remain unrecorded; the undamaged decorative base does not assert that a wall is known intact. Only explicitly recorded broken walls enter narrative/death facts. Old initial snapshots remain byte-for-byte valid. Ultimate reward derivation now accumulates partial observations so a later wall record cannot erase an exit reward.
+
+New commands/field validation are shared by browser and edge. For this refinement, `generate-death-scene` and `narrate-story` must be redeployed before publishing the frontend, because they validate stored Play logs. The other four generation bundles need no additional deployment solely for this refinement; the original import's backend release remains a separate prerequisite. No migration or private identity upload. Deployment and signed-in paid-provider smoke are not claimed by automated mocks.
