@@ -33,3 +33,6 @@
 /* Cooldowns remain readable while the action itself is unavailable. */
 .hunter-cooldowns button:disabled{opacity:1;background:#151616;color:#b4a99a;border-color:#4b4138}
 .hunter-cooldowns button:disabled span,.hunter-cooldowns button:disabled small{color:#a99c8e}
+
+.hunter-ally-health{display:flex;align-items:center;gap:.65rem;min-width:0}.hunter-ally-health>span{font-size:.85rem;color:#e5d8c0}.hunter-ally-health .play-state-stepper{flex-shrink:0}
+.play-workspace .hunter-ally .play-state-control-bar{display:flex;justify-content:space-between}.hunter-ally-health .play-state-stepper{grid-template-columns:44px 2.5rem 44px}

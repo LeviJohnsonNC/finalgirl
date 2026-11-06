@@ -781,6 +781,8 @@ export function playStoryBeats(
       (/^buddy\..+\.status$/.test(key) && value === 'defeated') ||
       (/^victim\./.test(key) && value === 'killed'))) priority = 65;
     if(e.hunterAction&&(['repair','force-mark-x','destroy-ally'].includes(e.hunterAction.command)||e.hunterAction.command==='countdown'&&hunterState(e.moduleData!.changes).phase==='mark-x'||e.hunterAction.command==='ally-health'&&e.hunterAction.value===0))priority=65;
+    if(e.mallAction?.command==='record-card')priority=55;
+    if(e.mallAction?.command==='observe-escape')priority=85;
     if(e.wingardAction && ['craft','trigger'].includes(e.wingardAction.command)) priority=65;
     if(e.wingardAction?.command==='person' && e.wingardAction.boatSaved)priority=75;
     const text = describeEvent(e).replace(/[—–]/g, ',');

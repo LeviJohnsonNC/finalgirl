@@ -123,3 +123,6 @@ This section supersedes the four cooldown controls described above. The repaired
 Block has a newly generated practical-costume photograph: planted stance, bent mechanical forearm braced across the upper chest, no awkward waving hand. Full hood/visor and arm survive widescreen laptop/phone crops. Accepted history drives selection, including reload, Undo and failure retry. This refinement changes neither identity-reference objects nor ending review schemas.
 
 For this refinement only, deploy `generate-death-scene` and `narrate-story` before frontend publication: these validate the stored logs and must recognize the new observation command. The original import's broader backend deployment remains a separate prerequisite. No migration or reference upload.
+
+
+The follow-up control polish adds an explicit Health label immediately before the Mark V Ally's minus/value/plus group, retaining its independent Health and existing title/artwork. This label-only change requires frontend publication; paired Savior log changes have their own function requirements above.

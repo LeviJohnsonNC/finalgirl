@@ -179,6 +179,7 @@ test('Hunter photographic counters, Reboot extra, blank repairs and persistent a
  const bloodlust=summarizePlay(await readLog(page)).bloodlust!;
  await page.getByRole('button',{name:'Decrease Hunter Countdown',exact:true}).click();expect(summarizePlay(await readLog(page)).bloodlust).toBe(bloodlust+1);
  await page.getByRole('button',{name:'Increase Hunter Countdown',exact:true}).click();expect(summarizePlay(await readLog(page)).bloodlust).toBe(bloodlust);
+ await expect(ally.locator('.hunter-ally-health > span')).toHaveText('Health');
  const actionSources=[];
  for(const [action,image] of [['Attack','ally-attack'],['Move','ally-move'],['Block','ally-block']] as const){
   await panel.getByRole('button',{name:action,exact:true}).click();await expect(ally.locator('img')).toHaveAttribute('src',new RegExp(image));
