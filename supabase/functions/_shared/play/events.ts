@@ -309,9 +309,9 @@ export function validMallHistory(log:readonly PlayEvent[]) {
  }
  return true;
 }
-export function canUndoHunter(log:readonly PlayEvent[],target:string) {
+export function canUndoHunter(log:readonly PlayEvent[],target:string,checkCurrentDependencies=true) {
  const e=log.find(e=>e.id===target);
-  if(e?.hunterAction&&['countdown','force-mark-x'].includes(e.hunterAction.command)&&hunterState(e.moduleData!.changes).phase==='mark-x'&&log.slice(log.indexOf(e)+1).some(later=>later.kind==='state'&&later.field==='killerHealth'||later.hunterReference))return false;
+ if(checkCurrentDependencies&&e?.hunterAction&&['countdown','force-mark-x'].includes(e.hunterAction.command)&&hunterState(e.moduleData!.changes).phase==='mark-x'&&log.slice(log.indexOf(e)+1).some(later=>later.kind==='state'&&later.field==='killerHealth'||later.kind==='moment'&&later.momentType==='killer-revived'||later.hunterReference))return false;
  return e?.moduleData?.module!==HUNTER_MODULE || !!e.hunterAction&&hunterParent(summarizePlay(log).entries)===target;
 }
 export function validHunterHistory(log:readonly PlayEvent[]) {
@@ -322,7 +322,9 @@ export function validHunterHistory(log:readonly PlayEvent[]) {
   const entries=summarizePlay(prefix).entries;
   if(target) {
    if(!target.hunterAction)return false;
-   if(event.kind==='undo'&&!canUndoHunter(prefix,target.id))return false;
+   // Replay keeps previously accepted logs readable. The timeline and durable
+   // append boundary apply today's additional arrival-dependency guard.
+   if(event.kind==='undo'&&!canUndoHunter(prefix,target.id,false))return false;
    if(event.kind==='restore') {
     const expected=resolveHunterAction(target.hunterAction,moduleState(entries,HUNTER_MODULE),entries);
     if(!expected||!sameHunterChanges(expected,target.moduleData!.changes))return false;

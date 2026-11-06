@@ -556,3 +556,24 @@ it('initializes the Intruder roster once and preserves empty legacy games',()=>{
     active:'trish','trish.health':6,'baghead.health':6,'zeke.health':6,
   });
 });
+
+import {initialHunter,hunterParent,resolveHunterAction} from '@/lib/play/hunter';
+it('blocks new arrival Undo after Mark X damage while retaining accepted older logs',()=>{
+ const log=[newPlayEvent({kind:'start',saved:0,killed:0,round:1}),newPlayEvent({kind:'state',field:'bloodlust',value:0}),newPlayEvent({kind:'module',moduleData:{module:'hunter',changes:initialHunter()}})];
+ for(const command of ['remove-part','remove-part','remove-part','countdown','countdown'] as const){
+  const entries=summarizePlay(log).entries,hunterAction={command,parent:hunterParent(entries)};
+  log.push(newPlayEvent({kind:'module',hunterAction,moduleData:{module:'hunter',changes:resolveHunterAction(hunterAction,moduleState(entries,'hunter'),entries)!}}));
+ }
+ const arrival=log[log.length-1];log.push(newPlayEvent({kind:'state',field:'killerHealth',value:7}));
+ const undo=newPlayEvent({kind:'undo',target:arrival.id});
+ const {result}=renderHook(useActiveGame);
+ const hunterGame={...game,hunterSetupVersion:1 as const,selection:{...game.selection,killer:'The Hunter'},playEvents:log};
+ act(()=>expect(result.current.save(hunterGame)).toBe(true));
+ act(()=>expect(result.current.appendPlayEvent(game.id,undo)).toBe(false));
+ expect(summarizePlay(result.current.activeGame.playEvents).killerHealth).toBe(7);
+ // This exact history could have been saved by the previous client.
+ act(()=>expect(result.current.save({...hunterGame,playEvents:[...log,undo]})).toBe(true));
+ cleanup();const restored=renderHook(useActiveGame);
+ expect(restored.result.current.activeGame).not.toBeNull();
+ expect(restored.result.current.activeGame.playEvents).toHaveLength(log.length+1);
+});

@@ -146,8 +146,14 @@ describe('Hunter photographed mechanics',()=>{
  });
  it('arrival Undo cannot reset later Mark X Health or invalidate a historical death',()=>{
   const s=session();s.act({command:'damage',value:6});s.act({command:'countdown'});const arrival=s.act({command:'countdown'});
-  expect(canUndoHunter(s.log,arrival.id)).toBe(true);s.log.push(newPlayEvent({kind:'state',field:'killerHealth',value:7}));
-  expect(canUndoHunter(s.log,arrival.id)).toBe(false);expect(validPlayLog([...s.log,newPlayEvent({kind:'undo',target:arrival.id})])).toBe(false);
+  expect(canUndoHunter(s.log,arrival.id)).toBe(true);
+  expect(canUndoHunter([...s.log,newPlayEvent({kind:'killed',quantity:1,hunterReference:true})],arrival.id)).toBe(false);
+  expect(canUndoHunter([...s.log,newPlayEvent({kind:'moment',momentType:'killer-revived',text:'Mark X returned'})],arrival.id)).toBe(false);
+  s.log.push(newPlayEvent({kind:'state',field:'killerHealth',value:7}));
+  expect(canUndoHunter(s.log,arrival.id)).toBe(false);
+  // Older clients allowed this Undo. Preserve accepted history without offering
+  // the unsafe correction in today's timeline/durable append boundary.
+  expect(validPlayLog([...s.log,newPlayEvent({kind:'undo',target:arrival.id})])).toBe(true);
   expect(summarizePlay(s.log).killerHealth).toBe(7);
  });
 
