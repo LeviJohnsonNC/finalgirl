@@ -1,3 +1,4 @@
+import type {MallReview} from './play/sunnydaze.ts';
 import { hunterReviewFacts, type HunterReview } from './play/hunter.ts';
 import type {KonradFate} from './play/konrad.ts';
 export function reviewedCharacterFate(health:number|undefined,review?:{fate:KonradFate},tormentorReview?:{loss:import('./play/tormentor.ts').TormentorLoss}):'survived'|'died'|'unknown' {
@@ -12,12 +13,14 @@ export function characterFate(health?: number): 'survived' | 'died' | 'unknown' 
 }
 
 export function endingFacts(facts: {
+  mallReview?:MallReview;
   hunterReview?:HunterReview;
   tormentorReview?:{loss:import('./play/tormentor.ts').TormentorLoss}; grimlashReview?:{loss:'none'|'unknown'|'skull'|'telluric'}; konradReview?: {fate:KonradFate}; outcome?: 'won' | 'lost'; finalGirlHealth?: number; killerHealth?: number; killer?: {name?:string}|string; poltergeistReview?:{carolynRescued:true|null;floppyAtEscape:true|null;epicRequired:boolean|null;escapeRoute?:'exit'|'helicopter'|null};
 }): string {
   const killer=typeof facts.killer==='string'?facts.killer:facts.killer?.name;
   const healthless=killer==='Poltergeist';
   return [
+    ...(facts.mallReview?[`Reviewed Sunnydaze Savior: ${facts.mallReview.savior}; Health ${facts.mallReview.health??'unrecorded'}; Trust position ${facts.mallReview.trust??'unrecorded'} (0 bottom, 3 highest). Exit reward ${facts.mallReview.exitReward??'unrecorded'}. He is a separate male Ally, never the selected Final Girl or an ordinary Victim. His death means immediate game loss, not the Final Girl’s death. An exited Savior is safe from subsequent on-board effects; his escape does not itself defeat the Killer. Unknown is not absence or death.`]:[]),
     ...(killer==='The Hunter'&&facts.hunterReview?[hunterReviewFacts(facts.hunterReview)]:[]),
     ...(facts.tormentorReview?[`Tormentor reviewed ending: ${facts.tormentorReview.loss}. A trap-terminal loss means the Final Girl died and lost immediately, without Final Health, even if Health is positive or unrecorded. No Escape and Endless Traps losses do not establish death. Preserve observed Health and Victim totals.`]:[]),
     ...(facts.grimlashReview?[`Grimlash Madness loss record: ${facts.grimlashReview.loss}. Skull or Telluric means a game loss, not necessarily physical death, zero Health or a Victim casualty. Unknown is not a loss. Do not invent Children outside Shady Acres.`]:[]),

@@ -1,3 +1,4 @@
+import {mallRules,MALL_PROMPT_CONTEXT} from './sunnydazeRules';
 import { hunterRules, HUNTER_PROMPT_CONTEXT } from './hunterRules';
 import { WINGARD, WINGARD_CRAFTS, WINGARD_EVENTS, WINGARD_STANDARD_ITEMS, WINGARD_SETUPS, WINGARD_SUPPLIES, WINGARD_TERRORS, WINGARD_VISUAL, wingardIngredients, wingardSetupDescription } from '../../../supabase/functions/_shared/play/wingardCatalog';
 import { intruderRules, INTRUDER_PROMPT_CONTEXT } from './intruderRules';
@@ -494,7 +495,7 @@ const slayer: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [hunterRules,tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolfRules, shadyAcres, mortTheTeenageDirtbag, megaBgCon, intruderRules, wingardCottage, falconwood, slayer, marrekRules];
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [mallRules,hunterRules,tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolfRules, shadyAcres, mortTheTeenageDirtbag, megaBgCon, intruderRules, wingardCottage, falconwood, slayer, marrekRules];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -503,6 +504,7 @@ export interface ModulePromptContext {
 }
 
 const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
+ 'Sunnydaze Mall':MALL_PROMPT_CONTEXT,
  'The Hunter': HUNTER_PROMPT_CONTEXT,
   Evomorph: EVOMORPH_PROMPT_CONTEXT,
   'USS Konrad':KONRAD_PROMPT_CONTEXT,

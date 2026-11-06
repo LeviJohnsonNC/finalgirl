@@ -361,3 +361,13 @@ for(const p of hunterPhotos){
 }
 if(images.filter(p=>p.startsWith(hunterDirectory+'/')||p==='src/assets/play/banners/hunter.webp').some(p=>!hunterFiles.has(p)))throw Error('Unmapped Hunter photograph');
 console.log('Verified 17 independent Hunter photographs and 9 chooser thumbnails.');
+
+// Sunnydaze has independent state photographs, never a generic mall fallback.
+const mallDirectory='src/assets/play/photos/sunnydaze';
+const mallPhotos=JSON.parse(readFileSync(join(mallDirectory,'manifest.json'),'utf8'));
+const mallExpected=['savior','header','bart','girl','twisted-bond','lockdown','wet-floors','food-fight','escalators','nerds','chopper-parked','savior-exited','savior-lost','bart-saved','bart-killed','girl-saved','girl-killed','chopper-riding','chopper-destroyed'];
+if(mallPhotos.length!==mallExpected.length||new Set(mallPhotos.map(p=>p.id)).size!==19||mallExpected.some(id=>!mallPhotos.some(p=>p.id===id)))throw Error('Incomplete Mall photographs');
+const mallFiles=new Set(),mallSources=new Set();
+for(const p of mallPhotos){const b=readFileSync(p.file);if(konradWebpDimensions(b).join()!==[p.width,p.height].join()||p.bytes!==b.length||b.length>160*1024||p.nativeWidth<p.width||p.nativeHeight<p.height||createHash('sha256').update(b).digest('hex')!==p.sha256||!/^exec-[a-f0-9-]+\.png$/.test(p.source)||!/^\w{64}$/.test(p.sourceSha256)||mallSources.has(p.source))throw Error('Invalid independent Mall photo '+p.id);mallSources.add(p.source);mallFiles.add(p.file);}
+if(images.filter(p=>p.startsWith(mallDirectory+'/')||p==='src/assets/play/banners/sunnydaze.webp').some(p=>!mallFiles.has(p)))throw Error('Unmapped Mall artwork');
+console.log('Verified 19 independent Sunnydaze Mall photographs.');

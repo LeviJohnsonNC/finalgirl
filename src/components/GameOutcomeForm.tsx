@@ -1,3 +1,4 @@
+import {MALL,MALL_MODULE,mallState,mallFacts} from '@/lib/play/sunnydaze';
 import { hunterState, hunterFacts } from '@/lib/play/hunter';
 import { INTRUDER_MODULE, INTRUDER_ROSTER, intruderFacts } from "@/lib/play/intruders";
 import {tormentorState,type TormentorLoss} from '@/lib/play/tormentor';
@@ -83,7 +84,8 @@ export const GameOutcomeForm = ({
   const fatalGrim=result.killer==='Grimlash'&&grimlashFatal({loss:grimLoss});
   const fatalShip=result.location==='USS Konrad'&&['airlock-loss','explosion-loss'].includes(shipFate);
   const fatalTormentor=result.killer==='The Tormentor'&&!['none','unknown'].includes(tormentorLoss);
-  const fatalEnding=fatalGrim||fatalShip||fatalTormentor;
+  const fatalMall=result.location===MALL&&mallState(moduleState(entries,MALL_MODULE)).savior==='killed';
+  const fatalEnding=fatalMall||fatalGrim||fatalShip||fatalTormentor;
   const isWin = !fatalEnding && reviewedOutcome === 'won';
   const billyState = observed.billy;
 
@@ -122,7 +124,7 @@ export const GameOutcomeForm = ({
   const hasKillerDetails = (isWin && (isPoltergeist || isBerith)) || (!isWin && isOrganism)
     || result.killer==='The Hunter' || isEvomorph || isRatchetLady || isBigBadWolf || isIntruders || isBilly || isGrimlash
     || isShriek || isSlayer || result.killer === 'The Tormentor';
-  const hasLocationDetails = result.location === 'USS Konrad' || result.location === 'Shady Acres' || isFalconwood || isAbbey;
+  const hasLocationDetails = result.location===MALL || result.location === 'USS Konrad' || result.location === 'Shady Acres' || isFalconwood || isAbbey;
 
 
   // Optional observations stay unknown until the player records them.
@@ -443,7 +445,7 @@ export const GameOutcomeForm = ({
           <option value="lost">Lost</option>
         </OutcomeSelect>
         {fatalEnding && <p role="status">Recorded {[
-          fatalShip && 'ship fate', fatalTormentor && 'trap outcome', fatalGrim && 'Harvest Madness',
+          fatalMall && 'Savior death', fatalShip && 'ship fate', fatalTormentor && 'trap outcome', fatalGrim && 'Harvest Madness',
         ].filter(Boolean).join(' and ')} requires a loss. Health and victim totals stay as recorded.</p>}
       </section>
       <div className="outcome-counters" aria-label="Final game totals">
@@ -781,6 +783,7 @@ export const GameOutcomeForm = ({
           </section>}
         </section>}
         {hasLocationDetails && <section className="outcome-modules" aria-labelledby="outcome-location-details">
+          {result.location===MALL&&<section className="outcome-panel outcome-module" aria-label="Mall ending review"><h3>Sunnydaze at the finish</h3><p>{mallFacts(moduleState(entries,MALL_MODULE))}</p></section>}
           <h2 id="outcome-location-details" className="outcome-module-group-title">Location details</h2>
           {result.location === 'USS Konrad' && <section className="outcome-panel outcome-module" aria-label="USS Konrad ending review">
             <h3>Ship ending</h3>

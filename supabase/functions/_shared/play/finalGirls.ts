@@ -1,3 +1,4 @@
+import {mallUnlocksUltimate} from './sunnydaze.ts';
 import { grimlashState, grimlashHealthBonus, type GrimlashEntry } from './grimlash.ts';
 /** Owner photographs IMG_9327 (starting faces) and IMG_9326 (Ultimate faces),
  * verified 2026-10-21. Factual paraphrases; secret items deliberately live only
@@ -67,7 +68,7 @@ export function observedFinalGirlMaxHealth(name: string, events: readonly (Griml
     if (event.kind === 'undo' && event.target) undone.add(event.target);
     if (event.kind === 'restore' && event.target) undone.delete(event.target);
   }
-  const flipped = events.some(event => event.kind === 'moment' && event.momentType === 'ultimate-unlocked' && !undone.has(event.id));
+  const flipped = mallUnlocksUltimate(events.filter(e=>!undone.has(e.id))) || events.some(event => event.kind === 'moment' && event.momentType === 'ultimate-unlocked' && !undone.has(event.id));
   const base=flipped ? getFinalGirlReference(name)?.ultimateHealth ?? startingHealth : startingHealth;
   return base+(killer==='Grimlash'?grimlashHealthBonus(grimlashState(events.filter(e=>!undone.has(e.id)))):0);
 }

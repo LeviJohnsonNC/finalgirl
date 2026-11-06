@@ -1,3 +1,4 @@
+import {MALL,MALL_MODULE,initialMall,resolveMallAction,mallParent} from '@/lib/play/sunnydaze';
 import { HUNTER, HUNTER_MODULE, initialHunter, resolveHunterAction, hunterParent, hunterState } from '@/lib/play/hunter';
 import { canUndoHunter, sameHunterChanges } from '@/lib/play/events';
 import { WINGARD, WINGARD_MODULE } from '../../supabase/functions/_shared/play/wingardCatalog';
@@ -64,6 +65,7 @@ export function useActiveGame() {
       if (isPermanentMoment(event) && summarizePlay(previous.playEvents).entries.some(entry => entry.kind === 'moment' && entry.momentType === event.momentType)) return previous;
       const log = previous.playEvents ?? [];
       if(event.kind==='undo'&&!canUndoWingard(log,event.target!))return previous;
+      if((event.moduleData?.module===MALL_MODULE&&(!event.mallAction||previous.selection.location!==MALL))||(event.mallReference&&previous.selection.location!==MALL))return previous;
       if(event.moduleData?.module===WINGARD_MODULE && (previous.selection.location!==WINGARD || !event.wingardAction))return previous;
       if(event.wingardReference && previous.selection.location!==WINGARD)return previous;
       if(event.kind==='undo'&&!canUndoMarrek(log,event.target!))return previous;
@@ -104,6 +106,7 @@ export function useActiveGame() {
       let accepted = event.kind === "killed"
         ? {...event,...(isHunter && {hunterReference:true as const}),...(isIntruders && {intruderReference:true as const}),...(isWolf && {wolfReference:true as const}),...(previous.selection.location === WOODS && {woodsReference:true as const})}
         : event;
+      if(event.kind==='killed'&&previous.selection.location===MALL)accepted={...accepted,mallReference:true};
       if(event.kind==='killed' && previous.selection.location===WINGARD)accepted={...accepted,wingardReference:true};
       if(previous.selection.killer==='Poltergeist' && ((event.kind==='state'&&event.field==='killerHealth') || (event.kind==='moment'&&event.momentType==='killer-revived'))) return previous;
       if (event.moduleData?.module === 'groves' && previous.selection.location !== 'Sacred Groves') return previous;
@@ -145,6 +148,7 @@ export function useActiveGame() {
       if (log.length === 0 && freshWolf) {
         setup.push(newPlayEvent({ kind: "module", moduleData: { module: "big-bad-wolf", changes: { mode: "track" } } }));
       }
+      if(!log.length&&previous.mallSetupVersion===1&&previous.selection.location===MALL)setup.push(newPlayEvent({kind:'module',moduleData:{module:MALL_MODULE,changes:initialMall(previous.selection.startingEvent)}}));
       const freshHunter=isHunter&&previous.hunterSetupVersion===1;
       if(!log.length&&freshHunter)setup.push(newPlayEvent({kind:'module',moduleData:{module:HUNTER_MODULE,changes:initialHunter()}}));
       const freshIntruders=isIntruders && previous.intrudersSetupVersion===1;
@@ -230,6 +234,7 @@ export function useActiveGame() {
         accepted={...event,evomorphAction:request,moduleData:{module:'evomorph',changes}};
         if(request.command==='evolve'&&changes.stage==='adult'&&!entries.some(e=>e.kind==='moment'&&e.momentType==='dark-power'))reveal.push(newPlayEvent({kind:'moment',momentType:'dark-power',permanent:true,text:'Dark Power revealed'}));
       }
+      if(event.mallAction){const entries=summarizePlay([...log,...baseline,...setup]).entries;const action=!log.length&&previous.mallSetupVersion===1&&event.mallAction.parent==='root'?{...event.mallAction,parent:mallParent(entries)}:event.mallAction;const changes=resolveMallAction(action,moduleState(entries,MALL_MODULE),entries);if(!changes||(log.length&&!sameHunterChanges(changes,event.moduleData!.changes)))return previous;accepted={...event,mallAction:action,moduleData:{module:MALL_MODULE,changes}};}
       if(event.hunterAction) {
         const entries=summarizePlay([...log,...baseline,...setup]).entries;
         const action=!log.length&&freshHunter&&event.hunterAction.parent==='root'?{...event.hunterAction,parent:hunterParent(entries)}:event.hunterAction;
@@ -255,6 +260,7 @@ export function useActiveGame() {
       if([...log,...additions].some(e=>e.moduleData?.module==='shady-acres')&&!validPlayLog([...log,...additions]))return previous;
       if([...log,...additions].some(e=>e.moduleData?.module==='grimlash')&&!validPlayLog([...log,...additions]))return previous;
       if((event.konradAction||event.kind==='undo'||event.kind==='restore')&&[...log,...additions].some(e=>e.moduleData?.module==='konrad')&&!validPlayLog([...log,...additions]))return previous;
+      if(previous.selection.location===MALL&&!validPlayLog([...log,...additions]))return previous;
       if(isHunter&&!validPlayLog([...log,...additions]))return previous;
       applied = true;
       return { ...previous, playEvents: [...log, ...additions] };

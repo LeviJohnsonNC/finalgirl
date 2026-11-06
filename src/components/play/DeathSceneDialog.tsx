@@ -1,3 +1,5 @@
+import {MALL} from '@/lib/play/sunnydaze';
+import {mallArt} from './mallArt';
 import { HUNTER, hunterState } from '@/lib/play/hunter';
 import { moduleState as hunterModuleState } from '@/lib/play/modules';
 import { summarizePlay as hunterSummary } from '@/lib/play/events';
@@ -348,7 +350,7 @@ const {characterImages}=useActiveImages();
                     }
                   }}
                 >
-                  {selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
+                  {selection.location===MALL&&cause==='hazard'?<ModuleArtwork art={mallArt('wet-floors')}/>:selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
                     :cause==='event'&&cottageEvent ? <ModuleArtwork art={wingardArt(cottageEvent.id,true)} />
                     :selection.killer===INTRUDERS&&cause==='killer'
                     ? <ModuleArtwork art={intruderArt(INTRUDER_ROSTER.find(p=>p.name===values.attacker)?.id??'header')} />

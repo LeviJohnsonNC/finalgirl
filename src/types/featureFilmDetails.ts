@@ -1,3 +1,4 @@
+import {MALL_SETUPS,MALL_EVENTS} from '../../supabase/functions/_shared/play/sunnydazeCatalog';
 import { WINGARD_EVENTS, WINGARD_SETUPS, wingardSetupDescription } from '../../supabase/functions/_shared/play/wingardCatalog';
 import { WOODS, WOODS_VISUAL, WOODS_EVENTS, WOODS_SETUPS, woodsSetupDescription } from "../../supabase/functions/_shared/play/storybookWoods";
 import {MARREK_EVENTS,MARREK_SETUPS,MARREK_SPACES,MARREK_VISUAL} from '../../supabase/functions/_shared/play/marrekWarehouse';
@@ -293,25 +294,8 @@ Tali's nose for caution, combined with her street smarts, means that she's a for
       description: `Welcome to the ultimate shopping experience! Step into the heart of fashion, excitement, and endless possibilities! Introducing Sunnydaze Mall, your premiere shopping destination!
 
 Sunnydaze has the latest trends in fashion, state-of-the-art electronics, and a wide variety of culinary delights… all under one roof! Sunnydaze… where every day is filled with sunshine and joy!`,
-      setupCards: [
-        { name: 'Foodcourt Faceoff', description: 'A setup for The Killer from Tomorrow featuring initial victim and token placement in the food court area.' },
-        { name: 'Special Delivery', description: 'A setup for The Killer from Tomorrow featuring initial victim and token placement.' },
-        { name: 'High Score!', description: 'A setup for The Killer from Tomorrow featuring initial victim and token placement in the arcade area.' },
-        { name: 'Family Dinner', description: 'A setup for The Killer from Tomorrow featuring initial victim and token placement.' },
-        { name: 'Black Friday', description: 'A setup for The Killer from Tomorrow featuring chaotic initial victim and token placement throughout the mall.' }
-      ],
-      events: [
-        { name: 'Food Fight!', description: 'If you are an ally, or an enemy enters the food court, they receive damage if there is at least 1 victim in either Food Court space.' },
-        { name: 'Bart the Mall Cop', description: 'Place Bart the Mall Cop in Security. He will move around the spaces surrounding the food court.' },
-        { name: 'Wet Floors', description: 'Whenever a victim in a railing space panics, roll twice and apply the lower result.' },
-        { name: 'Lockdown!', description: 'Both door spaces are sealed off. You can remove this by going to Security.' },
-        { name: 'Flash Mob!', description: 'Place 6 new victims in the food court, then panic all victims in the food court.' },
-        { name: 'Rise of the Nerds!', description: 'Place a new Victim at both Boards \'n Bones and Joystick Heroes.' },
-        { name: 'Fire Sale!', description: 'Move all victims that are adjacent to a store into the store.' },
-        { name: 'Busted Escalators', description: 'Lose 2 time when moving through an escalator.' },
-        { name: 'The Savior\'s Girl', description: 'The victim closest to the savior is now the savior\'s girl.' },
-        { name: 'Renovations', description: 'Destroy a wall on one of the stores.' }
-      ]
+      setupCards: MALL_SETUPS.map(c=>({name:c.name,description:`Final Girl: ${c.girl}. Killer: ${c.killer}. Savior: ${c.savior}. Use the printed Setup for Victim placements.`})),
+      events:MALL_EVENTS.map(c=>({name:c.name,description:c.effect}))
     },
     killer: {
       name: 'The Hunter',

@@ -15,6 +15,7 @@ const DEFAULT_SETTINGS: ImageSettings = {
 };
 
 export interface GenerateImageContext {
+  mallReview?:import('@/lib/play/sunnydaze').MallReview;
   hunterReview?:import('@/lib/play/hunter').HunterReview;
   marrekOpening?:import('../../supabase/functions/_shared/play/marrekWarehouse').MarrekOpening;
   tormentorOpening?:import('../../supabase/functions/_shared/play/tormentor').TormentorOpening;
