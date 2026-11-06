@@ -2,7 +2,7 @@
 
 ## Scope and status
 
-Owner: **The Hunter**, killer module `hunter`, existing film `s3-killer-from-tomorrow` (The Killer from Tomorrow). Branch `feat/hunter-module`. Standard supplied killer board, booklet, Ally, four Powers, three Finales and complete Terror batch. Sunnydaze Mall mechanics, Kat/Tali ability/personal-item imports, alternate/Extreme rules and unprovided token faces are outside this killer import.
+Owner: **The Hunter**, killer module `hunter`, existing film `s3-killer-from-tomorrow` (The Killer from Tomorrow). Original import branch `feat/hunter-module`; current refinement branch `codex/hunter-play-refinement`. Standard supplied killer board, booklet, Ally, four Powers, three Finales and complete Terror batch. Sunnydaze Mall mechanics, Kat/Tali ability/personal-item imports, alternate/Extreme rules and unprovided token faces are outside this killer import.
 
 The three preliminary commits (`b7f06a9`, `4f93d9d`, `7dcd33a`) changed only canonical Hunter Health, narrative baseline and starting Horror. Retained them and built the module on that branch. Presentation follows MODULE_STANDARD, MODULE_IMPORT_PLAYBOOK and current shared capabilities. Local verification and final-head CI status are recorded below; production upload/deployment and signed-in provider smoke tests remain separate release work.
 
@@ -83,3 +83,35 @@ No migration. Before publishing the new frontend:
 4. Signed-in production smoke: opening with Hunter and a mixed location, save/reload, Part shutdown/arrival/repair, contextual death/cache/narration, ending prose and model-aware painted poster. A missing reference fails closed and is a release blocker, not permission to invent a substitute.
 
 These objects/functions/frontend have not been deployed by this implementation task. Merge, final-head CI, deployment and live provider verification are distinct. Remaining release steps above are explicit.
+
+
+## Approved Play refinement — 2026-11-06 (current presentation)
+
+This section supersedes the original paired-model, damage-form and text-Part presentation above. Levi approved direct Parts/Countdown controls, four Mark V part-state images, one active-model widescreen hero, clickable component photographs, and a separate repaired Ally with action-specific photographs. Reboot extras beyond the initial three and activation only after an installed token grants Health are explicitly approved.
+
+### Current behavior and scope
+
+- Top tracker uses Parts minus/value/plus while Mark V is active. Minus observes one completed removal, not one damage; physical damage thresholds and Minor damage stay player-resolved. Plus resolves a new hidden Reboot Part and never consumes/relabels detached or installed Parts. Counts above three retain intact art and the actual value. Old partial-damage commands remain replay-compatible; a quiet clear action appears only for existing unfinished damage.
+- Last removal atomically records shutdown and exposes Countdown 2. Countdown minus observes one Killer-phase step and adds Bloodlust; plus reverses a recorded step's actual delta, including zero at the cap, while preserving independent repairs and unknown Bloodlust. No phase timer/round automation is introduced. Unknown recovered countdown history cannot invent a reversal. Arrival switches once to Mark X at 15 Health; dependent Mark X Health/death observations prevent unsafe arrival Undo.
+- Natural arrival leaves Finale unrevealed. A quiet Resolve Mark X Terror action retains the exact separate forced transition, Minor transfer and Finale reveal. The removed screenshot-1 damage/form/Terror block does not return. Mark X's conditional four-Health System Reboot remains a quiet action.
+- One hero shows Mark V, then Mark X, with only the model name. During Countdown it shows shut-down Mark V. A repaired Ally can exist during Countdown and never implies early Mark X arrival.
+- Each removed Part exposes a stable picture card: dim Uncollected, coloured Collected, then a different Installed photo. Pickup and installation each still cost one physical Time at their legal spaces; the app does not pay Time or infer movement. Installation records the actual printed token Health, including zero, with Bio Tissue's bonus exactly once.
+- Blank tokens are consumed/installed even if no Health is granted. Without a bonus, Mark V remains unrepaired and can accept another token; it is not permanently destroyed. First positive total activates the Ally and initializes cubes. Further repairs preserve occupied cooldowns. An activated Ally reaching zero is permanently destroyed and cannot act or be repaired again. Designer clarification: https://boardgamegeek.com/thread/3450465/repairing-the-mark-v-cybernetic-part-tokens . Token faces/values remain physically revealed rather than invented.
+- Ally has a separate photograph and Health strip. Four compact controls retain Attack, both independently cooled Moves and Block (reduce incoming damage by one, deal one back). Both moves share action art; the latest accepted use event selects Attack/Move/Block art until another action is recorded. Upkeep and repair never reset that picture; reload/Undo derive it from accepted history without adding a redundant saved field.
+- Existing named cards, opening/private-reference objects, death signatures, mixed ownership and painted ending posters retain their integration. New commands and zero-token parsing live in the browser/server shared domain; unchanged old initial snapshots remain valid. No database migration or identity-reference upload is required.
+
+### Artwork and verification
+
+Fifteen new independent photographs cover three damaged/shutdown stages, four detached/installed component pairs and four Ally poses. The approved intact image supplies the fourth Mark V state. Existing Mark X and destroyed-Mark-V photographs are retained. Full prompt descriptions, exact generated source IDs/digests and bounded derivatives are in the Hunter art README/manifest. All model cards stay widescreen on phones; inactive dimming is used only for uncollected components, never to substitute for a requested physical state.
+
+Domain expectations explicitly cover direct removals/Reboot extras, unknown/capped/manual Bloodlust with linked countdown reversal, zero-token and Bio Tissue activation, independent repairs/cooldowns and arrival Undo safety. Browser evidence covers normal/forced lifecycle, legacy recovery, all 12 locations, durable write failure/offline/reload, both reveal entry points, death/cache/narration and ending context. New photographic journeys additionally assert all four part-count pictures, blank-token activation gating, distinct extra-Part artwork, installed-state photos, persistent action selection and unchanged Mark X Health when adjusting Ally Health. Screenshots inspect 1280×640, 1366×768, 1440×900, 390×844 and 320×568.
+
+### Release requirements
+
+Backend-before-frontend remains required: deploy the affected shared validation graph in `generate-story`, `generate-ending`, `generate-scene-image`, `generate-visual-bible`, `generate-death-scene` and `narrate-story`, then publish frontend through the established Lovable flow. No schema migration and no changed private identity object. CI/PR, deployment and signed-in provider verification are separate; the current task does not claim live deployment or live paid-provider validation without evidence.
+
+Local refinement gates: `npm run check` passed (995 frontend/domain tests, 142 Node edge tests; typecheck/lint passed with 11 pre-existing fast-refresh warnings). `npm run check:assets` passed all 32 Hunter originals and nine chooser thumbnails, plus the rest of the catalog. Production build passed. 42 Hunter and Sunnydaze desktop/mobile browser journeys pass, including the dedicated blank-token, action-art, fourth-Part and independent-Allies cases. Automated provider calls remain mocked.
+
+Actual visual review found and corrected a wrist-installation image incorrectly placed at the shoulder and insufficient contrast on disabled cooldown labels. Reviewed the loaded component cards, part-count tracker crops, shutdown, installed states, idle/Attack/Move/Block and destroyed Ally, plus Mark X/named-card integration on laptop and phone. No requested mechanic or image is a placeholder. Direct Git push and Supabase deployment credentials are not available in this execution environment; code/asset publication uses the connected GitHub integration. Production backend/frontend deployment and signed-in live generation remain release checks.
+
+Final compatibility review also verifies that historical logs containing an Undo accepted by the old client remain loadable. Current timeline/durable append guards reject a new arrival Undo after recorded Mark X Health, revival or a contextual death. The additional hook test exercises both the rejected new write and reload of the old accepted history.

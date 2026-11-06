@@ -4,3 +4,32 @@
 /* Four shield hearts must retain 44px targets inside the compact zero state. */
 .play-hunter .play-health-tokens{flex-wrap:wrap}
 .play-hunter .play-health-tokens>button{flex:0 0 auto;min-width:44px}
+/* Hunter counter/parts/ally refinement: preserve widescreen frames at every size. */
+.play-hunter>.hunter-model{width:100%}
+.play-hunter .hunter-model-photo{aspect-ratio:16/9}
+.hunter-core .play-state-stepper>strong,.hunter-ally .play-state-stepper>strong{min-width:2.5rem;text-align:center;font-size:1.1rem;color:#f0e4cf}
+.hunter-core .play-state-stepper,.hunter-ally .play-state-stepper{align-items:center}
+.hunter-core .play-state-title{font-size:.85rem}
+.hunter-core .play-module-error{padding:.5rem}
+.hunter-quiet-actions{display:flex;gap:.5rem 1rem;flex-wrap:wrap}
+.hunter-parts-list{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+.play-hunter .hunter-part{display:block;padding:0;overflow:hidden;border-radius:5px;background:#121313}
+.hunter-part .play-illustrated-tile{position:relative;width:100%;aspect-ratio:16/9;border:0;overflow:hidden;display:block;background:#121313}
+.hunter-part .play-module-art{position:absolute;inset:0;width:100%;height:100%}
+.hunter-part .play-illustrated-tile::after{content:'';position:absolute;inset:0;background:linear-gradient(transparent 35%,#050607eb)}
+.hunter-part .play-tile-caption{z-index:1;text-align:left}
+.play-hunter .hunter-part .play-illustrated-tile:disabled{opacity:1;cursor:default}
+.hunter-part[data-status=on-board] .play-module-art{filter:grayscale(1) brightness(.38)}
+.hunter-part>.module-unnamed{margin:0 .65rem}
+.hunter-repair{padding:.75rem;gap:.5rem}
+.hunter-repair p{margin:0}
+.hunter-ally .play-state-control-bar{padding:.6rem .8rem;position:relative;flex-wrap:wrap;gap:.5rem}
+.hunter-ally-actions{display:grid;gap:.75rem;min-width:0}
+.hunter-cooldowns{grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem;margin:0}
+.hunter-cooldowns .hunter-action{padding:.65rem;min-width:0;overflow-wrap:anywhere}
+.hunter-cooldowns small{color:#d4c4ac}
+@media(max-width:750px){.hunter-parts-list{grid-template-columns:repeat(2,minmax(0,1fr))}.hunter-cooldowns{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){.play-hunter .hunter-model-photo{aspect-ratio:16/9}.hunter-parts-list{grid-template-columns:minmax(0,1fr)}.hunter-ally .play-state-control-bar{padding:.6rem}}
+/* Cooldowns remain readable while the action itself is unavailable. */
+.hunter-cooldowns button:disabled{opacity:1;background:#151616;color:#b4a99a;border-color:#4b4138}
+.hunter-cooldowns button:disabled span,.hunter-cooldowns button:disabled small{color:#a99c8e}

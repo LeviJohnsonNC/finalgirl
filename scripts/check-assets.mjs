@@ -349,7 +349,7 @@ if(images.filter(file=>file.startsWith(wingardFolder+'/')||file==='src/assets/pl
 // Hunter's distinct model states and named cards must all have independent originals.
 const hunterDirectory='src/assets/play/photos/hunter';
 const hunterPhotos=JSON.parse(readFileSync(join(hunterDirectory,'manifest.json'),'utf8'));
-const hunterExpected=['header','mark-v','mark-v-shutdown','mark-v-ally','mark-v-destroyed','mark-x','titanium-tissue','cybernetic-agility','reinforced-endoskeleton','minigun','relentless-pursuit','termination-mode','adaptive-ai','titanium-shield','advanced-ai','counter-measures','shock-awe'];
+const hunterExpected=['header','mark-v','mark-v-shutdown','mark-v-ally','mark-v-destroyed','mark-x','titanium-tissue','cybernetic-agility','reinforced-endoskeleton','minigun','relentless-pursuit','termination-mode','adaptive-ai','titanium-shield','advanced-ai','counter-measures','shock-awe','mark-v-parts-2','mark-v-parts-1','mark-v-parts-0','part-1','part-2','part-3','part-1-installed','part-2-installed','part-3-installed','ally-idle','ally-attack','ally-move','ally-block','part-4','part-4-installed'];
 if(hunterPhotos.length!==hunterExpected.length||new Set(hunterPhotos.map(p=>p.id)).size!==hunterExpected.length||hunterExpected.some(id=>!hunterPhotos.some(p=>p.id===id)))throw Error('Incomplete Hunter photograph manifest');
 const hunterFiles=new Set(),hunterSources=new Set();
 for(const p of hunterPhotos){
@@ -360,7 +360,7 @@ for(const p of hunterPhotos){
  if(p.thumbnail){const t=readFileSync(p.thumbnail.file);if(t.length>35*1024||t.length!==p.thumbnail.bytes||createHash('sha256').update(t).digest('hex')!==p.thumbnail.sha256||konradWebpDimensions(t).join()!=='288,162')throw Error('Invalid Hunter thumbnail '+p.id);hunterFiles.add(p.thumbnail.file);}
 }
 if(images.filter(p=>p.startsWith(hunterDirectory+'/')||p==='src/assets/play/banners/hunter.webp').some(p=>!hunterFiles.has(p)))throw Error('Unmapped Hunter photograph');
-console.log('Verified 17 independent Hunter photographs and 9 chooser thumbnails.');
+console.log('Verified 32 independent Hunter photographs and 9 chooser thumbnails.');
 
 // Sunnydaze has independent state photographs, never a generic mall fallback.
 const mallDirectory='src/assets/play/photos/sunnydaze';

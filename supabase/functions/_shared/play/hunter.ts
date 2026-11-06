@@ -41,7 +41,7 @@ export const HUNTER_ACTIONS = [
  {id:'react',name:'Reduce attack by 1 · deal 1 damage',cooldown:2},
 ] as const;
 type Fields=Record<string,string|number|boolean|null>;
-type Entry={id?:string;kind:string;momentType?:string;killerCard?:string;moduleData?:{module:string;changes:Fields}};
+type Entry={id?:string;kind:string;field?:string;value?:number|null;momentType?:string;killerCard?:string;hunterAction?:{command:string};moduleData?:{module:string;changes:Fields}};
 export type HunterPart={id:number;status:'on-board'|'backpack'|'installed';health:number|null};
 export interface HunterState {
  phase:'unknown'|'mark-v'|'countdown'|'mark-x';
@@ -58,7 +58,7 @@ export function parseHunter(value:unknown):HunterState|null {
  try {const s=JSON.parse(value) as HunterState;
  if(!s||!['unknown','mark-v','countdown','mark-x'].includes(s.phase)||!['unknown','unrepaired','alive','destroyed'].includes(s.ally)||typeof s.forced!=='boolean')return null;
  if(!['remaining','countdown','damage','allyHealth'].every(k=>s[k as keyof HunterState]===null||n(s[k as keyof HunterState],0,k==='countdown'?2:99)))return null;
- if(!Array.isArray(s.parts)||s.parts.length>20||s.parts.some(p=>!p||!n(p.id,1,99)||!['on-board','backpack','installed'].includes(p.status)||(p.health!==null&&!n(p.health,1,99)))||new Set(s.parts.map(p=>p.id)).size!==s.parts.length)return null;
+ if(!Array.isArray(s.parts)||s.parts.length>20||s.parts.some(p=>!p||!n(p.id,1,99)||!['on-board','backpack','installed'].includes(p.status)||(p.health!==null&&!n(p.health,0,99)))||new Set(s.parts.map(p=>p.id)).size!==s.parts.length)return null;
  if(!s.cooldowns||Object.keys(s.cooldowns).length!==4||HUNTER_ACTIONS.some(a=>s.cooldowns[a.id]!==null&&!n(s.cooldowns[a.id],0,a.cooldown)))return null;
  if(s.ally==='alive'&&(!n(s.allyHealth,1)||s.phase==='mark-v'))return null;
  if(s.ally==='destroyed'&&s.allyHealth!==0)return null;
@@ -67,6 +67,25 @@ export function parseHunter(value:unknown):HunterState|null {
 }
 export const hunterState=(fields:Fields):HunterState=>parseHunter(fields.snapshot)??unknownHunter();
 export const hunterParent=(entries:readonly Entry[])=>[...entries].reverse().find(e=>e.moduleData?.module===HUNTER_MODULE)?.id??'root';
+/** Replay only Hunter-linked Bloodlust steps; unrelated manual observations stay independent. */
+export function hunterCountdownReversal(entries:readonly Entry[]) {
+ let bloodlust:number|undefined;
+ const steps:Array<{id:string;delta:number|undefined}>=[];
+ for(const e of entries){
+  if(e.kind==='state'&&e.field==='bloodlust')bloodlust=e.value??undefined;
+  if(e.moduleData?.module!==HUNTER_MODULE)continue;
+  if(e.hunterAction?.command==='countdown'){
+   const next=bloodlust===undefined?undefined:Math.min(10,bloodlust+1);
+   steps.push({id:e.id!,delta:next===undefined||bloodlust===undefined?undefined:next-bloodlust});bloodlust=next;
+  }else if(e.hunterAction?.command==='countdown-back'){
+   const step=steps.pop();if(bloodlust!==undefined&&step?.delta!==undefined)bloodlust=Math.max(0,bloodlust-step.delta);
+  }else if(e.hunterAction?.command==='force-mark-x'){
+   // Forced arrival ends the countdown correction journey.
+   steps.length=0;
+  }
+ }
+ return steps[steps.length-1];
+}
 export function hunterCard(entries:readonly Entry[],type:'dark-power'|'finale') {return entries.find(e=>e.kind==='moment'&&e.momentType===type)?.killerCard;}
 export const hunterHasReveal=(s:HunterState,type:string)=>type==='dark-power'&&['countdown','mark-x'].includes(s.phase)||type==='finale'&&s.forced;
 export const hunterMinorField=(id:string)=>`minor.${id}`;
@@ -79,7 +98,7 @@ export function validHunterField(key:string,value:unknown) {
 export type HunterAction={parent:string}&(
  |{command:'damage';value:number}
  |{command:'record-part';status:'on-board'|'backpack'}
- |{command:'end-action'|'countdown'|'force-mark-x'|'reboot'|'upkeep'|'destroy-ally'}
+ |{command:'end-action'|'remove-part'|'countdown'|'countdown-back'|'force-mark-x'|'reboot'|'upkeep'|'destroy-ally'}
  |{command:'pickup'|'drop';part:number}
  |{command:'repair';part:number;value:number}
  |{command:'ally-health';value:number}
@@ -95,7 +114,7 @@ export function validHunterAction(v:unknown):v is HunterAction {
  switch(a.command){
  case 'record-part':return a.status==='on-board'||a.status==='backpack';
  case 'damage':return n(a.value,1);
- case 'repair':return n(a.part,1)&&n(a.value,1);
+ case 'repair':return n(a.part,1)&&n(a.value);
  case 'pickup':case 'drop':return n(a.part,1);
  case 'ally-health':return n(a.value);
  case 'cooldown':return HUNTER_ACTIONS.some(c=>c.id===a.action&&n(a.value,0,c.cooldown));
@@ -103,7 +122,7 @@ export function validHunterAction(v:unknown):v is HunterAction {
  case 'minor':return HUNTER_MINORS.some(c=>c.id===a.card&&(a.value===null||n(a.value,0,c.health)));
  case 'effect':return ['counterMeasures','shockAwe'].includes(a.key)&&typeof a.value==='boolean';
  case 'recover':return ['mark-v','countdown','mark-x'].includes(a.phase)&&n(a.remaining,0,20)&&n(a.countdown,0,2)&&['unrepaired','alive','destroyed'].includes(a.ally)&&n(a.health);
- default:return ['end-action','countdown','force-mark-x','reboot','upkeep','destroy-ally'].includes(a.command);
+ default:return ['end-action','remove-part','countdown','countdown-back','force-mark-x','reboot','upkeep','destroy-ally'].includes(a.command);
  }
 }
 export function resolveHunterAction(a:HunterAction,fields:Fields,entries:readonly Entry[]):Fields|undefined {
@@ -127,14 +146,20 @@ export function resolveHunterAction(a:HunterAction,fields:Fields,entries:readonl
   s.remaining-=removed;s.damage=s.remaining?damage%threshold:0;
   if(!s.remaining)s.phase='countdown';
   break;}
+ case 'remove-part':
+  if(s.phase!=='mark-v'||s.remaining===null||s.remaining<1)return;
+  s.parts.push({id:Math.max(0,...s.parts.map(p=>p.id))+1,status:'on-board',health:null});
+  s.remaining--;if(!s.remaining){s.phase='countdown';s.damage=0;}break;
  case 'end-action':if(s.damage===null||s.damage===0)return;s.damage=0;break;
  case 'countdown':if(s.phase!=='countdown'||s.countdown===null||s.countdown===0)return;s.countdown--;if(!s.countdown)s.phase='mark-x';break;
+ case 'countdown-back':if(s.phase!=='countdown'||s.countdown!==1||!hunterCountdownReversal(entries))return;s.countdown++;break;
  case 'force-mark-x':if(s.forced||s.phase==='unknown')return;if(s.phase==='mark-v'&&!drop())return;s.phase='mark-x';s.countdown=0;s.forced=true;break;
  case 'reboot':if(s.phase==='mark-x')return {rebootCount:Number(fields.rebootCount??0)+1};if(s.phase!=='mark-v'||s.remaining===null||s.remaining>=20)return;s.remaining++;break;
  case 'pickup':{const p=s.parts.find(p=>p.id===a.part);if(!p||p.status!=='on-board')return;p.status='backpack';break;}
  case 'drop':{const p=s.parts.find(p=>p.id===a.part);if(!p||p.status!=='backpack')return;p.status='on-board';break;}
  case 'repair':{const p=s.parts.find(p=>p.id===a.part);if(!p||p.status!=='backpack'||s.phase==='mark-v'||s.ally==='destroyed'||s.ally==='unknown'||s.allyHealth===null||s.allyHealth+a.value+(power===HUNTER_POWERS[0].name?1:0)>99)return;
- const firstRepair=s.ally==='unrepaired';p.status='installed';p.health=a.value;s.ally='alive';if(firstRepair)s.cooldowns=Object.fromEntries(HUNTER_ACTIONS.map(a=>[a.id,0]));s.allyHealth+=a.value+(power===HUNTER_POWERS[0].name?1:0);break;}
+ const firstRepair=s.ally==='unrepaired';p.status='installed';p.health=a.value;s.allyHealth+=a.value+(power===HUNTER_POWERS[0].name?1:0);
+ if(s.allyHealth>0){s.ally='alive';if(firstRepair)s.cooldowns=Object.fromEntries(HUNTER_ACTIONS.map(a=>[a.id,0]));}break;}
  case 'ally-health':if(s.ally!=='alive'||a.value===s.allyHealth)return;s.allyHealth=a.value;if(!a.value)s.ally='destroyed';break;
  case 'destroy-ally':if(s.phase==='mark-v'||s.ally==='destroyed'||s.ally==='unknown')return;s.ally='destroyed';s.allyHealth=0;break;
  case 'cooldown':if(s.ally!=='alive'||s.cooldowns[a.action]!==null)return;s.cooldowns[a.action]=a.value;break;
@@ -169,8 +194,10 @@ export function describeHunterAction(a:HunterAction,fields:Fields):string {
  switch(a.command){
  case 'record-part':return `Recorded an existing Cybernetic Part · ${a.status}`;
  case 'damage':return `Applied ${a.value} damage to Mark V Parts${s.phase==='countdown'?' · Mark V shut down':''}`;
+ case 'remove-part':return `Removed one Mark V Part${s.phase==='countdown'?' · Mark V shut down':''}`;
  case 'end-action':return 'Ended phase · cleared unfinished Part damage';
  case 'countdown':return s.phase==='mark-x'?'Removed last Countdown token · Mark X arrived':'Removed one Countdown token';
+ case 'countdown-back':return 'Restored one Countdown token · reversed its Bloodlust change';
  case 'force-mark-x':return 'Resolved Hunter Mark X Terror · Finale revealed';
  case 'pickup':return `Retrieved Cybernetic Part ${a.part}`;
  case 'drop':return `Dropped Cybernetic Part ${a.part}`;
