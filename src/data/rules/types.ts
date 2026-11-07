@@ -5,7 +5,7 @@ export type RuleBlock =
   | { type: 'callout'; variant?: 'note' | 'critical' | 'designer' | 'tip'; title?: string; text: string }
   | { type: 'heading'; level: 2 | 3; text: string }
   | { type: 'example'; title: string; text: string }
-  | { type: 'table'; headers: string[]; rows: string[][] };
+  | { type: 'table'; headers: string[]; rows: string[][]; modalLayout?: 'comparison' | 'records' | 'placements' };
 
 export interface RuleSection {
   id: string;

@@ -59,11 +59,11 @@ const grimlash: EntityRuleModule = {
   ],
   rules: [
     {type:'paragraph',text:'Standard board: Grimlash starts with 10 Health and Horror 4. Bloodlust has nine positions, 0–8. Its overflow discards the next Terror card. Harvest Madness positions 0–2 are Level 0; 3–4 Level 1; 5–6 Level 2; 7–9 Level 3; 10 is the fatal skull. These indices describe physical spaces, not printed numbers.'},
-    {type:'table',headers:['Bloodlust position','Attack','Movement','Entry icon'],rows:GRIMLASH_BLOODLUST.map((c,i)=>[String(i),String(c.attack),String(c.move),c.entry])},
+    {type:'table',modalLayout:'comparison',headers:['Bloodlust position','Attack','Movement','Entry icon'],rows:GRIMLASH_BLOODLUST.map((c,i)=>[String(i),String(c.attack),String(c.move),c.entry])},
     {type:'paragraph',text:'Photographed unnamed landscape action face: '+GRIMLASH_ACTIONS.base},
     {type:'table',headers:['Harvest ability','Level','Effect'],rows:GRIMLASH_HARVEST.map(c=>[c.name,String(c.level),c.effect])},
     {type:'table',headers:['Power / Finale / Minor','Effect'],rows:[...GRIMLASH_MINORS,...GRIMLASH_POWERS,...GRIMLASH_FINALES].map(c=>[c.name,c.effect])},
-    {type:'table',headers:['Terror','Copies','Action sequence','Effect'],rows:GRIMLASH_TERRORS.map(c=>[c.name,String(c.quantity),GRIMLASH_ACTIONS[c.id]??'Triggered Minor Dark Power',c.effect])},
+    {type:'table',modalLayout:'records',headers:['Terror','Copies','Action sequence','Effect'],rows:GRIMLASH_TERRORS.map(c=>[c.name,String(c.quantity),GRIMLASH_ACTIONS[c.id]??'Triggered Minor Dark Power',c.effect])},
     { type: 'heading', level: 3, text: 'Harvest Madness' },
     {
       type: 'paragraph',
@@ -142,7 +142,7 @@ const shadyAcres: EntityRuleModule = {
     {type:'table',headers:['Event','Effect'],rows:SHADY_EVENTS.map(c=>[c.name,c.effect])},
     {type:'table',headers:['Terror','Copies','Effect'],rows:SHADY_TERRORS.map(c=>[c.name,String(c.quantity),c.effect])},
     {type:'table',headers:['Item','Effect'],rows:SHADY_ITEMS.map(c=>[c.name,c.effect])},
-    {type:'table',headers:['Setup','Final Girl','Killer','Victims (all unlisted spaces: 0)'],rows:SHADY_SETUPS.map(s=>[s.name,SHADY_SPACES.find(p=>p.id===s.girl)!.name,SHADY_SPACES.find(p=>p.id===s.killer)!.name,Object.entries(s.victims).map(([id,n])=>SHADY_SPACES.find(p=>p.id===id)!.name+': '+n).join('; ')])},
+    {type:'table',modalLayout:'placements',headers:['Setup','Final Girl','Killer','Victims (all unlisted spaces: 0)'],rows:SHADY_SETUPS.map(s=>[s.name,SHADY_SPACES.find(p=>p.id===s.girl)!.name,SHADY_SPACES.find(p=>p.id===s.killer)!.name,Object.entries(s.victims).map(([id,n])=>SHADY_SPACES.find(p=>p.id===id)!.name+': '+n).join('; ')])},
     {type:'paragraph',text:'Board-coordinate labels North/West/Southwest/South/Inner East/Outer East Field and West exit/Central/Southeast/East exit road identify unnamed spaces, not printed location names. Search spaces: Old Barn, McCoy Farmhouse, Ralph’s Garage.'},
     { type: 'heading', level: 3, text: 'Children' },
     {

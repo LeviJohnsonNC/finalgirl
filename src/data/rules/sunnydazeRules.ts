@@ -2,8 +2,10 @@ import {MALL,MALL_SOURCE,MALL_VISUAL,MALL_TRUST,MALL_STORES,MALL_SETUPS,MALL_EVE
 import type {EntityRuleModule,ModulePromptContext} from './moduleRules';
 const storeName=(id:string)=>MALL_STORES.find(s=>s.id===id)?.name??id;
 export const mallRules:EntityRuleModule={entity:MALL,kind:'location',filmId:'s3-killer-from-tomorrow',source:MALL_SOURCE,credits:{design:'Evan Derrick',art:'Tyler Johnson'},tags:['savior','trust','ally','railings','destroyed walls','stores','chopper',...MALL_EVENTS.map(c=>c.name),...MALL_TERRORS.map(c=>c.name),...MALL_ITEMS.map(c=>c.name),...MALL_SAVIOR_CARDS.map(c=>c.name)],setup:[
+ {type:'heading',level:3,text:'Setup checklist'},
  {type:'list',items:['Use the chosen Setup card. Place the orange Special Victim meeple representing the Savior at its S space. He is an Ally, not a Victim.','Set out the Savior Ally card with four Health and four Action cubes nearby. Start Trust at the bottom, Go to Hell!','Shuffle the ten Savior cards into their own deck. Add both Build Trust Action cards to the tableau. Put the Chopper in the Atrium.']},
- {type:'table',headers:['Setup','Final Girl','Killer','Savior','Victims · all unlisted spaces 0'],rows:MALL_SETUPS.map(c=>[c.name,c.girl,c.killer,c.savior,Object.entries(c.victims).map(([id,n])=>`${storeName(id)}: ${n}`).join('; ')])},
+ {type:'heading',level:3,text:'Setup card placements'},
+ {type:'table',modalLayout:'placements',headers:['Setup','Final Girl','Killer','Savior','Victims · all unlisted spaces 0'],rows:MALL_SETUPS.map(c=>[c.name,c.girl,c.killer,c.savior,Object.entries(c.victims).map(([id,n])=>`${storeName(id)}: ${n}`).join('; ')])},
  {type:'paragraph',text:'Compass/concourse names distinguish unnamed board spaces; they are app reference labels, not printed store names. The five marked upper spaces are Railing spaces. The two Food Court spaces remain separate. Setups preserve their actual printed placements; choosing a Setup does not simulate movement.'}
 ],rules:[
  {type:'heading',level:3,text:'The Savior and targeting'},
@@ -13,7 +15,7 @@ export const mallRules:EntityRuleModule={entity:MALL,kind:'location',filmId:'s3-
  {type:'table',headers:['Trust · bottom to top','Available Ally actions','Exit'],rows:MALL_TRUST.map((name,i)=>[name,i===0?'None':i===1?'Recover Health and damage-reduction Reaction':i===2?'Both Move actions, Recover and Reaction':'All five actions',i===3?'May exit from an Exit during Action':'Cannot exit'])},
  {type:'heading',level:3,text:'Savior cards and Upkeep'},
  {type:'paragraph',text:'While the Savior remains in play and until his deck runs out, draw a Savior card during Upkeep. Resolve only the current Trust row. Three cards require the Savior in or adjacent to your space; otherwise discard and draw another Savior card. Recording a card name or advancing cubes in the app does not resolve movement, Time, Item, damage, Terror or Event effects.'},
- {type:'table',headers:['Savior card','Copies',...MALL_TRUST],rows:MALL_SAVIOR_CARDS.map(c=>[c.name+('nearby'in c?' · discard/redraw if not in or adjacent to your space':''),String(c.quantity),...c.effects])},
+ {type:'table',modalLayout:'records',headers:['Savior card','Copies',...MALL_TRUST],rows:MALL_SAVIOR_CARDS.map(c=>[c.name+('nearby'in c?' · discard/redraw if not in or adjacent to your space':''),String(c.quantity),...c.effects])},
  {type:'heading',level:3,text:'Ally actions, reactions and cubes'},
  {type:'paragraph',text:'There are five action rows but only four cubes. During Action use an available Action by putting a cube in the leftmost space of that row. Occupied rows are unavailable. The blue damage-reduction Reaction can be used in any phase, in response to an attack. At Upkeep every cube advances right once and returns after leaving the final space. Lower Trust restricts future action use but does not return occupied cubes.'},
  {type:'table',headers:['Action','Minimum Trust','Cooldown spaces'],rows:MALL_ACTIONS.map(c=>[c.name,MALL_TRUST[c.minimum],String(c.cooldown)])},

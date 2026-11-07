@@ -5,7 +5,8 @@ import { AlertTriangle, Info, Lightbulb, Pencil } from 'lucide-react';
 
 interface RuleBlockProps {
   block: RuleBlockType;
-  headingId?: string;
+  jumpId?: string;
+  inModal?: boolean;
   glossary: GlossaryTermType[];
   onJumpTo: (sectionId: string) => void;
 }
@@ -60,7 +61,41 @@ const calloutStyles: Record<string, { className: string; icon: React.ReactNode; 
   },
 };
 
-export const RuleBlock = ({ block, glossary, onJumpTo, headingId }: RuleBlockProps) => {
+function RuleRecords({ block, renderCell, jumpId }: {
+  block: Extract<RuleBlockType, { type: 'table' }>;
+  renderCell: (text: string) => React.ReactNode;
+  jumpId?: string;
+}) {
+  const placements = block.modalLayout === 'placements';
+  return (
+    <ul className="rule-records" role="list" data-placements={placements || undefined} aria-label={block.headers[0]}>
+      {block.rows.map(([name, ...fields], index) => (
+        <li key={index} className="rule-record"
+          id={jumpId ? `${jumpId}-row-${index}` : undefined} tabIndex={jumpId ? -1 : undefined}>
+          <strong className="rule-record-title">{renderCell(name)}</strong>
+          <dl className="rule-record-fields">
+            {fields.map((value, column) => {
+              const label = block.headers[column + 1];
+              const isPlacementList = placements && column === fields.length - 1;
+              return (
+                <div key={column} data-placement-list={isPlacementList || undefined} data-copy-count={label === 'Copies' || undefined}>
+                  <dt>{label}</dt>
+                  <dd>
+                    {isPlacementList
+                      ? <ul role="list">{value.split('; ').map((item) => <li key={item}>{renderCell(item)}</li>)}</ul>
+                      : renderCell(value)}
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export const RuleBlock = ({ block, glossary, onJumpTo, jumpId, inModal }: RuleBlockProps) => {
   switch (block.type) {
     case "groves-setup": return <GrovesBoard setup={block.setup}/>;
     case 'paragraph':
@@ -88,7 +123,7 @@ export const RuleBlock = ({ block, glossary, onJumpTo, headingId }: RuleBlockPro
     case 'heading': {
       const Tag = block.level === 2 ? 'h3' : 'h4';
       return (
-        <Tag id={headingId} tabIndex={headingId ? -1 : undefined} className="font-title text-base sm:text-lg text-secondary uppercase tracking-wide mt-5 mb-1 flex items-center gap-2 before:content-[''] before:block before:w-1.5 before:h-4 before:bg-secondary/70">
+        <Tag id={jumpId} tabIndex={jumpId ? -1 : undefined} className="font-title text-base sm:text-lg text-secondary uppercase tracking-wide mt-5 mb-1 flex items-center gap-2 before:content-[''] before:block before:w-1.5 before:h-4 before:bg-secondary/70">
           {block.text}
         </Tag>
       );
@@ -135,9 +170,15 @@ export const RuleBlock = ({ block, glossary, onJumpTo, headingId }: RuleBlockPro
         </div>
       );
 
-    case 'table':
-      return (
-        <div className="rule-table-wrap my-3">
+    case 'table': {
+      const renderCell = (text: string) => renderText(text, glossary, onJumpTo);
+      const layout = inModal ? block.modalLayout ?? 'responsive' : undefined;
+      if (layout === 'records' || layout === 'placements') {
+        return <RuleRecords block={block} renderCell={renderCell} jumpId={layout === 'placements' ? jumpId : undefined} />;
+      }
+
+      const table = (
+        <div className="rule-table-wrap my-3" data-comparison={layout === 'comparison' || undefined}>
           <table className="rule-table w-full type-label">
             <thead>
               <tr>
@@ -151,17 +192,24 @@ export const RuleBlock = ({ block, glossary, onJumpTo, headingId }: RuleBlockPro
             <tbody>
               {block.rows.map((row, i) => (
                 <tr key={i}>
-                  {row.map((cell, j) => (
-                    <td key={j} className="align-top">
-                      {renderText(cell, glossary, onJumpTo)}
-                    </td>
-                  ))}
+                  {row.map((cell, j) => inModal && j === 0
+                    ? <th key={j} scope="row" className="align-top">{renderCell(cell)}</th>
+                    : <td key={j} className="align-top">{renderCell(cell)}</td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       );
+
+      return layout === 'responsive' ? (
+        <div className="rule-table-block">
+          {table}
+          <RuleRecords block={block} renderCell={renderCell} />
+        </div>
+      ) : table;
+    }
 
     default:
       return null;
