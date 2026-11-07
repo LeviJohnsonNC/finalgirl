@@ -284,7 +284,7 @@ const Rules = () => {
   );
 
   return (
-    <div className={`rules-page rules-cinema ${activeChapter ? 'rules-is-reading' : ''}`}>
+    <div className={`rules-page rules-cinema rule-reader-theme ${activeChapter ? 'rules-is-reading' : ''}`}>
       <div className="rulebook-shell">
         <div className="rulebook-masthead"><span><span className="rule-status-dot" /> Field guide to surviving the night</span><span>VOL. 01 / FAN REFERENCE</span></div>
         {!activeChapter && (
