@@ -1,4 +1,4 @@
-import { narrationKey, removeGameNarration } from "@/lib/play/narrationCache";
+import { narrationCleanupKeys, removeGameNarration } from "@/lib/play/narrationCache";
 import { getFilmIdByLocation } from "@/types/gameData";
 import type { ActiveGame } from "@/lib/activeGame";
 import type { GameResult } from "@/hooks/useGameHistory";
@@ -36,14 +36,14 @@ export async function clearDiscardedNarration(
     local?.introStory,
   ]);
   for (const text of intros)
-    if (text) keys.push(await narrationKey(text, { kind: "intro", filmId }));
+    if (text) keys.push(...await narrationCleanupKeys(text, { kind: "intro", filmId }));
   const ending =
     session?.endingStory ??
     history?.ending_narration ??
     (local && "endingNarration" in local ? local.endingNarration : undefined);
   if (ending)
     keys.push(
-      await narrationKey(ending, {
+      ...await narrationCleanupKeys(ending, {
         kind: "ending",
         outcome: session?.result?.outcome ?? history?.outcome,
         filmId,
@@ -51,7 +51,7 @@ export async function clearDiscardedNarration(
     );
   for (const scene of reply.scenes ?? [])
     keys.push(
-      await narrationKey(scene.text, {
+      ...await narrationCleanupKeys(scene.text, {
         kind: "death",
         filmId,
         deathSceneId: scene.id,
