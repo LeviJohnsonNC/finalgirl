@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, type ReactNode } from 'react';
 import '@/styles/narration.css';
 import '@/styles/ending.css';
 import { StoryBloodLoader } from '@/components/loaders/CinematicLoaders';
+import { OpeningFilmLoader } from '@/components/loaders/OpeningFilmLoader';
 import { renderStoryText } from '@/lib/textFormatting';
 
 interface NarrationLayoutProps {
@@ -74,12 +75,13 @@ interface NarrationReaderProps {
   story: string | null;
   isGenerating: boolean;
   generatingLabel?: string;
+  location?: string;
   error: string | null;
   onRetry: () => void;
   actions?: ReactNode;
 }
 
-export const NarrationReader = ({ kind, story, isGenerating, generatingLabel, error, onRetry, actions }: NarrationReaderProps) => {
+export const NarrationReader = ({ kind, story, isGenerating, generatingLabel, location, error, onRetry, actions }: NarrationReaderProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     const scroll = scrollRef.current;
@@ -106,7 +108,9 @@ export const NarrationReader = ({ kind, story, isGenerating, generatingLabel, er
     <div className="narration-reader-edge" aria-hidden="true" />
     <div ref={scrollRef} className="narration-reader-scroll" role="region" aria-label={kind === 'opening' ? 'Opening narration' : 'Ending narration'} aria-busy={isGenerating} tabIndex={0}>
       {isGenerating ? (
-        <div className="narration-reader-state"><StoryBloodLoader kind={kind} label={generatingLabel} /></div>
+        <div className="narration-reader-state">
+          {kind === 'opening' ? <OpeningFilmLoader location={location ?? ''} /> : <StoryBloodLoader kind={kind} label={generatingLabel} />}
+        </div>
       ) : error ? (
         <div className="narration-reader-state" role="status">
           <p>{error}</p>

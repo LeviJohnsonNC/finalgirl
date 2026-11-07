@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import { filmAngle, filmBottom, gateHeight, gateWidth } from '../../src/components/loaders/openingFilmGeometry';
 import { test, expect, gameId, selection, opening } from './fixtures';
 
 const image = 'https://example.test/poster.png';
@@ -169,8 +170,8 @@ for (const viewport of [{ width: 1024, height: 530 }, { width: 1024, height: 600
 }
 
 test('blood still grows and receives visible droplets after a three-minute wait', async ({ page, archive }, info) => {
-  await page.addInitScript(() => {
-    const state = window as Window & { bloodTime?: number; bloodPixels?: { ink: number; settledInk: number; hash: number } };
+  await page.addInitScript(({ filmAngle, filmBottom, gateHeight, gateWidth }) => {
+    const state = window as Window & { bloodTime?: number; bloodPixels?: { ink: number; settledInk: number; outsideFilm: number; hash: number } };
     state.bloodTime = 0;
     const times = new WeakSet<WebGLUniformLocation>();
     const proto = WebGLRenderingContext.prototype;
@@ -189,24 +190,32 @@ test('blood still grows and receives visible droplets after a three-minute wait'
       if (!isBlood(this)) return;
       const pixels = new Uint8Array(this.drawingBufferWidth * this.drawingBufferHeight * 4);
       this.readPixels(0, 0, this.drawingBufferWidth, this.drawingBufferHeight, this.RGBA, this.UNSIGNED_BYTE, pixels);
-      let ink = 0, settledInk = 0, hash = 0;
+      let ink = 0, settledInk = 0, outsideFilm = 0, hash = 0;
+      const angle = filmAngle * Math.PI / 180;
       for (let i = 0; i < pixels.length; i += 4) {
         if (pixels[i + 3] > 128) {
           ink++;
           // readPixels starts at the bottom. The lower 48% contains only
           // settled stain/trails, never an airborne drop that may merge away.
-          if (Math.floor(i / 4 / this.drawingBufferWidth) < this.drawingBufferHeight * .48) settledInk++;
+          const pixel = i / 4;
+          const x = ((pixel % this.drawingBufferWidth) / this.drawingBufferWidth - .5) * gateWidth / gateHeight;
+          const y = 1 - Math.floor(pixel / this.drawingBufferWidth) / this.drawingBufferHeight;
+          if (y > .52) {
+            settledInk++;
+            const stockY = -(Math.sin(angle) * x) + Math.cos(angle) * (y - .5) + .5;
+            if (stockY > filmBottom / gateHeight + .005) outsideFilm++;
+          }
         }
         hash = (Math.imul(hash, 31) + pixels[i] + pixels[i + 3]) | 0;
       }
-      state.bloodPixels = { ink, settledInk, hash };
+      state.bloodPixels = { ink, settledInk, outsideFilm, hash };
     };
-  });
+  }, { filmAngle, filmBottom, gateHeight, gateWidth });
   await archive.install(page, { draft: { ...draft, introStory: undefined } });
   await page.route('**/functions/v1/generate-story', () => new Promise(() => {}));
   await resume(page);
   await expect(page.locator('.blood-loader canvas')).toHaveAttribute('data-renderer', 'webgl');
-  const pixels = () => page.evaluate(() => (window as Window & { bloodPixels?: { ink: number; settledInk: number; hash: number } }).bloodPixels!);
+  const pixels = () => page.evaluate(() => (window as Window & { bloodPixels?: { ink: number; settledInk: number; outsideFilm: number; hash: number } }).bloodPixels!);
   const at = async (time: number) => {
     const previous = (await pixels()).hash;
     await page.evaluate(t => { (window as Window & { bloodTime?: number }).bloodTime = t; }, time);
@@ -222,6 +231,7 @@ test('blood still grows and receives visible droplets after a three-minute wait'
   await at(181.1); // Different late frame: arrivals continue after the stain expands.
   const extended = await at(300);
   expect(extended.settledInk).toBeGreaterThan(late.settledInk);
+  expect(extended.outsideFilm).toBe(0);
 });
 
 
