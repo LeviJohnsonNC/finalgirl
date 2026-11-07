@@ -85,6 +85,7 @@ export const VisualBibleRequestSchema = z.object({
 
 // Schema for narrate-story endpoint
 export const NarrationRequestSchema = z.object({
+  stream: z.boolean().optional(),
   text: z.string().min(10).max(10000),
   // Which moment is being read, so the narrator can be cast to match it.
   // Optional: an omitted kind reads as the opening, which is the old behaviour.

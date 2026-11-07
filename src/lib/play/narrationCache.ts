@@ -1,6 +1,7 @@
+import { NARRATION_PROFILE, NARRATION_MODEL } from '../../../supabase/functions/_shared/narration';
 import { isGameDiscarded } from "@/lib/discardedGames";
 /** Owner-scoped, bounded device audio cache. Storage failure never prevents playback. */
-const MAX_BYTES = 12 * 1024 * 1024,
+const MAX_BYTES = 64 * 1024 * 1024,
   MAX_ENTRIES = 24;
 interface Entry {
   id: string;
@@ -14,7 +15,7 @@ const id = (owner: string, key: string) => owner + ':' + key;
 export async function narrationKey(text: string, casting: unknown) {
   const hash = await crypto.subtle.digest(
     'SHA-256',
-    new TextEncoder().encode(JSON.stringify({ version: 2, text, casting })),
+    new TextEncoder().encode(JSON.stringify({ version: NARRATION_PROFILE, model: NARRATION_MODEL, text, casting })),
   );
   return Array.from(new Uint8Array(hash), (b) =>
     b.toString(16).padStart(2, '0'),
@@ -166,4 +167,12 @@ export async function removeGameNarration(owner: string, gameId: string, keys: s
     }
     await completion;
   } finally { db.close(); }
+}
+
+/** A failed decode must not poison every subsequent replay. */
+export async function deleteNarrationClip(owner: string, key: string) {
+  memory.delete(id(owner, key));
+  const db = await database(); if (!db) return;
+  try { const tx = db.transaction('clips', 'readwrite'); const completion = done(tx); tx.objectStore('clips').delete(id(owner, key)); await completion; }
+  catch { /* Device storage is optional. */ } finally { db.close(); }
 }

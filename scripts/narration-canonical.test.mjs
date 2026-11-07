@@ -17,7 +17,8 @@ const load = (path, imports) => {
     if(name==='./hunter.ts'||name==='./play/hunter.ts')return hunter;
     if(name==='./sunnydaze.ts'||name==='./play/sunnydaze.ts')return mall;
     if(name==='./sunnydazeCatalog.ts')return mallCatalog;
-    if (imports[name]) return imports[name];
+    if (name === '../_shared/narration.ts') return load('../supabase/functions/_shared/narration.ts', {});
+      if (imports[name]) return imports[name];
     throw new Error(name);
   }, ex);
   return ex;
@@ -68,6 +69,9 @@ async function fixture({
   legacy = false,
   countChanged = false,
   sacredGroves = false,
+  stream = false,
+  provider,
+  candidates = ['test'],
 } = {}) {
   const state = {
     selection: {
@@ -175,7 +179,7 @@ async function fixture({
     '../_shared/voices.ts': {
       castVoice: (opts) => {
         assert.equal(opts.kind, 'death');
-        return { candidates: ['test'], label: 'cold' };
+        return { candidates, label: 'cold' };
       },
     },
     '../_shared/play/death.ts': death,
@@ -200,14 +204,16 @@ async function fixture({
           decode: (v) => Buffer.from(v, 'base64'),
           encode: (v) => Buffer.from(v).toString('base64'),
         };
+      if (name === '../_shared/narration.ts') return load('../supabase/functions/_shared/narration.ts', {});
       if (imports[name]) return imports[name];
       throw new Error(name);
     },
     {},
     { env: { get: () => 'configured' } },
     async (_url, opts) => {
-      spoken.push(JSON.parse(opts.body).text);
+      spoken.push(JSON.parse(opts.body).text.replace(/^\[[^\]]*\] /, ''));
       assert.ok(opts.signal instanceof AbortSignal);
+      if (provider) return provider(_url, opts);
       return new Response(JSON.stringify({ audioContent: 'dGVzdA==' }), {
         status: 200,
       });
@@ -222,6 +228,7 @@ async function fixture({
         method: 'POST',
         body: JSON.stringify({
           text: 'Caller-supplied replacement content.',
+          stream,
           kind: 'death',
           deathSceneId: sceneId,
         }),
@@ -269,3 +276,57 @@ for (const legacy of [false,true]) test(`Dr. Fright ${legacy?'legacy':'current'}
 });
 
  test('Sacred Groves linked history retains canonical saved narration identity',async()=>{const f=await fixture({sacredGroves:true});assert.equal((await f.handler(f.request())).status,200);assert.deepEqual(f.spoken,['The canonical owned scene is narrated.']);});
+
+
+test('streaming relays the first PCM before synthesis ends and terminates with explicit completion', async () => {
+  let finish;
+  const f = await fixture({ stream: true, provider: async (url, opts) => {
+    assert.ok(url.endsWith('voice:stream'));
+    const body = JSON.parse(opts.body);
+    assert.equal(body.modelId, 'inworld-tts-2'); assert.equal(body.audioConfig.audioEncoding, 'PCM');
+    return new Response(new ReadableStream({ start(c) {
+      c.enqueue(new TextEncoder().encode('{"result":{"audioContent":"AAAA"}}\n'));
+      finish = () => { c.enqueue(new TextEncoder().encode('{"result":{"audioContent":"AAAA"}}')); c.close(); };
+    } }));
+  } });
+  const response = await f.handler(f.request());
+  assert.equal(response.headers.get('Content-Type'), 'application/x-ndjson');
+  const reader = response.body.getReader();
+  const first = new TextDecoder().decode((await reader.read()).value);
+  assert.match(first, /"type":"start"/);
+  const next = new TextDecoder().decode((await reader.read()).value);
+  assert.match(next, /"type":"audio"/);
+  finish(); let rest = ''; while (true) { const item = await reader.read(); if (item.done) break; rest += new TextDecoder().decode(item.value); }
+  assert.match(rest, /"type":"done"/);
+});
+
+test('stream errors after HTTP 200 never become completed audio', async () => {
+  const f = await fixture({ stream: true, provider: async () => new Response('{"result":{"audioContent":"AAAA"}}\n{"error":{"code":13,"message":"interrupted"}}\n') });
+  const response = await f.handler(f.request()); const body = await response.text();
+  assert.match(body, /"type":"audio"/); assert.match(body, /"type":"error"/); assert.doesNotMatch(body, /"type":"done"/);
+});
+
+test('only a specific missing voice triggers a fallback, not an arbitrary bad request', async () => {
+  for (const missing of [false, true]) {
+    let calls = 0;
+    const f = await fixture({ candidates: ['missing', 'available'], stream: true, provider: async () => {
+      calls++; if (calls === 1) return new Response(JSON.stringify({ code: missing ? 5 : 3, message: missing ? 'Voice not found' : 'Invalid audio config' }), { status: 400 });
+      return new Response('{"result":{"audioContent":"AAAA"}}\n');
+    } });
+    const body = await (await f.handler(f.request())).text();
+    assert.equal(calls, missing ? 2 : 1); assert.match(body, missing ? /"type":"done"/ : /"type":"error"/);
+  }
+});
+
+test('cancelling the downstream reader aborts the paid upstream request', async () => {
+  let upstreamSignal;
+  const f = await fixture({ stream: true, provider: async (_url, opts) => {
+    upstreamSignal = opts.signal;
+    return new Response(new ReadableStream({ start(c) {
+      c.enqueue(new TextEncoder().encode('{"result":{"audioContent":"AAAA"}}\n'));
+      opts.signal.addEventListener('abort', () => c.error(new Error('cancelled')), { once: true });
+    } }));
+  } });
+  const response = await f.handler(f.request()); const reader = response.body.getReader();
+  await reader.read(); await reader.cancel(); assert.equal(upstreamSignal.aborted, true);
+});

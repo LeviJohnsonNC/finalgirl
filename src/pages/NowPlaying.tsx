@@ -95,7 +95,7 @@ const NowPlaying = ({
   // Whether the look-book call has finished (successfully or not). The first
   // image waits for this so it is composed with the same look the poster will use.
   const [visualBibleSettled, setVisualBibleSettled] = useState(false);
-  const { isNarrating, isPlaying, progress, toggleNarration } = useNarration();
+  const { isNarrating, isPlaying, isPaused, isBuffering, isComplete, pauseResume, seek, progress, toggleNarration } = useNarration();
   const {
     isAuthenticated,
     autoGenerate,
@@ -328,7 +328,8 @@ const NowPlaying = ({
     onExit={() => onCheckpoint({ playMode: false })}
     onFinish={finishPlay}
     onDiscard={onDiscard}
-    onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying} hasStory={Boolean(story)}
+    narrationTransport={(isPlaying || isPaused) ? <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} paused={isPaused} buffering={isBuffering} complete={isComplete} onPauseResume={() => void pauseResume()} onSeek={seek} /> : undefined}
+    onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying || isPaused} hasStory={Boolean(story)}
     showDeathDetails={showDeathPanel} onShowDeathDetails={enabled => onCheckpoint({showDeathPanel: enabled})}
     drafts={playDrafts} onDraft={saveDraft}
     moduleControls={<ModuleControls setupScenario={setupScenario} startingEvent={startingEvent} sessionId={sessionId} killer={killer} location={location} finalGirl={finalGirl} events={playEvents} onEvent={recordPlayEvent} blocked={playSyncBlocked} />}
@@ -349,16 +350,16 @@ const NowPlaying = ({
       controls={<>
         {onPlayEvent && <button onClick={() => onCheckpoint({ playMode: true })} className="narration-button narration-button--primary">Enter Play mode</button>}
         <div className="narration-control-row">
-          {story && <button onClick={handleNarrate} disabled={isNarrating || isGenerating} className="narration-button narration-button--narrate">
-            {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" /> : isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            {isNarrating ? 'Generating...' : isPlaying ? 'Stop' : 'Narrate'}
+          {story && <button onClick={handleNarrate} disabled={isGenerating} className="narration-button narration-button--narrate">
+            {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" /> : (isPlaying || isPaused) ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            {isNarrating ? 'Cancel narration' : isPlaying || isPaused ? 'Stop' : 'Narrate'}
           </button>}
           {applicableSpecialRules.length > 0 && <SpecialRulesModal killer={killer} location={location}>
             <button className="narration-button narration-button--quiet"><ScrollText className="w-4 h-4 shrink-0" /><span>Special Rules</span></button>
           </SpecialRulesModal>}
           {onDiscard && <SessionOptions onDiscard={onDiscard} />}
         </div>
-        {isPlaying && <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} />}
+        {(isPlaying || isPaused) && <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} paused={isPaused} buffering={isBuffering} complete={isComplete} onPauseResume={() => void pauseResume()} onSeek={seek} />}
       </>}
       image={showImageSlot ? <NarrationPhoto previewUrl={aiEnabled ? locationImages[location] : undefined} variant="scene" imageUrl={sceneImageUrl} isGenerating={isGeneratingImage} error={imageError} onRetry={() => developScene(sceneImageUrl || undefined)} caption={`Reel 01 · ${location}`} /> : undefined}
     >

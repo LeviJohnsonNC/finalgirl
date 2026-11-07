@@ -20,67 +20,90 @@ float smin(float a,float b,float k){float h=max(k-abs(a-b),0.)/k;return min(a,b)
 float segment(vec2 p,vec2 a,vec2 b){vec2 q=p-a,v=b-a;return length(q-v*clamp(dot(q,v)/max(dot(v,v),.00001),0.,1.));}
 `;
 export const bloodShader = common + `
-float dripField(vec2 p) {
-  float drip=1.;
+// A finite number of procedural lanes, no particle allocation or per-frame React work.
+float deposited(float t) {
+  float mass=0.;
   for(int i=0;i<3;i++){
-    float fi=float(i);
-    float x=.375+fi*.11;
-    float start=.53+fi*.012;
-    float age=max(0.,time-12.-fi*15.);
-    float lengthening=(.40-fi*.04)*age/(age+65.+fi*18.);
-    float bend=.004*sin(p.y*18.+fi);
-    float stem=segment(p,vec2(x,start),vec2(x+bend,start+lengthening))-(.005-fi*.00065);
-    float bead=length((p-vec2(x+bend,start+lengthening))*vec2(1.,.8))-(.016-fi*.002);
-    float d=smin(stem,bead,.009);
-    if(age>0.) drip=min(drip,d);
+    float f=float(i),period=4.6+f*1.83;
+    float clock=max(0.,t-f*1.55);
+    float cycle=floor(clock/period),age=mod(clock,period);
+    mass+=cycle+smoothstep(1.22,1.65,age)*step(f*1.55,t);
   }
-  return drip;
+  return mass;
+}
+float extent(float t){float m=deposited(t);return .017+.66*m/(m+17.);}
+float dripField(vec2 p) {
+  float field=1.,g=extent(time);
+  for(int i=0;i<3;i++){
+    float f=float(i),age=max(0.,time-20.-f*14.);
+    float x=.47+(f-1.)*.072;
+    float root=.466+min(g*.49,.17);
+    float reach=(.30-f*.026)*age/(age+110.);
+    float width=(.0055-f*.0005)*(1.-.3*smoothstep(root+.02,root+.12,p.y));
+    float tip=root+reach;
+    float bend=.006*sin((p.y-root)*14.+f)*smoothstep(root,tip,p.y);
+    float stem=segment(p,vec2(x,root-.018),vec2(x+bend,tip)) - width;
+    // Surface tension: narrow neck, heavy rounded pendant, no pointed cartoon teardrop.
+    float bead=length((p-vec2(x+bend,tip))*vec2(1.,.81))-(.014-f*.001);
+    if(age>0.) field=min(field,smin(stem,bead,.012));
+  }
+  return field;
+}
+vec3 wetBlood(vec2 nxy,float thickness,float variation){
+  vec3 n=normalize(vec3(nxy,sqrt(max(.03,1.-dot(nxy,nxy)))));
+  vec3 light=normalize(vec3(-.45,-.65,.85));
+  float diffuse=max(0.,dot(n,light));
+  float fresnel=pow(1.-max(0.,n.z),3.);
+  // Dark absorbing core, translucent crimson rim, and a coherent softbox reflection.
+  vec3 body=mix(vec3(.25,.009,.012),vec3(.065,.001,.004),thickness);
+  body*=.75+.3*diffuse+.08*variation;
+  vec3 halfLight=normalize(light+vec3(0.,0.,1.));
+  float broad=pow(max(0.,dot(n,halfLight)),26.);
+  float sharp=pow(max(0.,dot(n,halfLight)),145.);
+  return body+vec3(.23,.012,.009)*fresnel+vec3(.62,.47,.37)*broad*.38+vec3(.95,.85,.72)*sharp*.78;
 }
 void main(){
-  // Texture occupies the upper part of the canvas; drips have reserved room below.
-  vec2 p=vec2(uv.x,1.-uv.y);
+  vec2 p=vec2(uv.x,1.-uv.y),center=vec2(.47,.466);
   vec2 tex=vec2(p.x,(p.y-.025)/.90);
   vec4 base=texture2D(artwork,tex);
   base.a*=step(0.,tex.y)*step(tex.y,1.);
-  vec2 center=vec2(.47,.49);
-  float angle=atan(tex.y-center.y,tex.x-center.x);
-  float arrival=length((tex-center)*vec2(1.,.95))+.035*sin(angle*7.+seed)+.035*cloud(tex*14.);
-  // A slow tail keeps exposing new photographic edges over multi-minute waits.
-  float growth=.18+.52*time/(time+65.);
-  float mask=1.-smoothstep(growth-.022,growth+.014,arrival);
-  base.a*=mask;
-  float drip=dripField(p);
-  float da=1.-smoothstep(-.001,.002,drip);
-  float epsilon=.001;
-  vec2 slope=vec2(dripField(p+vec2(epsilon,0.))-drip,dripField(p+vec2(0.,epsilon))-drip)/epsilon;
-  vec3 normal=normalize(vec3(slope,.55));
-  float spec=pow(max(0.,dot(normal,normalize(vec3(-.55,-.65,.7)))),24.);
-  float edge=exp(-abs(drip+.002)*240.);
-  vec3 dc=vec3(.19,.003,.007)+edge*vec3(.22,.012,.008)+spec*vec3(.65,.43,.34);
-  vec3 color=mix(dc,base.rgb,base.a);
-  float alpha=max(da,base.a);
-  // Continuous arrivals remain legible even at laptop sizes. Each lane has
-  // a different cadence/seed; the stain itself never resets or shrinks.
+  vec2 delta=(p-center)*vec2(1.,1.06);
+  float angle=atan(delta.y,delta.x),g=extent(time);
+  // Uneven wetting grows only when another drop lands. The first mark is truly tiny.
+  float edge=length(delta)-g*(1.+.10*sin(angle*7.+seed)+.08*(cloud(p*23.)-.5));
+  base.a*=1.-smoothstep(-.003,.003,edge);
+  vec3 color=base.rgb;
+  float alpha=base.a;
+  float d=dripField(p),e=.0008;
+  vec2 gradient=vec2(dripField(p+vec2(e,0.))-d,dripField(p+vec2(0.,e))-d)/e;
+  float da=1.-smoothstep(-.0008,.0016,d);
+  vec2 normal=gradient*clamp(1.+d/.010,0.,.97);
+  vec3 liquid=wetBlood(normal,clamp(-d*90.,0.,1.),noise(p*250.));
+  // Stems emerge from beneath the photographic stain rather than floating over it.
+  color=mix(liquid,color,base.a); alpha=max(alpha,da);
   for(int i=0;i<3;i++){
-    float fi=float(i),period=3.7+fi*1.37;
-    float clock=max(0.,time-fi*1.3);
+    float f=float(i),period=4.6+f*1.83,clock=max(0.,time-f*1.55);
     float cycle=floor(clock/period),age=mod(clock,period);
-    vec2 hit=vec2(.39+.18*hash(vec2(cycle+seed,fi+2.)),.40+.10*hash(vec2(fi+4.,cycle+seed)));
-    float fall=smoothstep(.0,1.35,age);
-    vec2 beadPos=hit-vec2(.012*(1.-fall),.27*(1.-fall));
-    float radius=.013+.007*hash(vec2(fi+seed,cycle));
-    vec2 beadShape=(p-beadPos)*vec2(1.,mix(.72,1.,fall));
-    float bead=1.-smoothstep(radius-.002,radius+.002,length(beadShape));
-    float contact=bead*(1.-smoothstep(1.35,1.85,age))*step(fi*1.3,time);
-    float shine=pow(max(0.,1.-length((p-beadPos+vec2(.004,.006))*65.)),4.);
-    color=mix(color,vec3(.31,.006,.011)+vec3(.65,.40,.30)*shine,contact);
-    alpha=max(alpha,contact);
-    float settled=max(0.,age-1.35);
-    float ring=exp(-pow((length(p-hit)-settled*.065)*110.,2.))*exp(-settled*2.5)*step(1.35,age);
-    color+=vec3(.32,.06,.035)*ring*base.a;
+    float visible=step(f*1.55,time);
+    float hitTime=time-age+1.25;
+    float spread=min(.055,extent(max(0.,hitTime-.1))*.42);
+    vec2 hit=center+vec2(hash(vec2(cycle+seed,f+2.))-.5,hash(vec2(f+4.,cycle+seed))-.5)*spread;
+    float fall=clamp(age/1.25,0.,1.);
+    float radius=.013+.006*hash(vec2(f+seed,cycle));
+    vec2 pos=hit-vec2(.008*(1.-fall),.34*(1.-fall*fall));
+    // Gravity accelerates the drop; slight elongation develops just before impact.
+    vec2 q=(p-pos)/vec2(radius,radius*(1.+.6*fall));
+    float surface=length(q),contact=(1.-smoothstep(.92,1.08,surface))*visible*(1.-smoothstep(1.25,1.39,age));
+    vec3 bead=wetBlood(q*.86,sqrt(max(0.,1.-surface*surface)),noise(p*180.));
+    color=mix(color,bead,contact); alpha=max(alpha,contact);
+    float impact=max(0.,age-1.25);
+    // Tiny irregular impact crown and a local wet highlight, not luminous concentric rings.
+    vec2 v=p-hit; float r=length(v),theta=atan(v.y,v.x);
+    float crownRadius=radius+impact*.06;
+    float crown=exp(-pow((r-crownRadius)*480.,2.))*pow(max(0.,sin(theta*9.+f)),5.);
+    crown*=exp(-impact*12.)*step(1.25,age)*visible;
+    color=mix(color,vec3(.42,.045,.026),crown*.55); alpha=max(alpha,crown*.7);
   }
-  // Very small wet-light movement, no global pulsing or shape wobble.
-  color*=.97+.03*sin(p.x*11.+p.y*8.+time*.31);
   gl_FragColor=vec4(color,alpha);
 }
 `;

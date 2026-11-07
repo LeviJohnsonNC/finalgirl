@@ -1,0 +1,25 @@
+# Streamed cinematic narration
+
+Narration remains an explicit user action. The edge function uses Inworld `inworld-tts-2`, three existing casting profiles with restrained performance direction, and 48 kHz mono PCM over an authenticated NDJSON relay. It accepts provider fragments/EOF records, rejects in-band errors after HTTP 200, and falls back only on a specific missing-voice error before any audio. Larger sentence/paragraph sections preserve context. A 45-second per-section deadline and 140-second overall deadline bound upstream work; cancelling or leaving the view aborts the request and playback. Cancellation does not refund already metered text.
+
+The browser primes Web Audio within the click, buffers 180 ms, schedules ahead on the audio clock, and offers pause/resume, rewind 10 seconds and seeking through received audio. The growing duration has a `+` until complete. A single WAV header is assembled only after a successful end marker; partial streams never enter the cache. Cached replay uses native HTMLAudio, preserving mobile gesture priming. Browsers without Web Audio and old open tabs retain the MP3 JSON route. The legacy MP3 concatenation route is compatibility only; streamed playback does not concatenate separate MP3 files.
+
+Owned device replay remains bounded (64 MiB / 24 entries; larger completed recordings still play but are not retained). The cache key versions model and delivery with `NARRATION_PROFILE`. **Bump that profile in the shared module whenever voice defaults, environment casting overrides, delivery, pronunciation or model changes.** Cached audio cannot infer a changed remote environment variable. Runtime response/log metadata records requested model and resolved voice. An environment-only casting change requires the profile bump; it is not automatically discovered by an offline cached replay. No new database, storage bucket, dependencies or secrets are required.
+
+Display markup is removed only for speech. Doctor abbreviations and Mark V are expanded for intelligibility. Character names remain verbatim pending a real pronunciation audition. Do not invent phonetic spellings or alter the archived prose. Existing voice identities have not been reselected based solely on descriptions. Natural-language direction replaces the former intended victory-announcer delivery; voice selection remains provisional until listening.
+
+## Verification and audition
+
+- Unit checks exercise segmentation, framing, PCM sample boundaries, scheduling underruns, pause/seek and correct WAV framing.
+- Edge handler checks cover canonical owned death text, early streaming, HTTP-200 errors, missing-voice fallback, arbitrary bad requests and downstream cancellation.
+- Browser checks use actual Web Audio with deterministic quiet PCM, including playback before the held final response, pause/rewind/seek, cached reload, interrupted-stream retry and stop. Existing owner-switch/unmount/cache checks remain. These do not establish vocal quality or real provider latency.
+- `node scripts/audition-narration.mjs --run` with `INWORLD_API_KEY` set locally generates ten bounded, paid current/new-model comparisons outside the repository. The script never logs the key. Listen blind where possible, and compare suspense, dialogue, victory, defeat and death on headphones and laptop speakers. It reports batch generation timing, not streaming startup.
+- After deployment, record click-to-first-audible median/p95, synthesis duration, buffer underruns and resolved voice for short/long stories. The browser logs `narration_first_audio`; edge logs `narration_complete` without story text. The 2–3-second startup goal is a target, not a measured production result.
+
+## Deployment
+
+Deploy `narrate-story` with `_shared/narration.ts`, `_shared/voices.ts`, the validator and existing shared dependencies **before publishing the frontend**. Keep the current Inworld secret. Verify the account can access TTS-2 and that the host flushes NDJSON chunks before completion. Then publish the frontend and smoke-test an opening, both endings and a death, plus cancellation, cached replay and a real Safari/iPhone. No automatic narration, production synthesis or deployment is performed by the test suite.
+
+The blood loader now begins at a tiny central mark. Deposited droplets drive irregular expansion; accelerating drops use absorbing dark cores, crimson rims and coherent reflected highlights, with surface-tension pendants and slowly lengthening trails. It stays bounded, retains reduced-motion and graphics-failure fallbacks, and pauses offscreen. Five-minute frames must continue changing without looping the stain back to its start.
+
+Local verification: 1,016 unit checks, 146 edge checks and 50 focused desktop/mobile browser journeys passed; rendered early/late blood and player captures were inspected. WebKit could not run because the container lacks its native libraries and cannot install system packages as root. Physical Safari and live-provider audition/latency remain rollout checks.
