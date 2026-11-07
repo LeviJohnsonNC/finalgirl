@@ -206,16 +206,16 @@ test('ending reserves its poster through story failure, retry and developing', a
   await page.getByRole('button', { name: 'Close', exact: true }).click();
 });
 
-test('a broken opening photograph can be developed again without losing the story', async ({ page, archive }) => {
+test('a broken opening photograph reloads without losing the story or generating again', async ({ page, archive }) => {
   await archive.install(page, { draft });
-  await page.route('**/narration-still.png', route => route.fulfill({ status: 404 }));
-  await page.route('https://example.test/poster.png', route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/buddyland.png') }));
+  let broken = true;
+  await page.route('**/narration-still.png', route => broken ? route.fulfill({ status: 404 }) : route.fulfill({ contentType: 'image/png', path: resolve('src/assets/locations/ai/buddyland.png') }));
   await resume(page);
   await expect(page.getByText('This photograph could not be loaded.')).toBeVisible();
-  await page.getByRole('button', { name: 'Try Again', exact: true }).click();
-  await expect.poll(() => Boolean(archive.releaseImage)).toBe(true);
-  archive.releaseImage!();
-  await expect(page.getByRole('img', { name: 'Scene still', exact: true })).toHaveAttribute('src', 'https://example.test/poster.png');
+  broken = false;
+  await page.getByRole('button', { name: 'Reload photograph', exact: true }).click();
+  await expect(page.getByRole('img', { name: 'Scene still', exact: true })).toHaveAttribute('src', stillUrl);
+  expect(archive.generationRequests.some(r => r.name === 'generate-scene-image')).toBe(false);
   await expect(page.getByRole('region', { name: 'Opening narration' })).toContainText('The chain on the side door');
   await expect(page.getByRole('button', { name: 'WON', exact: true })).toBeEnabled();
 });

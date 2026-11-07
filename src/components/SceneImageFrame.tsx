@@ -1,5 +1,5 @@
 import { AlertTriangle, Expand, RefreshCw } from 'lucide-react';
-import { ProjectorLeader } from '@/components/ProjectorLeader';
+import { DarkroomImageLoader } from '@/components/loaders/CinematicLoaders';
 import { ImageLightbox } from '@/components/ImageLightbox';
 
 interface SceneImageFrameProps {
@@ -88,7 +88,7 @@ export const SceneImageFrame = ({
   if (isGenerating) {
     return frame(
       <div className="absolute inset-0 flex items-center justify-center">
-        <ProjectorLeader label="Developing" />
+        <DarkroomImageLoader variant={variant} />
         <div className="film-grain absolute inset-0 pointer-events-none opacity-[0.2]" />
         <div className="vignette absolute inset-0 pointer-events-none" />
       </div>,

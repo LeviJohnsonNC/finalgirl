@@ -83,7 +83,7 @@ const NowPlaying = ({
   onGameEnd,
 }: NowPlayingProps) => {
   const film = FEATURE_FILMS.find(f => f.id === filmId);
-  const { locationImages } = useActiveImages();
+  const { locationImages, aiEnabled } = useActiveImages();
   const bgImage = locationImages[location] ?? nowPlayingBg;
 
   const [deathEventId,setDeathEventId]=useState<string|null>(null);
@@ -360,7 +360,7 @@ const NowPlaying = ({
         </div>
         {isPlaying && <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} />}
       </>}
-      image={showImageSlot ? <NarrationPhoto variant="scene" imageUrl={sceneImageUrl} isGenerating={isGeneratingImage} error={imageError} onRetry={() => developScene(sceneImageUrl || undefined)} caption={`Reel 01 · ${location}`} /> : undefined}
+      image={showImageSlot ? <NarrationPhoto previewUrl={aiEnabled ? locationImages[location] : undefined} variant="scene" imageUrl={sceneImageUrl} isGenerating={isGeneratingImage} error={imageError} onRetry={() => developScene(sceneImageUrl || undefined)} caption={`Reel 01 · ${location}`} /> : undefined}
     >
       <NarrationReader kind="opening" story={story} isGenerating={isGenerating} error={error} onRetry={generateStory} actions={<>
         <span className="narration-result-label">Record result</span>

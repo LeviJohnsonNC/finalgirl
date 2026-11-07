@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
 import '@/styles/narration.css';
 import '@/styles/ending.css';
-import { ProjectorLeader } from '@/components/ProjectorLeader';
+import { StoryBloodLoader } from '@/components/loaders/CinematicLoaders';
 import { renderStoryText } from '@/lib/textFormatting';
 
 interface NarrationLayoutProps {
@@ -106,7 +106,7 @@ export const NarrationReader = ({ kind, story, isGenerating, generatingLabel, er
     <div className="narration-reader-edge" aria-hidden="true" />
     <div ref={scrollRef} className="narration-reader-scroll" role="region" aria-label={kind === 'opening' ? 'Opening narration' : 'Ending narration'} aria-busy={isGenerating} tabIndex={0}>
       {isGenerating ? (
-        <div className="narration-reader-state" role={generatingLabel ? 'status' : undefined}><ProjectorLeader size={generatingLabel ? 'sm' : 'lg'} label={generatingLabel ?? 'The projector is warming up'} /></div>
+        <div className="narration-reader-state"><StoryBloodLoader kind={kind} label={generatingLabel} /></div>
       ) : error ? (
         <div className="narration-reader-state" role="status">
           <p>{error}</p>
