@@ -46,7 +46,7 @@ export const NarrationPhoto = ({ imageUrl, isGenerating, error, onRetry, variant
           </button>
         </ImageLightbox>}
         {overlay && <div className={`narration-photo-development${revealing && !developing ? ' narration-photo-development--revealing' : ''}`}>
-          <DarkroomImageLoader variant={variant} previewUrl={previewUrl} label={loading && !isGenerating ? 'Bringing the photograph into focus' : undefined} />
+          <DarkroomImageLoader variant={variant} previewUrl={previewUrl} developedUrl={revealing && !developing ? shown.url : undefined} label={revealing && !developing ? 'Your photograph is ready' : loading && !isGenerating ? 'Bringing the photograph into focus' : undefined} />
         </div>}
       </div> : <div className="narration-photo-placeholder">
         {failure ? <>

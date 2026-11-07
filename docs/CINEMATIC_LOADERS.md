@@ -11,7 +11,9 @@ cloudy photographic development and red safelight.
   Decorative effects never issue requests, report progress or delay saves.
 - `usePresentedImage` keeps the displayed picture separate from an incoming URL.
   New results load and decode before replacement; a newer request invalidates an
-  older decode. The reveal lasts at most 600ms and reduced motion skips it.
+  older decode. The decoded result develops inside the tray during a bounded 1.6-second handoff;
+  reduced motion skips it. This uses an HTML image, so cross-origin GPU texture
+  restrictions cannot prevent the actual photograph appearing.
 - A stalled download times out at 25 seconds. `Reload photograph` retries that
   same URL, without paying for another generation. An explicit Reshoot option
   remains available for permanently missing files. Generation failures retain
@@ -46,5 +48,41 @@ photo is atmosphere, not a progressive preview of the generated result.
   images-off, story reframing, and laptop/phone layouts.
 - Development-only `/__dev/loaders` exposes live and fixed 2/8/20/60/180-second
   material studies and an image handoff/reshoot control.
+- A rendered-pixel regression checks blood area at 2/20/180/300 seconds and
+  changing arrivals after three minutes. Laptop fit checks include 1024×530,
+  1024×600, 1280×640 and 1440×800, with the Hunter’s long title.
+
+## Continuous waits and laptop fit
+
+Blood uses a slow rational growth curve instead of an early exponential finish.
+Three differently timed lanes feed visible droplets into the stain while three
+persistent drips lengthen over minutes. The shape never resets. The darkroom
+cloud pattern varies by mount; its warm metal double border catches a quiet red
+safelight reflection. Reduced motion disables the border movement too.
+
+At laptop widths (900px+) and usable heights (500px+), the opening spread uses
+the available viewport height minus the measured footer. Its reader takes the
+space remaining after controls/title. The loader scales inside that space;
+completed prose scrolls inside the reader. Phones and very short windows retain
+normal page scrolling.
+
+## Actual-photo preview investigation (2026-11-07)
+
+`generateImage` currently makes a non-streaming Lovable chat-completions request
+using the configured image-model override or Gemini candidates. The edge function
+uploads the finished image (and composes ending posters) before returning a URL.
+No intermediate image reaches the client. The in-tray result reveal is therefore
+a presentation of the finished image, not progress during generation.
+
+OpenAI documents 0–3 intermediate images via `partial_images` on a streaming
+image-generation request: https://developers.openai.com/api/docs/guides/image-generation#streaming
+Google documents interleaved image/text streaming, which does not establish
+successive previews of the same unfinished photograph through our Lovable route:
+https://ai.google.dev/gemini-api/docs/streaming
+Lovable's image documentation does not confirm that preview contract for the
+current route: https://docs.lovable.dev/features/ai-images
+A future true-preview path needs provider/gateway confirmation plus streaming,
+reference-fidelity, billing and poster-composition validation. No provider or
+backend behavior changed in this polish pass.
 
 The artwork and animation specifications are in `src/assets/loaders/README.md`.

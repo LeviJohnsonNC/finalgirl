@@ -20,7 +20,8 @@ export function StoryBloodLoader({ kind = 'opening', label, inspectTime }: { kin
   </div>;
 }
 
-export function DarkroomImageLoader({ variant = 'scene', previewUrl, inspectTime, label }: { variant?: 'scene' | 'poster'; previewUrl?: string; inspectTime?: number; label?: string }) {
+export function DarkroomImageLoader({ variant = 'scene', previewUrl, inspectTime, label, developedUrl }: { variant?: 'scene' | 'poster'; previewUrl?: string; inspectTime?: number; label?: string; developedUrl?: string }) {
+  const [seed] = useState(() => Math.random() * 20);
   const portrait = variant === 'poster';
   const artwork = portrait ? portraitTray : tray;
   return <div className={`cinematic-loader darkroom-loader${portrait ? ' darkroom-loader--portrait' : ''}`} role="status" aria-live="polite">
@@ -29,7 +30,8 @@ export function DarkroomImageLoader({ variant = 'scene', previewUrl, inspectTime
         <img src={artwork} alt="" className="darkroom-tray" />
         <div className="darkroom-fallback-paper">{previewUrl && <img src={previewUrl} alt="" />}</div>
       </div>
-      <MaterialCanvas artwork={artwork} photograph={previewUrl} shader={darkroomShader} portrait={portrait} inspectTime={inspectTime} />
+      <MaterialCanvas artwork={artwork} photograph={previewUrl} shader={darkroomShader} portrait={portrait} seed={inspectTime === undefined ? seed : 2} inspectTime={inspectTime} />
+      {developedUrl && <div className="darkroom-developed-print"><img src={developedUrl} alt="" /></div>}
     </div>
     <div className="cinematic-loader-copy">
       <p className="cinematic-loader-title">Developing the nightmare</p>

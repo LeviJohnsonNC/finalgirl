@@ -19,7 +19,7 @@ export default function LoaderPreview() {
       <button onClick={() => { setGenerating(false); setUrl(mall); }}>Complete image</button>
       <button onClick={() => setGenerating(true)}>Reshoot</button>
     </div>
-    <div key={key} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 32, maxWidth: 1200, margin: 'auto' }}>
+    <div key={`${key}:${time ?? "live"}`} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 32, maxWidth: 1200, margin: 'auto' }}>
       <div>
         <section style={{ minHeight: 350, display: 'grid', placeItems: 'center', background: '#0d0b09', border: '1px solid #30251f' }}><StoryBloodLoader inspectTime={time} /></section>
         <section style={{ aspectRatio: '16/9', marginTop: 24 }}><DarkroomImageLoader previewUrl={mall} inspectTime={time} /></section>

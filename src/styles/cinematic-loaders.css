@@ -60,3 +60,76 @@
   .narration-layout--ending .blood-loader .cinematic-loader-title { font-size: 18px; letter-spacing: .12em; }
   .narration-layout--ending .blood-loader .cinematic-loader-status { font-size: 11px; margin-top: 5px; }
 }
+
+/* A darkroom presentation board: warm metal edge, inset keyline, red safelight. */
+.darkroom-loader {
+  border: 1px solid #81715b;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 3px #15110d, inset 0 0 0 4px #514335,
+    inset 0 18px 36px -30px #cf3023, 0 12px 30px #0008;
+  background: radial-gradient(ellipse at 15% 0%, #28110c 0%, #090807 65%);
+}
+.darkroom-loader::before {
+  content: ''; position: absolute; inset: -1px; pointer-events: none;
+  border-radius: inherit; border-top: 1px solid #be5c43;
+  box-shadow: 0 -4px 14px -8px #d12c17;
+  opacity: .65; animation: safelight-reflection 11s ease-in-out infinite alternate;
+}
+@keyframes safelight-reflection { to { opacity: .3; } }
+.darkroom-loader-art { mask-image: linear-gradient(transparent, #000 3%, #000 97%, transparent); }
+.darkroom-loader .cinematic-loader-title { font-size: clamp(14px, 3.3cqw, 27px); }
+.darkroom-loader .cinematic-loader-status { font-size: clamp(10px, 2cqw, 12px); }
+.darkroom-loader .darkroom-loader-art { width: min(90cqw, calc((100cqh - 90px) * 1.5)); }
+.darkroom-loader--portrait .darkroom-loader-art { width: min(86cqw, calc((100cqh - 102px) * 2 / 3)); }
+.darkroom-loader--portrait .cinematic-loader-title { font-size: clamp(14px, 6cqw, 23px); }
+/* Only the decoded, completed result enters this DOM layer. No cross-origin
+   canvas upload, progressive-preview claim, or extra generation request. */
+.darkroom-developed-print {
+  position: absolute; left: 19.34%; top: 26.54%; width: 63.32%; height: 54.42%;
+  transform: rotate(-3.15deg); overflow: hidden; background: #100e0b;
+  animation: photograph-develop .85s ease-out both;
+}
+.darkroom-developed-print img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.darkroom-developed-print::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(125deg, #d9aa6a22, transparent 40%, #740d0822);
+}
+.darkroom-loader--portrait .darkroom-developed-print {
+  left: 20.2%; top: 21.4%; width: 61.6%; height: 62.2%; transform: rotate(-1.43deg);
+}
+@keyframes photograph-develop {
+  from { opacity: 0; filter: sepia(.9) brightness(.6) blur(3px); }
+  to { opacity: 1; filter: sepia(.18) brightness(.95) blur(0); }
+}
+.narration-photo-development--revealing {
+  opacity: 1; pointer-events: none; animation: photograph-handoff 1.6s ease both;
+}
+@keyframes photograph-handoff { 0%, 64% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .darkroom-loader::before, .darkroom-developed-print, .narration-photo-development--revealing { animation: none; }
+}
+
+/* Use the actual space left after the heading/controls, including short laptops.
+   The story alone scrolls after completion; the loader and actions always fit. */
+@media (min-width: 900px) and (min-height: 500px) {
+  .narration-layout.narration-layout--opening {
+    grid-template-rows: minmax(0, 1fr);
+    height: calc(100dvh - var(--app-footer-h, 44px));
+    padding-top: clamp(18px, 4vh, 40px); padding-bottom: 16px; align-items: stretch;
+  }
+  .narration-layout.narration-layout--opening.narration-layout--text-only { grid-template-columns: minmax(0, 820px); justify-content: center; }
+  .narration-layout--opening .narration-heading, .narration-layout--opening .narration-controls, .narration-reader-actions { flex-shrink: 0; }
+  .narration-layout--opening .narration-copy { display: flex; flex-direction: column; min-height: 0; }
+  .narration-layout--opening .narration-title { font-size: calc(clamp(34px, 7.3vh, 70px) * var(--title-fit, 1)); }
+  .narration-layout--opening .narration-controls { margin-top: clamp(10px, 2vh, 22px); gap: 8px; }
+  .narration-layout--opening .narration-button--primary { min-height: 48px; }
+  .narration-layout--opening .narration-reader { flex: 1; min-height: 0; }
+  .narration-layout--opening .narration-reader-scroll { flex: 1; min-height: 0; max-height: none; }
+  .narration-layout--opening .narration-art { display: flex; align-items: center; padding-top: 0; }
+  .narration-reader-scroll:has(.blood-loader) { display: flex; padding: 10px 18px; }
+  .narration-reader-state:has(.blood-loader) { width: 100%; height: 100%; min-height: 0; container-type: size; }
+  .narration-reader-state .blood-loader { height: 100%; padding: 0; gap: 4px; }
+  .narration-reader-state .blood-loader-art { width: min(70cqw, calc(100cqh - 76px), 290px); flex: none; }
+  .blood-loader .cinematic-loader-title { font-size: clamp(16px, 3.2cqw, 25px); }
+  .blood-loader .cinematic-loader-status { margin-top: 5px; font-size: 11px; }
+}

@@ -25,9 +25,9 @@ float dripField(vec2 p) {
   for(int i=0;i<3;i++){
     float fi=float(i);
     float x=.375+fi*.11;
-    float start=.64+fi*.015;
-    float age=max(0.,time-3.-fi*2.7);
-    float lengthening=(.24-fi*.035)*(1.-exp(-age/(14.+fi*5.)));
+    float start=.53+fi*.012;
+    float age=max(0.,time-12.-fi*15.);
+    float lengthening=(.40-fi*.04)*age/(age+65.+fi*18.);
     float bend=.004*sin(p.y*18.+fi);
     float stem=segment(p,vec2(x,start),vec2(x+bend,start+lengthening))-(.005-fi*.00065);
     float bead=length((p-vec2(x+bend,start+lengthening))*vec2(1.,.8))-(.016-fi*.002);
@@ -45,7 +45,8 @@ void main(){
   vec2 center=vec2(.47,.49);
   float angle=atan(tex.y-center.y,tex.x-center.x);
   float arrival=length((tex-center)*vec2(1.,.95))+.035*sin(angle*7.+seed)+.035*cloud(tex*14.);
-  float growth=.085+.59*(1.-exp(-time/8.5));
+  // A slow tail keeps exposing new photographic edges over multi-minute waits.
+  float growth=.18+.52*time/(time+65.);
   float mask=1.-smoothstep(growth-.022,growth+.014,arrival);
   base.a*=mask;
   float drip=dripField(p);
@@ -58,22 +59,25 @@ void main(){
   vec3 dc=vec3(.19,.003,.007)+edge*vec3(.22,.012,.008)+spec*vec3(.65,.43,.34);
   vec3 color=mix(dc,base.rgb,base.a);
   float alpha=max(da,base.a);
-  // Each contact has a fast arrival and a damped, local specular disturbance.
-  // Five staggered channels avoid a visible whole-scene loop.
-  for(int i=0;i<5;i++){
-    float fi=float(i),period=7.9+fi*2.31;
-    float clock=max(0.,time-fi*1.7);
+  // Continuous arrivals remain legible even at laptop sizes. Each lane has
+  // a different cadence/seed; the stain itself never resets or shrinks.
+  for(int i=0;i<3;i++){
+    float fi=float(i),period=3.7+fi*1.37;
+    float clock=max(0.,time-fi*1.3);
     float cycle=floor(clock/period),age=mod(clock,period);
-    vec2 hit=vec2(.34+.31*hash(vec2(cycle+seed,fi+2.)),.34+.16*hash(vec2(fi+4.,cycle+seed)));
-    float r=length(p-hit);
-    float ring=exp(-pow((r-age*.035)*150.,2.))*exp(-age*2.1);
-    color+=vec3(.20,.04,.025)*ring*base.a;
-    float falling=1.-smoothstep(.0,.42,age);
-    vec2 beadPos=hit-vec2(.007,falling*.10);
-    float bead=1.-smoothstep(.005,.009,length(p-beadPos));
-    float contact=bead*(1.-smoothstep(.4,.7,age))*step(fi*1.7,time);
-    color=mix(color,vec3(.34,.008,.012)+vec3(.4,.23,.17)*pow(max(0.,1.-length((p-beadPos+vec2(.002,.003))*240.)),3.),contact);
+    vec2 hit=vec2(.39+.18*hash(vec2(cycle+seed,fi+2.)),.40+.10*hash(vec2(fi+4.,cycle+seed)));
+    float fall=smoothstep(.0,1.35,age);
+    vec2 beadPos=hit-vec2(.012*(1.-fall),.27*(1.-fall));
+    float radius=.013+.007*hash(vec2(fi+seed,cycle));
+    vec2 beadShape=(p-beadPos)*vec2(1.,mix(.72,1.,fall));
+    float bead=1.-smoothstep(radius-.002,radius+.002,length(beadShape));
+    float contact=bead*(1.-smoothstep(1.35,1.85,age))*step(fi*1.3,time);
+    float shine=pow(max(0.,1.-length((p-beadPos+vec2(.004,.006))*65.)),4.);
+    color=mix(color,vec3(.31,.006,.011)+vec3(.65,.40,.30)*shine,contact);
     alpha=max(alpha,contact);
+    float settled=max(0.,age-1.35);
+    float ring=exp(-pow((length(p-hit)-settled*.065)*110.,2.))*exp(-settled*2.5)*step(1.35,age);
+    color+=vec3(.32,.06,.035)*ring*base.a;
   }
   // Very small wet-light movement, no global pulsing or shape wobble.
   color*=.97+.03*sin(p.x*11.+p.y*8.+time*.31);

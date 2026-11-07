@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
+export const IMAGE_REVEAL_MS = 1600;
+
 /** Presentation only: never starts generation or delays persistence/save readiness. */
 export function usePresentedImage(imageUrl: string, isGenerating: boolean) {
   // Saved pictures render normally, without replaying a development sequence.
@@ -35,7 +37,7 @@ export function usePresentedImage(imageUrl: string, isGenerating: boolean) {
   }, [imageUrl, retry, isGenerating]);
   useEffect(() => {
     if (!revealing) return;
-    const timeout = window.setTimeout(() => setRevealing(false), 600);
+    const timeout = window.setTimeout(() => setRevealing(false), IMAGE_REVEAL_MS);
     return () => clearTimeout(timeout);
   }, [revealing]);
   const loading = Boolean(imageUrl && imageUrl !== shown.url && failedUrl !== imageUrl);
