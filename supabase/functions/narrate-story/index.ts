@@ -41,6 +41,7 @@ serve(async (req) => {
     // Auth + rate limit (narration can be heavier; allow more per hour)
     const guard = await requireUser(req, cors, { functionName: "narrate-story", hourlyLimit: 60 });
     if (!guard.ok) return guard.response;
+    const logUsage = guard.logUsage; // Keep the narrowed method in the async generator.
 
     // Parse and validate request body
     const body = await req.json();
@@ -137,7 +138,7 @@ serve(async (req) => {
       }
       if (!resolved) throw new Error('The selected narrator is unavailable. Please try again later.');
       for (const chunk of chunks.slice(1)) for await (const audio of synthesize(chunk, voiceId)) { audioCount++; yield audio; }
-      await guard.logUsage({ model: `${NARRATION_MODEL}:${voiceId}`, kind: `narration-${persona.label}` });
+      await logUsage({ model: `${NARRATION_MODEL}:${voiceId}`, kind: `narration-${persona.label}` });
       console.info('narration_complete', { ...metadata(), firstAudioMs: Math.round(firstAudioMs), totalMs: Math.round(performance.now() - started), sections: chunks.length });
     }
     if (streaming) {
@@ -170,7 +171,6 @@ serve(async (req) => {
       { headers: { ...cors, 'Content-Type': 'application/json' } });
 
   } catch (error: unknown) {
-    // speak() throws a ready-made Response for upstream failures it cannot retry.
     if (error instanceof Response) return error;
     console.error('Error generating narration:', error);
     return new Response(
