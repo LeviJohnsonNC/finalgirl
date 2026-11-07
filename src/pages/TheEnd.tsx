@@ -94,7 +94,7 @@ const TheEnd = ({
   const tormentorReview=useMemo(()=>result.killer==='The Tormentor'?(formData.tormentorReview??{loss:tormentorState(endingModuleState(endingSummary(result.playEvents).entries,'tormentor')).loss}):undefined,[result.killer,result.playEvents,formData.tormentorReview]);
   const fate = reviewedCharacterFate(formData.finalGirlHealth ?? undefined,shipReview,tormentorReview);
   const endingKillerHealth = hunter&&hunter.phase!=='mark-x'||result.killer==='The Intruders'||isKillerUnkillable(result.killer) ? undefined : formData.killerHealth ?? undefined;
-  const { locationImages } = useActiveImages();
+  const { locationImages, aiEnabled } = useActiveImages();
   const background = locationImages[result.location] ?? nowPlayingBg;
   // Reserve the poster column while it develops, not just once it exists.
   const showPosterSlot = Boolean(posterImageUrl) || isGeneratingImage || Boolean(imageError) || (settingsReady && isAuthenticated && autoGenerate);
@@ -307,7 +307,7 @@ const TheEnd = ({
         {isGeneratingImage && !posterImageUrl && <p className="ending-poster-save-note">The poster is developing. Wait to include it, or save the story now.</p>}
         <div className="ending-transport">{isPlaying && <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} />}</div>
       </>}
-      image={showPosterSlot ? <NarrationPhoto variant="poster" imageUrl={posterImageUrl} isGenerating={isGeneratingImage} error={imageError} onRetry={() => developPoster(posterImageUrl || undefined)} caption={`${result.finalGirl} vs ${result.killer}`} /> : undefined}
+      image={showPosterSlot ? <NarrationPhoto previewUrl={aiEnabled ? locationImages[result.location] : undefined} variant="poster" imageUrl={posterImageUrl} isGenerating={isGeneratingImage} error={imageError} onRetry={() => developPoster(posterImageUrl || undefined)} caption={`${result.finalGirl} vs ${result.killer}`} /> : undefined}
     >
       {awaitingRefresh
         ? <p className="ending-review-message" role="status">The record changed. Update the ending to reflect the new details.</p>
