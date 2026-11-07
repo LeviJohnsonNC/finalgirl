@@ -4,7 +4,7 @@ attribute vec2 position;
 varying vec2 uv;
 void main(){ uv=position*.5+.5; gl_Position=vec4(position,0.,1.); }
 `;
-const common = `
+export const common = `
 precision highp float;
 varying vec2 uv;
 uniform float time;
@@ -19,7 +19,22 @@ float cloud(vec2 p){return noise(p)*.57+noise(p*2.03)*.28+noise(p*4.1)*.15;}
 float smin(float a,float b,float k){float h=max(k-abs(a-b),0.)/k;return min(a,b)-h*h*k*.25;}
 float segment(vec2 p,vec2 a,vec2 b){vec2 q=p-a,v=b-a;return length(q-v*clamp(dot(q,v)/max(dot(v,v),.00001),0.,1.));}
 `;
-export const bloodShader = common + `
+export const wetBloodLighting = `
+vec3 wetBlood(vec2 nxy,float thickness,float variation){
+  vec3 n=normalize(vec3(nxy,sqrt(max(.03,1.-dot(nxy,nxy)))));
+  vec3 light=normalize(vec3(-.45,-.65,.85));
+  float diffuse=max(0.,dot(n,light));
+  float fresnel=pow(1.-max(0.,n.z),3.);
+  // Dark absorbing core, translucent crimson rim, and a coherent softbox reflection.
+  vec3 body=mix(vec3(.25,.009,.012),vec3(.065,.001,.004),thickness);
+  body*=.75+.3*diffuse+.08*variation;
+  vec3 halfLight=normalize(light+vec3(0.,0.,1.));
+  float broad=pow(max(0.,dot(n,halfLight)),26.);
+  float sharp=pow(max(0.,dot(n,halfLight)),145.);
+  return body+vec3(.23,.012,.009)*fresnel+vec3(.62,.47,.37)*broad*.38+vec3(.95,.85,.72)*sharp*.78;
+}
+`;
+export const bloodShader = common + wetBloodLighting + `
 // A finite number of procedural lanes, no particle allocation or per-frame React work.
 float deposited(float t) {
   float mass=0.;
@@ -49,19 +64,7 @@ float dripField(vec2 p) {
   }
   return field;
 }
-vec3 wetBlood(vec2 nxy,float thickness,float variation){
-  vec3 n=normalize(vec3(nxy,sqrt(max(.03,1.-dot(nxy,nxy)))));
-  vec3 light=normalize(vec3(-.45,-.65,.85));
-  float diffuse=max(0.,dot(n,light));
-  float fresnel=pow(1.-max(0.,n.z),3.);
-  // Dark absorbing core, translucent crimson rim, and a coherent softbox reflection.
-  vec3 body=mix(vec3(.25,.009,.012),vec3(.065,.001,.004),thickness);
-  body*=.75+.3*diffuse+.08*variation;
-  vec3 halfLight=normalize(light+vec3(0.,0.,1.));
-  float broad=pow(max(0.,dot(n,halfLight)),26.);
-  float sharp=pow(max(0.,dot(n,halfLight)),145.);
-  return body+vec3(.23,.012,.009)*fresnel+vec3(.62,.47,.37)*broad*.38+vec3(.95,.85,.72)*sharp*.78;
-}
+
 void main(){
   vec2 p=vec2(uv.x,1.-uv.y),center=vec2(.47,.466);
   vec2 tex=vec2(p.x,(p.y-.025)/.90);

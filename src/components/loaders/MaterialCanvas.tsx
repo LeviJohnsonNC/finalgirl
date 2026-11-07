@@ -9,12 +9,15 @@ interface Props {
   /** Deterministic inspection in the development preview; never request progress. */
   inspectTime?: number;
   seed?: number;
+  onFrame?: (time: number) => void;
 }
 
 /** One quad, two bounded textures, no per-frame React work. The photographic
  * DOM fallback stays mounted underneath until the first successful draw. */
-export function MaterialCanvas({ artwork, photograph, shader, portrait = false, inspectTime, seed = 2 }: Props) {
+export function MaterialCanvas({ artwork, photograph, shader, portrait = false, inspectTime, seed = 2, onFrame }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const frameCallback = useRef(onFrame);
+  frameCallback.current = onFrame;
   const [renderer, setRenderer] = useState<'loading' | 'webgl' | 'fallback'>('loading');
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -82,6 +85,7 @@ export function MaterialCanvas({ artwork, photograph, shader, portrait = false, 
       const t = inspectTime ?? (motion.matches ? 30 : elapsed);
       gl.uniform1f(gl.getUniformLocation(program, 'time'), t);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      frameCallback.current?.(t);
       if (firstDraw) { firstDraw = false; setRenderer('webgl'); }
       if (!motion.matches && inspectTime === undefined) frame = requestAnimationFrame(draw);
     };

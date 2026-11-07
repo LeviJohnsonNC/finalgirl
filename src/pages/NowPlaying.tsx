@@ -362,7 +362,7 @@ const NowPlaying = ({
       </>}
       image={showImageSlot ? <NarrationPhoto previewUrl={aiEnabled ? locationImages[location] : undefined} variant="scene" imageUrl={sceneImageUrl} isGenerating={isGeneratingImage} error={imageError} onRetry={() => developScene(sceneImageUrl || undefined)} caption={`Reel 01 · ${location}`} /> : undefined}
     >
-      <NarrationReader kind="opening" story={story} isGenerating={isGenerating} error={error} onRetry={generateStory} actions={<>
+      <NarrationReader kind="opening" location={location} story={story} isGenerating={isGenerating} error={error} onRetry={generateStory} actions={<>
         <span className="narration-result-label">Record result</span>
         <div className="narration-result-buttons">
           <button className="narration-result narration-result--won" onClick={() => onGameEnd('won', !isGenerating && !error ? story || undefined : undefined, sceneImageUrl || undefined, visualBible)}>WON</button>

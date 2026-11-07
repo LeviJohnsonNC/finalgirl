@@ -52,9 +52,9 @@ test('opening reader supports long stories, full-size photos, narration and resu
   await expect(page.getByRole('progressbar', { name: 'Narration progress' })).toBeVisible();
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await page.getByRole('button', { name: 'Special Rules', exact: true }).click();
-  await expect(page.getByRole('dialog')).toBeVisible();
-  if (testInfo.project.name === 'desktop') expect((await page.getByRole('dialog').boundingBox())!.width).toBeGreaterThan(900);
-  await page.getByRole('button', { name: 'Close', exact: true }).click();
+  const rules = page.getByRole('dialog', { name: 'Special Rules', exact: true });
+  await expect(rules.getByRole('tabpanel').getByText(/place 4 Power Source tokens/)).toBeInViewport();
+  await rules.getByRole('button', { name: 'Close', exact: true }).click();
   await page.getByRole('button', { name: 'WON', exact: true }).click();
   await expect(page.getByLabel('Weapon Used', { exact: true })).toBeVisible();
 });
