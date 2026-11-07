@@ -170,8 +170,8 @@ for (const viewport of [{ width: 1024, height: 530 }, { width: 1024, height: 600
 
 test('blood still grows and receives visible droplets after a three-minute wait', async ({ page, archive }, info) => {
   await page.addInitScript(() => {
-    const state = window as Window & { bloodTime?: number; bloodPixels?: { ink: number; hash: number } };
-    state.bloodTime = 2;
+    const state = window as Window & { bloodTime?: number; bloodPixels?: { ink: number; settledInk: number; hash: number } };
+    state.bloodTime = 0;
     const times = new WeakSet<WebGLUniformLocation>();
     const proto = WebGLRenderingContext.prototype;
     const location = proto.getUniformLocation, uniform = proto.uniform1f, draw = proto.drawArrays;
@@ -189,19 +189,24 @@ test('blood still grows and receives visible droplets after a three-minute wait'
       if (!isBlood(this)) return;
       const pixels = new Uint8Array(this.drawingBufferWidth * this.drawingBufferHeight * 4);
       this.readPixels(0, 0, this.drawingBufferWidth, this.drawingBufferHeight, this.RGBA, this.UNSIGNED_BYTE, pixels);
-      let ink = 0, hash = 0;
+      let ink = 0, settledInk = 0, hash = 0;
       for (let i = 0; i < pixels.length; i += 4) {
-        if (pixels[i + 3] > 128) ink++;
+        if (pixels[i + 3] > 128) {
+          ink++;
+          // readPixels starts at the bottom. The lower 48% contains only
+          // settled stain/trails, never an airborne drop that may merge away.
+          if (Math.floor(i / 4 / this.drawingBufferWidth) < this.drawingBufferHeight * .48) settledInk++;
+        }
         hash = (Math.imul(hash, 31) + pixels[i] + pixels[i + 3]) | 0;
       }
-      state.bloodPixels = { ink, hash };
+      state.bloodPixels = { ink, settledInk, hash };
     };
   });
   await archive.install(page, { draft: { ...draft, introStory: undefined } });
   await page.route('**/functions/v1/generate-story', () => new Promise(() => {}));
   await resume(page);
   await expect(page.locator('.blood-loader canvas')).toHaveAttribute('data-renderer', 'webgl');
-  const pixels = () => page.evaluate(() => (window as Window & { bloodPixels?: { ink: number; hash: number } }).bloodPixels!);
+  const pixels = () => page.evaluate(() => (window as Window & { bloodPixels?: { ink: number; settledInk: number; hash: number } }).bloodPixels!);
   const at = async (time: number) => {
     const previous = (await pixels()).hash;
     await page.evaluate(t => { (window as Window & { bloodTime?: number }).bloodTime = t; }, time);
@@ -211,12 +216,12 @@ test('blood still grows and receives visible droplets after a three-minute wait'
   const early = await pixels();
   const mid = await at(20);
   const late = await at(180);
-  expect(mid.ink).toBeGreaterThan(early.ink * 1.2);
+  expect(mid.ink).toBeGreaterThan(early.ink * 20); // genuinely tiny initial mark
   expect(late.ink).toBeGreaterThan(mid.ink * 1.1);
   await page.screenshot({ path: info.outputPath('blood-three-minutes.png'), fullPage: true });
   await at(181.1); // Different late frame: arrivals continue after the stain expands.
   const extended = await at(300);
-  expect(extended.ink).toBeGreaterThan(late.ink);
+  expect(extended.settledInk).toBeGreaterThan(late.settledInk);
 });
 
 
