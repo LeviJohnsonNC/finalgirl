@@ -323,7 +323,7 @@ body:has(.narration-session) [role='dialog'] .film-grain { animation: none; tran
 .play-narration-transport { padding:6px 12px; border-bottom:1px solid #b9a68133; background:#0c0a08e8; }
 
 .narration-controls .narration-seek { height:auto; background:none; }
-.narration-seek input[type=range] { appearance:none; -webkit-appearance:none; padding:0; border:0; border-radius:0; background:transparent; min-height:32px; box-shadow:none; }
+.play-workspace .narration-seek input[type=range], .narration-seek input[type=range] { appearance:none; -webkit-appearance:none; padding:0; border:0; border-radius:0; background:transparent; min-height:32px; box-shadow:none; }
 .narration-seek input::-webkit-slider-runnable-track { height:3px; border-radius:1px; background:#b7d5d24d; }
 .narration-seek input::-webkit-slider-thumb { appearance:none; -webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:#c3d6cd; margin-top:-3.5px; box-shadow:0 0 0 3px #b7d5d214; }
 .narration-seek input::-moz-range-track { height:3px; background:#b7d5d24d; }

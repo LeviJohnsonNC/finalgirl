@@ -110,7 +110,7 @@ export const useNarration = () => {
           firstAudio = true;
           console.info('narration_first_audio', { milliseconds: Math.round(performance.now() - started), streamed: true });
         }
-        setProgress({ elapsed: state.elapsed, duration: state.duration });
+        setProgress(previous => previous.elapsed === state.elapsed && previous.duration === state.duration ? previous : { elapsed: state.elapsed, duration: state.duration });
         setIsPlaying(state.playing); setIsPaused(!state.playing); pausedRef.current = !state.playing;
         setIsBuffering(state.buffering); setIsComplete(state.complete);
         if (state.duration > 0) setIsNarrating(false);
