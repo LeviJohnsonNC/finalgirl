@@ -53,6 +53,7 @@ export const NarrationPhoto = ({ imageUrl, isGenerating, error, onRetry, variant
           <AlertTriangle className="w-5 h-5" />
           <p>{failure}</p>
           <button className="narration-button narration-button--quiet" onClick={failed ? presentation.retryLoad : onRetry}>{failed ? 'Reload photograph' : 'Try Again'}</button>
+          {failed && <button className="narration-button narration-button--quiet" onClick={onRetry}>Reshoot</button>}
         </> : variant === 'poster' ? <p>The poster will develop after the ending.</p> : null}
       </div>}
       {variant === 'poster' && <p ref={posterCaption} className="ending-poster-caption" aria-hidden="true"><span>{caption}</span></p>}

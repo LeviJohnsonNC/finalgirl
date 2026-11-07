@@ -2,7 +2,7 @@
 
 These photographic assets are for the story and image loaders, not game identity
 art or generation references. No runtime image-generation request is made for a
-loader. Captions remain HTML. The three WebP files total approximately 188 KiB.
+loader. Captions remain HTML. The three WebP files total approximately 183 KiB.
 
 Source: built-in image generation, using Levi's approved blood-stain and darkroom
 references from 2026-11-06. Outputs were reduced to WebP at quality 88 (blood alpha

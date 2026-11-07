@@ -13,8 +13,9 @@ cloudy photographic development and red safelight.
   New results load and decode before replacement; a newer request invalidates an
   older decode. The reveal lasts at most 600ms and reduced motion skips it.
 - A stalled download times out at 25 seconds. `Reload photograph` retries that
-  same URL, without paying for another generation. Generation failures retain the
-  existing explicit generation retry.
+  same URL, without paying for another generation. An explicit Reshoot option
+  remains available for permanently missing files. Generation failures retain
+  the existing explicit generation retry.
 - A previous decoded picture remains on screen if replacement download fails.
   This is not persistent rollback: the server may delete the replaced storage
   object after attachment. No storage/persistence policies changed here.

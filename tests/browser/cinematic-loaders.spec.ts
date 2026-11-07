@@ -121,3 +121,17 @@ test('losing a graphics context switches to the still without trapping generatio
   await expect.poll(() => Boolean(archive.releaseImage)).toBe(true); archive.releaseImage!();
   await expect(page.getByRole('img', { name: 'Scene still', exact: true })).toBeVisible();
 });
+
+test('a permanently missing saved photograph can be explicitly reshot', async ({ page, archive }) => {
+  const missing = 'https://example.test/missing.png';
+  await archive.install(page, { draft: { ...draft, sceneImageUrl: missing } });
+  await page.route(missing, route => route.fulfill({ status: 404 }));
+  await page.route(image, route => route.fulfill({ contentType: 'image/png', path: photo }));
+  await resume(page);
+  await expect(page.getByRole('button', { name: 'Reload photograph' })).toBeVisible();
+  expect(archive.generationRequests.some(r => r.name === 'generate-scene-image')).toBe(false);
+  await page.getByRole('button', { name: 'Reshoot', exact: true }).click();
+  await expect.poll(() => Boolean(archive.releaseImage)).toBe(true); archive.releaseImage!();
+  await expect(page.getByRole('img', { name: 'Scene still', exact: true })).toHaveAttribute('src', image);
+  await expect(page.getByRole('region', { name: 'Opening narration' })).toContainText(opening);
+});
