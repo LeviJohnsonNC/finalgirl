@@ -83,6 +83,7 @@ export interface PlayScreenProps {
   onFinish: (outcome: "won" | "lost") => void;
   onDiscard?: () => void;
   onNarrate: () => void;
+  narrationTransport?: React.ReactNode;
   narrationBusy: boolean;
   narrationPlaying: boolean;
   hasStory: boolean;
@@ -316,14 +317,14 @@ export function PlayScreen(props: PlayScreenProps) {
           {props.hasStory && (
             <button
               onClick={props.onNarrate}
-              disabled={props.narrationBusy}
+              aria-busy={props.narrationBusy}
               aria-label={
-                props.narrationPlaying
+                (props.narrationPlaying || props.narrationBusy)
                   ? "Stop introduction"
                   : "Narrate introduction"
               }
             >
-              <Volume2 size={16} /> Narrate
+              <Volume2 size={16} /> {props.narrationBusy ? "Cancel narration" : props.narrationPlaying ? "Stop" : "Narrate"}
             </button>
           )}
           <button
@@ -337,6 +338,7 @@ export function PlayScreen(props: PlayScreenProps) {
           {props.onDiscard && <SessionOptions onDiscard={props.onDiscard} />}
         </nav>
       </header>
+      {props.narrationTransport && <div className="play-narration-transport">{props.narrationTransport}</div>}
       <section className="play-tracking" aria-label="Play controls">
         <div className="play-counters">
           {(["round", "saved", "killed"] as const).map((counter) => {

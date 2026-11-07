@@ -133,3 +133,9 @@
   .blood-loader .cinematic-loader-title { font-size: clamp(16px, 3.2cqw, 25px); }
   .blood-loader .cinematic-loader-status { margin-top: 5px; font-size: 11px; }
 }
+/* Graphics fallback follows the same small-to-large progression. */
+.blood-loader-art:has([data-renderer='fallback']) .blood-fallback {
+  clip-path:circle(2% at 47% 49%); animation:blood-fallback-spread 150s ease-out forwards;
+}
+@keyframes blood-fallback-spread { 0% { clip-path:circle(2% at 47% 49%); } 10% { clip-path:circle(12% at 47% 49%); } 40% { clip-path:circle(32% at 47% 49%); } 100% { clip-path:circle(65% at 47% 49%); } }
+@media (prefers-reduced-motion:reduce) { .blood-loader-art:has([data-renderer='fallback']) .blood-fallback { animation:none; clip-path:circle(30% at 47% 49%); } }

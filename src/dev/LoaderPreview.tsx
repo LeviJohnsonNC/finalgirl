@@ -14,7 +14,7 @@ export default function LoaderPreview() {
   return <main style={{ minHeight: '100vh', background: '#090807', color: '#dfd4c0', padding: 32 }}>
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 28 }}>
       <strong>Loader material study</strong>
-      {[undefined, 2, 8, 20, 60, 180].map(t => <button key={t ?? 'live'} onClick={() => setTime(t)}>{t === undefined ? 'Live' : `${t}s`}</button>)}
+      {[undefined, 0, .8, 2, 8, 20, 60, 180].map(t => <button key={t ?? 'live'} onClick={() => setTime(t)}>{t === undefined ? 'Live' : `${t}s`}</button>)}
       <button onClick={() => setKey(k => k + 1)}>Restart</button>
       <button onClick={() => { setGenerating(false); setUrl(mall); }}>Complete image</button>
       <button onClick={() => setGenerating(true)}>Reshoot</button>

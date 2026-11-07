@@ -9,19 +9,19 @@ export function DeathNarration({
   scene: DeathScene;
   filmId: string | null;
 }) {
-  const { isPlaying, isNarrating, progress, toggleNarration, stopNarration } =
+  const { isPlaying, isNarrating, isPaused, isBuffering, isComplete, pauseResume, seek, progress, toggleNarration, stopNarration } =
     useNarration();
   return (
     <div className="play-death-narration">
       <button
         aria-label={
-          isPlaying || isNarrating
+          isPlaying || isPaused || isNarrating
             ? "Stop death narration"
             : "Narrate death scene"
         }
-        title={isPlaying || isNarrating ? "Stop narration" : "Narrate scene"}
+        title={isPlaying || isPaused || isNarrating ? "Stop narration" : "Narrate scene"}
         onClick={() => {
-          if (isPlaying || isNarrating) stopNarration();
+          if (isPlaying || isPaused || isNarrating) stopNarration();
           else
             void toggleNarration(scene.scene_text, {
               kind: "death",
@@ -34,16 +34,16 @@ export function DeathNarration({
       >
         {isNarrating ? (
           <Loader2 className="w-4 h-4 animate-spin" />
-        ) : isPlaying ? (
+        ) : (isPlaying || isPaused) ? (
           <Square className="w-4 h-4" />
         ) : (
           <Volume2 className="w-4 h-4" />
         )}
       </button>
-      {isPlaying && (
+      {(isPlaying || isPaused) && (
         <NarrationTransport
           elapsed={progress.elapsed}
-          duration={progress.duration}
+          duration={progress.duration} paused={isPaused} buffering={isBuffering} complete={isComplete} onPauseResume={() => void pauseResume()} onSeek={seek}
         />
       )}
     </div>

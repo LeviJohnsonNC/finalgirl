@@ -6,49 +6,8 @@ import { getCorsHeaders } from "../_shared/auth.ts";
 import { NarrationRequestSchema, validateRequest } from "../_shared/validation.ts";
 import { requireUser } from "../_shared/guard.ts";
 import { castVoice } from "../_shared/voices.ts";
+import { NARRATION_PROFILE, NARRATION_MODEL, NARRATION_SAMPLE_RATE, delivery, narrationChunks, narrationMessages } from "../_shared/narration.ts";
 
-
-const MAX_CHUNK_SIZE = 1900; // Inworld limit is 2000, leave margin for safety
-
-// Split text into chunks at sentence boundaries
-function splitTextIntoChunks(text: string, maxSize: number): string[] {
-  const chunks: string[] = [];
-  let remaining = text;
-
-  while (remaining.length > 0) {
-    if (remaining.length <= maxSize) {
-      chunks.push(remaining);
-      break;
-    }
-
-    // Find the last sentence boundary within maxSize
-    let splitIndex = maxSize;
-    const searchArea = remaining.slice(0, maxSize);
-    
-    // Look for sentence endings (. ! ?) followed by space
-    const lastPeriod = searchArea.lastIndexOf('. ');
-    const lastExclaim = searchArea.lastIndexOf('! ');
-    const lastQuestion = searchArea.lastIndexOf('? ');
-    
-    const sentenceEnd = Math.max(lastPeriod, lastExclaim, lastQuestion);
-    
-    if (sentenceEnd > maxSize * 0.5) {
-      // Found a good sentence boundary in the second half
-      splitIndex = sentenceEnd + 2; // Include the punctuation and space
-    } else {
-      // Fall back to last space
-      const lastSpace = searchArea.lastIndexOf(' ');
-      if (lastSpace > maxSize * 0.3) {
-        splitIndex = lastSpace + 1;
-      }
-    }
-
-    chunks.push(remaining.slice(0, splitIndex).trim());
-    remaining = remaining.slice(splitIndex).trim();
-  }
-
-  return chunks.filter(chunk => chunk.length > 0);
-}
 
 // Concatenate multiple base64 audio chunks into one
 function concatenateBase64Audio(base64Chunks: string[]): string {
@@ -82,6 +41,7 @@ serve(async (req) => {
     // Auth + rate limit (narration can be heavier; allow more per hour)
     const guard = await requireUser(req, cors, { functionName: "narrate-story", hourlyLimit: 60 });
     if (!guard.ok) return guard.response;
+    const logUsage = guard.logUsage; // Keep the narrowed method in the async generator.
 
     // Parse and validate request body
     const body = await req.json();
@@ -121,91 +81,96 @@ serve(async (req) => {
       filmId: validation.data.filmId,
     });
 
-    // Split text into chunks if needed
-    const chunks = splitTextIntoChunks(text, MAX_CHUNK_SIZE);
-
-    /** Synthesises one chunk, returning null if this voice id is rejected. */
-    const speak = async (chunk: string, voiceId: string): Promise<string | null> => {
-      const response = await fetch('https://api.inworld.ai/tts/v1/voice', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${INWORLD_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        signal:validation.data.kind==='death'?AbortSignal.timeout(25000):undefined,
-        body: JSON.stringify({ text: chunk, voiceId, modelId: 'inworld-tts-1.5-max' }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return data.audioContent as string;
-      }
-
-      const errorText = await response.text();
-      console.error(`Inworld error (voice ${voiceId}):`, response.status, errorText);
-
-      // An unknown voice id is a casting problem, not an outage: report it so
-      // the caller can try the next candidate.
-      if (response.status === 400 || response.status === 404) return null;
-      throw new Response(
-        JSON.stringify({
-          error: response.status === 429
-            ? 'Too many requests. Please wait a moment.'
-            : 'Failed to generate narration. Please try again.',
-        }),
-        { status: response.status === 429 ? 429 : 500, headers: { ...cors, 'Content-Type': 'application/json' } },
-      );
+    const streaming = validation.data.stream === true;
+    const direction = `[${delivery[persona.label] ?? delivery.dread}] `;
+    const chunks = narrationChunks(text, (streaming ? 4000 : 2000) - direction.length - 24);
+    if (!chunks.length) return new Response(JSON.stringify({ error: 'No spoken text was provided.' }), { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } });
+    const abort = new AbortController();
+    const signal = AbortSignal.any([req.signal, abort.signal, AbortSignal.timeout(140000)]);
+    const started = performance.now();
+    let voiceId = '', firstAudioMs = 0, audioCount = 0;
+    const metadata = () => ({ profile: NARRATION_PROFILE, model: NARRATION_MODEL, voiceId, persona: persona.label, sampleRate: NARRATION_SAMPLE_RATE });
+    const unavailableVoice = (payload: unknown) => {
+      const error = payload as { code?: number; message?: string; error?: { code?: number; message?: string } };
+      const detail = error?.error ?? error;
+      return detail?.code === 5 && /voice/i.test(detail.message ?? '');
     };
+    async function* synthesize(chunk: string, candidate: string): AsyncGenerator<string> {
+      const response = await fetch(`https://api.inworld.ai/tts/v1/voice${streaming ? ':stream' : ''}`, {
+        method: 'POST', headers: { Authorization: `Basic ${INWORLD_API_KEY}`, 'Content-Type': 'application/json' },
+        signal: AbortSignal.any([signal, AbortSignal.timeout(45000)]),
+        body: JSON.stringify({ text: direction + chunk, voiceId: candidate, modelId: NARRATION_MODEL,
+          audioConfig: { audioEncoding: streaming ? 'PCM' : 'MP3', sampleRateHertz: NARRATION_SAMPLE_RATE, speakingRate: 1, ...(streaming ? {} : { bitRate: 128000 }) } }),
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        if (unavailableVoice(payload)) throw new Error('VOICE_UNAVAILABLE');
+        throw new Error(response.status === 429 ? 'Narration is busy. Please try again shortly.' : 'The narrator could not finish. Please try again.');
+      }
+      const messages = streaming && response.body ? narrationMessages(response.body) : [await response.json()];
+      let received = false;
+      for await (const message of messages) {
+        if (message.error || message.code) {
+          if (!received && unavailableVoice(message)) throw new Error('VOICE_UNAVAILABLE');
+          throw new Error('The narration stream was interrupted. Please try again.');
+        }
+        const audio = (streaming ? message.result : message)?.audioContent;
+        if (!audio) continue; // Timestamp / usage-only messages are valid.
+        if (typeof audio !== 'string' || audio.length > 4_000_000) throw new Error('Invalid narration audio.');
+        received = true; yield audio;
+      }
+      if (!received) throw new Error('The narrator returned no audio. Please try again.');
+    }
+    async function* generate(): AsyncGenerator<string> {
+      // Only retry a genuinely missing voice, and only before a single audible byte.
+      let resolved = false;
+      for (const candidate of persona.candidates) {
+        try {
+          voiceId = candidate;
+          for await (const audio of synthesize(chunks[0], candidate)) {
+            if (!audioCount) firstAudioMs = performance.now() - started;
+            audioCount++; yield audio;
+          }
+          resolved = true; break;
+        } catch (error) {
+          if (audioCount || !(error instanceof Error) || error.message !== 'VOICE_UNAVAILABLE') throw error;
+        }
+      }
+      if (!resolved) throw new Error('The selected narrator is unavailable. Please try again later.');
+      for (const chunk of chunks.slice(1)) for await (const audio of synthesize(chunk, voiceId)) { audioCount++; yield audio; }
+      await logUsage({ model: `${NARRATION_MODEL}:${voiceId}`, kind: `narration-${persona.label}` });
+      console.info('narration_complete', { ...metadata(), firstAudioMs: Math.round(firstAudioMs), totalMs: Math.round(performance.now() - started), sections: chunks.length });
+    }
+    if (streaming) {
+      const encoder = new TextEncoder();
+      const generation = generate();
+      let first = true;
+      const body = new ReadableStream<Uint8Array>({
+        async pull(controller) {
+          const send = (value: unknown) => { if (!signal.aborted) controller.enqueue(encoder.encode(JSON.stringify(value) + '\n')); };
+          try {
+            // Backpressure bounds queued audio when the browser/network reads slowly.
+            const next = await generation.next();
+            if (next.done) { send({ type: 'done', ...metadata() }); controller.close(); return; }
+            if (first) { send({ type: 'start', ...metadata() }); first = false; }
+            send({ type: 'audio', audio: next.value });
+          } catch (error) {
+            if (!signal.aborted) send({ type: 'error', error: error instanceof Error ? error.message : 'Narration was interrupted.' });
+            try { controller.close(); } catch { /* reader cancelled */ }
+          }
+        },
+        async cancel() { abort.abort(); await generation.return(undefined).catch(() => {}); },
+      });
+      return new Response(body, { headers: { ...cors, 'Content-Type': 'application/x-ndjson', 'Cache-Control': 'no-store, no-transform', 'X-Accel-Buffering': 'no', 'X-Content-Type-Options': 'nosniff' } });
+    }
 
-    // Resolve the voice once, on the first chunk, then keep it for the rest —
-    // a narration that changed voice halfway through would be worse than one
-    // that used the fallback throughout.
-    let voiceId: string | null = null;
+    // Compatibility for older open tabs and browsers without Web Audio.
     const audioChunks: string[] = [];
+    for await (const audio of generate()) audioChunks.push(audio);
+    return new Response(JSON.stringify({ audioContent: concatenateBase64Audio(audioChunks), ...metadata() }),
+      { headers: { ...cors, 'Content-Type': 'application/json' } });
 
-    for (const candidate of persona.candidates) {
-      const first = await speak(chunks[0], candidate);
-      if (first !== null) {
-        voiceId = candidate;
-        audioChunks.push(first);
-        break;
-      }
-      console.warn(`Voice ${candidate} unavailable, trying next candidate`);
-    }
-
-    if (voiceId === null) {
-      return new Response(
-        JSON.stringify({ error: 'Failed to generate narration. Please try again.' }),
-        { status: 500, headers: { ...cors, 'Content-Type': 'application/json' } },
-      );
-    }
-
-    for (const chunk of chunks.slice(1)) {
-      const audio = await speak(chunk, voiceId);
-      if (audio === null) {
-        // The voice worked a moment ago, so this is not a casting problem.
-        return new Response(
-          JSON.stringify({ error: 'Failed to generate narration. Please try again.' }),
-          { status: 500, headers: { ...cors, 'Content-Type': 'application/json' } },
-        );
-      }
-      audioChunks.push(audio);
-    }
-
-    await guard.logUsage({ model: `inworld:${voiceId}`, kind: `narration-${persona.label}` });
-
-    // Concatenate all audio chunks
-    const combinedAudio = chunks.length === 1 
-      ? audioChunks[0] 
-      : concatenateBase64Audio(audioChunks);
-    
-
-    return new Response(
-      JSON.stringify({ audioContent: combinedAudio, voiceId, persona: persona.label }),
-      { headers: { ...cors, 'Content-Type': 'application/json' } }
-    );
   } catch (error: unknown) {
-    // speak() throws a ready-made Response for upstream failures it cannot retry.
     if (error instanceof Response) return error;
     console.error('Error generating narration:', error);
     return new Response(
