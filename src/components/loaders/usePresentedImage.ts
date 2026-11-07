@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-export const IMAGE_REVEAL_MS = 1600;
+export const IMAGE_REVEAL_MS = 1050;
 
 /** Presentation only: never starts generation or delays persistence/save readiness. */
 export function usePresentedImage(imageUrl: string, isGenerating: boolean) {

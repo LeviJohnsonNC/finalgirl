@@ -36,6 +36,7 @@ export function DarkroomImageLoader({ variant = 'scene', previewUrl, inspectTime
     <div className="cinematic-loader-copy">
       <p className="cinematic-loader-title">Developing the nightmare</p>
       <p className="cinematic-loader-status">{label ?? (portrait ? 'Your final frame is coming into focus' : 'Your scene is coming into focus')}</p>
+      {portrait && <p className="cinematic-loader-status darkroom-compact-status">{developedUrl ? 'Poster ready' : label ? 'Focusing…' : 'Developing…'}</p>}
     </div>
   </div>;
 }

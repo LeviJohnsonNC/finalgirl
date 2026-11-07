@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, type CSSProperties } from 'react';
 import { AlertTriangle, Expand, RefreshCw } from 'lucide-react';
 import { ImageLightbox } from '@/components/ImageLightbox';
 import { DarkroomImageLoader } from '@/components/loaders/CinematicLoaders';
-import { usePresentedImage } from '@/components/loaders/usePresentedImage';
+import { IMAGE_REVEAL_MS, usePresentedImage } from '@/components/loaders/usePresentedImage';
 
 interface NarrationPhotoProps {
   imageUrl: string;
@@ -39,7 +39,7 @@ export const NarrationPhoto = ({ imageUrl, isGenerating, error, onRetry, variant
   const mount = (
     <div className={`narration-photo-mount${overlay ? ' narration-photo-mount--developing' : ''}`} aria-busy={developing}>
       <div className="narration-photo-edge" aria-hidden="true" />
-      {hasImage || overlay ? <div className="narration-photo-stage" style={{ '--stage-ratio': ratio } as CSSProperties}>
+      {hasImage || overlay ? <div className="narration-photo-stage" style={{ '--stage-ratio': ratio, '--photo-reveal-duration': `${IMAGE_REVEAL_MS}ms` } as CSSProperties}>
         {hasImage && <ImageLightbox imageUrl={shown.url} caption={caption}>
           <button type="button" className="narration-photo-open" aria-label={`View ${label.toLowerCase()} full size`} disabled={developing}>
             <img src={shown.url} alt={label} onLoad={event => presentation.onImageLoad(event.currentTarget)} onError={presentation.onImageError} />
