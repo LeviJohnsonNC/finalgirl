@@ -32,6 +32,8 @@ per-frame React state. GPU textures are capped at 1024px and drawing buffers at
 hidden tabs. Context loss, missing assets and unavailable graphics retain a
 photographic DOM fallback and accessible text. Reduced motion renders one still.
 Listeners, frames, textures, shaders and buffers are released on unmount.
+Resource changes also replace the DOM canvas, so late artwork preferences cannot
+reuse a context that cleanup has already released.
 
 The actual generated result stays an HTML image. Only same-origin bundled
 photographic location assets are used for the decorative developing image when

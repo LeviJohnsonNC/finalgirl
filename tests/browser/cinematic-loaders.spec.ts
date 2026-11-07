@@ -218,3 +218,24 @@ test('blood still grows and receives visible droplets after a three-minute wait'
   const extended = await at(300);
   expect(extended.ink).toBeGreaterThan(late.ink);
 });
+
+
+test('portrait remains animated after artwork preferences settle and reveals the real poster', async ({ page, archive }, info) => {
+  archive.autoImages = true; archive.aiCastingArt = false;
+  const formData = { finalHorrorLevel: 4, finalGirlHealth: 2, killerHealth: 0, weaponUsed: 'Flashlight', victimsSaved: 3, victimsKilled: 6, endingSubLocation: 'Camp', gameHighlights: '' };
+  await archive.install(page, { draft: { ...draft, phase: 'ending', endingStory: opening, result: { ...selection, id: gameId, timestamp: 1, outcome: 'won' }, formData } });
+  await page.route(image, route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/scrapbooks/final-girl-cover.png') }));
+  await resume(page);
+  const canvas = page.locator('.darkroom-loader--portrait canvas');
+  await expect(canvas).toHaveAttribute('data-renderer', 'webgl');
+  await expect.poll(() => Boolean(archive.releaseImage)).toBe(true);
+  // Keep the check after async settings and preview changes have settled.
+  await page.waitForTimeout(500);
+  await expect(canvas).toHaveAttribute('data-renderer', 'webgl');
+  archive.releaseImage!();
+  await expect(page.locator('.darkroom-developed-print img')).toHaveAttribute('src', image);
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: info.outputPath('portrait-real-photo.png'), fullPage: true });
+  await expect(page.locator('.narration-photo-development')).toHaveCount(0);
+  await expect(page.getByRole('img', { name: 'Movie poster', exact: true })).toBeVisible();
+});
