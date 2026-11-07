@@ -64,7 +64,7 @@
 }
 /* Playback appears in a reserved line, so starting/stopping never moves prose. */
 .ending-transport {
-  min-height: 24px;
+  min-height: 44px;
 }
 .ending-transport > div {
   max-width: none;
@@ -204,7 +204,7 @@
     min-height: 50px;
   }
   .ending-transport {
-    min-height: 24px;
+    min-height: 44px;
   }
   .narration-layout--ending .narration-reader {
     order: 0;

@@ -157,7 +157,7 @@ test('images-off ending keeps unknown fate honest and a readable text-only layou
     await route.fulfill({ headers: { 'access-control-allow-origin': '*' }, json: { audioContent: 'UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=', voiceId: 'Test', persona: 'cold' } });
   });
   await page.getByRole('button', { name: 'Narrate', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Generating...', exact: true })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Cancel narration', exact: true })).toBeEnabled();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath('ending-narration-generating.png'), fullPage: true });
   await expect.poll(() => Boolean(releaseNarration)).toBe(true);

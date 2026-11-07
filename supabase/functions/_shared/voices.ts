@@ -56,8 +56,8 @@ export const PERSONAS: Record<string, VoicePersona> = {
       FALLBACK_VOICE,
     ],
   },
-  // She survived. Big trailer-announcer read — the only time this app is
-  // allowed to sound triumphant, and even then it should feel a little wrong.
+  // Existing survivor casting, pending a listening comparison. TTS-2 direction
+  // now asks for exhausted relief rather than the former trailer-announcer read.
   survivor: {
     label: "survivor",
     candidates: [

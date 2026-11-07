@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { clearDiscardedNarration } from '../discardNarration';
+import { getFilmIdByLocation } from '@/types/gameData';
 import {
   getNarrationClip,
   putNarrationClip,
@@ -28,4 +30,18 @@ describe('device audio cache', () => {
     expect(await getNarrationClip('cache-limit', 'clip-0')).toBeNull();
     expect(await getNarrationClip('cache-limit', 'clip-24')).not.toBeNull();
   });
+});
+
+
+it('discard removes an old unassociated v2 recording while retaining another owner’s clip', async () => {
+  const text = 'An old saved opening.';
+  const casting = { kind: 'intro', filmId: getFilmIdByLocation('Camp Happy Trails') };
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify({ version: 2, text, casting })));
+  const legacyKey = Array.from(new Uint8Array(hash), byte => byte.toString(16).padStart(2, '0')).join('');
+  const clip = new Blob(['legacy audio']);
+  await putNarrationClip('legacy-owner', legacyKey, clip);
+  await putNarrationClip('other-owner', legacyKey, clip);
+  await clearDiscardedNarration('legacy-owner', 'discarded-game', { discarded: true, history: { intro_story: text, location: 'Camp Happy Trails' } });
+  expect(await getNarrationClip('legacy-owner', legacyKey)).toBeNull();
+  expect(await getNarrationClip('other-owner', legacyKey)).toBe(clip);
 });

@@ -4,11 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { createPrimedAudio, base64ToBlob } from '@/lib/audioUtils';
 import {
+  deleteNarrationClip,
   getNarrationClip,
   putNarrationClip,
   narrationKey,
 } from '@/lib/play/narrationCache';
 import { claimNarrator } from '@/lib/play/narrationCoordinator';
+import { NarrationPcmPlayer } from '@/lib/narration/pcmPlayer';
+import { narrationMessages, NARRATION_PROFILE } from '../../supabase/functions/_shared/narration';
 import { isGameDiscarded } from '@/lib/discardedGames';
 export interface NarrationCasting {
   kind: 'intro' | 'ending' | 'death';
@@ -26,6 +29,11 @@ export const useNarration = () => {
   ownerRef.current = owner;
   const [isNarrating, setIsNarrating] = useState(false),
     [isPlaying, setIsPlaying] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
+  const pcmRef = useRef<NarrationPcmPlayer | null>(null);
+  const pausedRef = useRef(false);
   const [progress, setProgress] = useState({ elapsed: 0, duration: 0 });
   const alive = useRef(true),
     serial = useRef(0);
@@ -34,12 +42,14 @@ export const useNarration = () => {
   const controllerRef = useRef<AbortController | null>(null),
     releaseRef = useRef<(() => void) | null>(null);
   const cleanup = useCallback(() => {
+    pcmRef.current?.dispose(); pcmRef.current = null;
     const audio = audioRef.current;
     audioRef.current = null;
     if (audio) {
       audio.onended = null;
       audio.onerror = null;
       audio.ontimeupdate = null;
+      audio.onwaiting = null; audio.onplaying = null;
       audio.pause();
       audio.src = '';
     }
@@ -57,6 +67,7 @@ export const useNarration = () => {
     cleanup();
     if (alive.current) {
       setIsNarrating(false);
+      setIsPaused(false); pausedRef.current = false; setIsBuffering(false); setIsComplete(false);
       setIsPlaying(false);
       setProgress({ elapsed: 0, duration: 0 });
     }
@@ -91,11 +102,28 @@ export const useNarration = () => {
       // This call must precede every await for iOS user-gesture activation.
       const audio = createPrimedAudio();
       audioRef.current = audio;
+      const started = performance.now();
+      let firstAudio = false;
+      const update = (state: { elapsed: number; duration: number; playing: boolean; buffering: boolean; complete: boolean }) => {
+        if (!current() || state.duration === 0) return;
+        if (!firstAudio && state.duration > 0 && state.playing && !state.buffering) {
+          firstAudio = true;
+          console.info('narration_first_audio', { milliseconds: Math.round(performance.now() - started), streamed: true });
+        }
+        setProgress(previous => previous.elapsed === state.elapsed && previous.duration === state.duration ? previous : { elapsed: state.elapsed, duration: state.duration });
+        setIsPlaying(state.playing); setIsPaused(!state.playing); pausedRef.current = !state.playing;
+        setIsBuffering(state.buffering); setIsComplete(state.complete);
+        if (state.duration > 0) setIsNarrating(false);
+      };
+      if (typeof AudioContext !== 'undefined') {
+        try { pcmRef.current = new NarrationPcmPlayer(update, () => { if (current()) stopNarration(); }); }
+        catch { /* Legacy whole-clip fallback still supports manual playback. */ }
+      }
       setIsNarrating(true);
       setIsPlaying(false);
       const timer = setTimeout(
         () => controller.abort(),
-        casting?.kind === 'death' ? 45000 : 150000,
+        150000,
       );
       try {
         if (requestOwner === 'guest')
@@ -124,6 +152,7 @@ export const useNarration = () => {
               },
               body: JSON.stringify({
                 text,
+                stream: Boolean(pcmRef.current),
                 kind: casting?.kind,
                 outcome: casting?.outcome,
                 filmId: casting?.filmId ?? undefined,
@@ -132,6 +161,31 @@ export const useNarration = () => {
               signal: controller.signal,
             },
           );
+          if (response.ok && response.headers.get('Content-Type')?.includes('application/x-ndjson')) {
+            const player = pcmRef.current;
+            if (!player || !response.body) throw new Error('Streaming audio is unavailable.');
+            let complete = false, begun = false;
+            for await (const message of narrationMessages(response.body)) {
+              if (!current()) return;
+              if (message.type === 'error') throw new Error(String(message.error).slice(0, 200));
+              if (message.type === 'start') {
+                if (begun || message.sampleRate !== 48000 || message.profile !== NARRATION_PROFILE) throw new Error('The narrator needs an app refresh.');
+                begun = true;
+              } else if (message.type === 'audio') {
+                if (!begun || complete || typeof message.audio !== 'string') throw new Error('Invalid narration stream.');
+                player.append(message.audio);
+              } else if (message.type === 'done') {
+                if (!begun || complete) throw new Error('Invalid narration completion.');
+                complete = true;
+              }
+            }
+            if (!current()) return;
+            if (!complete) throw new Error('Narration was interrupted. Your story is still saved.');
+            player.finish();
+            void putNarrationClip(requestOwner, key, player.toBlob(), gameId);
+            setIsComplete(true);
+            return;
+          }
           const data = await response.json();
           if (!current()) return;
           if (!response.ok || data.error)
@@ -151,6 +205,7 @@ export const useNarration = () => {
           void putNarrationClip(requestOwner, key, blob, gameId);
         }
         if (!current()) return;
+        pcmRef.current?.dispose(); pcmRef.current = null;
         const url = URL.createObjectURL(blob);
         urlRef.current = url;
         audio.src = url;
@@ -161,32 +216,35 @@ export const useNarration = () => {
               duration: Number.isFinite(audio.duration) ? audio.duration : 0,
             });
         };
+        audio.onwaiting = () => { if (current()) setIsBuffering(true); };
+        audio.onplaying = () => { if (current()) setIsBuffering(false); };
         audio.onended = () => {
           if (current()) stopNarration();
         };
         audio.onerror = () => {
           if (current()) {
+            void deleteNarrationClip(requestOwner, key);
             stopNarration();
             toast.error(
-              'Audio playback failed. The saved clip can be replayed.',
+              'Audio playback failed. Tap Narrate to create a fresh recording.',
             );
           }
         };
         await audio.play();
-        if (current()) setIsPlaying(true);
+        if (current()) { setIsPlaying(true); setIsComplete(true); }
       } catch (reason) {
         if (current()) {
           toast.error('Narration failed', {
             description:
               reason instanceof Error ? reason.message : 'Try again later.',
           });
-          cleanup();
+          cleanup(); setIsPlaying(false); setIsPaused(false); setIsBuffering(false);
         } else if (
           alive.current &&
           serial.current === request &&
           ownerRef.current === requestOwner
         ) {
-          cleanup();
+          cleanup(); setIsPlaying(false); setIsPaused(false); setIsBuffering(false);
           toast.error('Narration timed out. Your story is still saved.');
         }
       } finally {
@@ -204,5 +262,25 @@ export const useNarration = () => {
     },
     [owner, cleanup, stopNarration],
   );
-  return { isNarrating, isPlaying, progress, toggleNarration, stopNarration };
+  const pauseResume = useCallback(async () => {
+    const pcm = pcmRef.current, audio = audioRef.current;
+    if (!audio) return;
+    try {
+      if (pausedRef.current) { if (pcm) await pcm.resume(); else await audio.play(); }
+      else { if (pcm) pcm.pause(); else audio.pause(); }
+      if (audioRef.current !== audio) return;
+      const paused = !pausedRef.current;
+      // PCM publishes state itself; HTMLAudio needs an explicit state update.
+      if (!pcm) { pausedRef.current = paused; setIsPaused(paused); setIsPlaying(!paused); }
+    } catch { toast.error('Playback could not resume. Try again.'); }
+  }, []);
+  const seek = useCallback((seconds: number) => {
+    if (pcmRef.current) pcmRef.current.seek(seconds);
+    else if (audioRef.current) {
+      const a = audioRef.current;
+      a.currentTime = Math.max(0, Math.min(seconds, Number.isFinite(a.duration) ? a.duration : 0));
+      setProgress({ elapsed: a.currentTime, duration: Number.isFinite(a.duration) ? a.duration : 0 });
+    }
+  }, []);
+  return { isNarrating, isPlaying, isPaused, isBuffering, isComplete, progress, toggleNarration, stopNarration, pauseResume, seek };
 };

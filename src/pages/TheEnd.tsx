@@ -67,7 +67,7 @@ const TheEnd = ({
   const [awaitingRefresh, setAwaitingRefresh] = useState(Boolean(needsRefresh));
   const [error, setError] = useState<string | null>(null);
   const [posterImageUrl, setPosterImageUrl] = useState<string>(initialPosterImageUrl ?? '');
-  const { isNarrating, isPlaying, progress, toggleNarration } = useNarration();
+  const { isNarrating, isPlaying, isPaused, isBuffering, isComplete, pauseResume, seek, progress, toggleNarration } = useNarration();
   const {
     isAuthenticated,
     autoGenerate,
@@ -295,9 +295,9 @@ const TheEnd = ({
             ? <button onClick={generateEnding} className="narration-button narration-button--primary">Update ending</button>
             : <button disabled={!canSaveEnding} onClick={() => onSave(endingStory!, posterImageUrl || undefined)}
                 className="narration-button narration-button--primary">Save to scrapbook</button>}
-          {endingStory && <button onClick={handleNarrate} disabled={isNarrating || isGenerating || Boolean(error)} className="narration-button narration-button--narrate">
-            {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : isPlaying ? <VolumeX className="w-4 h-4" aria-hidden="true" /> : <Volume2 className="w-4 h-4" aria-hidden="true" />}
-            {isNarrating ? 'Generating...' : isPlaying ? 'Stop' : 'Narrate'}
+          {endingStory && <button onClick={handleNarrate} disabled={isGenerating || Boolean(error)} className="narration-button narration-button--narrate">
+            {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : (isPlaying || isPaused) ? <VolumeX className="w-4 h-4" aria-hidden="true" /> : <Volume2 className="w-4 h-4" aria-hidden="true" />}
+            {isNarrating ? 'Cancel narration' : isPlaying || isPaused ? 'Stop' : 'Narrate'}
           </button>}
         </div>
         <div className="ending-record-actions">
@@ -305,7 +305,7 @@ const TheEnd = ({
           <button type="button" onClick={() => onSave('', undefined)}>Save record only</button>
         </div>
         {isGeneratingImage && !posterImageUrl && <p className="ending-poster-save-note">The poster is developing. Wait to include it, or save the story now.</p>}
-        <div className="ending-transport">{isPlaying && <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} />}</div>
+        <div className="ending-transport">{(isPlaying || isPaused) && <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} paused={isPaused} buffering={isBuffering} complete={isComplete} onPauseResume={() => void pauseResume()} onSeek={seek} />}</div>
       </>}
       image={showPosterSlot ? <NarrationPhoto previewUrl={aiEnabled ? locationImages[result.location] : undefined} variant="poster" imageUrl={posterImageUrl} isGenerating={isGeneratingImage} error={imageError} onRetry={() => developPoster(posterImageUrl || undefined)} caption={`${result.finalGirl} vs ${result.killer}`} /> : undefined}
     >
