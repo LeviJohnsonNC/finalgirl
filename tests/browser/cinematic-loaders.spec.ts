@@ -10,8 +10,28 @@ async function resume(page: import('@playwright/test').Page) {
   await page.locator('.narration-title').waitFor();
 }
 
+async function holdLoaderTexture(page: import('@playwright/test').Page, assetName: string) {
+  await page.addInitScript(name => {
+    // The DOM still can load while its WebGL texture deliberately waits.
+    const NativeImage = window.Image;
+    let held = true;
+    window.addEventListener('release-loader-texture', () => { held = false; }, { once: true });
+    window.Image = class extends NativeImage {
+      get src() { return super.src; }
+      set src(url: string) {
+        if (held && url.includes(`/assets/${name}-`) && url.endsWith('.webp')) {
+          window.addEventListener('release-loader-texture', () => { super.src = url; }, { once: true });
+        } else {
+          super.src = url;
+        }
+      }
+    };
+  }, assetName);
+}
+
 test('story blood and darkroom appear in the real generation flow and hand off cleanly', async ({ page, archive }, info) => {
   archive.autoImages = true; archive.aiCastingArt = true;
+  await holdLoaderTexture(page, 'developer-tray');
   if (info.project.name === 'desktop') await page.setViewportSize({ width: 1440, height: 900 });
   await archive.install(page, { draft: { ...draft, introStory: undefined } });
   let finishStory!: () => void;
@@ -33,7 +53,13 @@ test('story blood and darkroom appear in the real generation flow and hand off c
   await expect.poll(() => Boolean(archive.releaseImage)).toBe(true);
   await expect(page.getByText('Developing the nightmare')).toBeVisible();
   await page.locator('.darkroom-loader').scrollIntoViewIfNeeded();
-  await expect(page.locator('.darkroom-loader canvas')).toHaveAttribute('data-renderer', 'webgl');
+  const canvas = page.locator('.darkroom-loader canvas');
+  const tray = page.locator('.darkroom-fallback .darkroom-tray');
+  await expect(canvas).toHaveAttribute('data-renderer', 'loading');
+  await expect(tray).toBeVisible();
+  await tray.evaluate((image: HTMLImageElement) => image.decode());
+  await page.evaluate(() => window.dispatchEvent(new Event('release-loader-texture')));
+  await expect(canvas).toHaveAttribute('data-renderer', 'webgl');
   await page.waitForTimeout(1800);
   await page.screenshot({ path: info.outputPath('image-loader.png'), fullPage: true });
   archive.releaseImage!();
@@ -43,6 +69,7 @@ test('story blood and darkroom appear in the real generation flow and hand off c
   finishDownload();
   await expect(page.locator('.darkroom-developed-print img')).toHaveAttribute('src', image);
   await expect(page.getByText('Your photograph is ready')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'View scene still full size' })).toBeEnabled();
   await page.screenshot({ path: info.outputPath('actual-photograph-in-bath.png'), fullPage: true });
   await expect(page.getByRole('img', { name: 'Scene still', exact: true })).toBeVisible();
   await expect(page.locator('.narration-photo-development')).toHaveCount(0);
@@ -236,12 +263,21 @@ test('blood still grows and receives visible droplets after a three-minute wait'
 
 
 test('portrait remains animated after artwork preferences settle and reveals the real poster', async ({ page, archive }, info) => {
+  if (info.project.name === 'desktop') await page.setViewportSize({ width: 1024, height: 530 });
+  await holdLoaderTexture(page, 'developer-tray-portrait');
   archive.autoImages = true; archive.aiCastingArt = false;
   const formData = { finalHorrorLevel: 4, finalGirlHealth: 2, killerHealth: 0, weaponUsed: 'Flashlight', victimsSaved: 3, victimsKilled: 6, endingSubLocation: 'Camp', gameHighlights: '' };
   await archive.install(page, { draft: { ...draft, phase: 'ending', endingStory: opening, result: { ...selection, id: gameId, timestamp: 1, outcome: 'won' }, formData } });
   await page.route(image, route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/scrapbooks/final-girl-cover.png') }));
   await resume(page);
   const canvas = page.locator('.darkroom-loader--portrait canvas');
+  const tray = page.locator('.darkroom-loader--portrait .darkroom-fallback .darkroom-tray');
+  await expect(canvas).toHaveAttribute('data-renderer', 'loading');
+  await expect(tray).toBeVisible();
+  await tray.evaluate((image: HTMLImageElement) => image.decode());
+  if (info.project.name === 'desktop') expect((await tray.boundingBox())!.height).toBeGreaterThan(60);
+  await page.screenshot({ path: info.outputPath('portrait-first-frame.png') });
+  await page.evaluate(() => window.dispatchEvent(new Event('release-loader-texture')));
   await expect(canvas).toHaveAttribute('data-renderer', 'webgl');
   await expect.poll(() => Boolean(archive.releaseImage)).toBe(true);
   // Keep the check after async settings and preview changes have settled.
@@ -249,8 +285,24 @@ test('portrait remains animated after artwork preferences settle and reveals the
   await expect(canvas).toHaveAttribute('data-renderer', 'webgl');
   archive.releaseImage!();
   await expect(page.locator('.darkroom-developed-print img')).toHaveAttribute('src', image);
-  await page.waitForTimeout(500);
+  await expect(page.getByRole('button', { name: 'View movie poster full size' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Save to scrapbook', exact: true })).toBeEnabled();
   await page.screenshot({ path: info.outputPath('portrait-real-photo.png'), fullPage: true });
   await expect(page.locator('.narration-photo-development')).toHaveCount(0);
   await expect(page.getByRole('img', { name: 'Movie poster', exact: true })).toBeVisible();
+});
+
+test('the ending starts with a pinprick while its graphics initialize', async ({ page, archive }) => {
+  await holdLoaderTexture(page, 'blood-stain');
+  const formData = { finalHorrorLevel: 4, finalGirlHealth: 2, killerHealth: 0, victimsSaved: 1 };
+  await archive.install(page, { draft: { ...draft, phase: 'ending', result: { ...selection, id: gameId, timestamp: 1, outcome: 'won' }, formData } });
+  await page.route('**/functions/v1/generate-ending', () => new Promise(() => {}));
+  await resume(page);
+  const canvas = page.locator('.blood-loader canvas');
+  const stain = page.locator('.blood-fallback');
+  await expect(canvas).toHaveAttribute('data-renderer', 'loading');
+  await expect(stain).toBeVisible();
+  await expect(stain).toHaveCSS('clip-path', 'circle(2% at 47% 49%)');
+  await page.evaluate(() => window.dispatchEvent(new Event('release-loader-texture')));
+  await expect(canvas).toHaveAttribute('data-renderer', 'webgl');
 });

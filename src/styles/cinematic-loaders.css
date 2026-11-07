@@ -6,7 +6,7 @@
 .material-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .blood-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding-block: 4px 12px; }
 .blood-loader-art { position: relative; width: clamp(140px, 28vh, 290px); max-width: 78%; aspect-ratio: 1; }
-.blood-fallback { position: absolute; top: 2.5%; left: 0; width: 100%; height: 79%; object-fit: fill; }
+.blood-fallback { position: absolute; top: 2.5%; left: 0; width: 100%; height: 90%; object-fit: fill; clip-path: circle(2% at 47% 49%); }
 .blood-loader-art:has([data-renderer='webgl']) .blood-fallback { visibility: hidden; }
 .darkroom-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 10px; padding: 10px 4px 15px; background: #090807; }
 .darkroom-loader-art { position: relative; width: 96%; aspect-ratio: 3 / 2; transform: rotate(-3deg); }
@@ -47,9 +47,6 @@
 .darkroom-loader .darkroom-loader-art { width: min(94cqw, calc((100cqh - 72px) * 1.5)); max-height: none; flex: none; }
 .darkroom-loader--portrait .darkroom-loader-art { width: min(88cqw, calc((100cqh - 90px) * 2 / 3)); }
 .narration-photo-error button { margin-left: 8px; text-decoration: underline; min-height: 36px; }
-.blood-loader-art:has([data-renderer='loading']) .blood-fallback,
-.darkroom-loader-art:has([data-renderer='loading']) .darkroom-fallback { visibility: hidden; }
-.blood-fallback { height: 90%; }
 .narration-layout--ending .narration-reader-state:has(.blood-loader) { min-height: 100%; }
 .narration-layout--ending .blood-loader-art { width: clamp(160px, 34vh, 290px); }
 .narration-prose { animation: narration-prose-arrive .3s ease-out both; }
@@ -82,12 +79,23 @@
 .darkroom-loader .darkroom-loader-art { width: min(90cqw, calc((100cqh - 90px) * 1.5)); }
 .darkroom-loader--portrait .darkroom-loader-art { width: min(86cqw, calc((100cqh - 102px) * 2 / 3)); }
 .darkroom-loader--portrait .cinematic-loader-title { font-size: clamp(14px, 6cqw, 23px); }
+@container (max-height: 220px) {
+  .darkroom-loader--portrait .darkroom-loader-art { width: min(80cqw, calc((100cqh - 65px) * 2 / 3)); }
+  .darkroom-loader--portrait .cinematic-loader-title { font-size: clamp(10px, 10cqw, 14px); letter-spacing: .07em; }
+  .darkroom-loader--portrait .cinematic-loader-status { margin-top: 4px; font-size: 9px; line-height: 1.25; }
+}
+.darkroom-compact-status { display: none; }
+@container (max-height: 145px) {
+  .darkroom-loader--portrait .darkroom-loader-art { width: min(85cqw, calc((100cqh - 24px) * 2 / 3)); }
+  .darkroom-loader--portrait .cinematic-loader-copy > :not(.darkroom-compact-status) { display: none; }
+  .darkroom-loader--portrait .darkroom-compact-status { display: block; margin: 0; }
+}
 /* Only the decoded, completed result enters this DOM layer. No cross-origin
    canvas upload, progressive-preview claim, or extra generation request. */
 .darkroom-developed-print {
   position: absolute; left: 19.34%; top: 26.54%; width: 63.32%; height: 54.42%;
   transform: rotate(-3.15deg); overflow: hidden; background: #100e0b;
-  animation: photograph-develop .85s ease-out both;
+  animation: photograph-develop calc(var(--photo-reveal-duration) * .54) ease-out both;
 }
 .darkroom-developed-print img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .darkroom-developed-print::after {
@@ -102,7 +110,7 @@
   to { opacity: 1; filter: sepia(.18) brightness(.95) blur(0); }
 }
 .narration-photo-development--revealing {
-  opacity: 1; pointer-events: none; animation: photograph-handoff 1.6s ease both;
+  opacity: 1; pointer-events: none; animation: photograph-handoff var(--photo-reveal-duration) ease both;
 }
 @keyframes photograph-handoff { 0%, 64% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
@@ -135,7 +143,7 @@
 }
 /* Graphics fallback follows the same small-to-large progression. */
 .blood-loader-art:has([data-renderer='fallback']) .blood-fallback {
-  clip-path:circle(2% at 47% 49%); animation:blood-fallback-spread 150s ease-out forwards;
+  animation: blood-fallback-spread 150s ease-out forwards;
 }
 @keyframes blood-fallback-spread { 0% { clip-path:circle(2% at 47% 49%); } 10% { clip-path:circle(12% at 47% 49%); } 40% { clip-path:circle(32% at 47% 49%); } 100% { clip-path:circle(65% at 47% 49%); } }
 @media (prefers-reduced-motion:reduce) { .blood-loader-art:has([data-renderer='fallback']) .blood-fallback { animation:none; clip-path:circle(30% at 47% 49%); } }
