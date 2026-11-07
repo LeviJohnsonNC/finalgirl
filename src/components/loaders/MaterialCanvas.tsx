@@ -132,5 +132,8 @@ export function MaterialCanvas({ artwork, photograph, shader, portrait = false, 
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
   }, [artwork, photograph, shader, portrait, inspectTime, seed]);
-  return <canvas ref={canvasRef} className="material-canvas" data-renderer={renderer} style={{ opacity: renderer === 'webgl' ? 1 : 0 }} aria-hidden="true" />;
+  // Releasing a WebGL context is terminal for that canvas. A resource change
+  // (e.g. loaded artwork preferences) must initialize a new DOM canvas too.
+  const contextKey = JSON.stringify([artwork, photograph, shader, portrait, inspectTime, seed]);
+  return <canvas key={contextKey} ref={canvasRef} className="material-canvas" data-renderer={renderer} style={{ opacity: renderer === 'webgl' ? 1 : 0 }} aria-hidden="true" />;
 }

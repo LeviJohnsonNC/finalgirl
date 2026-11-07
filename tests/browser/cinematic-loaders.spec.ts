@@ -40,6 +40,9 @@ test('story blood and darkroom appear in the real generation flow and hand off c
   await expect(page.getByText('Bringing the photograph into focus')).toBeVisible();
   await expect(page.locator('.narration-photo-mount')).toHaveAttribute('aria-busy', 'true');
   finishDownload();
+  await expect(page.locator('.darkroom-developed-print img')).toHaveAttribute('src', image);
+  await expect(page.getByText('Your photograph is ready')).toBeVisible();
+  await page.screenshot({ path: info.outputPath('actual-photograph-in-bath.png'), fullPage: true });
   await expect(page.getByRole('img', { name: 'Scene still', exact: true })).toBeVisible();
   await expect(page.locator('.narration-photo-development')).toHaveCount(0);
   await expect(page.locator('.narration-photo-mount')).toHaveAttribute('aria-busy', 'false');
@@ -134,4 +137,105 @@ test('a permanently missing saved photograph can be explicitly reshot', async ({
   await expect.poll(() => Boolean(archive.releaseImage)).toBe(true); archive.releaseImage!();
   await expect(page.getByRole('img', { name: 'Scene still', exact: true })).toHaveAttribute('src', image);
   await expect(page.getByRole('region', { name: 'Opening narration' })).toContainText(opening);
+});
+
+for (const viewport of [{ width: 1024, height: 530 }, { width: 1024, height: 600 }, { width: 1280, height: 640 }, { width: 1440, height: 800 }]) {
+  test(`loading fits a ${viewport.width}x${viewport.height} laptop including the subtitle and result controls`, async ({ page, archive }, info) => {
+    await page.setViewportSize(viewport);
+    archive.autoImages = true; archive.aiCastingArt = true;
+    const hunter = { ...selection, killer: 'The Hunter', location: 'Sunnydaze Mall', filmId: 's3-killer-from-tomorrow' };
+    await archive.install(page, { draft: { ...draft, selection: hunter, introStory: undefined } });
+    let finishStory!: () => void;
+    await page.route('**/functions/v1/generate-story', async route => {
+      await new Promise<void>(r => { finishStory = r; });
+      await route.fulfill({ contentType: 'text/event-stream', headers: { 'Access-Control-Allow-Origin': '*' }, body: `data: ${JSON.stringify({ choices: [{ delta: { content: opening } }] })}\n\ndata: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n` });
+    });
+    await resume(page); await page.evaluate(() => document.fonts.ready);
+    await expect(page.locator('.blood-loader canvas')).toHaveAttribute('data-renderer', 'webgl');
+    const fits = () => page.evaluate(() => {
+      const reader = document.querySelector('.narration-reader-scroll')!;
+      return document.documentElement.scrollHeight <= innerHeight + 1 && reader.scrollHeight <= reader.clientHeight + 1;
+    });
+    await expect.poll(fits).toBe(true);
+    await expect(page.getByText('Writing your opening scene')).toBeInViewport();
+    await expect(page.getByRole('button', { name: 'WON', exact: true })).toBeInViewport();
+    await page.screenshot({ path: info.outputPath('laptop-blood.png') });
+    finishStory();
+    await expect(page.locator('.darkroom-loader canvas')).toHaveAttribute('data-renderer', 'webgl');
+    await expect(page.getByText('Your scene is coming into focus')).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true);
+    await page.screenshot({ path: info.outputPath('laptop-darkroom.png') });
+  });
+}
+
+test('blood still grows and receives visible droplets after a three-minute wait', async ({ page, archive }, info) => {
+  await page.addInitScript(() => {
+    const state = window as Window & { bloodTime?: number; bloodPixels?: { ink: number; hash: number } };
+    state.bloodTime = 2;
+    const times = new WeakSet<WebGLUniformLocation>();
+    const proto = WebGLRenderingContext.prototype;
+    const location = proto.getUniformLocation, uniform = proto.uniform1f, draw = proto.drawArrays;
+    proto.getUniformLocation = function(program, name) {
+      const result = location.call(this, program, name);
+      if (name === 'time' && result) times.add(result);
+      return result;
+    };
+    const isBlood = (gl: WebGLRenderingContext) => (gl.canvas as HTMLCanvasElement).closest('.blood-loader');
+    proto.uniform1f = function(location, value) {
+      uniform.call(this, location, location && times.has(location) && isBlood(this) ? state.bloodTime ?? value : value);
+    };
+    proto.drawArrays = function(mode, first, count) {
+      draw.call(this, mode, first, count);
+      if (!isBlood(this)) return;
+      const pixels = new Uint8Array(this.drawingBufferWidth * this.drawingBufferHeight * 4);
+      this.readPixels(0, 0, this.drawingBufferWidth, this.drawingBufferHeight, this.RGBA, this.UNSIGNED_BYTE, pixels);
+      let ink = 0, hash = 0;
+      for (let i = 0; i < pixels.length; i += 4) {
+        if (pixels[i + 3] > 128) ink++;
+        hash = (Math.imul(hash, 31) + pixels[i] + pixels[i + 3]) | 0;
+      }
+      state.bloodPixels = { ink, hash };
+    };
+  });
+  await archive.install(page, { draft: { ...draft, introStory: undefined } });
+  await page.route('**/functions/v1/generate-story', () => new Promise(() => {}));
+  await resume(page);
+  await expect(page.locator('.blood-loader canvas')).toHaveAttribute('data-renderer', 'webgl');
+  const pixels = () => page.evaluate(() => (window as Window & { bloodPixels?: { ink: number; hash: number } }).bloodPixels!);
+  const at = async (time: number) => {
+    const previous = (await pixels()).hash;
+    await page.evaluate(t => { (window as Window & { bloodTime?: number }).bloodTime = t; }, time);
+    await expect.poll(async () => (await pixels()).hash).not.toBe(previous);
+    return pixels();
+  };
+  const early = await pixels();
+  const mid = await at(20);
+  const late = await at(180);
+  expect(mid.ink).toBeGreaterThan(early.ink * 1.2);
+  expect(late.ink).toBeGreaterThan(mid.ink * 1.1);
+  await page.screenshot({ path: info.outputPath('blood-three-minutes.png'), fullPage: true });
+  await at(181.1); // Different late frame: arrivals continue after the stain expands.
+  const extended = await at(300);
+  expect(extended.ink).toBeGreaterThan(late.ink);
+});
+
+
+test('portrait remains animated after artwork preferences settle and reveals the real poster', async ({ page, archive }, info) => {
+  archive.autoImages = true; archive.aiCastingArt = false;
+  const formData = { finalHorrorLevel: 4, finalGirlHealth: 2, killerHealth: 0, weaponUsed: 'Flashlight', victimsSaved: 3, victimsKilled: 6, endingSubLocation: 'Camp', gameHighlights: '' };
+  await archive.install(page, { draft: { ...draft, phase: 'ending', endingStory: opening, result: { ...selection, id: gameId, timestamp: 1, outcome: 'won' }, formData } });
+  await page.route(image, route => route.fulfill({ contentType: 'image/png', path: resolve('src/assets/scrapbooks/final-girl-cover.png') }));
+  await resume(page);
+  const canvas = page.locator('.darkroom-loader--portrait canvas');
+  await expect(canvas).toHaveAttribute('data-renderer', 'webgl');
+  await expect.poll(() => Boolean(archive.releaseImage)).toBe(true);
+  // Keep the check after async settings and preview changes have settled.
+  await page.waitForTimeout(500);
+  await expect(canvas).toHaveAttribute('data-renderer', 'webgl');
+  archive.releaseImage!();
+  await expect(page.locator('.darkroom-developed-print img')).toHaveAttribute('src', image);
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: info.outputPath('portrait-real-photo.png'), fullPage: true });
+  await expect(page.locator('.narration-photo-development')).toHaveCount(0);
+  await expect(page.getByRole('img', { name: 'Movie poster', exact: true })).toBeVisible();
 });

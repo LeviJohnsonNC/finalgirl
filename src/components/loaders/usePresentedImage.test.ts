@@ -1,6 +1,6 @@
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { usePresentedImage } from './usePresentedImage';
+import { IMAGE_REVEAL_MS, usePresentedImage } from './usePresentedImage';
 
 class PendingImage {
   static instances: PendingImage[] = [];
@@ -37,7 +37,7 @@ describe('image presentation lifecycle', () => {
     await act(async () => { decoded(); await Promise.resolve(); });
     expect(result.current.shown.url).toBe('new');
     expect(result.current.revealing).toBe(true);
-    act(() => vi.advanceTimersByTime(600));
+    act(() => vi.advanceTimersByTime(IMAGE_REVEAL_MS));
     expect(result.current.revealing).toBe(false);
   });
   it('ignores stale decoding after a newer request starts', async () => {
