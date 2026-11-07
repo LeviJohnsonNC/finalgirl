@@ -4615,9 +4615,6 @@
 .image-lightbox-mount img { max-width: calc(96vw - clamp(20px, 3vw, 48px)); max-height: calc(92dvh - clamp(20px, 3vw, 48px)); }
 .image-lightbox-edge { position: absolute; inset: 0; pointer-events: none; border: clamp(12px, 1.7vw, 28px) solid transparent; border-image: url('./assets/narration-paper-frame.webp') 125 stretch; }
 .image-lightbox > button { z-index: 3; color: #fff4dc; background: #080b0de6; border-radius: 50%; }
-.special-rules-dialog { font-family: Georgia, serif; font-size: 17px; line-height: 1.65; }
-.special-rules-dialog .type-caption { font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.6; }
-.special-rules-dialog .type-body-sm, .special-rules-dialog .rule-paragraph, .special-rules-dialog li { font-family: Georgia, serif; font-size: 17px; line-height: 1.65; }
 
 .scrapbook-artwork-open { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; cursor: zoom-in; }
 .scrapbook-missing-art { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 140px; height: 100%; background: #261f1966; color: #4c3425; border: 1px dashed #6c594366; }

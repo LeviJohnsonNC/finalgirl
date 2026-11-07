@@ -124,41 +124,41 @@ body:has(.rules-cinema) main { padding-bottom: calc(var(--app-footer-h, 64px) + 
 .rule-hero-title h1 { font: 700 clamp(32px, 4vw, 55px)/1.02 var(--font-rules-title); text-transform: uppercase; letter-spacing: .01em; text-wrap: balance; margin: 0; }
 .rule-hero-title h1:focus { outline: none; }
 .rule-hero-title p { margin: 10px 0 0; font: 400 10px/1.5 var(--font-rules-label); text-transform: uppercase; letter-spacing: .12em; color: hsl(var(--rules-muted)); }
-.rules-cinema .rule-paper { margin: 0; padding: 4px clamp(18px, 3vw, 36px) 30px; max-width: none; background: none; border: none; border-radius: 0; }
-.rules-cinema .rule-paper::before, .rules-cinema .rule-paper::after { display: none; }
+.rule-reader-theme .rule-paper { margin: 0; padding: 4px clamp(18px, 3vw, 36px) 30px; max-width: none; background: none; border: none; border-radius: 0; }
+.rule-reader-theme .rule-paper::before, .rule-reader-theme .rule-paper::after { display: none; }
 .rule-article-sections { max-width: 65ch; margin: 0 auto; display: grid; gap: 30px; }
 .rule-article-sections > section { min-width: 0; scroll-margin-top: 145px; }
-.rules-cinema .rule-paper p, .rules-cinema .rule-paper li, .rules-cinema .rule-paper td { font-family: var(--font-rules-body); font-size: 20px; font-weight: 400; line-height: 1.65; letter-spacing: .005em; color: hsl(var(--rules-ink)); }
-.rules-cinema .rule-paper p { margin-top: 0; }
-.rules-cinema .rule-paper li { padding-left: 3px; }
-.rules-cinema .rule-paper li + li { margin-top: 12px; }
-.rules-cinema .rule-paper li::marker { color: hsl(var(--rules-muted)); }
-.rules-cinema .rule-section-heading, .rules-cinema .rule-paper h3, .rules-cinema .rule-paper h4, .rule-glossary h2 { font: 700 25px/1.2 var(--font-rules-title); color: hsl(var(--rules-ink)); letter-spacing: .03em; }
-.rules-cinema .rule-section-heading { margin-bottom: 16px; }
-.rules-cinema .rule-paper h3, .rules-cinema .rule-paper h4 { margin-top: 26px; }
-.rules-cinema .rule-paper p > button, .rules-cinema .rule-paper li button, .rules-cinema .rule-paper td button { color: hsl(var(--rules-ink)); text-decoration-color: hsl(var(--blood-red-legible) / .8); text-decoration-thickness: 1px; font-weight: 600; }
-.rules-cinema .rule-paper p > button:hover, .rules-cinema .rule-paper li button:hover { color: hsl(var(--secondary)); }
-.rules-cinema .rule-callout { padding: 16px 18px 18px; margin: 22px 0; border-radius: 1px 3px 1px 2px; border-left-width: 3px; box-shadow: inset 0 1px 0 hsl(var(--rules-ink) / .03); }
-.rules-cinema .rule-callout-stamp { font: 400 9px/1.5 var(--font-rules-label); letter-spacing: .1em; color: hsl(var(--rules-muted)); margin-bottom: 5px; }
-.rules-cinema .rule-callout-header { align-items: baseline; gap: 8px; margin-bottom: 7px; }
-.rules-cinema .rule-callout-header svg { align-self: center; flex-shrink: 0; }
-.rules-cinema .rule-callout-header > span { font: 700 15px/1.25 var(--font-rules-title); letter-spacing: .08em; }
-.rules-cinema .rule-callout p { font-size: 18px; line-height: 1.6; }
-.rules-cinema .callout-critical { background: hsl(var(--blood-red) / .12); border-color: hsl(var(--blood-red) / .6); border-left-color: hsl(var(--blood-red-legible)); }
-.rules-cinema .callout-critical .rule-callout-header { color: hsl(var(--blood-red-legible)); text-shadow: none; }
-.rules-cinema .rule-example { padding: 18px; margin: 22px 0; background: hsl(var(--card)); border: 1px dashed hsl(var(--rules-muted) / .4); }
-.rules-cinema .rule-example-stamp { justify-content: start; flex-wrap: wrap; gap: 8px 16px; }
-.rules-cinema .rule-example-stamp span { font: 700 13px/1.5 var(--font-rules-label); }
-.rules-cinema .rule-example p { font-size: 18px; }
-.rules-cinema .binder-tabs-wrap { margin: 0 0 24px; }
-.rules-cinema .binder-tabs { border-color: hsl(var(--rules-muted) / .25); padding: 0 0 8px; gap: 6px; }
-.rules-cinema .binder-tab { font: 700 14px/1.2 var(--font-rules-title); min-height: 42px; padding: 10px 14px; border-radius: 1px; border: 1px solid hsl(var(--rules-muted) / .25); color: hsl(var(--rules-muted)); text-transform: uppercase; letter-spacing: .04em; transform: none; }
-.rules-cinema .binder-tab-active { background: hsl(var(--secondary) / .09); color: hsl(var(--secondary)); border-color: hsl(var(--secondary) / .5); }
-.rules-cinema .rule-table th { font: 700 12px/1.4 var(--font-rules-label); padding: 12px; }
-.rules-cinema .rule-table td { font-size: 18px; padding: 12px; }
-.rules-cinema .rule-table { min-width: 380px; }
-.rules-cinema .see-also-tape { font: 700 12px/1.5 var(--font-rules-title); letter-spacing: .06em; min-height: 36px; padding: 7px 12px; }
-.rules-cinema .rule-paper section > div:last-child > span { font: 400 10px/1.5 var(--font-rules-label); }
+.rule-reader-theme .rule-paper p, .rule-reader-theme .rule-paper li, .rule-reader-theme .rule-paper td { font-family: var(--font-rules-body); font-size: 20px; font-weight: 400; line-height: 1.65; letter-spacing: .005em; color: hsl(var(--rules-ink)); }
+.rule-reader-theme .rule-paper p { margin-top: 0; }
+.rule-reader-theme .rule-paper li { padding-left: 3px; }
+.rule-reader-theme .rule-paper li + li { margin-top: 12px; }
+.rule-reader-theme .rule-paper li::marker { color: hsl(var(--rules-muted)); }
+.rule-reader-theme .rule-section-heading, .rule-reader-theme .rule-paper h3, .rule-reader-theme .rule-paper h4, .rule-glossary h2 { font: 700 25px/1.2 var(--font-rules-title); color: hsl(var(--rules-ink)); letter-spacing: .03em; }
+.rule-reader-theme .rule-section-heading { margin-bottom: 16px; }
+.rule-reader-theme .rule-paper h3, .rule-reader-theme .rule-paper h4 { margin-top: 26px; }
+.rule-reader-theme .rule-paper p > button, .rule-reader-theme .rule-paper li button, .rule-reader-theme .rule-paper td button { color: hsl(var(--rules-ink)); text-decoration-color: hsl(var(--blood-red-legible) / .8); text-decoration-thickness: 1px; font-weight: 600; }
+.rule-reader-theme .rule-paper p > button:hover, .rule-reader-theme .rule-paper li button:hover { color: hsl(var(--secondary)); }
+.rule-reader-theme .rule-callout { padding: 16px 18px 18px; margin: 22px 0; border-radius: 1px 3px 1px 2px; border-left-width: 3px; box-shadow: inset 0 1px 0 hsl(var(--rules-ink) / .03); }
+.rule-reader-theme .rule-callout-stamp { font: 400 9px/1.5 var(--font-rules-label); letter-spacing: .1em; color: hsl(var(--rules-muted)); margin-bottom: 5px; }
+.rule-reader-theme .rule-callout-header { align-items: baseline; gap: 8px; margin-bottom: 7px; }
+.rule-reader-theme .rule-callout-header svg { align-self: center; flex-shrink: 0; }
+.rule-reader-theme .rule-callout-header > span { font: 700 15px/1.25 var(--font-rules-title); letter-spacing: .08em; }
+.rule-reader-theme .rule-callout p { font-size: 18px; line-height: 1.6; }
+.rule-reader-theme .callout-critical { background: hsl(var(--blood-red) / .12); border-color: hsl(var(--blood-red) / .6); border-left-color: hsl(var(--blood-red-legible)); }
+.rule-reader-theme .callout-critical .rule-callout-header { color: hsl(var(--blood-red-legible)); text-shadow: none; }
+.rule-reader-theme .rule-example { padding: 18px; margin: 22px 0; background: hsl(var(--card)); border: 1px dashed hsl(var(--rules-muted) / .4); }
+.rule-reader-theme .rule-example-stamp { justify-content: start; flex-wrap: wrap; gap: 8px 16px; }
+.rule-reader-theme .rule-example-stamp span { font: 700 13px/1.5 var(--font-rules-label); }
+.rule-reader-theme .rule-example p { font-size: 18px; }
+.rule-reader-theme .binder-tabs-wrap { margin: 0 0 24px; }
+.rule-reader-theme .binder-tabs { border-color: hsl(var(--rules-muted) / .25); padding: 0 0 8px; gap: 6px; }
+.rule-reader-theme .binder-tab { font: 700 14px/1.2 var(--font-rules-title); min-height: 42px; padding: 10px 14px; border-radius: 1px; border: 1px solid hsl(var(--rules-muted) / .25); color: hsl(var(--rules-muted)); text-transform: uppercase; letter-spacing: .04em; transform: none; }
+.rule-reader-theme .binder-tab:is(.binder-tab-active, [data-state="active"]) { background: hsl(var(--secondary) / .09); color: hsl(var(--secondary)); border-color: hsl(var(--secondary) / .5); }
+.rule-reader-theme .rule-table th { font: 700 12px/1.4 var(--font-rules-label); padding: 12px; }
+.rule-reader-theme .rule-table td { font-size: 18px; padding: 12px; }
+.rule-reader-theme .rule-table { min-width: 380px; }
+.rule-reader-theme .see-also-tape { font: 700 12px/1.5 var(--font-rules-title); letter-spacing: .06em; min-height: 36px; padding: 7px 12px; }
+.rule-reader-theme .rule-paper section > div:last-child > span { font: 400 10px/1.5 var(--font-rules-label); }
 .rule-reader-footer { display: flex; justify-content: space-between; align-items: center; gap: 22px; padding: 22px 0 0; }
 .rule-next { display: flex; align-items: center; justify-content: end; gap: 18px; text-align: right; min-height: 48px; color: hsl(var(--rules-ink)); }
 .rule-next > span { display: flex; flex-direction: column; gap: 5px; font: 700 20px/1.1 var(--font-rules-title); text-transform: uppercase; }
@@ -227,12 +227,12 @@ body:has(.rules-cinema) main { padding-bottom: calc(var(--app-footer-h, 64px) + 
   .rule-hero-title .rule-number { width: 42px; height: 61px; font-size: 29px; }
   .rule-hero-title h1 { font-size: 33px; }
   .rule-hero-title p { margin-top: 7px; font-size: 8px; letter-spacing: .06em; }
-  .rules-cinema .rule-paper { padding: 6px 16px 22px; }
-  .rules-cinema .rule-paper p, .rules-cinema .rule-paper li, .rules-cinema .rule-paper td { font-size: 19px; line-height: 1.6; }
-  .rules-cinema .rule-paper .rule-callout p, .rules-cinema .rule-example p { font-size: 18px; }
-  .rules-cinema .rule-callout { padding: 13px; }
-  .rules-cinema .rule-section-heading { font-size: 24px; }
-  .rules-cinema .binder-tab { font-size: 14px; padding: 10px 12px; }
+  .rule-reader-theme .rule-paper { padding: 6px 16px 22px; }
+  .rule-reader-theme .rule-paper p, .rule-reader-theme .rule-paper li, .rule-reader-theme .rule-paper td { font-size: 19px; line-height: 1.6; }
+  .rule-reader-theme .rule-paper .rule-callout p, .rule-reader-theme .rule-example p { font-size: 18px; }
+  .rule-reader-theme .rule-callout { padding: 13px; }
+  .rule-reader-theme .rule-section-heading { font-size: 24px; }
+  .rule-reader-theme .binder-tab { font-size: 14px; padding: 10px 12px; }
   .rule-reader-footer { gap: 14px; align-items: start; padding-top: 16px; }
   .rule-next > span { font-size: 17px; }
   .rule-next { gap: 9px; }

@@ -5,6 +5,7 @@ import { AlertTriangle, Info, Lightbulb, Pencil } from 'lucide-react';
 
 interface RuleBlockProps {
   block: RuleBlockType;
+  headingId?: string;
   glossary: GlossaryTermType[];
   onJumpTo: (sectionId: string) => void;
 }
@@ -59,7 +60,7 @@ const calloutStyles: Record<string, { className: string; icon: React.ReactNode; 
   },
 };
 
-export const RuleBlock = ({ block, glossary, onJumpTo }: RuleBlockProps) => {
+export const RuleBlock = ({ block, glossary, onJumpTo, headingId }: RuleBlockProps) => {
   switch (block.type) {
     case "groves-setup": return <GrovesBoard setup={block.setup}/>;
     case 'paragraph':
@@ -87,7 +88,7 @@ export const RuleBlock = ({ block, glossary, onJumpTo }: RuleBlockProps) => {
     case 'heading': {
       const Tag = block.level === 2 ? 'h3' : 'h4';
       return (
-        <Tag className="font-title text-base sm:text-lg text-secondary uppercase tracking-wide mt-5 mb-1 flex items-center gap-2 before:content-[''] before:block before:w-1.5 before:h-4 before:bg-secondary/70">
+        <Tag id={headingId} tabIndex={headingId ? -1 : undefined} className="font-title text-base sm:text-lg text-secondary uppercase tracking-wide mt-5 mb-1 flex items-center gap-2 before:content-[''] before:block before:w-1.5 before:h-4 before:bg-secondary/70">
           {block.text}
         </Tag>
       );

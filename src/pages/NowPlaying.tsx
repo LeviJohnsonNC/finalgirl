@@ -10,8 +10,8 @@ import { ModuleControls } from '@/components/play/ModuleControls';
 import { validModuleObservation, moduleState } from '@/lib/play/modules';
 import { newPlayEvent, summarizePlay, type PlayDetails, type PlayEvent } from '@/lib/play/events';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, VolumeX, Loader2, ScrollText } from 'lucide-react';
-import { SpecialRulesModal, getApplicableSpecialRules } from '@/components/SpecialRulesModal';
+import { Volume2, VolumeX, Loader2 } from 'lucide-react';
+import { SpecialRulesModal } from '@/components/SpecialRulesModal';
 import { getModulePromptContext } from '@/data/rules/moduleRules';
 import { getMissionByName } from '@/data/falconwoodMissions';
 import { streamChatCompletion } from '@/lib/streamChatCompletion';
@@ -122,7 +122,6 @@ const NowPlaying = ({
   const tormentorGuidance=tormentorOpening?tormentorOpeningGuidance(tormentorOpening):undefined;
   const visualGuidance=[marrekGuidance,tormentorGuidance,evomorphGuidance,moduleContext?.visualGuidance].filter(Boolean).join('\n');
   const missionData = getMissionByName(mission);
-  const applicableSpecialRules = getApplicableSpecialRules(killer, location);
   // Reserve the image column as soon as there is something to show there —
   // a finished still, one developing, or a failure worth retrying.
   const showImageSlot = Boolean(sceneImageUrl) || isGeneratingImage || Boolean(imageError);
@@ -354,9 +353,9 @@ const NowPlaying = ({
             {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" /> : (isPlaying || isPaused) ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             {isNarrating ? 'Cancel narration' : isPlaying || isPaused ? 'Stop' : 'Narrate'}
           </button>}
-          {applicableSpecialRules.length > 0 && <SpecialRulesModal killer={killer} location={location}>
-            <button className="narration-button narration-button--quiet"><ScrollText className="w-4 h-4 shrink-0" /><span>Special Rules</span></button>
-          </SpecialRulesModal>}
+          <SpecialRulesModal key={JSON.stringify([killer, location])} killer={killer} location={location}>
+            <button type="button" className="narration-button narration-button--quiet special-rules-trigger">Special Rules</button>
+          </SpecialRulesModal>
           {onDiscard && <SessionOptions onDiscard={onDiscard} />}
         </div>
         {(isPlaying || isPaused) && <NarrationTransport elapsed={progress.elapsed} duration={progress.duration} paused={isPaused} buffering={isBuffering} complete={isComplete} onPauseResume={() => void pauseResume()} onSeek={seek} />}
