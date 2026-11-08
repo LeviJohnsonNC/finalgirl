@@ -23,7 +23,14 @@ export function HunterControls({events,onEvent,blocked}:ControlsProps) {
  return <section className="play-hunter" aria-label="Hunter tracking">
   <article aria-label={s.phase==='mark-x'?'Mark X':'Mark V'} className="hunter-model">
    <div className="hunter-model-photo"><ModuleArtwork art={hunterModelArt(s)}/></div>
-   <div className="hunter-model-caption"><h3>{s.phase==='mark-x'?'Mark X':'Mark V'}</h3>{s.phase==='unknown'&&<p>Unrecorded</p>}</div>
+   <div className="hunter-model-caption">
+    <div><h3>{s.phase==='mark-x'?'Mark X':'Mark V'}</h3>{s.phase==='unknown'&&<p>Unrecorded</p>}</div>
+    {s.phase!=='unknown'&&!s.forced&&(
+     <button type="button" className="hunter-transform" disabled={blocked} onClick={()=>act({command:'force-mark-x'})}>
+      Resolve Mark X Terror
+     </button>
+    )}
+   </div>
   </article>
   {s.phase==='unknown'?<details className="hunter-recovery"><summary>Record current Hunter state</summary>
    <label>Active model<PlaySelect aria-label="Current Hunter model" value={legacyPhase} onChange={e=>{const phase=e.target.value as typeof legacyPhase;setLegacyPhase(phase);setLegacyParts(phase==='mark-v'?'':'0');setLegacyCountdown(phase==='mark-x'?'0':'');}}><option value="mark-v">Mark V</option><option value="countdown">Shut down · Countdown</option><option value="mark-x">Mark X</option></PlaySelect></label>
@@ -33,11 +40,10 @@ export function HunterControls({events,onEvent,blocked}:ControlsProps) {
    {legacyAlly==='alive'&&<label>Ally Health<input type="number" min="1" max="99" value={legacyHealth} onChange={e=>setLegacyHealth(e.target.value)}/></label>}
    <button className="hunter-action" disabled={blocked} onClick={()=>act({command:'recover',phase:legacyPhase,remaining:Number(legacyParts),countdown:Number(legacyCountdown),ally:legacyAlly,health:Number(legacyHealth)})}>Record observed state</button>
   </details>:<>
-   <div className="hunter-quiet-actions">
+   {(s.phase==='mark-x'||(s.damage??0)>0)&&<div className="hunter-quiet-actions">
     {s.phase==='mark-x'&&<button className="module-unnamed" disabled={blocked} onClick={()=>act({command:'reboot'})}>System Reboot · recover 4 Health</button>}
-    {!s.forced&&<button className="module-unnamed" disabled={blocked} onClick={()=>act({command:'force-mark-x'})}>Resolve Mark X Terror</button>}
     {s.damage!==null&&s.damage>0&&<button className="module-unnamed" disabled={blocked} onClick={()=>act({command:'end-action'})}>Clear previously recorded partial damage</button>}
-   </div>
+   </div>}
    {fields.recovered===true&&<details className="hunter-recovery"><summary>Record existing Parts</summary><p>Earlier Part locations are not fully recorded.</p><button className="hunter-action" disabled={blocked} onClick={()=>act({command:'record-part',status:'on-board'})}>Record Part on board</button><button className="hunter-action" disabled={blocked} onClick={()=>act({command:'record-part',status:'backpack'})}>Record carried Part</button></details>}
    {s.parts.length>0&&<section className="hunter-parts" aria-label="Recovered Cybernetic Parts"><h3>Cybernetic Parts</h3><div className="hunter-parts-list">{s.parts.map(p=>{
     const installed=p.status==='installed',collected=p.status==='backpack';

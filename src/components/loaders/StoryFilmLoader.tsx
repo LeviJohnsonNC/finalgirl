@@ -7,7 +7,11 @@ import { openingFilmStills } from './openingFilm';
 import { openingFilmShader } from './openingFilmShader';
 import '@/styles/opening-film-loader.css';
 
-export function OpeningFilmLoader({ location, inspectTime }: { location: string; inspectTime?: number }) {
+export function StoryFilmLoader({ location, label = 'Writing your opening scene', inspectTime }: {
+  location: string;
+  label?: string;
+  inspectTime?: number;
+}) {
   const id = useId();
   const [seed] = useState(() => Math.random() * 20);
   const scene = useRef<HTMLDivElement>(null);
@@ -77,7 +81,7 @@ export function OpeningFilmLoader({ location, inspectTime }: { location: string;
     </div>
     <div className="cinematic-loader-copy">
       <p className="cinematic-loader-title">Every story leaves a stain</p>
-      <p className="cinematic-loader-status">Writing your opening scene</p>
+      <p className="cinematic-loader-status">{label}</p>
     </div>
   </div>;
 }

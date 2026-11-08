@@ -47,9 +47,9 @@ Inspect with `npm run dev`, then `/__dev/loaders`. That route and its material-s
 module are omitted from production. Fixed-time controls use a fixed seed; live
 story requests choose a seed once per mounted sequence.
 
-## Amber film gate for opening stories
+## Amber film gate for opening and ending stories
 
-The opening-story wait uses a shared empty film-gate photograph (`film/gate.webp`,
+The opening and ending story waits use a shared empty film-gate photograph (`film/gate.webp`,
 960 × 400) and three distinct widescreen environment photographs (720 × 405) for
 each named location in the catalog. The images were generated from the approved
 amber gate reference and existing location photographs. Each trio uses
@@ -63,8 +63,8 @@ The film moves one frame pitch and seats once. The falling drop and guide bead
 stay in gate coordinates. The smear, pool and trails use film coordinates and
 respect the stock and perforations. Decorative assets and motion are independent
 of the story request. The same film is shown as a still under reduced motion
-or graphics failure. The existing ending uses the standalone blood material.
+or graphics failure.
 
 Use `/__dev/loaders` to choose a location and inspect the film before, during
-and after the pull-through. Verify the mounted opening at 1024 × 530 and 320 px
-wide and inspect both the impact and the five-minute settled state.
+and after the pull-through. Verify both readers at 1024 × 530 and 320 px wide.
+Inspect the impact and the five-minute settled state.
