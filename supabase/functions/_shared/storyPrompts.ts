@@ -1,3 +1,4 @@
+import { SLAYER, SLAYER_RULE_GUIDANCE, SLAYER_VISUAL } from "./play/slayer.ts";
 import { HUNTER, HUNTER_VISUAL } from './play/hunter.ts';
 import { INTRUDERS, INTRUDER_VISUAL } from "./play/intruders.ts";
 import {marrekOpeningGuidance} from './play/marrekWarehouse.ts';
@@ -48,6 +49,10 @@ export function buildOpeningUser(data: unknown): string {
     return { identity, specialRules };
   };
   const threat = split(killer), place = split(location);
+  if (threat.identity.name === SLAYER) {
+    threat.identity.appearance = SLAYER_VISUAL;
+    threat.specialRules = SLAYER_RULE_GUIDANCE + ' The opening begins before any crossing or Rift Collapse.';
+  }
   if(threat.identity.name===HUNTER){threat.identity.appearance=HUNTER_VISUAL;threat.specialRules='The original pursuer is hooded Mark V. Mark X has not arrived and no repaired Ally is established. Do not foreshadow by depicting unobserved repairs, arrivals or extra attacks.';}
   if (threat.identity.name===INTRUDERS) {
     threat.identity.appearance=INTRUDER_VISUAL;

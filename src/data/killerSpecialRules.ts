@@ -1,3 +1,4 @@
+import { SLAYER_RULE_GUIDANCE } from "@/lib/play/slayer";
 import { INTRUDER_PROMPT_CONTEXT } from "./rules/intruderRules";
 /**
  * Special gameplay rules for each killer in Final Girl.
@@ -91,10 +92,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   // ── Season 3 ─────────────────────────────────────────────────────────────
 
-  'Slayer': {
-    narrativeNote:
-      'A tall, gaunt, spider-limbed creature from the Mirror Dimension — a dark reflection of Falconwood it pulls victims into through rifts. It moves only in the Mirror Dimension and can be attacked only by someone in the same dimension, but it always senses the Final Girl no matter which dimension she is in. Do NOT describe Slayer being hurt by attacks from Our Dimension.',
-  },
+  Slayer: {narrativeNote: SLAYER_RULE_GUIDANCE},
 
   'The Hunter': {
     narrativeNote:

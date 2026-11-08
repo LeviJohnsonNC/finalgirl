@@ -1,4 +1,5 @@
 import { MALL_MODULE, describeMallAction, initialMall, isInitialMall, resolveMallAction, validMallAction, mallParent, mallState, type MallAction } from './sunnydaze.ts';
+import { SLAYER_MODULE, describeSlayerAction, initialSlayer, resolveSlayerAction, slayerParent, validSlayerAction, type SlayerAction } from "./slayer.ts";
 import { HUNTER_MODULE, describeHunterAction, initialHunter, resolveHunterAction, validHunterAction, hunterParent, hunterState, hunterCountdownReversal, type HunterAction } from './hunter.ts';
 import { WINGARD_MODULE } from './wingardCatalog.ts';
 import { isInitialWingard, resolveWingardAction, validWingardAction, wingardParent, describeWingardAction, type WingardAction } from './wingardCottage.ts';
@@ -61,6 +62,7 @@ export const isPermanentMoment = (e: Pick<PlayEvent, "kind" | "momentType">): bo
 /** New milestones carry an explicit lock. Legacy undone observations stay undone. */
 export const isLockedPlayEvent = (e: PlayEvent): boolean =>
   (isPermanentMoment(e) && e.permanent === true) ||
+  (e.kind === "module" && e.moduleData?.module === SLAYER_MODULE && !e.slayerAction) ||
   (e.kind === "module" && e.moduleData?.module === "billy" && e.moduleData.changes.powerSourcesReady === true);
 export type PlayKind =
   | "start"
@@ -91,6 +93,8 @@ export interface PlayDetails {
 export interface PlayEvent extends PlayDetails {
   mallAction?: MallAction;
   mallReference?: true;
+  slayerAction?: SlayerAction;
+  slayerReference?: true;
   hunterAction?: HunterAction;
   hunterReference?: true;
   intruderAction?: IntruderAction;
@@ -178,6 +182,9 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
   if(e.mallReference!==undefined&&(e.kind!=='killed'||e.mallReference!==true))return false;
   if(e.mallAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!==MALL_MODULE||!validMallAction(e.mallAction)))return false;
   if(e.moduleData?.module===MALL_MODULE&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.mallAction&&!isInitialMall(e.moduleData.changes))))return false;
+  if (e.slayerReference !== undefined && (e.kind !== "killed" || e.slayerReference !== true)) return false;
+  if (e.slayerAction !== undefined && (e.kind !== "module" || e.moduleData?.module !== SLAYER_MODULE || !validSlayerAction(e.slayerAction))) return false;
+  if (e.moduleData?.module === SLAYER_MODULE && (e.kind !== "module" || !validModuleObservation(e.moduleData) || (!e.slayerAction && e.moduleData.changes.snapshot !== initialSlayer().snapshot))) return false;
   if (e.hunterReference !== undefined && (e.kind!=='killed'||e.hunterReference!==true))return false;
   if(e.hunterAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!==HUNTER_MODULE||!validHunterAction(e.hunterAction)))return false;
   if(e.moduleData?.module===HUNTER_MODULE&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.hunterAction&&e.moduleData.changes.snapshot!==initialHunter().snapshot)))return false;
@@ -279,7 +286,7 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validMallHistory(log) && validHunterHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
 }
@@ -308,6 +315,35 @@ export function validMallHistory(log:readonly PlayEvent[]) {
   }
  }
  return true;
+}
+export function canUndoSlayer(log: readonly PlayEvent[], target: string) {
+  const original = log.find(e => e.id === target);
+  return original?.moduleData?.module !== SLAYER_MODULE ||
+    !!original.slayerAction && slayerParent(summarizePlay(log).entries) === target;
+}
+export function validSlayerHistory(log: readonly PlayEvent[]) {
+  const observations = new Map(log.filter(e => e.moduleData?.module === SLAYER_MODULE).map(e => [e.id, e]));
+  if (!observations.size) return true;
+  let sawObservation = false;
+  for (const [index, event] of log.entries()) {
+    const target = event.kind === "undo" || event.kind === "restore" ? observations.get(event.target!) : undefined;
+    if (event.moduleData?.module !== SLAYER_MODULE && !target) continue;
+    if (target && (log.indexOf(target) >= index || !target.slayerAction)) return false;
+    const entries = summarizePlay(log.slice(0, index)).entries;
+    if (event.kind === "undo") {
+      if (slayerParent(entries) !== target!.id) return false;
+      continue;
+    }
+    const observation = target ?? event;
+    if (observation.slayerAction) {
+      const expected = resolveSlayerAction(observation.slayerAction, moduleState(entries, SLAYER_MODULE), entries);
+      if (!expected || expected.snapshot !== observation.moduleData!.changes.snapshot) return false;
+    } else if (sawObservation || observation.moduleData!.changes.snapshot !== initialSlayer().snapshot) {
+      return false;
+    }
+    sawObservation = true;
+  }
+  return true;
 }
 export function canUndoHunter(log:readonly PlayEvent[],target:string,checkCurrentDependencies=true) {
  const e=log.find(e=>e.id===target);
@@ -740,6 +776,7 @@ export function describeEvent(e: PlayEvent): string {
       return `${e.text}${e.killerCard ? `: ${e.killerCard}` : ""}${e.detail ? `${e.killerCard ? ". " : ": "}${e.detail}` : ""}`;
     case "module":
       if(e.mallAction)return describeMallAction(e.mallAction);
+      if(e.slayerAction)return describeSlayerAction(e.slayerAction,e.moduleData!.changes);
       if(e.hunterAction)return describeHunterAction(e.hunterAction,e.moduleData!.changes);
       if (e.woodsAction) return describeWoodsAction(e.woodsAction);
       if (e.wingardAction) return describeWingardAction(e.wingardAction);
@@ -781,6 +818,8 @@ export function playStoryBeats(
       (/^buddy\..+\.status$/.test(key) && value === 'defeated') ||
       (/^victim\./.test(key) && value === 'killed'))) priority = 65;
     if(e.hunterAction&&(['repair','force-mark-x','destroy-ally'].includes(e.hunterAction.command)||e.hunterAction.command==='countdown'&&hunterState(e.moduleData!.changes).phase==='mark-x'||e.hunterAction.command==='ally-health'&&e.hunterAction.value===0))priority=65;
+    if (e.slayerAction?.command === "collapse") priority = 90;
+    if (e.slayerAction?.command === "cross" || e.slayerAction?.command === "pull") priority = 65;
     if(e.mallAction?.command==='record-card')priority=55;
     if(e.mallAction?.command==='observe-escape')priority=85;
     if(e.wingardAction && ['craft','trigger'].includes(e.wingardAction.command)) priority=65;

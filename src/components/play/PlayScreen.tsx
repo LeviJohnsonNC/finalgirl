@@ -572,7 +572,7 @@ export function PlayScreen(props: PlayScreenProps) {
         {moment && (
           <div className="play-moment-editor">
             {isReveal && <KillerCards killer={killer} events={events} onEvent={onEvent} typeOnly={moment.momentType as "dark-power" | "finale"} />}
-            {isReveal && killer !== WOLF && killer !== INTRUDERS && killer !== 'The Hunter' && momentCards.length > 0 && (
+            {isReveal && killer !== WOLF && killer !== INTRUDERS && killer !== 'The Hunter' && killer !== 'Slayer' && momentCards.length > 0 && (
               <label>
                 {moment.momentType === "dark-power"
                   ? "Which Dark Power?"

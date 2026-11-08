@@ -1,3 +1,5 @@
+import { SLAYER, SLAYER_TERRORS } from "@/lib/play/slayer";
+import { slayerArt } from "./slayerArt";
 import {MALL} from '@/lib/play/sunnydaze';
 import {mallArt} from './mallArt';
 import { HUNTER, hunterState } from '@/lib/play/hunter';
@@ -130,6 +132,7 @@ const {characterImages}=useActiveImages();
   const [editingDetails, setEditingDetails] = useState(false);
   const payoff = useRef<HTMLElement>(null);
   const [message, setMessage] = useState("");
+  const slayerTerror = selection.killer === SLAYER ? SLAYER_TERRORS.find(card => card.name === values.terrorCard) : undefined;
   const wolfTerror = selection.killer === WOLF ? WOLF_TERRORS.find(card => card.name === values.terrorCard) : undefined;
   const [resultError, setResultError] = useState("");
   const scenes = useDeathScenes(sessionId, syncNow);
@@ -337,6 +340,7 @@ const {characterImages}=useActiveImages();
                   key={cause}
                   className={`play-cause-tile play-cause-tile--${cause}`}
                   aria-pressed={values.cause === cause}
+                  data-slayer-photo={selection.killer === SLAYER && (cause === "killer" || cause === "terror" && !!slayerTerror) || undefined}
                   data-wingard-photo={(cause==='terror' && !!cottageTerror || cause==='event' && !!cottageEvent) || undefined}
                   data-woods-photo={(cause === "terror" && !!woodsTerrorImage || cause === "event" && piperCause) || undefined}
                   data-wolf-photo={selection.killer === WOLF && (cause === "killer" || (cause === "terror" && !!wolfTerror)) || undefined}
@@ -356,6 +360,8 @@ const {characterImages}=useActiveImages();
                     ? <ModuleArtwork art={intruderArt(INTRUDER_ROSTER.find(p=>p.name===values.attacker)?.id??'header')} />
                     : selection.killer===INTRUDERS&&cause==='terror'&&INTRUDER_TERRORS.some(c=>c.name===values.terrorCard)
                       ? <ModuleArtwork art={intruderArt(INTRUDER_TERRORS.find(c=>c.name===values.terrorCard)!.id)} />
+                    : selection.killer === SLAYER && cause === "killer" ? <ModuleArtwork art={slayerArt("header")} />
+                    : slayerTerror && cause === "terror" ? <ModuleArtwork art={slayerArt(slayerTerror.id)} />
                     : selection.killer === WOLF && cause === "killer" ? <ModuleArtwork art={wolfPortrait} />
                     : cause === "terror" && wolfTerror
                       ? <ModuleArtwork art={wolfArt(wolfTerror.id)} />

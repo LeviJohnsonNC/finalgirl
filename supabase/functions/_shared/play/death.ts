@@ -1,4 +1,5 @@
 import { MALL, MALL_MODULE, mallFacts } from './sunnydaze.ts';
+import { SLAYER, SLAYER_MODULE, slayerFacts } from "./slayer.ts";
 import { HUNTER, HUNTER_MODULE, hunterFacts } from './hunter.ts';
 import { WINGARD, WINGARD_MODULE } from './wingardCatalog.ts';
 import { wingardFacts, wingardState } from './wingardCottage.ts';
@@ -28,6 +29,7 @@ export function deathFacts(
 ) {
   if(!validPlayLog(events))return null;
   if(selection.location!==MALL&&events.some(e=>e.moduleData?.module===MALL_MODULE||e.mallReference))return null;
+  if (selection.killer !== SLAYER && events.some(e => e.moduleData?.module === SLAYER_MODULE || e.slayerReference)) return null;
   if(selection.killer!==HUNTER&&events.some(e=>e.moduleData?.module===HUNTER_MODULE||e.hunterReference))return null;
   if (selection.killer!==INTRUDERS && events.some(e=>e.moduleData?.module===INTRUDER_MODULE||e.intruderReference)) return null;
   if (selection.killer !== WOLF && events.some(e => e.moduleData?.module === "big-bad-wolf" || e.wolfReference)) return null;
@@ -49,8 +51,9 @@ export function deathFacts(
   const intruderDeath=selection.killer===INTRUDERS && e.intruderReference;
   const wingardDeath = selection.location===WINGARD && e.wingardReference;
   const mallDeath=selection.location===MALL&&e.mallReference;
+  const slayerDeath = selection.killer === SLAYER && e.slayerReference;
   const hunterDeath=selection.killer===HUNTER&&e.hunterReference;
-  const historical = mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath
+  const historical = slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath
     ? summarizePlay(events.slice(0, events.findIndex(event => event.id === eventId) + 1)).entries
     : [];
   // The death's own fields reflect deliberate edits. Only the surrounding
@@ -83,6 +86,11 @@ export function deathFacts(
   );
   if(context?.[MALL_MODULE])delete context[MALL_MODULE];
   if(mallDeath&&historical.some(e=>e.moduleData?.module===MALL_MODULE))context={...context,[MALL_MODULE]:{facts:mallFacts(moduleState(historical,MALL_MODULE))}};
+  if (context?.slayer) delete context.slayer;
+  if (slayerDeath && historical.some(entry => entry.moduleData?.module === SLAYER_MODULE)) {
+    const facts = slayerFacts(moduleState(historical, SLAYER_MODULE));
+    if (facts) context = {...context, slayer: {facts: facts + " These positions do not establish the dimension of the Victim who died."}};
+  }
   if(context?.hunter)delete context.hunter;
   if(hunterDeath&&historical.some(e=>e.moduleData?.module===HUNTER_MODULE))context={...context,hunter:{facts:hunterFacts(moduleState(historical,HUNTER_MODULE),historical)}};
   if(context&&!Object.keys(context).length)context=undefined;

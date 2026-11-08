@@ -1,3 +1,4 @@
+import { SLAYER_VISUAL } from "@/lib/play/slayer";
 import { INTRUDER_VISUAL } from "@/lib/play/intruders";
 import { WOLF_VISUAL } from "@/lib/play/bigBadWolf";
 import {TORMENTOR_VISUAL} from '../../supabase/functions/_shared/play/tormentor';
@@ -65,9 +66,7 @@ The beast is hunched in a defensive yet aggressive stance amidst a blinding whit
   'The Intruders': INTRUDER_VISUAL,
 
   // The Falconwood Files
-  'Slayer': `A menacing, humanoid reptilian creature with a powerful, athletic build and a highly aggressive, supernatural presence. It has thick, moss-green scaly skin that appears calcified and deeply textured, resembling cracked stone or aged bark. Its face is gaunt and skull-like, with a recessed nose and a grimacing mouth that reveals sharp, predatory teeth. The most prominent feature is its large, intensely glowing neon-blue eyes that radiate a brilliant, piercing light.
-
-Arcs of electric-blue lightning crackle violently across its chest and down its heavily muscled arms, terminating in sharp, three-fingered claws. The creature is captured mid-movement in a low, predatory crouch, suggesting immense speed and volatility. It appears to be a fusion of a biological swamp-dwelling monster and raw, unstable electrical energy.`,
+  Slayer: SLAYER_VISUAL,
 
   // Terror From Above (Vignette)
   'Birds': `A dense, chaotic swarm of dozens of black birds, primarily crows or ravens, caught in mid-flight against a turbulent, oppressive sky. The birds are scattered across the frame in a frantic, non-linear pattern, their silhouettes sharp and jagged against the clouds. Some are captured with wings fully arched in a power stroke, while others appear to be diving or banking sharply, creating a visceral sense of frantic motion and avian panic.

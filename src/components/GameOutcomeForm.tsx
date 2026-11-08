@@ -1,3 +1,4 @@
+import { slayerState } from "@/lib/play/slayer";
 import {MALL,MALL_MODULE,mallState,mallFacts} from '@/lib/play/sunnydaze';
 import { hunterState, hunterFacts } from '@/lib/play/hunter';
 import { INTRUDER_MODULE, INTRUDER_ROSTER, intruderFacts } from "@/lib/play/intruders";
@@ -31,6 +32,11 @@ interface GameOutcomeFormProps {
   onSaveResult?: (formData: EndingFormData) => void;
   onContinue: (formData: EndingFormData) => void;
   onDiscard: () => void;
+}
+
+function slayerFinishDimension(events?: import('@/lib/play/events').PlayEvent[]) {
+  const dimension = slayerState(moduleState(summarizePlay(events).entries, 'slayer')).girl;
+  return dimension === 'our' ? 'Our Dimension' : dimension === 'mirror' ? 'Mirror Dimension' : '';
 }
 
 function useDraftField<T>(
@@ -295,9 +301,11 @@ export const GameOutcomeForm = ({
     initialDraft,
     textDraft.queue,
   );
-  const [endingDimension, setEndingDimension] = useDraftField<
-    '' | 'Our Dimension' | 'Mirror Dimension'
-  >('endingDimension', '', initialDraft, onDraftChange);
+  const [endingDimension, setEndingDimension] = useDraftField<'' | 'Our Dimension' | 'Mirror Dimension'>(
+    'endingDimension',
+    isSlayer ? slayerFinishDimension(result.playEvents) : '',
+    initialDraft, onDraftChange,
+  );
 
   const buildFormData = (): EndingFormData => {
     // Augment gameHighlights with killer-specific conditions so the LLM gets full context
@@ -387,14 +395,9 @@ export const GameOutcomeForm = ({
       }
       highlights = [highlights, ...falconParts].filter(Boolean).join('. ');
     }
-    if (isSlayer && endingDimension) {
-      const dimensionPart = `Ended in: ${endingDimension}`;
-      highlights = highlights
-        ? `${highlights}. ${dimensionPart}`
-        : dimensionPart;
-    }
-
     const formData: EndingFormData = {
+      ...(isSlayer && {slayerReview: {finalDimension: endingDimension === 'Our Dimension' ? 'our' :
+        endingDimension === 'Mirror Dimension' ? 'mirror' : null}}),
       ...(result.location==='Shady Acres'&&{childrenOnBoardAtFinish:childrenAtFinish}),
       ...(result.killer==='The Tormentor'&&{tormentorReview:{loss:tormentorLoss}}),
       ...(isGrimlash&&{grimlashReview:{loss:grimLoss}}),

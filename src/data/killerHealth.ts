@@ -1,3 +1,4 @@
+import { SLAYER_SETUP } from "@/lib/play/slayer";
 /**
  * Killer health (HP) data for Final Girl.
  * Maps each killer to their maximum health card count based on official game data.
@@ -32,7 +33,7 @@ const KILLER_MAX_HP: Record<string, number> = {
   'Big Bad Wolf': 9,
 
   // Season 3
-  'Slayer': 9,
+  'Slayer': SLAYER_SETUP.killerHealth,
   'The Hunter': 15,
   'Razorface': 9,
   'The Tormentor': 7,

@@ -586,11 +586,7 @@ The town's history is being documented by a group of local youths in a collectiv
       name: 'Slayer',
       description: `Something is rotten in the heart of Falconwood. It doesn't just stalk; it tears through the fabric of reality itself. The Slayer is a nightmare from the Mirror Dimension—a silent, predatory force that turns our familiar world into a cold, dark reflection. Once you hear the static and the air turns thin, it's already too late. You aren't just being hunted; you're being erased.
 
-The Slayer has a tall, unnaturally gaunt humanoid frame. Its limbs are slightly too long, giving it a spider-like, predatory gait. It doesn't wear clothes; instead, its "skin" has a texture like wet, charred obsidian or dark, bruised muscle.
-
-It lacks a traditional face. Where eyes and a nose should be, there is only smooth, stretched skin that ripples as if something is moving underneath. Its only feature is a jagged, lipless maw that opens wider than a human jaw should, filled with rows of needle-like teeth.
-
-The Slayer exists between dimensions, emerging from the Mirror Dimension to hunt its prey. When it appears, reality distorts—lights flicker, static fills the air, and shadows move independently of their sources.`
+Its moss-green skin has the rough, layered ridges of wet bark. A gaunt skull-like face and cold blue eyes catch the light. Long claws grip whatever surface it reaches through. It pursues the Final Girl across a world and its dark reflection, with both sharing the same physical landmarks.`
     }
   },
   's3-marrek-murders': {

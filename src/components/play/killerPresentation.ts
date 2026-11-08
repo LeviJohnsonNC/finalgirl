@@ -1,3 +1,5 @@
+import { SLAYER, SLAYER_POWERS, SLAYER_FINALES } from '@/lib/play/slayer';
+import { slayerArt } from './slayerArt';
 import { HUNTER, HUNTER_POWERS, HUNTER_FINALES } from '@/lib/play/hunter';
 import { hunterArt } from './hunterArt';
 import { INTRUDERS, INTRUDER_POWERS, INTRUDER_FINALES } from "@/lib/play/intruders";
@@ -66,6 +68,8 @@ export function illustratedKillerCards(
   type: "dark-power" | "finale",
 ): IllustratedKillerCard[] {
   const power = type === "dark-power";
+  if (killer === SLAYER) return [...(power ? SLAYER_POWERS : SLAYER_FINALES)]
+    .map(card => ({...card, art:slayerArt(card.id,true), heroArt:slayerArt(card.id)})).sort((a,b) => a.name.localeCompare(b.name));
   if(killer===HUNTER)return [...(power?HUNTER_POWERS:HUNTER_FINALES)].map(card=>({...card,art:hunterArt(card.id,true),heroArt:hunterArt(card.id)})).sort((a,b)=>a.name.localeCompare(b.name));
   if (killer===INTRUDERS) return [...(power?INTRUDER_POWERS:INTRUDER_FINALES)]
     .map(card=>({...card,art:intruderArt(card.id,true),heroArt:intruderArt(card.id)}))

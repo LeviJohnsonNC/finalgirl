@@ -1,3 +1,4 @@
+import { SLAYER_VISUAL } from "./play/slayer.ts";
 import { WINGARD_VISUAL } from './play/wingardCatalog.ts';
 import { INTRUDER_VISUAL } from "./play/intruders.ts";
 import { WOODS_VISUAL } from "./play/storybookWoods.ts";
@@ -35,8 +36,7 @@ export const DEATH_KILLER_CUES: Record<string, string> = {
   'Big Bad Wolf':
     'A massive, heavily muscled grey wolf with a formidable and menacing presence. Its thick, matted coat is a mix of charcoal, slate grey, and muddy brown, heavily stained with dark, viscous blood. The wolf is riddled with several wooden arrows protruding at jagged angles from its shoulders, back, and forelimbs, indicating a state of severe injury that has only fueled its ferocity. Its face is contorted into a visceral snarl, with the upper lip curled back to expose long, sharp canines and pale gums. The most striking feature is its eyes—luminous, glowing red orbs that pierce through the gloom with an unnatural, predatory intensity.',
   'The Intruders': INTRUDER_VISUAL,
-  Slayer:
-    'A menacing, humanoid reptilian creature with a powerful, athletic build and a highly aggressive, supernatural presence. It has thick, moss-green scaly skin that appears calcified and deeply textured, resembling cracked stone or aged bark. Its face is gaunt and skull-like, with a recessed nose and a grimacing mouth that reveals sharp, predatory teeth. The most prominent feature is its large, intensely glowing neon-blue eyes that radiate a brilliant, piercing light. Arcs of electric-blue lightning crackle violently across its chest and down its heavily muscled arms, terminating in sharp, three-fingered claws.',
+  Slayer: SLAYER_VISUAL,
   Birds:
     'A dense, chaotic swarm of dozens of black birds, primarily crows or ravens, caught in mid-flight against a turbulent, oppressive sky. The birds are scattered across the frame in a frantic, non-linear pattern, their silhouettes sharp and jagged against the clouds. Some are captured with wings fully arched in a power stroke, while others appear to be diving or banking sharply, creating a visceral sense of frantic motion and avian panic. The backdrop is a heavy, low-hanging sky dominated by thick, roiling storm clouds in shades of charcoal, deep slate, and bruised grey.',
   Zombies:

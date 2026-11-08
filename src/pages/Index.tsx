@@ -1,3 +1,4 @@
+import { SLAYER, dimensionLabel } from "@/lib/play/slayer";
 import { sameEndingReview } from '@/lib/endingReview';
 import { WOODS } from "../../supabase/functions/_shared/play/storybookWoods";
 import {tormentorState,tormentorFatal,tormentorParent,resolveTormentorAction} from '@/lib/play/tormentor';
@@ -157,6 +158,7 @@ const IndexContent = () => {
       ...(selection.location === 'Shady Acres' && {shadySetupVersion:1 as const}),
       ...(selection.location === 'USS Konrad' && {konradSetupVersion:1 as const}),
       ...(selection.location==='Sunnydaze Mall'&&{mallSetupVersion:1 as const}),
+      ...(selection.killer === SLAYER && {slayerSetupVersion:1 as const}),
       ...(selection.killer === 'The Hunter' && {hunterSetupVersion:1 as const}),
       ...(selection.killer === 'The Intruders' && {intrudersSetupVersion:1 as const}),
       ...(selection.killer === 'Big Bad Wolf' && { wolfSetupVersion: 1 as const }),
@@ -220,7 +222,8 @@ const IndexContent = () => {
     if(game.selection.killer==='The Tormentor'&&formData.tormentorReview){const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'tormentor');if(tormentorState(state).loss!==formData.tormentorReview.loss){const action={parent:tormentorParent(en),command:'loss' as const,value:formData.tormentorReview.loss};const changes=resolveTormentorAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',tormentorAction:action,moduleData:{module:'tormentor',changes}})))throw new Error('The trap ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The reviewed trap ending is unavailable.');}}
     if(game.selection.killer==='Grimlash'&&formData.grimlashReview) {const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'grimlash');if(state.loss!==formData.grimlashReview.loss){const action={parent:grimlashParent(en),command:'loss' as const,value:formData.grimlashReview.loss,correction:true};const changes=resolveGrimlashAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',grimlashAction:action,moduleData:{module:'grimlash',changes}})))throw new Error('The Madness ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Madness ending is unavailable.');}}
     if(game.selection.location==='Shady Acres'&&formData.childrenOnBoardAtFinish!==undefined){const entries=summarizePlay(game.playEvents).entries,state=moduleState(entries,'shady-acres');if(shadyState(state).finishChildren!==formData.childrenOnBoardAtFinish){const action={parent:shadyParent(entries),command:'finish' as const,value:formData.childrenOnBoardAtFinish};const changes=resolveShadyAction(action,state,entries);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',shadyAction:action,moduleData:{module:'shady-acres',changes}})))throw new Error('The Children observation could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Children observation is unavailable.');}}
-    const {konradReview:_review,childrenOnBoardAtFinish:_children,...fields}=formData;
+    const {konradReview:_review,childrenOnBoardAtFinish:_children,slayerReview,...fields}=formData;
+    const finishDimension = game.selection.killer === SLAYER ? slayerReview?.finalDimension : undefined;
     const reviewedEntries=summarizePlay(game.playEvents).entries;
     const fatalEnding=game.selection.killer==='The Tormentor'&&tormentorFatal(tormentorState(moduleState(reviewedEntries,'tormentor')))||game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(reviewedEntries,'grimlash'))||game.selection.location==='USS Konrad'&&konradFatal(moduleState(reviewedEntries,'konrad'));
     const outcome = fatalEnding ? 'lost' : formData.outcome ?? game.result.outcome;
@@ -231,6 +234,7 @@ const IndexContent = () => {
     const clearEnding = nextPhase === 'outcome' || changed;
     const updates = {
       ...fields, outcome, playEvents: game.playEvents,
+      ...(finishDimension && {gameHighlights: [fields.gameHighlights, `Ended in: ${dimensionLabel(finishDimension)}`].filter(Boolean).join(". ")}),
       ...(clearEnding && { endingNarration: null, posterImageUrl: null }),
     };
     updateGame(game.result.id, updates);
