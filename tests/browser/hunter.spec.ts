@@ -49,7 +49,15 @@ test('Hunter forced transition, failed-write retry, both reveal entry points, Al
  await page.getByRole('button',{name:'Dark Power',exact:true}).click();
  await expect(page.locator('.play-moment-editor').getByRole('region',{name:'Dark Power selection',exact:true})).toContainText('Cybernetic Agility');
  await page.locator('.play-moment-editor').getByRole('button',{name:'Record',exact:true}).click();
- await panel.getByRole('button',{name:'Resolve Mark X Terror',exact:true}).click();
+ await page.setViewportSize(info.project.name==='mobile'?{width:320,height:568}:{width:1280,height:640});
+ const transform=panel.getByRole('article',{name:'Mark V',exact:true}).getByRole('button',{name:'Resolve Mark X Terror',exact:true});
+ await expect(transform).toBeEnabled();
+ expect((await transform.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+ await transform.scrollIntoViewIfNeeded();
+ await page.screenshot({path:info.outputPath('hunter-transform.png')});
+ await transform.focus();
+ await transform.press('Enter');
+ await expect(panel.getByRole('button',{name:'Resolve Mark X Terror',exact:true})).toHaveCount(0);
  await expect(panel.getByRole('article',{name:'Mark X',exact:true})).toContainText('Mark X');
  let log=await readLog(page);expect(summarizePlay(log)).toMatchObject({bloodlust:10,killerHealth:15,killed:0});
  const beforeFinaleView=(await readLog(page)).length;await page.getByRole('button',{name:'Finale',exact:true}).click();expect((await readLog(page)).length).toBe(beforeFinaleView);await page.locator('.play-moment-editor').getByRole('button',{name:'Record',exact:true}).click();

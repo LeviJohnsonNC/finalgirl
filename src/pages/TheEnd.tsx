@@ -314,7 +314,7 @@ const TheEnd = ({
     >
       {awaitingRefresh
         ? <p className="ending-review-message" role="status">The record changed. Update the ending to reflect the new details.</p>
-        : <NarrationReader kind="ending" story={endingStory} isGenerating={isGenerating} generatingLabel={isReframing ? 'Reframing the ending…' : undefined} error={error} onRetry={generateEnding} />}
+        : <NarrationReader kind="ending" location={result.location} story={endingStory} isGenerating={isGenerating} generatingLabel={isReframing ? 'Reframing the ending…' : undefined} error={error} onRetry={generateEnding} />}
     </NarrationLayout>
   );
 };

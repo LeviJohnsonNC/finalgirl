@@ -21,7 +21,7 @@ test("Slayer records crossings, a Special Victim pull and one atomic Rift Collap
   expect(summarizePlay(await log())).toMatchObject({killerHealth:11,finalHorrorLevel:4,bloodlust:0});
   const capture = async (name: string, width: number) => {
     await tracker.locator("img").evaluate(async (image: HTMLImageElement) => {image.loading="eager";await image.decode();});
-    await tracker.screenshot({path:info.outputPath(`${name}-${width}.jpg`),type:"jpeg",style:".app-footer{visibility:hidden}"});
+    await tracker.screenshot({path:info.outputPath(`${name}-${width}.jpg`),type:"jpeg",style:".app-footer,[data-sonner-toaster]{visibility:hidden}"});
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   };
   const sizes = sizeMatrix[info.project.name === "mobile" ? "mobile" : "desktop"];
@@ -104,7 +104,7 @@ test("Slayer card photography, Terror suggestions and cached death", async ({pag
     else expect(art.src).toMatch(new RegExp("/" + id + "(?:-|[.])"));
     expect(seen.has(art.src)).toBe(false);
     seen.add(art.src);
-    await element.screenshot({path:info.outputPath(id+".jpg"),type:"jpeg",quality:84,style:".app-footer{visibility:hidden}"});
+    await element.screenshot({path:info.outputPath(id+".jpg"),type:"jpeg",quality:84,style:".app-footer,[data-sonner-toaster]{visibility:hidden}"});
   };
   await inspect(panel.locator(":scope > summary"),"slayer");
   for (const card of SLAYER_MINORS) {

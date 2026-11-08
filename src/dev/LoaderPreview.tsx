@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DarkroomImageLoader } from '@/components/loaders/CinematicLoaders';
-import { OpeningFilmLoader } from '@/components/loaders/OpeningFilmLoader';
+import { StoryFilmLoader } from '@/components/loaders/StoryFilmLoader';
 import { NarrationPhoto } from '@/components/NarrationPhoto';
 import mall from '@/assets/locations/ai/sunnydaze-mall.png';
 import { FEATURE_FILMS } from '@/types/gameData';
@@ -30,7 +30,7 @@ export default function LoaderPreview() {
     </div>
     <div key={key} style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: 32, maxWidth: 1200, margin: 'auto' }}>
       <div>
-        <section style={{ minHeight: 350, display: 'grid', placeItems: 'center', background: '#0d0b09', border: '1px solid #30251f' }}><OpeningFilmLoader key={location} location={location} inspectTime={time} /></section>
+        <section style={{ minHeight: 350, display: 'grid', placeItems: 'center', background: '#0d0b09', border: '1px solid #30251f' }}><StoryFilmLoader key={location} location={location} inspectTime={time} /></section>
         <section style={{ aspectRatio: '16/9', marginTop: 24 }}><DarkroomImageLoader previewUrl={mall} inspectTime={time} /></section>
         <NarrationPhoto imageUrl={url} isGenerating={generating} onRetry={() => setGenerating(true)} variant="scene" caption="Development handoff" previewUrl={mall} />
       </div>

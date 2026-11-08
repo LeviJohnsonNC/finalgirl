@@ -8,6 +8,8 @@ const fiction = {};
 new Function('exports', compile('../supabase/functions/_shared/fictionBoundary.ts'))(fiction);
 const hunterIdentity={};
 new Function('exports',compile('../supabase/functions/_shared/play/hunter.ts'))(hunterIdentity);
+const slayerIdentity={};
+new Function('exports',compile('../supabase/functions/_shared/play/slayer.ts'))(slayerIdentity);
 const storyFacts = {}, prompts = {}, narrativeStyle = {};
 const posterDesign = {};
 new Function('exports', compile('../supabase/functions/_shared/posterDesign.ts'))(posterDesign);
@@ -27,7 +29,7 @@ function openingWith(entries) {
 }
 new Function('require', 'exports', compile('../supabase/functions/_shared/openingReferences.ts'))(
   name => { if (name === './openingReferenceManifest.ts') return manifest; throw new Error('Unexpected opening import: ' + name); }, opening);
-new Function('require','exports', compile('../supabase/functions/_shared/storyFacts.ts'))(name=>{assert.equal(name,'./play/hunter.ts');return hunterIdentity;},storyFacts);
+new Function('require','exports', compile('../supabase/functions/_shared/storyFacts.ts'))(name=>{if(name==='./play/slayer.ts')return slayerIdentity;assert.equal(name,'./play/hunter.ts');return hunterIdentity;},storyFacts);
 new Function('exports', compile('../supabase/functions/_shared/narrativeStyle.ts'))(narrativeStyle);
 const marrekIdentity = {};
 new Function('exports', compile('../supabase/functions/_shared/play/marrekWarehouse.ts'))(marrekIdentity);
@@ -410,4 +412,18 @@ test('Hunter fixed references verify both digests and model-aware posters use di
  }
  const f=imageHandler({referenceError:true});const body={...await request().json(),killer:'The Hunter',hunterReview:{phase:'mark-x',ally:'destroyed',allyHealth:0}};
  assert.equal((await f.handler(new Request('https://example.test',{method:'POST',body:JSON.stringify(body)}))).status,503);assert.equal(f.imageCalls.length,0);
+});
+
+test('Slayer uses the reviewed private opening JPEG and retains the selected Final Girl reference', async () => {
+  const bytes = new Uint8Array(readFileSync(new URL('../supabase/reference-assets/slayer.jpg', import.meta.url)));
+  const sha256 = createHash('sha256').update(bytes).digest('hex');
+  const path = `slayer-${sha256.slice(0,16)}.jpg`;
+  assert.deepEqual(REFERENCE_MANIFEST.Slayer,{path,sha256});
+  assert.deepEqual(opening.openingReferenceNames('Janelle','Slayer'),['Janelle','Slayer']);
+  const refs = await opening.openingReferences('Unknown','Slayer',async key => {
+    assert.equal(key,path);
+    return bytes;
+  });
+  assert.equal(refs[0].name,'Slayer');
+  await assert.rejects(opening.openingReferences('Unknown','Slayer',async () => new Uint8Array([255,216,255,217])), /does not match/);
 });

@@ -14,6 +14,7 @@ const code = (path) =>
 const load = (path, imports) => {
   const ex = {};
   new Function('require', 'exports', code(path))((name) => {
+    if(name==='./slayer.ts'||name==='./play/slayer.ts')return slayer;
     if(name==='./hunter.ts'||name==='./play/hunter.ts')return hunter;
     if(name==='./sunnydaze.ts'||name==='./play/sunnydaze.ts')return mall;
     if(name==='./sunnydazeCatalog.ts')return mallCatalog;
@@ -26,6 +27,7 @@ const load = (path, imports) => {
 const mallCatalog=load('../supabase/functions/_shared/play/sunnydazeCatalog.ts',{});
 const mall=load('../supabase/functions/_shared/play/sunnydaze.ts',{'./sunnydazeCatalog.ts':mallCatalog});
 const hunter=load('../supabase/functions/_shared/play/hunter.ts',{});
+const slayer=load('../supabase/functions/_shared/play/slayer.ts',{});
 const buddyland = load('../supabase/functions/_shared/play/buddyland.ts', {});
 const camp = load('../supabase/functions/_shared/play/camp.ts', {});
 const geppetto = load('../supabase/functions/_shared/play/geppetto.ts', {});
