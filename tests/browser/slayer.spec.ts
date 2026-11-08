@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { chooseKillerCard, openModule, searchPick } from "./play-helpers";
+import { openMinorPowers, chooseKillerCard, openModule, searchPick } from "./play-helpers";
 import { summarizePlay, type PlayEvent } from "../../src/lib/play/events";
 import { moduleState } from "../../src/lib/play/modules";
 import { SLAYER_POWERS, SLAYER_FINALES, SLAYER_MINORS, SLAYER_TERRORS, slayerState } from "../../src/lib/play/slayer";
@@ -18,9 +18,12 @@ test("Slayer records crossings, a Special Victim pull and one atomic Rift Collap
   const tracker = panel.getByRole("article",{name:"Dimension Tracker"});
   const log = () => page.evaluate(k => JSON.parse(localStorage.getItem(k)!).playEvents as PlayEvent[], key);
   await expect(tracker).toHaveAttribute("data-dimension","our");
+  await expect(tracker.getByText("Correct dimensions",{exact:true})).toHaveCount(0);
   expect(summarizePlay(await log())).toMatchObject({killerHealth:11,finalHorrorLevel:4,bloodlust:0});
   const capture = async (name: string, width: number) => {
     await tracker.locator("img").evaluate(async (image: HTMLImageElement) => {image.loading="eager";await image.decode();});
+    const photoWidth = await tracker.locator("img").evaluate(img => img.getBoundingClientRect().width);
+    expect(Math.abs(photoWidth - await tracker.evaluate(el => el.clientWidth))).toBeLessThanOrEqual(1);
     await tracker.screenshot({path:info.outputPath(`${name}-${width}.jpg`),type:"jpeg",style:".app-footer,[data-sonner-toaster]{visibility:hidden}"});
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   };
@@ -107,6 +110,7 @@ test("Slayer card photography, Terror suggestions and cached death", async ({pag
     await element.screenshot({path:info.outputPath(id+".jpg"),type:"jpeg",quality:84,style:".app-footer,[data-sonner-toaster]{visibility:hidden}"});
   };
   await inspect(panel.locator(":scope > summary"),"slayer");
+  await openMinorPowers(panel);
   for (const card of SLAYER_MINORS) {
     await inspect(panel.getByRole("button",{name:"Reveal " + card.name,exact:true}),card.id+"-thumb");
   }

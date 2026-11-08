@@ -1,5 +1,5 @@
 import {test,expect,activeGame,userId} from './fixtures';
-import {openModule,undoLatestObservation,chooseKillerCard,searchPick,statusPick,saveResultOnly} from './play-helpers';
+import {openMinorPowers, openModule,undoLatestObservation,chooseKillerCard,searchPick,statusPick,saveResultOnly} from './play-helpers';
 import {newPlayEvent,summarizePlay,type PlayEvent} from '../../src/lib/play/events';
 import {GRIMLASH_TERRORS,GRIMLASH_POWERS,GRIMLASH_FINALES,initialGrimlash,grimlashParent,grimlashState,resolveGrimlashAction,type GrimlashAction} from '../../src/lib/play/grimlash';
 import {initialKonrad,konradParent,resolveKonradAction} from '../../src/lib/play/konrad';
@@ -68,6 +68,7 @@ test('all kept-card scenes and both live Minor Powers use readable actual contro
   for(let level=1;level<=3;level++){const slot=panel.getByRole('region',{name:`Level ${level} kept ability`,exact:true});if(index)await slot.getByRole('button',{name:'Clear ability name',exact:true}).click();await slot.getByRole('button',{name:`Record Madness Level ${level} Ability`,exact:true}).click();const id=levels[level-1][index];await slot.getByRole('button',{name:`Keep ${names[id]}`,exact:true}).click();await expect(slot.locator('.play-tile-caption strong')).toHaveText(names[id]);await expect(slot.locator('img')).toHaveAttribute('src',new RegExp(id));}
   await panel.locator('.grim-kept img').evaluateAll(async images=>{await Promise.all(images.map(im=>(im as HTMLImageElement).decode()));});await panel.locator('.grim-kept').screenshot({path:info.outputPath(`grimlash-abilities-${index}.jpg`),type:'jpeg',quality:80,animations:'disabled',style:'.app-footer{visibility:hidden}'});
  }
+ await openMinorPowers(panel);
  await panel.getByRole('button',{name:'Reveal Flaming Eyes',exact:true}).click();await panel.getByRole('button',{name:'Add another Minor Power',exact:true}).click();await panel.getByRole('button',{name:'Reveal Burning Sickle',exact:true}).click();await expect(panel.getByRole('article',{name:'Flaming Eyes',exact:true})).toContainText('1/1 health');await expect(panel.getByRole('article',{name:'Burning Sickle',exact:true})).toContainText('2/2 health');await panel.locator('.grim-minors').screenshot({path:info.outputPath('grimlash-minors.jpg'),type:'jpeg',quality:80,animations:'disabled',style:'.app-footer{visibility:hidden}'});expect(summarizePlay(await log(page)).killed).toBe(0);expect(archive.calls).toEqual([]);
 });
 

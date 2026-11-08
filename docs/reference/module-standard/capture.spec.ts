@@ -161,6 +161,8 @@ for (const reference of references) {
     if (reference.module) await openModule(page, reference.module);
     if (reference.reveals)
       await page.locator(".module-card-section > summary").click();
+    if (reference.id.startsWith("minor-"))
+      await page.locator(".module-minor-section > summary").click();
     const target = page.locator(reference.selector);
     await expect(target).toBeVisible();
     await target.scrollIntoViewIfNeeded();

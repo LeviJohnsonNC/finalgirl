@@ -68,7 +68,7 @@ export function HunterControls({events,onEvent,blocked}:ControlsProps) {
    </section>}
    {s.phase!=='mark-v'&&s.ally==='unrepaired'&&<button className="module-unnamed" disabled={blocked} onClick={()=>act({command:'destroy-ally'})}>Terminate Mark V · remove unrepaired model</button>}
   </>}
-  <section aria-label="Hunter Minor Dark Powers"><h3>Minor Dark Powers</h3><MinorPowerGroup>{HUNTER_MINORS.map(card=>{
+  <section aria-label="Hunter Minor Dark Powers"><MinorPowerGroup>{HUNTER_MINORS.map(card=>{
    const key=hunterMinorField(card.id),value=fields[key],health=typeof value==='number'?value:undefined;
    return <MinorPowerControl key={card.id} name={card.name} health={health} maxHealth={card.health} disabled={blocked} previouslyRevealed={entries.some(e=>typeof e.moduleData?.changes[key]==='number')} art={()=>hunterArt(card.id,true)} heroArt={hunterArt(card.id)} onChange={value=>act({command:'minor',card:card.id,value})}/>;
   })}</MinorPowerGroup></section>

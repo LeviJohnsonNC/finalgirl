@@ -1,11 +1,11 @@
 import { ModuleArtwork } from "./ModuleArtwork";
-import hearts from "@/assets/play/geppetto/cards.webp";
+import liveHeart from "@/assets/play/geppetto/heart-live.webp";
+import spentHeart from "@/assets/play/geppetto/heart-spent.webp";
 
-// Original approved jeweled-heart pair: live (7), spent (8).
-const heartArt = (filled: boolean) => ({src: hearts, atlas: {
-  width: 1254, height: 1254, x: (filled ? 1 : 2) * 418 + 3,
-  y: 2 * 418 + 3, cellWidth: 412, cellHeight: 412,
-}});
+const heartArt = (filled: boolean) => ({
+  src: filled ? liveHeart : spentHeart,
+  fit: "meet" as const,
+});
 
 /** Slots visualize one numeric health value. Clicking any filled/empty token
  * removes/restores exactly one health, never jumps to a slot's index. */

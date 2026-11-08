@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { HealthlessMinorControl } from './HealthlessMinorControl';
+import { MinorPowerSection } from './MinorPowerSection';
 import { IllustratedTile } from './IllustratedTile';
 import { PlaySelect } from './PlaySelect';
 import { KillerCards } from './KillerCards';
@@ -49,11 +50,12 @@ export function PoltergeistControls({ events, onEvent, blocked }: ControlsProps)
         </div>}
       </article>
     </div>
-    <h3>Minor Dark Powers</h3>
+    <MinorPowerSection>
     <div className="polter-minors" data-module-control="minor-effect">
       {POLTERGEIST_MINORS.filter(p => recordedMinors.length === 0 || choosingMinors || recordedMinors.includes(p)).map(p => <HealthlessMinorControl key={p.id} name={p.name} value={state[`minor.${p.id}`] as string | undefined} art={poltergeistArt(p.id)} disabled={Boolean(blocked)} activationBlocked={state.minorsRemoved === true || state.carolyn === 'with-you' || state.carolyn === 'rescued'} onActivate={() => action('activate-minor', p.id)} onEnd={() => action('end-minor', p.id)} onCorrect={value => action('correct', `minor.${p.id}`, value)}/>)}
       {recordedMinors.length > 0 && recordedMinors.length < POLTERGEIST_MINORS.length && <button className="module-change-choice" aria-expanded={choosingMinors} onClick={() => setChoosingMinors(!choosingMinors)}>{choosingMinors ? 'Done choosing Minor Powers' : 'Add another Minor Power'}</button>}
     </div>
+    </MinorPowerSection>
     <KillerCards killer="Poltergeist" events={events} onEvent={onEvent} disabled={blocked}/>
     {message && <p role="alert">{message}</p>}
   </section>;

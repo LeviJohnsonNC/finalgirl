@@ -1,5 +1,5 @@
 import {test,expect,activeGame,userId} from './fixtures';
-import {openModule,chooseKillerCard,undoLatestObservation} from './play-helpers';
+import {openMinorPowers, openModule,chooseKillerCard,undoLatestObservation} from './play-helpers';
 import {newPlayEvent,summarizePlay,validPlayLog,type PlayEvent} from '../../src/lib/play/events';
 import {moduleState} from '../../src/lib/play/modules';
 const storageKey=`final-girl-active-game-v1:${userId}`;
@@ -50,6 +50,7 @@ test('Intruders worked example, direct portrait activation, loaded artwork and f
   const panel=page.locator('.play-module-panel[data-module="intruders"]');
   await panel.locator('details.module-card-section > summary').click();
   await chooseKillerCard(panel,'Finale','Release the Beast');
+  await openMinorPowers(panel);
   await panel.getByRole('button',{name:'Reveal Amphetamines'}).click();
   await expect(panel.getByRole('article',{name:'Amphetamines',exact:true})).toContainText('2/2 health');
   await panel.getByRole('button',{name:'Add another Minor Power'}).click();

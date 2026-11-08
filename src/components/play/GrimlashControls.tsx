@@ -50,7 +50,7 @@ export function GrimlashControls({events,onEvent,blocked}:ControlsProps) {
    </section>;
   })}</div>
   {GRIMLASH_HARVEST.some(c=>c.flip&&s[`kept.${c.level}`]===c.id&&s[`face.${c.level}`]==='spent')&&<button className="grim-upkeep" disabled={blocked} onClick={()=>action({command:'upkeep'})}>Record Upkeep · ready spent abilities</button>}
-  <section className="grim-minors"><h3>Minor Dark Powers</h3><MinorPowerGroup>{GRIMLASH_MINORS.map(c=><MinorPowerControl key={c.id} name={c.name} health={s[`minor.${c.id}.health`] as number|undefined} maxHealth={c.health} art={()=>grimlashArt(c.id,true)} heroArt={grimlashArt(c.id,!(typeof s[`minor.${c.id}.health`]==='number'&&Number(s[`minor.${c.id}.health`])>0))} disabled={blocked} previouslyRevealed={entries.some(e=>e.moduleData?.module==='grimlash'&&typeof e.moduleData.changes[`minor.${c.id}.health`]==='number')} onChange={value=>action({command:'minor',id:c.id,value})}/>)}</MinorPowerGroup></section>
+  <section className="grim-minors"><MinorPowerGroup>{GRIMLASH_MINORS.map(c=><MinorPowerControl key={c.id} name={c.name} health={s[`minor.${c.id}.health`] as number|undefined} maxHealth={c.health} art={()=>grimlashArt(c.id,true)} heroArt={grimlashArt(c.id,!(typeof s[`minor.${c.id}.health`]==='number'&&Number(s[`minor.${c.id}.health`])>0))} disabled={blocked} previouslyRevealed={entries.some(e=>e.moduleData?.module==='grimlash'&&typeof e.moduleData.changes[`minor.${c.id}.health`]==='number')} onChange={value=>action({command:'minor',id:c.id,value})}/>)}</MinorPowerGroup></section>
   <KillerCards killer="Grimlash" events={events} onEvent={onEvent} disabled={blocked}/>
   {message&&<p role="alert" className="play-module-error">{message}</p>}
  </section>;

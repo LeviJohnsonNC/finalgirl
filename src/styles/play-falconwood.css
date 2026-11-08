@@ -8,9 +8,51 @@
 .falconwood-title h3 {font-family:var(--font-display, Georgia),serif; font-size:clamp(1.65rem, 4vw, 2.55rem); line-height:1.1; margin:.2rem 0 0}
 .falconwood-mission-body {display:grid; gap:.55rem; padding:.8rem; color:#f5e6d2}
 .falconwood-progress {font-size:1.15rem}
-.falconwood-note {color:#d7bb9d}
+.falconwood-mission-body[hidden] { display: none; }
+.falconwood-mission[data-complete="true"] .falconwood-title small { color: #e7d193; }
+.falconwood-primary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .65rem 1rem;
+  min-width: 0;
+}
+.falconwood-count > span { font-weight: 600; }
+.falconwood-primary-row > .falconwood-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  min-height: 50px;
+  padding-inline: .9rem;
+}
+.falconwood-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #907e6868;
+  border-radius: .55rem;
+  overflow: hidden;
+}
+.falconwood-mission .falconwood-stepper button { border: 0; }
+.falconwood-stepper button:focus-visible { outline-offset: -3px; }
+.falconwood-stepper output { color: #f8c696; font-weight: 650; }
+.falconwood-mission-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0 1rem;
+  padding-inline: .85rem;
+  border-top: 1px solid #8b735552;
+}
+.falconwood-mission-footer button.falconwood-quiet {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+}
+.falconwood-mission-footer details[open] { padding-bottom: .55rem; }
 .falconwood-row,.falconwood-count,.falconwood-chips,.falconwood-clue,.falconwood-events-heading,.falconwood-field {display:flex; align-items:center; gap:.45rem; flex-wrap:wrap; min-width:0}
-.falconwood-count span,.falconwood-events-heading h4,.falconwood-clue b {margin-right:auto}
+.falconwood-events-heading h4,.falconwood-clue b {margin-right:auto}
 .falconwood-grid {display:grid; gap:.75rem; grid-template-columns:repeat(2,minmax(0,1fr)); min-width:0}
 .falconwood-grid .play-illustrated-tile {width:100%; min-height:0; aspect-ratio:16/9}
 .falconwood-grid .play-illustrated-tile:disabled {opacity:1}
@@ -27,4 +69,7 @@
 .falconwood-clue button {flex:1}
 .play-falconwood .play-select-trigger {max-width:100%; min-height:44px}
 .falconwood-events-heading h4 {margin-block:0}
-@media (max-width:550px) {.falconwood-grid {grid-template-columns:minmax(0,1fr)}}
+@media (max-width:550px) {
+  .falconwood-grid {grid-template-columns:minmax(0,1fr)}
+  .falconwood-primary-row > .falconwood-action { width: 100%; }
+}

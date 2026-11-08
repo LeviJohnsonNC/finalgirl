@@ -78,7 +78,15 @@ export async function chooseKillerCard(
   await choice.click();
   await expect(section.locator(".module-revealed-hero h4")).toHaveText(name);
 }
+export async function openMinorPowers(scope: Locator) {
+  const section = scope.locator(".module-minor-section");
+  if ((await section.getAttribute("open")) === null)
+    await section.locator(":scope > summary").click();
+  await expect(section).toHaveAttribute("open", "");
+}
+
 export async function showMinorChoices(scope: Locator) {
+  await openMinorPowers(scope);
   const add = scope.getByRole("button", {
     name: "Add another Minor Power",
     exact: true,

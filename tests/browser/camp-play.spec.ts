@@ -4,6 +4,7 @@ import {
   searchPick,
   statusPick,
   openModule,
+  openMinorPowers,
   openHistory,
 } from "./play-helpers";
 import type { Page } from "@playwright/test";
@@ -231,6 +232,7 @@ test("Camp and Hans corrections preserve immutable history, Undo, restore and tu
   await undoLatestObservation(page);
   await expect(boyfriend).toHaveAttribute("data-state", "saved");
   await openModule(page, "hans");
+  await openMinorPowers(page.locator('[data-module="hans"]'));
   const rage = page
     .locator(".play-minor-power")
     .filter({ hasText: "Unholy Rage" });
@@ -341,6 +343,7 @@ test("art controls reject failed local saves and recover offline observations on
   await expect(
     page.locator(".play-camp-person").filter({ hasText: "Boyfriend" }),
   ).toHaveAttribute("data-state", "unrecorded");
+  await openMinorPowers(page.locator('[data-module="hans"]'));
   const rage = page
     .locator(".play-minor-power")
     .filter({ hasText: "Unholy Rage" });

@@ -159,8 +159,14 @@ for (const [mission,character,photo] of [
       await captureArtwork(hero,'hunt-cleared',info);
       await captureArtwork(panel.getByRole('button',{name:/Telekinesis Uses remaining/}),'telekinesis',info);
     } else if (id === 'father') {
+      const completion = panel.getByRole('button',{name:'Record father freed'});
+      await expect(completion).toBeDisabled();
+      await expect(panel.getByText('0 of 3 keys',{exact:true})).toHaveCount(0);
+      await expect(panel.getByText('Adjust requirement',{exact:true})).toHaveCount(0);
       for (let n = 0; n < 3; n++) await panel.getByRole('button',{name:'Increase Banked keys'}).click();
-      await panel.getByRole('button',{name:'Record father freed'}).click();
+      await expect(panel.getByRole('group',{name:'Banked keys'}).locator('output')).toHaveText('3');
+      await panel.locator('.falconwood-mission').screenshot({path:info.outputPath('father-ready.jpg'),style:'.app-footer,[data-sonner-toaster]{visibility:hidden}'});
+      await completion.click();
     } else if (id === 'code') {
       await panel.getByRole('button',{name:'Code token 6'}).click();
       await panel.getByRole('combobox',{name:'Physical d20 result'}).click();
@@ -185,6 +191,8 @@ for (const [mission,character,photo] of [
       await panel.getByRole('button',{name:'Record friend revived'}).click();
       await captureArtwork(panel.getByRole('button',{name:/Spell Book Uses remaining/}),'spell-book',info);
     }
+    await expect(hero).toContainText('Mission complete');
+    if (id !== 'hunt') await captureArtwork(hero,`${id}-success`,info);
     const portrait = panel.getByRole('button',{name:character,exact:true});
     await captureArtwork(portrait,photo,info);
     const height = (await portrait.boundingBox())!.height;

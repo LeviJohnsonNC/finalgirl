@@ -277,12 +277,6 @@
 .play-module-content .module-cinematic-minor .play-health-tokens > button {
   width: 61px;
   height: 61px;
-  border: 1px solid #98665388;
-  background: #111012;
-  border-radius: 5px;
-  box-shadow:
-    inset 0 1px #e5c5a622,
-    0 4px 9px #0008;
 }
 .play-module-content .module-cinematic-minor .module-correction {
   padding: 0 20px 8px;

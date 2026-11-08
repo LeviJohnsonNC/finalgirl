@@ -109,7 +109,6 @@ export function CampControls({
     <div className="play-camp-modules">
       {killer === "Hans" && part !== "location" && (
         <section aria-label="Hans tracking">
-          <h3 className="play-module-subheading">Minor Dark Powers</h3>
 
           <MinorPowerGroup className="play-camp-body module-minor-grid">
             {HANS_MINOR_POWERS.map((power, row) => {

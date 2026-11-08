@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId, installTestAudio } from './fixtures';
-import { openModule, searchPick, undoLatestObservation } from './play-helpers';
+import { openMinorPowers, openModule, searchPick, undoLatestObservation } from './play-helpers';
 import { deathFacts } from '../../src/lib/play/death';
 import type { PlayEvent } from '../../src/lib/play/events';
 const key = `final-girl-active-game-v1:${userId}`;
@@ -11,6 +11,7 @@ for (const location of ['Camp Happy Trails', 'Buddyland', 'Carnival of Blood', '
         await openModule(page, 'poltergeist');
         const panel = page.locator('[data-module="poltergeist"]');
         await expect(panel.getByRole('button', { name: 'View Carolyn actions' })).toBeVisible();
+        await openMinorPowers(panel);
         await panel.getByRole('button', { name: 'Activate Psychic Confusion', exact: true }).click();
         await panel.getByRole('button', { name: 'Add another Minor Power', exact: true }).click();
         await panel.getByRole('button', { name: 'Activate Unseen Forces', exact: true }).click();
@@ -121,6 +122,7 @@ test('photographic cards and healthless Minor states match the baseline at every
             await panel.getByRole('button', { name: `Clear ${kind} card name`, exact: true }).click();
         }
     }
+    await openMinorPowers(panel);
     await panel.getByRole('button', { name: 'Activate Psychic Confusion', exact: true }).click();
     const before = await page.evaluate(k => JSON.parse(localStorage.getItem(k)!).playEvents.length, key);
     await panel.getByRole('button', { name: 'Add another Minor Power', exact: true }).click();
@@ -138,6 +140,7 @@ test('unknown legacy state and failed durable writes remain honest and retryable
  await archive.install(page,{draft:{...activeGame,playMode:true,selection:{...activeGame.selection,killer:'Poltergeist'},playEvents:[{id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',at:1,kind:'start',saved:2,killed:3,round:5}]}});
  await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();const before=await page.evaluate(k=>localStorage.getItem(k),key);await openModule(page,'poltergeist');const panel=page.locator('[data-module="poltergeist"]');
  expect(await page.evaluate(k=>localStorage.getItem(k),key)).toBe(before);await expect(panel.getByRole('button',{name:'View Carolyn actions'})).toContainText('Not recorded');
+ await openMinorPowers(panel);
  await panel.getByRole('button',{name:'Activate Psychic Confusion',exact:true}).click();
  await panel.getByRole('button',{name:'View Carolyn actions'}).click();
  await page.evaluate(()=>{const original=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k.startsWith('final-girl-active-game-v1:'))throw new Error('synthetic quota');return original.call(this,k,v);};});
@@ -146,7 +149,9 @@ test('unknown legacy state and failed durable writes remain honest and retryable
  await panel.screenshot({path:info.outputPath('failed-join-unknown.png'),animations:'disabled',style:'.app-footer{visibility:hidden}'});
  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'poltergeist');
  await panel.getByRole('button',{name:'View Carolyn actions'}).click();await panel.getByRole('button',{name:'Carolyn joins you',exact:true}).click();
- await undoLatestObservation(page);await expect(panel.getByRole('button',{name:'End effect: Psychic Confusion',exact:true})).toHaveAttribute('aria-pressed','true');
+ await undoLatestObservation(page);
+ await openMinorPowers(panel);
+ await expect(panel.getByRole('button',{name:'End effect: Psychic Confusion',exact:true})).toHaveAttribute('aria-pressed','true');
  await expect(page.getByRole('button',{name:'Save one victim',exact:true})).toContainText('2');await expect(page.getByRole('button',{name:'Record one victim killed',exact:true})).toContainText('3');
 });
 

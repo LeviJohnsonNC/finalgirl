@@ -422,14 +422,16 @@
   {
     "id": "captain-killed",
     "file": "src/assets/play/photos/konrad/captain-killed.webp",
-    "source": "exec-fe631bdf-f61a-43a7-a0f2-a0d0fde4e40a.png",
-    "nativeWidth": 1672,
-    "nativeHeight": 941,
+    "source": "exec-6f0792ed-6d6f-46d1-aec0-4c998dff37a9.png",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
     "width": 1280,
     "height": 720,
-    "bytes": 92736,
-    "sha256": "cd324c2a5abb60d0dc25cc368409e7b96f7f6dd6e0841926f0adbd5f7f5accf4",
-    "quality": 84
+    "bytes": 155044,
+    "sha256": "cb14af607812f144ec2d1f13208ee6f3f26b4939f664688e7562a64cca72c2d9",
+    "quality": 86,
+    "sourceSha256": "bfc84586eef9d8ee1c9bf55a42d57441a5759bb97136fe136e02d78ff3c6c7cf",
+    "prompt": "One wide 3:2 candid 1980s consumer 35mm horror film still for a fictional game. Match the clothing and location of the left-hand reference. same practical spaceship control room, slumped motionless on the deck beneath overturned console chair in a navy uniform, intermittent amber fault light. Scene should imply fatal aftermath through stillness, disturbed environment and naturalistic light. No visible blood, injury, gore, action, collage or lettering. Center subject for a wide card crop."
   },
   {
     "id": "jonas-saved",

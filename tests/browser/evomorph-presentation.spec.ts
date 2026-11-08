@@ -1,5 +1,5 @@
 import {test,expect,activeGame,userId} from './fixtures';
-import {openModule,statusPick,undoLatestObservation} from './play-helpers';
+import {openMinorPowers,openModule,statusPick,undoLatestObservation} from './play-helpers';
 import type {Page} from '@playwright/test';
 const key=`final-girl-active-game-v1:${userId}`;
 const draft={...activeGame,evomorphSetupVersion:1,playMode:true,selection:{...activeGame.selection,killer:'Evomorph',location:'USS Konrad'}};
@@ -76,6 +76,7 @@ test('all Evomorph cards have distinct custom photographs in choices, reveals an
  await archive.install(page,{draft});await resume(page);
  const panel=page.locator('[data-module="evomorph"]');
  await panel.getByText('Dark Power & Finale',{exact:true}).click();
+ await openMinorPowers(panel);
  const sources=new Set<string>();
  for(const name of ['Dead Silence','Shadow Dread','Sideswipe']){
   const card=panel.getByRole('article',{name,exact:true});

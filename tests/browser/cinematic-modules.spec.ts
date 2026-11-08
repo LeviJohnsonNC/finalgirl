@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { showMinorChoices, openModule, undoLatestObservation } from "./play-helpers";
+import { openMinorPowers, showMinorChoices, openModule, undoLatestObservation } from "./play-helpers";
 import { newPlayEvent } from "../../src/lib/play/events";
 
 const selection = {
@@ -25,6 +25,8 @@ test("Minor powers expand independently and depleted health stays editable throu
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
   await openModule(page, "inkanyamba");
   const panel = page.locator('[data-module="inkanyamba"]');
+  await expect(panel.locator(".module-minor-section")).not.toHaveAttribute("open", "");
+  await openMinorPowers(panel);
   const power = panel.locator(".module-minor").filter({
     has: page.getByRole("button", {
       name: "Reveal Boiling Anger",
@@ -66,6 +68,7 @@ test("Minor powers expand independently and depleted health stays editable throu
   await page.reload();
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
   await openModule(page, "inkanyamba");
+  await openMinorPowers(panel);
   await expect(active).toContainText("1/3 health");
   await expect(panel.getByText("Wrath reference", { exact: true })).toHaveCount(
     0,

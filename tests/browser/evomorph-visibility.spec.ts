@@ -1,5 +1,5 @@
 import {test,expect,activeGame,userId} from './fixtures';
-import {openModule,undoLatestObservation} from './play-helpers';
+import {openMinorPowers, openModule,undoLatestObservation} from './play-helpers';
 import type {Page} from '@playwright/test';
 const key=`final-girl-active-game-v1:${userId}`;
 const log=(page:Page)=>page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents,key);
@@ -64,11 +64,15 @@ for(const [killer,location,id]of pairs)test(`shared owner headers and Minor Powe
   expect(await log(page)).toEqual(before);
   if(id!=='poltergeist'){
    const panel=page.locator(`[data-module="${id}"]`);
-   if(id==='geppetto')await panel.getByText('Minor Dark Powers',{exact:true}).click();
+   await expect(panel.locator('.module-minor-section')).not.toHaveAttribute('open','');
+   await openMinorPowers(panel);
+   expect(await log(page)).toEqual(before);
    await panel.locator('.module-minor-choice').first().click();
    const hearts=panel.locator('.play-health-tokens').first();
-   const source=(await hearts.locator('image').first().getAttribute('href'))!;
-   expect(source).toMatch(/cards.*\.webp/);
+   const source=(await hearts.locator('img').first().getAttribute('src'))!;
+   expect(source).toMatch(/heart-live.*\.webp/);
+   await expect(hearts.locator('button').first()).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
+   await expect(hearts.locator('button').first()).toHaveCSS('border-top-width','0px');
    await hearts.locator('button').first().click();
    await expect(hearts.locator('button[aria-pressed="false"]')).toHaveCount(1);
    await hearts.screenshot({path:info.outputPath(`hearts-${id}.png`),animations:'disabled',style:'.app-footer{visibility:hidden}'});

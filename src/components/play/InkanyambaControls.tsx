@@ -40,7 +40,6 @@ export function InkanyambaControls({
         onChange={(wrath) => change({ wrath })}
       />
       <div className="ink-minors">
-        <h3>Minor Dark Powers</h3>
         <MinorPowerGroup className="ink-minor-grid">
           {INKANYAMBA_MINOR_POWERS.map((p, row) => (
             <MinorPowerControl

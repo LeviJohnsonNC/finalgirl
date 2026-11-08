@@ -161,6 +161,30 @@
     sans-serif;
   color: hsl(var(--foreground) / 0.8);
 }
+.module-minor-section {
+  min-width: 0;
+  border: 1px solid hsl(var(--foreground) / .18);
+  border-radius: 7px;
+  background: hsl(var(--background) / .48);
+}
+.module-minor-section > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: .5rem .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.module-minor-section > summary::-webkit-details-marker { display: none; }
+.module-minor-section > summary:focus-visible {
+  outline: 2px solid hsl(var(--secondary));
+  outline-offset: -2px;
+}
+.module-minor-section[open] > summary svg { transform: rotate(180deg); }
+.module-minor-section[open] > summary { border-bottom: 1px solid hsl(var(--foreground) / .14); }
+.module-minor-section > :not(summary) { margin: .65rem; }
 .module-minor .play-health-tokens {
   display: flex;
   gap: 10px;
@@ -171,15 +195,9 @@
   min-height: 44px;
   padding: 0;
   overflow: hidden;
-  border: 1px solid hsl(var(--destructive) / 0.4);
-  border-radius: 8px;
-  background: hsl(var(--background));
-}
-.module-minor
-  .play-health-tokens
-  > button[aria-pressed="false"]
-  .play-module-art {
-  filter: grayscale(1) brightness(0.35);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .module-reveal {
   align-self: start;
