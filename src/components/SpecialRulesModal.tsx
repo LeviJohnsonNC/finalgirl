@@ -39,18 +39,26 @@ export const SpecialRulesModal = ({ killer, location, children }: SpecialRulesMo
   const showSetup = setup.body.length > 0;
   const activeView = showSetup && view === 'setup' ? 'setup' : 'rules';
   const section = activeView === 'setup' ? setup : rules;
+  const topicId = (index: number) => `${topicPrefix}-topic-${index}`;
   const topics = section.body.flatMap((block, index) => block.type === 'heading'
-    ? [{ id: `${topicPrefix}-topic-${index}`, title: block.text }]
+    ? [{ id: topicId(index), title: block.text }]
     : []);
-  const showTopics = activeView === 'rules' && topics.length >= 3;
+  const placementTopics = section.body.flatMap((block, index) =>
+    block.type === 'table' && block.modalLayout === 'placements'
+      ? block.rows.map(([title], row) => ({ id: `${topicId(index)}-row-${row}`, title }))
+      : []);
+  const showTopics = topics.length >= 2 || placementTopics.length > 0;
+  const jumpLabel = activeView === 'setup' ? 'Jump to setup' : 'Jump to topic';
 
   function jumpToTopic(id: string) {
     const reader = readerRef.current;
-    const heading = document.getElementById(id);
-    if (!reader || !heading) return;
-    const top = heading.getBoundingClientRect().top - reader.getBoundingClientRect().top + reader.scrollTop;
-    reader.scrollTo({ top: top - 16 });
-    heading.focus({ preventScroll: true });
+    const target = id === 'start' ? reader : document.getElementById(id);
+    if (!reader || !target) return;
+    const top = id === 'start'
+      ? 0
+      : target.getBoundingClientRect().top - reader.getBoundingClientRect().top + reader.scrollTop - 12;
+    reader.scrollTo({ top });
+    target.focus({ preventScroll: true });
   }
 
   return (
@@ -87,9 +95,15 @@ export const SpecialRulesModal = ({ killer, location, children }: SpecialRulesMo
               )}
               {showTopics && (
                 <label className="special-rules-topics">
-                  <select aria-label="Jump to topic" value="" onChange={(event) => jumpToTopic(event.target.value)}>
-                    <option value="" disabled>Jump to topic</option>
+                  <select aria-label={jumpLabel} value="" onChange={(event) => jumpToTopic(event.target.value)}>
+                    <option value="" disabled>{jumpLabel}</option>
+                    <option value="start">{activeView === 'setup' ? 'Start of setup' : 'Start of rules'}</option>
                     {topics.map(({ id, title }) => <option key={id} value={id}>{title}</option>)}
+                    {placementTopics.length > 0 && (
+                      <optgroup label="Setup cards">
+                        {placementTopics.map(({ id, title }) => <option key={id} value={id}>{title}</option>)}
+                      </optgroup>
+                    )}
                   </select>
                   <ChevronDown size={15} aria-hidden="true" />
                 </label>
@@ -101,10 +115,10 @@ export const SpecialRulesModal = ({ killer, location, children }: SpecialRulesMo
             {...(!showSetup && { role: 'region', 'aria-labelledby': undefined, 'aria-label': `${active.entity} rules` })}>
             <div className="rule-paper">
               <div className="rule-article-sections">
-                <div className="space-y-3">
+                <div className="special-rules-blocks">
                   {section.body.map((block, index) => (
-                    <RuleBlock key={index} block={block} glossary={[]} onJumpTo={() => {}}
-                      headingId={showTopics ? `${topicPrefix}-topic-${index}` : undefined} />
+                    <RuleBlock key={index} block={block} inModal glossary={[]} onJumpTo={() => {}}
+                      jumpId={showTopics ? topicId(index) : undefined} />
                   ))}
                 </div>
                 <footer className="special-rules-source">{active.source}</footer>

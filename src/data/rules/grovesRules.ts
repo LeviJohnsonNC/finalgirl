@@ -63,6 +63,7 @@ export const grovesRules: EntityRuleModule = {
     },
     {
       type: "table",
+      modalLayout: "comparison",
       headers: ["Level", "Unleash Divine Wrath"],
       rows: GROVES_UNLEASH.map((text, i) => [String(i + 1), text]),
     },
@@ -73,6 +74,7 @@ export const grovesRules: EntityRuleModule = {
     },
     {
       type: "table",
+      modalLayout: "comparison",
       headers: ["Bloodlust line", "Additional location instruction"],
       rows: GROVES_BLOODLUST.map((text, i) => [String(i), text]),
     },
