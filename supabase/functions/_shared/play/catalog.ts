@@ -1,4 +1,5 @@
 import {MALL,MALL_EVENTS,MALL_TERRORS,MALL_ITEMS,MALL_SPACES,MALL_SOURCE} from './sunnydazeCatalog.ts';
+import { SLAYER, SLAYER_SOURCE, SLAYER_TERRORS } from "./slayer.ts";
 import { HUNTER, HUNTER_SOURCE, HUNTER_TERRORS } from './hunter.ts';
 import { WINGARD, WINGARD_EVENTS, WINGARD_TERRORS, WINGARD_ITEMS, WINGARD_PEOPLE, WINGARD_SPACES, WINGARD_SOURCE } from './wingardCatalog.ts';
 import { WOODS, WOODS_SOURCE, WOODS_EVENTS, WOODS_TERRORS, WOODS_ITEMS, WOODS_PEOPLE, WOODS_SPACES } from "./storybookWoods.ts";
@@ -51,6 +52,7 @@ const rules =
 export const PLAY_CARDS: readonly PlayCard[] = [
  ...MALL_EVENTS.map(card=>({...card,kind:"event" as const,location:MALL,source:MALL_SOURCE})),
  ...MALL_TERRORS.map(card=>({...card,kind:"terror" as const,location:MALL,source:MALL_SOURCE})),
+  ...SLAYER_TERRORS.map(card => ({...card, kind:"terror" as const, killer:SLAYER, source:SLAYER_SOURCE})),
   ...HUNTER_TERRORS.map(card=>({...card,kind:"terror" as const,killer:HUNTER,source:HUNTER_SOURCE})),
   ...INTRUDER_TERRORS.map(card => ({...card, kind:"terror" as const, killer:INTRUDERS, source:INTRUDER_SOURCE})),
   ...WOLF_TERRORS.map(card => ({ ...card, kind: "terror" as const, killer: WOLF, source: WOLF_SOURCE })),

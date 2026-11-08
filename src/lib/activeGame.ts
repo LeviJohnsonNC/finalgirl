@@ -12,6 +12,7 @@ export interface GameSelection {
   finalGirlStartingHealth?: number;
 }
 export interface EndingFormData {
+  slayerReview?: import("./play/slayer").SlayerReview;
   childrenOnBoardAtFinish?: number|null;
   tormentorReview?:{loss:import('../../supabase/functions/_shared/play/tormentor').TormentorLoss};
   grimlashReview?: {loss:import('../../supabase/functions/_shared/play/grimlash').GrimlashLoss};
@@ -33,6 +34,7 @@ export interface ActiveGame {
   wolfSetupVersion?: 1;
   intrudersSetupVersion?: 1;
   mallSetupVersion?:1;
+  slayerSetupVersion?: 1;
   hunterSetupVersion?: 1;
   shadySetupVersion?: 1;
   grimlashSetupVersion?: 1;
@@ -84,6 +86,10 @@ export function isActiveGame(value: unknown): value is ActiveGame {
   if(game.marrekSetupVersion!==undefined&&game.marrekSetupVersion!==1)return false;
   if(game.selection?.location!=='Marrek Warehouse'&&Array.isArray(game.playEvents)&&game.playEvents.some(e=>e.moduleData?.module==='marrek'))return false;
   if(Array.isArray(game.playEvents)&&game.playEvents.some(e=>e.moduleData?.module==='hunter'&&!e.hunterAction)&&game.hunterSetupVersion!==1)return false;
+  if (game.slayerSetupVersion !== undefined && (game.slayerSetupVersion !== 1 || game.selection?.killer !== "Slayer")) return false;
+  if (Array.isArray(game.playEvents) && game.playEvents.some(e =>
+    (e.moduleData?.module === "slayer" || e.slayerReference) && game.selection?.killer !== "Slayer" ||
+    e.moduleData?.module === "slayer" && !e.slayerAction && game.slayerSetupVersion !== 1)) return false;
   if(game.hunterSetupVersion!==undefined&&(game.hunterSetupVersion!==1||game.selection?.killer!=='The Hunter'))return false;
   if(game.selection?.killer!=='The Hunter'&&Array.isArray(game.playEvents)&&game.playEvents.some(e=>e.moduleData?.module==='hunter'||e.hunterReference))return false;
   if (game.intrudersSetupVersion !== undefined && (game.intrudersSetupVersion !== 1 || game.selection?.killer !== "The Intruders")) return false;

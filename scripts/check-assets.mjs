@@ -371,3 +371,42 @@ const mallFiles=new Set(),mallSources=new Set();
 for(const p of mallPhotos){const b=readFileSync(p.file);if(konradWebpDimensions(b).join()!==[p.width,p.height].join()||p.bytes!==b.length||b.length>160*1024||p.nativeWidth<p.width||p.nativeHeight<p.height||createHash('sha256').update(b).digest('hex')!==p.sha256||!/^exec-[a-f0-9-]+\.png$/.test(p.source)||!/^\w{64}$/.test(p.sourceSha256)||mallSources.has(p.source))throw Error('Invalid independent Mall photo '+p.id);mallSources.add(p.source);mallFiles.add(p.file);}
 if(images.filter(p=>p.startsWith(mallDirectory+'/')||p==='src/assets/play/banners/sunnydaze.webp').some(p=>!mallFiles.has(p)))throw Error('Unmapped Mall artwork');
 console.log('Verified 59 independent Sunnydaze Mall photographs, including 20 Trust/action and 20 store-wall states.');
+
+const slayerDirectory = 'src/assets/play/photos/slayer';
+const slayerPhotos = JSON.parse(readFileSync(join(slayerDirectory,'manifest.json'),'utf8'));
+const slayerChoices = ['mind-control','renewed-determination','master-plan','in-my-head','rift-collapse',
+  'welcome-to-my-world','lets-finish-this','interdimensional-interference','interdimensional-focus','zealous-attacks'];
+const slayerExpected = ['our','mirror','collapsed','header',...slayerChoices,'sky-turned-black','so-many-gone',
+  'people-disappearing','through-the-wall','hyperdimensional-travel','detect-blood','after-me',
+  'what-is-this-place','dark-and-cold','something-evil'];
+const slayerPaths = new Set();
+const slayerSources = new Set();
+for (const photo of slayerPhotos) {
+  const file = photo.id === 'header' ? 'src/assets/play/banners/slayer.webp' : join(slayerDirectory,`${photo.id}.webp`);
+  if (!slayerExpected.includes(photo.id) || photo.file !== file ||
+    slayerPaths.has(photo.file) || slayerSources.has(photo.source) || !/^exec-[a-f0-9-]+\.png$/.test(photo.source) ||
+    !/^[a-f0-9]{64}$/.test(photo.sourceSha256) || photo.nativeWidth < 1536 || photo.nativeWidth < photo.width || photo.nativeHeight < photo.height) {
+    throw Error('Invalid Slayer source or mapping: ' + photo.id);
+  }
+  slayerSources.add(photo.source);
+  if (Boolean(photo.thumbnail) !== slayerChoices.includes(photo.id) ||
+      photo.thumbnail && photo.thumbnail.file !== join(slayerDirectory,`${photo.id}-thumb.webp`)) {
+    throw Error('Invalid Slayer chooser mapping: ' + photo.id);
+  }
+  for (const [entry, width, height, budget] of [
+    [photo, photo.width, photo.height, 160 * 1024],
+    ...(photo.thumbnail ? [[photo.thumbnail,288,162,35 * 1024]] : []),
+  ]) {
+    const bytes = readFileSync(entry.file);
+    if (konradWebpDimensions(bytes).join() !== [width,height].join() ||
+        bytes.length !== entry.bytes || bytes.length > budget || createHash('sha256').update(bytes).digest('hex') !== entry.sha256) {
+      throw Error('Invalid Slayer photograph: ' + entry.file);
+    }
+    slayerPaths.add(entry.file);
+  }
+}
+if (slayerSources.size !== slayerExpected.length ||
+    images.some(file => file.startsWith(slayerDirectory+'/') && !slayerPaths.has(file))) {
+  throw Error('Incomplete or unmapped Slayer photography');
+}
+console.log('Verified 24 original Slayer photographs and 10 chooser thumbnails.');

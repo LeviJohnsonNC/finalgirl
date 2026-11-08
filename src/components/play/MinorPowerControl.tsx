@@ -8,6 +8,7 @@ export function MinorPowerControl({
   health,
   art,
   heroArt,
+  choiceArt,
   onChange,
   className = "",
   previouslyRevealed = false,
@@ -20,6 +21,7 @@ export function MinorPowerControl({
   disabled?: boolean;
   art: (health: number) => ModuleArt;
   heroArt?: ModuleArt;
+  choiceArt?: ModuleArt;
   onChange: (health: number | null) => unknown;
   className?: string;
   previouslyRevealed?: boolean;
@@ -62,7 +64,7 @@ export function MinorPowerControl({
           aria-label={`${previouslyRevealed ? "Record full health for" : "Reveal"} ${name}`}
           onClick={() => onChange(maxHealth)}
         >
-          <span className="module-minor-art">{picture}</span>
+          <span className="module-minor-art">{choiceArt ? <ModuleArtwork art={choiceArt} /> : picture}</span>
           <span className="module-minor-choice-copy">
             <span className="cinematic-eyebrow">Minor Dark Power</span>
             <strong>{name}</strong>

@@ -1,3 +1,4 @@
+import { SLAYER, SLAYER_BLOODLUST } from "@/lib/play/slayer";
 import { WOLF, WOLF_BLOODLUST } from "@/lib/play/bigBadWolf";
 import level0 from "@/assets/play/bloodlust/level-0.webp";
 import level1 from "@/assets/play/bloodlust/level-1.webp";
@@ -33,6 +34,7 @@ const photographs = [
 export const verifiedBloodlustMaximum: Readonly<Record<string, number>> = {
   "The Hunter": 10,
   "The Intruders": 10,
+  [SLAYER]: SLAYER_BLOODLUST.length - 1,
   [WOLF]: WOLF_BLOODLUST.length - 1,
   "The Tormentor": 6,
   Grimlash: 8,

@@ -1,4 +1,5 @@
 import { MALL, MALL_MODULE, MALL_ITEMS, MALL_VISUAL, validMallField, mallFacts } from './sunnydaze.ts';
+import { SLAYER, SLAYER_MODULE, SLAYER_POWERS, SLAYER_FINALES, slayerFacts, validSlayerField } from "./slayer.ts";
 import { HUNTER, HUNTER_MODULE, HUNTER_POWERS, HUNTER_FINALES, validHunterField, hunterFacts } from './hunter.ts';
 import { WINGARD, WINGARD_MODULE, WINGARD_ITEMS, WINGARD_VISUAL } from './wingardCatalog.ts';
 import { wingardState, wingardFacts, validWingardField } from './wingardCottage.ts';
@@ -63,7 +64,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -85,6 +86,7 @@ type ObservedEvent = {
 
 /** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
 export function killerMomentCards(killer: string, type: string) {
+  if (killer === SLAYER) return [...(type === "dark-power" ? SLAYER_POWERS : type === "finale" ? SLAYER_FINALES : [])].sort((a,b) => a.name.localeCompare(b.name));
   if (killer === HUNTER) return [...(type==="dark-power"?HUNTER_POWERS:type==="finale"?HUNTER_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === INTRUDERS) return [...(type==="dark-power"?INTRUDER_POWERS:type==="finale"?INTRUDER_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === WOLF) return [...(type === "dark-power" ? WOLF_POWERS : type === "finale" ? WOLF_FINALES : [])].sort((a,b) => a.name.localeCompare(b.name));
@@ -178,6 +180,7 @@ function validField(
   value: unknown,
 ) {
   if (module === MALL_MODULE) return validMallField(key,value);
+  if (module === SLAYER_MODULE) return validSlayerField(key,value);
   if (module === HUNTER_MODULE) return validHunterField(key,value);
   if (module === INTRUDER_MODULE) return validIntruderField(key,value);
   if (module === "big-bad-wolf") return validWolfField(key, value);
@@ -305,7 +308,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    ![MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    ![SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -522,6 +525,7 @@ export function describeModule(observation: ModuleObservation) {
       return minor?`${minor.name}: ${value??'unrecorded'} Health`:`${names[id]} ${field}: ${value??'unrecorded'}`;
     }).join(' · ');
   }
+  if (observation.module === SLAYER_MODULE) return slayerFacts(observation.changes) || "Dimension Tracker recorded";
   if (observation.module === MALL_MODULE) return mallFacts(observation.changes);
   if (observation.module === HUNTER_MODULE) {
     return observation.changes.snapshot ? hunterFacts(observation.changes) : Object.entries(observation.changes).map(([key,value])=>`${key}: ${value??'unrecorded'}`).join('; ');
@@ -560,6 +564,9 @@ export function moduleContext(
 ) {
   const context: Record<string, ModuleState> = {};
   if (selection.location===MALL && entries.some(e=>e.moduleData?.module===MALL_MODULE)) context[MALL_MODULE]={facts:mallFacts(moduleState(entries,MALL_MODULE))};
+  if (selection.killer === SLAYER && entries.some(e => e.moduleData?.module === SLAYER_MODULE)) {
+    context.slayer = { facts: slayerFacts(moduleState(entries, SLAYER_MODULE)) };
+  }
   if (selection.killer === HUNTER && entries.some(e=>e.moduleData?.module===HUNTER_MODULE)) {
     context.hunter={facts:hunterFacts(moduleState(entries,HUNTER_MODULE),entries)};
   }
@@ -652,6 +659,11 @@ export function moduleStoryBeats(
     const threat = moduleStoryBeats({...selection,location:''},entries);
     const cottage = wingardFacts(wingardState(moduleState(entries,WINGARD_MODULE))).join(' ');
     return [fitStoryText(cottage,threat?520:895),fitStoryText(threat,370)].filter(Boolean).join('\n');
+  }
+  if (selection.killer === SLAYER) {
+    const threat = slayerFacts(moduleState(entries, SLAYER_MODULE), false);
+    const place = moduleStoryBeats({...selection, killer: ""}, entries);
+    return [threat, fitStoryText(place, 895 - threat.length)].filter(Boolean).join("\n");
   }
   if (selection.killer===INTRUDERS) {
     const state=moduleState(entries,INTRUDER_MODULE);
@@ -933,6 +945,7 @@ export function moduleReferences(
   mechanism?: string,
 ) {
   const refs = buddylandReferences(selection, context, attacker);
+  if (selection.killer === SLAYER && typeof context?.slayer?.facts === "string") refs.push({name:"Slayer dimension observations",effect:context.slayer.facts});
   if(selection.location===MALL){refs.push({name:'Mall people and hazard boundary',effect:'The Savior is a separate Ally, never an ordinary Victim. Bart/Girl status does not identify the victim of this scene unless the death-specific victim field explicitly selects that role. Infer no extra casualty from a card, decorative picture, or other person’s status.'});if(mechanism==='Railing fall')refs.push({name:mechanism,effect:'A voluntary jump lands safely on 5–6; on 1–4 the jumper loses one Health. Taking damage in a Railing space knocks that figure into the Food Court below and causes one additional Health loss. Only this scene’s explicit observation establishes what happened.'});if(mechanism==='Store wall knockback')refs.push({name:mechanism,effect:'Store damage knocks a figure through an eligible unbroken wall into the newly adjacent space, causes one additional Health loss and leaves a Destroyed Wall. No eligible wall means no special knockback. Do not invent a chain of extra casualties.'});}
   if(selection.killer===HUNTER&&typeof context?.hunter?.facts==='string')refs.push({name:'Hunter model and Ally observations',effect:context.hunter.facts});
     if(selection.killer==='The Tormentor'){const trap=TORMENTOR_TRAPS.find(c=>c.name===mechanism);if(trap)refs.push({name:trap.name,effect:`${trap.deck==='girl'?'Final Girl':'Victim'} Death Trap. Tasks: ${trap.tasks.join('; ')}. Progress: ${trap.checkpoints.join(' → ')}. ${trap.fail} Only this recorded death is established; costs and other casualties are not inferred.`});}

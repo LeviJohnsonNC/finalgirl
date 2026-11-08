@@ -1,3 +1,5 @@
+import { SLAYER, SLAYER_COLLAPSE } from '@/lib/play/slayer';
+import { SlayerCollapseControl } from './SlayerCollapseControl';
 import { HUNTER, hunterState, hunterHasReveal } from '@/lib/play/hunter';
 import { useState } from "react";
 import { WOLF } from "@/lib/play/bigBadWolf";
@@ -132,6 +134,8 @@ export function KillerCards({
                 </p>
               )}
               {selected && <RevealedCard card={selected} label={label} />}
+              {killer === SLAYER && selected?.name === SLAYER_COLLAPSE && type === "finale" &&
+                <SlayerCollapseControl events={events} onEvent={onEvent} disabled={disabled} />}
               {!selected && (
                 <Chooser
                   cards={cards}

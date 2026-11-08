@@ -1,3 +1,6 @@
+import { SlayerControls } from './SlayerControls';
+import { slayerArt } from './slayerArt';
+import { SLAYER, SLAYER_MODULE, dimensionLabel, slayerState } from '@/lib/play/slayer';
 import {MallControls} from './MallControls';
 import {mallArt} from './mallArt';
 import {MALL_MODULE,MALL,MALL_TRUST,mallState} from '@/lib/play/sunnydaze';
@@ -81,7 +84,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -108,6 +111,8 @@ const peopleSummary = (
 // never determines the killer's controls (and vice versa).
 export const moduleDefinitions: Definition[] = [
  {id:MALL_MODULE,owner:'location',match:MALL,title:'Inside Sunnydaze Mall',art:mallArt('header'),capabilities:['character','event','minor-power'],Controls:MallControls,summary:f=>{const s=mallState(f);return `Savior ${s.savior==='present'?'in play':s.savior}${s.trust===null?'':` · ${MALL_TRUST[s.trust]}`}`;}},
+ {id:SLAYER_MODULE,owner:'killer',match:SLAYER,title:'Slayer',art:slayerArt('header'),capabilities:['reveals','minor-power'],Controls:SlayerControls,
+  summary:fields=>{const s=slayerState(fields);return `Final Girl · ${dimensionLabel(s.girl)} / Slayer · ${dimensionLabel(s.slayer)}${s.collapsed ? ' · Rift Collapse recorded' : ''}`;}},
  {id:'hunter',owner:'killer',match:'The Hunter',title:'The Hunter',art:hunterArt('header'),capabilities:['reveals','minor-power'],Controls:HunterControls,summary:fields=>{const s=hunterState(fields);return s.phase==='unknown'?'Model not recorded':s.phase==='mark-v'?`Mark V · ${s.remaining??'?'} Parts`:s.phase==='countdown'?`Mark V shut down · Countdown ${s.countdown??'?'}`:`Mark X active · Mark V ${s.ally==='alive'?'Ally':s.ally}`;}},
   {id:WINGARD_MODULE,owner:'location',match:WINGARD,title:'Inside Wingard Cottage',
     art:wingardArt('header'),capabilities:['character','event'],Controls:WingardControls,
