@@ -1,4 +1,7 @@
 import { SlayerControls } from './SlayerControls';
+import { FALCONWOOD, FALCONWOOD_MODULE, falconwoodProgress, falconwoodState, missionById, missionByName } from '../../../supabase/functions/_shared/play/falconwood';
+import { FalconwoodControls } from './FalconwoodControls';
+import { falconwoodArt } from './falconwoodArt';
 import { slayerArt } from './slayerArt';
 import { SLAYER, SLAYER_MODULE, dimensionLabel, slayerState } from '@/lib/play/slayer';
 import {MallControls} from './MallControls';
@@ -66,6 +69,8 @@ import { FrightControls } from "./FrightControls";
 
 export interface ControlsProps {
   blocked?: boolean;
+  mission?: string | null;
+  falconwoodFresh?: boolean;
   setupScenario?: string | null;
   startingEvent?: string | null;
   killer: string;
@@ -84,12 +89,12 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
   art: ModuleArt;
-  summary: (state: State) => string;
+  summary: (state: State, props?: ControlsProps) => string;
   Controls: (props: ControlsProps) => React.ReactNode;
 }
 const peopleSummary = (
@@ -110,6 +115,12 @@ const peopleSummary = (
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
 export const moduleDefinitions: Definition[] = [
+ {id:FALCONWOOD_MODULE,owner:'location',match:FALCONWOOD,title:'Inside Falconwood',art:falconwoodArt('header'),
+  capabilities:[],Controls:FalconwoodControls,summary:(fields,props)=>{
+    const state=falconwoodState(fields);
+    const mission=missionById(state.mission)??missionByName(props?.mission);
+    return mission ? `${mission.name} · ${falconwoodProgress({...state,mission:mission.id})}` : falconwoodProgress(state);
+ } },
  {id:MALL_MODULE,owner:'location',match:MALL,title:'Inside Sunnydaze Mall',art:mallArt('header'),capabilities:['character','event','minor-power'],Controls:MallControls,summary:f=>{const s=mallState(f);return `Savior ${s.savior==='present'?'in play':s.savior}${s.trust===null?'':` · ${MALL_TRUST[s.trust]}`}`;}},
  {id:SLAYER_MODULE,owner:'killer',match:SLAYER,title:'Slayer',art:slayerArt('header'),capabilities:['reveals','minor-power'],Controls:SlayerControls,
   summary:fields=>{const s=slayerState(fields);return `Final Girl · ${dimensionLabel(s.girl)} / Slayer · ${dimensionLabel(s.slayer)}${s.collapsed ? ' · Rift Collapse recorded' : ''}`;}},

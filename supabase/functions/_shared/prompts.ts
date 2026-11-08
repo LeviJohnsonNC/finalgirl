@@ -13,6 +13,7 @@ import { fallbackPosterDesign, parsePosterDesign, posterArtDirection, POSTER_DES
 
 export interface SceneContext {
   hunterReview?:HunterReview;
+  falconwoodReview?: import("./play/falconwood.ts").FalconwoodReview;
   slayerReview?: import("./play/slayer.ts").SlayerReview;
   tormentorReview?:{loss:import('./play/tormentor.ts').TormentorLoss};
   marrekOpening?:MarrekOpening;

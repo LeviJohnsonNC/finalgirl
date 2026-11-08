@@ -1,3 +1,4 @@
+import { falconwoodReview, falconwoodReviewText, falconwoodState } from "../../supabase/functions/_shared/play/falconwood";
 import { slayerState } from "@/lib/play/slayer";
 import {MALL,MALL_MODULE,mallState,mallFacts} from '@/lib/play/sunnydaze';
 import { hunterState, hunterFacts } from '@/lib/play/hunter';
@@ -283,9 +284,11 @@ export const GameOutcomeForm = ({
     onDraftChange,
   );
   // Falconwood / Slayer
+  const recordedMission = falconwoodState(moduleState(entries, "falconwood"));
+  const showLegacyMissionNotes = !recordedMission.mission || !!initialDraft?.missionProgress || !!initialDraft?.friendJoined;
   const [missionCompleted, setMissionCompleted] = useDraftField(
     'missionCompleted',
-    null as boolean | null,
+    recordedMission.complete ?? (null as boolean | null),
     initialDraft,
     onDraftChange,
   );
@@ -375,27 +378,21 @@ export const GameOutcomeForm = ({
       ];
       highlights = [highlights, ...shriekParts].filter(Boolean).join('. ');
     }
-    if (isFalconwood) {
+    if (isFalconwood && (missionProgress.trim() || friendJoined.trim())) {
       const falconParts: string[] = [];
-      if (result.mission) falconParts.push(`Mission: ${result.mission}`);
       if (missionCompleted) {
-        falconParts.push(
-          'Mission completed — the killer could finally be finished',
-        );
         if (friendJoined.trim())
           falconParts.push(
             `Friend who joined the fight: ${friendJoined.trim()}`,
           );
       } else if (missionCompleted === false) {
-        falconParts.push(
-          'Mission NOT completed — the killer could not be finished',
-        );
         if (missionProgress.trim())
           falconParts.push(`Mission progress: ${missionProgress.trim()}`);
       }
       highlights = [highlights, ...falconParts].filter(Boolean).join('. ');
     }
     const formData: EndingFormData = {
+      ...(isFalconwood && {falconwoodReview:falconwoodReview(recordedMission,result.mission,missionCompleted)}),
       ...(isSlayer && {slayerReview: {finalDimension: endingDimension === 'Our Dimension' ? 'our' :
         endingDimension === 'Mirror Dimension' ? 'mirror' : null}}),
       ...(result.location==='Shady Acres'&&{childrenOnBoardAtFinish:childrenAtFinish}),
@@ -822,7 +819,8 @@ export const GameOutcomeForm = ({
               <OutcomeChoices label="Mission result" value={missionCompleted === null ? '' : String(missionCompleted)}
                 onChange={value => setMissionCompleted(value === '' ? null : value === 'true')}
                 options={[['true', 'Completed'], ['false', 'Incomplete']]} />
-              {missionCompleted ? (
+              <p className="type-caption text-muted-foreground">{falconwoodReviewText(falconwoodReview(recordedMission,result.mission,missionCompleted))}</p>
+              {showLegacyMissionNotes && missionCompleted ? (
                 <div className="space-y-1">
                   <label htmlFor="friend-joined" className="type-caption text-muted-foreground">
                     Friend Who Joined You
@@ -835,7 +833,7 @@ export const GameOutcomeForm = ({
                     className="w-full h-11 px-3 bg-muted/50 border border-border/50 rounded-sm type-body-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-secondary/50 transition-colors"
                   />
                 </div>
-              ) : missionCompleted === false && (
+              ) : showLegacyMissionNotes && missionCompleted === false && (
                 <div className="space-y-1">
                   <label htmlFor="mission-progress" className="type-caption text-muted-foreground">
                     Mission Progress
@@ -887,17 +885,19 @@ export const GameOutcomeForm = ({
           </label>
         </div>
       </section>
+      {isFalconwood && isWin && missionCompleted !== true && <p role="status">Confirm mission completion before saving a win.</p>}
       {textDraft.saveFailed && <p role="alert">Your latest text could not be saved. Keep this page open and free browser storage, then <button type="button" onClick={textDraft.flush}>retry saving</button>.</p>}
       <div className="outcome-actions">
         <button
           type="button"
+          disabled={isFalconwood && isWin && missionCompleted !== true}
           onClick={handleContinue}
           className="outcome-continue"
         >
           Generate ending <ArrowRight size={21} aria-hidden="true" />
         </button>
         {onSaveResult && (
-          <button type="button" className="outcome-save-only" onClick={() => {
+          <button type="button" className="outcome-save-only" disabled={isFalconwood && isWin && missionCompleted !== true} onClick={() => {
             if (textDraft.flush()) onSaveResult(buildFormData());
           }}>Save record only</button>
         )}

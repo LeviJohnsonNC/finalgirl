@@ -2,6 +2,7 @@ import {MALL,MALL_MODULE,initialMall} from './play/sunnydaze';
 import { WINGARD, WINGARD_MODULE } from '../../supabase/functions/_shared/play/wingardCatalog';
 import { initialWingard } from '../../supabase/functions/_shared/play/wingardCottage';
 import { WOODS, WOODS_MODULE, initialWoods } from "../../supabase/functions/_shared/play/storybookWoods";
+import { FALCONWOOD, FALCONWOOD_MODULE, initialFalconwood, missionByName } from "../../supabase/functions/_shared/play/falconwood";
 import { validPlayLog, validPlayDetails, type PlayEvent, type PlayDetails } from './play/events';
 import type { GameResult } from '@/hooks/useGameHistory';
 
@@ -12,6 +13,7 @@ export interface GameSelection {
   finalGirlStartingHealth?: number;
 }
 export interface EndingFormData {
+  falconwoodReview?: import("../../supabase/functions/_shared/play/falconwood").FalconwoodReview;
   slayerReview?: import("./play/slayer").SlayerReview;
   childrenOnBoardAtFinish?: number|null;
   tormentorReview?:{loss:import('../../supabase/functions/_shared/play/tormentor').TormentorLoss};
@@ -34,6 +36,7 @@ export interface ActiveGame {
   wolfSetupVersion?: 1;
   intrudersSetupVersion?: 1;
   mallSetupVersion?:1;
+  falconwoodSetupVersion?: 1;
   slayerSetupVersion?: 1;
   hunterSetupVersion?: 1;
   shadySetupVersion?: 1;
@@ -86,6 +89,13 @@ export function isActiveGame(value: unknown): value is ActiveGame {
   if(game.marrekSetupVersion!==undefined&&game.marrekSetupVersion!==1)return false;
   if(game.selection?.location!=='Marrek Warehouse'&&Array.isArray(game.playEvents)&&game.playEvents.some(e=>e.moduleData?.module==='marrek'))return false;
   if(Array.isArray(game.playEvents)&&game.playEvents.some(e=>e.moduleData?.module==='hunter'&&!e.hunterAction)&&game.hunterSetupVersion!==1)return false;
+  if (game.falconwoodSetupVersion !== undefined && (game.falconwoodSetupVersion !== 1 || game.selection?.location !== FALCONWOOD || !missionByName(game.selection?.mission))) return false;
+  if (Array.isArray(game.playEvents) && game.playEvents.some(event =>
+    (event?.falconwoodReference || event?.moduleData?.module === FALCONWOOD_MODULE) && game.selection?.location !== FALCONWOOD ||
+    event?.moduleData?.module === FALCONWOOD_MODULE && (event.falconwoodAction
+      ? !!missionByName(game.selection?.mission) && event.falconwoodAction.mission !== missionByName(game.selection?.mission)?.id
+      : game.falconwoodSetupVersion !== 1 || event.moduleData.changes?.snapshot !== initialFalconwood(game.selection?.mission, game.selection?.startingEvent)?.snapshot)
+  )) return false;
   if (game.slayerSetupVersion !== undefined && (game.slayerSetupVersion !== 1 || game.selection?.killer !== "Slayer")) return false;
   if (Array.isArray(game.playEvents) && game.playEvents.some(e =>
     (e.moduleData?.module === "slayer" || e.slayerReference) && game.selection?.killer !== "Slayer" ||

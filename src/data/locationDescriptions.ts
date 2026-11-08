@@ -113,17 +113,7 @@ Key elements: Arctic or Antarctic tundra setting with heavy snow. Insulated modu
   'Wingard Cottage': WINGARD_VISUAL,
 
   // The Falconwood Files
-  'Falconwood': `A quiet, mid-century suburban cul-de-sac called Falconwood, where the architecture consists of modest two-story homes with vinyl siding, dark shutters, and neatly manicured lawns. The neighborhood feels settled and routine, frozen in a state of perpetual late-afternoon gloom under a heavy, overcast sky.
-
-At the entrance of the street stands a weathered wooden sign welcoming visitors to Falconwood, established in 1952. Beside it, a towering wooden utility pole supports a single street light that glows with a harsh, flickering orange hue, casting an unnatural warmth onto the damp asphalt even though the sun hasn't fully set.
-
-A vintage wood-paneled station wagon is parked in one of the driveways, its boxy frame and tan paint reinforcing a distinct 1980s suburban vibe. The houses are well-maintained but feel oddly vacant; porch lights are off, and the white garage doors remain tightly shut, suggesting a neighborhood where privacy is paramount and the streets are intentionally empty.
-
-Beyond the manicured lawns, a dense wall of lush green trees presses right up against the back of the properties, creating a sharp boundary between the civilized street and the untamed woods. A chain-link fence topped with warning signs marks a restricted area near the treeline, hinting at a hidden facility or a forgotten boundary just out of reach.
-
-The atmosphere is one of suburban isolation and quiet dread—the kind of stillness that suggests everyone is indoors, watching from behind their shutters, waiting for something to break the silence.
-
-Key elements: Suburban cul-de-sac with 1980s-style homes and manicured lawns. Weathered wooden "Falconwood" entry sign. Vintage wood-paneled station wagon parked in a driveway. Glowing orange street light under a gloomy, overcast sky. Dense forest backdrop with a restricted chain-link fence.`,
+  'Falconwood': `An ordinary-looking American river town in the 1980s. Two-lane roads and bridges connect modest houses, a local school, a shopping mall, a library, a community pool and fairgrounds. The forest and the fenced government lab sit toward the outskirts. The lab's activity has made some locals suspicious. Use the selected setup and reported landmark to choose which part of town and time of day the scene depicts. Keep unseen threats, mission outcomes and special equipment conditional on the recorded game.`,
 
   'MegaBGCon': `A massive board game convention hall spread across a cavernous indoor expo space, packed shoulder-to-shoulder with attendees, vendor booths, demo tables, food stands, and towering banners suspended from the ceiling. The layout feels broad and open at first glance, but the density of people, booths, and intersecting aisles turns it into a maze of congestion, noise, and constant motion.
 

@@ -1,3 +1,4 @@
+import { FALCONWOOD, FALCONWOOD_MODULE, falconwoodState, falconwoodFacts, validFalconwoodField } from "./falconwood.ts";
 import { MALL, MALL_MODULE, MALL_ITEMS, MALL_VISUAL, validMallField, mallFacts } from './sunnydaze.ts';
 import { SLAYER, SLAYER_MODULE, SLAYER_POWERS, SLAYER_FINALES, slayerFacts, validSlayerField } from "./slayer.ts";
 import { HUNTER, HUNTER_MODULE, HUNTER_POWERS, HUNTER_FINALES, validHunterField, hunterFacts } from './hunter.ts';
@@ -64,7 +65,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -180,6 +181,7 @@ function validField(
   value: unknown,
 ) {
   if (module === MALL_MODULE) return validMallField(key,value);
+  if (module === FALCONWOOD_MODULE) return validFalconwoodField(key, value);
   if (module === SLAYER_MODULE) return validSlayerField(key,value);
   if (module === HUNTER_MODULE) return validHunterField(key,value);
   if (module === INTRUDER_MODULE) return validIntruderField(key,value);
@@ -308,7 +310,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    ![SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    ![FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -525,6 +527,7 @@ export function describeModule(observation: ModuleObservation) {
       return minor?`${minor.name}: ${value??'unrecorded'} Health`:`${names[id]} ${field}: ${value??'unrecorded'}`;
     }).join(' · ');
   }
+  if (observation.module === FALCONWOOD_MODULE) return falconwoodFacts(falconwoodState(observation.changes)) || "Falconwood updated";
   if (observation.module === SLAYER_MODULE) return slayerFacts(observation.changes) || "Dimension Tracker recorded";
   if (observation.module === MALL_MODULE) return mallFacts(observation.changes);
   if (observation.module === HUNTER_MODULE) {
@@ -648,6 +651,11 @@ export function moduleStoryBeats(
   selection: ModuleSelection,
   entries: readonly ObservedEvent[],
 ): string {
+  if (selection.location === FALCONWOOD) {
+    const threat = moduleStoryBeats({...selection,location:''}, entries);
+    const town = falconwoodFacts(falconwoodState(moduleState(entries,FALCONWOOD_MODULE)));
+    return [fitStoryText(town,threat ? 510 : 895), fitStoryText(threat,town ? 375 : 895)].filter(Boolean).join("\n");
+  }
   if(selection.location===MALL){const threat=moduleStoryBeats({...selection,location:''},entries);const place=mallFacts(moduleState(entries,MALL_MODULE));return [fitStoryText(place,threat?520:895),fitStoryText(threat,370)].filter(Boolean).join('\n');}
   if(selection.killer===HUNTER) {
     const fields=moduleState(entries,HUNTER_MODULE);
@@ -945,6 +953,10 @@ export function moduleReferences(
   mechanism?: string,
 ) {
   const refs = buddylandReferences(selection, context, attacker);
+  if (selection.location === FALCONWOOD && typeof context?.falconwood?.facts === "string") {
+    refs.push({name:"Falconwood mission observations",effect:context.falconwood.facts});
+    if (attacker === 'Agent') refs.push({name:'Agent',effect:'A human agent on the Hunt, separate from ordinary Victims and Minions. Only the explicit death record establishes a casualty.'});
+  }
   if (selection.killer === SLAYER && typeof context?.slayer?.facts === "string") refs.push({name:"Slayer dimension observations",effect:context.slayer.facts});
   if(selection.location===MALL){refs.push({name:'Mall people and hazard boundary',effect:'The Savior is a separate Ally, never an ordinary Victim. Bart/Girl status does not identify the victim of this scene unless the death-specific victim field explicitly selects that role. Infer no extra casualty from a card, decorative picture, or other person’s status.'});if(mechanism==='Railing fall')refs.push({name:mechanism,effect:'A voluntary jump lands safely on 5–6; on 1–4 the jumper loses one Health. Taking damage in a Railing space knocks that figure into the Food Court below and causes one additional Health loss. Only this scene’s explicit observation establishes what happened.'});if(mechanism==='Store wall knockback')refs.push({name:mechanism,effect:'Store damage knocks a figure through an eligible unbroken wall into the newly adjacent space, causes one additional Health loss and leaves a Destroyed Wall. No eligible wall means no special knockback. Do not invent a chain of extra casualties.'});}
   if(selection.killer===HUNTER&&typeof context?.hunter?.facts==='string')refs.push({name:'Hunter model and Ally observations',effect:context.hunter.facts});

@@ -341,3 +341,18 @@ Deno.test('Sunnydaze Savior review is location-scoped, loss-authoritative and in
  assertEquals(SceneImageRequestSchema.safeParse({...poster,sceneType:'beginning'}).success,false);
  assertEquals(SceneImageRequestSchema.safeParse({...poster,outcome:'won'}).success,false);
 });
+
+Deno.test('Falconwood review is shared by prose and poster and must match the selected mission and outcome', () => {
+  const mission = {name:'Expose the Lab',description:'Carry the evidence out.'};
+  const review = {mission:'lab',complete:true} as const;
+  const prose = {introStory:'An opening story with enough length to pass validation for the Falconwood mission test.',outcome:'won',
+    killer:{name:'Slayer'},location:{name:'Falconwood'},finalGirl:{name:'Nancy'},mission,falconwoodReview:review};
+  const poster = {sceneType:'ending',story:prose.introStory,outcome:'won',killer:'Slayer',location:'Falconwood',finalGirl:'Nancy',mission,falconwoodReview:review};
+  assertEquals(EndingRequestSchema.parse(prose).falconwoodReview,review);
+  assertEquals(SceneImageRequestSchema.parse(poster).falconwoodReview,review);
+  assertEquals(EndingRequestSchema.safeParse({...prose,falconwoodReview:{mission:'lab',complete:false}}).success,false);
+  assertEquals(SceneImageRequestSchema.safeParse({...poster,falconwoodReview:{mission:'friend',complete:true}}).success,false);
+  assertEquals(EndingRequestSchema.safeParse({...prose,location:{name:'Sunnydaze Mall'}}).success,false);
+  assertEquals(SceneImageRequestSchema.safeParse({...poster,sceneType:'beginning'}).success,false);
+  assertEquals(EndingRequestSchema.safeParse({...prose,outcome:'lost',falconwoodReview:{mission:'lab',complete:true}}).success,true);
+});

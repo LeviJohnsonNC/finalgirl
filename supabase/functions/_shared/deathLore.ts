@@ -74,7 +74,7 @@ export const DEATH_LOCATION_CUES: Record<string, string> = {
   "Storybook Woods": WOODS_VISUAL,
   'Wingard Cottage': WINGARD_VISUAL,
   Falconwood:
-    'A quiet, mid-century suburban cul-de-sac called Falconwood, where the architecture consists of modest two-story homes with vinyl siding, dark shutters, and neatly manicured lawns. The neighborhood feels settled and routine, frozen in a state of perpetual late-afternoon gloom under a heavy, overcast sky. At the entrance of the street stands a weathered wooden sign welcoming visitors to Falconwood, established in 1952.',
+    'A small 1980s American river town. A bridge connects ordinary residential roads, municipal buildings and woodland. Use the recorded landmark, which may include a modest shopping mall, a fenced government lab, a public pool, a library or a town fair. Keep unreported places and mission rewards outside the scene.',
   MegaBGCon:
     'A massive board game convention hall spread across a cavernous indoor expo space, packed shoulder-to-shoulder with attendees, vendor booths, demo tables, food stands, and towering banners suspended from the ceiling. The layout feels broad and open at first glance, but the density of people, booths, and intersecting aisles turns it into a maze of congestion, noise, and constant motion. At ground level, the space is divided into long vendor corridors lined with brightly branded booths, shelving, signage, and play areas.',
 };

@@ -1,3 +1,5 @@
+import { FALCONWOOD } from "./falconwood.ts";
+import { FALCONWOOD_EVENTS, FALCONWOOD_ITEMS, FALCONWOOD_MISSION_ITEMS, FALCONWOOD_ROLES, FALCONWOOD_SOURCE, FALCONWOOD_SPACES, FALCONWOOD_TERRORS } from "./falconwoodCatalog.ts";
 import {MALL,MALL_EVENTS,MALL_TERRORS,MALL_ITEMS,MALL_SPACES,MALL_SOURCE} from './sunnydazeCatalog.ts';
 import { SLAYER, SLAYER_SOURCE, SLAYER_TERRORS } from "./slayer.ts";
 import { HUNTER, HUNTER_SOURCE, HUNTER_TERRORS } from './hunter.ts';
@@ -50,6 +52,8 @@ const station = wiki("Station_2891");
 const rules =
   "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
+ ...FALCONWOOD_TERRORS.map(card => ({...card,kind:"terror" as const,location:FALCONWOOD,source:FALCONWOOD_SOURCE})),
+ ...FALCONWOOD_EVENTS.map(card => ({...card,kind:"event" as const,location:FALCONWOOD,source:FALCONWOOD_SOURCE})),
  ...MALL_EVENTS.map(card=>({...card,kind:"event" as const,location:MALL,source:MALL_SOURCE})),
  ...MALL_TERRORS.map(card=>({...card,kind:"terror" as const,location:MALL,source:MALL_SOURCE})),
   ...SLAYER_TERRORS.map(card => ({...card, kind:"terror" as const, killer:SLAYER, source:SLAYER_SOURCE})),
@@ -176,18 +180,19 @@ const normalize = (s: string) =>
     .replace(/\s+/g, " ")
     .trim();
 export function applicablePlayCards(
-  selection: { killer: string; location: string },
+  selection: { killer: string; location: string; mission?: string | null },
   kind: PlayCard["kind"],
 ) {
   return PLAY_CARDS.filter(
     (card) =>
       card.kind === kind &&
+      (card.location !== FALCONWOOD || card.name !== "Survive the Hunt" || selection.mission === "Survive the Hunt") &&
       (card.killer === selection.killer ||
         card.location === selection.location),
   ).sort((a, b) => a.name.localeCompare(b.name));
 }
 export function findPlayCard(
-  selection: { killer: string; location: string },
+  selection: { killer: string; location: string; mission?: string | null },
   kind: PlayCard["kind"],
   name = "",
 ) {
@@ -198,8 +203,9 @@ export function findPlayCard(
   );
 }
 /** Context-only Woods cards stay searchable as rules and accept historical free text. */
-export function suggestedDeathCards(selection: {killer:string;location:string}, kind: "terror" | "event") {
+export function suggestedDeathCards(selection: {killer:string;location:string;mission?:string|null}, kind: "terror" | "event") {
   return applicablePlayCards(selection, kind).filter(card => {
+    if (card.location === FALCONWOOD && kind === "event") return ["Head Researcher", "Conspiracy Theorist"].includes(card.name);
     if(card.location===WINGARD)return kind==='event'
       ? ['Booby Traps','Escape Attempt','Marked for Death','Loser Boyfriend'].includes(card.name)
       : WINGARD_TERRORS.some(terror=>terror.fatal && terror.name===card.name);
@@ -208,7 +214,7 @@ export function suggestedDeathCards(selection: {killer:string;location:string}, 
   });
 }
 export function playCardContext(
-  selection: { killer: string; location: string },
+  selection: { killer: string; location: string; mission?: string | null },
   terrorCard?: string,
   eventCard?: string,
 ) {
@@ -223,6 +229,7 @@ export function playCardContext(
   });
 }
 export const PLAY_ROOMS: Record<string, readonly string[]> = {
+ [FALCONWOOD]:FALCONWOOD_SPACES,
  [WOODS]: WOODS_SPACES.map(space => space.name),
  [MALL]:MALL_SPACES,
  [WINGARD]:WINGARD_SPACES,
@@ -288,14 +295,14 @@ export function playMechanisms(selection: {
 export function playItems(
   location: string,
 ): readonly { name: string; effect: string }[] {
-  return location === MALL ? MALL_ITEMS : location === WOODS ? WOODS_ITEMS : location === WINGARD ? WINGARD_ITEMS : location === "Marrek Warehouse" ? MARREK_ITEMS : location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
+  return location === FALCONWOOD ? FALCONWOOD_ITEMS : location === MALL ? MALL_ITEMS : location === WOODS ? WOODS_ITEMS : location === WINGARD ? WINGARD_ITEMS : location === "Marrek Warehouse" ? MARREK_ITEMS : location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
     ? CAMP_ITEMS
     : location === "Buddyland"
       ? BUDDYLAND_ITEMS
       : [];
 }
 export function playVictims(location: string): readonly { name: string }[] {
-  return location===MALL?[{name:'Bart the Mall Cop'},{name:'The Savior’s Girl'}]:location === WOODS ? WOODS_PEOPLE : location === WINGARD ? WINGARD_PEOPLE : location === "Marrek Warehouse" ? MARREK_PEOPLE : location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
+  return location === FALCONWOOD ? FALCONWOOD_ROLES : location===MALL?[{name:'Bart the Mall Cop'},{name:'The Savior’s Girl'}]:location === WOODS ? WOODS_PEOPLE : location === WINGARD ? WINGARD_PEOPLE : location === "Marrek Warehouse" ? MARREK_PEOPLE : location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
     ? CAMP_VICTIMS
     : location === "Buddyland"
       ? SPECIAL_VICTIMS
@@ -303,6 +310,9 @@ export function playVictims(location: string): readonly { name: string }[] {
 }
 
 /** Location-only callers keep their existing catalogs. Killer Items follow the killer. */
-export function selectionItems(selection:{killer:string;location:string}) {
-  return [...playItems(selection.location),...(selection.killer==='Poltergeist'?POLTERGEIST_ITEMS:[])];
+export function selectionItems(selection:{killer:string;location:string;mission?:string|null}) {
+  const missionItem = selection.location === FALCONWOOD
+    ? FALCONWOOD_MISSION_ITEMS.filter(item => item.name === (selection.mission === 'Missing Friend' ? 'Spell Book' : selection.mission === 'Survive the Hunt' ? 'Telekinesis' : ''))
+    : [];
+  return [...playItems(selection.location), ...missionItem,...(selection.killer==='Poltergeist'?POLTERGEIST_ITEMS:[])];
 }

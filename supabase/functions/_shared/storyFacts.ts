@@ -1,3 +1,4 @@
+import { falconwoodReviewText, type FalconwoodReview } from "./play/falconwood.ts";
 import { dimensionLabel, type SlayerReview } from "./play/slayer.ts";
 import type {MallReview} from './play/sunnydaze.ts';
 import { hunterReviewFacts, type HunterReview } from './play/hunter.ts';
@@ -15,6 +16,7 @@ export function characterFate(health?: number): 'survived' | 'died' | 'unknown' 
 
 export function endingFacts(facts: {
   mallReview?:MallReview;
+  falconwoodReview?:FalconwoodReview;
   slayerReview?:SlayerReview;
   hunterReview?:HunterReview;
   tormentorReview?:{loss:import('./play/tormentor.ts').TormentorLoss}; grimlashReview?:{loss:'none'|'unknown'|'skull'|'telluric'}; konradReview?: {fate:KonradFate}; outcome?: 'won' | 'lost'; finalGirlHealth?: number; killerHealth?: number; killer?: {name?:string}|string; poltergeistReview?:{carolynRescued:true|null;floppyAtEscape:true|null;epicRequired:boolean|null;escapeRoute?:'exit'|'helicopter'|null};
@@ -22,6 +24,7 @@ export function endingFacts(facts: {
   const killer=typeof facts.killer==='string'?facts.killer:facts.killer?.name;
   const healthless=killer==='Poltergeist';
   return [
+    ...(facts.falconwoodReview ? [`Reviewed Falconwood mission at finish: ${falconwoodReviewText(facts.falconwoodReview)} Use this result over earlier progress. A completed mission does not establish how it was completed, the Final Girl's survival, or how the Killer was defeated.`] : []),
     ...(facts.mallReview?[`Reviewed Sunnydaze Savior: ${facts.mallReview.savior}; Health ${facts.mallReview.health??'unrecorded'}; Trust position ${facts.mallReview.trust??'unrecorded'} (0 bottom, 3 highest). Exit reward ${facts.mallReview.exitReward??'unrecorded'}. He is a separate male Ally, never the selected Final Girl or an ordinary Victim. His death means immediate game loss, not the Final Girl’s death. An exited Savior is safe from subsequent on-board effects; his escape does not itself defeat the Killer. Unknown is not absence or death.`]:[]),
     ...(killer === 'Slayer' && facts.slayerReview
       ? [facts.slayerReview.finalDimension

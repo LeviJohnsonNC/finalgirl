@@ -10,6 +10,8 @@ const hunterIdentity={};
 new Function('exports',compile('../supabase/functions/_shared/play/hunter.ts'))(hunterIdentity);
 const slayerIdentity={};
 new Function('exports',compile('../supabase/functions/_shared/play/slayer.ts'))(slayerIdentity);
+const falconwood = {};
+new Function('exports', compile('../supabase/functions/_shared/play/falconwood.ts'))(falconwood);
 const storyFacts = {}, prompts = {}, narrativeStyle = {};
 const posterDesign = {};
 new Function('exports', compile('../supabase/functions/_shared/posterDesign.ts'))(posterDesign);
@@ -29,7 +31,7 @@ function openingWith(entries) {
 }
 new Function('require', 'exports', compile('../supabase/functions/_shared/openingReferences.ts'))(
   name => { if (name === './openingReferenceManifest.ts') return manifest; throw new Error('Unexpected opening import: ' + name); }, opening);
-new Function('require','exports', compile('../supabase/functions/_shared/storyFacts.ts'))(name=>{if(name==='./play/slayer.ts')return slayerIdentity;assert.equal(name,'./play/hunter.ts');return hunterIdentity;},storyFacts);
+new Function('require','exports', compile('../supabase/functions/_shared/storyFacts.ts'))(name=>{if(name==='./play/slayer.ts')return slayerIdentity;if(name==='./play/falconwood.ts')return falconwood;assert.equal(name,'./play/hunter.ts');return hunterIdentity;},storyFacts);
 new Function('exports', compile('../supabase/functions/_shared/narrativeStyle.ts'))(narrativeStyle);
 const marrekIdentity = {};
 new Function('exports', compile('../supabase/functions/_shared/play/marrekWarehouse.ts'))(marrekIdentity);

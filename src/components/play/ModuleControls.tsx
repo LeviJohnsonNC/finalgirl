@@ -25,7 +25,7 @@ export function ModuleControls({
               title={module.title}
               kind={module.owner === "killer" ? "Killer" : "Location"}
               art={module.id === 'evomorph' ? evomorphStageArt(moduleState(entries, 'evomorph').stage) : module.art}
-              summary={module.summary(moduleState(entries, module.id))}
+              summary={module.summary(moduleState(entries, module.id), props)}
               preferenceKey={key}
             >
               <module.Controls {...props} />

@@ -1,4 +1,5 @@
 import {MALL,MALL_MODULE,initialMall,resolveMallAction,mallParent} from '@/lib/play/sunnydaze';
+import { FALCONWOOD, FALCONWOOD_MODULE, initialFalconwood, falconwoodParent, missionByName, resolveFalconwoodAction } from "../../supabase/functions/_shared/play/falconwood";
 import { SLAYER, SLAYER_MODULE, initialSlayer, resolveSlayerAction, slayerParent } from "@/lib/play/slayer";
 import { HUNTER, HUNTER_MODULE, initialHunter, resolveHunterAction, hunterParent, hunterState } from '@/lib/play/hunter';
 import { canUndoHunter, sameHunterChanges } from '@/lib/play/events';
@@ -20,7 +21,7 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 import { readStoredValue, useLocalStorage } from './useLocalStorage';
-import { validPlayLog, canUndoWingard, canUndoMarrek, canUndoTormentor, canUndoShady, canUndoGrimlash, canUndoKonrad, canUndoEvomorph, canChangeDeathCount, isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
+import { validPlayLog, canUndoFalconwood, canUndoWingard, canUndoMarrek, canUndoTormentor, canUndoShady, canUndoGrimlash, canUndoKonrad, canUndoEvomorph, canChangeDeathCount, isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
 import { ActiveGame, isActiveGame } from '@/lib/activeGame';
 import { resolveCreechAction } from '../../supabase/functions/_shared/play/creech';
 import { mapleLinkedChange } from '../../supabase/functions/_shared/play/maple';
@@ -67,6 +68,10 @@ export function useActiveGame() {
       const log = previous.playEvents ?? [];
       if(event.kind==='undo'&&!canUndoWingard(log,event.target!))return previous;
       if((event.moduleData?.module===MALL_MODULE&&(!event.mallAction||previous.selection.location!==MALL))||(event.mallReference&&previous.selection.location!==MALL))return previous;
+      const isFalconwood = previous.selection.location === FALCONWOOD;
+      if (event.moduleData?.module === FALCONWOOD_MODULE && (!isFalconwood || !event.falconwoodAction) || event.falconwoodReference && !isFalconwood) return previous;
+      if (event.falconwoodAction && missionByName(previous.selection.mission) && event.falconwoodAction.mission !== missionByName(previous.selection.mission)?.id) return previous;
+      if (event.kind === "undo" && !canUndoFalconwood(log, event.target!)) return previous;
       if(event.moduleData?.module===WINGARD_MODULE && (previous.selection.location!==WINGARD || !event.wingardAction))return previous;
       if(event.wingardReference && previous.selection.location!==WINGARD)return previous;
       if(event.kind==='undo'&&!canUndoMarrek(log,event.target!))return previous;
@@ -110,6 +115,7 @@ export function useActiveGame() {
         ? {...event,...(isSlayer && {slayerReference:true as const}),...(isHunter && {hunterReference:true as const}),...(isIntruders && {intruderReference:true as const}),...(isWolf && {wolfReference:true as const}),...(previous.selection.location === WOODS && {woodsReference:true as const})}
         : event;
       if(event.kind==='killed'&&previous.selection.location===MALL)accepted={...accepted,mallReference:true};
+      if (event.kind === "killed" && isFalconwood) accepted = {...accepted, falconwoodReference: true};
       if(event.kind==='killed' && previous.selection.location===WINGARD)accepted={...accepted,wingardReference:true};
       if(previous.selection.killer==='Poltergeist' && ((event.kind==='state'&&event.field==='killerHealth') || (event.kind==='moment'&&event.momentType==='killer-revived'))) return previous;
       if (event.moduleData?.module === 'groves' && previous.selection.location !== 'Sacred Groves') return previous;
@@ -152,6 +158,9 @@ export function useActiveGame() {
         setup.push(newPlayEvent({ kind: "module", moduleData: { module: "big-bad-wolf", changes: { mode: "track" } } }));
       }
       if(!log.length&&previous.mallSetupVersion===1&&previous.selection.location===MALL)setup.push(newPlayEvent({kind:'module',moduleData:{module:MALL_MODULE,changes:initialMall(previous.selection.startingEvent)}}));
+      const freshFalconwood = isFalconwood && previous.falconwoodSetupVersion === 1;
+      const falconwoodSetup = !log.length && freshFalconwood && initialFalconwood(previous.selection.mission, previous.selection.startingEvent);
+      if (falconwoodSetup) setup.push(newPlayEvent({kind:"module", moduleData:{module:FALCONWOOD_MODULE, changes:falconwoodSetup}}));
       const freshSlayer = isSlayer && previous.slayerSetupVersion === 1;
       if (!log.length && freshSlayer) setup.push(newPlayEvent({kind:"module", moduleData:{module:SLAYER_MODULE, changes:initialSlayer()}}));
       const freshHunter=isHunter&&previous.hunterSetupVersion===1;
@@ -240,6 +249,14 @@ export function useActiveGame() {
         if(request.command==='evolve'&&changes.stage==='adult'&&!entries.some(e=>e.kind==='moment'&&e.momentType==='dark-power'))reveal.push(newPlayEvent({kind:'moment',momentType:'dark-power',permanent:true,text:'Dark Power revealed'}));
       }
       if(event.mallAction){const entries=summarizePlay([...log,...baseline,...setup]).entries;const action=!log.length&&previous.mallSetupVersion===1&&event.mallAction.parent==='root'?{...event.mallAction,parent:mallParent(entries)}:event.mallAction;const changes=resolveMallAction(action,moduleState(entries,MALL_MODULE),entries);if(!changes||(log.length&&!sameHunterChanges(changes,event.moduleData!.changes)))return previous;accepted={...event,mallAction:action,moduleData:{module:MALL_MODULE,changes}};}
+      if (event.falconwoodAction) {
+        const entries = summarizePlay([...log, ...baseline, ...setup]).entries;
+        const action = falconwoodSetup && event.falconwoodAction.parent === "root"
+          ? {...event.falconwoodAction, parent:falconwoodParent(entries)} : event.falconwoodAction;
+        const changes = resolveFalconwoodAction(action, moduleState(entries, FALCONWOOD_MODULE), entries);
+        if (!changes || changes.snapshot !== event.moduleData!.changes.snapshot) return previous;
+        accepted = {...event, falconwoodAction:action, moduleData:{module:FALCONWOOD_MODULE,changes}};
+      }
       if (event.slayerAction) {
         const entries = summarizePlay([...log, ...baseline, ...setup]).entries;
         const action = !log.length && freshSlayer && event.slayerAction.parent === "root"
@@ -274,6 +291,7 @@ export function useActiveGame() {
       if([...log,...additions].some(e=>e.moduleData?.module==='grimlash')&&!validPlayLog([...log,...additions]))return previous;
       if((event.konradAction||event.kind==='undo'||event.kind==='restore')&&[...log,...additions].some(e=>e.moduleData?.module==='konrad')&&!validPlayLog([...log,...additions]))return previous;
       if(previous.selection.location===MALL&&!validPlayLog([...log,...additions]))return previous;
+      if (isFalconwood && !validPlayLog([...log, ...additions])) return previous;
       if (isSlayer && !validPlayLog([...log, ...additions])) return previous;
       if(isHunter&&!validPlayLog([...log,...additions]))return previous;
       applied = true;

@@ -13,6 +13,7 @@ const compile = (path) =>
 function load(path, dependencies = {}) {
   const exports = {};
   new Function("exports", "require", compile(path))(exports, (name) => {
+    if(name==='./falconwood.ts'||name==='./play/falconwood.ts')return falconwood;
     if(name==='./slayer.ts'||name==='./play/slayer.ts')return slayer;
     if(name==='./play/hunter.ts')return hunter;
     if (!(name in dependencies)) throw Error(`Missing ${name}`);
@@ -21,6 +22,7 @@ function load(path, dependencies = {}) {
   return exports;
 }
 const hunter=load('../supabase/functions/_shared/play/hunter.ts');
+const falconwood=load('../supabase/functions/_shared/play/falconwood.ts',{});
 const slayer=load('../supabase/functions/_shared/play/slayer.ts',{});
 const encoder = new TextEncoder();
 const frame = (value) =>

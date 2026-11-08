@@ -1,3 +1,6 @@
+import { FALCONWOOD, FALCONWOOD_PEOPLE, missionByName } from "../../../supabase/functions/_shared/play/falconwood";
+import { FALCONWOOD_TERRORS } from "../../../supabase/functions/_shared/play/falconwoodCatalog";
+import { falconwoodArt } from './falconwoodArt';
 import { SLAYER, SLAYER_TERRORS } from "@/lib/play/slayer";
 import { slayerArt } from "./slayerArt";
 import {MALL} from '@/lib/play/sunnydaze';
@@ -132,6 +135,8 @@ const {characterImages}=useActiveImages();
   const [editingDetails, setEditingDetails] = useState(false);
   const payoff = useRef<HTMLElement>(null);
   const [message, setMessage] = useState("");
+  const falconwoodTerror = selection.location === FALCONWOOD && suggestedDeathCards(selection,"terror").some(card => card.name === values.terrorCard)
+    ? FALCONWOOD_TERRORS.find(card => card.name === values.terrorCard) : undefined;
   const slayerTerror = selection.killer === SLAYER ? SLAYER_TERRORS.find(card => card.name === values.terrorCard) : undefined;
   const wolfTerror = selection.killer === WOLF ? WOLF_TERRORS.find(card => card.name === values.terrorCard) : undefined;
   const [resultError, setResultError] = useState("");
@@ -361,6 +366,8 @@ const {characterImages}=useActiveImages();
                     : selection.killer===INTRUDERS&&cause==='terror'&&INTRUDER_TERRORS.some(c=>c.name===values.terrorCard)
                       ? <ModuleArtwork art={intruderArt(INTRUDER_TERRORS.find(c=>c.name===values.terrorCard)!.id)} />
                     : selection.killer === SLAYER && cause === "killer" ? <ModuleArtwork art={slayerArt("header")} />
+                    : falconwoodTerror && cause === "terror" ? <ModuleArtwork art={falconwoodArt(falconwoodTerror.id,true)} />
+                    : selection.location === FALCONWOOD && cause === "minion" && values.attacker === "Agent" ? <ModuleArtwork art={falconwoodArt("hunt-active")} />
                     : slayerTerror && cause === "terror" ? <ModuleArtwork art={slayerArt(slayerTerror.id)} />
                     : selection.killer === WOLF && cause === "killer" ? <ModuleArtwork art={wolfPortrait} />
                     : cause === "terror" && wolfTerror
@@ -394,12 +401,12 @@ const {characterImages}=useActiveImages();
                     label="Death attacker"
                     value={values.attacker ?? ""}
                     onChange={(v) => update("attacker", v)}
-                    options={[...(selection.location==='Shady Acres'?['Child 1','Child 2','Child 3']:[]),...(
+                    options={[...(selection.location === FALCONWOOD && selection.mission === "Survive the Hunt" ? ["Agent"] : []), ...(selection.location==='Shady Acres' ?['Child 1','Child 2','Child 3']:[]),...(
                       selection.killer === "Billy the Bear"
                         ? BUDDIES.map((b) => b.name)
                         : selection.killer === "Geppetto" ? ["Puppet", "Puppet 1", "Puppet 2", "Puppet 3"] : selection.killer === "Poltergeist" ? ["Behemoth","Clown Doll"] : [])]
                     }
-                    placeholder={selection.location==='Shady Acres'?'Choose or enter an Enemy':selection.killer === "Geppetto" ? "Choose a Puppet or enter a minion" : "Choose a Buddy or enter a minion"}
+                    placeholder={selection.location===FALCONWOOD?"Choose or enter an Enemy":selection.location==='Shady Acres'?'Choose or enter an Enemy':selection.killer === "Geppetto" ? "Choose a Puppet or enter a minion" : "Choose a Buddy or enter a minion"}
                   />
                 </label>
               )}
@@ -461,7 +468,9 @@ const {characterImages}=useActiveImages();
                   }
                   options={[
                     "Regular victim",
-                    ...playVictims(selection.location).map(v => v.name),
+                    ...playVictims(selection.location).filter(v => selection.location !== FALCONWOOD ||
+                      FALCONWOOD_PEOPLE.some(name => name === v.name) || missionByName(selection.mission)?.friend === v.name
+                    ).map(v => v.name),
                   ]}
                   placeholder={facts.quantity > 1 ? "Names or a group description" : "Regular victim"}
                 />
