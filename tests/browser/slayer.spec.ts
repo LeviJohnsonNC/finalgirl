@@ -162,6 +162,7 @@ test("Slayer finish review preselects Play and uses the saved override for the s
   await page.getByRole("button",{name:"Enter Mirror Dimension",exact:true}).click();
   await page.getByRole("button",{name:"Finish game",exact:true}).click();
   await page.getByRole("button",{name:"Won",exact:true}).click();
+  await page.getByRole("button",{name:"Confirm mission completed",exact:true}).click();
   const dimension = page.getByRole("group",{name:"Dimension at finish",exact:true});
   await expect(dimension.getByRole("radio",{name:"Mirror Dimension",exact:true})).toBeChecked();
   await dimension.getByRole("radio",{name:"Our Dimension",exact:true}).check();

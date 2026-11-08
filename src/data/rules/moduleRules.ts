@@ -1,3 +1,5 @@
+import { FALCONWOOD_EVENTS, FALCONWOOD_ITEMS, FALCONWOOD_MISSION_ITEMS, FALCONWOOD_MISSION_RULES, FALCONWOOD_SETUPS, FALCONWOOD_SOURCE, FALCONWOOD_TERRORS } from "../../../supabase/functions/_shared/play/falconwoodCatalog";
+import { FALCONWOOD_LEADS, missionById } from "../../../supabase/functions/_shared/play/falconwood";
 import { slayerRules, SLAYER_PROMPT_CONTEXT } from "./slayerRules";
 import {mallRules,MALL_PROMPT_CONTEXT} from './sunnydazeRules';
 import { hunterRules, HUNTER_PROMPT_CONTEXT } from './hunterRules';
@@ -342,7 +344,7 @@ const falconwood: EntityRuleModule = {
   entity: 'Falconwood',
   kind: 'location',
   filmId: 's3-falconwood-files',
-  source: 'The Falconwood Files — Location Sheet',
+  source: FALCONWOOD_SOURCE,
   credits: { design: 'Mike Martins', art: 'Vincent Dutrait' },
   tags: ['falconwood', 'bridge', 'river crossing', 'mission', 'friends', 'd20', 'location'],
   setup: [
@@ -353,6 +355,9 @@ const falconwood: EntityRuleModule = {
         'Before normal setup, randomly select a Mission and follow the setup instructions on that Mission sheet.',
       ],
     },
+    { type:'table', headers:['Setup','Final Girl','Killer','Starting Victims'], modalLayout:'placements',
+      rows:FALCONWOOD_SETUPS.map(setup=>[setup.name,setup.finalGirl,setup.killer,
+        Object.entries(setup.victims).map(([space,count])=>`${space} ×${count}`).join(', ')]) },
   ],
   rules: [
     { type: 'heading', level: 3, text: 'Definitions' },
@@ -395,6 +400,24 @@ const falconwood: EntityRuleModule = {
       type: 'paragraph',
       text: 'Many cards will instruct you to roll the 20-sided die, or d20, as indicated by the d20 symbol.',
     },
+    { type:'heading', level:3, text:'Mission sheets' },
+    ...FALCONWOOD_MISSION_RULES.flatMap(mission => [
+      { type:'heading' as const, level:3 as const, text:missionById(mission.id)!.name },
+      { type:'list' as const, items:[mission.setup, mission.progress, mission.complete,
+        `Gain progress · ${mission.gain}`, `Lose progress · ${mission.loss}`, `${missionById(mission.id)!.friend} · ${mission.friend}`] },
+    ]),
+    { type:'heading', level:3, text:'Mission token references' },
+    { type:'list', items:FALCONWOOD_LEADS.map((space,index) => `Expose the Lab · ${index+1} · ${space}`) },
+    { type:'table', modalLayout:'records', headers:['Missing Friend region','First A–Z','Last A–Z'], rows:[
+      ['A1/B1 · East / North','Library','Shopping Mall'], ['A1/B2 · East / South','Community Pool','Town Fair'],
+      ['A2/B1 · West / North','Best Friend’s House','School'], ['A2/B2 · West / South','Fanghorn Forest','Government Lab'],
+    ] },
+    { type:'heading', level:3, text:'Events' },
+    { type:'list', items:FALCONWOOD_EVENTS.map(card=>`${card.name} · ${card.effect}`) },
+    { type:'heading', level:3, text:'Terror cards' },
+    { type:'list', items:FALCONWOOD_TERRORS.map(card=>`${card.name} · ${card.effect}`) },
+    { type:'heading', level:3, text:'Items and Mission Items' },
+    { type:'list', items:[...FALCONWOOD_ITEMS,...FALCONWOOD_MISSION_ITEMS].map(card=>`${card.name} · ${card.effect}`) },
   ],
 };
 
@@ -441,8 +464,8 @@ const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
   },
   Slayer: SLAYER_PROMPT_CONTEXT,
   Falconwood: {
-    narrativeGuidance: 'Falconwood is a shrinking rural town (peak population 16,715) poisoned by a government lab: mysterious deaths, disappearances, families fleeing, and locals who either play dumb or are desperate to expose the truth. A river splits the town — bridges are the only reliable crossings, while river crossings are usually impassable. The Final Girl is pursuing a specific mission (exposing the lab, rescuing a friend), and completing it is what finally makes the killer vulnerable. Completing the mission also earns a Friend who fights alongside her.',
-    visualGuidance: 'Depict a small 1980s American town split by a river: a green Falconwood road sign, bridges, a shopping mall, a fenced government lab, woods, farmland, a pizza delivery van, and washed-out overcast light.',
+    narrativeGuidance: 'Falconwood is a shrinking rural town (peak population 16,715) poisoned by a government lab: mysterious deaths, disappearances, families fleeing, and locals who either play dumb or are desperate to expose the truth. A river splits the town — bridges are the only reliable crossings, while river crossings are usually impassable. Use only the selected mission and preserve its reported status. Mission completion permits revealing the last remaining Killer’s Final Health token. A Friend or reward can enter the story when verified.',
+    visualGuidance: 'Depict a small 1980s American town split by a river: a green Falconwood road sign, bridges, a shopping mall, a fenced government lab, woods and farmland. Use the relevant landmark and current scene lighting. Include the pizza van only when reported.',
     rulesSummary: 'Bridges cross the river; River Crossings normally cannot be used and do not count as adjacent. A randomly selected Mission must be completed to win — the Killer cannot lose its final health until then. Cards can grant or lose Mission Progress. Completing the Mission grants a Friend (a Special Victim who follows into the Killer\u2019s space, is attacked last, and never panics beside you). Some cards call for a 20-sided die roll.',
   },
   'Marrek Warehouse': MARREK_PROMPT_CONTEXT,

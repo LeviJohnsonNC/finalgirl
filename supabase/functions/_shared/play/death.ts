@@ -1,3 +1,4 @@
+import { FALCONWOOD, FALCONWOOD_MODULE, falconwoodFacts, falconwoodState, missionById, missionByName } from "./falconwood.ts";
 import { MALL, MALL_MODULE, mallFacts } from './sunnydaze.ts';
 import { SLAYER, SLAYER_MODULE, slayerFacts } from "./slayer.ts";
 import { HUNTER, HUNTER_MODULE, hunterFacts } from './hunter.ts';
@@ -21,6 +22,7 @@ export interface DeathSelection {
   killer: string;
   location: string;
   finalGirl: string;
+  mission?: string | null;
 }
 export function deathFacts(
   selection: DeathSelection,
@@ -28,6 +30,9 @@ export function deathFacts(
   eventId: string,
 ) {
   if(!validPlayLog(events))return null;
+  if (selection.location !== FALCONWOOD && events.some(e => e.moduleData?.module === FALCONWOOD_MODULE || e.falconwoodReference)) return null;
+  const selectedMission = missionByName(selection.mission);
+  if (selectedMission && events.some(e => e.falconwoodAction && e.falconwoodAction.mission !== selectedMission.id)) return null;
   if(selection.location!==MALL&&events.some(e=>e.moduleData?.module===MALL_MODULE||e.mallReference))return null;
   if (selection.killer !== SLAYER && events.some(e => e.moduleData?.module === SLAYER_MODULE || e.slayerReference)) return null;
   if(selection.killer!==HUNTER&&events.some(e=>e.moduleData?.module===HUNTER_MODULE||e.hunterReference))return null;
@@ -46,6 +51,7 @@ export function deathFacts(
   const entries = summarizePlay(events).entries;
   const e = entries.find((e) => e.id === eventId && e.kind === "killed");
   if (!e) return null;
+  const falconwoodDeath = selection.location === FALCONWOOD && e.falconwoodReference;
   const woodsDeath = selection.location === WOODS && e.woodsReference;
   const wolfDeath = selection.killer === WOLF && e.wolfReference;
   const intruderDeath=selection.killer===INTRUDERS && e.intruderReference;
@@ -53,7 +59,7 @@ export function deathFacts(
   const mallDeath=selection.location===MALL&&e.mallReference;
   const slayerDeath = selection.killer === SLAYER && e.slayerReference;
   const hunterDeath=selection.killer===HUNTER&&e.hunterReference;
-  const historical = slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath
+  const historical = falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath
     ? summarizePlay(events.slice(0, events.findIndex(event => event.id === eventId) + 1)).entries
     : [];
   // The death's own fields reflect deliberate edits. Only the surrounding
@@ -84,6 +90,11 @@ export function deathFacts(
     ),
     false,
   );
+  const missionState = falconwoodDeath ? falconwoodState(moduleState(historical,FALCONWOOD_MODULE)) : undefined;
+  if (missionState) {
+    const facts = falconwoodFacts({...missionState, mission:missionState.mission ?? selectedMission?.id});
+    if (facts) context = {...context,[FALCONWOOD_MODULE]:{facts}};
+  }
   if(context?.[MALL_MODULE])delete context[MALL_MODULE];
   if(mallDeath&&historical.some(e=>e.moduleData?.module===MALL_MODULE))context={...context,[MALL_MODULE]:{facts:mallFacts(moduleState(historical,MALL_MODULE))}};
   if (context?.slayer) delete context.slayer;
@@ -126,6 +137,7 @@ export function deathFacts(
     note: e.text ?? "",
     round: e.currentRound,
     // Omit absent additions to preserve signatures for legacy saved scenes.
+    ...(falconwoodDeath && missionState?.mission && {mission:missionById(missionState.mission)?.name}),
     ...(e.mechanism && { mechanism: e.mechanism }),
     ...(e.terrorCard && { terrorCard: e.terrorCard }),
     ...(e.eventCard && { eventCard: e.eventCard }),

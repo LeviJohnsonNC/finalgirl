@@ -1,4 +1,5 @@
 import { MALL_MODULE, describeMallAction, initialMall, isInitialMall, resolveMallAction, validMallAction, mallParent, mallState, type MallAction } from './sunnydaze.ts';
+import { FALCONWOOD_EFFECTS, FALCONWOOD_MODULE, falconwoodParent, falconwoodState, initialFalconwood, missionById, resolveFalconwoodAction, validFalconwoodAction, type FalconwoodAction } from "./falconwood.ts";
 import { SLAYER_MODULE, describeSlayerAction, initialSlayer, resolveSlayerAction, slayerParent, validSlayerAction, type SlayerAction } from "./slayer.ts";
 import { HUNTER_MODULE, describeHunterAction, initialHunter, resolveHunterAction, validHunterAction, hunterParent, hunterState, hunterCountdownReversal, type HunterAction } from './hunter.ts';
 import { WINGARD_MODULE } from './wingardCatalog.ts';
@@ -62,6 +63,7 @@ export const isPermanentMoment = (e: Pick<PlayEvent, "kind" | "momentType">): bo
 /** New milestones carry an explicit lock. Legacy undone observations stay undone. */
 export const isLockedPlayEvent = (e: PlayEvent): boolean =>
   (isPermanentMoment(e) && e.permanent === true) ||
+  (e.kind === "module" && e.moduleData?.module === FALCONWOOD_MODULE && !e.falconwoodAction) ||
   (e.kind === "module" && e.moduleData?.module === SLAYER_MODULE && !e.slayerAction) ||
   (e.kind === "module" && e.moduleData?.module === "billy" && e.moduleData.changes.powerSourcesReady === true);
 export type PlayKind =
@@ -93,6 +95,8 @@ export interface PlayDetails {
 export interface PlayEvent extends PlayDetails {
   mallAction?: MallAction;
   mallReference?: true;
+  falconwoodAction?: FalconwoodAction;
+  falconwoodReference?: true;
   slayerAction?: SlayerAction;
   slayerReference?: true;
   hunterAction?: HunterAction;
@@ -182,6 +186,9 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
   if(e.mallReference!==undefined&&(e.kind!=='killed'||e.mallReference!==true))return false;
   if(e.mallAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!==MALL_MODULE||!validMallAction(e.mallAction)))return false;
   if(e.moduleData?.module===MALL_MODULE&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.mallAction&&!isInitialMall(e.moduleData.changes))))return false;
+  if (e.falconwoodReference !== undefined && (e.kind !== "killed" || e.falconwoodReference !== true)) return false;
+  if (e.falconwoodAction !== undefined && (e.kind !== "module" || e.moduleData?.module !== FALCONWOOD_MODULE || !validFalconwoodAction(e.falconwoodAction))) return false;
+  if (e.moduleData?.module === FALCONWOOD_MODULE && (e.kind !== "module" || !validModuleObservation(e.moduleData))) return false;
   if (e.slayerReference !== undefined && (e.kind !== "killed" || e.slayerReference !== true)) return false;
   if (e.slayerAction !== undefined && (e.kind !== "module" || e.moduleData?.module !== SLAYER_MODULE || !validSlayerAction(e.slayerAction))) return false;
   if (e.moduleData?.module === SLAYER_MODULE && (e.kind !== "module" || !validModuleObservation(e.moduleData) || (!e.slayerAction && e.moduleData.changes.snapshot !== initialSlayer().snapshot))) return false;
@@ -286,7 +293,7 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
 }
@@ -316,6 +323,41 @@ export function validMallHistory(log:readonly PlayEvent[]) {
  }
  return true;
 }
+export function canUndoFalconwood(log: readonly PlayEvent[], target: string) {
+  const original = log.find(event => event.id === target);
+  return original?.moduleData?.module !== FALCONWOOD_MODULE ||
+    !!original.falconwoodAction && falconwoodParent(summarizePlay(log).entries) === target;
+}
+
+function validFalconwoodHistory(log: readonly PlayEvent[]) {
+  const observations = new Map(log.filter(event => event.moduleData?.module === FALCONWOOD_MODULE).map(event => [event.id, event]));
+  if (!observations.size) return true;
+  let initialized = false;
+  for (const [index, event] of log.entries()) {
+    const target = event.kind === "undo" || event.kind === "restore" ? observations.get(event.target!) : undefined;
+    if (event.moduleData?.module !== FALCONWOOD_MODULE && !target) continue;
+    if (target && (log.indexOf(target) >= index || !target.falconwoodAction)) return false;
+    const entries = summarizePlay(log.slice(0, index)).entries;
+    if (event.kind === "undo") {
+      if (falconwoodParent(entries) !== target!.id) return false;
+      continue;
+    }
+    const observation = target ?? event;
+    const fields = observation.moduleData!.changes;
+    if (observation.falconwoodAction) {
+      const expected = resolveFalconwoodAction(observation.falconwoodAction, moduleState(entries, FALCONWOOD_MODULE), entries);
+      if (expected?.snapshot !== fields.snapshot) return false;
+    } else {
+      const state = falconwoodState(fields);
+      const activeEvent = Object.keys(state.people)[0] ??
+        FALCONWOOD_EFFECTS.find(([id]) => state.effects[id])?.[1];
+      if (initialized || fields.snapshot !== initialFalconwood(missionById(state.mission)?.name, activeEvent)?.snapshot) return false;
+    }
+    initialized = true;
+  }
+  return true;
+}
+
 export function canUndoSlayer(log: readonly PlayEvent[], target: string) {
   const original = log.find(e => e.id === target);
   return original?.moduleData?.module !== SLAYER_MODULE ||
@@ -776,6 +818,9 @@ export function describeEvent(e: PlayEvent): string {
       return `${e.text}${e.killerCard ? `: ${e.killerCard}` : ""}${e.detail ? `${e.killerCard ? ". " : ": "}${e.detail}` : ""}`;
     case "module":
       if(e.mallAction)return describeMallAction(e.mallAction);
+      if (e.falconwoodAction?.command === 'complete' || e.falconwoodAction?.command === 'attest') return 'Falconwood mission completed';
+      if (e.falconwoodAction?.command === 'found') return 'Best Friend found prone';
+      if (e.falconwoodAction?.command === 'start') return 'Hunt started';
       if(e.slayerAction)return describeSlayerAction(e.slayerAction,e.moduleData!.changes);
       if(e.hunterAction)return describeHunterAction(e.hunterAction,e.moduleData!.changes);
       if (e.woodsAction) return describeWoodsAction(e.woodsAction);

@@ -1,3 +1,4 @@
+import { FALCONWOOD, falconwoodReview, falconwoodReviewText, falconwoodState, missionByName } from "../../supabase/functions/_shared/play/falconwood";
 import { SLAYER, dimensionLabel } from "@/lib/play/slayer";
 import { sameEndingReview } from '@/lib/endingReview';
 import { WOODS } from "../../supabase/functions/_shared/play/storybookWoods";
@@ -40,6 +41,7 @@ import { getFilmIdByLocation } from '@/types/gameData';
 import { GameResult } from '@/hooks/useGameHistory';
 import { GameHistoryProvider, useGameHistoryContext } from '@/contexts/GameHistoryContext';
 import { NewsTicker } from '@/components/NewsTicker';
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { DiscardGameDialog } from '@/components/DiscardGameDialog';
 import { isGameDiscarded } from '@/lib/discardedGames';
 import { useAuth } from '@/hooks/useAuth';
@@ -66,6 +68,7 @@ const IndexContent = () => {
   const { user, isLoading: authLoading } = useAuth();
   const owner = user?.id ?? 'guest';
   const sessionOwner = useRef(owner); sessionOwner.current = owner;
+  const [confirmMissionWin,setConfirmMissionWin] = useState<{id:string; finish:() => void}|null>(null);
   const [discardTarget,setDiscardTarget] = useState<{owner:string;game:ActiveGame}|null>(null);
   const [setupReturn,setSetupReturn] = useState<{owner:string;selection:ActiveGame['selection']}|null>(null);
   const { page: currentPage, navigate: setCurrentPage, back: goBack, canGoBack } = usePageNavigation<'home' | 'dashboard' | 'archive' | 'nowPlaying' | 'outcome' | 'ending' | 'scrapbooks' | 'stats' | 'rules' | 'lobby'>('home');
@@ -150,8 +153,13 @@ const IndexContent = () => {
       toast.error('Resume or discard the current game before casting a new one.');
       return;
     }
+    if (selection.location === FALCONWOOD && !missionByName(selection.mission)) {
+      toast.error("Choose a Falconwood mission before starting.");
+      return;
+    }
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
       coreTrackersVersion: 1,
+      ...(selection.location === FALCONWOOD && {falconwoodSetupVersion:1 as const}),
       ...(selection.location === WOODS && {woodsSetupVersion:1 as const}),
       ...(selection.location === 'Wingard Cottage' && {wingardSetupVersion:1 as const}),
       ...(selection.location === 'Marrek Warehouse' && {marrekSetupVersion:1 as const}),
@@ -174,22 +182,32 @@ const IndexContent = () => {
       ...(selection.killer === 'Dr. Fright' && {frightSetupVersion: 1 as const}),
       ...(selection.location === 'Maple Lane' && {mapleSetupVersion: 1 as const}),
       ...(selection.location === 'Carnival of Blood' && {carnivalSetupVersion: 1 as const}),
-      selection: { ...selection, filmId: getFilmIdByLocation(selection.location), finalGirlStartingHealth: getFinalGirlHealth(selection.finalGirl) } })) setCurrentPage('nowPlaying');
+      selection: { ...selection, mission: selection.location === FALCONWOOD ? selection.mission : null, filmId: getFilmIdByLocation(selection.location), finalGirlStartingHealth: getFinalGirlHealth(selection.finalGirl) } })) setCurrentPage('nowPlaying');
   };
 
   const handleBackFromNowPlaying = goBack;
 
-  const handleGameEnd = (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, bible?: string) => {
+  const handleGameEnd = (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, bible?: string, missionConfirmed = false) => {
     const game = getCurrentGame();
     if (!game || game.id !== activeGame?.id) return;
     try {
       const grimlashLost=game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(summarizePlay(game.playEvents).entries,'grimlash'));
       const tormentorLost=game.selection.killer==='The Tormentor'&&tormentorFatal(tormentorState(moduleState(summarizePlay(game.playEvents).entries,'tormentor')));
       const resolvedOutcome=tormentorLost||grimlashLost?'lost':game.selection.location==='USS Konrad'&&konradFatal(moduleState(summarizePlay(game.playEvents).entries,'konrad'))?'lost':outcome;
+      if (game.selection.location === FALCONWOOD && resolvedOutcome === 'won' && !game.result) {
+        const fields = moduleState(summarizePlay(game.playEvents).entries, 'falconwood');
+        const confirmed = falconwoodState(fields).complete === true || game.formDraft?.missionCompleted === true;
+        if (!confirmed && !missionConfirmed) {
+          setConfirmMissionWin({id:game.id,finish:() => handleGameEnd(outcome, story, sceneImageUrl, bible, true)});
+          return;
+        }
+        if (!confirmed && !updateFormDraft(game.id, {missionCompleted:true})) return;
+      }
       const result = game.result ?? recordGame({ outcome:resolvedOutcome, ...game.selection, ...trackedOutcome(game.playEvents),
         introStory: story, sceneImageUrl, visualBible: bible, finalGirlMaxHealth: observedFinalGirlMaxHealth(game.selection.finalGirl,game.playEvents,game.selection.finalGirlStartingHealth,game.selection.killer) }, game.id);
       recordedIds.current.add(game.id);
       if (checkpoint(game.id, { phase: 'outcome', result, introStory: story, sceneImageUrl, visualBible: bible })) {
+        setConfirmMissionWin(null);
         setCurrentPage('outcome');
       }
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save your game.'); }
@@ -222,19 +240,27 @@ const IndexContent = () => {
     if(game.selection.killer==='The Tormentor'&&formData.tormentorReview){const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'tormentor');if(tormentorState(state).loss!==formData.tormentorReview.loss){const action={parent:tormentorParent(en),command:'loss' as const,value:formData.tormentorReview.loss};const changes=resolveTormentorAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',tormentorAction:action,moduleData:{module:'tormentor',changes}})))throw new Error('The trap ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The reviewed trap ending is unavailable.');}}
     if(game.selection.killer==='Grimlash'&&formData.grimlashReview) {const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'grimlash');if(state.loss!==formData.grimlashReview.loss){const action={parent:grimlashParent(en),command:'loss' as const,value:formData.grimlashReview.loss,correction:true};const changes=resolveGrimlashAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',grimlashAction:action,moduleData:{module:'grimlash',changes}})))throw new Error('The Madness ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Madness ending is unavailable.');}}
     if(game.selection.location==='Shady Acres'&&formData.childrenOnBoardAtFinish!==undefined){const entries=summarizePlay(game.playEvents).entries,state=moduleState(entries,'shady-acres');if(shadyState(state).finishChildren!==formData.childrenOnBoardAtFinish){const action={parent:shadyParent(entries),command:'finish' as const,value:formData.childrenOnBoardAtFinish};const changes=resolveShadyAction(action,state,entries);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',shadyAction:action,moduleData:{module:'shady-acres',changes}})))throw new Error('The Children observation could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Children observation is unavailable.');}}
-    const {konradReview:_review,childrenOnBoardAtFinish:_children,slayerReview,...fields}=formData;
+    const {konradReview:_review,childrenOnBoardAtFinish:_children,slayerReview,falconwoodReview:submittedMission,...fields}=formData;
     const finishDimension = game.selection.killer === SLAYER ? slayerReview?.finalDimension : undefined;
     const reviewedEntries=summarizePlay(game.playEvents).entries;
     const fatalEnding=game.selection.killer==='The Tormentor'&&tormentorFatal(tormentorState(moduleState(reviewedEntries,'tormentor')))||game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(reviewedEntries,'grimlash'))||game.selection.location==='USS Konrad'&&konradFatal(moduleState(reviewedEntries,'konrad'));
     const outcome = fatalEnding ? 'lost' : formData.outcome ?? game.result.outcome;
-    const review = { ...formData, outcome };
+    const missionReview = game.selection.location === FALCONWOOD && (game.falconwoodSetupVersion === 1 || submittedMission)
+      ? falconwoodReview(falconwoodState(moduleState(reviewedEntries, 'falconwood')), game.selection.mission, submittedMission?.complete)
+      : undefined;
+    if (missionReview && outcome === 'won' && missionReview.complete !== true) {
+      throw new Error('Confirm the Falconwood mission was completed before recording a win.');
+    }
+    const review = { ...formData, outcome, ...(missionReview && {falconwoodReview:missionReview}) };
     const changed = !sameEndingReview(game.formData, review, game.result.outcome)
       || (game.result.playEvents?.length ?? 0) !== (game.playEvents?.length ?? 0);
     const hasOldEnding = Boolean(game.endingStory || game.posterImageUrl || game.endingNeedsRefresh);
     const clearEnding = nextPhase === 'outcome' || changed;
     const updates = {
       ...fields, outcome, playEvents: game.playEvents,
-      ...(finishDimension && {gameHighlights: [fields.gameHighlights, `Ended in: ${dimensionLabel(finishDimension)}`].filter(Boolean).join(". ")}),
+      ...((finishDimension || missionReview) && {gameHighlights: [fields.gameHighlights,
+        finishDimension && `Ended in: ${dimensionLabel(finishDimension)}`,
+        missionReview && falconwoodReviewText(missionReview)].filter(Boolean).join(" ")}),
       ...(clearEnding && { endingNarration: null, posterImageUrl: null }),
     };
     updateGame(game.result.id, updates);
@@ -371,6 +397,7 @@ const IndexContent = () => {
               setupScenario={gameSelection.setupScenario}
               startingEvent={gameSelection.startingEvent}
               mission={gameSelection.mission}
+              falconwoodFresh={activeGame.falconwoodSetupVersion === 1}
               filmId={gameSelection.filmId}
               key={activeGame.id}
               sessionId={activeGame.id}
@@ -461,6 +488,20 @@ const IndexContent = () => {
 
   return (
     <div className={`app-shell min-h-screen bg-background relative overflow-x-hidden${isGameSession ? ' game-session' : ''}${isNarrationPage ? ' narration-session' : ''}`}>
+      <AlertDialog open={confirmMissionWin?.id === activeGame?.id && !!confirmMissionWin} onOpenChange={open => {if (!open) setConfirmMissionWin(null);}}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Did you complete the mission?</AlertDialogTitle>
+            <AlertDialogDescription>Falconwood requires mission completion for a win. Confirm the result from the physical game.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Back to Play</AlertDialogCancel>
+            <button type="button" className="min-h-[44px] rounded-md bg-primary px-4 text-primary-foreground" onClick={() => confirmMissionWin?.finish()}>
+              Confirm mission completed
+            </button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <DiscardGameDialog game={discardTarget?.owner === owner ? discardTarget.game : null} onClose={() => setDiscardTarget(null)} onConfirm={confirmDiscard} />
       {/* Shared App Header — hidden on mobile when scrapbook is open */}
       {!isNarrationPage && <div className={isScrapbookOpen ? 'hidden sm:block' : currentPage==='nowPlaying' && activeGame?.playMode ? 'play-active-header' : ''}>

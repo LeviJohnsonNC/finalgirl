@@ -1,3 +1,4 @@
+import { getMissionByName, locationHasMissions } from "@/data/falconwoodMissions";
 import { useState, useCallback, useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { AlertTriangle, Play, Loader2, RotateCcw } from 'lucide-react';
 import { CastingSlot } from '@/components/CastingSlot';
@@ -58,7 +59,8 @@ const CastingRoom = ({ onStartGame, onGoToArchive, initialSelection }: CastingRo
 
   const ownedContent = useMemo(() => getOwnedContent(ownedFilms), [ownedFilms]);
   const hasOwnedContent = ownedFilms.length > 0;
-  const isComplete = selection.killer && selection.location && selection.finalGirl;
+  const isComplete = selection.killer && selection.location && selection.finalGirl &&
+    (!locationHasMissions(selection.location) || !!getMissionByName(selectedMission));
   const castingContent = useRef<HTMLDivElement>(null);
   const castingTableau = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -120,7 +122,7 @@ const CastingRoom = ({ onStartGame, onGoToArchive, initialSelection }: CastingRo
       finalGirl: selection.finalGirl,
       setupScenario: selectedSetup,
       startingEvent: selectedEvent,
-      mission: selectedMission,
+      mission: locationHasMissions(selection.location) ? selectedMission : null,
     });
   }, [isComplete, selection, selectedSetup, selectedEvent, selectedMission, onStartGame]);
 

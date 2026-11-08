@@ -1,3 +1,4 @@
+import { missionById } from "../../supabase/functions/_shared/play/falconwood";
 import {MALL,MALL_MODULE,mallReview} from '@/lib/play/sunnydaze';
 import { hunterReview, hunterReviewFacts } from '@/lib/play/hunter';
 import {tormentorState} from '@/lib/play/tormentor';
@@ -91,6 +92,8 @@ const TheEnd = ({
   const isWin = result.outcome === 'won';
   const grimlashReview=useMemo(()=>result.killer==='Grimlash'?(formData.grimlashReview??{loss:(endingModuleState(endingSummary(result.playEvents).entries,'grimlash').loss??'unknown') as import('@/lib/play/grimlash').GrimlashLoss}):undefined,[result.killer,result.playEvents,formData.grimlashReview]);
   const shipReview=useMemo(()=>result.location==='USS Konrad'?{fate:konradState(endingModuleState(endingSummary(result.playEvents).entries,'konrad')).fate}:undefined,[result.location,result.playEvents]);
+  const falconwoodReview = result.location === "Falconwood" ? formData.falconwoodReview : undefined;
+  const missionName = result.location === "Falconwood" ? result.mission ?? missionById(falconwoodReview?.mission)?.name : undefined;
   const slayerReview = result.killer === "Slayer" ? formData.slayerReview : undefined;
   const tormentorReview=useMemo(()=>result.killer==='The Tormentor'?(formData.tormentorReview??{loss:tormentorState(endingModuleState(endingSummary(result.playEvents).entries,'tormentor')).loss}):undefined,[result.killer,result.playEvents,formData.tormentorReview]);
   const fate = reviewedCharacterFate(formData.finalGirlHealth ?? undefined,shipReview,tormentorReview);
@@ -128,11 +131,12 @@ const TheEnd = ({
       ...(shipReview&&{konradReview:shipReview}),
        ...(grimlashReview&&{grimlashReview}),
       ...(tormentorReview&&{tormentorReview}),
+      ...(falconwoodReview && {falconwoodReview}),
       ...(slayerReview && {slayerReview}),
       introStory,
       finalGirlHealth: formData.finalGirlHealth ?? undefined,
       killerHealth: endingKillerHealth,
-      mission: getMissionByName(result.mission),
+      mission: getMissionByName(missionName),
       ...(hunter&&{hunterReview:hunter}),
       ...(mall&&{mallReview:mall}),
       scenarioRules: [hunter&&hunterReviewFacts(hunter),result.killer==='Slayer'||result.killer==='The Hunter'||result.killer==='The Intruders'||result.killer==='Big Bad Wolf'||result.killer==='The Tormentor'||result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='Sunnydaze Mall'||result.location==='USS Konrad'||result.location==='Shady Acres'||result.location==='Storybook Woods'?playStoryBeats(result.playEvents,result):undefined, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
@@ -141,7 +145,7 @@ const TheEnd = ({
       draftPoster: true,
     });
     if (url && mounted.current) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
-  }, [isGenerating, error, awaitingRefresh, hunter, mall, slayerReview, tormentorReview, shipReview, grimlashReview, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
+  }, [isGenerating, error, awaitingRefresh, hunter, mall, missionName, falconwoodReview, slayerReview, tormentorReview, shipReview, grimlashReview, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
 
   // The poster develops on its own once the ending narration lands.
   //
@@ -189,7 +193,7 @@ const TheEnd = ({
       const finalGirlMaxHealth = result.finalGirlMaxHealth ?? getLegacyFinalGirlHealth(result.finalGirl);
 
       const payload = {
-        mission: getMissionByName(result.mission),
+        mission: getMissionByName(missionName),
         introStory,
         outcome: result.outcome,
         killer: {
@@ -222,6 +226,7 @@ const TheEnd = ({
         ...(shipReview&&{konradReview:shipReview}),
        ...(grimlashReview&&{grimlashReview}),
       ...(tormentorReview&&{tormentorReview}),
+        ...(falconwoodReview && {falconwoodReview}),
         ...(slayerReview && {slayerReview}),
         ...(result.killer==='Poltergeist'&&formData.poltergeistReview&&{poltergeistReview:formData.poltergeistReview}),
         ...(formData.endingSubLocation && { endingSubLocation: formData.endingSubLocation }),

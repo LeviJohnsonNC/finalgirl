@@ -410,3 +410,40 @@ if (slayerSources.size !== slayerExpected.length ||
   throw Error('Incomplete or unmapped Slayer photography');
 }
 console.log('Verified 24 original Slayer photographs and 10 chooser thumbnails.');
+
+const falconwoodFolder = 'src/assets/play/photos/falconwood';
+const falconwoodManifest = JSON.parse(readFileSync(join(falconwoodFolder,'manifest.json'),'utf8'));
+const falconwoodTerror = ['code-blue','neverending-attacks','retreat','run-up-that-hill','scared','changing-room','indecision','make-out-closet'];
+const falconwoodPhotos = [
+  'header','father','friend','code','lab','hunt','hunt-active','hunt-cleared','friend-prone','spell-book','telekinesis',
+  'dry','dry-off','packed','freaks','opened','closed','van','van-off',
+  ...['father-person','friend-person','code-person','lab-person','hunt-person','conspiracy-theorist','head-researcher']
+    .flatMap(id => [id,id+'-saved',id+'-killed']),
+  ...falconwoodTerror,
+];
+if (Object.keys(falconwoodManifest).length !== falconwoodPhotos.length ||
+    new Set(Object.values(falconwoodManifest).map(shot => shot.sourceSha256)).size !== falconwoodPhotos.length) {
+  throw Error('Incomplete or duplicate Falconwood photography');
+}
+const falconwoodFiles = new Set();
+for (const id of falconwoodPhotos) {
+  const shot = falconwoodManifest[id];
+  const file = id === 'header' ? 'src/assets/play/banners/falconwood.webp' : join(falconwoodFolder,id+'.webp');
+  if (!shot?.prompt || shot.file !== file || !/^exec-[a-f0-9-]+\.png$/.test(shot.source) ||
+      !/^[a-f0-9]{64}$/.test(shot.sourceSha256) || !!shot.thumbnail !== falconwoodTerror.includes(id)) {
+    throw Error('Invalid Falconwood provenance: ' + id);
+  }
+  const derivatives = [[file,shot,160*1024]];
+  if (shot.thumbnail) derivatives.push([join(falconwoodFolder,id+'-thumb.webp'),shot.thumbnail,35*1024]);
+  for (const [path,expected,budget] of derivatives) {
+    const bytes = readFileSync(path);
+    const [width,height] = konradWebpDimensions(bytes);
+    if (width !== expected.width || height !== expected.height || width > shot.nativeWidth || height > shot.nativeHeight ||
+        bytes.length !== expected.bytes || bytes.length > budget || createHash('sha256').update(bytes).digest('hex') !== expected.sha256) {
+      throw Error('Invalid Falconwood derivative: ' + path);
+    }
+    falconwoodFiles.add(path);
+  }
+}
+if (images.some(file => file.startsWith(falconwoodFolder+'/') && !falconwoodFiles.has(file))) throw Error('Unmapped Falconwood artwork');
+console.log('Verified 48 independent Falconwood photographs and eight Terror thumbnails.');

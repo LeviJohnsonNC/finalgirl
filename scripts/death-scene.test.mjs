@@ -14,6 +14,7 @@ const code = (path) =>
 function moduleAt(path, imports) {
   const ex = {};
   new Function("require", "exports", code(path))((name) => {
+    if(name==='./falconwood.ts'||name==='./play/falconwood.ts')return falconwood;
     if(name==='./slayer.ts'||name==='./play/slayer.ts')return slayer;
     if(name==='./hunter.ts'||name==='./play/hunter.ts')return hunter;
     if(name==='./sunnydaze.ts'||name==='./play/sunnydaze.ts')return mall;
@@ -26,6 +27,7 @@ function moduleAt(path, imports) {
 const mallCatalog=moduleAt('../supabase/functions/_shared/play/sunnydazeCatalog.ts',{});
 const mall=moduleAt('../supabase/functions/_shared/play/sunnydaze.ts',{'./sunnydazeCatalog.ts':mallCatalog});
 const hunter=moduleAt('../supabase/functions/_shared/play/hunter.ts',{});
+const falconwood=moduleAt('../supabase/functions/_shared/play/falconwood.ts',{});
 const slayer=moduleAt('../supabase/functions/_shared/play/slayer.ts',{});
 const buddyland = moduleAt(
   "../supabase/functions/_shared/play/buddyland.ts",

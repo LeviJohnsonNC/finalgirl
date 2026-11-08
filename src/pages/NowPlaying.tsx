@@ -62,6 +62,7 @@ interface NowPlayingProps {
   startingEvent: string | null;
   /** Falconwood only: the Mission that must be completed to win. */
   mission?: string | null;
+  falconwoodFresh?: boolean;
   filmId: string | null;
   onBack: () => void;
   onGameEnd: (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, visualBible?: string) => void;
@@ -78,6 +79,7 @@ const NowPlaying = ({
   setupScenario,
   startingEvent,
   mission,
+  falconwoodFresh,
   filmId,
   onBack,
   onGameEnd,
@@ -121,7 +123,7 @@ const NowPlaying = ({
   const tormentorOpening=killer==='The Tormentor'?(tormentorFreshSetup?'fresh-v1' as const:'legacy-unknown' as const):undefined;
   const tormentorGuidance=tormentorOpening?tormentorOpeningGuidance(tormentorOpening):undefined;
   const visualGuidance=[marrekGuidance,tormentorGuidance,evomorphGuidance,moduleContext?.visualGuidance].filter(Boolean).join('\n');
-  const missionData = getMissionByName(mission);
+  const missionData = location === "Falconwood" ? getMissionByName(mission) : undefined;
   // Reserve the image column as soon as there is something to show there —
   // a finished still, one developing, or a failure worth retrying.
   const showImageSlot = Boolean(sceneImageUrl) || isGeneratingImage || Boolean(imageError);
@@ -178,13 +180,13 @@ const NowPlaying = ({
       moduleVisualGuidance: visualGuidance,
       visualBible,
       sceneType: 'beginning',
-      mission: getMissionByName(mission),
+      mission: missionData,
       scenarioRules: [tormentorGuidance,evomorphGuidance, getKillerNarrativeRules(killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
       gameId: sessionImageId.current,
       previousImageUrl,
     });
     if (url) { setSceneImageUrl(url); checkpointRef.current({ sceneImageUrl: url }); }
-  }, [story, killer, finalGirl, location, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, mission, visualBible, generateImage, marrekOpening, tormentorOpening, tormentorGuidance, evomorphGuidance, visualGuidance]);
+  }, [story, killer, finalGirl, location, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, missionData, visualBible, generateImage, marrekOpening, tormentorOpening, tormentorGuidance, evomorphGuidance, visualGuidance]);
 
   // Images generate on their own now — no API key, no button to find.
   //
@@ -331,8 +333,8 @@ const NowPlaying = ({
     onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying || isPaused} hasStory={Boolean(story)}
     showDeathDetails={showDeathPanel} onShowDeathDetails={enabled => onCheckpoint({showDeathPanel: enabled})}
     drafts={playDrafts} onDraft={saveDraft}
-    moduleControls={<ModuleControls setupScenario={setupScenario} startingEvent={startingEvent} sessionId={sessionId} killer={killer} location={location} finalGirl={finalGirl} events={playEvents} onEvent={recordPlayEvent} blocked={playSyncBlocked} />}
-    deathPanel={deathEventId && syncPlayNow ? <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl}} events={playEvents} getEvents={getPlayEvents} eventId={deathEventId} draft={playDrafts[deathEventId]} onDraft={saveDraft} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/> : undefined}
+    moduleControls={<ModuleControls mission={mission} falconwoodFresh={falconwoodFresh} setupScenario={setupScenario} startingEvent={startingEvent} sessionId={sessionId} killer={killer} location={location} finalGirl={finalGirl} events={playEvents} onEvent={recordPlayEvent} blocked={playSyncBlocked} />}
+    deathPanel={deathEventId && syncPlayNow ? <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl,mission}} events={playEvents} getEvents={getPlayEvents} eventId={deathEventId} draft={playDrafts[deathEventId]} onDraft={saveDraft} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/> : undefined}
     onDeath={event=>setDeathEventId(event.id)}/>;
 
   return (

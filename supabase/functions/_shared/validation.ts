@@ -1,3 +1,4 @@
+import { missionByName } from "./play/falconwood.ts";
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { corsHeaders } from './auth.ts';
 
@@ -7,6 +8,15 @@ const SlayerReviewSchema = z.object({finalDimension:z.enum(["our","mirror"]).nul
 const TormentorReviewSchema=z.object({loss:z.enum(['unknown','none','trap-terminal','no-escape','endless-traps'])}).strict();
 const TormentorOpeningSchema=z.enum(['fresh-v1','legacy-unknown']);
 const GrimlashReviewSchema=z.object({loss:z.enum(['none','unknown','skull','telluric'])}).strict();
+const FalconwoodReviewSchema = z.object({
+  mission: z.enum(['father','friend','hunt','lab','code']).optional(),
+  complete: z.boolean().nullable(),
+  progress: z.string().max(150).optional(),
+  friend: z.enum(['in-play','saved','killed','left','prone']).optional(),
+  uses: z.number().int().min(0).max(2).optional(),
+}).refine(review => (!review.friend || !!review.mission) &&
+  (review.friend !== 'prone' || review.mission === 'friend') &&
+  (review.uses === undefined || review.mission === 'hunt' || review.mission === 'friend' && review.uses <= 1));
 const MissionSchema = z.object({ name: z.string().min(1).max(100), description: z.string().max(1500) });
 const KonradReviewSchema = z.object({fate:z.enum(['unknown','survived','airlock-loss','explosion-loss'])}).strict();
 
@@ -45,6 +55,7 @@ export const SceneImageRequestSchema = z.object({
   hunterReview:HunterReviewSchema.optional(),
   marrekOpening:TormentorOpeningSchema.optional(),
   tormentorOpening:TormentorOpeningSchema.optional(),
+  falconwoodReview:FalconwoodReviewSchema.optional(),
   slayerReview:SlayerReviewSchema.optional(),
   tormentorReview:TormentorReviewSchema.optional(),
   grimlashReview:GrimlashReviewSchema.optional(),
@@ -70,7 +81,10 @@ export const SceneImageRequestSchema = z.object({
   gameId: z.string().uuid().optional(),
   referenceImageUrl: z.string().url().max(2000).optional(),
   previousImageUrl: z.string().url().max(2000).optional()
-}).refine(v => !v.slayerReview || v.killer === "Slayer" && v.sceneType === "ending", {message:"Slayer review belongs to Slayer ending"}).refine(v=>!v.mallReview||v.location==='Sunnydaze Mall'&&v.sceneType==='ending',{message:'Mall review belongs to its ending'}).refine(v=>v.mallReview?.savior!=='killed'||v.outcome==='lost',{message:'Savior death requires loss'}).refine(v=>!v.hunterReview||v.killer==='The Hunter'&&v.sceneType==='ending',{message:'Hunter review belongs to its ending'}).refine(v => !v.draftPoster || (v.sceneType === 'ending' && Boolean(v.gameId)), { message: 'A draft poster belongs to a game ending', path: ['draftPoster'] }).refine(v=>!v.marrekOpening||v.location==='Marrek Warehouse'&&v.sceneType==='beginning',{message:'Warehouse opening provenance belongs to its opening'}).refine(v=>!v.grimlashReview||v.killer==='Grimlash'&&v.sceneType==='ending',{message:'Madness review belongs to Grimlash ending'}).refine(v=>!v.grimlashReview||!['skull','telluric'].includes(v.grimlashReview.loss)||v.outcome==='lost',{message:'Madness loss requires lost outcome'}).refine(v=>v.killer==='Grimlash'||(v.finalGirlHealth??0)<=10,{message:'Raised Health requires Grimlash'}).refine(value=>!value.konradReview||value.location==='USS Konrad'&&value.sceneType==='ending',{message:'Ship review belongs to USS Konrad ending',path:['konradReview']}).refine(value=>!value.konradReview||!['airlock-loss','explosion-loss'].includes(value.konradReview.fate)||value.outcome==='lost',{message:'Fatal ship ending requires a loss',path:['outcome']}).refine(v=>!v.tormentorOpening||v.killer==='The Tormentor'&&v.sceneType==='beginning',{message:'Tormentor opening provenance belongs to an opening'}).refine(v=>!v.tormentorReview||v.killer==='The Tormentor'&&v.sceneType==='ending',{message:'Tormentor review belongs to its ending'}).refine(v=>!v.tormentorReview||['none','unknown'].includes(v.tormentorReview.loss)||v.outcome==='lost',{message:'Tormentor loss requires a lost result'});
+}).refine(v => !v.falconwoodReview || v.location === 'Falconwood' && v.sceneType === 'ending' &&
+  (v.outcome !== 'won' || v.falconwoodReview.complete === true) &&
+  (!v.mission || missionByName(v.mission.name)?.id === v.falconwoodReview.mission),
+  {message:'Falconwood review must match its mission and reviewed outcome'}).refine(v => !v.slayerReview || v.killer === "Slayer" && v.sceneType === "ending", {message:"Slayer review belongs to Slayer ending"}).refine(v=>!v.mallReview||v.location==='Sunnydaze Mall'&&v.sceneType==='ending',{message:'Mall review belongs to its ending'}).refine(v=>v.mallReview?.savior!=='killed'||v.outcome==='lost',{message:'Savior death requires loss'}).refine(v=>!v.hunterReview||v.killer==='The Hunter'&&v.sceneType==='ending',{message:'Hunter review belongs to its ending'}).refine(v => !v.draftPoster || (v.sceneType === 'ending' && Boolean(v.gameId)), { message: 'A draft poster belongs to a game ending', path: ['draftPoster'] }).refine(v=>!v.marrekOpening||v.location==='Marrek Warehouse'&&v.sceneType==='beginning',{message:'Warehouse opening provenance belongs to its opening'}).refine(v=>!v.grimlashReview||v.killer==='Grimlash'&&v.sceneType==='ending',{message:'Madness review belongs to Grimlash ending'}).refine(v=>!v.grimlashReview||!['skull','telluric'].includes(v.grimlashReview.loss)||v.outcome==='lost',{message:'Madness loss requires lost outcome'}).refine(v=>v.killer==='Grimlash'||(v.finalGirlHealth??0)<=10,{message:'Raised Health requires Grimlash'}).refine(value=>!value.konradReview||value.location==='USS Konrad'&&value.sceneType==='ending',{message:'Ship review belongs to USS Konrad ending',path:['konradReview']}).refine(value=>!value.konradReview||!['airlock-loss','explosion-loss'].includes(value.konradReview.fate)||value.outcome==='lost',{message:'Fatal ship ending requires a loss',path:['outcome']}).refine(v=>!v.tormentorOpening||v.killer==='The Tormentor'&&v.sceneType==='beginning',{message:'Tormentor opening provenance belongs to an opening'}).refine(v=>!v.tormentorReview||v.killer==='The Tormentor'&&v.sceneType==='ending',{message:'Tormentor review belongs to its ending'}).refine(v=>!v.tormentorReview||['none','unknown'].includes(v.tormentorReview.loss)||v.outcome==='lost',{message:'Tormentor loss requires a lost result'});
 
 // Schema for generate-visual-bible endpoint
 export const VisualBibleRequestSchema = z.object({
@@ -102,6 +116,7 @@ export const EndingRequestSchema = z.object({
   mallReview:MallReviewSchema.optional(),
   hunterReview:HunterReviewSchema.optional(),
   endingStreamVersion: z.literal(1).optional(),
+  falconwoodReview:FalconwoodReviewSchema.optional(),
   slayerReview:SlayerReviewSchema.optional(),
   tormentorReview:TormentorReviewSchema.optional(),
   grimlashReview:GrimlashReviewSchema.optional(),
@@ -137,7 +152,10 @@ export const EndingRequestSchema = z.object({
   playSummary:z.string().max(1800).optional(),
   konradReview:KonradReviewSchema.optional(),
   poltergeistReview:z.object({carolynRescued:z.literal(true).nullable(),floppyAtEscape:z.literal(true).nullable(),epicRequired:z.boolean().nullable(),escapeRoute:z.enum(['exit','helicopter']).nullable().optional()}).strict().optional()
-}).refine(v => !v.slayerReview || v.killer.name === 'Slayer', {message:'Slayer review belongs to Slayer ending'}).refine(v=>!v.mallReview||v.location.name==='Sunnydaze Mall',{message:'Mall review belongs to Sunnydaze Mall'}).refine(v=>v.mallReview?.savior!=='killed'||v.outcome==='lost',{message:'Savior death requires loss'}).refine(v=>!v.hunterReview||v.killer.name==='The Hunter',{message:'Hunter review belongs to The Hunter'}).refine(v=>!v.grimlashReview||v.killer.name==='Grimlash',{message:'Madness review belongs to Grimlash'}).refine(v=>!v.grimlashReview||!['skull','telluric'].includes(v.grimlashReview.loss)||v.outcome==='lost',{message:'Madness loss requires lost outcome'}).refine(v=>v.killer.name==='Grimlash'||(v.finalGirlHealth??0)<=10&&(v.finalGirlMaxHealth??0)<=10,{message:'Raised Health requires Grimlash'}).refine(value=>!value.konradReview||value.location.name==='USS Konrad',{message:'Ship review belongs to USS Konrad',path:['konradReview']}).refine(value=>!value.konradReview||!['airlock-loss','explosion-loss'].includes(value.konradReview.fate)||value.outcome==='lost',{message:'Fatal ship ending requires a loss',path:['outcome']}).refine(value=>value.poltergeistReview?.escapeRoute!=='helicopter'||value.location.name==='Creech Manor',{message:'Helicopter rescue route belongs to Creech Manor',path:['poltergeistReview','escapeRoute']}).refine(value=>!value.poltergeistReview||value.killer.name==='Poltergeist',{message:'Rescue review belongs to Poltergeist',path:['poltergeistReview']}).refine(v=>!v.tormentorReview||v.killer.name==='The Tormentor',{message:'Tormentor review belongs to The Tormentor'}).refine(v=>!v.tormentorReview||['none','unknown'].includes(v.tormentorReview.loss)||v.outcome==='lost',{message:'Tormentor loss requires a lost result'});
+}).refine(v => !v.falconwoodReview || v.location.name === 'Falconwood' &&
+  (v.outcome !== 'won' || v.falconwoodReview.complete === true) &&
+  (!v.mission || missionByName(v.mission.name)?.id === v.falconwoodReview.mission),
+  {message:'Falconwood review must match its mission and reviewed outcome'}).refine(v => !v.slayerReview || v.killer.name === 'Slayer' , {message:'Slayer review belongs to Slayer ending'}).refine(v=>!v.mallReview||v.location.name==='Sunnydaze Mall',{message:'Mall review belongs to Sunnydaze Mall'}).refine(v=>v.mallReview?.savior!=='killed'||v.outcome==='lost',{message:'Savior death requires loss'}).refine(v=>!v.hunterReview||v.killer.name==='The Hunter',{message:'Hunter review belongs to The Hunter'}).refine(v=>!v.grimlashReview||v.killer.name==='Grimlash',{message:'Madness review belongs to Grimlash'}).refine(v=>!v.grimlashReview||!['skull','telluric'].includes(v.grimlashReview.loss)||v.outcome==='lost',{message:'Madness loss requires lost outcome'}).refine(v=>v.killer.name==='Grimlash'||(v.finalGirlHealth??0)<=10&&(v.finalGirlMaxHealth??0)<=10,{message:'Raised Health requires Grimlash'}).refine(value=>!value.konradReview||value.location.name==='USS Konrad',{message:'Ship review belongs to USS Konrad',path:['konradReview']}).refine(value=>!value.konradReview||!['airlock-loss','explosion-loss'].includes(value.konradReview.fate)||value.outcome==='lost',{message:'Fatal ship ending requires a loss',path:['outcome']}).refine(value=>value.poltergeistReview?.escapeRoute!=='helicopter'||value.location.name==='Creech Manor',{message:'Helicopter rescue route belongs to Creech Manor',path:['poltergeistReview','escapeRoute']}).refine(value=>!value.poltergeistReview||value.killer.name==='Poltergeist',{message:'Rescue review belongs to Poltergeist',path:['poltergeistReview']}).refine(v=>!v.tormentorReview||v.killer.name==='The Tormentor',{message:'Tormentor review belongs to The Tormentor'}).refine(v=>!v.tormentorReview||['none','unknown'].includes(v.tormentorReview.loss)||v.outcome==='lost',{message:'Tormentor loss requires a lost result'});
 
 export type StoryRequest = z.infer<typeof StoryRequestSchema>;
 export type SceneImageRequest = z.infer<typeof SceneImageRequestSchema>;

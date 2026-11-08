@@ -9,8 +9,10 @@ const require = createRequire(import.meta.url);
 const transpile = file => ts.transpileModule(readFileSync(new URL(file, import.meta.url), 'utf8'), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText;
-const schemas = {};
+const schemas = {}, falconwood = {};
+new Function('exports', transpile('../supabase/functions/_shared/play/falconwood.ts'))(falconwood);
 new Function('require', 'exports', transpile('../supabase/functions/_shared/validation.ts'))(name => {
+  if (name === './play/falconwood.ts') return falconwood;
   if (name.includes('zod')) return require('zod');
   if (name === './auth.ts') return { corsHeaders: { 'Access-Control-Allow-Origin': 'https://example.test' } };
   throw new Error('Unexpected schema import: ' + name);
