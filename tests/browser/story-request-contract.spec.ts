@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import ts from 'typescript';
 import { z } from 'zod';
+import * as falconwood from '../../supabase/functions/_shared/play/falconwood';
 import { test, expect, activeGame } from './fixtures';
 import { newPlayEvent as event, summarizePlay, type PlayEvent } from '../../src/lib/play/events';
 import { moduleState } from '../../src/lib/play/modules';
@@ -15,6 +16,7 @@ const source = ts.transpileModule(readFileSync('supabase/functions/_shared/valid
 new Function('require', 'exports', source)((name: string) => {
   if (name.includes('zod')) return { z };
   if (name === './auth.ts') return { corsHeaders: {} };
+  if (name === './play/falconwood.ts') return falconwood;
   throw new Error(`Unexpected schema dependency: ${name}`);
 }, schemas);
 
