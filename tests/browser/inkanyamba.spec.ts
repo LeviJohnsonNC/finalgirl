@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId, installTestAudio } from "./fixtures";
-import { chooseKillerCard, showMinorChoices, openModule, searchPick, openHistory, undoLatestObservation, setTracker } from "./play-helpers";
+import { chooseKillerCard, openMinorPowers, showMinorChoices, openModule, searchPick, openHistory, undoLatestObservation, setTracker } from "./play-helpers";
 import { newPlayEvent, type PlayEvent } from "../../src/lib/play/events";
 import { deathFacts } from "../../src/lib/play/death";
 const selection = {
@@ -237,6 +237,7 @@ test("review loaded artwork, selected Epic, health states and reachable controls
       expect((await button.boundingBox())!.width).toBeGreaterThanOrEqual(44);
     await p.locator(".module-card-section > summary").click();
   }
+  await openMinorPowers(p);
   await p
     .getByRole("button", { name: "Reveal Boiling Anger", exact: true })
     .click();

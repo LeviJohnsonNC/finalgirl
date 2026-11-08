@@ -243,7 +243,6 @@ export function BuddylandControls({
                 );
               })}
           </div>
-          <h3 className="play-module-subheading">Minor Dark Powers</h3>
           <MinorPowerGroup className="module-minor-grid module-billy-minors">
             {BILLY_POWERS.filter((p) => "health" in p).map((power, row) => {
               const health = billy[`power.${power.id}.health`];

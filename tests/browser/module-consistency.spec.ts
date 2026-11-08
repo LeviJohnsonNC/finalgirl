@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { openModule, statusPick, undoLatestObservation } from "./play-helpers";
+import { openMinorPowers, openModule, statusPick, undoLatestObservation } from "./play-helpers";
 import type { PlayEvent } from "../../src/lib/play/events";
 
 const killers = [
@@ -104,11 +104,7 @@ for (const killer of killers)
         ),
       ).toHaveLength(0);
       const panel = page.locator(`[data-module="${killer.id}"]`);
-      if (killer.id === "geppetto")
-        await panel
-          .locator(".geppetto-details > summary")
-          .filter({ hasText: "Minor Dark Powers" })
-          .click();
+      await openMinorPowers(panel);
       const minor = panel
         .locator(".module-minor")
         .filter({ hasText: killer.minor });
@@ -157,11 +153,7 @@ for (const killer of killers)
       await resume(page);
       await openModule(page, killer.id);
       await openModule(page, location.id);
-      if (killer.id === "geppetto")
-        await panel
-          .locator(".geppetto-details > summary")
-          .filter({ hasText: "Minor Dark Powers" })
-          .click();
+      await openMinorPowers(panel);
       await expect(minor).toContainText("2/2 health");
       if (location.id === "carnival")
         await venue

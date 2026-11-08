@@ -29,6 +29,8 @@ it("focuses recorded powers without imposing a single-power limit or losing zero
     );
   }
   render(<Harness />);
+  expect(screen.getByText("Minor Dark Powers").closest("details")).not.toHaveAttribute("open");
+  fireEvent.click(screen.getByText("Minor Dark Powers"));
   expect(screen.queryByRole("button", { name: "Reveal Two" })).toBeNull();
   fireEvent.click(
     screen.getByRole("button", { name: "Add another Minor Power" }),
@@ -72,6 +74,7 @@ it("keeps alternatives available after a rejected reveal and preserves legacy un
       />
     </MinorPowerGroup>,
   );
+  fireEvent.click(screen.getByText("Minor Dark Powers"));
   expect(screen.queryByRole("button", { name: "Reveal New" })).toBeNull();
   expect(
     screen.getByText("Revealed earlier · health not recorded"),

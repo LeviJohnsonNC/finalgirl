@@ -1295,20 +1295,20 @@
     "reference": "outsider"
   },
   "outsider-killed": {
-    "source": "exec-b4072ac0-0b4e-4d85-af31-4f4c5c95be0e.png",
+    "source": "exec-05eeaa66-d76a-4722-abe7-06c424ee729b.png",
     "sourceSize": [
       1536,
       1024
     ],
-    "sourceSha256": "812176b690e2c2c83dceff5dd9fe9d3e07061b2af3e9fe5cb26a65dfb992fb74",
+    "sourceSha256": "9cb3138c3de0b0c4fe9d7b70cdde760d971a5c5782cf71be7eda61f07887526a",
     "hero": {
       "file": "outsider-killed.webp",
       "size": [
         1280,
         853
       ],
-      "bytes": 110810,
-      "sha256": "d9799daa8975ca5c490bf374f3f8519ab45f2a6bd6c9217cdcab1902a9daeba0"
+      "bytes": 139562,
+      "sha256": "a0d864c8f2d3793f495573802d33ff75668e0624f052ef44ec0edf34c1cd43ca"
     },
     "tile": {
       "file": "outsider-killed-tile.webp",
@@ -1316,10 +1316,10 @@
         400,
         267
       ],
-      "bytes": 16152,
-      "sha256": "e57d587c9b49dacaa0527852c94cb11efee181ed9b50c5226186b7d9f8b4fda4"
+      "bytes": 21872,
+      "sha256": "85ae6035ab02b43b9f152028f8f693b08dc8a83d3fc87af5975e25bb701e7c82"
     },
-    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. Non-graphic aftermath portrait of the same adult and clothes as the source, motionless with closed eyes, slumped in a chair in an empty cottage room, muted natural light, peaceful face visible. No injury, blood, attack, or weapon. Preserve face, age, hair and costume from the supplied reference.",
+    "prompt": "One wide 3:2 candid 1980s consumer 35mm horror film still for an adult fictional character's Killed outcome. Use left image for exact adult face, hair, age and wardrobe. Same practical environment. cottage entry, person in blue denim motionless beneath open window among the wreckage of a chair. Disturbing aftermath through posture, toppled objects and lighting. Intact costume. No visible blood, injury, gore, assailant, collage or lettering. Keep subject in center for a shallow app crop.",
     "focalPosition": "center",
     "reference": "outsider"
   },
@@ -1353,20 +1353,20 @@
     "reference": "boyfriend"
   },
   "boyfriend-killed": {
-    "source": "exec-1a270399-7a85-4134-b244-3ca75de5f6b3.png",
+    "source": "exec-7e51a697-af7a-455d-a948-dac46a06ec71.png",
     "sourceSize": [
       1536,
       1024
     ],
-    "sourceSha256": "a9e0ecc3ce8fce83671f04e77cc76d02b1ee0d59b90748f2066d153db37fd18f",
+    "sourceSha256": "8187bbee19e78e4e5c67196f894d673509ef7146a0c0aebeccb917ed9deb4e5d",
     "hero": {
       "file": "boyfriend-killed.webp",
       "size": [
         1280,
         853
       ],
-      "bytes": 95686,
-      "sha256": "d496669f70ea636b3547ffbd4b04171ed570b9982c5f0e8fe218837c0a1fbae6"
+      "bytes": 102802,
+      "sha256": "be0bfd8e265aaba738ffa590b3ea0eec1bda3423ea9bf8e30d39ed484908c175"
     },
     "tile": {
       "file": "boyfriend-killed-tile.webp",
@@ -1374,10 +1374,10 @@
         400,
         267
       ],
-      "bytes": 14368,
-      "sha256": "8295bb3a1d3a1c0cddb6fe391a83750de0a0a6213e085fadb6a570e35e3ca938"
+      "bytes": 15668,
+      "sha256": "20e087a7e0771cad09ed29c96a19613a963d1fa4043938656452ec4942eee3da"
     },
-    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. Non-graphic aftermath portrait of the same adult and clothes as the source, motionless with closed eyes, slumped in a chair in an empty cottage room, muted natural light, peaceful face visible. No injury, blood, attack, or weapon. Preserve face, age, hair and costume from the supplied reference.",
+    "prompt": "One wide 3:2 candid 1980s consumer 35mm horror film still for an adult fictional character's Killed outcome. Use left image for exact adult face, hair, age and wardrobe. Same practical environment. rustic kitchen, man in rust jacket motionless on hardwood next to overturned chair. Disturbing aftermath through posture, toppled objects and lighting. Intact costume. No visible blood, injury, gore, assailant, collage or lettering. Keep subject in center for a shallow app crop.",
     "focalPosition": "center",
     "reference": "boyfriend"
   },
@@ -1411,20 +1411,20 @@
     "reference": "neighbor"
   },
   "neighbor-killed": {
-    "source": "exec-ccd856e5-b917-4501-8a0a-ad10799284ec.png",
+    "source": "exec-b54d4136-bb0b-4b51-9414-804fd14a7b7c.png",
     "sourceSize": [
       1536,
       1024
     ],
-    "sourceSha256": "f3b90134992bfa6d5c8d2219562ccbd302a8e675a481a88f5812ec64fc80f28c",
+    "sourceSha256": "a341c2923596b50308d58225994ba5d1610c1e04e221fcb3017a9d1f6ea5e6e7",
     "hero": {
       "file": "neighbor-killed.webp",
       "size": [
         1280,
         853
       ],
-      "bytes": 120802,
-      "sha256": "3976e202ee696e95ac6fe0107f2cf58faa87987b538aa804ab03d8910fa4d95c"
+      "bytes": 136574,
+      "sha256": "963b41cbd1c434efa9c14719d549ad68399ae294602c4181ace25c7ac217becc"
     },
     "tile": {
       "file": "neighbor-killed-tile.webp",
@@ -1432,10 +1432,10 @@
         400,
         267
       ],
-      "bytes": 19772,
-      "sha256": "79c6402e8847349234bcbb48ea9110fa42c21f1400a76198f034bcfdb0c2bf04"
+      "bytes": 19804,
+      "sha256": "9f8d56a5242f22b5e1c408bb017bffd82ab61132949d4bc6b59e109ccd7f1728"
     },
-    "prompt": "Wide 3:2 game card photograph, candid 1980s consumer 35mm color film, tactile practical materials, believable ordinary light, no text, no logos or graphic overlays. Non-graphic aftermath portrait of the same adult and clothes as the source, motionless with closed eyes, slumped in a chair in an empty cottage room, muted natural light, peaceful face visible. No injury, blood, attack, or weapon. Preserve face, age, hair and costume from the supplied reference.",
+    "prompt": "One wide 3:2 candid 1980s consumer 35mm horror film still for an adult fictional character's Killed outcome. Use left image for exact adult face, hair, age and wardrobe. Same practical environment. cottage living room, older woman in navy cardigan collapsed from armchair to floor next to a toppled lamp. Disturbing aftermath through posture, toppled objects and lighting. Intact costume. No visible blood, injury, gore, assailant, collage or lettering. Keep subject in center for a shallow app crop.",
     "focalPosition": "center",
     "reference": "neighbor"
   }

@@ -42,7 +42,6 @@ export function BigBadWolfControls({ events, blocked, onEvent }: ControlsProps) 
         </div>
       </section>
       <section className="wolf-minors" aria-label="Wolf Minor Dark Powers">
-        <h3>Minor Dark Powers</h3>
         <MinorPowerGroup>
           {WOLF_MINORS.map(card => {
             const key = wolfMinorField(card.id);

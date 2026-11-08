@@ -275,7 +275,6 @@ export function FrightControls({
         className="fright-minors"
         aria-label="Dr. Fright Minor Dark Powers"
       >
-        <h3>Minor Dark Powers</h3>
         <MinorPowerGroup className="fright-minor-grid">
           {FRIGHT_MINOR_POWERS.map((power, row) => (
             <MinorPowerControl

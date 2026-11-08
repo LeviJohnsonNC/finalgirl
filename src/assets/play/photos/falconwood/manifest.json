@@ -77,17 +77,17 @@
     "width": 1280
   },
   "code-person-killed": {
-    "bytes": 104540,
+    "bytes": 138256,
     "file": "src/assets/play/photos/falconwood/code-person-killed.webp",
     "height": 853,
     "nativeHeight": 1024,
     "nativeWidth": 1536,
     "position": "50% 42%",
-    "prompt": "Landscape candid 1986 consumer 35mm film photo. Identity-matched code-person killed in a different candid scene. Exact adult face, age, clothing and hair. Clear head and shoulders near center. No blood or visible injuries. Real materials and available light. No typography overlays or graphic injury.",
+    "prompt": "One wide 3:2 candid 1986 consumer 35mm horror movie still for an adult fictional character's Killed outcome. Match adult identity, face, hair, clothes and practical location from LEFT reference. mall atrium, motionless person in green varsity jacket behind an overturned café table. Make aftermath readable through inert posture and disturbed set. Low light, tactile reality, ordinary film grain, no visible injuries, blood, gore, attackers, captions or panels. Center subject for wide card crop.",
     "referenceSource": "exec-3108fc7c-d3f5-433c-b1c2-cf65dc82a622.png",
-    "sha256": "f147b33a8220c1bbfc89cb29309d830aebd01536c2148616a49fe131f4c0e87a",
-    "source": "exec-7cb3f28f-01ed-458f-a4e7-553d2b115353.png",
-    "sourceSha256": "ea939483ce3e4b3b4d41c14eda2dfdbf100594a1ed8ee4166fdd04196c0eed1e",
+    "sha256": "5b2cd82370fc838c2a31c750f6babdbde58a74825be0b9cca03dad1d9f37e951",
+    "source": "exec-5802fa47-c78a-448b-bb2e-076bb34584e2.png",
+    "sourceSha256": "a03914bf3f496f0299c1bbbf514c3836ccf2cb0aca2d0c6ce51af8e96457d23d",
     "width": 1280
   },
   "code-person-saved": {
@@ -104,6 +104,19 @@
     "sourceSha256": "83c43c983c48456969d990b276b11e76442c55417fd6846839247d2c639cd5e0",
     "width": 1280
   },
+  "code-success": {
+    "bytes": 91600,
+    "file": "src/assets/play/photos/falconwood/code-success.webp",
+    "height": 640,
+    "nativeHeight": 887,
+    "nativeWidth": 1774,
+    "position": "50% 42%",
+    "prompt": "Candid 1986 35mm mission completion still. Top row fourth mall still and bottom row fourth dark-skinned young adult in green and cream letter jacket. Same 1980s mall and café table. The same young adult leans forward with a relieved smile as women's hands fit the last piece of a neatly arranged pattern of blank-backed paper clues. Faint celebration, no readable text or game components. Natural practical light and real materials, centered for responsive banner crop.",
+    "sha256": "6d117fabaab1f7f6e2bdc0ffe269787c8bda68e40599f8b5fbcbc71f1bfd3504",
+    "source": "exec-5486f725-d501-44b6-b354-00470d165e7b.png",
+    "sourceSha256": "0077b117d6c50dec6843461cc4d02f919424c92f453f21e1715b944406faf2c8",
+    "width": 1280
+  },
   "conspiracy-theorist": {
     "bytes": 130492,
     "file": "src/assets/play/photos/falconwood/conspiracy-theorist.webp",
@@ -118,17 +131,17 @@
     "width": 1280
   },
   "conspiracy-theorist-killed": {
-    "bytes": 135274,
+    "bytes": 141976,
     "file": "src/assets/play/photos/falconwood/conspiracy-theorist-killed.webp",
     "height": 853,
     "nativeHeight": 1024,
     "nativeWidth": 1536,
     "position": "50% 42%",
-    "prompt": "Landscape candid 1986 consumer 35mm film photo. Identity-matched conspiracy-theorist killed in a different candid scene. Exact adult face, age, clothing and hair. Clear head and shoulders near center. No blood or visible injuries. Real materials and available light. No typography overlays or graphic injury.",
+    "prompt": "One wide 3:2 candid 1986 consumer 35mm horror movie still for an adult fictional character's Killed outcome. Match adult identity, face, hair, clothes and practical location from LEFT reference. mall corridor, motionless man in denim beside a toppled planter and cracked glasses. Make aftermath readable through inert posture and disturbed set. Low light, tactile reality, ordinary film grain, no visible injuries, blood, gore, attackers, captions or panels. Center subject for wide card crop.",
     "referenceSource": "exec-885830fb-7646-4d3a-96ee-ec59f7586875.png",
-    "sha256": "c4957622751e32f6cd714e6a4ff3870172593cfcdc3e0cb65b080910c3d8ef5f",
-    "source": "exec-d3fba80b-5851-4e81-8cff-5dda3b625957.png",
-    "sourceSha256": "0ecb7f8670eb0461c8a2260577fcceec855e3bf662cfbff85e78ad24c766e88a",
+    "sha256": "9f5128ecf7fa733fc9a84a63e2589b0f7bddbe2a235c0a51330444c0457b31e5",
+    "source": "exec-e22a17d9-09af-428c-a772-b1f1fe0aac20.png",
+    "sourceSha256": "a2b27fd00773cc1f5250f2deb67df5943bc90312c9a14ff514d518b6ca1ae207",
     "width": 1280
   },
   "conspiracy-theorist-saved": {
@@ -198,17 +211,17 @@
     "width": 1280
   },
   "father-person-killed": {
-    "bytes": 106272,
+    "bytes": 152224,
     "file": "src/assets/play/photos/falconwood/father-person-killed.webp",
     "height": 853,
     "nativeHeight": 1024,
     "nativeWidth": 1536,
     "position": "50% 42%",
-    "prompt": "Landscape candid 1986 consumer 35mm film photo. Identity-matched father-person killed in a different candid scene. Exact adult face, age, clothing and hair. Clear head and shoulders near center. No blood or visible injuries. Real materials and available light. No typography overlays or graphic injury.",
+    "prompt": "Candid 1986 horror aftermath in the same municipal jail. Match the father in his tan jacket and retain intact costume and clear character identity.",
     "referenceSource": "exec-ca666846-f260-4330-a9d3-a18bdf1002f1.png",
-    "sha256": "38a12d701096de89d5832ffd4656c6b636740cd25c10fd97328e5fdc6c958fde",
-    "source": "exec-863ebf08-09f9-444a-afa3-34f5c1ac5e50.png",
-    "sourceSha256": "8535e1c471ce4e05cd7d995517412cd202d8ea2a354e9975c3be213c19ab1ced",
+    "sha256": "63e661e58c84f65dedb89cc2663a252784cbeb2eb0bce020b4e6e0ce5321187b",
+    "source": "exec-8d330c76-de1e-4d11-ac5a-9569596c6804.png",
+    "sourceSha256": "7b5212081483f12ad9b6d7ca29c96cae944993681df082ff047e50e161349629",
     "width": 1280
   },
   "father-person-saved": {
@@ -223,6 +236,19 @@
     "sha256": "d743f51d6671b460b4e02d9a565ff58872e639c5f2175aeb496522671f5156d5",
     "source": "exec-b854c293-9a3e-4b2d-971d-5c076633ef01.png",
     "sourceSha256": "627fcd1e907814628bb608b6f428b4baa4054c9ad64038f663f8ffe30a3532d2",
+    "width": 1280
+  },
+  "father-success": {
+    "bytes": 58974,
+    "file": "src/assets/play/photos/falconwood/father-success.webp",
+    "height": 427,
+    "nativeHeight": 724,
+    "nativeWidth": 2172,
+    "position": "50% 42%",
+    "prompt": "Candid 1986 35mm mission completion still. Top-left jail still and bottom-left father portrait. Same grim municipal jail and bars. The cell is visibly unlocked and open, the same moustached middle-aged father with tan jacket and burgundy shirt crossing the threshold into corridor, his relieved face visible, a woman’s hand lowering the keys at edge of frame. Natural practical light and real materials, centered for responsive banner crop.",
+    "sha256": "55d5606777a8eb9bdc9bdcc0bd0abe856527ac3e86c7413fb787eedfd38152e0",
+    "source": "exec-41ed9bb4-9396-4f40-a131-b50afb6dd147.png",
+    "sourceSha256": "faa2a048b34e76afeb45bbd589fc646cf8d213cc404c8ed131569f11a8bfe0d0",
     "width": 1280
   },
   "freaks": {
@@ -265,17 +291,17 @@
     "width": 1280
   },
   "friend-person-killed": {
-    "bytes": 79470,
+    "bytes": 111038,
     "file": "src/assets/play/photos/falconwood/friend-person-killed.webp",
     "height": 853,
     "nativeHeight": 1024,
     "nativeWidth": 1536,
     "position": "50% 42%",
-    "prompt": "Landscape candid 1986 consumer 35mm film photo. Identity-matched friend-person killed in a different candid scene. Exact adult face, age, clothing and hair. Clear head and shoulders near center. No blood or visible injuries. Real materials and available light. No typography overlays or graphic injury.",
+    "prompt": "One wide 3:2 candid 1986 consumer 35mm horror movie still for an adult fictional character's Killed outcome. Match adult identity, face, hair, clothes and practical location from LEFT reference. library, books tumbled around the still woman in denim, her slack hand lit by a library desk lamp. Make aftermath readable through inert posture and disturbed set. Low light, tactile reality, ordinary film grain, no visible injuries, blood, gore, attackers, captions or panels. Center subject for wide card crop.",
     "referenceSource": "exec-e065d3b1-9fdb-4ffe-ab58-d0d9db4981de.png",
-    "sha256": "c548223699be967b79d93e3460649273d8ddc01555e63984d219661d307614eb",
-    "source": "exec-e966b5f1-370e-45e8-9b27-3c71aac9910a.png",
-    "sourceSha256": "3c20b9fb2a9ecbde369aca5f5fe8c99cb521f7f7ba79c92fcaf25d70ff41926a",
+    "sha256": "a3c12424c3621726930e35e7d705c05da829ef6b86724dc1fea227a82af48cd8",
+    "source": "exec-0ea33dbf-3ded-432f-922c-ac6e6940192b.png",
+    "sourceSha256": "d32f481da0dfd6dd2e01c1af30d3bc02f79ad0899a39a96b4186ad2137802ec9",
     "width": 1280
   },
   "friend-person-saved": {
@@ -305,6 +331,19 @@
     "sourceSha256": "ccffcf45cea70fb060bdb0a12d80fbe61bd21832322830b6e7a9e5caa96de8c3",
     "width": 1280
   },
+  "friend-success": {
+    "bytes": 71752,
+    "file": "src/assets/play/photos/falconwood/friend-success.webp",
+    "height": 427,
+    "nativeHeight": 724,
+    "nativeWidth": 2172,
+    "position": "50% 42%",
+    "prompt": "Candid 1986 35mm mission completion still. Top row second library still and bottom row second curly-haired Best Friend portrait. Same window, shelving, and overturned chair now upright. The same adult curly-haired woman in denim is awake, holding a table edge while a woman's hand steadies her elbow, face with relief and recognition. Natural practical light and real materials, centered for responsive banner crop.",
+    "sha256": "33f0b54ccc3145d4b60309b0428713e9210fc749635ea7ae9d0d9d0883afefb6",
+    "source": "exec-a48376f0-dd24-418c-a961-de3f0cc9d103.png",
+    "sourceSha256": "a695a03cda4541404e2d25a081d4c70ffbcf65ce1f499f9d81383268f0f8cecf",
+    "width": 1280
+  },
   "head-researcher": {
     "bytes": 85318,
     "file": "src/assets/play/photos/falconwood/head-researcher.webp",
@@ -319,17 +358,17 @@
     "width": 1280
   },
   "head-researcher-killed": {
-    "bytes": 81608,
+    "bytes": 115464,
     "file": "src/assets/play/photos/falconwood/head-researcher-killed.webp",
     "height": 853,
     "nativeHeight": 1024,
     "nativeWidth": 1536,
     "position": "50% 42%",
-    "prompt": "Landscape candid 1986 consumer 35mm film photo. Identity-matched head-researcher killed in a different candid scene. Exact adult face, age, clothing and hair. Clear head and shoulders near center. No blood or visible injuries. Real materials and available light. No typography overlays or graphic injury.",
+    "prompt": "One wide 3:2 candid 1986 consumer 35mm horror movie still for an adult fictional character's Killed outcome. Match adult identity, face, hair, clothes and practical location from LEFT reference. laboratory aisle, woman in white coat fallen sideways beside overturned stool and scattered glassware. Make aftermath readable through inert posture and disturbed set. Low light, tactile reality, ordinary film grain, no visible injuries, blood, gore, attackers, captions or panels. Center subject for wide card crop.",
     "referenceSource": "exec-a20e2868-5d4b-4545-87f6-6ca7f077dfdb.png",
-    "sha256": "09259f180ca584f7f0eb2864d268e9df45705fe4fd844fb0860fea766c56468f",
-    "source": "exec-a21d0391-0a1c-4898-a80b-c7066f8f143d.png",
-    "sourceSha256": "20594b9a4d7baea710fe9c622ad8ff65b1a79c25bed50c2ea7be6a47c2c6a1cc",
+    "sha256": "ec332d799173012bea8de5d775aafa9dbaa9df6773955fbdc771d6406a8c77d3",
+    "source": "exec-0d672420-38fa-44c8-a4a4-30e525155ead.png",
+    "sourceSha256": "4c12947dcef7a3150da12898cf1125095c98355a708e4ea28526544739e78364",
     "width": 1280
   },
   "head-researcher-saved": {
@@ -386,16 +425,16 @@
     "width": 1280
   },
   "hunt-cleared": {
-    "bytes": 139744,
+    "bytes": 110610,
     "file": "src/assets/play/photos/falconwood/hunt-cleared.webp",
-    "height": 853,
-    "nativeHeight": 1024,
-    "nativeWidth": 1536,
+    "height": 427,
+    "nativeHeight": 724,
+    "nativeWidth": 2172,
     "position": "50% 42%",
-    "prompt": "Landscape candid 1986 consumer 35mm film photo. Empty river-town road after the hunt at blue dawn, still black sedan parked by the curb, open driver's door, pale exhaust gone, deserted wet asphalt. Clear sense of quiet after pursuit, no bodies. Real materials and available light. No typography overlays or graphic injury.",
-    "sha256": "9caa9a9c3805dbf1eaf971c9e0f312ba1bde8f9b130c63b78d155f9463678e56",
-    "source": "exec-dcbabf64-4117-4a79-b251-62a2d2761fc8.png",
-    "sourceSha256": "7b8c03b64c0b54da8778366310c74d98c974cc839a83bcddde836f1872e83db9",
+    "prompt": "Candid 1986 35mm mission completion still. Top row fifth and bottom row first empty dark sedan in rainy riverside town. The dark unmarked sedan has been abandoned with its front doors open, no agents, no people. A woman seen from behind at a distance walks toward the brighter end of the quiet street. Same 1980s real town, wet pavement, streetlights now giving way to cold dawn. Natural practical light and real materials, centered for responsive banner crop.",
+    "sha256": "ae5862f5a8882be84d98cc2cdc06b6bd44c6c7af9bd9e973e8834dfaed54fee6",
+    "source": "exec-36d9ed80-4f8e-42d3-ab30-2a9e1ef53bf7.png",
+    "sourceSha256": "8e1c3d8ee53f8c25f906ac1d387ac27a99f9cbb0abcf4ec174a1aef00a52e4e6",
     "width": 1280
   },
   "hunt-person": {
@@ -412,17 +451,17 @@
     "width": 1280
   },
   "hunt-person-killed": {
-    "bytes": 73068,
+    "bytes": 106164,
     "file": "src/assets/play/photos/falconwood/hunt-person-killed.webp",
     "height": 853,
     "nativeHeight": 1024,
     "nativeWidth": 1536,
     "position": "50% 42%",
-    "prompt": "Landscape candid 1986 consumer 35mm film photo. Identity-matched hunt-person killed in a different candid scene. Exact adult face, age, clothing and hair. Clear head and shoulders near center. No blood or visible injuries. Real materials and available light. No typography overlays or graphic injury.",
+    "prompt": "One wide 3:2 candid 1986 consumer 35mm horror movie still for an adult fictional character's Killed outcome. Match adult identity, face, hair, clothes and practical location from LEFT reference. small laboratory, fallen chair, glasses askew, woman motionless across the lino beside scattered pages. Make aftermath readable through inert posture and disturbed set. Low light, tactile reality, ordinary film grain, no visible injuries, blood, gore, attackers, captions or panels. Center subject for wide card crop.",
     "referenceSource": "exec-bbef3e27-02ea-4b31-b519-d91341b2311e.png",
-    "sha256": "d8cd46bce70d9dc780f02aa6ef5eabfc9dbf57dcce8a01518b4ed7e29339fd62",
-    "source": "exec-449082a0-2cc7-4995-97dc-06a7da227bec.png",
-    "sourceSha256": "0ae453bbc6b67b70e8b124b59279e9265a6659a4b7fccf3907dbc0bb339fa81b",
+    "sha256": "65a25dd2b3ff46ad7bddb0f116b7e5d0ac31f6413da4913afd64f1bf0bed02ca",
+    "source": "exec-8f8b7138-c326-456f-8676-2caa3fb7905d.png",
+    "sourceSha256": "60d8a691b91b79232940472bda6b3a0b47984bb7f1ace4caa4db739ef0cd59d7",
     "width": 1280
   },
   "hunt-person-saved": {
@@ -485,17 +524,17 @@
     "width": 1280
   },
   "lab-person-killed": {
-    "bytes": 80736,
+    "bytes": 101674,
     "file": "src/assets/play/photos/falconwood/lab-person-killed.webp",
     "height": 853,
     "nativeHeight": 1024,
     "nativeWidth": 1536,
     "position": "50% 42%",
-    "prompt": "Landscape candid 1986 consumer 35mm film photo. Identity-matched lab-person killed in a different candid scene. Exact adult face, age, clothing and hair. Clear head and shoulders near center. No blood or visible injuries. Real materials and available light. No typography overlays or graphic injury.",
+    "prompt": "One wide 3:2 candid 1986 consumer 35mm horror movie still for an adult fictional character's Killed outcome. Match adult identity, face, hair, clothes and practical location from LEFT reference. police station floor, motionless man in brown coat by a torn evidence folder. Make aftermath readable through inert posture and disturbed set. Low light, tactile reality, ordinary film grain, no visible injuries, blood, gore, attackers, captions or panels. Center subject for wide card crop.",
     "referenceSource": "exec-76573450-1dc7-4ddc-96a2-5b0a5003dc66.png",
-    "sha256": "50ee779aec4884b1295ba3153de0938b26900053fdc6e2631f4ef166ef42d397",
-    "source": "exec-13789c02-1447-4290-8a7a-b24788af9eb5.png",
-    "sourceSha256": "cc1d4268f4b07642c2ad0609da9eb9c44edf84b1263a5a6195ae8566baed0cea",
+    "sha256": "85e6bcb2925fc4f94c200642be26d398a0abe8beef56125b86cbc2f2a0fecd6b",
+    "source": "exec-fbde0e99-f9af-4a6f-ba0b-77ee67e1574f.png",
+    "sourceSha256": "17a95552478028afbeb8f172664b98d585d33c93196d80ea80aeaadd9987ea96",
     "width": 1280
   },
   "lab-person-saved": {
@@ -510,6 +549,19 @@
     "sha256": "c28bc753aec3df381de045fac2e4bffc8e5b186117c6dd3d2b89ecf4034b7e8f",
     "source": "exec-58fea39e-d460-41f5-a6e0-6c3f9a356a32.png",
     "sourceSha256": "496f7ed1455a79b207da57174ac97f6547a6565c149c99e094be08401b054e74",
+    "width": 1280
+  },
+  "lab-success": {
+    "bytes": 67042,
+    "file": "src/assets/play/photos/falconwood/lab-success.webp",
+    "height": 427,
+    "nativeHeight": 724,
+    "nativeWidth": 2172,
+    "position": "50% 42%",
+    "prompt": "Candid 1986 35mm mission completion still. Top row third laboratory evidence still and bottom row third mustached Reporter portrait. The evidence has arrived at the modest small-town police station. Same man with curly dark hair and mustache in brown jacket slides the same manila evidence folder across the counter to a uniformed desk officer. Face and exchange visible. Natural practical light and real materials, centered for responsive banner crop.",
+    "sha256": "d8ee26f0b58e7b268bc8724ad0cbb77576bfc4309e1cf0c7a4004742885d98d9",
+    "source": "exec-8c315787-518b-445f-9f99-bffcabf8c300.png",
+    "sourceSha256": "6046c401165e3c530cc7ed7d29656eb22003fd6232f2e04017ba33b013afd104",
     "width": 1280
   },
   "make-out-closet": {

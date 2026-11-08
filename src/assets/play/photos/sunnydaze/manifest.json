@@ -49,7 +49,7 @@
     "height": 630,
     "bytes": 78010,
     "sha256": "917aafd27685c930da8940d15371e7608d56289a0f0daf62e974305211993bb3",
-    "prompt": "Representative Savior\u2019s Girl role, an ordinary young adult woman aged 22 with shoulder-length wavy chestnut hair, denim jacket over a maroon T-shirt, black jeans. She stands unposed by a food-court planter, cautious but alert. Complete head, waist-up, authentic unglamorous skin. No other people."
+    "prompt": "Representative Savior’s Girl role, an ordinary young adult woman aged 22 with shoulder-length wavy chestnut hair, denim jacket over a maroon T-shirt, black jeans. She stands unposed by a food-court planter, cautious but alert. Complete head, waist-up, authentic unglamorous skin. No other people."
   },
   {
     "id": "twisted-bond",
@@ -62,7 +62,7 @@
     "height": 630,
     "bytes": 62580,
     "sha256": "b413eea47438fb1fcc1819a54f82f928dfcf6564e1f221e07227c0ba5e31e0aa",
-    "prompt": "The exact blond teenage boy from the reference, same dark sleeveless hoodie and grey sleeves, seen three-quarter from the side at a mall railing, nervously drawn toward the dim concourse beyond, ominous long humanlike shadow across the tiles but no visible pursuer and no injury. Boy\u2019s entire head clearly visible on right half. No literal ropes or bonds."
+    "prompt": "The exact blond teenage boy from the reference, same dark sleeveless hoodie and grey sleeves, seen three-quarter from the side at a mall railing, nervously drawn toward the dim concourse beyond, ominous long humanlike shadow across the tiles but no visible pursuer and no injury. Boy’s entire head clearly visible on right half. No literal ropes or bonds."
   },
   {
     "id": "lockdown",
@@ -153,7 +153,7 @@
     "height": 630,
     "bytes": 55208,
     "sha256": "d5305a2e7ac0d587281807c8da8c0c5d7737a976fe7b24cdba4f4d2e80feea42",
-    "prompt": "Preserve this exact boy\u2019s face, blond hair, dark sleeveless hoodie and grey sleeves. Photograph him unposed just outside the mall exit in a safe quiet parking lot at dawn, relieved and looking back toward the camera, waist-up with full head visible. No wounds, no pursuer. Same photographic realism."
+    "prompt": "Preserve this exact boy’s face, blond hair, dark sleeveless hoodie and grey sleeves. Photograph him unposed just outside the mall exit in a safe quiet parking lot at dawn, relieved and looking back toward the camera, waist-up with full head visible. No wounds, no pursuer. Same photographic realism."
   },
   {
     "id": "savior-lost",
@@ -179,20 +179,20 @@
     "height": 630,
     "bytes": 62786,
     "sha256": "b0c4fcfa6edc4e56c8eb49380b09f968c36db7aba92a61a3e3aa4c0fc10b64f7",
-    "prompt": "Preserve this exact fictional security guard\u2019s face, moustache, hair, navy uniform and shoulder radio. Show him safely outside the mall beside a beige brick wall at dawn, tired and relieved, waist-up full head visible. Real unposed candid photograph, same restrained 35mm medium. No writing."
+    "prompt": "Preserve this exact fictional security guard’s face, moustache, hair, navy uniform and shoulder radio. Show him safely outside the mall beside a beige brick wall at dawn, tired and relieved, waist-up full head visible. Real unposed candid photograph, same restrained 35mm medium. No writing."
   },
   {
     "id": "bart-killed",
     "file": "src/assets/play/photos/sunnydaze/bart-killed.webp",
-    "source": "exec-06e26c65-fd33-42c7-95b8-f262ed8c701b.png",
-    "sourceSha256": "e2cfa893bec43caeb0fc805b67e052962ecad0384b3ccf4b83707c1ba28db002",
-    "nativeWidth": 1672,
-    "nativeHeight": 941,
+    "source": "exec-2a0d2042-e800-4389-948f-030b69d8dbb1.png",
+    "sourceSha256": "332cee1881d40014eecfa91c4079f1799dd2195e2ea86ac2951b78e3d522a16d",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
     "width": 1120,
     "height": 630,
-    "bytes": 59438,
-    "sha256": "72f44cc25d4a7af843e37c6883dccc90dfe5c1e914b876f119e864191e549314",
-    "prompt": "Preserve exact fictional adult security guard face, moustache and uniform. A non-graphic resolved-outcome photo: the adult guard lying still on his side on the mall tile floor near his dropped portable radio, eyes closed. Fully clothed, no blood, no visible wounds, no attacker. Ordinary photographic human proportions. Wide safe crop keeps face visible above bottom label area."
+    "bytes": 125974,
+    "sha256": "0583a924de39116d59488ab1e3433350341c9ec73200c58ff381b32d28ab36e1",
+    "prompt": "One wide 3:2 candid 1980s consumer 35mm horror film still for a fictional game. Match the clothing and location of the left-hand reference. mall planter, fallen security guard in dark blue uniform behind a tipped bench, dropped radio, disrupted store display. Scene should imply fatal aftermath through stillness, disturbed environment and naturalistic light. No visible blood, injury, gore, action, collage or lettering. Center subject for a wide card crop."
   },
   {
     "id": "girl-saved",
@@ -205,20 +205,20 @@
     "height": 630,
     "bytes": 104368,
     "sha256": "7c3b13938d770fdeb80a859ca2a426f67eafae02cc31be852609b9c402ceed75",
-    "prompt": "Preserve exact adult woman\u2019s face, wavy chestnut hair, denim jacket and maroon shirt. She is safe outside the mall at dawn, tired and relieved beside a parked car, waist-up candid photograph with her complete head visible. Same real 1980s materials and natural skin."
+    "prompt": "Preserve exact adult woman’s face, wavy chestnut hair, denim jacket and maroon shirt. She is safe outside the mall at dawn, tired and relieved beside a parked car, waist-up candid photograph with her complete head visible. Same real 1980s materials and natural skin."
   },
   {
     "id": "girl-killed",
     "file": "src/assets/play/photos/sunnydaze/girl-killed.webp",
-    "source": "exec-c0a20b8c-769f-4c61-a5a9-266e3b0fb906.png",
-    "sourceSha256": "891565393dcb80cb479e0342ea758c5cd80b4e6f10fcf471c256aa95d2e71a73",
-    "nativeWidth": 1672,
-    "nativeHeight": 941,
+    "source": "exec-67480898-cfbf-4351-8d5f-f4aafe9fc537.png",
+    "sourceSha256": "099f50967816c59486c229337f5fd27d2220713bcf163de40bceff5d24e7b951",
+    "nativeWidth": 1536,
+    "nativeHeight": 1024,
     "width": 1120,
     "height": 630,
-    "bytes": 82658,
-    "sha256": "c28b3dfde142aa9221fb86bb61bf3f56d4a764f4e5a75d14801f3fb19fc4b6db",
-    "prompt": "Preserve the exact adult woman age 22, wavy chestnut hair, denim jacket and maroon shirt. A non-graphic resolved-outcome photo: adult woman lying still on her side beside the mall planter, eyes closed. Fully clothed, no blood, no wounds, no attacker. Wide image with face identifiable above bottom caption. Real tangible human and materials, not illustration."
+    "bytes": 140386,
+    "sha256": "6596a6680c004aa3570cee441e4773749b78e766cf875cd9da5c1c11df95e1fa",
+    "prompt": "One wide 3:2 candid 1980s consumer 35mm horror film still for a fictional game. Match the clothing and location of the left-hand reference. mall planter aftermath, denim jacket and dropped belongings at a knocked-over bench, scattered glass and disrupted storefront, no person visible. Scene should imply fatal aftermath through stillness, disturbed environment and naturalistic light. No visible blood, injury, gore, action, collage or lettering. Center subject for a wide card crop."
   },
   {
     "id": "chopper-riding",

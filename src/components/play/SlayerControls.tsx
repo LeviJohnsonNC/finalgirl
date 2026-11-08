@@ -58,10 +58,10 @@ export function SlayerControls({events, onEvent, blocked}: ControlsProps) {
         <button type="button" className="slayer-primary" disabled={blocked || !companions.some(id => eligible.includes(id))}
           onClick={() => cross(companions.filter(id => eligible.includes(id)))}>Cross with selected</button>
       </fieldset>}
-      <details className="slayer-editor slayer-correction">
-        <summary>{state.girl && state.slayer ? 'Correct dimensions' : 'Record current dimension'}</summary>
+      {(!state.girl || !state.slayer) && <details className="slayer-editor slayer-correction">
+        <summary>Record current dimension</summary>
         <div className="slayer-actions">
-          {(['girl','slayer'] as const).map(who => <label key={who}>{who === 'girl' ? 'Final Girl' : 'Slayer'}
+          {(['girl','slayer'] as const).filter(who => !state[who]).map(who => <label key={who}>{who === 'girl' ? 'Final Girl' : 'Slayer'}
             <select aria-label={who === 'girl' ? 'Final Girl dimension' : 'Slayer dimension'} disabled={blocked}
               value={state[who] ?? ''} onChange={e => {
                 if (isDimension(e.target.value)) act({command:'set-dimension',who,to:e.target.value});
@@ -70,7 +70,7 @@ export function SlayerControls({events, onEvent, blocked}: ControlsProps) {
             </select>
           </label>)}
         </div>
-      </details>
+      </details>}
     </article>
     <section className="slayer-markers" aria-label="Special Victims">
       <div className="slayer-actions">

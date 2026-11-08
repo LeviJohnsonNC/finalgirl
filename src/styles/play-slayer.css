@@ -1,6 +1,6 @@
 .play-slayer { display: grid; gap: .85rem; min-width: 0; }
 .slayer-tracker { overflow: hidden; border: 1px solid #5b4b45; background: #1b1717; }
-.slayer-tracker-photo { aspect-ratio: 16 / 7; max-height: 345px; overflow: hidden; }
+.slayer-tracker-photo { width: 100%; aspect-ratio: 16 / 7; max-height: 345px; overflow: hidden; }
 .slayer-tracker-photo img { display: block; width: 100%; height: 100%; }
 .slayer-tracker[data-dimension="unknown"] .slayer-tracker-photo { filter: grayscale(.85) brightness(.58); }
 .slayer-tracker-bar, .slayer-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .45rem .75rem; }

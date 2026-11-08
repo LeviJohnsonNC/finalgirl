@@ -424,24 +424,24 @@
   },
   {
     "id": "zipp-killed",
-    "source": "exec-2630f954-b258-46df-b656-9a2832861d9a.png",
-    "sourceSha256": "de811b2075a71536c003226d5a3d2c55553c921f543000d81708b57302ba81f4",
+    "source": "exec-0fb6905c-baeb-457d-b548-c9e3273e9999.png",
+    "sourceSha256": "1178923aee1076a2972c2ff32375285467cc7430bb10ca9707d3f82947e49b9e",
     "nativeWidth": 1536,
     "nativeHeight": 1024,
-    "prompt": "Use case: identity-preserve. Create ONE new original landscape 1536x1024 candid 1980s 35mm photograph of this EXACT fictional adult person. Preserve their face, age, ethnicity, hair, gray mustache, olive work shirt and white undershirt. New restrained fictional horror aftermath composition: the same person lies still on their side on ordinary warehouse concrete beside cartons, face recognizable, eyes gently closed, body posture unambiguously motionless, no blood, exposed injury, gore, weapon or attacker. This UI image illustrates a player-recorded Killed outcome; no new plot or mechanism is established. Keep face in central 70% and upper half for wide responsive crops, space below for HTML caption. Real skin, coherent natural available light, practical materials, restrained film grain. No illustration, CGI, text, logo, border or collage. Identity reference only; do not copy the original pose or background.",
+    "prompt": "One wide 3:2 candid 1980s consumer 35mm horror film still for an adult fictional character's Killed outcome. Use left image for exact adult face, hair, age and wardrobe. Same practical environment. warehouse stockroom, olive shirt, motionless slumped against a low pallet, harsh overhead work light. Disturbing aftermath through posture, toppled objects and lighting. Intact costume. No visible blood, injury, gore, assailant, collage or lettering. Keep subject in center for a shallow app crop.",
     "position": "50% 42%",
     "referenceSource": "exec-f1a589f8-718a-40c2-ab12-1308faa19128.png",
     "file": "src/assets/play/photos/marrek/zipp-killed.webp",
-    "width": 1279,
+    "width": 1280,
     "height": 853,
-    "bytes": 80690,
-    "sha256": "65c00bd479236f443bec435e675fcedd96809ddf187a2d825363a96a8113c2ac",
+    "bytes": 105578,
+    "sha256": "97528b46f538d70542d9274a87f55c42a510076a1e5ae547a81e2246fcd8e4ee",
     "thumbnail": {
       "file": "src/assets/play/photos/marrek/zipp-killed-thumb.webp",
       "width": 400,
       "height": 267,
-      "bytes": 12038,
-      "sha256": "436f57ab55028104039608957a847ac9e152cf4e018e9c4eaa6244e3e0ffc36e"
+      "bytes": 20006,
+      "sha256": "2a3e5e32b561189298e9668646b8ec6d0ded78ec9b959ecd8ebcba820147372e"
     }
   },
   {
@@ -468,24 +468,24 @@
   },
   {
     "id": "friend-killed",
-    "source": "exec-1dab9443-d686-40c6-8abc-5bdc31458d96.png",
-    "sourceSha256": "fc8881384daf3fa095fcf3c9a8f76e0480e58ab89e91975a7bdd5a65052929f9",
+    "source": "exec-678843bf-fa3f-4b87-86df-805bb2d51f9f.png",
+    "sourceSha256": "889834060328f391f65548b828d819985543c43439390a754ee7968158d8aa6b",
     "nativeWidth": 1536,
     "nativeHeight": 1024,
-    "prompt": "Use case: identity-preserve. Create ONE new original landscape 1536x1024 candid 1980s 35mm photograph of this EXACT fictional adult person. Preserve their face, age, ethnicity, hair, burgundy jacket and cream tee. New restrained fictional horror aftermath composition: the same person lies still on their side on ordinary warehouse concrete beside cartons, face recognizable, eyes gently closed, body posture unambiguously motionless, no blood, exposed injury, gore, weapon or attacker. This UI image illustrates a player-recorded Killed outcome; no new plot or mechanism is established. Keep face in central 70% and upper half for wide responsive crops, space below for HTML caption. Real skin, coherent natural available light, practical materials, restrained film grain. No illustration, CGI, text, logo, border or collage. Identity reference only; do not copy the original pose or background.",
+    "prompt": "One wide 3:2 candid 1980s consumer 35mm horror film still for an adult fictional character's Killed outcome. Use left image for exact adult face, hair, age and wardrobe. Same practical environment. warehouse stockroom, woman in maroon jacket motionless in the wake of fallen packages, one slack hand near a dropped carton. Disturbing aftermath through posture, toppled objects and lighting. Intact costume. No visible blood, injury, gore, assailant, collage or lettering. Keep subject in center for a shallow app crop.",
     "position": "50% 42%",
     "referenceSource": "exec-a6506896-a18d-4f6f-a566-4de26476889f.png",
     "file": "src/assets/play/photos/marrek/friend-killed.webp",
-    "width": 1279,
+    "width": 1280,
     "height": 853,
-    "bytes": 69740,
-    "sha256": "30f6f257be2e149686bbe71723e137011d9925db740f7a05838d1cd2c00d8267",
+    "bytes": 87742,
+    "sha256": "80ae14cbbc0028d36113135e023844b121e1ec56f9c842de8440e8a98f5ba501",
     "thumbnail": {
       "file": "src/assets/play/photos/marrek/friend-killed-thumb.webp",
       "width": 400,
       "height": 267,
-      "bytes": 10880,
-      "sha256": "f152a415ed02a849e009b073a3504ba16200cada37a9f00ffacdd6af85af70df"
+      "bytes": 17212,
+      "sha256": "2b59292db9700d1544ed611911d9026dcbc6c74b1277187208e815f47f3de4fd"
     }
   },
   {
@@ -512,24 +512,24 @@
   },
   {
     "id": "supervisor-killed",
-    "source": "exec-d077434f-4b05-4f84-9187-aaafcdc69201.png",
-    "sourceSha256": "442e98f57be3f51486d13d12aa35f1dfe62ef0c9b350e02147ed31955380cfa3",
+    "source": "exec-2094ce38-7eeb-43e5-8d7c-d841defa2594.png",
+    "sourceSha256": "5a1e7beb001bb19afab47dcdfd7628c37d629b5b5284da2cb9d90bca07157e41",
     "nativeWidth": 1536,
     "nativeHeight": 1024,
-    "prompt": "Use case: identity-preserve. Create ONE new original landscape 1536x1024 candid 1980s 35mm photograph of this EXACT fictional adult person. Preserve their face, age, ethnicity, hair, eyeglasses, navy jacket and blue shirt. New restrained fictional horror aftermath composition: the same person lies still on their side on ordinary warehouse concrete beside cartons, face recognizable, eyes gently closed, body posture unambiguously motionless, no blood, exposed injury, gore, weapon or attacker. This UI image illustrates a player-recorded Killed outcome; no new plot or mechanism is established. Keep face in central 70% and upper half for wide responsive crops, space below for HTML caption. Real skin, coherent natural available light, practical materials, restrained film grain. No illustration, CGI, text, logo, border or collage. Identity reference only; do not copy the original pose or background.",
+    "prompt": "One wide 3:2 candid 1980s consumer 35mm horror film still for an adult fictional character's Killed outcome. Use left image for exact adult face, hair, age and wardrobe. Same practical environment. warehouse loading area, man in navy jacket motionless on dusty concrete, his glasses knocked aside. Disturbing aftermath through posture, toppled objects and lighting. Intact costume. No visible blood, injury, gore, assailant, collage or lettering. Keep subject in center for a shallow app crop.",
     "position": "50% 42%",
     "referenceSource": "exec-40519189-0302-40ff-b834-1f3e5b18c92f.png",
     "file": "src/assets/play/photos/marrek/supervisor-killed.webp",
-    "width": 1279,
+    "width": 1280,
     "height": 853,
-    "bytes": 78106,
-    "sha256": "12830d3c2a09191faf1d6a37eff25660e97a68bfa2ce5235cc38c4fbfa384559",
+    "bytes": 120684,
+    "sha256": "eba398ad59ba710a0754f26bfd44cee257725e6b0ba4fa8e7b9a248c21878ab5",
     "thumbnail": {
       "file": "src/assets/play/photos/marrek/supervisor-killed-thumb.webp",
       "width": 400,
       "height": 267,
-      "bytes": 11472,
-      "sha256": "310f97833bbaf74d953d079598e198bc7cfa96fbf06df4e28093edf7362403c9"
+      "bytes": 19462,
+      "sha256": "db57cd3d8a6a2b1ab57a6e6fe45f452d48f48054ac06929724a7b91dc50a8815"
     }
   },
   {

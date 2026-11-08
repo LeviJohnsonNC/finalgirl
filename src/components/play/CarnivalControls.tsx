@@ -21,6 +21,8 @@ import { PlaySelect } from "./PlaySelect";
 import boardArt from "@/assets/play/carnival/board-traps.webp";
 import itemArt from "@/assets/play/carnival/item-traps.webp";
 import peopleArt from "@/assets/play/carnival/companions.webp";
+import siblingKilled from "@/assets/play/carnival/sibling-killed.webp";
+import fianceKilled from "@/assets/play/carnival/fiance-killed.webp";
 import eventArt from "@/assets/play/carnival/events.webp";
 import "@/styles/play-carnival.css";
 
@@ -40,6 +42,10 @@ const atlas = (
     cellHeight: 1024 / rows - 8,
   },
 });
+const killedArtwork: Record<string, ModuleArt> = {
+  "person.sibling": { src: siblingKilled, fit: "slice" },
+  "person.fiance": { src: fianceKilled, fit: "slice" },
+};
 const eventArtwork: Record<string, ModuleArt> = {
   "animal-panic": atlas(eventArt, 1, 2, 2),
   clowns: atlas(eventArt, 0, 2, 2),
@@ -296,7 +302,7 @@ export function CarnivalControls({
                   label: statuses[value],
                 }))}
                 outcomes={actor.values.slice(1)}
-                art={atlas(peopleArt, actor.index)}
+                art={(value === "killed" && killedArtwork[actor.key]) || atlas(peopleArt, actor.index)}
                 tileClassName="carnival-actor-tile"
                 help={actor.help}
                 showRules={!actor.key.startsWith("person.")}

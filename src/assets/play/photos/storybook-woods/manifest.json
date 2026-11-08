@@ -162,18 +162,18 @@
   {
     "id": "hansel-killed",
     "file": "src/assets/play/photos/storybook-woods/hansel-killed.webp",
-    "source": "exec-cad49fae-e9cb-4094-8aa1-d2b59b3189c2.png",
-    "sourceSha256": "83f2b7e59c758dc8e1bd917f1876826e6da951660752b87a583b37731940af15",
+    "source": "exec-6ab711f7-d4ac-448d-894b-92ed0f385541.png",
+    "sourceSha256": "f0c63e953e5911b34bdb307615b6b61c8ce570fb48d5ddea49bc8983c1c62f5e",
     "nativeWidth": 1536,
     "nativeHeight": 1024,
     "width": 1280,
     "height": 720,
-    "bytes": 159568,
-    "sha256": "b1dd235e83e9a7317f7bb96d61a4bf3338c4c702e5caaa9b3388c8837f6cd6b2",
+    "bytes": 160006,
+    "sha256": "26ea987fb529a1dabf5ea0037ffeacedabe48cd8460fe1ae81aa318f5ee394ef",
     "crop": "50% 50%",
     "surface": "Hansel killed outcome",
-    "prompt": "Photorealistic-natural. One wide original frame for Storybook Woods in a horror board game companion. Candid 1980s 35mm location photograph, practical real locations, coherent natural exposure, restrained fine grain, visible believable materials. Mossy ancient forest in damp autumn, practical folklore in rural timber and stone, deep green and cool grey with slight amber accents. No wolf, game props, words, collage, black bars, digital fantasy illustration or artificial halo. 3:2 or wider; safe central 16:9 crop. Same adult actor, face and freckles, short auburn curls, oatmeal shirt and brown vest. Silent, non-graphic aftermath, motionless lying against mossy timber on a cottage verge, eyes closed, upper torso and face in crop. No wounds or blood, ominously still, natural overcast light.",
-    "reference": "exec-73c369c7-613c-4043-bf0f-b26463efc1dc.png"
+    "prompt": "One wide 3:2 candid 1980s consumer 35mm horror film still for a fictional game. Match the clothing and location of the left-hand reference. forest cottage doorstep, dropped distinctive brown vest and satchel on the muddy threshold, overturned basket and torn fabric, no person visible. Scene should imply fatal aftermath through stillness, disturbed environment and naturalistic light. No visible blood, injury, gore, action, collage or lettering. Center subject for a wide card crop.",
+    "reference": "hansel.webp"
   },
   {
     "id": "treats",
@@ -290,18 +290,18 @@
   {
     "id": "woodsman-killed",
     "file": "src/assets/play/photos/storybook-woods/woodsman-killed.webp",
-    "source": "exec-84638f60-9dbe-45d0-ba6f-aef66577b59d.png",
-    "sourceSha256": "4967ddff3f3e0a2ff819eb4a9b4e2000764c4469bb5717f7d9bfffefca520a8b",
+    "source": "exec-7cf1c44a-8776-4e79-b1ae-941b0788b8b7.png",
+    "sourceSha256": "978bdea1ef77841ff0e9f22fa0126083afbff3326faf8652e562d217b6d7f1fc",
     "nativeWidth": 1536,
     "nativeHeight": 1024,
     "width": 1280,
     "height": 720,
-    "bytes": 162696,
-    "sha256": "0be991a3ac934372f0a3777c63bc35ffb3823154f14cd2583cb696eec22aa60c",
+    "bytes": 144910,
+    "sha256": "0999a08e28fe5b88d4d33e36b818b21c7e1b432b99517e8a6ad64fecbb2835d6",
     "crop": "50% 50%",
     "surface": "Woodsman killed outcome",
-    "prompt": "Photorealistic-natural. One wide original frame for Storybook Woods in a horror board game companion. Candid 1980s 35mm location photograph, practical real locations, coherent natural exposure, restrained fine grain, visible believable materials. Mossy ancient forest in damp autumn, practical folklore in rural timber and stone, deep green and cool grey with slight amber accents. No wolf, game props, words, collage, black bars, digital fantasy illustration or artificial halo. 3:2 or wider; safe central 16:9 crop. Retain the exact middle-aged actor, square face, salt-and-pepper stubble, green wool coat and brown shirt. Different side angle, still and motionless against a stack of damp timber rounds after an unseen attack, eyes shut, low grey afternoon light, non-graphic with no visible injuries or blood. One hand relaxed, face in safe center.",
-    "reference": "exec-1c7fa1c3-8633-4285-8c3b-d1cd4a2a1ec9.png"
+    "prompt": "One wide 3:2 candid 1980s consumer 35mm horror film still for a fictional game. Match the clothing and location of the left-hand reference. forest woodpile, adult green wool coat and matching face in profile, collapsed inert beside freshly spilled logs. Scene should imply fatal aftermath through stillness, disturbed environment and naturalistic light. No visible blood, injury, gore, action, collage or lettering. Center subject for a wide card crop.",
+    "reference": "woodsman.webp"
   },
   {
     "id": "piper-saved",
@@ -322,18 +322,18 @@
   {
     "id": "piper-killed",
     "file": "src/assets/play/photos/storybook-woods/piper-killed.webp",
-    "source": "exec-de7ea3b7-eed7-4aec-b9ac-c95b15e4a938.png",
-    "sourceSha256": "aed1bb259c0bb5f529dfb55d709cb58430787b1ff7f8c1d82ef49aca0c03ad40",
+    "source": "exec-eadf4f26-a3a9-44e6-ad9b-3dde8fd83988.png",
+    "sourceSha256": "5120d3e3508e58ef26866a462ef0c7be6cfc06dcc1a4d4b2b30fe2a6111be7ca",
     "nativeWidth": 1536,
     "nativeHeight": 1024,
     "width": 1280,
     "height": 720,
-    "bytes": 159634,
-    "sha256": "d5f88f3e3af97593829c8059a3573245e6b5b9b2d52f8ae942c7b612a350c32c",
+    "bytes": 157990,
+    "sha256": "5865f9c19e0a7ce0cb38bba08de7750480fa498c38340421e1ff5cdcfebf2ae5",
     "crop": "50% 50%",
     "surface": "Piper killed outcome",
-    "prompt": "Photorealistic-natural. One wide original frame for Storybook Woods in a horror board game companion. Candid 1980s 35mm location photograph, practical real locations, coherent natural exposure, restrained fine grain, visible believable materials. Mossy ancient forest in damp autumn, practical folklore in rural timber and stone, deep green and cool grey with slight amber accents. No wolf, game props, words, collage, black bars, digital fantasy illustration or artificial halo. 3:2 or wider; safe central 16:9 crop. Retain exactly the same adult actor, narrow angular face, olive skin, charcoal hat with rust band and dark earth-brown wool coat. Motionless sitting low against a weathered village wall, eyes closed, dark wood recorder in mud near hand. Quiet non-graphic aftermath, no blood, readable early evening natural light, slightly oblique medium shot.",
-    "reference": "exec-a0c9c45d-5399-44f6-85c4-7ef45905455e.png"
+    "prompt": "One wide 3:2 candid 1980s consumer 35mm horror film still for a fictional game. Match the clothing and location of the left-hand reference. woodland cottage path, familiar brown coat motionless at the edge of a ditch, his wood pipe split across wet cobbles. Scene should imply fatal aftermath through stillness, disturbed environment and naturalistic light. No visible blood, injury, gore, action, collage or lettering. Center subject for a wide card crop.",
+    "reference": "piper.webp"
   },
   {
     "id": "breadcrumb-off",

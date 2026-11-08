@@ -1,4 +1,4 @@
-import { showMinorChoices } from "./play-helpers";
+import { openMinorPowers, showMinorChoices } from "./play-helpers";
 import { test, expect, installTestAudio } from "./fixtures";
 import {
   draft,
@@ -34,6 +34,7 @@ test("Minor Power artwork, empty/full/removed states and temporary reminders fit
           { width: 320, height: 568 },
           { width: 390, height: 844 },
         ];
+  await openMinorPowers(panel(page));
   for (const size of sizes) {
     await page.setViewportSize(size);
     await panel(page).locator(".fright-minors").scrollIntoViewIfNeeded();
@@ -180,6 +181,7 @@ for (const location of [
     });
     await page.reload();
     await resume(page);
+    await openMinorPowers(panel(page));
     await expect(
       endless.getByText("1/1 health", { exact: true }),
     ).toBeVisible();

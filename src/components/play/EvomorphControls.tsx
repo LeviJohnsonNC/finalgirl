@@ -45,7 +45,7 @@ export function EvomorphControls({events,onEvent,blocked}:ControlsProps) {
 
       </div>
     </div>
-    <section aria-label="Evomorph Minor Dark Powers"><h3>Minor Dark Powers</h3><MinorPowerGroup className="evo-minors">{EVOMORPH_MINORS.map(p=><MinorPowerControl key={p.id} name={p.name} maxHealth={p.health} health={state[`minor.${p.id}.health`] as number|undefined} previouslyRevealed={entries.some(e=>e.moduleData?.module==='evomorph'&&typeof e.moduleData.changes[`minor.${p.id}.health`]==='number')} disabled={blocked} art={()=>evomorphArt(p.id)} heroArt={evomorphArt(p.id)} onChange={health=>act('minor',{key:p.id,value:health})}/>)}</MinorPowerGroup></section>
+    <section aria-label="Evomorph Minor Dark Powers"><MinorPowerGroup className="evo-minors">{EVOMORPH_MINORS.map(p=><MinorPowerControl key={p.id} name={p.name} maxHealth={p.health} health={state[`minor.${p.id}.health`] as number|undefined} previouslyRevealed={entries.some(e=>e.moduleData?.module==='evomorph'&&typeof e.moduleData.changes[`minor.${p.id}.health`]==='number')} disabled={blocked} art={()=>evomorphArt(p.id)} heroArt={evomorphArt(p.id)} onChange={health=>act('minor',{key:p.id,value:health})}/>)}</MinorPowerGroup></section>
     <KillerCards killer="Evomorph" events={events} onEvent={onEvent} disabled={blocked}/>
     {(message||localError)&&<p role="alert">{message||localError}</p>}
   </section>;

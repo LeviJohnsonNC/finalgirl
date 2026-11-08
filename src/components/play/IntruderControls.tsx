@@ -110,7 +110,6 @@ export function IntruderRoster({events,onEvent}:{events:PlayEvent[];onEvent:Cont
 export function IntruderCards({events,blocked,onEvent}:ControlsProps) {
   const {entries,state,send,message}=useIntruderRecord(events,onEvent);
   return <section aria-label="Intruder cards">
-    <h3>Minor Dark Powers</h3>
     <MinorPowerGroup>
       {INTRUDER_MINORS.map(card=>{
         const key=intruderMinorField(card.id);

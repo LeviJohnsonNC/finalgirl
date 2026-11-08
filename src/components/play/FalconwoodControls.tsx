@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { BookOpen, LockKeyholeOpen } from 'lucide-react';
 import { newPlayEvent, summarizePlay } from '@/lib/play/events';
 import { moduleState } from '@/lib/play/modules';
 import {
@@ -29,9 +30,11 @@ const clueLabels = {A:['East of river','West of river'], B:['North','South'], C:
 function Count({label, value, max, onChange}: {label: string; value?: number; max: number; onChange: (value: number) => void}) {
   return <div className="falconwood-count" role="group" aria-label={label}>
     <span>{label}</span>
-    <button type="button" aria-label={`Decrease ${label}`} disabled={value === undefined || value <= 0} onClick={() => onChange(value! - 1)}>−</button>
-    <output>{value ?? '?'}</output>
-    <button type="button" aria-label={`Increase ${label}`} disabled={value === undefined || value >= max} onClick={() => onChange(value! + 1)}>+</button>
+    <div className="falconwood-stepper">
+      <button type="button" aria-label={`Decrease ${label}`} disabled={value === undefined || value <= 0} onClick={() => onChange(value! - 1)}>−</button>
+      <output>{value ?? '?'}</output>
+      <button type="button" aria-label={`Increase ${label}`} disabled={value === undefined || value >= max} onClick={() => onChange(value! + 1)}>+</button>
+    </div>
     {value === undefined && <PlaySelect aria-label={`Record ${label}`} value="" onChange={event => onChange(Number(event.target.value))}>
       <option value="" disabled>Record…</option>
       {Array.from({length:max + 1}, (_, n) => <option key={n} value={String(n)}>{n}</option>)}
@@ -39,7 +42,7 @@ function Count({label, value, max, onChange}: {label: string; value?: number; ma
   </div>;
 }
 
-export function FalconwoodControls({events, onEvent, mission: selected, falconwoodFresh, startingEvent, blocked, killer}: ControlsProps) {
+export function FalconwoodControls({events, onEvent, mission: selected, falconwoodFresh, startingEvent, blocked}: ControlsProps) {
   const entries = summarizePlay(events).entries;
   const fields = moduleState(entries, FALCONWOOD_MODULE);
   const displayed = !events.length && falconwoodFresh ? initialFalconwood(selected, startingEvent) ?? fields : fields;
@@ -60,6 +63,9 @@ export function FalconwoodControls({events, onEvent, mission: selected, falconwo
   const targetMet = state.count !== undefined && state.target !== undefined && state.count >= state.target;
   const ready = mission?.id === 'friend' ? state.friend === 'prone' : mission?.id === 'hunt' ? state.started && state.count === 0
     : mission?.id === 'code' ? total !== undefined && !!roll && total + Number(roll) >= 20 : targetMet;
+  const missionImage = !mission ? 'header'
+    : state.complete === true ? mission.id === 'hunt' ? 'hunt-cleared' : `${mission.id}-success`
+    : mission.id === 'hunt' && state.started ? 'hunt-active' : mission.id;
   const hasItem = mission && 'item' in mission;
   const renderPerson = (name: string, id: string, status: string | undefined, change: (value: string) => void) =>
     <CharacterControl name={name} value={status} states={outcomes} present="in-play" art={peopleArt(id, status)}
@@ -77,40 +83,34 @@ export function FalconwoodControls({events, onEvent, mission: selected, falconwo
   const field = (label: string, control: ReactNode) => <label className="falconwood-field"><span>{label}</span>{control}</label>;
   return <section className="play-falconwood" aria-label="Falconwood tracking">
     <fieldset disabled={blocked} className="falconwood-fieldset">
-      <article className="falconwood-mission">
+      <article className="falconwood-mission" data-complete={state.complete === true}>
         <div className="falconwood-hero">
-          <ModuleArtwork art={falconwoodArt(mission?.id === 'hunt' ? state.complete ? 'hunt-cleared' : state.started ? 'hunt-active' : 'hunt' : mission?.id ?? 'header')} />
-          <div className="falconwood-title"><small>Mission</small><h3>{mission?.name ?? 'Mission unrecorded'}</h3></div>
+          <ModuleArtwork art={falconwoodArt(missionImage)} />
+          <div className="falconwood-title"><small>{mission && state.complete ? 'Mission complete' : 'Mission'}</small><h3>{mission?.name ?? 'Mission unrecorded'}</h3></div>
         </div>
-        <div className="falconwood-mission-body">
+        <div className="falconwood-mission-body" hidden={Boolean(mission && state.complete)}>
           {mission ? <>
-            <div className="falconwood-events-heading">
-              <strong className="falconwood-progress">{falconwoodProgress({...state, mission:mission.id})}</strong>
-              <SpecialRulesModal killer="" location="Falconwood"><button type="button" className="falconwood-quiet">Location rules</button></SpecialRulesModal>
-            </div>
-            {!state.complete && killer !== 'Poltergeist' && <small className="falconwood-note">Final Health protected until completion · last Killer only</small>}
-            {!state.complete && (mission.id === 'father' || mission.id === 'lab') && <>
-              <Count label={mission.id === 'father' ? 'Banked keys' : 'Evidence recovered'} value={state.count}
-                max={mission.id === 'father' ? 6 : 4} onChange={value => send('count', value)}/>
-              <details className="falconwood-quiet"><summary>Adjust requirement</summary>
-                {field('Required', <PlaySelect aria-label="Mission requirement" value={String(state.target ?? '')} onChange={event => send('target', Number(event.target.value))}>
-                  <option value="" disabled>Unrecorded</option>
-                  {Array.from({length:mission.id === 'father' ? 6 : 4}, (_, i) => <option key={i} value={String(i+1)}>{i+1}</option>)}
-                </PlaySelect>)}
-              </details>
-              {mission.id === 'lab' && <>
-                {field('Revealed lead', <PlaySelect aria-label="Revealed lead" value={String(state.lead ?? '')} onChange={event => send('lead', event.target.value ? Number(event.target.value) : null)}>
-                  <option value="">No lead recorded</option>
-                  {FALCONWOOD_LEADS.map((name, i) => <option key={name} value={String(i+1)}>{i+1} · {name}</option>)}
-                </PlaySelect>)}
-                {state.lead !== undefined && state.count !== undefined && state.count < 4 && <div className="falconwood-row">
-                  <PlaySelect aria-label="Next revealed lead" value={nextLead} onChange={event => setNextLead(event.target.value)}>
-                    <option value="">Next lead unrecorded</option>
-                    {FALCONWOOD_LEADS.filter(name => name !== FALCONWOOD_LEADS[state.lead! - 1]).map(name => <option key={name} value={String(FALCONWOOD_LEADS.indexOf(name)+1)}>{name}</option>)}
-                  </PlaySelect>
-                  {action('Record evidence recovered', () => { if (send('recover', nextLead ? Number(nextLead) : null)) setNextLead(''); })}
-                </div>}
-              </>}
+            {!state.complete && mission.id !== 'father' &&
+              <strong className="falconwood-progress">{falconwoodProgress({...state, mission:mission.id})}</strong>}
+            {!state.complete && mission.id === 'father' && <div className="falconwood-primary-row">
+              <Count label="Banked keys" value={state.count} max={6} onChange={value => send('count', value)}/>
+              <button type="button" className="falconwood-action" disabled={!ready} onClick={() => send('complete')}>
+                <LockKeyholeOpen size={16} aria-hidden="true" />{mission.completion}
+              </button>
+            </div>}
+            {!state.complete && mission.id === 'lab' && <>
+              <Count label="Evidence recovered" value={state.count} max={4} onChange={value => send('count', value)}/>
+              {field('Revealed lead', <PlaySelect aria-label="Revealed lead" value={String(state.lead ?? '')} onChange={event => send('lead', event.target.value ? Number(event.target.value) : null)}>
+                <option value="">No lead recorded</option>
+                {FALCONWOOD_LEADS.map((name, i) => <option key={name} value={String(i+1)}>{i+1} · {name}</option>)}
+              </PlaySelect>)}
+              {state.lead !== undefined && state.count !== undefined && state.count < 4 && <div className="falconwood-row">
+                <PlaySelect aria-label="Next revealed lead" value={nextLead} onChange={event => setNextLead(event.target.value)}>
+                  <option value="">Next lead unrecorded</option>
+                  {FALCONWOOD_LEADS.filter(name => name !== FALCONWOOD_LEADS[state.lead! - 1]).map(name => <option key={name} value={String(FALCONWOOD_LEADS.indexOf(name)+1)}>{name}</option>)}
+                </PlaySelect>
+                {action('Record evidence recovered', () => { if (send('recover', nextLead ? Number(nextLead) : null)) setNextLead(''); })}
+              </div>}
             </>}
             {!state.complete && mission.id === 'code' && <>
               <div className="falconwood-chips" role="group" aria-label="Recorded code tokens">
@@ -148,11 +148,8 @@ export function FalconwoodControls({events, onEvent, mission: selected, falconwo
                 {state.attack3 ? 'Agents attack at 3' : 'Record Attack 3'}
               </button>
             </>}
-            {!state.complete && ready && action(mission.completion, () => send('complete', mission.id === 'code' ? Number(roll) : undefined))}
-            <details className="falconwood-quiet"><summary>{state.complete ? 'Correct completion' : 'Already completed on the board?'}</summary>
-              {state.complete ? action('Mark mission incomplete', () => send('correct-completion', false))
-                : action('Confirm mission completed', () => send('attest'))}
-            </details>
+            {!state.complete && mission.id !== 'father' && ready &&
+              action(mission.completion, () => send('complete', mission.id === 'code' ? Number(roll) : undefined))}
           </> : <>
             {state.complete && <strong>Mission complete · Identity unrecorded</strong>}
             {field('Record physical mission', <PlaySelect aria-label="Record physical mission" value="" onChange={event => chooseMission(event.target.value)}>
@@ -161,6 +158,16 @@ export function FalconwoodControls({events, onEvent, mission: selected, falconwo
             </PlaySelect>)}
           </>}
         </div>
+        <footer className="falconwood-mission-footer">
+          <SpecialRulesModal killer="" location="Falconwood">
+            <button type="button" className="falconwood-quiet"><BookOpen size={16} aria-hidden="true"/>Location rules</button>
+          </SpecialRulesModal>
+          {mission && <details className="falconwood-quiet">
+            <summary>{state.complete ? 'Correct completion' : 'Already completed on the board?'}</summary>
+            {state.complete ? action('Mark mission incomplete', () => send('correct-completion', false))
+              : action('Confirm mission completed', () => send('attest'))}
+          </details>}
+        </footer>
       </article>
       {mission && (state.friend || state.complete || state.uses !== undefined) && <div className="falconwood-grid">
         {state.friend === 'prone' ? <IllustratedTile className="module-control-tile" art={falconwoodArt('friend-prone')} title={mission.friend}

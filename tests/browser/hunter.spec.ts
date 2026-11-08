@@ -1,5 +1,5 @@
 import {test,expect,activeGame} from './fixtures';
-import {openModule} from './play-helpers';
+import {openMinorPowers, openModule} from './play-helpers';
 test('Hunter natural progression, repair and five-viewport controls',async({page,archive},info)=>{
  await archive.install(page,{draft:{...activeGame,playMode:true,coreTrackersVersion:1,hunterSetupVersion:1,selection:{...activeGame.selection,killer:'The Hunter',location:'Maple Lane',finalGirl:'Ginny'},playEvents:[]}});
  await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
@@ -70,6 +70,7 @@ test('Hunter forced transition, failed-write retry, both reveal entry points, Al
  await expect(panel.getByRole('button',{name:'Attack',exact:true})).toHaveAttribute('aria-pressed','true');
  await expect(panel.getByRole('button',{name:'Attack',exact:true})).toBeEnabled();
  await chooseKillerCard(panel,'Finale','Adaptive A.I.');
+ await openMinorPowers(panel);
  await panel.getByRole('button',{name:'Reveal Titanium Shield',exact:true}).click();
  for(let i=0;i<4;i++)await panel.getByRole('button',{name:'Remove one Titanium Shield health, heart 1',exact:true}).click();
  await expect(panel.getByRole('article',{name:'Titanium Shield',exact:true})).toContainText('Removed · 0/4 health');
@@ -143,6 +144,7 @@ test('every Hunter named photo loads at real card sizes, with stable model order
  await capture('header',panel.locator(':scope > summary'));await capture('fresh-models',panel.getByRole('article',{name:'Mark V',exact:true}));
  await panel.locator('details.module-card-section > summary').click();await capture('unselected',panel.locator('details.module-card-section'));
  for(const [type,cards] of [['Dark Power',HUNTER_POWERS],['Finale',HUNTER_FINALES]] as const){for(const card of cards){await chooseKillerCard(panel,type,card.name);await capture(card.id,panel.getByRole('region',{name:`${type} selection`,exact:true}));}}
+ await openMinorPowers(panel);
  await panel.getByRole('button',{name:'Reveal Titanium Shield',exact:true}).click();await capture('titanium-shield',panel.getByRole('article',{name:'Titanium Shield',exact:true}));
  await panel.getByRole('button',{name:'Add another Minor Power',exact:true}).click();await panel.getByRole('button',{name:'Reveal Advanced A.I.',exact:true}).click();await capture('advanced-ai',panel.getByRole('article',{name:'Advanced A.I.',exact:true}));
  await panel.getByRole('button',{name:'Counter-Measures Not recorded in play',exact:true}).click();await panel.getByRole('button',{name:'Shock & Awe Not recorded in play',exact:true}).click();await capture('ongoing',panel.locator('.hunter-effects'));

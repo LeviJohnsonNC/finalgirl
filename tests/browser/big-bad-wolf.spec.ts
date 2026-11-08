@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { openModule, chooseKillerCard, searchPick } from "./play-helpers";
+import { openMinorPowers, openModule, chooseKillerCard, searchPick } from "./play-helpers";
 import { WOLF_MINORS, WOLF_POWERS, WOLF_FINALES, WOLF_TERRORS } from "../../src/lib/play/bigBadWolf";
 import { summarizePlay, type PlayEvent } from "../../src/lib/play/events";
 
@@ -76,6 +76,7 @@ test("Wolf setup, linked reveals, Minor health and loaded photographs", async ({
   const later: PlayEvent[] = await page.evaluate(k => JSON.parse(localStorage.getItem(k)!).playEvents, key);
   expect(later.filter(event => event.kind === "moment" && event.momentType === "dark-power")).toHaveLength(1);
 
+  await openMinorPowers(panel);
   await panel.getByRole("button", { name: "Reveal What Big Teeth You Have!", exact: true }).click();
   await panel.getByRole("button", { name: "Remove one What Big Teeth You Have! health, heart 1", exact: true }).click();
   await panel.getByRole("button", { name: "Remove one What Big Teeth You Have! health, heart 1", exact: true }).click();
@@ -90,6 +91,7 @@ test("Wolf setup, linked reveals, Minor health and loaded photographs", async ({
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
   await openModule(page, "big-bad-wolf");
   await expect(mode.getByRole("heading")).toHaveText("Slay");
+  await openMinorPowers(panel);
   await expect(panel.getByText("1/2 health")).toBeVisible();
 
   await panel.locator("details.module-card-section > summary").click();
@@ -138,6 +140,7 @@ test("each Wolf card loads its own photograph and a named Terror keeps the same 
   const tracker = page.getByRole("group", { name:"Killer Health tracker" });
   await tracker.locator("img").evaluate(async image => { await (image as HTMLImageElement).decode(); });
   await tracker.screenshot({path:info.outputPath("health-portrait.jpg"),type:"jpeg",style:".app-footer{visibility:hidden}"});
+  await openMinorPowers(panel);
   for (const card of WOLF_MINORS) {
     await inspect(panel.getByRole("button",{name:"Reveal " + card.name,exact:true}),card.id + "-thumb");
   }

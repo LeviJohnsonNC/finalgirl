@@ -416,6 +416,7 @@ const falconwoodManifest = JSON.parse(readFileSync(join(falconwoodFolder,'manife
 const falconwoodTerror = ['code-blue','neverending-attacks','retreat','run-up-that-hill','scared','changing-room','indecision','make-out-closet'];
 const falconwoodPhotos = [
   'header','father','friend','code','lab','hunt','hunt-active','hunt-cleared','friend-prone','spell-book','telekinesis',
+  'father-success','friend-success','code-success','lab-success',
   'dry','dry-off','packed','freaks','opened','closed','van','van-off',
   ...['father-person','friend-person','code-person','lab-person','hunt-person','conspiracy-theorist','head-researcher']
     .flatMap(id => [id,id+'-saved',id+'-killed']),
@@ -446,4 +447,4 @@ for (const id of falconwoodPhotos) {
   }
 }
 if (images.some(file => file.startsWith(falconwoodFolder+'/') && !falconwoodFiles.has(file))) throw Error('Unmapped Falconwood artwork');
-console.log('Verified 48 independent Falconwood photographs and eight Terror thumbnails.');
+console.log('Verified 52 independent Falconwood photographs and eight Terror thumbnails.');

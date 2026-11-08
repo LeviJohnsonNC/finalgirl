@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { openModule, undoLatestObservation } from "./play-helpers";
+import { openMinorPowers, openModule, undoLatestObservation } from "./play-helpers";
 for (const [killer, id] of [
   ["Inkanyamba", "inkanyamba"],
   ["Hans", "hans"],
@@ -25,6 +25,7 @@ for (const [killer, id] of [
       .getByRole("button", { name: "RESUME GAME", exact: true })
       .click();
     await openModule(page, id);
+    await openMinorPowers(page.locator(`[data-module="${id}"]`));
     const panel = page.locator(`[data-module="${id}"]`);
     if (id === "fright")
       await panel.locator(".fright-details > summary").click();

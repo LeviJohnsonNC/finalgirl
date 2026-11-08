@@ -1,5 +1,5 @@
 import {test,expect,activeGame,userId} from './fixtures';
-import {openModule} from './play-helpers';
+import {openMinorPowers, openModule} from './play-helpers';
 import type {PlayEvent} from '../../src/lib/play/events';
 const key=`final-girl-active-game-v1:${userId}`;
 const log=(page:import('@playwright/test').Page):Promise<PlayEvent[]>=>page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents,key);
@@ -38,6 +38,7 @@ test('Evomorph controls and photographic states at all target sizes',async({page
  await panel.getByText('Dark Power & Finale',{exact:true}).click();
  await panel.getByRole('button',{name:'Choose Razor Tail',exact:true}).click();
  await panel.getByRole('button',{name:'Choose Death in the Dark',exact:true}).click();
+ await openMinorPowers(panel);
  await panel.getByRole('button',{name:'Reveal Sideswipe',exact:true}).click();
  await panel.getByRole('button',{name:'Add another Minor Power',exact:true}).click();
  await panel.getByRole('button',{name:'Reveal Dead Silence',exact:true}).click();
