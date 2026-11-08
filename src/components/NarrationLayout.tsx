@@ -1,8 +1,7 @@
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
 import '@/styles/narration.css';
 import '@/styles/ending.css';
-import { StoryBloodLoader } from '@/components/loaders/CinematicLoaders';
-import { OpeningFilmLoader } from '@/components/loaders/OpeningFilmLoader';
+import { StoryFilmLoader } from '@/components/loaders/StoryFilmLoader';
 import { renderStoryText } from '@/lib/textFormatting';
 
 interface NarrationLayoutProps {
@@ -75,7 +74,7 @@ interface NarrationReaderProps {
   story: string | null;
   isGenerating: boolean;
   generatingLabel?: string;
-  location?: string;
+  location: string;
   error: string | null;
   onRetry: () => void;
   actions?: ReactNode;
@@ -109,7 +108,7 @@ export const NarrationReader = ({ kind, story, isGenerating, generatingLabel, lo
     <div ref={scrollRef} className="narration-reader-scroll" role="region" aria-label={kind === 'opening' ? 'Opening narration' : 'Ending narration'} aria-busy={isGenerating} tabIndex={0}>
       {isGenerating ? (
         <div className="narration-reader-state">
-          {kind === 'opening' ? <OpeningFilmLoader location={location ?? ''} /> : <StoryBloodLoader kind={kind} label={generatingLabel} />}
+          <StoryFilmLoader location={location} label={generatingLabel ?? (kind === 'ending' ? 'Writing your final scene' : undefined)} />
         </div>
       ) : error ? (
         <div className="narration-reader-state" role="status">

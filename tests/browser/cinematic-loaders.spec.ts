@@ -292,17 +292,48 @@ test('portrait remains animated after artwork preferences settle and reveals the
   await expect(page.getByRole('img', { name: 'Movie poster', exact: true })).toBeVisible();
 });
 
-test('the ending starts with a pinprick while its graphics initialize', async ({ page, archive }) => {
+test('the ending uses the location film from its first frame and hands off to the story', async ({ page, archive }, info) => {
+  const desktop = info.project.name === 'desktop';
+  await page.setViewportSize(desktop ? { width: 1024, height: 530 } : { width: 320, height: 568 });
   await holdLoaderTexture(page, 'blood-stain');
+  archive.autoImages = true;
+  const selected = { ...selection, location: 'Sunnydaze Mall' };
   const formData = { finalHorrorLevel: 4, finalGirlHealth: 2, killerHealth: 0, victimsSaved: 1 };
-  await archive.install(page, { draft: { ...draft, phase: 'ending', result: { ...selection, id: gameId, timestamp: 1, outcome: 'won' }, formData } });
-  await page.route('**/functions/v1/generate-ending', () => new Promise(() => {}));
+  await archive.install(page, { draft: { ...draft, selection: selected, phase: 'ending', result: { ...selected, id: gameId, timestamp: 1, outcome: 'won' }, formData } });
+  let finishStory!: () => void;
+  const pendingStory = new Promise<void>(resolve => { finishStory = resolve; });
+  await page.route('**/functions/v1/generate-ending', async route => {
+    await pendingStory;
+    await route.fallback();
+  });
   await resume(page);
-  const canvas = page.locator('.blood-loader canvas');
-  const stain = page.locator('.blood-fallback');
+  const reader = page.getByRole('region', { name: 'Ending narration' });
+  const film = reader.locator('.opening-film-loader');
+  const canvas = film.locator('canvas');
+  await expect(reader).toHaveAttribute('aria-busy', 'true');
+  await expect(film.getByText('Writing your final scene')).toBeVisible();
   await expect(canvas).toHaveAttribute('data-renderer', 'loading');
-  await expect(stain).toBeVisible();
-  await expect(stain).toHaveCSS('clip-path', 'circle(2% at 47% 49%)');
+  await expect(film.locator('.opening-film-plate')).toBeVisible();
+  const stills = film.locator('.opening-film-still');
+  await expect(stills).toHaveCount(3);
+  for (let frame = 1; frame <= 3; frame++) {
+    await expect(stills.nth(frame - 1)).toHaveAttribute('href', new RegExp(`sunnydaze-mall-0${frame}-`));
+  }
   await page.evaluate(() => window.dispatchEvent(new Event('release-loader-texture')));
   await expect(canvas).toHaveAttribute('data-renderer', 'webgl');
+  await expect(film).toBeInViewport({ ratio: .99 });
+  const caption = (await film.getByText('Writing your final scene').boundingBox())!;
+  const footer = (await page.locator('.app-footer').boundingBox())!;
+  expect(caption.y + caption.height).toBeLessThan(footer.y);
+  if (desktop) expect(await reader.evaluate(node => node.scrollHeight <= node.clientHeight + 1)).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await page.screenshot({ path: info.outputPath('ending-film.png') });
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(film.locator('.opening-film-stock')).toHaveCSS('transform', 'none');
+  await expect(page.getByRole('button', { name: 'Save record only' })).toBeEnabled();
+  finishStory();
+  await expect(film).toHaveCount(0);
+  await expect(reader).toContainText(archive.endingText);
+  await expect(page.getByRole('button', { name: 'Save to scrapbook' })).toBeEnabled();
 });

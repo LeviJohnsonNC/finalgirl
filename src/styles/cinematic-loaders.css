@@ -5,9 +5,6 @@
 .cinematic-loader-status { margin: 9px 0 0; font: 12px/1.5 'Courier New', monospace; color: #bcb09c; text-wrap: balance; }
 .material-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .blood-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding-block: 4px 12px; }
-.blood-loader-art { position: relative; width: clamp(140px, 28vh, 290px); max-width: 78%; aspect-ratio: 1; }
-.blood-fallback { position: absolute; top: 2.5%; left: 0; width: 100%; height: 90%; object-fit: fill; clip-path: circle(2% at 47% 49%); }
-.blood-loader-art:has([data-renderer='webgl']) .blood-fallback { visibility: hidden; }
 .darkroom-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 10px; padding: 10px 4px 15px; background: #090807; }
 .darkroom-loader-art { position: relative; width: 96%; aspect-ratio: 3 / 2; transform: rotate(-3deg); }
 .darkroom-fallback { position: absolute; inset: 0; }
@@ -31,12 +28,10 @@
 .narration-photo-development--revealing { opacity: 0; pointer-events: none; }
 .narration-reader-state:has(.blood-loader) { min-height: 0; }
 @media (max-height: 720px) and (min-width: 900px) {
-  .blood-loader-art { width: clamp(110px, 20vh, 165px); }
   .blood-loader .cinematic-loader-title { font-size: 19px; }
   .blood-loader .cinematic-loader-status { margin-top: 6px; font-size: 11px; }
 }
 @media (max-width: 899px) {
-  .blood-loader-art { width: 235px; }
   .cinematic-loader-title { font-size: 23px; }
   .darkroom-loader--portrait .cinematic-loader-title { font-size: 21px; }
 }
@@ -48,12 +43,10 @@
 .darkroom-loader--portrait .darkroom-loader-art { width: min(88cqw, calc((100cqh - 90px) * 2 / 3)); }
 .narration-photo-error button { margin-left: 8px; text-decoration: underline; min-height: 36px; }
 .narration-layout--ending .narration-reader-state:has(.blood-loader) { min-height: 100%; }
-.narration-layout--ending .blood-loader-art { width: clamp(160px, 34vh, 290px); }
 .narration-prose { animation: narration-prose-arrive .3s ease-out both; }
 @keyframes narration-prose-arrive { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .narration-prose { animation: none; } }
 @media (max-width: 899px) and (max-height: 680px) {
-  .narration-layout--ending .blood-loader-art { width: 120px; }
   .narration-layout--ending .blood-loader .cinematic-loader-title { font-size: 18px; letter-spacing: .12em; }
   .narration-layout--ending .blood-loader .cinematic-loader-status { font-size: 11px; margin-top: 5px; }
 }
@@ -137,13 +130,6 @@
   .narration-reader-scroll:has(.blood-loader) { display: flex; padding: 10px 18px; }
   .narration-reader-state:has(.blood-loader) { width: 100%; height: 100%; min-height: 0; container-type: size; }
   .narration-reader-state .blood-loader { height: 100%; padding: 0; gap: 4px; }
-  .narration-reader-state .blood-loader-art { width: min(70cqw, calc(100cqh - 76px), 290px); flex: none; }
   .blood-loader .cinematic-loader-title { font-size: clamp(16px, 3.2cqw, 25px); }
   .blood-loader .cinematic-loader-status { margin-top: 5px; font-size: 11px; }
 }
-/* Graphics fallback follows the same small-to-large progression. */
-.blood-loader-art:has([data-renderer='fallback']) .blood-fallback {
-  animation: blood-fallback-spread 150s ease-out forwards;
-}
-@keyframes blood-fallback-spread { 0% { clip-path:circle(2% at 47% 49%); } 10% { clip-path:circle(12% at 47% 49%); } 40% { clip-path:circle(32% at 47% 49%); } 100% { clip-path:circle(65% at 47% 49%); } }
-@media (prefers-reduced-motion:reduce) { .blood-loader-art:has([data-renderer='fallback']) .blood-fallback { animation:none; clip-path:circle(30% at 47% 49%); } }

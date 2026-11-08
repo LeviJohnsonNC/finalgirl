@@ -66,3 +66,8 @@
   .narration-reader-state .opening-film-window { aspect-ratio: 3.1; width: min(100cqw, calc(max(48px, 100cqh - 51px) * 3.1)); }
   .narration-reader-state .opening-film-gate { top: 50%; left: 0; width: 100%; height: auto; transform: translateY(-50%); }
 }
+
+/* On phones, give the film the space reserved for playback after the story. */
+@media (max-width: 899px) {
+  .narration-layout--ending:has(.opening-film-loader) .ending-transport:empty { display: none; }
+}
