@@ -376,7 +376,7 @@ const slayerDirectory = 'src/assets/play/photos/slayer';
 const slayerPhotos = JSON.parse(readFileSync(join(slayerDirectory,'manifest.json'),'utf8'));
 const slayerChoices = ['mind-control','renewed-determination','master-plan','in-my-head','rift-collapse',
   'welcome-to-my-world','lets-finish-this','interdimensional-interference','interdimensional-focus','zealous-attacks'];
-const slayerExpected = ['our','mirror','collapsed','header',...slayerChoices,'sky-turned-black','so-many-gone',
+const slayerExpected = ['our','mirror','collapsed','header', ...Array.from({length: 7}, (_, count) => `mirror-victims-${count}`),...slayerChoices,'sky-turned-black','so-many-gone',
   'people-disappearing','through-the-wall','hyperdimensional-travel','detect-blood','after-me',
   'what-is-this-place','dark-and-cold','something-evil'];
 const slayerPaths = new Set();
@@ -409,7 +409,7 @@ if (slayerSources.size !== slayerExpected.length ||
     images.some(file => file.startsWith(slayerDirectory+'/') && !slayerPaths.has(file))) {
   throw Error('Incomplete or unmapped Slayer photography');
 }
-console.log('Verified 24 original Slayer photographs and 10 chooser thumbnails.');
+console.log('Verified 31 original Slayer photographs and 10 chooser thumbnails.');
 
 const falconwoodFolder = 'src/assets/play/photos/falconwood';
 const falconwoodManifest = JSON.parse(readFileSync(join(falconwoodFolder,'manifest.json'),'utf8'));

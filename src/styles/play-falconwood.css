@@ -40,9 +40,9 @@
 .falconwood-mission-footer {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 0 1rem;
-  padding-inline: .85rem;
+  align-items: center;
+  gap: .35rem 1rem;
+  padding: .4rem .85rem;
   border-top: 1px solid #8b735552;
 }
 .falconwood-mission-footer button.falconwood-quiet {
@@ -50,6 +50,17 @@
   align-items: center;
   gap: .45rem;
 }
+.falconwood-mission-footer .falconwood-complete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  margin-inline-start: auto;
+  padding-inline: .9rem;
+  background: #332720;
+  border-color: #99775e;
+}
+.falconwood-complete:hover:not(:disabled) { background: #56392d; }
 .falconwood-mission-footer details[open] { padding-bottom: .55rem; }
 .falconwood-row,.falconwood-count,.falconwood-chips,.falconwood-clue,.falconwood-events-heading,.falconwood-field {display:flex; align-items:center; gap:.45rem; flex-wrap:wrap; min-width:0}
 .falconwood-events-heading h4,.falconwood-clue b {margin-right:auto}
@@ -72,4 +83,5 @@
 @media (max-width:550px) {
   .falconwood-grid {grid-template-columns:minmax(0,1fr)}
   .falconwood-primary-row > .falconwood-action { width: 100%; }
+  .falconwood-mission-footer .falconwood-complete { width: 100%; }
 }

@@ -1,6 +1,13 @@
 .play-slayer { display: grid; gap: .85rem; min-width: 0; }
 .slayer-tracker { overflow: hidden; border: 1px solid #5b4b45; background: #1b1717; }
 .slayer-tracker-photo { width: 100%; aspect-ratio: 16 / 7; max-height: 345px; overflow: hidden; }
+.slayer-mirror-photo { aspect-ratio: 16 / 9; max-height: 420px; background: #0c1117; }
+.slayer-mirror-stepper { display: inline-flex; align-items: center; border: 1px solid #765956; border-radius: .45rem; }
+.slayer-mirror-stepper button { min-width: 44px; min-height: 44px; border-radius: .35rem; background: #302526; color: #fff4e9; font-size: 1.2rem; }
+.slayer-mirror-stepper button:hover:not(:disabled) { background: #5a302d; }
+.slayer-mirror-stepper button:disabled { opacity: .42; }
+.slayer-mirror-stepper button:focus-visible { outline: 2px solid #f6c68c; outline-offset: -2px; }
+.slayer-mirror-stepper output { min-width: 2.1rem; text-align: center; color: #f4e5d1; font-variant-numeric: tabular-nums; }
 .slayer-tracker-photo img { display: block; width: 100%; height: 100%; }
 .slayer-tracker[data-dimension="unknown"] .slayer-tracker-photo { filter: grayscale(.85) brightness(.58); }
 .slayer-tracker-bar, .slayer-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .45rem .75rem; }

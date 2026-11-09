@@ -60,6 +60,9 @@ describe('Slayer', () => {
 
   it('gates Collapse on the current named reveal and preserves the accepted physical transition after clearing it', () => {
     const log = start();
+    expect(state(log).mirrorVictims).toBeUndefined();
+    expect(validSlayerAction({parent:'root',command:'mirror-victims',count:7})).toBe(false);
+    log.push(record(log,{command:'mirror-victims',count:1}));
     log.push(record(log,{command:'track-marker',id:'1',label:'Best Friend',dimension:'mirror'}));
     log.push(record(log,{command:'track-marker',id:'2',label:'Another',dimension:null}));
     log.push(record(log,{command:'track-marker',id:'3',label:'Unconfirmed',dimension:null}));
@@ -73,8 +76,8 @@ describe('Slayer', () => {
     const undo = newPlayEvent({kind:'undo',target:collapse.id});
     const restore = newPlayEvent({kind:'restore',target:collapse.id});
     expect(validPlayLog([...log,undo,restore])).toBe(true);
-    expect(state([...log,undo]).slayer).toBe('mirror');
-    expect(state([...log,clear])).toMatchObject({collapsed:true,girl:'our',slayer:'our',
+    expect(state([...log,undo])).toMatchObject({slayer:'mirror',mirrorVictims:1});
+    expect(state([...log,clear])).toMatchObject({collapsed:true,girl:'our',slayer:'our',mirrorVictims:0,
       markers:{'1':{dimension:'our'},'2':{dimension:'our'},'3':{dimension:null}}});
     const later = record(log,{command:'set-dimension',who:'girl',to:'mirror'});
     expect(validPlayLog([...log,later,undo])).toBe(false);

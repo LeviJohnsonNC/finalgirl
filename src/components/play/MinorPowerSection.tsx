@@ -1,13 +1,10 @@
 import type { ReactNode } from "react";
-import { ChevronDown } from "lucide-react";
+import "@/styles/play-controls.css";
 
 export function MinorPowerSection({ children }: { children: ReactNode }) {
   return (
     <details className="module-minor-section">
-      <summary>
-        Minor Dark Powers
-        <ChevronDown aria-hidden="true" size={16} />
-      </summary>
+      <summary>Minor Dark Powers</summary>
       {children}
     </details>
   );

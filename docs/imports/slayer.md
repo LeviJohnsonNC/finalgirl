@@ -94,3 +94,7 @@ No SQL change is required. The shared import graph reaches these six edge functi
 - [Intruders import record](https://github.com/LeviJohnsonNC/finalgirl/blob/2b7bac3df107247bbcc76cfcdc9e6ba4f1279415/docs/imports/the-intruders.md)
 - [Big Bad Wolf import record](https://github.com/LeviJohnsonNC/finalgirl/blob/2b7bac3df107247bbcc76cfcdc9e6ba4f1279415/docs/imports/big-bad-wolf.md)
 - [Van Ryder’s Series 3 Feature Film Rulebook](https://cdn.shopify.com/s/files/1/0593/6984/8897/files/FG3_FeatureFilm_Rulebook.pdf?v=1736347059)
+
+## Mirror Dimension tracker follow-up
+
+The separate tracker shows a progression from an empty Mirror scene to six ordinary Victims, matching the supply of gray pieces. The player records the number using − and +. Existing named Special Victim records remain editable, but Play no longer offers to add new ones. The tally starts at zero in the UI and remains unrecorded in narrative facts until explicitly changed. Confirming Rift Collapse clears a recorded tally in the same event. Undo restores the prior tally and dimensions. Counting a Victim changes neither the saved nor killed total. Both old and new snapshots replay without migration.
