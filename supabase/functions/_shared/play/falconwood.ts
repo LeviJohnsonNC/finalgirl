@@ -155,10 +155,13 @@ export function resolveFalconwoodAction(action: FalconwoodAction, fields: Fields
       const previousCount = state.count;
       state.count = value;
       state.complete ??= false;
-      if (command === 'progress-count' && (!state.friend || state.friend === 'prone') && (
+      if (command === 'progress-count' && (
         mission === 'father' && state.target !== undefined && (previousCount ?? 0) < state.target && value >= state.target ||
         mission === 'hunt' && previousCount !== 0 && value === 0
-      )) recordMissionSuccess(state, mission);
+      )) {
+        if (!state.friend || state.friend === 'prone') recordMissionSuccess(state, mission);
+        else state.complete = true;
+      }
       break;
     }
     case 'target':

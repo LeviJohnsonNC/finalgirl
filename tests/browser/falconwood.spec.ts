@@ -211,6 +211,13 @@ for (const [mission,character,photo] of [
         await expect(portrait.locator('img')).toHaveCSS('filter','none');
       }
     }
+    if (id === 'father') {
+      await panel.getByText('Correct completion',{exact:true}).click();
+      await panel.getByRole('button',{name:'Mark mission incomplete'}).click();
+      await panel.getByRole('button',{name:'Complete mission',exact:true}).click();
+      await expect(hero).toContainText('Mission complete');
+      await expect(portrait).toContainText('Killed');
+    }
     if (id === 'friend') {
       await panel.getByRole('button',{name:'Location rules'}).click();
       const rules = page.getByRole('dialog',{name:'Special Rules'});
