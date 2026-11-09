@@ -57,6 +57,7 @@ export function isDimension(value: unknown): value is Dimension {
 export function dimensionLabel(dimension: Dimension | null) {
   return dimension === 'our' ? 'Our Dimension' : dimension === 'mirror' ? 'Mirror Dimension' : 'Unrecorded';
 }
+export const MAX_MIRROR_VICTIMS = 6;
 export const SLAYER_MARKERS = ['1', '2', '3'] as const;
 export type SlayerMarker = typeof SLAYER_MARKERS[number];
 type Marker = { label: string; dimension: Dimension | null };
@@ -64,6 +65,7 @@ type SlayerState = {
   girl: Dimension | null;
   slayer: Dimension | null;
   collapsed: boolean;
+  mirrorVictims?: number;
   markers: Partial<Record<SlayerMarker, Marker>>;
   minors: Record<string, number>;
 };
@@ -74,6 +76,8 @@ const isMarker = (id: unknown): id is SlayerMarker => SLAYER_MARKERS.some(slot =
 const isMinor = (id: unknown): id is string => SLAYER_MINORS.some(card => card.id === id);
 const isHealth = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 2;
 const isLabel = (value: unknown): value is string => typeof value === 'string' && value.length <= 32 && value.trim() === value && [...value].every(character => character.charCodeAt(0) >= 32);
+const isMirrorCount = (value: unknown): value is number => typeof value === 'number' &&
+  Number.isInteger(value) && value >= 0 && value <= MAX_MIRROR_VICTIMS;
 const isMap = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
 
 function parseSlayer(value: unknown): SlayerState | null {
@@ -82,7 +86,9 @@ function parseSlayer(value: unknown): SlayerState | null {
     const state: unknown = JSON.parse(value);
     if (!isMap(state) || !(state.girl === null || isDimension(state.girl)) ||
         !(state.slayer === null || isDimension(state.slayer)) || typeof state.collapsed !== 'boolean' ||
-        !isMap(state.markers) || !isMap(state.minors) || Object.keys(state).length !== 5) return null;
+        !isMap(state.markers) || !isMap(state.minors) ||
+        Object.keys(state).length !== (state.mirrorVictims === undefined ? 5 : 6) ||
+        (state.mirrorVictims !== undefined && !isMirrorCount(state.mirrorVictims))) return null;
     if (!Object.entries(state.markers).every(([id, marker]) => isMarker(id) && isMap(marker) &&
         Object.keys(marker).length === 2 && isLabel(marker.label) && (marker.dimension === null || isDimension(marker.dimension)))) return null;
     if (!Object.entries(state.minors).every(([id, health]) => isMinor(id) && isHealth(health))) return null;
@@ -93,6 +99,7 @@ export const slayerState = (fields: ModuleState) => parseSlayer(fields.snapshot)
 export const validSlayerField = (key: string, value: unknown) => key === 'snapshot' && parseSlayer(value) !== null;
 
 export type SlayerCommand =
+  | { command: 'mirror-victims'; count: number }
   | { command: 'cross'; to: Dimension; companions: SlayerMarker[] }
   | { command: 'set-dimension'; who: 'girl' | 'slayer'; to: Dimension }
   | { command: 'track-marker'; id: SlayerMarker; label: string; dimension: Dimension | null }
@@ -111,6 +118,7 @@ export function validSlayerAction(value: unknown): value is SlayerAction {
   if (!isMap(value) || !(value.parent === 'root' || isId(value.parent))) return false;
   const length = Object.keys(value).length;
   switch (value.command) {
+    case 'mirror-victims': return length === 3 && isMirrorCount(value.count);
     case 'cross': return length === 4 && isDimension(value.to) && markerList(value.companions);
     case 'set-dimension': return length === 4 && (value.who === 'girl' || value.who === 'slayer') && isDimension(value.to);
     case 'track-marker': return length === 5 && isMarker(value.id) && isLabel(value.label) && (value.dimension === null || isDimension(value.dimension));
@@ -133,6 +141,10 @@ export function resolveSlayerAction(action: SlayerAction, fields: ModuleState, e
   if (slayerParent(entries) !== action.parent) return null;
   const state = slayerState(fields);
   switch (action.command) {
+    case 'mirror-victims':
+      if (!isMirrorCount(action.count) || (state.mirrorVictims ?? 0) === action.count) return null;
+      state.mirrorVictims = action.count;
+      break;
     case 'cross':
       if (state.girl === null || state.girl === action.to ||
           !action.companions.every(id => state.markers[id]?.dimension === state.girl)) return null;
@@ -169,6 +181,7 @@ export function resolveSlayerAction(action: SlayerAction, fields: ModuleState, e
       state.collapsed = true;
       state.girl = 'our';
       state.slayer = 'our';
+      if (state.mirrorVictims !== undefined) state.mirrorVictims = 0;
       for (const id of SLAYER_MARKERS) {
         const marker = state.markers[id];
         if (marker && (marker.dimension === 'mirror' || action.includeUnknown.includes(id))) marker.dimension = 'our';
@@ -193,6 +206,7 @@ export function slayerFacts(fields: ModuleState, includeGirl = true) {
   if (state.collapsed) facts.push('Rift Collapse was physically recorded.');
   if (includeGirl && state.girl) facts.push(`Final Girl last observed in ${dimensionLabel(state.girl)}.`);
   if (state.slayer) facts.push(`Slayer last observed in ${dimensionLabel(state.slayer)}.`);
+  if (state.mirrorVictims !== undefined) facts.push(`Ordinary Victims last counted in the Mirror Dimension: ${state.mirrorVictims}.`);
   for (const marker of Object.values(state.markers)) {
     if (marker.label && marker.dimension) {
       facts.push(`Special Victim ${marker.label} last observed in ${dimensionLabel(marker.dimension)}.`);
@@ -203,6 +217,7 @@ export function slayerFacts(fields: ModuleState, includeGirl = true) {
 export function describeSlayerAction(action: SlayerAction, fields: ModuleState) {
   const state = slayerState(fields);
   switch (action.command) {
+    case 'mirror-victims': return `Mirror Dimension · ${action.count} ${action.count === 1 ? 'Victim' : 'Victims'}`;
     case 'cross': return `Final Girl crossed into ${dimensionLabel(action.to)}${action.companions.length ? ' with tracked Special Victims' : ''}`;
     case 'collapse': return 'Rift Collapse recorded · Slayer moved into Our Dimension';
     case 'pull': return `${state.markers[action.id]?.label || 'Special Victim'} pulled into the Mirror Dimension`;

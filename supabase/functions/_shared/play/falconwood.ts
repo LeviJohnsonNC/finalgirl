@@ -48,7 +48,7 @@ export interface FalconwoodState {
 }
 type Fields = Record<string, unknown>;
 type Entry = {id: string; moduleData?: {module: string; changes: Fields}};
-type Command = 'mission' | 'count' | 'target' | 'token' | 'lose-token' | 'clue' | 'lead' | 'recover' | 'found'
+type Command = 'mission' | 'count' | 'progress-count' | 'target' | 'token' | 'lose-token' | 'clue' | 'lead' | 'recover' | 'found'
   | 'start' | 'reduced' | 'attack' | 'complete' | 'attest' | 'correct-completion'
   | 'friend' | 'uses' | 'effect' | 'person';
 export interface FalconwoodAction {
@@ -59,7 +59,7 @@ export interface FalconwoodAction {
   value?: string | number | boolean | null;
 }
 const commands: readonly Command[] = [
-  'mission', 'count', 'target', 'token', 'lose-token', 'clue', 'lead', 'recover', 'found',
+  'mission', 'count', 'progress-count', 'target', 'token', 'lose-token', 'clue', 'lead', 'recover', 'found',
   'start', 'reduced', 'attack', 'complete', 'attest', 'correct-completion', 'friend', 'uses', 'effect', 'person',
 ];
 const blank = (): FalconwoodState => ({effects: {}, people: {}});
@@ -128,6 +128,13 @@ export function validFalconwoodAction(value: unknown): value is FalconwoodAction
       || typeof value.value === 'string' && value.value.length <= 50);
 }
 
+function recordMissionSuccess(state: FalconwoodState, mission: MissionId) {
+  state.complete = true;
+  state.friend = 'in-play';
+  if (mission === 'friend' && state.uses === undefined) state.uses = 1;
+  if (mission === 'hunt' && state.uses === undefined) state.uses = 2;
+}
+
 export function resolveFalconwoodAction(action: FalconwoodAction, fields: Fields, entries: readonly Entry[]) {
   if (!validFalconwoodAction(action) || action.parent !== falconwoodParent(entries)) return;
   const state = falconwoodState(fields);
@@ -141,11 +148,22 @@ export function resolveFalconwoodAction(action: FalconwoodAction, fields: Fields
       if (!mission || value !== mission) return;
       break;
     case 'count':
+    case 'progress-count': {
+      if (command === 'progress-count' && mission !== 'father' && mission !== 'hunt') return;
       if (state.complete || !inRange(value, 0, mission === 'father' ? 6 : 4)
         || !['father', 'lab', 'hunt'].includes(mission ?? '') || mission === 'hunt' && !state.started) return;
+      const previousCount = state.count;
       state.count = value;
       state.complete ??= false;
+      if (command === 'progress-count' && (
+        mission === 'father' && state.target !== undefined && (previousCount ?? 0) < state.target && value >= state.target ||
+        mission === 'hunt' && previousCount !== 0 && value === 0
+      )) {
+        if (!state.friend || state.friend === 'prone') recordMissionSuccess(state, mission);
+        else state.complete = true;
+      }
       break;
+    }
     case 'target':
       if ((mission !== 'father' && mission !== 'lab') || state.complete || !inRange(value, 1, mission === 'father' ? 6 : 4)) return;
       state.target = value;
@@ -209,10 +227,7 @@ export function resolveFalconwoodAction(action: FalconwoodAction, fields: Fields
       if (mission === 'friend' && state.friend !== 'prone') return;
       if (mission === 'hunt' && (!state.started || state.count !== 0)) return;
       if (mission === 'code' && (!state.tokens || !inRange(value, 1, 20) || value + state.tokens.reduce((a,b) => a+b, 0) < 20)) return;
-      state.complete = true;
-      state.friend = 'in-play';
-      if (mission === 'friend' && state.uses === undefined) state.uses = 1;
-      if (mission === 'hunt' && state.uses === undefined) state.uses = 2;
+      recordMissionSuccess(state, mission);
       break;
     case 'attest':
       if (state.complete) return;

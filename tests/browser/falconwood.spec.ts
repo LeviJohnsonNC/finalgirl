@@ -109,6 +109,12 @@ test('Falconwood blocks a Lost-to-Won edit in save-only until completion is revi
   await panel.getByRole('button',{name:'Start hunt',exact:true}).click();
   await expect(panel).toContainText('3 Agents remaining');
   await expect(panel).toContainText('Agents attack at 3');
+  await panel.getByRole('button',{name:'Complete mission',exact:true}).click();
+  await expect(panel.locator('.falconwood-hero')).toContainText('Mission complete');
+  await expect(panel.getByRole('button',{name:'Complete mission',exact:true})).toHaveCount(0);
+  await panel.getByText('Correct completion',{exact:true}).click();
+  await panel.getByRole('button',{name:'Mark mission incomplete'}).click();
+  await expect(panel.locator('.falconwood-hero')).not.toContainText('Mission complete');
   await page.getByRole('button',{name:'Finish game',exact:true}).click();
   await page.getByRole('button',{name:'Lost',exact:true}).click();
   const result = page.getByRole('combobox',{name:'Game result'});
@@ -155,7 +161,7 @@ for (const [mission,character,photo] of [
       await panel.getByRole('button',{name:'Start hunt',exact:true}).click();
       await captureArtwork(hero,'hunt-active',info);
       for (let n = 0; n < 4; n++) await panel.getByRole('button',{name:'Decrease Agents remaining'}).click();
-      await panel.getByRole('button',{name:'Record hunt survived'}).click();
+      await expect(hero).toContainText('Mission complete');
       await captureArtwork(hero,'hunt-cleared',info);
       await captureArtwork(panel.getByRole('button',{name:/Telekinesis Uses remaining/}),'telekinesis',info);
     } else if (id === 'father') {
@@ -163,10 +169,10 @@ for (const [mission,character,photo] of [
       await expect(completion).toBeDisabled();
       await expect(panel.getByText('0 of 3 keys',{exact:true})).toHaveCount(0);
       await expect(panel.getByText('Adjust requirement',{exact:true})).toHaveCount(0);
-      for (let n = 0; n < 3; n++) await panel.getByRole('button',{name:'Increase Banked keys'}).click();
-      await expect(panel.getByRole('group',{name:'Banked keys'}).locator('output')).toHaveText('3');
+      await expect(panel.getByText('Already completed on the board?',{exact:true})).toHaveCount(0);
+      await expect(panel.getByRole('button',{name:'Complete mission',exact:true})).toBeVisible();
       await panel.locator('.falconwood-mission').screenshot({path:info.outputPath('father-ready.jpg'),style:'.app-footer,[data-sonner-toaster]{visibility:hidden}'});
-      await completion.click();
+      for (let n = 0; n < 3; n++) await panel.getByRole('button',{name:'Increase Banked keys'}).click();
     } else if (id === 'code') {
       await panel.getByRole('button',{name:'Code token 6'}).click();
       await panel.getByRole('combobox',{name:'Physical d20 result'}).click();
@@ -174,7 +180,7 @@ for (const [mission,character,photo] of [
       await expect(panel.getByRole('button',{name:'Record code cracked'})).toHaveCount(0);
       await panel.getByRole('combobox',{name:'Physical d20 result'}).click();
       await page.getByRole('option',{name:'14',exact:true}).click();
-      await panel.getByRole('button',{name:'Record code cracked'}).click();
+      await expect(hero).toContainText('Mission complete');
     } else if (id === 'lab') {
       await panel.getByRole('combobox',{name:'Revealed lead',exact:true}).click();
       await page.getByRole('option',{name:'1 · Best Friend’s House',exact:true}).click();
@@ -200,6 +206,17 @@ for (const [mission,character,photo] of [
       await panel.getByRole('button',{name:`Mark ${character} ${status}`}).click();
       await captureArtwork(portrait,`${photo}-${status}`,info);
       expect((await portrait.boundingBox())!.height).toBeCloseTo(height,0);
+      if (status === 'killed') {
+        await expect(portrait).toHaveCSS('opacity','1');
+        await expect(portrait.locator('img')).toHaveCSS('filter','none');
+      }
+    }
+    if (id === 'father') {
+      await panel.getByText('Correct completion',{exact:true}).click();
+      await panel.getByRole('button',{name:'Mark mission incomplete'}).click();
+      await panel.getByRole('button',{name:'Complete mission',exact:true}).click();
+      await expect(hero).toContainText('Mission complete');
+      await expect(portrait).toContainText('Killed');
     }
     if (id === 'friend') {
       await panel.getByRole('button',{name:'Location rules'}).click();

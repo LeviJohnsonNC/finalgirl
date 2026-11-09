@@ -27,10 +27,6 @@
   cursor: default;
 }
 
-.woods-controls .module-character[data-state="killed"] .play-module-art {
-  filter: saturate(.7) brightness(.9);
-}
-
 .woods-controls :is([data-state="unknown"], [data-state="inactive"], [data-state="absent"], [data-state="left"], [data-state="replaced"], [data-state="unrecorded"]) .play-module-art {
   filter: grayscale(.7) brightness(.7);
 }

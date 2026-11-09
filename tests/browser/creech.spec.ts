@@ -13,6 +13,7 @@ test('hunter group and reported Bloodlust save together, undo and reload',async(
  await panel.getByText('Bloodlust with death (optional)',{exact:true}).click();
  await panel.getByLabel('Observed final Bloodlust',{exact:true}).fill('4');
  await panel.getByRole('button',{name:'Mark Orange Ghost Hunter killed',exact:true}).click();
+ await expect(panel.getByRole('button',{name:'View Orange Ghost Hunter',exact:true}).locator('.play-module-art')).toHaveCSS('filter','none');
  await expect(panel.getByRole('button',{name:'View Ghost Hunters',exact:true})).toContainText('Survivors can follow');
  await expect.poll(()=>page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents.filter((e:{creechAction?:{kind:string}})=>e.creechAction?.kind==='hunter').length,key)).toBe(1);
  await undoLatestObservation(page);await expect(panel.getByRole('button',{name:'View Orange Ghost Hunter',exact:true})).toContainText('In play');await expect(panel.getByRole('button',{name:'View Ghost Hunters',exact:true})).toContainText('Will not follow yet');

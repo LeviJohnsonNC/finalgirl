@@ -116,3 +116,7 @@ Target 48 original images plus derivatives. Headers about 1500 × 500 and hero/c
 - Finish asks for physical confirmation before an unconfirmed win can enter history. Both save actions use the reviewed mission status. Story and poster share a bounded owner-scoped snapshot. Older free-text notes remain available, and a late confirmation never grants rewards.
 - Added 52 independent photographic sources, including success art for each of the five missions, and eight bounded Terror derivatives. See the [Play photo manifest](../../src/assets/play/photos/falconwood/manifest.json) and its [scene notes](../../src/assets/play/photos/falconwood/README.md).
 - The location needs no migration or private reference upload. The frontend and compatible shared Edge bundles must ship together. Paired live opening verification still depends on the existing Slayer Storage object.
+
+## Mission completion follow-up
+
+Banking the required keys and recording the final Agent defeated complete the mission in the same accepted observation. Entering a successful physical d20 result completes Crack the Code. Expose the Lab and Missing Friend still distinguish collecting evidence from delivering it and finding the Friend from reviving them. The Complete mission button accepts a physical-board result when Play progress is incomplete. It does not infer unobserved rewards or grant Health or Horror changes. Previous snapshots keep their original replay behavior.

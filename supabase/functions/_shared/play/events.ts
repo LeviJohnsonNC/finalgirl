@@ -818,7 +818,10 @@ export function describeEvent(e: PlayEvent): string {
       return `${e.text}${e.killerCard ? `: ${e.killerCard}` : ""}${e.detail ? `${e.killerCard ? ". " : ": "}${e.detail}` : ""}`;
     case "module":
       if(e.mallAction)return describeMallAction(e.mallAction);
-      if (e.falconwoodAction?.command === 'complete' || e.falconwoodAction?.command === 'attest') return 'Falconwood mission completed';
+      if (e.falconwoodAction?.command === 'complete' || e.falconwoodAction?.command === 'attest' ||
+          e.falconwoodAction?.command === 'progress-count' && e.moduleData && falconwoodState(e.moduleData.changes).complete) {
+        return 'Falconwood mission completed';
+      }
       if (e.falconwoodAction?.command === 'found') return 'Best Friend found prone';
       if (e.falconwoodAction?.command === 'start') return 'Hunt started';
       if(e.slayerAction)return describeSlayerAction(e.slayerAction,e.moduleData!.changes);

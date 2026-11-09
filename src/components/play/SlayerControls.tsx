@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { SLAYER, SLAYER_MARKERS, SLAYER_MINORS, dimensionLabel, isDimension, type Dimension, type SlayerMarker } from '@/lib/play/slayer';
+import { MAX_MIRROR_VICTIMS, SLAYER, SLAYER_MARKERS, SLAYER_MINORS, dimensionLabel, isDimension, type Dimension, type SlayerMarker } from '@/lib/play/slayer';
 import { KillerCards } from './KillerCards';
 import { MinorPowerControl } from './MinorPowerControl';
 import { MinorPowerGroup } from './MinorPowerGroup';
@@ -17,13 +17,10 @@ export function SlayerControls({events, onEvent, blocked}: ControlsProps) {
   const [companionsOpen, setCompanionsOpen] = useState(false);
   const [companions, setCompanions] = useState<SlayerMarker[]>([]);
   const [openMarker, setOpenMarker] = useState<SlayerMarker | null>(null);
-  const [adding, setAdding] = useState(false);
-  const [label, setLabel] = useState('');
-  const [markerDimension, setMarkerDimension] = useState<Dimension | null>(null);
+  const mirrorVictims = state.mirrorVictims ?? 0;
   const destination = state.girl === 'mirror' ? 'our' : 'mirror';
   const crossing = state.girl === 'mirror' ? 'Return to Our Dimension' : 'Enter Mirror Dimension';
   const used = SLAYER_MARKERS.filter(id => !!state.markers[id]);
-  const available = SLAYER_MARKERS.find(id => !state.markers[id]);
   const eligible = used.filter(id => state.girl !== null && state.markers[id]?.dimension === state.girl);
   const art = state.girl === 'mirror' ? 'mirror' : state.collapsed && state.girl === 'our' && state.slayer === 'our' ? 'collapsed' : 'our';
   const cross = (withMarkers: SlayerMarker[]) => {
@@ -72,14 +69,25 @@ export function SlayerControls({events, onEvent, blocked}: ControlsProps) {
         </div>
       </details>}
     </article>
-    <section className="slayer-markers" aria-label="Special Victims">
+    <article className="slayer-tracker" aria-label="Mirror Dimension">
+      <div className="slayer-tracker-photo slayer-mirror-photo"><ModuleArtwork art={slayerArt(`mirror-victims-${mirrorVictims}`)}/></div>
+      <div className="slayer-tracker-bar">
+        <h3>Mirror Dimension</h3>
+        <div className="slayer-mirror-stepper" role="group" aria-label="Mirror Dimension victims">
+          <button type="button" aria-label="Remove a Mirror Dimension victim" disabled={blocked || mirrorVictims === 0}
+            onClick={() => act({command:'mirror-victims',count:mirrorVictims - 1})}>−</button>
+          <output aria-label="Mirror Dimension victim count">{mirrorVictims}</output>
+          <button type="button" aria-label="Add a Mirror Dimension victim" disabled={blocked || mirrorVictims === MAX_MIRROR_VICTIMS}
+            onClick={() => act({command:'mirror-victims',count:mirrorVictims + 1})}>+</button>
+        </div>
+      </div>
+    </article>
+    {used.length > 0 && <section className="slayer-markers" aria-label="Previously tracked Special Victims">
       <div className="slayer-actions">
         {used.map(id => <button type="button" className="slayer-chip" key={id} disabled={blocked} aria-expanded={openMarker === id}
-          onClick={() => {setOpenMarker(openMarker === id ? null : id);setAdding(false);}}>
+          onClick={() => setOpenMarker(openMarker === id ? null : id)}>
           <strong>{state.markers[id]?.label || `Special Victim ${id}`}</strong> · {dimensionLabel(state.markers[id]?.dimension ?? null)}
         </button>)}
-        {available && <button type="button" className="module-unnamed" disabled={blocked} aria-expanded={adding}
-          onClick={() => {setAdding(!adding);setOpenMarker(null);setLabel('');setMarkerDimension(null);}}>Add Special Victim</button>}
       </div>
       {openMarker && state.markers[openMarker] && <div className="slayer-actions slayer-editor">
         {state.markers[openMarker].dimension === 'our' && <button type="button" className="slayer-primary"
@@ -94,17 +102,7 @@ export function SlayerControls({events, onEvent, blocked}: ControlsProps) {
           if (act({command:'untrack-marker',id:openMarker})) setOpenMarker(null);
         }}>Stop tracking marker</button>
       </div>}
-      {adding && available && <form className="slayer-actions slayer-editor" onSubmit={e => {
-        e.preventDefault();
-        if (act({command:'track-marker',id:available,label:label.trim(),dimension:markerDimension})) setAdding(false);
-      }}>
-        <label>Role name (optional)<input maxLength={32} value={label} onChange={e => setLabel(e.target.value)}/></label>
-        <label>Observed dimension<select value={markerDimension ?? ''} onChange={e => {
-          setMarkerDimension(isDimension(e.target.value) ? e.target.value : null);
-        }}><option value="">Unrecorded</option><DimensionOptions/></select></label>
-        <button className="slayer-primary" disabled={blocked}>Record marker</button>
-      </form>}
-    </section>
+    </section>}
     {message && <p role="alert">{message}</p>}
     <MinorPowerGroup>
       {SLAYER_MINORS.map(card => <MinorPowerControl key={card.id} name={card.name} health={state.minors[card.id]}

@@ -7,7 +7,7 @@ import { SLAYER_POWERS, SLAYER_FINALES, SLAYER_MINORS, SLAYER_TERRORS, slayerSta
 const key = `final-girl-active-game-v1:${userId}`;
 const sizeMatrix = { desktop:[[1280,640],[1366,768],[1440,900]], mobile:[[390,844],[320,568]] };
 
-test("Slayer records crossings, a Special Victim pull and one atomic Rift Collapse", async ({page,archive}, info) => {
+test("Slayer tracks zero to six Mirror Victims, crossings and one atomic Rift Collapse", async ({page,archive}, info) => {
   test.setTimeout(90000);
   await archive.install(page,{draft:{...activeGame, selection:{...activeGame.selection,killer:"Slayer",location:"Creech Manor"},
     coreTrackersVersion:1,slayerSetupVersion:1,playMode:true,playEvents:[]}});
@@ -29,14 +29,29 @@ test("Slayer records crossings, a Special Victim pull and one atomic Rift Collap
   };
   const sizes = sizeMatrix[info.project.name === "mobile" ? "mobile" : "desktop"];
   for (const [width,height] of sizes) {await page.setViewportSize({width,height});await capture("our",width);}
-  await panel.getByRole("button",{name:"Add Special Victim",exact:true}).click();
-  await panel.getByLabel("Role name (optional)").fill("Ghost Hunter");
-  await panel.getByLabel("Observed dimension").selectOption("our");
-  await panel.getByRole("button",{name:"Record marker",exact:true}).click();
-  await panel.getByRole("button",{name:"Ghost Hunter · Our Dimension",exact:true}).click();
-  await panel.getByRole("button",{name:"Pulled into Mirror",exact:true}).click();
-  await expect(tracker).toHaveAttribute("data-dimension","our");
-  await expect(panel.getByRole("button",{name:"Ghost Hunter · Mirror Dimension",exact:true})).toBeVisible();
+  await expect(panel.getByRole("button",{name:"Add Special Victim",exact:true})).toHaveCount(0);
+  const mirror = panel.getByRole("article",{name:"Mirror Dimension",exact:true});
+  const mirrorCount = mirror.getByLabel("Mirror Dimension victim count");
+  const addVictim = mirror.getByRole("button",{name:"Add a Mirror Dimension victim"});
+  const removeVictim = mirror.getByRole("button",{name:"Remove a Mirror Dimension victim"});
+  const logBeforeCount = await log();
+  await expect(removeVictim).toBeDisabled();
+  for (let count = 0; count <= 6; count++) {
+    if (count > 0) await addVictim.click();
+    await expect(mirrorCount).toHaveText(String(count));
+    const image = mirror.locator("img");
+    await expect(image).toHaveAttribute("src",new RegExp("mirror-victims-" + count + "[-.]"));
+    await image.evaluate(async (img: HTMLImageElement) => {img.loading="eager";await img.decode();});
+    await mirror.screenshot({path:info.outputPath(`mirror-victims-${count}.jpg`),style:".app-footer,[data-sonner-toaster]{visibility:hidden}"});
+  }
+  expect(logBeforeCount.some(event => event.slayerAction?.command === "mirror-victims")).toBe(false);
+  await expect(addVictim).toBeDisabled();
+  await removeVictim.click();
+  await expect(mirrorCount).toHaveText("5");
+  await page.reload();
+  await page.getByRole("button",{name:"RESUME GAME",exact:true}).click();
+  await openModule(page,"slayer");
+  await expect(mirrorCount).toHaveText("5");
   await tracker.getByRole("button",{name:"Enter Mirror Dimension",exact:true}).click();
   await expect(tracker).toHaveAttribute("data-dimension","mirror");
   for (const [width,height] of sizes) {await page.setViewportSize({width,height});await capture("mirror",width);}
@@ -47,7 +62,7 @@ test("Slayer records crossings, a Special Victim pull and one atomic Rift Collap
   await chooseKillerCard(remember,"Finale","Interdimensional Rift Collapse");
   await expect(tracker).toHaveAttribute("data-dimension","mirror");
   await remember.getByRole("button",{name:"Record Rift Collapse",exact:true}).click();
-  await expect(remember.getByRole("region",{name:"Rift Collapse preview"})).toContainText("Ghost Hunter");
+  await expect(remember.getByRole("region",{name:"Rift Collapse preview"})).toBeVisible();
   const beforeFailure = await log();
   await page.evaluate(k => {
     const set = Storage.prototype.setItem;
@@ -60,10 +75,11 @@ test("Slayer records crossings, a Special Victim pull and one atomic Rift Collap
   await remember.getByRole("button",{name:"Confirm Rift Collapse",exact:true}).click();
   await expect(remember.getByRole("alert")).toContainText("could not be saved");
   expect(await log()).toEqual(beforeFailure);
+  await expect(mirrorCount).toHaveText("5");
   await page.evaluate(() => (window as unknown as {restoreSlayerWrites:()=>void}).restoreSlayerWrites());
   await remember.getByRole("button",{name:"Confirm Rift Collapse",exact:true}).click();
   await expect(tracker).toHaveAttribute("data-dimension","our");
-  await expect(panel.getByRole("button",{name:"Ghost Hunter · Our Dimension",exact:true})).toBeVisible();
+  await expect(mirrorCount).toHaveText("0");
   const entries = await log();
   expect(entries.filter(event => event.slayerAction?.command === "collapse")).toHaveLength(1);
   expect(summarizePlay(entries)).toMatchObject({killerHealth:11,finalHorrorLevel:4,bloodlust:0,killed:0,saved:0});
@@ -72,7 +88,9 @@ test("Slayer records crossings, a Special Victim pull and one atomic Rift Collap
   const timeline = page.getByRole("region",{name:"Game timeline",exact:true});
   await timeline.getByRole("button",{name:/^Undo Rift Collapse recorded/}).click();
   await expect(tracker).toHaveAttribute("data-dimension","mirror");
+  await expect(mirrorCount).toHaveText("5");
   await timeline.getByRole("button",{name:/^Restore Rift Collapse recorded/}).click();
+  await expect(mirrorCount).toHaveText("0");
   await expect(tracker).toHaveAttribute("data-dimension","our");
   await remember.getByRole("button",{name:"Clear Finale card name",exact:true}).click();
   await page.reload();
@@ -92,7 +110,14 @@ test("Slayer card photography, Terror suggestions and cached death", async ({pag
   const panel = page.locator('[data-module="slayer"]');
   await expect(page.locator('[data-module="sunnydaze-mall"],[data-module="sunnydaze"]')).toHaveCount(1);
   await expect(panel.getByRole("button",{name:/Savior/})).toHaveCount(0);
-  await panel.locator("details.module-card-section > summary").click();
+  const revealSummary = panel.locator("details.module-card-section > summary");
+  const minorSummary = panel.locator("details.module-minor-section > summary");
+  const disclosureStyle = (el: Element) => {
+    const { display, fontFamily, fontSize, listStyleType } = getComputedStyle(el);
+    return { display, fontFamily, fontSize, listStyleType };
+  };
+  expect(await minorSummary.evaluate(disclosureStyle)).toEqual(await revealSummary.evaluate(disclosureStyle));
+  await revealSummary.click();
 
   const seen = new Set<string>();
   const inspect = async (element: import("@playwright/test").Locator, id: string) => {

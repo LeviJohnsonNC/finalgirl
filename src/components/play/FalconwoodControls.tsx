@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { BookOpen, LockKeyholeOpen } from 'lucide-react';
+import { BookOpen, Check, LockKeyholeOpen } from 'lucide-react';
 import { newPlayEvent, summarizePlay } from '@/lib/play/events';
 import { moduleState } from '@/lib/play/modules';
 import {
@@ -62,7 +62,9 @@ export function FalconwoodControls({events, onEvent, mission: selected, falconwo
   const total = state.tokens?.reduce((sum, value) => sum + value, 0);
   const targetMet = state.count !== undefined && state.target !== undefined && state.count >= state.target;
   const ready = mission?.id === 'friend' ? state.friend === 'prone' : mission?.id === 'hunt' ? state.started && state.count === 0
-    : mission?.id === 'code' ? total !== undefined && !!roll && total + Number(roll) >= 20 : targetMet;
+    : mission?.id === 'code' ? false : targetMet;
+  const friendAlreadyRecorded = !!state.friend && state.friend !== 'prone';
+  const canRecordCompletion = ready && !friendAlreadyRecorded;
   const missionImage = !mission ? 'header'
     : state.complete === true ? mission.id === 'hunt' ? 'hunt-cleared' : `${mission.id}-success`
     : mission.id === 'hunt' && state.started ? 'hunt-active' : mission.id;
@@ -93,8 +95,8 @@ export function FalconwoodControls({events, onEvent, mission: selected, falconwo
             {!state.complete && mission.id !== 'father' &&
               <strong className="falconwood-progress">{falconwoodProgress({...state, mission:mission.id})}</strong>}
             {!state.complete && mission.id === 'father' && <div className="falconwood-primary-row">
-              <Count label="Banked keys" value={state.count} max={6} onChange={value => send('count', value)}/>
-              <button type="button" className="falconwood-action" disabled={!ready} onClick={() => send('complete')}>
+              <Count label="Banked keys" value={state.count} max={6} onChange={value => send('progress-count', value)}/>
+              <button type="button" className="falconwood-action" disabled={!canRecordCompletion} onClick={() => send('complete')}>
                 <LockKeyholeOpen size={16} aria-hidden="true" />{mission.completion}
               </button>
             </div>}
@@ -114,11 +116,17 @@ export function FalconwoodControls({events, onEvent, mission: selected, falconwo
             </>}
             {!state.complete && mission.id === 'code' && <>
               <div className="falconwood-chips" role="group" aria-label="Recorded code tokens">
-                {[1,2,3,4,5,6].map(value => <button key={value} type="button" aria-label={`Code token ${value}`} aria-pressed={state.tokens?.includes(value) ?? false} onClick={() => send('token', value)}>{value}</button>)}
+                {[1,2,3,4,5,6].map(value => <button key={value} type="button" aria-label={`Code token ${value}`} aria-pressed={state.tokens?.includes(value) ?? false} onClick={() => { if (send('token', value)) setRoll(''); }}>{value}</button>)}
               </div>
               {total !== undefined && <>
                 <span>Shopping Mall · Roll {Math.max(1, 20-total)} or higher</span>
-                {field('Physical d20 result', <PlaySelect aria-label="Physical d20 result" value={roll} onChange={event => setRoll(event.target.value)}>
+                {field('Physical d20 result', <PlaySelect aria-label="Physical d20 result" value={roll} onChange={event => {
+                  const result = Number(event.target.value);
+                  if (event.target.value && result + total >= 20) {
+                    if (friendAlreadyRecorded) send('attest');
+                    else send('complete', result);
+                  } else setRoll(event.target.value);
+                }}>
                   <option value="">Record roll…</option>
                   {Array.from({length:20}, (_, i) => <option key={i} value={String(i+1)}>{i+1}</option>)}
                 </PlaySelect>)}
@@ -143,13 +151,13 @@ export function FalconwoodControls({events, onEvent, mission: selected, falconwo
               {!state.started ? <div className="falconwood-row">
                 {action('Start hunt', () => send('start', state.reduced ? 3 : 4))}
                 <button type="button" aria-pressed={state.reduced ?? false} onClick={() => send('reduced', !state.reduced)}>Start with three</button>
-              </div> : <Count label="Agents remaining" value={state.count} max={4} onChange={value => send('count', value)}/>}
+              </div> : <Count label="Agents remaining" value={state.count} max={4} onChange={value => send('progress-count', value)}/>}
               <button type="button" className="falconwood-quiet" aria-pressed={state.attack3 ?? false} onClick={() => send('attack', !state.attack3)}>
                 {state.attack3 ? 'Agents attack at 3' : 'Record Attack 3'}
               </button>
             </>}
-            {!state.complete && mission.id !== 'father' && ready &&
-              action(mission.completion, () => send('complete', mission.id === 'code' ? Number(roll) : undefined))}
+            {!state.complete && mission.id !== 'father' && canRecordCompletion &&
+              action(mission.completion, () => send('complete'))}
           </> : <>
             {state.complete && <strong>Mission complete · Identity unrecorded</strong>}
             {field('Record physical mission', <PlaySelect aria-label="Record physical mission" value="" onChange={event => chooseMission(event.target.value)}>
@@ -162,11 +170,12 @@ export function FalconwoodControls({events, onEvent, mission: selected, falconwo
           <SpecialRulesModal killer="" location="Falconwood">
             <button type="button" className="falconwood-quiet"><BookOpen size={16} aria-hidden="true"/>Location rules</button>
           </SpecialRulesModal>
-          {mission && <details className="falconwood-quiet">
-            <summary>{state.complete ? 'Correct completion' : 'Already completed on the board?'}</summary>
-            {state.complete ? action('Mark mission incomplete', () => send('correct-completion', false))
-              : action('Confirm mission completed', () => send('attest'))}
-          </details>}
+          {mission && (state.complete ? <details className="falconwood-quiet">
+            <summary>Correct completion</summary>
+            {action('Mark mission incomplete', () => send('correct-completion', false))}
+          </details> : <button type="button" className="falconwood-action falconwood-complete" onClick={() => send(canRecordCompletion ? 'complete' : 'attest')}>
+            <Check size={16} aria-hidden="true" />Complete mission
+          </button>)}
         </footer>
       </article>
       {mission && (state.friend || state.complete || state.uses !== undefined) && <div className="falconwood-grid">

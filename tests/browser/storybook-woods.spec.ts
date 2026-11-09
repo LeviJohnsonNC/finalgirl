@@ -52,6 +52,7 @@ test("Storybook Woods crossings and Special Victims in the actual Play panel", a
     for (const status of ["killed","saved"]) {
       await panel.getByRole("button",{name:`Mark ${name} ${status}`,exact:true}).click();
       await inspectPhoto(portrait,`${id}-${status}`,info);
+      if (status === "killed") await expect(portrait.locator("img")).toHaveCSS("filter","none");
     }
   }
   await panel.getByRole("button",{name:"Mark Hansel replaced",exact:true}).click();

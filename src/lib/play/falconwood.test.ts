@@ -44,6 +44,31 @@ describe('Falconwood observations', () => {
     expect(validPlayLog(s.events)).toBe(true);
   });
 
+  it('records trackable mission success with the final count and can undo both at once', () => {
+    const father = scenario('Save Your Father');
+    expect(father.act('target',2)).toBe(true);
+    expect(father.act('progress-count',1)).toBe(true);
+    expect(father.state()).toMatchObject({count:1,complete:false});
+    expect(father.act('progress-count',2)).toBe(true);
+    expect(father.state()).toMatchObject({count:2,complete:true,friend:'in-play'});
+    const hunt = scenario('Survive the Hunt');
+    expect(hunt.act('progress-count',0)).toBe(false);
+    expect(hunt.act('start',3)).toBe(true);
+    expect(hunt.act('progress-count',1)).toBe(true);
+    expect(hunt.act('progress-count',0)).toBe(true);
+    expect(hunt.state()).toMatchObject({count:0,complete:true,friend:'in-play',uses:2});
+    expect(hunt.act('complete')).toBe(false);
+    const last = hunt.events[hunt.events.length - 1];
+    const undone = [...hunt.events,newPlayEvent({kind:'undo',target:last.id})];
+    expect(validPlayLog(undone)).toBe(true);
+    const state = falconwoodState(moduleState(summarizePlay(undone).entries,'falconwood'));
+    expect(state).toMatchObject({count:1,complete:false});
+    expect(state.uses).toBeUndefined();
+    expect(state.friend).toBeUndefined();
+    expect(summarizePlay(hunt.events).killed).toBe(0);
+    expect(validPlayLog(father.events)).toBe(true);
+  });
+
   it('uses physical dice, evidence handoff and single lead observations', () => {
     const code = scenario('Crack the Code');
     expect(code.act('token',5)).toBe(true);
