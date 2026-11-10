@@ -1,6 +1,6 @@
 import { MALL_MODULE, describeMallAction, initialMall, isInitialMall, resolveMallAction, validMallAction, mallParent, mallState, type MallAction } from './sunnydaze.ts';
 import { FALCONWOOD_EFFECTS, FALCONWOOD_MODULE, falconwoodParent, falconwoodState, initialFalconwood, missionById, resolveFalconwoodAction, validFalconwoodAction, type FalconwoodAction } from "./falconwood.ts";
-import { SLAYER_MODULE, describeSlayerAction, initialSlayer, resolveSlayerAction, slayerParent, validSlayerAction, type SlayerAction } from "./slayer.ts";
+import { SLAYER_MODULE, describeSlayerAction, validSlayerSetup, resolveSlayerAction, slayerParent, validSlayerAction, type SlayerAction } from "./slayer.ts";
 import { HUNTER_MODULE, describeHunterAction, initialHunter, resolveHunterAction, validHunterAction, hunterParent, hunterState, hunterCountdownReversal, type HunterAction } from './hunter.ts';
 import { WINGARD_MODULE } from './wingardCatalog.ts';
 import { isInitialWingard, resolveWingardAction, validWingardAction, wingardParent, describeWingardAction, type WingardAction } from './wingardCottage.ts';
@@ -191,7 +191,7 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
   if (e.moduleData?.module === FALCONWOOD_MODULE && (e.kind !== "module" || !validModuleObservation(e.moduleData))) return false;
   if (e.slayerReference !== undefined && (e.kind !== "killed" || e.slayerReference !== true)) return false;
   if (e.slayerAction !== undefined && (e.kind !== "module" || e.moduleData?.module !== SLAYER_MODULE || !validSlayerAction(e.slayerAction))) return false;
-  if (e.moduleData?.module === SLAYER_MODULE && (e.kind !== "module" || !validModuleObservation(e.moduleData) || (!e.slayerAction && e.moduleData.changes.snapshot !== initialSlayer().snapshot))) return false;
+  if (e.moduleData?.module === SLAYER_MODULE && (e.kind !== "module" || !validModuleObservation(e.moduleData) || (!e.slayerAction && !validSlayerSetup(e.moduleData.changes.snapshot)))) return false;
   if (e.hunterReference !== undefined && (e.kind!=='killed'||e.hunterReference!==true))return false;
   if(e.hunterAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!==HUNTER_MODULE||!validHunterAction(e.hunterAction)))return false;
   if(e.moduleData?.module===HUNTER_MODULE&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.hunterAction&&e.moduleData.changes.snapshot!==initialHunter().snapshot)))return false;
@@ -380,7 +380,7 @@ export function validSlayerHistory(log: readonly PlayEvent[]) {
     if (observation.slayerAction) {
       const expected = resolveSlayerAction(observation.slayerAction, moduleState(entries, SLAYER_MODULE), entries);
       if (!expected || expected.snapshot !== observation.moduleData!.changes.snapshot) return false;
-    } else if (sawObservation || observation.moduleData!.changes.snapshot !== initialSlayer().snapshot) {
+    } else if (sawObservation || !validSlayerSetup(observation.moduleData!.changes.snapshot)) {
       return false;
     }
     sawObservation = true;

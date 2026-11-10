@@ -1,5 +1,8 @@
+import { SlayerMirrorVictims } from './SlayerMirrorVictims';
+import { FALCONWOOD_MODULE, falconwoodState, missionById } from '../../../supabase/functions/_shared/play/falconwood';
+import { moduleState } from '@/lib/play/modules';
 import { useState } from 'react';
-import { MAX_MIRROR_VICTIMS, SLAYER, SLAYER_MARKERS, SLAYER_MINORS, dimensionLabel, isDimension, type Dimension, type SlayerMarker } from '@/lib/play/slayer';
+import { SLAYER, SLAYER_MARKERS, SLAYER_MINORS, dimensionLabel, isDimension, type SlayerMarker } from '@/lib/play/slayer';
 import { KillerCards } from './KillerCards';
 import { MinorPowerControl } from './MinorPowerControl';
 import { MinorPowerGroup } from './MinorPowerGroup';
@@ -12,12 +15,12 @@ import '@/styles/play-slayer.css';
 const dimensions = ['our','mirror'] as const;
 const DimensionOptions = () => <>{dimensions.map(value => <option key={value} value={value}>{dimensionLabel(value)}</option>)}</>;
 
-export function SlayerControls({events, onEvent, blocked}: ControlsProps) {
-  const {state, act, message} = useSlayerRecord(events, onEvent, blocked);
+export function SlayerControls({events, onEvent, blocked, location, mission}: ControlsProps) {
+  const {entries, state, act, message} = useSlayerRecord(events, onEvent, blocked);
   const [companionsOpen, setCompanionsOpen] = useState(false);
   const [companions, setCompanions] = useState<SlayerMarker[]>([]);
   const [openMarker, setOpenMarker] = useState<SlayerMarker | null>(null);
-  const mirrorVictims = state.mirrorVictims ?? 0;
+  const recordedMission = missionById(falconwoodState(moduleState(entries, FALCONWOOD_MODULE)).mission)?.name ?? mission;
   const destination = state.girl === 'mirror' ? 'our' : 'mirror';
   const crossing = state.girl === 'mirror' ? 'Return to Our Dimension' : 'Enter Mirror Dimension';
   const used = SLAYER_MARKERS.filter(id => !!state.markers[id]);
@@ -69,20 +72,9 @@ export function SlayerControls({events, onEvent, blocked}: ControlsProps) {
         </div>
       </details>}
     </article>
-    <article className="slayer-tracker" aria-label="Mirror Dimension">
-      <div className="slayer-tracker-photo slayer-mirror-photo"><ModuleArtwork art={slayerArt(`mirror-victims-${mirrorVictims}`)}/></div>
-      <div className="slayer-tracker-bar">
-        <h3>Mirror Dimension</h3>
-        <div className="slayer-mirror-stepper" role="group" aria-label="Mirror Dimension victims">
-          <button type="button" aria-label="Remove a Mirror Dimension victim" disabled={blocked || mirrorVictims === 0}
-            onClick={() => act({command:'mirror-victims',count:mirrorVictims - 1})}>−</button>
-          <output aria-label="Mirror Dimension victim count">{mirrorVictims}</output>
-          <button type="button" aria-label="Add a Mirror Dimension victim" disabled={blocked || mirrorVictims === MAX_MIRROR_VICTIMS}
-            onClick={() => act({command:'mirror-victims',count:mirrorVictims + 1})}>+</button>
-        </div>
-      </div>
-    </article>
-    {used.length > 0 && <section className="slayer-markers" aria-label="Previously tracked Special Victims">
+    <SlayerMirrorVictims state={state} act={act} blocked={blocked} location={location} mission={recordedMission}/>
+    {used.length > 0 && <details className="slayer-markers slayer-correction" aria-label="Previously tracked Special Victims">
+      <summary>Correct Special Victims</summary>
       <div className="slayer-actions">
         {used.map(id => <button type="button" className="slayer-chip" key={id} disabled={blocked} aria-expanded={openMarker === id}
           onClick={() => setOpenMarker(openMarker === id ? null : id)}>
@@ -102,7 +94,7 @@ export function SlayerControls({events, onEvent, blocked}: ControlsProps) {
           if (act({command:'untrack-marker',id:openMarker})) setOpenMarker(null);
         }}>Stop tracking marker</button>
       </div>}
-    </section>}
+    </details>}
     {message && <p role="alert">{message}</p>}
     <MinorPowerGroup>
       {SLAYER_MINORS.map(card => <MinorPowerControl key={card.id} name={card.name} health={state.minors[card.id]}

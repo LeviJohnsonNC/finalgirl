@@ -35,6 +35,9 @@ test("Slayer tracks zero to six Mirror Victims, crossings and one atomic Rift Co
   const addVictim = mirror.getByRole("button",{name:"Add a Mirror Dimension victim"});
   const removeVictim = mirror.getByRole("button",{name:"Remove a Mirror Dimension victim"});
   const logBeforeCount = await log();
+  await expect(mirrorCount).toHaveText("2");
+  await removeVictim.click();
+  await removeVictim.click();
   await expect(removeVictim).toBeDisabled();
   for (let count = 0; count <= 6; count++) {
     if (count > 0) await addVictim.click();
@@ -231,4 +234,57 @@ test("Slayer rules fit a narrow screen and an old game keeps its unknown tracker
       item => item.clientWidth > 0 && item.scrollWidth > item.clientWidth+1));
   expect(overflow).toBe(false);
   await dialog.screenshot({path:info.outputPath("slayer-rules.jpg"),type:"jpeg"});
+});
+
+test('Falconwood Special Victims overlay Mirror, survive reload and return with Collapse or crossing', async ({page,archive},info) => {
+  await archive.install(page,{draft:{...activeGame,selection:{...activeGame.selection,killer:'Slayer',location:'Falconwood',mission:'Save Your Father'},
+    playMode:true,slayerSetupVersion:1,coreTrackersVersion:1,falconwoodSetupVersion:1,playEvents:[]}});
+  await page.goto('/');
+  await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  await openModule(page,'slayer');
+  const panel = page.locator('[data-module="slayer"]');
+  const mirror = panel.getByRole('article',{name:'Mirror Dimension',exact:true});
+  const choices = mirror.getByRole('group',{name:'Track Special Victims in Mirror Dimension'});
+  const overlay = mirror.getByRole('group',{name:'Special Victims in Mirror Dimension',exact:true});
+  await expect(mirror.getByLabel('Mirror Dimension victim count')).toHaveText('2');
+  for (const name of ['Adopted Father','Conspiracy Theorist','Head Researcher']) {
+    await choices.getByRole('button',{name:`${name} Add to Mirror`,exact:true}).click();
+    await expect(overlay.getByRole('button',{name:`Return ${name} to Our Dimension`})).toBeVisible();
+  }
+  await expect(overlay.getByRole('button')).toHaveCount(3);
+  const sizes = sizeMatrix[info.project.name === 'mobile' ? 'mobile' : 'desktop'];
+  for (const [width,height] of sizes) {
+    await page.setViewportSize({width,height});
+    await mirror.locator('img').evaluateAll(async images => {await Promise.all(images.map(async node => {const image=node as HTMLImageElement;image.loading='eager';await image.decode();}));});
+    await mirror.screenshot({path:info.outputPath(`mirror-specials-${width}.jpg`),style:'.app-footer,[data-sonner-toaster]{visibility:hidden}'});
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    for (const button of await overlay.getByRole('button').all()) {
+      const bounds = await button.boundingBox();
+      expect(bounds!.width).toBeGreaterThanOrEqual(44);
+      expect(bounds!.height).toBeGreaterThanOrEqual(44);
+    }
+  }
+  await page.reload();
+  await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  await openModule(page,'slayer');
+  await expect(overlay.getByRole('button')).toHaveCount(3);
+  await overlay.getByRole('button',{name:'Return Adopted Father to Our Dimension'}).click();
+  await expect(choices.getByRole('button',{name:'Adopted Father Add to Mirror'})).toHaveAttribute('aria-pressed','false');
+  const tracker = panel.getByRole('article',{name:'Dimension Tracker'});
+  await tracker.getByRole('button',{name:'With Special Victims'}).click();
+  await tracker.getByRole('checkbox',{name:'Adopted Father'}).check();
+  await tracker.getByRole('button',{name:'Cross with selected'}).click();
+  await expect(overlay.getByRole('button')).toHaveCount(3);
+  await tracker.getByRole('button',{name:'Return to Our Dimension',exact:true}).click();
+  const remember = page.getByRole('region',{name:'Remember this',exact:true});
+  await remember.getByRole('button',{name:'Finale',exact:true}).click();
+  await chooseKillerCard(remember,'Finale','Interdimensional Rift Collapse');
+  await remember.getByRole('button',{name:'Record Rift Collapse',exact:true}).click();
+  await remember.getByRole('button',{name:'Confirm Rift Collapse',exact:true}).click();
+  await expect(overlay.getByRole('button')).toHaveCount(0);
+  await expect(mirror.getByLabel('Mirror Dimension victim count')).toHaveText('0');
+  await page.getByRole('button',{name:/The night so far/i}).click();
+  await page.getByRole('region',{name:'Game timeline',exact:true}).getByRole('button',{name:/^Undo Rift Collapse recorded/}).click();
+  await expect(overlay.getByRole('button')).toHaveCount(3);
+  await expect(mirror.getByLabel('Mirror Dimension victim count')).toHaveText('2');
 });

@@ -4,7 +4,7 @@ export const SLAYER = 'Slayer';
 export const SLAYER_MODULE = 'slayer';
 export const SLAYER_SOURCE = 'The Falconwood Files — Slayer killer board, booklet and cards';
 export const SLAYER_VISUAL = 'A moss-green ridged humanoid creature with a gaunt skull-like face, tiny cold-blue eyes and long claws. It looks like a tangible practical creature suit under real light. Our Dimension and its cold, damp reflection share the same selected Location. Use restrained optical effects and plausible local light.';
-export const SLAYER_RULE_GUIDANCE = 'Slayer normally hunts Victims from the Mirror Dimension, while it can sense and attack the Final Girl across dimensions. Damaging Actions and Items normally require the same dimension. A damage-dealing Reaction when attacked in Our Dimension is an exception. A confirmed Rift Collapse brings Slayer to Our Dimension. Separate a card reveal from a resolved event. Only observed crossings, pulls and outcomes establish what happened.';
+export const SLAYER_RULE_GUIDANCE = 'Slayer can target and attack Victims only in the Mirror Dimension until a resolved Rift Collapse brings it to Our Dimension. It can sense and attack the Final Girl across dimensions; this exception never applies to Victims. Damaging Actions and Items normally require the same dimension. A damage-dealing Reaction when attacked in Our Dimension is an exception. A confirmed Rift Collapse brings Slayer to Our Dimension. Separate a card reveal from a resolved event. Only observed crossings, pulls and outcomes establish what happened.';
 export const SLAYER_SETUP = { killerHealth: 11, finalHorrorLevel: 4, bloodlust: 0 };
 export const SLAYER_BLOODLUST = [
   [2, 2, 'Start'], [2, 2, ''], [2, 2, 'Increase Horror by 1'], [2, 3, ''],
@@ -71,7 +71,10 @@ type SlayerState = {
 };
 const empty = (): SlayerState => ({ girl: null, slayer: null, collapsed: false, markers: {}, minors: {} });
 const changesFor = (state: SlayerState) => ({ snapshot: JSON.stringify(state) });
-export const initialSlayer = () => changesFor({ ...empty(), girl: 'our', slayer: 'mirror' });
+export const initialSlayer = () => changesFor({ ...empty(), girl: 'our', slayer: 'mirror', mirrorVictims: 2 });
+// Accepted historical setup must keep replaying with its original unknown count.
+export const validSlayerSetup = (snapshot: unknown) => snapshot === initialSlayer().snapshot ||
+  snapshot === changesFor({ ...empty(), girl: 'our', slayer: 'mirror' }).snapshot;
 const isMarker = (id: unknown): id is SlayerMarker => SLAYER_MARKERS.some(slot => slot === id);
 const isMinor = (id: unknown): id is string => SLAYER_MINORS.some(card => card.id === id);
 const isHealth = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 2;
@@ -142,7 +145,7 @@ export function resolveSlayerAction(action: SlayerAction, fields: ModuleState, e
   const state = slayerState(fields);
   switch (action.command) {
     case 'mirror-victims':
-      if (!isMirrorCount(action.count) || (state.mirrorVictims ?? 0) === action.count) return null;
+      if (!isMirrorCount(action.count) || state.mirrorVictims === action.count) return null;
       state.mirrorVictims = action.count;
       break;
     case 'cross':
