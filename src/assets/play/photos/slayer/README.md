@@ -11,3 +11,5 @@ The twenty-four original module photographs use a practical creature suit and ca
 | Ten Terror IDs | 1152 × 648 photographs mapped once per unique title. The narrow cause tiles crop around the center. |
 
 [Manifest](manifest.json) records the original source filename and digest, scene prompt, derivative dimensions, file digest and byte size for every photograph. Runtime photographs are capped at 160 KiB and thumbnails at 35 KiB. The separate trusted opening JPEG is derived from the existing casting portrait and staged by `scripts/opening-references.mjs --only=Slayer`.
+
+Special Victim scene layers (November 10): `SlayerMirrorVictims` reuses Falconwood's existing `{mission}-person`, `conspiracy-theorist` and `head-researcher` photographs, with HTML names and separate clickable overlays. Only markers explicitly recorded in Mirror appear. Ordinary-victim artwork continues to represent only the ordinary tally; scene portraits add no casualties or location outcomes. No combined-state photographs or new raster assets are required.

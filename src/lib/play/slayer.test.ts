@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('https://deno.land/x/zod@v3.22.4/mod.ts', async () => import('zod'));
 import { SceneImageRequestSchema, EndingRequestSchema } from '../../../supabase/functions/_shared/validation';
 import { endingFacts } from '../../../supabase/functions/_shared/storyFacts';
-import { deathFacts, deathSignature } from './death';
+import { deathFacts, deathSignature, slayerVictimSetting } from './death';
 import { newPlayEvent, summarizePlay, validPlayLog, type PlayEvent } from './events';
 import { moduleState } from './modules';
 import { playStartingValues } from './defaults';
@@ -41,6 +41,50 @@ describe('Slayer', () => {
     expect(state([])).toMatchObject({girl:null,slayer:null});
   });
 
+  it('seeds two victims only for new games and replays the original setup unchanged', () => {
+    expect(state(start()).mirrorVictims).toBe(2);
+    expect(validPlayLog(start())).toBe(true);
+    const legacy = start();
+    const snapshot = JSON.parse(initialSlayer().snapshot);
+    delete snapshot.mirrorVictims;
+    legacy[1].moduleData!.changes.snapshot = JSON.stringify(snapshot);
+    expect(validPlayLog(legacy)).toBe(true);
+    expect(state(legacy).mirrorVictims).toBeUndefined();
+    legacy.push(record(legacy,{command:'mirror-victims',count:0}));
+    expect(validPlayLog(legacy)).toBe(true);
+    expect(state(legacy).mirrorVictims).toBe(0);
+    const saved = start();
+    saved.push(record(saved,{command:'mirror-victims',count:4}));
+    expect(state(JSON.parse(JSON.stringify(saved))).mirrorVictims).toBe(4);
+  });
+
+  it('keeps Slayer victim attacks in Mirror and freezes the resolved Collapse exception', async () => {
+    const log = start();
+    const before = newPlayEvent({kind:'killed',quantity:1,cause:'killer',slayerReference:true});
+    log.push(before);
+    const reveal = newPlayEvent({kind:'moment',momentType:'finale',killerCard:SLAYER_COLLAPSE,permanent:true,text:'Finale revealed'});
+    log.push(reveal);
+    const revealed = newPlayEvent({kind:'killed',quantity:1,cause:'killer',slayerReference:true});
+    log.push(revealed);
+    log.push(record(log,{command:'collapse',reveal:reveal.id,includeUnknown:[]}));
+    const after = newPlayEvent({kind:'killed',quantity:1,cause:'killer',slayerReference:true});
+    log.push(after);
+    expect(slayerVictimSetting(deathFacts(selection,log,before.id)!)).toBe('Mirror Dimension');
+    expect(slayerVictimSetting(deathFacts(selection,log,revealed.id)!)).toBe('Mirror Dimension');
+    expect(slayerVictimSetting(deathFacts(selection,log,after.id)!)).toBe('Our Dimension after Rift Collapse');
+    const {deathPrompt} = await import('../../../supabase/functions/_shared/deathPrompt');
+    const facts = deathFacts(selection,log,before.id)!;
+    const prompt = deathPrompt(facts,[]);
+    expect(JSON.parse(prompt.user).slayerVictimSetting).toBe('Mirror Dimension');
+    expect(prompt.system).toContain('He never emerges into Our Dimension');
+    expect(JSON.parse(deathPrompt(deathFacts(selection,log,after.id)!,[]).user).slayerVictimSetting).toBe('Our Dimension after Rift Collapse');
+    expect(JSON.parse(deathPrompt({...facts,cause:'hazard',attacker:''},[]).user).slayerVictimSetting).toBeUndefined();
+    expect(slayerVictimSetting({...facts,cause:'hazard',attacker:''})).toBeNull();
+    expect(slayerVictimSetting({...facts,killer:'Hans'})).toBeNull();
+    expect(slayerVictimSetting({...facts,cause:'terror',terrorCard:SLAYER_TERRORS[2].name})).toBe('Mirror Dimension');
+    expect(slayerVictimSetting({...facts,cause:'other',attacker:'Slayer'})).toBe('Mirror Dimension');
+  });
+
   it('moves just selected markers, records independent pulls, and rejects stale or forged observations', () => {
     const log = start();
     for (const id of ['1','2','3'] as const) log.push(record(log,{command:'track-marker',id,label:`Role ${id}`,dimension:'our'}));
@@ -60,7 +104,7 @@ describe('Slayer', () => {
 
   it('gates Collapse on the current named reveal and preserves the accepted physical transition after clearing it', () => {
     const log = start();
-    expect(state(log).mirrorVictims).toBeUndefined();
+    expect(state(log).mirrorVictims).toBe(2);
     expect(validSlayerAction({parent:'root',command:'mirror-victims',count:7})).toBe(false);
     log.push(record(log,{command:'mirror-victims',count:1}));
     log.push(record(log,{command:'track-marker',id:'1',label:'Best Friend',dimension:'mirror'}));

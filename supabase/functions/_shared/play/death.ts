@@ -1,6 +1,6 @@
 import { FALCONWOOD, FALCONWOOD_MODULE, falconwoodFacts, falconwoodState, missionById, missionByName } from "./falconwood.ts";
 import { MALL, MALL_MODULE, mallFacts } from './sunnydaze.ts';
-import { SLAYER, SLAYER_MODULE, slayerFacts } from "./slayer.ts";
+import { SLAYER, SLAYER_MODULE, SLAYER_TERRORS, slayerFacts } from "./slayer.ts";
 import { HUNTER, HUNTER_MODULE, hunterFacts } from './hunter.ts';
 import { WINGARD, WINGARD_MODULE } from './wingardCatalog.ts';
 import { wingardFacts, wingardState } from './wingardCottage.ts';
@@ -144,6 +144,20 @@ export function deathFacts(
     ...(e.attacker && { attacker: e.attacker }),
     ...(context && { moduleContext: context }),
   };
+}
+/** Narrative setting for an attributed Slayer victim attack. Preserve cached facts:
+ * collapse is read from this death's frozen context, never the current tracker. */
+export function slayerVictimSetting(facts: {
+  killer: string; cause: string; attacker?: string; terrorCard?: string;
+  moduleContext?: { slayer?: { facts?: unknown } };
+}): string | null {
+  if (facts.killer !== SLAYER) return null;
+  const terror = facts.cause === 'terror' && SLAYER_TERRORS.find(card => card.name === facts.terrorCard);
+  if (facts.cause !== 'killer' && facts.attacker !== SLAYER &&
+      !(terror && /attack|kill/i.test(terror.effect))) return null;
+  return typeof facts.moduleContext?.slayer?.facts === 'string' &&
+    facts.moduleContext.slayer.facts.includes('Rift Collapse was physically recorded.')
+    ? 'Our Dimension after Rift Collapse' : 'Mirror Dimension';
 }
 export type DeathFacts = NonNullable<ReturnType<typeof deathFacts>>;
 /** Only Dr. Fright gets a new cache namespace; historical fact hashes stay valid. */

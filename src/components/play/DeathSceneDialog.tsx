@@ -56,6 +56,7 @@ import {
 
 import {
   deathFacts,
+  slayerVictimSetting,
   deathSignature,
   deathSignatures,
   deathCauseLabels,
@@ -129,6 +130,7 @@ const {characterImages}=useActiveImages();
     ...initial,
     ...draft,
   }));
+  const slayerSetting = facts && slayerVictimSetting({...facts, ...values});
   const [signatures, setSignatures] = useState<string[]>([]);
   const [take, setTake] = useState(0);
   const [requested, setRequested] = useState(false);
@@ -302,7 +304,7 @@ const {characterImages}=useActiveImages();
           </p>
           <DialogTitle>Gruesome Death</DialogTitle>
           <DialogDescription>
-            {reading ? "" : "Add details, or return to the game."}
+            {slayerSetting ? `Slayer victim attack · ${slayerSetting}` : reading ? "" : "Add details, or return to the game."}
           </DialogDescription>
         </div>
         <div className="play-death-body" data-mode={reading ? "reading" : "editing"}>
