@@ -19,7 +19,7 @@
 .station-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .75rem; }
 @media (max-width: 570px) {
   .station-grid { grid-template-columns: 1fr; }
-  .station-hero { min-height: 9.25rem; }
+  .station-hero { aspect-ratio: 2 / 1; min-height: 9.25rem; }
 }
 .station-mechanic { display: grid; align-content: start; gap: .4rem; min-width: 0; }
 .station-grid .play-illustrated-tile { min-height: 8rem; }
@@ -36,6 +36,10 @@
 }
 .station-grid :is([data-state="unrecorded"], [data-state="ended"]) .play-module-art {
   filter: grayscale(.8) brightness(.62);
+}
+.play-module-content .station-controls .module-character > .module-control-tile:disabled {
+  opacity: 1;
+  cursor: default;
 }
 @media (max-width: 570px) {
   .play-module-content .station-controls .station-grid .module-control-tile { aspect-ratio: 2; }

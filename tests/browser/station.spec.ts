@@ -119,7 +119,12 @@ test('Station renders equipment, roles, allies and Terror crops across states',a
   for(const ally of STATION_ALLIES) await allies.getByRole('button',{name:new RegExp(ally.name)}).click();
   await expect(panel.getByLabel('Doctor aboard')).toBeChecked();
   await expect(panel.getByRole('combobox',{name:'Total passengers',exact:true})).toHaveValue('1');
-  await capture(panel,'station-active');
+  const viewports = info.project.name === 'mobile' ? [[390,844],[320,568]] : [[1280,640],[1366,768],[1440,900]];
+  for (const [width,height] of viewports) {
+    await page.setViewportSize({width,height});
+    await capture(panel,`station-active-${width}`);
+  }
+  await page.setViewportSize({width:viewports[0][0],height:viewports[0][1]});
   for(const role of STATION_ROLES) await crew.getByRole('button',{name:`Mark ${role.name} killed`,exact:true}).click();
   await capture(crew,'station-crew-killed');
   for(const role of STATION_ROLES){

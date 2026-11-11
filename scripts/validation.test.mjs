@@ -6,19 +6,29 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import ts from 'typescript';
 const require = createRequire(import.meta.url);
-const transpile = file => ts.transpileModule(readFileSync(new URL(file, import.meta.url), 'utf8'), {
-  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-}).outputText;
-const schemas = {}, falconwood = {};
-new Function('exports', transpile('../supabase/functions/_shared/play/falconwood.ts'))(falconwood);
-new Function('require', 'exports', transpile('../supabase/functions/_shared/validation.ts'))(name => {
-  if (name === './play/falconwood.ts') return falconwood;
-  if (name.includes('zod')) return require('zod');
-  if (name === './auth.ts') return { corsHeaders: { 'Access-Control-Allow-Origin': 'https://example.test' } };
-  throw new Error('Unexpected schema import: ' + name);
-}, schemas);
-new Function('require', 'exports', 'Deno', transpile('../supabase/functions/_shared/validation_test.ts'))(name => {
-  if (name === './validation.ts') return schemas;
-  if (name.includes('/assert/')) return { assertEquals: assert.deepEqual, assertExists: value => assert.notEqual(value, undefined) };
-  throw new Error('Unexpected test import: ' + name);
-}, {}, { test });
+const shared = new URL('../supabase/functions/_shared/', import.meta.url);
+const modules = new Map();
+
+function load(file) {
+  if (modules.has(file.href)) return modules.get(file.href);
+  const exports = {};
+  modules.set(file.href, exports);
+  const { outputText } = ts.transpileModule(readFileSync(file, 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  });
+  new Function('require', 'exports', 'Deno', outputText)(name => {
+    if (name === 'https://deno.land/x/zod@v3.22.4/mod.ts') return require('zod');
+    if (name === 'https://deno.land/std@0.224.0/assert/mod.ts') {
+      return { assertEquals: assert.deepEqual, assertExists: value => assert.notEqual(value, undefined) };
+    }
+    const dependency = new URL(name, file);
+    if (dependency.href === new URL('auth.ts', shared).href) {
+      return { corsHeaders: { 'Access-Control-Allow-Origin': 'https://example.test' } };
+    }
+    if (dependency.href.startsWith(shared.href) && dependency.pathname.endsWith('.ts')) return load(dependency);
+    throw new Error('Unexpected validation import: ' + name);
+  }, exports, { test });
+  return exports;
+}
+
+load(new URL('validation_test.ts', shared));
