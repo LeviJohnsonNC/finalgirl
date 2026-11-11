@@ -143,7 +143,7 @@ test("cause-first modal preserves separate death drafts and discards hidden fact
     page.getByRole("combobox", { name: "Death location", exact: true }),
   ).toHaveCount(0);
   await page.getByRole("button", { name: "Terror card", exact: true }).click();
-  await searchPick(page, "Terror card", "The generator is out.");
+  await searchPick(page, "Terror card", "The Generator Is Out!");
   await expect(modal).not.toContainText(
     "Frostbite remains through the next Upkeep",
   );

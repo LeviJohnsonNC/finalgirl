@@ -35,6 +35,7 @@ export interface ActiveGame {
   wingardSetupVersion?: 1;
   tormentorSetupVersion?: 1;
   wolfSetupVersion?: 1;
+  stationSetupVersion?: 1;
   organismSetupVersion?: 1;
   intrudersSetupVersion?: 1;
   mallSetupVersion?:1;
@@ -104,6 +105,10 @@ export function isActiveGame(value: unknown): value is ActiveGame {
     e.moduleData?.module === "slayer" && !e.slayerAction && game.slayerSetupVersion !== 1)) return false;
   if(game.hunterSetupVersion!==undefined&&(game.hunterSetupVersion!==1||game.selection?.killer!=='The Hunter'))return false;
   if(game.selection?.killer!=='The Hunter'&&Array.isArray(game.playEvents)&&game.playEvents.some(e=>e.moduleData?.module==='hunter'||e.hunterReference))return false;
+  if (game.stationSetupVersion !== undefined && (game.stationSetupVersion !== 1 || game.selection?.location !== 'Station 2891')) return false;
+  if (Array.isArray(game.playEvents) && game.playEvents.some(event =>
+    ((event?.stationReference || event?.moduleData?.module === 'station-2891') && game.selection?.location !== 'Station 2891') ||
+    (event?.moduleData?.module === 'station-2891' && !event.stationAction && game.stationSetupVersion !== 1))) return false;
   if (game.organismSetupVersion!==undefined&&(game.organismSetupVersion!==1||game.selection?.killer!=="The Organism")) return false;
   if (Array.isArray(game.playEvents)&&game.playEvents.some(event=>
     ((event?.organismReference||event?.moduleData?.module==="organism")&&game.selection?.killer!=="The Organism")||

@@ -1,3 +1,4 @@
+import { STATION_MODULE, isInitialStation, resolveStationAction, stationParent, validStationAction, type StationAction } from './station.ts';
 import { ORGANISM_MODULE, ORGANISM_MAX_BLOODLUST, initialOrganism, isInitialOrganism, isOrganismCasualty, organismParent, resolveOrganismAction, sameOrganismChanges, validOrganismAction, type OrganismAction } from "./organism.ts";
 import { MALL_MODULE, describeMallAction, initialMall, isInitialMall, resolveMallAction, validMallAction, mallParent, mallState, type MallAction } from './sunnydaze.ts';
 import { FALCONWOOD_EFFECTS, FALCONWOOD_MODULE, falconwoodParent, falconwoodState, initialFalconwood, missionById, resolveFalconwoodAction, validFalconwoodAction, type FalconwoodAction } from "./falconwood.ts";
@@ -65,6 +66,7 @@ export const isPermanentMoment = (e: Pick<PlayEvent, "kind" | "momentType">): bo
 export const isLockedPlayEvent = (e: PlayEvent): boolean =>
   (isPermanentMoment(e) && e.permanent === true) ||
   (e.kind === "module" && e.moduleData?.module === FALCONWOOD_MODULE && !e.falconwoodAction) ||
+  (e.kind === "module" && e.moduleData?.module === STATION_MODULE && !e.stationAction) ||
   (e.kind === "module" && e.moduleData?.module === ORGANISM_MODULE && !e.organismAction) ||
   (e.kind === "module" && e.moduleData?.module === SLAYER_MODULE && !e.slayerAction) ||
   (e.kind === "module" && e.moduleData?.module === "billy" && e.moduleData.changes.powerSourcesReady === true);
@@ -103,6 +105,8 @@ export interface PlayEvent extends PlayDetails {
   slayerReference?: true;
   hunterAction?: HunterAction;
   hunterReference?: true;
+  stationAction?: StationAction;
+  stationReference?: true;
   organismAction?: OrganismAction;
   organismReference?: true;
   intruderAction?: IntruderAction;
@@ -199,6 +203,10 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
   if (e.hunterReference !== undefined && (e.kind!=='killed'||e.hunterReference!==true))return false;
   if(e.hunterAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!==HUNTER_MODULE||!validHunterAction(e.hunterAction)))return false;
   if(e.moduleData?.module===HUNTER_MODULE&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.hunterAction&&e.moduleData.changes.snapshot!==initialHunter().snapshot)))return false;
+  if (e.stationReference !== undefined && (e.kind !== 'killed' || e.stationReference !== true)) return false;
+  if (e.stationAction !== undefined && (e.kind !== 'module' || e.moduleData?.module !== STATION_MODULE || !validStationAction(e.stationAction))) return false;
+  if (e.moduleData?.module === STATION_MODULE && (e.kind !== 'module' || !validModuleObservation(e.moduleData) ||
+      (!e.stationAction && !isInitialStation(e.moduleData.changes)))) return false;
   if (e.organismReference!==undefined&&(e.kind!=="killed"||e.organismReference!==true)) return false;
   if (e.organismAction!==undefined && (e.moduleData?.module!==ORGANISM_MODULE || !validOrganismAction(e.organismAction) ||
     (isOrganismCasualty(e.organismAction) ? e.kind!=="killed"||e.quantity!==1 : e.kind!=="module"))) return false;
@@ -302,9 +310,36 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validOrganismHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validStationHistory(log) && validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validOrganismHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
+}
+function validStationHistory(log: readonly PlayEvent[]) {
+  const observations = new Map(log.filter(e => e.moduleData?.module === STATION_MODULE).map(e => [e.id,e]));
+  if (!observations.size) return true;
+  let seeded = false;
+  for (const [index,event] of log.entries()) {
+    const isObservation = event.moduleData?.module === STATION_MODULE;
+    const target = event.target ? observations.get(event.target) : undefined;
+    if (!isObservation && !target) continue;
+    const prefix = log.slice(0,index);
+    const entries = summarizePlay(prefix).entries;
+    if (target && (!prefix.includes(target) || !target.stationAction || !['undo','restore'].includes(event.kind))) return false;
+    if (event.kind === 'undo') {
+      if (!target || stationParent(entries) !== target.id) return false;
+      continue;
+    }
+    if (target && entries.some(e => e.id === target.id)) return false;
+    const observation = target ?? event;
+    if (!observation.stationAction) {
+      if (seeded || entries.some(e => e.moduleData?.module === STATION_MODULE) || !isInitialStation(observation.moduleData!.changes)) return false;
+      seeded = true;
+      continue;
+    }
+    const resolved = resolveStationAction(observation.stationAction,moduleState(entries,STATION_MODULE),entries);
+    if (!resolved || resolved.snapshot !== observation.moduleData!.changes.snapshot) return false;
+  }
+  return true;
 }
 export function canUndoMall(log:readonly PlayEvent[],target:string) {
  const e=log.find(e=>e.id===target);

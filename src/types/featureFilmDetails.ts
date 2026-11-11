@@ -1,3 +1,4 @@
+import {STATION_EVENTS, STATION_SETUPS, stationSetupDescription} from '../../supabase/functions/_shared/play/stationCatalog';
 import { FALCONWOOD_EVENTS, FALCONWOOD_SETUPS, falconwoodSetupDescription } from "../../supabase/functions/_shared/play/falconwoodCatalog";
 import {MALL_SETUPS,MALL_EVENTS} from '../../supabase/functions/_shared/play/sunnydazeCatalog';
 import { WINGARD_EVENTS, WINGARD_SETUPS, wingardSetupDescription } from '../../supabase/functions/_shared/play/wingardCatalog';
@@ -389,28 +390,9 @@ Uki is incredibly tough and along with her dog, an Alaskan Malamute named Gus, i
     ],
     location: {
       name: 'Station 2891',
-      description: `"Cold doesn't begin to describe it. There ain't really no word for it to put it plainly, ma'am. You bundle up and if you go outside at night you never, ever let go of the guide line. Other than that we'll mostly be working all the time." - Stu Carpenter, Station 2891 Facilities Manager.
-
-Station 2891 is an isolated research facility in Antarctica, heavily inspired by John Carpenter's The Thing. The gameplay here is defined by uncertainty. In other Final Girl scenarios, you know exactly where the killer is. At Station 2891, the killer starts hidden among the group. You have to balance the urge to save people with the terrifying possibility that the person you're leading toward the helicopter is actually the monster waiting to mutate.`,
-      setupCards: [
-        { name: 'Clear the Grounds', description: 'Many victims are outside of the station.' },
-        { name: 'A New Stew', description: 'Victims are in the mess hall (or on the way) eating a delicious stew.' },
-        { name: 'Good Morning', description: 'Victims are all just waking up, most of them are in the station, with a couple early risers already outside.' },
-        { name: 'Quittin\' Time', description: 'End of the day for the victims, sun is starting to set.' },
-        { name: 'R&R', description: 'Break time for the victims, they are scattered around the station.' }
-      ],
-      events: [
-        { name: 'Don\'t Worry! We\'re Here to Help!', description: 'The helicopter is here, ready to rescue victims, however the victims around it have panicked and have spread out.' },
-        { name: 'Someone Pulled the Fire Alarm!', description: 'The fire alarm has been pulled, and all the victims in the station have panicked.' },
-        { name: 'Pair Up!', description: 'Victims are pairing up for safety.' },
-        { name: 'There\'s Been an Accident in the Lab!', description: 'An explosion has occurred in the Lab! Any victim in the lab has died in the explosion, and one wall has been blown out, exposing it to the outside.' },
-        { name: 'Heavy Storm', description: 'Heavy winter storm makes it much harder to move around outside.' },
-        { name: 'Who Goes There?', description: 'Several scientists have arrived from another station.' },
-        { name: 'Chow Time!', description: 'The closest victim to the Kitchen is a Chef.' },
-        { name: 'What\'s Up Doc', description: 'One of the victims is a doctor, who can help heal the final girl.' },
-        { name: 'Comms Specialist', description: 'One of the victims is a comms specialist, who can help radio in the helicopter.' },
-        { name: 'Hidden Weapons Cache', description: 'There are now extra weapons hidden throughout the station.' }
-      ]
+      description: 'An isolated polar research outpost of narrow corridors, icy guide lines and outbuildings. Outside, repeated exposure to the cold is dangerous. The helicopter must reach Arctic Airport to evacuate passengers.',
+      setupCards: STATION_SETUPS.map(setup=>({name:setup.name,description:stationSetupDescription(setup)})),
+      events: STATION_EVENTS.map(event=>({name:event.name,description:event.effect}))
     },
     killer: {
       name: 'The Organism',

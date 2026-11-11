@@ -1,3 +1,6 @@
+import { STATION, STATION_MODULE, initialStation, stationState, stationSummary } from '../../../supabase/functions/_shared/play/station';
+import { StationControls } from './StationControls';
+import { stationArt } from './stationArt';
 import {OrganismCards} from "./OrganismControls";
 import {organismArt} from "./organismArt";
 import {ORGANISM, ORGANISM_MODULE, organismLiving, organismRoster} from "@/lib/play/organism";
@@ -74,6 +77,7 @@ export interface ControlsProps {
   blocked?: boolean;
   mission?: string | null;
   falconwoodFresh?: boolean;
+  stationFresh?: boolean;
   setupScenario?: string | null;
   startingEvent?: string | null;
   killer: string;
@@ -92,7 +96,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -117,7 +121,11 @@ const peopleSummary = (
 };
 // Adding a module registers its owner, artwork and controls here. Location
 // never determines the killer's controls (and vice versa).
+const stationDefinition: Definition = {id:STATION_MODULE,owner:'location',match:STATION,title:'Inside Station 2891',art:stationArt.banner,
+  capabilities:['character','event'],Controls:StationControls,
+  summary:(fields,props)=>stationSummary(stationState(!props.events.length&&props.stationFresh?initialStation(props.startingEvent):fields))};
 export const moduleDefinitions: Definition[] = [
+ ...(import.meta.env.MODE === 'station-pilot' ? [stationDefinition] : []),
  {id:FALCONWOOD_MODULE,owner:'location',match:FALCONWOOD,title:'Inside Falconwood',art:falconwoodArt('header'),
   capabilities:[],Controls:FalconwoodControls,summary:(fields,props)=>{
     const state=falconwoodState(fields);

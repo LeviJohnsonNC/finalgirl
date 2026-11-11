@@ -1,3 +1,4 @@
+import {STATION, STATION_EVENTS, stationNameKey, stationSetup, stationSetupDescription} from '../../supabase/functions/_shared/play/stationCatalog';
 import {marrekOpeningGuidance} from '@/lib/play/marrekWarehouse';
 import {tormentorOpeningGuidance} from '@/lib/play/tormentor';
 import { evomorphOpeningGuidance } from '../../supabase/functions/_shared/play/evomorph';
@@ -63,6 +64,7 @@ interface NowPlayingProps {
   /** Falconwood only: the Mission that must be completed to win. */
   mission?: string | null;
   falconwoodFresh?: boolean;
+  stationFresh?: boolean;
   filmId: string | null;
   onBack: () => void;
   onGameEnd: (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, visualBible?: string) => void;
@@ -80,6 +82,7 @@ const NowPlaying = ({
   startingEvent,
   mission,
   falconwoodFresh,
+  stationFresh,
   filmId,
   onBack,
   onGameEnd,
@@ -226,6 +229,8 @@ const NowPlaying = ({
 
       const killerDetails = killerFilmDetails?.killer;
       const locationDetails = locationFilmDetails?.location;
+      const stationSetupCard = location === STATION ? stationSetup(setupScenario) : undefined;
+      const stationEventCard = location === STATION ? STATION_EVENTS.find(event=>stationNameKey(event.name)===stationNameKey(startingEvent??'')) : undefined;
       const finalGirlDetails = finalGirlFilmDetails?.finalGirls?.find(fg => fg.name === finalGirl);
 
       const { killerRules, locationRules } = getStoryRequestRules(killer, location);
@@ -250,12 +255,12 @@ const NowPlaying = ({
           backstory: finalGirlDetails?.backstory || `A survivor named ${finalGirl}.`
         },
         startingEvent: startingEvent ? {
-          name: startingEvent,
-          description: locationDetails?.events?.find(e => e.name === startingEvent)?.description || startingEvent
+          name: stationEventCard?.name ?? startingEvent,
+          description: stationEventCard?.effect ?? locationDetails?.events?.find(e => e.name === startingEvent)?.description ?? startingEvent
         } : undefined,
         startingSetup: setupScenario ? {
-          name: setupScenario,
-          description: locationDetails?.setupCards?.find(s => s.name === setupScenario)?.description || setupScenario
+          name: stationSetupCard?.name ?? setupScenario,
+          description: stationSetupCard ? stationSetupDescription(stationSetupCard) : locationDetails?.setupCards?.find(s => s.name === setupScenario)?.description ?? setupScenario
         } : undefined
       };
 
@@ -333,7 +338,7 @@ const NowPlaying = ({
     onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying || isPaused} hasStory={Boolean(story)}
     showDeathDetails={showDeathPanel} onShowDeathDetails={enabled => onCheckpoint({showDeathPanel: enabled})}
     drafts={playDrafts} onDraft={saveDraft}
-    moduleControls={<ModuleControls mission={mission} falconwoodFresh={falconwoodFresh} setupScenario={setupScenario} startingEvent={startingEvent} sessionId={sessionId} killer={killer} location={location} finalGirl={finalGirl} events={playEvents} onEvent={recordPlayEvent} blocked={playSyncBlocked} />}
+    moduleControls={<ModuleControls mission={mission} falconwoodFresh={falconwoodFresh} stationFresh={stationFresh} setupScenario={setupScenario} startingEvent={startingEvent} sessionId={sessionId} killer={killer} location={location} finalGirl={finalGirl} events={playEvents} onEvent={recordPlayEvent} blocked={playSyncBlocked} />}
     deathPanel={deathEventId && syncPlayNow ? <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl,mission}} events={playEvents} getEvents={getPlayEvents} eventId={deathEventId} draft={playDrafts[deathEventId]} onDraft={saveDraft} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/> : undefined}
     onDeath={event=>setDeathEventId(event.id)}/>;
 

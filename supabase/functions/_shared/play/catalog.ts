@@ -1,3 +1,4 @@
+import {STATION, STATION_EVENTS, STATION_ITEMS, STATION_ROLES, STATION_SOURCE, STATION_SPACES, STATION_TERRORS, stationNameKey} from './stationCatalog.ts';
 import { ORGANISM, ORGANISM_SOURCE, ORGANISM_TERRORS, ORGANISM_ITEM } from "./organism.ts";
 import { FALCONWOOD } from "./falconwood.ts";
 import { FALCONWOOD_EVENTS, FALCONWOOD_ITEMS, FALCONWOOD_MISSION_ITEMS, FALCONWOOD_ROLES, FALCONWOOD_SOURCE, FALCONWOOD_SPACES, FALCONWOOD_TERRORS } from "./falconwoodCatalog.ts";
@@ -48,10 +49,6 @@ export interface PlayCard {
   effect?: string;
   source: string;
 }
-const wiki = (page: string) => `https://finalgirl.fandom.com/wiki/${page}`;
-const station = wiki("Station_2891");
-const rules =
-  "https://gamers-hq.de/media/pdf/ca/8a/9f/FG_S2_FeatureFilmRules-compressed_2.pdf";
 export const PLAY_CARDS: readonly PlayCard[] = [
  ...FALCONWOOD_TERRORS.map(card => ({...card,kind:"terror" as const,location:FALCONWOOD,source:FALCONWOOD_SOURCE})),
  ...FALCONWOOD_EVENTS.map(card => ({...card,kind:"event" as const,location:FALCONWOOD,source:FALCONWOOD_SOURCE})),
@@ -97,66 +94,8 @@ export const PLAY_CARDS: readonly PlayCard[] = [
     location: "Buddyland",
     source: "Owner photo IMG_9311.jpg",
   })),
-  ...[
-    "It's happy hour!",
-    "It's not safe in here!",
-    "Tell me where it is!",
-    "What supplies are in the chopper?",
-    "We can't stay here",
-  ].map((name) => ({
-    name,
-    kind: "terror" as const,
-    location: "Station 2891",
-    source: station,
-  })),
-  {
-    name: "The generator is out.",
-    kind: "terror",
-    location: "Station 2891",
-    effect:
-      "Frostbite remains through the next Upkeep. Draw two Events, then target the Final Girl or a Victim, move and attack. Resolve Frostbite and helicopter movement.",
-    source: wiki("%22The_generator_is_out.%22"),
-  },
-  {
-    name: "They... just left.",
-    kind: "terror",
-    location: "Station 2891",
-    effect:
-      "With no Victims, replace this card. Otherwise remove one normal Victim, preferring outdoors, and add one Bloodlust. Target a Victim and move, then resolve Frostbite and helicopter movement.",
-    source: wiki("%22They..._just_left.%22"),
-  },
-  {
-    name: "We'll be dead by morning.",
-    kind: "terror",
-    location: "Station 2891",
-    effect:
-      "Choose two Horror or one Bloodlust, then panic all Victims or yourself. Target the Final Girl or a Victim and move. Resolve Frostbite and helicopter movement.",
-    source: wiki("%22We%27ll_be_dead_by_morning.%22"),
-  },
-  ...[
-    "Chow time!",
-    "Comms Specialist",
-    "Don't worry! We're here to help!",
-    "Heavy Storm",
-    "Hidden Weapons Cache",
-    "Someone pulled the fire alarm!",
-    "There's been an accident in the lab!",
-    "What's up doc?",
-    "Who goes there?",
-  ].map((name) => ({
-    name,
-    kind: "event" as const,
-    location: "Station 2891",
-    source: station,
-  })),
-  {
-    name: "Pair up!",
-    kind: "event",
-    location: "Station 2891",
-    effect:
-      "Redistribute lone Victims in pairs through Kitchen, Radio Room, Rec Room and Lab. Add a Victim if needed to complete the last pair, then discard the Event.",
-    source: `${rules}#page=11`,
-  },
+  ...STATION_TERRORS.map(card=>({...card,kind:'terror' as const,location:STATION,source:STATION_SOURCE})),
+  ...STATION_EVENTS.map(card=>({...card,kind:'event' as const,location:STATION,source:STATION_SOURCE})),
   ...HANS_TERRORS.map((card) => ({ ...card, kind: "terror" as const })),
   ...CAMP_TERRORS.map((card) => ({ ...card, kind: "terror" as const })),
   ...CAMP_EVENTS.map((card) => ({
@@ -193,12 +132,13 @@ export function findPlayCard(
   const key = selection.location === WOODS && kind === "event" && normalize(name) === "troll bridge"
     ? "toll bridge" : normalize(name);
   return applicablePlayCards(selection, kind).find(
-    (card) => normalize(card.name) === key,
+    (card) => card.location === STATION ? stationNameKey(card.name) === stationNameKey(name) : normalize(card.name) === key,
   );
 }
 /** Context-only Woods cards stay searchable as rules and accept historical free text. */
 export function suggestedDeathCards(selection: {killer:string;location:string;mission?:string|null}, kind: "terror" | "event") {
   return applicablePlayCards(selection, kind).filter(card => {
+    if (card.location===STATION && kind==='event') return card.name === STATION_EVENTS.find(event=>event.id==='lab-accident')?.name;
     if (card.killer===ORGANISM) return ORGANISM_TERRORS.some(terror=>terror.name===card.name&&terror.death);
     if (card.location === FALCONWOOD && kind === "event") return ["Head Researcher", "Conspiracy Theorist"].includes(card.name);
     if(card.location===WINGARD)return kind==='event'
@@ -233,19 +173,7 @@ export const PLAY_ROOMS: Record<string, readonly string[]> = {
   "Sacred Groves": GROVES_SPACES.filter(s=>s.type === "sacred" || s.type === "search").map(s=>s.name),
   "Maple Lane": [...MAPLE_HOUSES,...MAPLE_STREETS].map(s=>s.name),
   "Carnival of Blood": CARNIVAL_ROOMS,
-  "Station 2891": [
-    "Commander's Hut",
-    "Supply Closet",
-    "Tool Shed",
-    "Kitchen",
-    "Lab",
-    "Radio Room",
-    "Rec Room",
-    "Armory",
-    "Hallway",
-    "Helipad",
-    "Outside",
-  ],
+  [STATION]: [...Object.values(STATION_SPACES), 'Armory', 'Hallway', 'Outside'],
   "USS Konrad": [...KONRAD_SPACES],
   "Creech Manor": CREECH_SPACES.map(s=>s.name),
   "Camp Happy Trails": CAMP_ROOMS,
@@ -272,7 +200,7 @@ export function playMechanisms(selection: {
     ...(selection.location === "Camp Happy Trails"
       ? ["Dark Waters", "Fire", "Star Crossed Lovers"]
       : []),
-    ...(selection.location === "Station 2891" ? ["Frostbite"] : []),
+    ...(selection.location === STATION ? ["Frostbite","Lab explosion"] : []),
     ...(selection.location === "Carnival of Blood" ? [...CARNIVAL_TRAPS, ...CARNIVAL_ITEM_TRAPS].map(t=>t.name) : []),
     ...(selection.location === "Maple Lane" ? ["Fire", "Booby Trap", "Street traffic"] : []),
     ...(selection.location==='USS Konrad'?['Crusher','Incinerator','Airlock','Self Destruct','Hull breach','Gas leak','Faulty Wiring','Garbage Day']:[]),
@@ -287,14 +215,14 @@ export function playMechanisms(selection: {
 export function playItems(
   location: string,
 ): readonly { name: string; effect: string }[] {
-  return location === FALCONWOOD ? FALCONWOOD_ITEMS : location === MALL ? MALL_ITEMS : location === WOODS ? WOODS_ITEMS : location === WINGARD ? WINGARD_ITEMS : location === "Marrek Warehouse" ? MARREK_ITEMS : location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
+  return location === STATION ? STATION_ITEMS : location === FALCONWOOD ? FALCONWOOD_ITEMS : location === MALL ? MALL_ITEMS : location === WOODS ? WOODS_ITEMS : location === WINGARD ? WINGARD_ITEMS : location === "Marrek Warehouse" ? MARREK_ITEMS : location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
     ? CAMP_ITEMS
     : location === "Buddyland"
       ? BUDDYLAND_ITEMS
       : [];
 }
 export function playVictims(location: string): readonly { name: string }[] {
-  return location === FALCONWOOD ? FALCONWOOD_ROLES : location===MALL?[{name:'Bart the Mall Cop'},{name:'The Savior’s Girl'}]:location === WOODS ? WOODS_PEOPLE : location === WINGARD ? WINGARD_PEOPLE : location === "Marrek Warehouse" ? MARREK_PEOPLE : location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
+  return location === STATION ? STATION_ROLES : location === FALCONWOOD ? FALCONWOOD_ROLES : location===MALL?[{name:'Bart the Mall Cop'},{name:'The Savior’s Girl'}]:location === WOODS ? WOODS_PEOPLE : location === WINGARD ? WINGARD_PEOPLE : location === "Marrek Warehouse" ? MARREK_PEOPLE : location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
     ? CAMP_VICTIMS
     : location === "Buddyland"
       ? SPECIAL_VICTIMS

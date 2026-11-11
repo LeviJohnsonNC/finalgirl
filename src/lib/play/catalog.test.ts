@@ -9,7 +9,7 @@ describe("sourced death context", () => {
     const selection = { killer: "Hans", location: "Station 2891" };
     const cards = applicablePlayCards(selection, "terror");
     expect(cards.some((c) => c.name === "Taking Souvenirs")).toBe(true);
-    expect(cards.some((c) => c.name === "The generator is out.")).toBe(true);
+    expect(cards.some((c) => c.name === "The Generator Is Out!")).toBe(true);
     expect(cards.some((c) => c.name === "Fire!")).toBe(false);
     expect(
       findPlayCard({ killer: "Hans", location: "Maple Lane" }, "event", "Fire!")
@@ -22,7 +22,7 @@ describe("sourced death context", () => {
         "Fire!",
       ),
     ).toBeUndefined();
-    expect(playCardContext(selection, "It's happy hour!")).toEqual([]);
+    expect(playCardContext(selection, "It's happy hour!")[0]?.effect).toContain("Rec Room");
     expect(playCardContext(selection, "Totally invented")).toEqual([]);
   });
   it("changes scene identity when card facts change and never supplies an unverified effect", async () => {
@@ -62,7 +62,7 @@ describe("sourced death context", () => {
     };
     expect(
       JSON.parse(deathPrompt(unknown, []).user).selectedCardContext,
-    ).toEqual([]);
+    ).toEqual([expect.objectContaining({kind:"event",name:"Heavy Storm"})]);
   });
 });
 
