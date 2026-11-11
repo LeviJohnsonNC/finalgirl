@@ -24,3 +24,21 @@
 .station-mechanic { display: grid; align-content: start; gap: .4rem; min-width: 0; }
 .station-grid .play-illustrated-tile { min-height: 8rem; }
 .station-mechanic .station-edit { padding: .15rem .25rem; }
+.station-grid { align-items: start; }
+.play-module-content .station-controls .station-grid .module-control-tile {
+  aspect-ratio: 2.45;
+  min-height: 8rem;
+}
+.play-module-content .station-grid > .module-control-tile,
+.play-module-content .station-mechanic > .module-control-tile {
+  border: 1px solid #746152;
+  border-radius: .45rem;
+}
+.station-grid :is([data-state="unrecorded"], [data-state="ended"]) .play-module-art {
+  filter: grayscale(.8) brightness(.62);
+}
+@media (max-width: 570px) {
+  .play-module-content .station-controls .station-grid .module-control-tile { aspect-ratio: 2; }
+}
+.station-edit > label { min-width: 0; max-width: 100%; }
+.station-edit select { min-width: 0; max-width: 100%; }

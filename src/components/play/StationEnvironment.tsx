@@ -20,7 +20,7 @@ function Frostbite({state,commit}:Props) {
   const targets = STATION_FROST_TARGETS.filter(id=>!STATION_ROLES.some(role=>role.id===id) ||
     STATION_ROLES.some(role=>role.id===id && state.roles?.[role.id]==='present' && !state.flight?.roles.includes(role.id)));
   return <div className="station-mechanic">
-    <IllustratedTile title="Frostbite" art={stationArt.frostbite}
+    <IllustratedTile className="module-control-tile" title="Frostbite" art={stationArt.frostbite}
       status={state.frost?.girl ? frostOptions[state.frost.girl] : 'Final Girl status unrecorded'}
       aria-expanded={open} onClick={()=>setOpen(!open)}/>
     {open && <div className="station-edit">
@@ -50,7 +50,7 @@ export function StationEnvironment({state,commit}:Props) {
         interaction="toggle" onActivate={()=>commit({kind:'storm',active:true})}
         onEnd={()=>commit({kind:'storm',active:false})} onClear={()=>commit({kind:'storm',active:null})}/>
       <div className="station-mechanic">
-        <IllustratedTile title="Lab wall" status={state.breach?breachLabels[state.breach]:'Breach status unrecorded'}
+        <IllustratedTile className="module-control-tile" title="Lab wall" status={state.breach?breachLabels[state.breach]:'Breach status unrecorded'}
           art={breached?stationArt.labBreached:stationArt.labIntact}
           aria-expanded={labOpen} onClick={()=>setLabOpen(!labOpen)}/>
         {labOpen && <div className="station-edit"><label>Lab opening<select value={state.breach??''}
@@ -59,7 +59,7 @@ export function StationEnvironment({state,commit}:Props) {
         </select></label></div>}
       </div>
       <div className="station-mechanic">
-        <IllustratedTile title="Skidozer" status={state.skidozer
+        <IllustratedTile className="module-control-tile" title="Skidozer" status={state.skidozer
           ? `${state.skidozer==='parked'?'Parked':'In use'}${state.skidozerSpace?` · ${STATION_SPACES[state.skidozerSpace]}`:''}`
           : 'Status unrecorded'}
           art={state.skidozer==='in-use'?stationArt.skidozerInUse:stationArt.skidozerParked}
@@ -76,7 +76,7 @@ export function StationEnvironment({state,commit}:Props) {
         </div>}
       </div>
       <div className="station-mechanic">
-        <IllustratedTile title="Hidden Weapons Cache" status={state.cache==='revealed'
+        <IllustratedTile className="module-control-tile" title="Hidden Weapons Cache" status={state.cache==='revealed'
           ? `Armory revealed${state.armorySpace?` · ${STATION_SPACES[state.armorySpace]}`:''}`
           : state.cache==='hidden'?'Cache placed':state.cache==='unsearched'?'Cache absent':'Status unrecorded'}
           art={state.cache==='revealed'?stationArt.armory:stationArt.cache} aria-expanded={cacheOpen} onClick={()=>setCacheOpen(!cacheOpen)}/>
