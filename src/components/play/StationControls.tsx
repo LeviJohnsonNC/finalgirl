@@ -30,7 +30,7 @@ function FlightRecord({state, correction, preselected, submit}: {
   const [pending,setPending] = useState(correction && !!state.flight?.pending);
   const groupAllowed = !correction || position !== 'helipad' && (position !== 'airport' || pending);
   const count = groupAllowed ? passengers === '' ? null : Number(passengers) : 0;
-  const selectedRoles = groupAllowed ? roles : [];
+  const selectedRoles = groupAllowed ? roles.filter(id=>state.roles?.[id] === 'present') : [];
   const submitRecord = () => correction
     ? submit({kind:'flight-correction',flight:{position,count,roles:selectedRoles,pending:position === 'airport' && pending}})
     : submit({kind:'depart',count,roles:selectedRoles});
@@ -61,7 +61,7 @@ export function StationControls({events,onEvent,blocked,stationFresh,startingEve
   const state = stationState(!events.length && stationFresh ? initialStation(startingEvent) : moduleState(entries,STATION_MODULE));
   const parent = stationParent(entries);
   const rescueRef = useRef<HTMLElement>(null);
-  const [boarding,setBoarding] = useState<{role:Role;parent:string}>();
+  const [boarding,setBoarding] = useState<{role:Role;sequence:number}>();
   const {record,message} = useModuleRecord(events,onEvent);
   const [source,setSource] = useState<typeof STATION_MOVE_SOURCES[number]>('Fly Faster!');
   const commit = (command: StationCommand) => {
@@ -84,8 +84,12 @@ export function StationControls({events,onEvent,blocked,stationFresh,startingEve
         {STATION_ROUTE.map(id=><li key={id} aria-current={f?.position===id?'step':undefined}>{id==='station'?'Departure':STATION_POSITIONS[id]}</li>)}
       </ol>
       {!!f?.roles.length && <p className="station-passengers">{STATION_ROLES.filter(role=>f.roles.includes(role.id)).map(role=>role.name).join(', ')} aboard</p>}
-      {f?.position === 'helipad' && <FlightRecord key={`${parent}:${boarding?.role ?? ''}`} state={state}
-        preselected={boarding?.parent===parent?boarding.role:undefined} submit={commit}/>}
+      {f?.position === 'helipad' && <FlightRecord key={boarding?.sequence??0} state={state}
+        preselected={boarding?.role} submit={command=>{
+          const recorded = commit(command);
+          if (recorded) setBoarding(undefined);
+          return recorded;
+        }}/>}
       {f?.pending && <div className="station-actions">
         <button type="button" onClick={()=>commit({kind:'confirm-rescue'})}>Apply rescue effects</button>
         <small>Start of next Action phase · {f.count === null ? 'Passenger count unrecorded' : `${f.count}/3 aboard`}</small>
@@ -103,13 +107,13 @@ export function StationControls({events,onEvent,blocked,stationFresh,startingEve
         </div>
       </div>}
       <details className="module-correction"><summary>Correct helicopter record</summary>
-        <FlightRecord key={parent} state={state} correction submit={commit}/>
+        <FlightRecord key={JSON.stringify(f)} state={state} correction submit={commit}/>
         {f && f.count === 0 && f.position !== 'helipad' && <button type="button" onClick={()=>commit({kind:'help'})}>Record rescue Event relocation</button>}
       </details>
     </section>
     <StationEnvironment state={state} commit={commit}/>
     <StationCrew state={state} commit={commit} board={role=>{
-      setBoarding({role,parent});
+      setBoarding(previous=>({role,sequence:(previous?.sequence??0)+1}));
       rescueRef.current?.focus();
     }}/>
     <StationAllies state={state} commit={commit}/>

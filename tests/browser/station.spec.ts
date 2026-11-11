@@ -117,6 +117,8 @@ test('Station renders equipment, roles, allies and Terror crops across states',a
   await expect(panel.getByLabel('Doctor aboard')).toBeChecked();
   await expect(panel.getByRole('combobox',{name:'Total passengers',exact:true})).toHaveValue('1');
   for(const ally of STATION_ALLIES) await allies.getByRole('button',{name:new RegExp(ally.name)}).click();
+  await expect(panel.getByLabel('Doctor aboard')).toBeChecked();
+  await expect(panel.getByRole('combobox',{name:'Total passengers',exact:true})).toHaveValue('1');
   await capture(panel,'station-active');
   for(const role of STATION_ROLES) await crew.getByRole('button',{name:`Mark ${role.name} killed`,exact:true}).click();
   await capture(crew,'station-crew-killed');
