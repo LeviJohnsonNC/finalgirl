@@ -43,6 +43,13 @@
       "when": 1792428198305,
       "tag": "0005_apply_discard_game_session",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794423322072,
+      "tag": "0006_bind_secret_item_photos_to_caller_unlocks",
+      "breakpoints": true
     }
   ]
 }
