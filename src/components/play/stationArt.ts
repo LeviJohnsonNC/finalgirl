@@ -1,3 +1,10 @@
+import skidozerParked from '@/assets/play/photos/station-2891/skidozer-parked.webp';
+import skidozerInUse from '@/assets/play/photos/station-2891/skidozer-in-use.webp';
+import labIntact from '@/assets/play/photos/station-2891/lab-intact.webp';
+import labBreached from '@/assets/play/photos/station-2891/lab-breached.webp';
+import storm from '@/assets/play/photos/station-2891/heavy-storm.webp';
+import cache from '@/assets/play/photos/station-2891/cache-hidden.webp';
+import armory from '@/assets/play/photos/station-2891/armory.webp';
 import airport from '@/assets/play/photos/station-2891/airport.webp';
 import banner from '@/assets/play/photos/station-2891/banner.webp';
 import departure from '@/assets/play/photos/station-2891/departure.webp';
@@ -13,4 +20,11 @@ export const stationArt = {
   air: {src:flight,position:'55% 49%'},
   frostbite: {src:frostbite,position:'67% center'},
   helipad: {src:helipad,position:'60% 52%'},
+  skidozerParked: {src:skidozerParked,position:'center'},
+  skidozerInUse: {src:skidozerInUse,position:'center'},
+  labIntact: {src:labIntact,position:'center'},
+  labBreached: {src:labBreached,position:'center'},
+  storm: {src:storm,position:'center'},
+  cache: {src:cache,position:'center'},
+  armory: {src:armory,position:'center'},
 } satisfies Record<string,ModuleArt>;
