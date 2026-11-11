@@ -12,3 +12,12 @@ Original generated stills. Each WebP is a responsive runtime source shared by th
 | flight.webp | Aircraft above a snow ridge |
 | airport.webp | Aircraft at the remote hangar |
 | frostbite.webp | Gloved hand and frozen guide line |
+
+## Equipment and conditions
+
+| File | Frame |
+| --- | --- |
+| skidozer-parked.webp, skidozer-in-use.webp | Mustard tracked vehicle idle or actively clearing snow |
+| lab-intact.webp, lab-breached.webp | Analog workbench with intact wall or new opening |
+| heavy-storm.webp | Station entrance reduced to one light in a whiteout |
+| cache-hidden.webp, armory.webp | Snow-covered crate and discovered cache |

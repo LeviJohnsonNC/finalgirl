@@ -21,3 +21,6 @@
   .station-grid { grid-template-columns: 1fr; }
   .station-hero { min-height: 9.25rem; }
 }
+.station-mechanic { display: grid; align-content: start; gap: .4rem; min-width: 0; }
+.station-grid .play-illustrated-tile { min-height: 8rem; }
+.station-mechanic .station-edit { padding: .15rem .25rem; }

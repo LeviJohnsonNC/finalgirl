@@ -1,3 +1,4 @@
+import {STATION, STATION_MODULE, stationFacts, stationState} from './station.ts';
 import {ORGANISM, ORGANISM_MODULE, organismFacts, organismLiving} from "./organism.ts";
 import { FALCONWOOD, FALCONWOOD_MODULE, falconwoodFacts, falconwoodState, missionById, missionByName } from "./falconwood.ts";
 import { MALL, MALL_MODULE, mallFacts } from './sunnydaze.ts';
@@ -31,6 +32,7 @@ export function deathFacts(
   eventId: string,
 ) {
   if(!validPlayLog(events))return null;
+  if (selection.location !== STATION && events.some(e=>e.stationReference || e.moduleData?.module===STATION_MODULE)) return null;
   if(selection.killer!==ORGANISM&&events.some(e=>e.moduleData?.module===ORGANISM_MODULE||e.organismReference)) return null;
   if (selection.location !== FALCONWOOD && events.some(e => e.moduleData?.module === FALCONWOOD_MODULE || e.falconwoodReference)) return null;
   const selectedMission = missionByName(selection.mission);
@@ -62,7 +64,8 @@ export function deathFacts(
   const mallDeath=selection.location===MALL&&e.mallReference;
   const slayerDeath = selection.killer === SLAYER && e.slayerReference;
   const hunterDeath=selection.killer===HUNTER&&e.hunterReference;
-  const historical = falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
+  const stationDeath = selection.location === STATION && e.stationReference;
+  const historical = stationDeath || falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
     ? summarizePlay(events.slice(0, events.findIndex(event => event.id === eventId) + 1)).entries
     : [];
   // The death's own fields reflect deliberate edits. Only the surrounding
@@ -124,6 +127,10 @@ export function deathFacts(
   if(organismDeath) {
     const facts=organismFacts(moduleState(historical,ORGANISM_MODULE),historical);
     if(facts) context={...context,[ORGANISM_MODULE]:{facts}};
+  }
+  if (stationDeath) {
+    const facts = stationFacts(stationState(moduleState(historical,STATION_MODULE)));
+    if (facts) context = {...context,[STATION_MODULE]:{facts}};
   }
   if (intruderDeath) {
     const state=moduleState(historical,INTRUDER_MODULE);

@@ -70,7 +70,7 @@ export const DEATH_LOCATION_CUES: Record<string, string> = {
   'USS Konrad':
     'A massive, modular industrial mining vessel, the USS KONRAD, suspended in low orbit above a vast, rust-colored terrestrial planet. The ship is a heavy, rectangular behemoth constructed from weathered and scarred metal plating, showing years of exposure to space-borne debris and industrial soot. It is utilitarian and imposing, designed for function rather than aesthetics, with a "used future" aesthetic characterized by exposed machinery and reinforced hull segments.',
   'Station 2891':
-    'A remote, high-arctic research outpost situated in a vast, frozen wasteland, characterized by a series of low-profile, modular industrial buildings heavily insulated against extreme cold. The station appears utilitarian and high-stakes—structures are wrapped in thick, quilted thermal blankets and reinforced panels, with plumes of steam or exhaust rising from vents into the frigid air.',
+    'A remote polar research outpost situated in a vast, frozen wasteland, characterized by a series of low-profile, modular industrial buildings heavily insulated against extreme cold. The station appears utilitarian and high-stakes—structures are wrapped in thick, quilted thermal blankets and reinforced panels, with plumes of steam or exhaust rising from vents into the frigid air.',
   "Storybook Woods": WOODS_VISUAL,
   'Wingard Cottage': WINGARD_VISUAL,
   Falconwood:

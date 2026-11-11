@@ -96,7 +96,7 @@ The scene is framed through the thick, dark casing of a nearby window, placing t
 
 Massive, blocky industrial spaceship in orbit. Weathered, scarred metal hull with corporate branding. Thick umbilical cables connecting to a docking platform. Atmospheric orange planet visible in the background. Harsh sunlight and deep shadows against the void of space.`,
 
-  "Station 2891": `A remote, high-arctic research outpost situated in a vast, frozen wasteland, characterized by a series of low-profile, modular industrial buildings heavily insulated against extreme cold. The station appears utilitarian and high-stakes—structures are wrapped in thick, quilted thermal blankets and reinforced panels, with plumes of steam or exhaust rising from vents into the frigid air.
+  "Station 2891": `A remote polar research outpost situated in a vast, frozen wasteland, characterized by a series of low-profile, modular industrial buildings heavily insulated against extreme cold. The station appears utilitarian and high-stakes—structures are wrapped in thick, quilted thermal blankets and reinforced panels, with plumes of steam or exhaust rising from vents into the frigid air.
 
 In the foreground, a weather-beaten metal sign stands partially buried in the snow, clearly marked "STATION 2891 - RESTRICTED AREA," establishing a sense of isolation and military or scientific secrecy. A heavy rope line defines a cleared walkway, cutting through the deep, drifted snow to guide personnel through whiteout conditions.
 

@@ -45,7 +45,7 @@ export type StationCommand =
   | { kind: 'flight-correction'; flight: Flight | null }
   | { kind: 'role'; id: Role; status: RoleState | null; correction?: true }
   | { kind: 'frost'; target: Frost; status: Status | null }
-  | { kind: 'storm'; active: boolean }
+  | { kind: 'storm'; active: boolean | null }
   | { kind: 'skidozer'; status: Skidozer | null; space?: Outdoor }
   | { kind: 'breach'; status: Breach | null }
   | { kind: 'cache'; status: Cache | null; space?: Exclude<Outdoor, 'helipad'> }
@@ -88,7 +88,7 @@ export function validStationAction(input: unknown): input is StationAction {
     case 'flight-correction': return allowed('flight') && (input.flight === null || validFlight(input.flight));
     case 'role': return allowed('id','status','correction') && oneOf(roleIds,input.id) && nullable(roleStates,input.status) && (input.correction === undefined || input.correction === true);
     case 'frost': return allowed('target','status') && oneOf(STATION_FROST_TARGETS,input.target) && nullable(frostStates,input.status);
-    case 'storm': return allowed('active') && typeof input.active === 'boolean';
+    case 'storm': return allowed('active') && (input.active === null || typeof input.active === 'boolean');
     case 'skidozer': return allowed('status','space') && nullable(skidozerStates,input.status) &&
       (input.space === undefined || input.status !== null && oneOf(STATION_OUTDOORS,input.space));
     case 'breach': return allowed('status') && nullable(breachStates,input.status);
@@ -215,7 +215,7 @@ function stationTransition(current: StationState, action: StationAction): Statio
       if (s.generator !== true) return;
       s.generator = false;
       break;
-    case 'storm': s.storm = action.active; break;
+    case 'storm': s.storm = action.active ?? undefined; break;
     case 'skidozer':
       s.skidozer = action.status ?? undefined;
       s.skidozerSpace = action.space;
@@ -256,6 +256,7 @@ export function stationFacts(s: StationState) {
   if (s.frost?.girl === 'marked') parts.push('The Final Girl had a recorded Frostbite token.');
   if (s.storm) parts.push('Heavy Storm was active.');
   if (s.generator) parts.push('Frostbite clearing is suspended at the next Upkeep.');
+  if (s.skidozer) parts.push(`Skidozer: ${s.skidozer === 'in-use' ? 'in use' : 'parked'}${s.skidozerSpace ? ` at ${STATION_SPACES[s.skidozerSpace]}` : ''}.`);
   if (s.cache === 'revealed') parts.push(`Armory discovered${s.armorySpace ? ` at ${STATION_SPACES[s.armorySpace]}` : ''}.`);
   for (const role of STATION_ROLES) {
     const status = s.roles?.[role.id];

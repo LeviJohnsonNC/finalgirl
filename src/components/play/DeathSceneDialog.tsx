@@ -1,3 +1,5 @@
+import {STATION, STATION_EVENTS, stationNameKey} from '../../../supabase/functions/_shared/play/stationCatalog';
+import {stationArt} from './stationArt';
 import {ORGANISM, ORGANISM_FORMS, ORGANISM_TERRORS} from "@/lib/play/organism";
 import {organismDeathAttackers} from "@/lib/play/death";
 import {organismArt} from "./organismArt";
@@ -135,6 +137,11 @@ const {characterImages}=useActiveImages();
     ...initial,
     ...draft,
   }));
+  const stationCauseArt = selection.location === STATION
+    ? values.mechanism === 'Frostbite' ? stationArt.frostbite
+      : values.mechanism === 'Lab explosion' || stationNameKey(values.eventCard ?? '') === stationNameKey(STATION_EVENTS.find(event=>event.id==='lab-accident')!.name)
+        ? stationArt.labBreached : undefined
+    : undefined;
   const slayerSetting = facts && slayerVictimSetting({...facts, ...values});
   const [signatures, setSignatures] = useState<string[]>([]);
   const [take, setTake] = useState(0);
@@ -369,7 +376,7 @@ const {characterImages}=useActiveImages();
                     }
                   }}
                 >
-                  {selection.location===MALL&&cause==='hazard'?<ModuleArtwork art={mallArt('wet-floors')}/>:selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
+                  {stationCauseArt && cause===values.cause ? <ModuleArtwork art={stationCauseArt}/> : selection.location===MALL&&cause==='hazard'?<ModuleArtwork art={mallArt('wet-floors')}/>:selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
                     :cause==='event'&&cottageEvent ? <ModuleArtwork art={wingardArt(cottageEvent.id,true)} />
                     :selection.killer===ORGANISM&&cause==="killer"?<ModuleArtwork art={organismArt(ORGANISM_FORMS.find(form=>form.name===values.attacker)?.id??"header")} />
                     :cause==="terror"&&organismTerror?<ModuleArtwork art={organismArt(organismTerror.id,true)} />
