@@ -172,7 +172,13 @@ test('Organism artwork loads in the complete module and selected death causes',a
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   const roster=page.getByRole('region',{name:'The Organism roster'});
   const capture=async(subject:typeof roster,name:string)=>{
-    await subject.locator('img:visible').evaluateAll(async images=>Promise.all(images.map(img=>(img as HTMLImageElement).decode())));
+    await subject.scrollIntoViewIfNeeded();
+    const photos=subject.locator('img:visible');
+    await photos.evaluateAll(images=>images.forEach(image=>{(image as HTMLImageElement).loading='eager';}));
+    await expect.poll(()=>photos.evaluateAll(images=>images.length>0&&images.every(img=>{
+      const image=img as HTMLImageElement;
+      return image.complete&&image.naturalWidth>0;
+    }))).toBe(true);
     await subject.screenshot({path:info.outputPath(name+'.jpg'),type:'jpeg',quality:83,animations:'disabled',style:'.app-footer{visibility:hidden}'});
   };
   await page.emulateMedia({reducedMotion:'reduce'});
