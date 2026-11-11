@@ -125,7 +125,7 @@ const stationDefinition: Definition = {id:STATION_MODULE,owner:'location',match:
   capabilities:['character','event'],Controls:StationControls,
   summary:(fields,props)=>stationSummary(stationState(!props.events.length&&props.stationFresh?initialStation(props.startingEvent):fields))};
 export const moduleDefinitions: Definition[] = [
- ...(import.meta.env.MODE === 'station-pilot' ? [stationDefinition] : []),
+ stationDefinition,
  {id:FALCONWOOD_MODULE,owner:'location',match:FALCONWOOD,title:'Inside Falconwood',art:falconwoodArt('header'),
   capabilities:[],Controls:FalconwoodControls,summary:(fields,props)=>{
     const state=falconwoodState(fields);

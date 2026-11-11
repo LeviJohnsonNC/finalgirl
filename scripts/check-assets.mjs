@@ -480,3 +480,30 @@ for(const photo of organismPhotos) {
 if(organismExpected.size||organismFiles.size!==31||
   images.some(file=>file.startsWith(organismFolder+'/')&&!organismFiles.has(file))) throw Error('Incomplete Organism art set');
 console.log('Verified 25 original Organism photographs and 6 chooser thumbnails.');
+
+// The Station stack shares one responsive runtime WebP per photographed state.
+const stationDirectory='src/assets/play/photos/station-2891';
+const stationManifest=JSON.parse(readFileSync(join(stationDirectory,'manifest.json'),'utf8'));
+const stationImages=images.filter(file=>file.startsWith(stationDirectory+'/'));
+const stationExpected=[
+ 'banner','helipad','departure','flight','airport','frostbite',
+ 'skidozer-parked','skidozer-in-use','lab-intact','lab-breached','heavy-storm','cache-hidden','armory',
+ ...['doctor','chef','comms'].flatMap(role=>[role,`${role}-saved`,`${role}-killed`]),'char','thule',
+ ...['happy-hour','not-safe','tell-me','generator','they-left','cant-stay','by-morning','chopper-supplies'].map(terror=>`terror-${terror}`),
+];
+if(stationImages.length!==stationExpected.length||Object.keys(stationManifest).length!==stationExpected.length)
+ throw new Error('Station artwork coverage does not match the supported states');
+const stationArtModule=readFileSync('src/components/play/stationArt.ts','utf8');
+const stationSources=new Set();
+for(const name of stationExpected){
+ const entry=stationManifest[name], file=join(stationDirectory,`${name}.webp`);
+ if(!entry||!/^exec-[a-f0-9-]+\.png$/.test(entry.source)||stationSources.has(entry.source)||!stationArtModule.includes(`/station-2891/${name}.webp`))
+  throw new Error('Unmapped Station photograph: '+name);
+ stationSources.add(entry.source);
+ const bytes=readFileSync(file), [width,height]=konradWebpDimensions(bytes);
+ if(entry.width!==width||entry.height!==height||width<1440||height<460||
+   width>entry.nativeWidth||height>entry.nativeHeight||
+   entry.bytes!==bytes.length||entry.sha256!==createHash('sha256').update(bytes).digest('hex'))
+  throw new Error('Invalid Station photograph: '+name);
+}
+console.log(`Verified ${stationImages.length} Station photographs and their runtime mappings.`);

@@ -1,3 +1,13 @@
+import char from '@/assets/play/photos/station-2891/char.webp';
+import thule from '@/assets/play/photos/station-2891/thule.webp';
+import happyHour from '@/assets/play/photos/station-2891/terror-happy-hour.webp';
+import notSafe from '@/assets/play/photos/station-2891/terror-not-safe.webp';
+import tellMe from '@/assets/play/photos/station-2891/terror-tell-me.webp';
+import generator from '@/assets/play/photos/station-2891/terror-generator.webp';
+import theyLeft from '@/assets/play/photos/station-2891/terror-they-left.webp';
+import cantStay from '@/assets/play/photos/station-2891/terror-cant-stay.webp';
+import byMorning from '@/assets/play/photos/station-2891/terror-by-morning.webp';
+import chopperSupplies from '@/assets/play/photos/station-2891/terror-chopper-supplies.webp';
 import doctorPresent from '@/assets/play/photos/station-2891/doctor.webp';
 import doctorSaved from '@/assets/play/photos/station-2891/doctor-saved.webp';
 import doctorKilled from '@/assets/play/photos/station-2891/doctor-killed.webp';
@@ -43,3 +53,19 @@ export const stationCrewArt = {
   chef: {present:{src:chefPresent,position:'64% center'},saved:{src:chefSaved,position:'64% center'},killed:{src:chefKilled,position:'64% center'}},
   comms: {present:{src:commsPresent,position:'64% center'},saved:{src:commsSaved,position:'64% center'},killed:{src:commsKilled,position:'64% center'}},
 } satisfies Record<string,Record<string,ModuleArt>>;
+
+export const stationAllyArt = {
+  char:{src:char,position:'64% center'},
+  thule:{src:thule,position:'64% center'},
+} satisfies Record<string,ModuleArt>;
+
+export const stationTerrorArt = {
+  'happy-hour': {src:happyHour,position:'62% center'},
+  'not-safe': {src:notSafe,position:'62% center'},
+  'tell-me': {src:tellMe,position:'62% center'},
+  'generator': {src:generator,position:'62% center'},
+  'they-left': {src:theyLeft,position:'62% center'},
+  'cant-stay': {src:cantStay,position:'62% center'},
+  'by-morning': {src:byMorning,position:'62% center'},
+  'chopper-supplies': {src:chopperSupplies,position:'62% center'},
+} satisfies Record<string,ModuleArt>;

@@ -1,4 +1,7 @@
 import { assertEquals, assertExists } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { deathFacts, deathSignature } from "./play/death.ts";
+import { newPlayEvent, validPlayLog, type PlayEvent } from "./play/events.ts";
+import { initialStation, resolveStationAction, STATION_MODULE, type StationAction } from "./play/station.ts";
 import { StoryRequestSchema, VisualBibleRequestSchema, SceneImageRequestSchema, EndingRequestSchema, NarrationRequestSchema, DeathRequestSchema, validateRequest } from "./validation.ts";
 
 // ============== StoryRequestSchema Tests ==============
@@ -355,4 +358,27 @@ Deno.test('Falconwood review is shared by prose and poster and must match the se
   assertEquals(EndingRequestSchema.safeParse({...prose,location:{name:'Sunnydaze Mall'}}).success,false);
   assertEquals(SceneImageRequestSchema.safeParse({...poster,sceneType:'beginning'}).success,false);
   assertEquals(EndingRequestSchema.safeParse({...prose,outcome:'lost',falconwoodReview:{mission:'lab',complete:true}}).success,true);
+});
+
+Deno.test("Station death fingerprints preserve the original observation after later corrections", async () => {
+  const location = "Station 2891";
+  const selection = { killer: "Hans", location, finalGirl: "Kate" };
+  const entries: PlayEvent[] = [newPlayEvent({ kind: "start", saved: 0, killed: 0, round: 1 })];
+  const baseline = newPlayEvent({ kind: "module", moduleData: { module: STATION_MODULE, changes: initialStation() } });
+  entries.push(baseline);
+  const breach: StationAction = { kind: "breach", status: "keys", parent: baseline.id };
+  const changes = resolveStationAction(breach, initialStation(), entries)!;
+  const breachEvent = newPlayEvent({ kind: "module", stationAction: breach, moduleData: { module: STATION_MODULE, changes } });
+  entries.push(breachEvent);
+  const death = newPlayEvent({ kind: "killed", quantity: 1, cause: "hazard", mechanism: "Frostbite", stationReference: true });
+  entries.push(death);
+  const original = deathFacts(selection, entries, death.id)!;
+  assertEquals(original.moduleContext?.[STATION_MODULE]?.facts?.toString().includes("made by the Skidozer"), true);
+  const correction: StationAction = { kind: "breach", status: "intact", parent: breachEvent.id };
+  const corrected = resolveStationAction(correction, changes, entries)!;
+  entries.push(newPlayEvent({ kind: "module", stationAction: correction, moduleData: { module: STATION_MODULE, changes: corrected } }));
+  const reloaded = JSON.parse(JSON.stringify(entries));
+  assertEquals(validPlayLog(reloaded), true);
+  assertEquals(await deathSignature(deathFacts(selection, reloaded, death.id)!), await deathSignature(original));
+  assertEquals(deathFacts({ ...selection, location: "Maple Lane" }, reloaded, death.id), null);
 });

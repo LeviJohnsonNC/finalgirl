@@ -70,3 +70,32 @@ SELECT set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
 DO $$ BEGIN ASSERT NOT EXISTS(SELECT 1 FROM public.game_history WHERE id='61616161-6161-4161-8161-616161616161');ASSERT NOT EXISTS(SELECT 1 FROM public.play_sessions WHERE id='61616161-6161-4161-8161-616161616161');END $$;
 RESET ROLE;
 ROLLBACK;
+
+-- Station pending rescue and finish totals survive the existing session/archive contract.
+BEGIN;
+SET ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',false);
+DO $$ DECLARE
+ id_value uuid := '92892892-8928-4928-8928-928928928928';
+ s jsonb;
+ observations jsonb;
+ snapshot_value text := '{"flight":{"count":3,"pending":true,"position":"airport","roles":[]}}';
+ r jsonb;
+BEGIN
+ observations := jsonb_build_array(
+  jsonb_build_object('kind','start','saved',0,'killed',0,'round',1,'id','92892892-8928-4928-8928-928928928929','at',1794412800000),
+  jsonb_build_object('kind','module','id','92892892-8928-4928-8928-928928928930','at',1794412800001,
+   'stationAction',jsonb_build_object('kind','flight-correction','parent','root','flight',(snapshot_value::jsonb)->'flight'),
+   'moduleData',jsonb_build_object('module','station-2891','changes',jsonb_build_object('snapshot',snapshot_value))));
+ s := jsonb_build_object('version',1,'id',id_value,'phase','nowPlaying',
+  'selection',jsonb_build_object('killer','Hans','location','Station 2891','finalGirl','Kate'),'playEvents',observations);
+ r := public.save_play_session(id_value,0,s,false);
+ ASSERT r->>'ok'='true';
+ ASSERT (SELECT state#>>'{playEvents,1,moduleData,changes,snapshot}' FROM public.play_sessions WHERE id=id_value)=snapshot_value;
+ INSERT INTO public.game_history(id,user_id,timestamp,outcome,killer,location,final_girl,victims_saved,play_events)
+  VALUES(id_value,auth.uid(),1,'lost','Hans','Station 2891','Kate',0,observations);
+ ASSERT (SELECT victims_saved FROM public.game_history WHERE id=id_value)=0;
+ ASSERT (SELECT play_events#>>'{1,moduleData,changes,snapshot}' FROM public.game_history WHERE id=id_value)=snapshot_value;
+END $$;
+RESET ROLE;
+ROLLBACK;
