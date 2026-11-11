@@ -20,11 +20,15 @@ function moduleAt(path, imports) {
     if(name==='./hunter.ts'||name==='./play/hunter.ts')return hunter;
     if(name==='./sunnydaze.ts'||name==='./play/sunnydaze.ts')return mall;
     if(name==='./sunnydazeCatalog.ts')return mallCatalog;
+    if(name==='./station.ts')return station;
+    if(name==='./stationCatalog.ts')return stationCatalog;
     if (imports[name]) return imports[name];
     throw new Error("Unexpected import " + name);
   }, ex);
   return ex;
 }
+const stationCatalog=moduleAt('../supabase/functions/_shared/play/stationCatalog.ts',{});
+const station=moduleAt('../supabase/functions/_shared/play/station.ts',{});
 const mallCatalog=moduleAt('../supabase/functions/_shared/play/sunnydazeCatalog.ts',{});
 const mall=moduleAt('../supabase/functions/_shared/play/sunnydaze.ts',{'./sunnydazeCatalog.ts':mallCatalog});
 const organism=moduleAt('../supabase/functions/_shared/play/organism.ts',{});

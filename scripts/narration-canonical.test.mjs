@@ -19,12 +19,16 @@ const load = (path, imports) => {
     if(name==='./hunter.ts'||name==='./play/hunter.ts')return hunter;
     if(name==='./sunnydaze.ts'||name==='./play/sunnydaze.ts')return mall;
     if(name==='./sunnydazeCatalog.ts')return mallCatalog;
+    if(name==='./station.ts')return station;
+    if(name==='./stationCatalog.ts')return stationCatalog;
     if (name === '../_shared/narration.ts') return load('../supabase/functions/_shared/narration.ts', {});
       if (imports[name]) return imports[name];
     throw new Error(name);
   }, ex);
   return ex;
 };
+const stationCatalog=load('../supabase/functions/_shared/play/stationCatalog.ts',{});
+const station=load('../supabase/functions/_shared/play/station.ts',{});
 const mallCatalog=load('../supabase/functions/_shared/play/sunnydazeCatalog.ts',{});
 const mall=load('../supabase/functions/_shared/play/sunnydaze.ts',{'./sunnydazeCatalog.ts':mallCatalog});
 const hunter=load('../supabase/functions/_shared/play/hunter.ts',{});
