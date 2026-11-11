@@ -168,7 +168,7 @@ const IndexContent = () => {
       ...(selection.location==='Sunnydaze Mall'&&{mallSetupVersion:1 as const}),
       ...(selection.killer === SLAYER && {slayerSetupVersion:1 as const}),
       ...(selection.killer === 'The Hunter' && {hunterSetupVersion:1 as const}),
-      ...(import.meta.env.MODE === "station-pilot" && selection.location === "Station 2891" && {stationSetupVersion:1 as const}),
+      ...(selection.location === "Station 2891" && {stationSetupVersion:1 as const}),
       ...(selection.killer === "The Organism" && {organismSetupVersion:1 as const}),
       ...(selection.killer === 'The Intruders' && {intrudersSetupVersion:1 as const}),
       ...(selection.killer === 'Big Bad Wolf' && { wolfSetupVersion: 1 as const }),

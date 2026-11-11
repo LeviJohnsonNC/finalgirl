@@ -25,7 +25,7 @@ export function StationCrew({state,commit,board}: {
         <CharacterControl name={role.name} value={aboard?'aboard':value} states={states} present="present" art={art}
           showRules={false} showStatusEditor={false} reactivateFrom={['left']}
           outcomes={value==='present'&&!aboard?['killed','left']:[]}
-          onChange={status=>commit({kind:'role',id:role.id,status:status as typeof value ?? null})}/>
+          onChange={status=>commit({kind:'role',id:role.id,status:status as 'present'|'killed'|'left'})}/>
         {value==='present'&&!aboard&&state.flight?.position==='helipad'&&
           <button type="button" aria-label={`Board ${role.name}`} onClick={()=>board(role.id)}>Board helicopter</button>}
         {value&&!aboard&&<details className="module-correction">

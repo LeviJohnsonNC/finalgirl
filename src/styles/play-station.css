@@ -12,15 +12,37 @@
 .station-edit, .station-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem .75rem; }
 .station-edit label { display: inline-flex; align-items: center; gap: .45rem; font-size: .84rem; }
 .station-controls button:not(.play-illustrated-tile), .station-controls select { min-height: 44px; padding: .25rem .65rem; border: 1px solid #826b61; border-radius: .4rem; background: #2f252b; color: #f7e5ce; }
-.station-controls button:disabled { opacity: .55; }
+.station-controls button:not(.play-illustrated-tile):disabled { opacity: .55; }
 .station-controls summary { min-height: 44px; align-content: center; }
 .station-check { min-height: 44px; cursor: pointer; }
 .station-controls :is(button,select,summary,input):focus-visible { outline: 2px solid #ffc98d; outline-offset: 2px; }
 .station-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .75rem; }
 @media (max-width: 570px) {
   .station-grid { grid-template-columns: 1fr; }
-  .station-hero { min-height: 9.25rem; }
+  .station-hero { aspect-ratio: 2 / 1; min-height: 9.25rem; }
 }
 .station-mechanic { display: grid; align-content: start; gap: .4rem; min-width: 0; }
 .station-grid .play-illustrated-tile { min-height: 8rem; }
 .station-mechanic .station-edit { padding: .15rem .25rem; }
+.station-grid { align-items: start; }
+.play-module-content .station-controls .station-grid .module-control-tile {
+  aspect-ratio: 2.45;
+  min-height: 8rem;
+}
+.play-module-content .station-grid > .module-control-tile,
+.play-module-content .station-mechanic > .module-control-tile {
+  border: 1px solid #746152;
+  border-radius: .45rem;
+}
+.station-grid :is([data-state="unrecorded"], [data-state="ended"]) .play-module-art {
+  filter: grayscale(.8) brightness(.62);
+}
+.play-module-content .station-controls .module-character > .module-control-tile:disabled {
+  opacity: 1;
+  cursor: default;
+}
+@media (max-width: 570px) {
+  .play-module-content .station-controls .station-grid .module-control-tile { aspect-ratio: 2; }
+}
+.station-edit > label { min-width: 0; max-width: 100%; }
+.station-edit select { min-width: 0; max-width: 100%; }

@@ -42,7 +42,10 @@ describe("registered modules use their declared shared interactions", () => {
           container.querySelector(`[data-module-control="${capability}"]`),
         ).not.toBeNull();
       expect(onEvent).not.toHaveBeenCalled();
-      expect(module.art.src).toMatch(/banners\//);
+      expect(
+        module.art.src.includes("/banners/") ||
+          module.art.src.endsWith(`/photos/${module.id}/banner.webp`),
+      ).toBe(true);
       expect(module.art.position).toMatch(/^\d+% (?:center|top|\d+%)$/);
       if (module.capabilities.includes("reveals"))
         for (const type of ["dark-power", "finale"] as const) {
