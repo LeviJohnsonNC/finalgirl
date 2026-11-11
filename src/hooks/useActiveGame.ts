@@ -1,3 +1,4 @@
+import { STATION, STATION_MODULE, initialStation, resolveStationAction, stationParent } from '../../supabase/functions/_shared/play/station';
 import {MALL,MALL_MODULE,initialMall,resolveMallAction,mallParent} from '@/lib/play/sunnydaze';
 import { FALCONWOOD, FALCONWOOD_MODULE, initialFalconwood, falconwoodParent, missionByName, resolveFalconwoodAction } from "../../supabase/functions/_shared/play/falconwood";
 import { ORGANISM, ORGANISM_MODULE, ORGANISM_MAX_BLOODLUST, initialOrganism, organismParent, resolveOrganismAction, sameOrganismChanges } from "@/lib/play/organism";
@@ -69,6 +70,9 @@ export function useActiveGame() {
       const log = previous.playEvents ?? [];
       if(event.kind==='undo'&&!canUndoWingard(log,event.target!))return previous;
       if((event.moduleData?.module===MALL_MODULE&&(!event.mallAction||previous.selection.location!==MALL))||(event.mallReference&&previous.selection.location!==MALL))return previous;
+      const isStation = previous.selection.location === STATION;
+      if ((event.moduleData?.module === STATION_MODULE && (!isStation || !event.stationAction)) ||
+          (event.stationReference && !isStation)) return previous;
       const isFalconwood = previous.selection.location === FALCONWOOD;
       if (event.moduleData?.module === FALCONWOOD_MODULE && (!isFalconwood || !event.falconwoodAction) || event.falconwoodReference && !isFalconwood) return previous;
       if (event.falconwoodAction && missionByName(previous.selection.mission) && event.falconwoodAction.mission !== missionByName(previous.selection.mission)?.id) return previous;
@@ -119,6 +123,7 @@ export function useActiveGame() {
       let accepted = event.kind === "killed"
         ? {...event,...(isOrganism && {organismReference:true as const}),...(isSlayer && {slayerReference:true as const}),...(isHunter && {hunterReference:true as const}),...(isIntruders && {intruderReference:true as const}),...(isWolf && {wolfReference:true as const}),...(previous.selection.location === WOODS && {woodsReference:true as const})}
         : event;
+      if (event.kind === 'killed' && isStation) accepted = {...accepted, stationReference:true};
       if(event.kind==='killed'&&previous.selection.location===MALL)accepted={...accepted,mallReference:true};
       if (event.kind === "killed" && isFalconwood) accepted = {...accepted, falconwoodReference: true};
       if(event.kind==='killed' && previous.selection.location===WINGARD)accepted={...accepted,wingardReference:true};
@@ -153,6 +158,8 @@ export function useActiveGame() {
         const changes = initialWoods(previous.selection.startingEvent);
         if (changes) setup.push(newPlayEvent({kind:"module",moduleData:{module:WOODS_MODULE,changes}}));
       }
+      const freshStation = !log.length && isStation && previous.stationSetupVersion === 1;
+      if (freshStation) setup.push(newPlayEvent({kind:'module', moduleData:{module:STATION_MODULE,changes:initialStation(previous.selection.startingEvent)}}));
       if(log.length===0 && previous.wingardSetupVersion===1 && previous.selection.location===WINGARD) {
         setup.push(newPlayEvent({kind:'module',moduleData:{module:WINGARD_MODULE,changes:initialWingard(previous.selection.startingEvent)}}));
       }
@@ -279,6 +286,14 @@ export function useActiveGame() {
         if(!changes||(log.length&&!sameHunterChanges(changes,event.moduleData!.changes)))return previous;
         accepted={...event,hunterAction:action,moduleData:{module:HUNTER_MODULE,changes}};
       }
+      if (event.stationAction) {
+        const entries = summarizePlay([...log,...baseline,...setup]).entries;
+        const action = freshStation && event.stationAction.parent === 'root'
+          ? {...event.stationAction,parent:stationParent(entries)} : event.stationAction;
+        const changes = resolveStationAction(action,moduleState(entries,STATION_MODULE),entries);
+        if (!changes || changes.snapshot !== event.moduleData!.changes.snapshot) return previous;
+        accepted = {...event,stationAction:action,moduleData:{module:STATION_MODULE,changes}};
+      }
       if(event.organismAction) {
         const entries=summarizePlay([...log,...baseline,...setup]).entries;
         const action=!log.length&&freshOrganism&&event.organismAction.parent==="root"
@@ -307,6 +322,7 @@ export function useActiveGame() {
       if((event.konradAction||event.kind==='undo'||event.kind==='restore')&&[...log,...additions].some(e=>e.moduleData?.module==='konrad')&&!validPlayLog([...log,...additions]))return previous;
       if(previous.selection.location===MALL&&!validPlayLog([...log,...additions]))return previous;
       if (isFalconwood && !validPlayLog([...log, ...additions])) return previous;
+      if (isStation && !validPlayLog([...log,...additions])) return previous;
       if (isOrganism && !validPlayLog([...log,...additions])) return previous;
       if (isSlayer && !validPlayLog([...log, ...additions])) return previous;
       if(isHunter&&!validPlayLog([...log,...additions]))return previous;

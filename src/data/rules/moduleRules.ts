@@ -1,3 +1,4 @@
+import {stationRules, STATION_PROMPT_CONTEXT} from './stationRules';
 import {organismRules, ORGANISM_PROMPT_CONTEXT} from "./organismRules";
 import { FALCONWOOD_EVENTS, FALCONWOOD_ITEMS, FALCONWOOD_MISSION_ITEMS, FALCONWOOD_MISSION_RULES, FALCONWOOD_SETUPS, FALCONWOOD_SOURCE, FALCONWOOD_TERRORS } from "../../../supabase/functions/_shared/play/falconwoodCatalog";
 import { FALCONWOOD_LEADS, missionById } from "../../../supabase/functions/_shared/play/falconwood";
@@ -422,7 +423,7 @@ const falconwood: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [organismRules,mallRules,hunterRules,tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolfRules, shadyAcres, mortTheTeenageDirtbag, megaBgCon, intruderRules, wingardCottage, falconwood, slayerRules, marrekRules];
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [stationRules,organismRules,mallRules,hunterRules,tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolfRules, shadyAcres, mortTheTeenageDirtbag, megaBgCon, intruderRules, wingardCottage, falconwood, slayerRules, marrekRules];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -432,6 +433,7 @@ export interface ModulePromptContext {
 
 const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
   "The Organism":ORGANISM_PROMPT_CONTEXT,
+  "Station 2891":STATION_PROMPT_CONTEXT,
  'Sunnydaze Mall':MALL_PROMPT_CONTEXT,
  'The Hunter': HUNTER_PROMPT_CONTEXT,
   Evomorph: EVOMORPH_PROMPT_CONTEXT,

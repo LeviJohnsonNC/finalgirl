@@ -1,3 +1,4 @@
+import { STATION, STATION_MODULE, stationFacts, stationState, validStationField } from './station.ts';
 import { ORGANISM, ORGANISM_MODULE, ORGANISM_FINALES, organismFacts, validOrganismField } from "./organism.ts";
 import { FALCONWOOD, FALCONWOOD_MODULE, falconwoodState, falconwoodFacts, validFalconwoodField } from "./falconwood.ts";
 import { MALL, MALL_MODULE, MALL_ITEMS, MALL_VISUAL, validMallField, mallFacts } from './sunnydaze.ts';
@@ -66,7 +67,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -184,6 +185,7 @@ function validField(
 ) {
   if (module === MALL_MODULE) return validMallField(key,value);
   if (module === FALCONWOOD_MODULE) return validFalconwoodField(key, value);
+  if (module === STATION_MODULE) return validStationField(key,value);
   if (module === ORGANISM_MODULE) return validOrganismField(key,value);
   if (module === SLAYER_MODULE) return validSlayerField(key,value);
   if (module === HUNTER_MODULE) return validHunterField(key,value);
@@ -313,7 +315,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    ![ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    ![STATION_MODULE, ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -666,6 +668,11 @@ export function moduleStoryBeats(
     const threat=hunterFacts(fields,entries);
     const place=moduleStoryBeats({...selection,killer:''},entries);
     return [fitStoryText(threat,place?440:880),fitStoryText(place,440)].filter(Boolean).join('\n');
+  }
+  if (selection.location === STATION) {
+    const place = stationFacts(stationState(moduleState(entries, STATION_MODULE)));
+    const threat = moduleStoryBeats({...selection, location:''}, entries);
+    return [fitStoryText(place, threat ? 490 : 895), fitStoryText(threat, place ? 400 : 895)].filter(Boolean).join('\n');
   }
   if(selection.location===WINGARD){
     const threat = moduleStoryBeats({...selection,location:''},entries);
