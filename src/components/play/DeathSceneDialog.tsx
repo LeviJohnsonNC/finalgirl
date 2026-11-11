@@ -1,5 +1,5 @@
-import {STATION, STATION_EVENTS, stationNameKey} from '../../../supabase/functions/_shared/play/stationCatalog';
-import {stationArt} from './stationArt';
+import {STATION, STATION_EVENTS, STATION_TERRORS, stationNameKey} from '../../../supabase/functions/_shared/play/stationCatalog';
+import {stationArt,stationTerrorArt} from './stationArt';
 import {ORGANISM, ORGANISM_FORMS, ORGANISM_TERRORS} from "@/lib/play/organism";
 import {organismDeathAttackers} from "@/lib/play/death";
 import {organismArt} from "./organismArt";
@@ -137,6 +137,7 @@ const {characterImages}=useActiveImages();
     ...initial,
     ...draft,
   }));
+  const stationTerror = selection.location === STATION && STATION_TERRORS.find(card=>stationNameKey(card.name)===stationNameKey(values.terrorCard??''));
   const stationCauseArt = selection.location === STATION
     ? values.mechanism === 'Frostbite' ? stationArt.frostbite
       : values.mechanism === 'Lab explosion' || stationNameKey(values.eventCard ?? '') === stationNameKey(STATION_EVENTS.find(event=>event.id==='lab-accident')!.name)
@@ -376,7 +377,7 @@ const {characterImages}=useActiveImages();
                     }
                   }}
                 >
-                  {stationCauseArt && cause===values.cause ? <ModuleArtwork art={stationCauseArt}/> : selection.location===MALL&&cause==='hazard'?<ModuleArtwork art={mallArt('wet-floors')}/>:selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
+                  {stationTerror && cause==='terror' ? <ModuleArtwork art={stationTerrorArt[stationTerror.id]}/> : stationCauseArt && cause===values.cause ? <ModuleArtwork art={stationCauseArt}/> : selection.location===MALL&&cause==='hazard'?<ModuleArtwork art={mallArt('wet-floors')}/>:selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
                     :cause==='event'&&cottageEvent ? <ModuleArtwork art={wingardArt(cottageEvent.id,true)} />
                     :selection.killer===ORGANISM&&cause==="killer"?<ModuleArtwork art={organismArt(ORGANISM_FORMS.find(form=>form.name===values.attacker)?.id??"header")} />
                     :cause==="terror"&&organismTerror?<ModuleArtwork art={organismArt(organismTerror.id,true)} />

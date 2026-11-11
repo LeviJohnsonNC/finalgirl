@@ -9,6 +9,7 @@ import { moduleState } from '@/lib/play/modules';
 import { ModuleArtwork } from './ModuleArtwork';
 import type { ControlsProps } from './moduleDefinitions';
 import { useModuleRecord } from './useModuleRecord';
+import { StationAllies } from './StationAllies';
 import { StationCrew } from './StationCrew';
 import { StationEnvironment } from './StationEnvironment';
 import { stationArt } from './stationArt';
@@ -111,6 +112,7 @@ export function StationControls({events,onEvent,blocked,stationFresh,startingEve
       setBoarding({role,parent});
       rescueRef.current?.focus();
     }}/>
+    <StationAllies state={state} commit={commit}/>
     {message && <p role="alert">{message}</p>}
   </fieldset>;
 }

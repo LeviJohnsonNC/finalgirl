@@ -25,3 +25,9 @@ Original generated stills. Each WebP is a responsive runtime source shared by th
 ## Special victims
 
 The Doctor, Chef and Comms Specialist each have present, saved and killed photographs. Saved views keep the person's identity at the airport, and killed views show personal effects and an empty room. Left play and aboard reuse the present photograph with separate state labels.
+
+## Allies and Terror crops
+
+Char and Thule have distinct base portraits reused for present and discarded observations. Each of the eight Station Terrors has an owner-filtered, card-specific crop in Gruesome Death. The Lab breach and Frostbite photos are also reused for their relevant death mechanisms.
+
+[Manifest](manifest.json) records the generated original, runtime dimensions, byte count and SHA-256 for each photo. Focal positions are declared in `src/components/play/stationArt.ts`. Play photos share the repository's 160 KiB runtime cap.
