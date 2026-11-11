@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   initialStation, resolveStationAction, stationParent, stationState, stationSummary,
   STATION_MODULE, STATION_MOVE_SOURCES, STATION_POSITIONS, STATION_ROLES, STATION_ROUTE,
@@ -9,6 +9,7 @@ import { moduleState } from '@/lib/play/modules';
 import { ModuleArtwork } from './ModuleArtwork';
 import type { ControlsProps } from './moduleDefinitions';
 import { useModuleRecord } from './useModuleRecord';
+import { StationCrew } from './StationCrew';
 import { StationEnvironment } from './StationEnvironment';
 import { stationArt } from './stationArt';
 import '@/styles/play-station.css';
@@ -16,14 +17,15 @@ import '@/styles/play-station.css';
 type Flight = NonNullable<StationState['flight']>;
 type Role = typeof STATION_ROLES[number]['id'];
 
-function FlightRecord({state, correction, submit}: {
+function FlightRecord({state, correction, preselected, submit}: {
   state: StationState;
   correction?: boolean;
+  preselected?: Role;
   submit: (command: StationCommand) => boolean;
 }) {
   const [position,setPosition] = useState<Flight['position']>(state.flight?.position ?? 'helipad');
-  const [passengers,setPassengers] = useState(correction ? String(state.flight?.count ?? '') : '0');
-  const [roles,setRoles] = useState<Role[]>(correction ? state.flight?.roles ?? [] : []);
+  const [passengers,setPassengers] = useState(correction ? String(state.flight?.count ?? '') : preselected ? '1' : '0');
+  const [roles,setRoles] = useState<Role[]>(correction ? state.flight?.roles ?? [] : preselected ? [preselected] : []);
   const [pending,setPending] = useState(correction && !!state.flight?.pending);
   const groupAllowed = !correction || position !== 'helipad' && (position !== 'airport' || pending);
   const count = groupAllowed ? passengers === '' ? null : Number(passengers) : 0;
@@ -57,6 +59,8 @@ export function StationControls({events,onEvent,blocked,stationFresh,startingEve
   const entries = summarizePlay(events).entries;
   const state = stationState(!events.length && stationFresh ? initialStation(startingEvent) : moduleState(entries,STATION_MODULE));
   const parent = stationParent(entries);
+  const rescueRef = useRef<HTMLElement>(null);
+  const [boarding,setBoarding] = useState<{role:Role;parent:string}>();
   const {record,message} = useModuleRecord(events,onEvent);
   const [source,setSource] = useState<typeof STATION_MOVE_SOURCES[number]>('Fly Faster!');
   const commit = (command: StationCommand) => {
@@ -70,7 +74,7 @@ export function StationControls({events,onEvent,blocked,stationFresh,startingEve
   const outbound = () => commit({kind:'move',direction:'outbound',source:selectedSource,
     ...(f?.position === 'air' && f.count !== 0 && {arrival:'action' as const})});
   return <fieldset disabled={blocked} className="station-controls" aria-label="Station 2891 tracking">
-    <section aria-label="Helicopter rescue" className="station-rescue">
+    <section ref={rescueRef} tabIndex={-1} aria-label="Helicopter rescue" className="station-rescue">
       <div className="station-hero">
         <ModuleArtwork art={f ? stationArt[f.position] : stationArt.banner}/>
         <div className="station-hero-caption"><h3>Helicopter</h3><p>{stationSummary(state)}</p></div>
@@ -79,7 +83,8 @@ export function StationControls({events,onEvent,blocked,stationFresh,startingEve
         {STATION_ROUTE.map(id=><li key={id} aria-current={f?.position===id?'step':undefined}>{id==='station'?'Departure':STATION_POSITIONS[id]}</li>)}
       </ol>
       {!!f?.roles.length && <p className="station-passengers">{STATION_ROLES.filter(role=>f.roles.includes(role.id)).map(role=>role.name).join(', ')} aboard</p>}
-      {f?.position === 'helipad' && <FlightRecord key={parent} state={state} submit={commit}/>}
+      {f?.position === 'helipad' && <FlightRecord key={`${parent}:${boarding?.role ?? ''}`} state={state}
+        preselected={boarding?.parent===parent?boarding.role:undefined} submit={commit}/>}
       {f?.pending && <div className="station-actions">
         <button type="button" onClick={()=>commit({kind:'confirm-rescue'})}>Apply rescue effects</button>
         <small>Start of next Action phase · {f.count === null ? 'Passenger count unrecorded' : `${f.count}/3 aboard`}</small>
@@ -102,6 +107,10 @@ export function StationControls({events,onEvent,blocked,stationFresh,startingEve
       </details>
     </section>
     <StationEnvironment state={state} commit={commit}/>
+    <StationCrew state={state} commit={commit} board={role=>{
+      setBoarding({role,parent});
+      rescueRef.current?.focus();
+    }}/>
     {message && <p role="alert">{message}</p>}
   </fieldset>;
 }

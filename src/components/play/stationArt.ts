@@ -1,3 +1,12 @@
+import doctorPresent from '@/assets/play/photos/station-2891/doctor.webp';
+import doctorSaved from '@/assets/play/photos/station-2891/doctor-saved.webp';
+import doctorKilled from '@/assets/play/photos/station-2891/doctor-killed.webp';
+import chefPresent from '@/assets/play/photos/station-2891/chef.webp';
+import chefSaved from '@/assets/play/photos/station-2891/chef-saved.webp';
+import chefKilled from '@/assets/play/photos/station-2891/chef-killed.webp';
+import commsPresent from '@/assets/play/photos/station-2891/comms.webp';
+import commsSaved from '@/assets/play/photos/station-2891/comms-saved.webp';
+import commsKilled from '@/assets/play/photos/station-2891/comms-killed.webp';
 import skidozerParked from '@/assets/play/photos/station-2891/skidozer-parked.webp';
 import skidozerInUse from '@/assets/play/photos/station-2891/skidozer-in-use.webp';
 import labIntact from '@/assets/play/photos/station-2891/lab-intact.webp';
@@ -28,3 +37,9 @@ export const stationArt = {
   cache: {src:cache,position:'center'},
   armory: {src:armory,position:'center'},
 } satisfies Record<string,ModuleArt>;
+
+export const stationCrewArt = {
+  doctor: {present:{src:doctorPresent,position:'64% center'},saved:{src:doctorSaved,position:'64% center'},killed:{src:doctorKilled,position:'64% center'}},
+  chef: {present:{src:chefPresent,position:'64% center'},saved:{src:chefSaved,position:'64% center'},killed:{src:chefKilled,position:'64% center'}},
+  comms: {present:{src:commsPresent,position:'64% center'},saved:{src:commsSaved,position:'64% center'},killed:{src:commsKilled,position:'64% center'}},
+} satisfies Record<string,Record<string,ModuleArt>>;

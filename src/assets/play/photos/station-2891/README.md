@@ -21,3 +21,7 @@ Original generated stills. Each WebP is a responsive runtime source shared by th
 | lab-intact.webp, lab-breached.webp | Analog workbench with intact wall or new opening |
 | heavy-storm.webp | Station entrance reduced to one light in a whiteout |
 | cache-hidden.webp, armory.webp | Snow-covered crate and discovered cache |
+
+## Special victims
+
+The Doctor, Chef and Comms Specialist each have present, saved and killed photographs. Saved views keep the person's identity at the airport, and killed views show personal effects and an empty room. Left play and aboard reuse the present photograph with separate state labels.
