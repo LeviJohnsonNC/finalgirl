@@ -1,3 +1,4 @@
+import {ORGANISM, ORGANISM_OPENING} from "./play/organism.ts";
 import { HUNTER, HUNTER_VISUAL, hunterReviewFacts, type HunterReview } from './play/hunter.ts';
 import { INTRUDERS, INTRUDER_VISUAL } from "./play/intruders.ts";
 import {marrekOpeningGuidance,type MarrekOpening} from './play/marrekWarehouse.ts';
@@ -38,7 +39,7 @@ export interface SceneContext {
 const block = (label: string, value?: string): string => value ? `\n${label}:\n${value}\n` : '';
 const isPoster = (ctx: SceneContext): boolean => ctx.sceneType ? ctx.sceneType === 'ending' : Boolean(ctx.outcome);
 const cast = (ctx: SceneContext): string => `FINAL GIRL: ${ctx.finalGirl}: ${resolveFinalGirlIdentity(ctx.finalGirl, ctx.finalGirlDescription) || 'Appearance unrecorded; do not substitute a famous character.'}
-THREAT: ${ctx.killer}: ${(ctx.killer === HUNTER ? HUNTER_VISUAL : ctx.killer === INTRUDERS ? INTRUDER_VISUAL : ctx.killer === 'Grimlash' ? GRIMLASH_VISUAL : ctx.killer === WOLF ? WOLF_VISUAL : ctx.killerDescription) || 'Appearance unrecorded; follow established story facts.'}
+THREAT: ${ctx.killer}: ${(ctx.killer===ORGANISM&&!isPoster(ctx)?ORGANISM_OPENING:ctx.killer === HUNTER ? HUNTER_VISUAL : ctx.killer === INTRUDERS ? INTRUDER_VISUAL : ctx.killer === 'Grimlash' ? GRIMLASH_VISUAL : ctx.killer === WOLF ? WOLF_VISUAL : ctx.killerDescription) || 'Appearance unrecorded; follow established story facts.'}
 LOCATION: ${ctx.location}: ${ctx.locationDescription || 'Use the selected location, not the killer\'s home setting.'}`;
 const facts = (ctx: SceneContext): string => `${cast(ctx)}
 ${ctx.killer===HUNTER?(isPoster(ctx)&&ctx.hunterReview?hunterReviewFacts(ctx.hunterReview):isPoster(ctx)?'Hunter model is unrecorded; do not infer Mark X arrival or a repaired Ally.':'Mark V is the original hooded pursuer. Mark X has not arrived. No repaired Ally is established.'):''}
@@ -85,6 +86,7 @@ function visualContinuity(ctx: SceneContext): string | undefined {
   return JSON.stringify({ ...JSON.parse(parsed),
     ...(reviewedFinalGirlIdentity(ctx.finalGirl) ? { finalGirl: 'Use the current named cast identity above.' } : {}),
     ...(ctx.killer === 'Grimlash' ? { killer: 'Use the current approved full-pumpkin Grimlash identity above.' } : {}),
+    ...(ctx.killer===ORGANISM&&!isPoster(ctx) ? {killer:ORGANISM_OPENING} : {}),
     ...(ctx.killer === INTRUDERS ? { killer: 'Use the three distinct Intruder identities above.' } : {}),
     ...(ctx.killer === WOLF ? { killer: 'Use the current arrow-studded Wolf identity above.' } : {}),
   });
@@ -185,6 +187,7 @@ ${photographMedium}
 ${FICTION_BOUNDARY}
 ${ctx.location==='Marrek Warehouse'?marrekOpeningGuidance(ctx.marrekOpening??'legacy-unknown'):''}
 ${ctx.killer==='The Tormentor'?tormentorOpeningGuidance(ctx.tormentorOpening??'legacy-unknown'):''}
+${ctx.killer===ORGANISM?ORGANISM_OPENING:""}
 ${identityLock(ctx)}
 Fill the entire edge-to-edge 16:9 canvas with the photographed scene: no letterboxing, pillarboxing or black bars. Compose for this frame, not a wider cinema image placed inside it.
 ${cast(ctx)}

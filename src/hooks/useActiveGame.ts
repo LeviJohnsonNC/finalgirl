@@ -1,5 +1,6 @@
 import {MALL,MALL_MODULE,initialMall,resolveMallAction,mallParent} from '@/lib/play/sunnydaze';
 import { FALCONWOOD, FALCONWOOD_MODULE, initialFalconwood, falconwoodParent, missionByName, resolveFalconwoodAction } from "../../supabase/functions/_shared/play/falconwood";
+import { ORGANISM, ORGANISM_MODULE, ORGANISM_MAX_BLOODLUST, initialOrganism, organismParent, resolveOrganismAction, sameOrganismChanges } from "@/lib/play/organism";
 import { SLAYER, SLAYER_MODULE, initialSlayer, resolveSlayerAction, slayerParent } from "@/lib/play/slayer";
 import { HUNTER, HUNTER_MODULE, initialHunter, resolveHunterAction, hunterParent, hunterState } from '@/lib/play/hunter';
 import { canUndoHunter, sameHunterChanges } from '@/lib/play/events';
@@ -89,6 +90,10 @@ export function useActiveGame() {
       if(event.moduleData?.module==='konrad'&&(previous.selection.location!=='USS Konrad'||!event.konradAction))return previous;
       if(event.kind==='undo'&&!canUndoEvomorph(log,event.target!))return previous;
       if (event.kind === 'death-count' && !canChangeDeathCount(log, event)) return previous;
+      const isOrganism = previous.selection.killer===ORGANISM;
+      if((event.moduleData?.module===ORGANISM_MODULE&&(!isOrganism||!event.organismAction))||(event.organismReference&&!isOrganism)) return previous;
+      if(isOrganism&&((event.kind==="state"&&(event.field==="killerHealth"||event.field==="bloodlust"&&typeof event.value==="number"&&event.value>ORGANISM_MAX_BLOODLUST))||
+        event.kind==="moment"&&["killer-revived","dark-power"].includes(event.momentType??""))) return previous;
       const isSlayer = previous.selection.killer === SLAYER;
       if ((event.moduleData?.module === SLAYER_MODULE && (!isSlayer || !event.slayerAction)) || (event.slayerReference && !isSlayer)) return previous;
       const isHunter=previous.selection.killer===HUNTER;
@@ -112,7 +117,7 @@ export function useActiveGame() {
         if (Object.entries(changes).every(([key, value]) => state[key] === (value ?? undefined))) return previous;
       }
       let accepted = event.kind === "killed"
-        ? {...event,...(isSlayer && {slayerReference:true as const}),...(isHunter && {hunterReference:true as const}),...(isIntruders && {intruderReference:true as const}),...(isWolf && {wolfReference:true as const}),...(previous.selection.location === WOODS && {woodsReference:true as const})}
+        ? {...event,...(isOrganism && {organismReference:true as const}),...(isSlayer && {slayerReference:true as const}),...(isHunter && {hunterReference:true as const}),...(isIntruders && {intruderReference:true as const}),...(isWolf && {wolfReference:true as const}),...(previous.selection.location === WOODS && {woodsReference:true as const})}
         : event;
       if(event.kind==='killed'&&previous.selection.location===MALL)accepted={...accepted,mallReference:true};
       if (event.kind === "killed" && isFalconwood) accepted = {...accepted, falconwoodReference: true};
@@ -165,9 +170,11 @@ export function useActiveGame() {
       if (!log.length && freshSlayer) setup.push(newPlayEvent({kind:"module", moduleData:{module:SLAYER_MODULE, changes:initialSlayer()}}));
       const freshHunter=isHunter&&previous.hunterSetupVersion===1;
       if(!log.length&&freshHunter)setup.push(newPlayEvent({kind:'module',moduleData:{module:HUNTER_MODULE,changes:initialHunter()}}));
+      const freshOrganism=isOrganism&&previous.organismSetupVersion===1;
+      if(!log.length&&freshOrganism) setup.push(newPlayEvent({kind:"module",moduleData:{module:ORGANISM_MODULE,changes:initialOrganism()}}));
       const freshIntruders=isIntruders && previous.intrudersSetupVersion===1;
       if (!log.length && freshIntruders) setup.push(newPlayEvent({kind:'module',moduleData:{module:INTRUDER_MODULE,changes:initialIntruders()}}));
-      if (log.length === 0 && (!isIntruders||freshIntruders) && previous.coreTrackersVersion === 1 && (!isWolf || freshWolf) && (!isHunter || freshHunter) && (!isSlayer || freshSlayer)) {
+      if (log.length === 0 && (!isIntruders||freshIntruders) && (!isOrganism||freshOrganism) && previous.coreTrackersVersion === 1 && (!isWolf || freshWolf) && (!isHunter || freshHunter) && (!isSlayer || freshSlayer)) {
         const values = playStartingValues(previous.selection.killer, previous.selection.finalGirl);
         values.finalGirlHealth = previous.selection.finalGirlStartingHealth ?? values.finalGirlHealth;
         for (const field of ['finalGirlHealth', 'killerHealth', 'bloodlust', 'finalHorrorLevel'] as const) {
@@ -272,6 +279,14 @@ export function useActiveGame() {
         if(!changes||(log.length&&!sameHunterChanges(changes,event.moduleData!.changes)))return previous;
         accepted={...event,hunterAction:action,moduleData:{module:HUNTER_MODULE,changes}};
       }
+      if(event.organismAction) {
+        const entries=summarizePlay([...log,...baseline,...setup]).entries;
+        const action=!log.length&&freshOrganism&&event.organismAction.parent==="root"
+          ? {...event.organismAction,parent:organismParent(entries)} : event.organismAction;
+        const changes=resolveOrganismAction(action,moduleState(entries,ORGANISM_MODULE),entries);
+        if(!changes||(log.length&&!sameOrganismChanges(changes,event.moduleData!.changes))) return previous;
+        accepted={...accepted,organismAction:action,moduleData:{module:ORGANISM_MODULE,changes}};
+      }
       if (event.intruderAction) {
         const entries=summarizePlay([...log,...baseline,...setup]).entries;
         const action=!log.length && freshIntruders && event.intruderAction.parent==='root'
@@ -292,6 +307,7 @@ export function useActiveGame() {
       if((event.konradAction||event.kind==='undo'||event.kind==='restore')&&[...log,...additions].some(e=>e.moduleData?.module==='konrad')&&!validPlayLog([...log,...additions]))return previous;
       if(previous.selection.location===MALL&&!validPlayLog([...log,...additions]))return previous;
       if (isFalconwood && !validPlayLog([...log, ...additions])) return previous;
+      if (isOrganism && !validPlayLog([...log,...additions])) return previous;
       if (isSlayer && !validPlayLog([...log, ...additions])) return previous;
       if(isHunter&&!validPlayLog([...log,...additions]))return previous;
       applied = true;

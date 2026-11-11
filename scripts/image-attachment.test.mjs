@@ -41,10 +41,13 @@ const wolfIdentity = {};
 new Function('exports', compile('../supabase/functions/_shared/play/bigBadWolf.ts'))(wolfIdentity);
 const grimlashIdentity = {};
 new Function('exports', compile('../supabase/functions/_shared/play/grimlash.ts'))(grimlashIdentity);
+const organismIdentity = {};
+new Function('exports', compile('../supabase/functions/_shared/play/organism.ts'))(organismIdentity);
 const intrudersIdentity = {};
 new Function('exports', compile('../supabase/functions/_shared/play/intruders.ts'))(intrudersIdentity);
 new Function('require', 'exports', compile('../supabase/functions/_shared/prompts.ts'))(name => {
   if (name === './play/hunter.ts') return hunterIdentity;
+  if (name === './play/organism.ts') return organismIdentity;
   if (name === './play/intruders.ts') return intrudersIdentity;
   if (name === './play/marrekWarehouse.ts') return marrekIdentity;
   if (name === './play/tormentor.ts') return tormentorIdentity;

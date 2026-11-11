@@ -54,8 +54,8 @@ it('covers the previously rejected Dr. Fright payload without weakening server l
 });
 
 it('retains legacy killer guidance and leaves absent module references absent', () => {
-  expect(getStoryRequestRules('The Organism', 'Uncatalogued location')).toEqual({
-    killerRules: getKillerNarrativeRules('The Organism'), locationRules: undefined,
+  expect(getStoryRequestRules('Ratchet Lady', 'Uncatalogued location')).toEqual({
+    killerRules: getKillerNarrativeRules('Ratchet Lady'), locationRules: undefined,
   });
   expect(getStoryRequestRules('Uncatalogued killer', 'Uncatalogued location')).toEqual({
     killerRules: undefined, locationRules: undefined,

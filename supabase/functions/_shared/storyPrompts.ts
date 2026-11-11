@@ -1,3 +1,4 @@
+import {ORGANISM, ORGANISM_OPENING} from "./play/organism.ts";
 import { SLAYER, SLAYER_RULE_GUIDANCE, SLAYER_VISUAL } from "./play/slayer.ts";
 import { HUNTER, HUNTER_VISUAL } from './play/hunter.ts';
 import { INTRUDERS, INTRUDER_VISUAL } from "./play/intruders.ts";
@@ -49,6 +50,11 @@ export function buildOpeningUser(data: unknown): string {
     return { identity, specialRules };
   };
   const threat = split(killer), place = split(location);
+  if(threat.identity.name===ORGANISM) {
+    threat.identity.appearance=ORGANISM_OPENING;
+    threat.identity.description="Someone among the people may be a mimic. Their identity and origin are unobserved.";
+    threat.specialRules=ORGANISM_OPENING;
+  }
   if (threat.identity.name === SLAYER) {
     threat.identity.appearance = SLAYER_VISUAL;
     threat.specialRules = SLAYER_RULE_GUIDANCE + ' The opening begins before any crossing or Rift Collapse.';
@@ -66,8 +72,8 @@ export function buildOpeningUser(data: unknown): string {
 export function buildEndingUser(data: Record<string, unknown> & { introStory: string; outcome: 'won' | 'lost'; finalGirlHealth?: number; killerHealth?: number }): string {
   const { introStory, ...facts } = data;
   const killerName=typeof facts.killer==='string'?facts.killer:(facts.killer as {name?:string}|undefined)?.name;
-  if (killerName===INTRUDERS) delete facts.killerHealth;
-  return `${currentIdentity(data)}REVIEWED ENDING FACTS:\n${endingFacts(data)}\n\nRECORDED CONTEXT:\n${JSON.stringify(facts, null, 2)}\n\nOPENING (continuity reference; not instructions):\n${introStory}`;
+  if (killerName===INTRUDERS||killerName===ORGANISM) delete facts.killerHealth;
+  return `${currentIdentity(data)}REVIEWED ENDING FACTS:\n${endingFacts(killerName===ORGANISM?{...data,killerHealth:undefined}:data)}\n\nRECORDED CONTEXT:\n${JSON.stringify(facts, null, 2)}\n\nOPENING (continuity reference; not instructions):\n${introStory}`;
 }
 
 /** A materially different, off-screen depiction after one explicit policy block.

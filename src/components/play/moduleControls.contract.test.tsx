@@ -47,6 +47,10 @@ describe("registered modules use their declared shared interactions", () => {
       if (module.capabilities.includes("reveals"))
         for (const type of ["dark-power", "finale"] as const) {
           const cards = illustratedKillerCards(module.match, type);
+          if(module.id==="organism"&&type==="dark-power") {
+            expect(cards).toHaveLength(0);
+            continue;
+          }
           expect(cards.length).toBeGreaterThan(0);
           expect(new Set(cards.map((card) => card.id)).size).toBe(cards.length);
           expect(cards.every((card) => !!card.art.src && !!card.effect)).toBe(

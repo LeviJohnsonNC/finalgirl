@@ -1,3 +1,4 @@
+import {ORGANISM, ORGANISM_FINALES, organismFinale} from "@/lib/play/organism";
 import { missionById } from "../../supabase/functions/_shared/play/falconwood";
 import {MALL,MALL_MODULE,mallReview} from '@/lib/play/sunnydaze';
 import { hunterReview, hunterReviewFacts } from '@/lib/play/hunter';
@@ -88,7 +89,7 @@ const TheEnd = ({
   const evomorphGuidance=result.killer==='Evomorph'?evomorphOpeningGuidance(endingModuleState(endingSummary(result.playEvents).entries,'evomorph').stage,false):undefined;
   const mall=useMemo(()=>result.location===MALL?mallReview(endingModuleState(endingSummary(result.playEvents).entries,MALL_MODULE)):undefined,[result.location,result.playEvents]);
   const hunter=useMemo(()=>result.killer==='The Hunter'?hunterReview(endingModuleState(endingSummary(result.playEvents).entries,'hunter')):undefined,[result.killer,result.playEvents]);
-  const endingVisualGuidance=[evomorphGuidance,moduleContext?.visualGuidance].filter(Boolean).join('\n');
+  const endingVisualGuidance=[evomorphGuidance,result.killer===ORGANISM?"Depict only forms established by the recorded ending. Keep the selected location and Final Girl.":moduleContext?.visualGuidance].filter(Boolean).join('\n');
   const isWin = result.outcome === 'won';
   const grimlashReview=useMemo(()=>result.killer==='Grimlash'?(formData.grimlashReview??{loss:(endingModuleState(endingSummary(result.playEvents).entries,'grimlash').loss??'unknown') as import('@/lib/play/grimlash').GrimlashLoss}):undefined,[result.killer,result.playEvents,formData.grimlashReview]);
   const shipReview=useMemo(()=>result.location==='USS Konrad'?{fate:konradState(endingModuleState(endingSummary(result.playEvents).entries,'konrad')).fate}:undefined,[result.location,result.playEvents]);
@@ -97,7 +98,15 @@ const TheEnd = ({
   const slayerReview = result.killer === "Slayer" ? formData.slayerReview : undefined;
   const tormentorReview=useMemo(()=>result.killer==='The Tormentor'?(formData.tormentorReview??{loss:tormentorState(endingModuleState(endingSummary(result.playEvents).entries,'tormentor')).loss}):undefined,[result.killer,result.playEvents,formData.tormentorReview]);
   const fate = reviewedCharacterFate(formData.finalGirlHealth ?? undefined,shipReview,tormentorReview);
-  const endingKillerHealth = hunter&&hunter.phase!=='mark-x'||result.killer==='The Intruders'||isKillerUnkillable(result.killer) ? undefined : formData.killerHealth ?? undefined;
+  const endingKillerHealth = hunter&&hunter.phase!=='mark-x'||result.killer==='The Intruders'||result.killer===ORGANISM||isKillerUnkillable(result.killer) ? undefined : formData.killerHealth ?? undefined;
+  const organismFinaleName=result.killer===ORGANISM?organismFinale(endingSummary(result.playEvents).entries)?.killerCard:undefined;
+  const organismLoss=result.killer===ORGANISM&&result.outcome==="lost"?
+    (formData.organismLoss==="assimilated"?"Assimilation":formData.organismLoss==="caught"?"Caught by the Organism":formData.gameHighlights?.match(/Loss type: (Assimilation|Caught by the Organism)/)?.[1]):undefined;
+  const organismLossContext=organismLoss&&[
+    `The player recorded the loss as ${organismLoss}.`,
+    organismLoss==="Assimilation"&&organismFinaleName&&
+      `Recorded Finale: ${organismFinaleName}. Treat this as assimilation rather than assuming a conventional killing blow. ${ORGANISM_FINALES.find(card=>card.name===organismFinaleName)?.effect??""}`,
+  ].filter(Boolean).join(" ");
   const { locationImages, aiEnabled } = useActiveImages();
   const background = locationImages[result.location] ?? nowPlayingBg;
   // Reserve the poster column while it develops, not just once it exists.
@@ -139,13 +148,13 @@ const TheEnd = ({
       mission: getMissionByName(missionName),
       ...(hunter&&{hunterReview:hunter}),
       ...(mall&&{mallReview:mall}),
-      scenarioRules: [hunter&&hunterReviewFacts(hunter),result.killer==='Slayer'||result.killer==='The Hunter'||result.killer==='The Intruders'||result.killer==='Big Bad Wolf'||result.killer==='The Tormentor'||result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='Sunnydaze Mall'||result.location==='USS Konrad'||result.location==='Shady Acres'||result.location==='Storybook Woods'?playStoryBeats(result.playEvents,result):undefined, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
+      scenarioRules: [hunter&&hunterReviewFacts(hunter),result.killer===ORGANISM||result.killer==='Slayer'||result.killer==='The Hunter'||result.killer==='The Intruders'||result.killer==='Big Bad Wolf'||result.killer==='The Tormentor'||result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='Sunnydaze Mall'||result.location==='USS Konrad'||result.location==='Shady Acres'||result.location==='Storybook Woods'?playStoryBeats(result.playEvents,result):undefined, organismLossContext, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
       gameId: result.id,
       previousImageUrl,
       draftPoster: true,
     });
     if (url && mounted.current) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
-  }, [isGenerating, error, awaitingRefresh, hunter, mall, missionName, falconwoodReview, slayerReview, tormentorReview, shipReview, grimlashReview, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
+  }, [isGenerating, error, awaitingRefresh, hunter, mall, missionName, falconwoodReview, slayerReview, tormentorReview, shipReview, grimlashReview, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, organismLossContext, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
 
   // The poster develops on its own once the ending narration lands.
   //
@@ -230,7 +239,7 @@ const TheEnd = ({
         ...(slayerReview && {slayerReview}),
         ...(result.killer==='Poltergeist'&&formData.poltergeistReview&&{poltergeistReview:formData.poltergeistReview}),
         ...(formData.endingSubLocation && { endingSubLocation: formData.endingSubLocation }),
-        ...(formData.gameHighlights && { gameHighlights: formData.gameHighlights }),
+        ...((formData.gameHighlights||organismLossContext) && {gameHighlights:[formData.gameHighlights,organismLossContext].filter(Boolean).join(" ")}),
       };
 
 

@@ -1,0 +1,81 @@
+.play-workspace .play-state--organism {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #150e13;
+}
+.organism-portraits {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  min-height: 160px;
+  gap: 2px;
+  flex: 1 0 auto;
+}
+.organism-portraits button {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  align-content: end;
+  min-width: 0;
+  padding: 6px;
+  overflow: hidden;
+  color: #f5e8d5;
+  text-align: left;
+  border-bottom: 2px solid var(--organism-color);
+}
+.organism-portraits button[data-color=red] { --organism-color: #d96665; }
+.organism-portraits button[data-color=black] { --organism-color: #66556c; }
+.organism-portraits button[data-color=grey] { --organism-color: #b5bcc2; }
+.organism-portraits button:focus-visible, .organism-portraits button[aria-pressed=true] {
+  outline: 2px solid #e2c592;
+  outline-offset: -2px;
+}
+.organism-portraits img {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.organism-portraits [data-status=unknown] img,
+.organism-portraits [data-status=defeated] img { filter: grayscale(1) brightness(.55); }
+.organism-portraits button::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(0deg,#100910f5 0%,#10091044 35%,transparent 70%);
+}
+.organism-portraits strong, .organism-portraits small { display: block; line-height: 1.2; }
+.organism-portraits strong { font-size: .88rem; }
+.organism-portraits small { font-size: .7rem; overflow-wrap: anywhere; }
+.play-workspace .play-state--organism .play-state-control-bar { flex: 0 0 auto; }
+.organism-actions { display: grid; gap: 6px; padding: 6px 8px; min-width: 0; }
+.organism-actions p { margin: 0; font-size: .8rem; }
+.organism-action-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.organism-actions button, .organism-quiet, .organism-secondary summary {
+  min-height: 44px;
+  padding: 5px 9px;
+  font-size: .78rem;
+  text-align: left;
+}
+.organism-actions button:not(.organism-quiet) { border: 1px solid #775261; background: #291723; border-radius: 4px; }
+.organism-actions button:disabled { opacity: .55; }
+.organism-quiet, .organism-secondary { color: #d2b6c0; }
+.organism-secondary summary { cursor: pointer; }
+.organism-bonus { padding: 4px 8px; color: #e5c490; font-size: .74rem; }
+.organism-actions ol { list-style: decimal; margin: 6px 0 4px 1.25rem; font-size: .8rem; }
+.organism-actions input { max-width: 8rem; background: #1a1118; padding: .3rem; }
+@media(max-width: 639px) {
+  .organism-portraits { min-height: 146px; }
+}
+
+.play-state--organism .play-state-stepper button { min-width: 44px; min-height: 44px; }
+
+
+/* Preserve the photograph's natural light while keeping the shared selected border. */
+.play-death-modal--illustrated .play-cause-tile[data-organism-photo][aria-pressed=true]::before {
+  background: linear-gradient(0deg,#120c11de,transparent 78%),linear-gradient(90deg,#120c1133,transparent);
+}
+.play-death-modal--illustrated .play-cause-tile[data-organism-photo][aria-pressed=true] > img { opacity: 1; }

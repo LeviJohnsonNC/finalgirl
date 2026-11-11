@@ -18,6 +18,7 @@ export interface EndingFormData {
   childrenOnBoardAtFinish?: number|null;
   tormentorReview?:{loss:import('../../supabase/functions/_shared/play/tormentor').TormentorLoss};
   grimlashReview?: {loss:import('../../supabase/functions/_shared/play/grimlash').GrimlashLoss};
+  organismLoss?: "caught"|"assimilated";
   outcome?: "won"|"lost";
   konradReview?: {fate: import("../../supabase/functions/_shared/play/konrad").KonradFate};
   poltergeistReview?: {carolynRescued:true|null;floppyAtEscape:true|null;epicRequired:boolean|null;escapeRoute?:'exit'|'helicopter'|null};
@@ -34,6 +35,7 @@ export interface ActiveGame {
   wingardSetupVersion?: 1;
   tormentorSetupVersion?: 1;
   wolfSetupVersion?: 1;
+  organismSetupVersion?: 1;
   intrudersSetupVersion?: 1;
   mallSetupVersion?:1;
   falconwoodSetupVersion?: 1;
@@ -102,6 +104,10 @@ export function isActiveGame(value: unknown): value is ActiveGame {
     e.moduleData?.module === "slayer" && !e.slayerAction && game.slayerSetupVersion !== 1)) return false;
   if(game.hunterSetupVersion!==undefined&&(game.hunterSetupVersion!==1||game.selection?.killer!=='The Hunter'))return false;
   if(game.selection?.killer!=='The Hunter'&&Array.isArray(game.playEvents)&&game.playEvents.some(e=>e.moduleData?.module==='hunter'||e.hunterReference))return false;
+  if (game.organismSetupVersion!==undefined&&(game.organismSetupVersion!==1||game.selection?.killer!=="The Organism")) return false;
+  if (Array.isArray(game.playEvents)&&game.playEvents.some(event=>
+    ((event?.organismReference||event?.moduleData?.module==="organism")&&game.selection?.killer!=="The Organism")||
+    (event?.moduleData?.module==="organism"&&!event.organismAction&&game.organismSetupVersion!==1))) return false;
   if (game.intrudersSetupVersion !== undefined && (game.intrudersSetupVersion !== 1 || game.selection?.killer !== "The Intruders")) return false;
   if (game.wolfSetupVersion !== undefined && (game.wolfSetupVersion !== 1 || game.selection?.killer !== "Big Bad Wolf")) return false;
   if (game.selection?.killer !== "Big Bad Wolf" && Array.isArray(game.playEvents) && game.playEvents.some(e => e?.moduleData?.module === "big-bad-wolf" || e?.wolfReference)) return false;

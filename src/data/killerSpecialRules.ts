@@ -63,10 +63,9 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
   },
 
   'The Organism': {
-    narrativeNote:
-      'A biological horror that assimilates rather than kills. If the Horror Track exceeds 6, the Final Girl is not killed — she is absorbed into the organism (a fate arguably worse than death). The Organism can only be defeated by destroying its core, not through conventional combat.',
-    lossCondition: 'Caught by the Organism (consumed) OR Horror Track exceeds 6 (assimilation — the Final Girl becomes part of the creature).',
-    winCondition: 'Destroy the Organism\'s core. Standard combat is ineffective against the bulk of its body.',
+    narrativeNote: 'The threat starts hidden among Exposed Victims. Testing can clear a person or reveal a separate mutation. Respect the reported forms and selected location. A reveal does not establish a casualty or attack.',
+    lossCondition: 'Record the physical outcome. The Final Girl can be killed or assimilated under the active Finale’s conditions.',
+    winCondition: 'Resolve the Exposed Victims and defeat all Mutated Organisms.',
   },
 
   'Ratchet Lady': {

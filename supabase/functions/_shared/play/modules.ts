@@ -1,3 +1,4 @@
+import { ORGANISM, ORGANISM_MODULE, ORGANISM_FINALES, organismFacts, validOrganismField } from "./organism.ts";
 import { FALCONWOOD, FALCONWOOD_MODULE, falconwoodState, falconwoodFacts, validFalconwoodField } from "./falconwood.ts";
 import { MALL, MALL_MODULE, MALL_ITEMS, MALL_VISUAL, validMallField, mallFacts } from './sunnydaze.ts';
 import { SLAYER, SLAYER_MODULE, SLAYER_POWERS, SLAYER_FINALES, slayerFacts, validSlayerField } from "./slayer.ts";
@@ -65,7 +66,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -89,6 +90,7 @@ type ObservedEvent = {
 export function killerMomentCards(killer: string, type: string) {
   if (killer === SLAYER) return [...(type === "dark-power" ? SLAYER_POWERS : type === "finale" ? SLAYER_FINALES : [])].sort((a,b) => a.name.localeCompare(b.name));
   if (killer === HUNTER) return [...(type==="dark-power"?HUNTER_POWERS:type==="finale"?HUNTER_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
+  if (killer === ORGANISM) return type==="finale" ? [...ORGANISM_FINALES].sort((a,b)=>a.name.localeCompare(b.name)) : [];
   if (killer === INTRUDERS) return [...(type==="dark-power"?INTRUDER_POWERS:type==="finale"?INTRUDER_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === WOLF) return [...(type === "dark-power" ? WOLF_POWERS : type === "finale" ? WOLF_FINALES : [])].sort((a,b) => a.name.localeCompare(b.name));
   if(killer==='The Tormentor')return [...(type==='dark-power'?TORMENTOR_POWERS:type==='finale'?TORMENTOR_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
@@ -182,6 +184,7 @@ function validField(
 ) {
   if (module === MALL_MODULE) return validMallField(key,value);
   if (module === FALCONWOOD_MODULE) return validFalconwoodField(key, value);
+  if (module === ORGANISM_MODULE) return validOrganismField(key,value);
   if (module === SLAYER_MODULE) return validSlayerField(key,value);
   if (module === HUNTER_MODULE) return validHunterField(key,value);
   if (module === INTRUDER_MODULE) return validIntruderField(key,value);
@@ -310,7 +313,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    ![FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    ![ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -333,7 +336,7 @@ export function moduleState(
 ): ModuleState {
   if (module === "fright") { const state=frightState(entries); if(!state) return {}; const {eventId:_id,...snapshot}=state; return {snapshot:JSON.stringify(snapshot),sleep:state.sleep,mode:state.mode,progress:state.path.length,...frightPublic(entries)}; }
   const state: ModuleState = {};
-  if (module === INTRUDER_MODULE) {
+  if (module === INTRUDER_MODULE || module === ORGANISM_MODULE) {
     for (const event of entries) {
       if (event.moduleData?.module !== module) continue;
       for (const [key,value] of Object.entries(event.moduleData.changes)) {
@@ -341,6 +344,7 @@ export function moduleState(
         else state[key]=value;
       }
     }
+    if (module === ORGANISM_MODULE) return state;
     const finale=entries.find(e=>e.kind==='moment'&&e.momentType==='finale');
     const power=entries.find(e=>e.kind==='moment'&&e.momentType==='dark-power');
     if (finale || Object.keys(state).length) state.mode=intruderMode(entries);
@@ -673,6 +677,11 @@ export function moduleStoryBeats(
     const place = moduleStoryBeats({...selection, killer: ""}, entries);
     return [threat, fitStoryText(place, 895 - threat.length)].filter(Boolean).join("\n");
   }
+  if (selection.killer===ORGANISM) {
+    const threat=organismFacts(moduleState(entries,ORGANISM_MODULE),entries);
+    const place=moduleStoryBeats({...selection,killer:""},entries);
+    return [fitStoryText(threat,place?400:895),fitStoryText(place,threat?490:895)].filter(Boolean).join("\n");
+  }
   if (selection.killer===INTRUDERS) {
     const state=moduleState(entries,INTRUDER_MODULE);
     const threat=Object.keys(state).length ? intruderFacts(state) : '';
@@ -888,6 +897,7 @@ export function buddylandReferences(
   if(selection.location===MALL){refs.push({name:MALL,effect:MALL_VISUAL});if(typeof context?.[MALL_MODULE]?.facts==='string')refs.push({name:'Mall observations',effect:context[MALL_MODULE].facts as string});}
   if(selection.location===WINGARD) refs.push({name:WINGARD,effect:WINGARD_VISUAL});
   if(selection.location==='Marrek Warehouse'){refs.push({name:'Marrek Warehouse',effect:MARREK_VISUAL});if(context?.marrek)refs.push({name:'Warehouse observations',effect:marrekFacts(marrekState(context.marrek)).join(' ')});}
+  if(selection.killer===ORGANISM && typeof context?.organism?.facts==="string") refs.push({name:"Organism observations",effect:context.organism.facts});
   if(selection.killer===INTRUDERS && context?.intruders) refs.push({name:'Intruder observations',effect:intruderFacts(context.intruders)});
   if(selection.killer==='The Tormentor'&&context?.tormentor){refs.push({name:'Tormentor observations',effect:tormentorFacts(tormentorState(context.tormentor))});for(const card of [...TORMENTOR_POWERS,...TORMENTOR_FINALES])if(card.name===context.tormentor.power||card.name===context.tormentor.finale)refs.push({name:card.name,effect:card.effect+' Recording the reveal does not prove its actions or consequences occurred.'});}
   if (selection.location === "Sacred Groves") {

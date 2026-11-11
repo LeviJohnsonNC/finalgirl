@@ -1,3 +1,4 @@
+import { ORGANISM, ORGANISM_SETUP } from "./organism";
 import { SLAYER, SLAYER_SETUP } from "./slayer";
 import { INTRUDERS, INTRUDER_HORROR } from "./intruders";
 import { WOLF, WOLF_SETUP } from './bigBadWolf';
@@ -23,6 +24,7 @@ export function playStartingValues(
     Geppetto: 8,
     'Dr. Fright': 9,
   };
+  if (killer === ORGANISM) return {finalGirlHealth:getFinalGirlHealth(finalGirl),...ORGANISM_SETUP};
   if (killer === SLAYER) return {finalGirlHealth: getFinalGirlHealth(finalGirl), ...SLAYER_SETUP};
   if (killer === INTRUDERS) return {finalGirlHealth:getFinalGirlHealth(finalGirl),finalHorrorLevel:INTRUDER_HORROR,bloodlust:0};
   if (killer === WOLF) return { finalGirlHealth: getFinalGirlHealth(finalGirl), ...WOLF_SETUP };

@@ -1,3 +1,4 @@
+import { ORGANISM_MODULE, ORGANISM_MAX_BLOODLUST, initialOrganism, isInitialOrganism, isOrganismCasualty, organismParent, resolveOrganismAction, sameOrganismChanges, validOrganismAction, type OrganismAction } from "./organism.ts";
 import { MALL_MODULE, describeMallAction, initialMall, isInitialMall, resolveMallAction, validMallAction, mallParent, mallState, type MallAction } from './sunnydaze.ts';
 import { FALCONWOOD_EFFECTS, FALCONWOOD_MODULE, falconwoodParent, falconwoodState, initialFalconwood, missionById, resolveFalconwoodAction, validFalconwoodAction, type FalconwoodAction } from "./falconwood.ts";
 import { SLAYER_MODULE, describeSlayerAction, validSlayerSetup, resolveSlayerAction, slayerParent, validSlayerAction, type SlayerAction } from "./slayer.ts";
@@ -64,6 +65,7 @@ export const isPermanentMoment = (e: Pick<PlayEvent, "kind" | "momentType">): bo
 export const isLockedPlayEvent = (e: PlayEvent): boolean =>
   (isPermanentMoment(e) && e.permanent === true) ||
   (e.kind === "module" && e.moduleData?.module === FALCONWOOD_MODULE && !e.falconwoodAction) ||
+  (e.kind === "module" && e.moduleData?.module === ORGANISM_MODULE && !e.organismAction) ||
   (e.kind === "module" && e.moduleData?.module === SLAYER_MODULE && !e.slayerAction) ||
   (e.kind === "module" && e.moduleData?.module === "billy" && e.moduleData.changes.powerSourcesReady === true);
 export type PlayKind =
@@ -101,6 +103,8 @@ export interface PlayEvent extends PlayDetails {
   slayerReference?: true;
   hunterAction?: HunterAction;
   hunterReference?: true;
+  organismAction?: OrganismAction;
+  organismReference?: true;
   intruderAction?: IntruderAction;
   intruderReference?: true;
   woodsAction?: WoodsAction;
@@ -195,6 +199,11 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
   if (e.hunterReference !== undefined && (e.kind!=='killed'||e.hunterReference!==true))return false;
   if(e.hunterAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!==HUNTER_MODULE||!validHunterAction(e.hunterAction)))return false;
   if(e.moduleData?.module===HUNTER_MODULE&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.hunterAction&&e.moduleData.changes.snapshot!==initialHunter().snapshot)))return false;
+  if (e.organismReference!==undefined&&(e.kind!=="killed"||e.organismReference!==true)) return false;
+  if (e.organismAction!==undefined && (e.moduleData?.module!==ORGANISM_MODULE || !validOrganismAction(e.organismAction) ||
+    (isOrganismCasualty(e.organismAction) ? e.kind!=="killed"||e.quantity!==1 : e.kind!=="module"))) return false;
+  if (e.moduleData?.module===ORGANISM_MODULE && (!validModuleObservation(e.moduleData) ||
+    (!e.organismAction && (e.kind!=="module" || !isInitialOrganism(e.moduleData.changes))))) return false;
   if (e.intruderReference !== undefined && (e.kind !== 'killed' || e.intruderReference !== true)) return false;
   if (e.intruderAction !== undefined && (e.kind !== 'module' || e.moduleData?.module !== INTRUDER_MODULE || !validIntruderAction(e.intruderAction))) return false;
   if (e.moduleData?.module === INTRUDER_MODULE &&
@@ -293,7 +302,7 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validOrganismHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
 }
@@ -418,6 +427,32 @@ export function validHunterHistory(log:readonly PlayEvent[]) {
 }
 export function sameHunterChanges(a:Record<string,unknown>,b:Record<string,unknown>) {
  return Object.keys(a).length===Object.keys(b).length&&Object.entries(a).every(([k,v])=>v===b[k]);
+}
+function validOrganismHistory(log:readonly PlayEvent[]) {
+  if(!log.some(event=>event.moduleData?.module===ORGANISM_MODULE)) return true;
+  for(const [index,event] of log.entries()) {
+    const target=event.kind==="undo"||event.kind==="restore"||event.kind==="reduce"||event.kind==="death-count"
+      ? log.find(prior=>prior.id===event.target) : undefined;
+    if(event.moduleData?.module!==ORGANISM_MODULE&&target?.moduleData?.module!==ORGANISM_MODULE) continue;
+    const prefix=log.slice(0,index);
+    const entries=summarizePlay(prefix).entries;
+    if(target) {
+      if(!prefix.includes(target)||!target.organismAction||event.kind==="reduce"||event.kind==="death-count") return false;
+      if(event.kind==="undo") {
+        if(organismParent(entries)!==target.id) return false;
+        continue;
+      }
+    }
+    const observation=target??event;
+    if(!observation.organismAction) {
+      if(prefix.some(prior=>prior.moduleData?.module===ORGANISM_MODULE)||
+        !sameOrganismChanges(observation.moduleData!.changes,initialOrganism())) return false;
+      continue;
+    }
+    const changes=resolveOrganismAction(observation.organismAction,moduleState(entries,ORGANISM_MODULE),entries);
+    if(!changes||!sameOrganismChanges(changes,observation.moduleData!.changes)) return false;
+  }
+  return true;
 }
 export function canUndoIntruder(log:readonly PlayEvent[],target:string) {
   const original=log.find(e=>e.id===target);
@@ -720,6 +755,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     }
     if (e.kind === "saved")
       summary.saved = Math.min(999, summary.saved! + original.quantity! - (reductions.get(e.id) ?? 0));
+    if (e.organismAction && isOrganismCasualty(e.organismAction) && summary.bloodlust!==undefined && summary.bloodlust<ORGANISM_MAX_BLOODLUST) summary.bloodlust++;
     if (e.kind === "killed")
       summary.killed = Math.min(999, summary.killed! + original.quantity! - (reductions.get(e.id) ?? 0));
     if (deltas.has(e.id)) summary.killed = Math.max(0, Math.min(999, summary.killed! + deltas.get(e.id)!));
@@ -866,6 +902,7 @@ export function playStoryBeats(
       (/^buddy\..+\.status$/.test(key) && value === 'defeated') ||
       (/^victim\./.test(key) && value === 'killed'))) priority = 65;
     if(e.hunterAction&&(['repair','force-mark-x','destroy-ally'].includes(e.hunterAction.command)||e.hunterAction.command==='countdown'&&hunterState(e.moduleData!.changes).phase==='mark-x'||e.hunterAction.command==='ally-health'&&e.hunterAction.value===0))priority=65;
+    if(e.organismAction?.command==="finale"||e.organismAction?.command==="assimilate") priority=85;
     if (e.slayerAction?.command === "collapse") priority = 90;
     if (e.slayerAction?.command === "cross" || e.slayerAction?.command === "pull") priority = 65;
     if(e.mallAction?.command==='record-card')priority=55;

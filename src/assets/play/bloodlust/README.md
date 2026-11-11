@@ -58,3 +58,5 @@ Billy's full board remains an existing source gap in `docs/module-reference-gaps
 ## Verification and release
 
 Tests cover distinct images for every verified position, generic/unknown/legacy fallback, loaded native derivatives, plus/minus, Undo, reload and rejected local saves. Actual Bloodlust cards are inspected on laptop and 390px/320px phones. CI status and publication are reported on the PR. Frontend/artwork deployment only; no SQL, edge-function, provider-prompt, identity-photo, Divine Wrath or narrative changes.
+
+The Organism has eight verified positions (0–7), counted on the supplied killer board inset and all three mutation faces. Its displayed positions map across the existing moon series. The top position uses the final image.

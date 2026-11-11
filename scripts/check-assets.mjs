@@ -448,3 +448,35 @@ for (const id of falconwoodPhotos) {
 }
 if (images.some(file => file.startsWith(falconwoodFolder+'/') && !falconwoodFiles.has(file))) throw Error('Unmapped Falconwood artwork');
 console.log('Verified 52 independent Falconwood photographs and eight Terror thumbnails.');
+
+const organismFolder = 'src/assets/play/photos/organism';
+const organismPhotos = JSON.parse(readFileSync(join(organismFolder,'manifest.json'),'utf8'));
+const organismPortraits = ['red-exposed','black-exposed','grey-exposed','red-safe','black-safe','grey-safe','tough','six','five'];
+const organismCards = ['reductive','cognitive','regenerative','acidic','legs','skin'];
+const organismTerror = ['absorbed','hit-run','trust','destroying-tests','must-be-you','survive','vulnerable','alone','anywhere'];
+const organismExpected = new Set(['header',...organismPortraits,...organismCards,...organismTerror]);
+const organismFiles = new Set();
+const organismSources = new Set();
+for(const photo of organismPhotos) {
+  const banner = photo.id==='header';
+  const file = banner?'src/assets/play/banners/organism.webp':join(organismFolder,photo.id+'.webp');
+  const dimensions = banner?[1152,480]:organismPortraits.includes(photo.id)?[640,800]:[960,540];
+  if(!organismExpected.delete(photo.id)||photo.file!==file||organismSources.has(photo.sourceSha256)||
+    !/^exec-[a-f0-9-]+\.png$/.test(photo.source)||!/^[a-f0-9]{64}$/.test(photo.sourceSha256)||
+    photo.nativeWidth<dimensions[0]||photo.nativeHeight<dimensions[1]||
+    Boolean(photo.thumbnail)!==organismCards.includes(photo.id)) throw Error('Invalid Organism source or mapping: '+photo.id);
+  organismSources.add(photo.sourceSha256);
+  if(photo.thumbnail&&photo.thumbnail.file!==join(organismFolder,photo.id+'-thumb.webp')) throw Error('Invalid Organism chooser: '+photo.id);
+  const variants = [[photo,dimensions,96*1024]];
+  if(photo.thumbnail) variants.push([photo.thumbnail,[288,162],22*1024]);
+  for(const [entry,size,budget] of variants) {
+    const bytes=readFileSync(entry.file);
+    if(organismFiles.has(entry.file)||konradWebpDimensions(bytes).join()!==size.join()||
+      [entry.width,entry.height].join()!==size.join()||bytes.length!==entry.bytes||bytes.length>budget||
+      createHash('sha256').update(bytes).digest('hex')!==entry.sha256) throw Error('Invalid Organism photograph: '+entry.file);
+    organismFiles.add(entry.file);
+  }
+}
+if(organismExpected.size||organismFiles.size!==31||
+  images.some(file=>file.startsWith(organismFolder+'/')&&!organismFiles.has(file))) throw Error('Incomplete Organism art set');
+console.log('Verified 25 original Organism photographs and 6 chooser thumbnails.');
