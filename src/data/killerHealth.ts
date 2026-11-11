@@ -28,7 +28,6 @@ const KILLER_MAX_HP: Record<string, number> = {
 
   // Season 2
   'Evomorph': 10,
-  'The Organism': 10,
   'Ratchet Lady': 8,
   'Big Bad Wolf': 9,
 
@@ -57,6 +56,6 @@ export function isKillerUnkillable(name: string): boolean {
  * Returns 0 for unkillable killers, and a reasonable default (9) for unknown killers.
  */
 export function getKillerMaxHealth(name: string): number {
-  if (UNKILLABLE_KILLERS.has(name)) return 0;
+  if (UNKILLABLE_KILLERS.has(name) || name==='The Organism') return 0;
   return KILLER_MAX_HP[name] ?? 9;
 }

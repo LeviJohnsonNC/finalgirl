@@ -333,6 +333,7 @@ const facts = load("../supabase/functions/_shared/storyFacts.ts");
 const marrek = load('../supabase/functions/_shared/play/marrekWarehouse.ts');
 const tormentor = load('../supabase/functions/_shared/play/tormentor.ts');
 const prompts = load("../supabase/functions/_shared/storyPrompts.ts", {
+  "./play/organism.ts": load("../supabase/functions/_shared/play/organism.ts"),
   "./play/intruders.ts": load("../supabase/functions/_shared/play/intruders.ts"),
   "./finalGirlIdentity.ts": load("../supabase/functions/_shared/finalGirlIdentity.ts"),
   "./fictionBoundary.ts": load("../supabase/functions/_shared/fictionBoundary.ts"),

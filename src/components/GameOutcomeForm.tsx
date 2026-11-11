@@ -1,3 +1,4 @@
+import {ORGANISM_MODULE,organismFacts} from "@/lib/play/organism";
 import { falconwoodReview, falconwoodReviewText, falconwoodState } from "../../supabase/functions/_shared/play/falconwood";
 import { slayerState } from "@/lib/play/slayer";
 import {MALL,MALL_MODULE,mallState,mallFacts} from '@/lib/play/sunnydaze';
@@ -399,10 +400,11 @@ export const GameOutcomeForm = ({
       ...(result.killer==='The Tormentor'&&{tormentorReview:{loss:tormentorLoss}}),
       ...(isGrimlash&&{grimlashReview:{loss:grimLoss}}),
       ...(result.location==='USS Konrad'&&{konradReview:{fate:shipFate}}),
+      ...(isOrganism&&!isWin&&organismLossType&&{organismLoss:organismLossType}),
       outcome: isWin ? 'won' : 'lost',
       finalHorrorLevel,
       finalGirlHealth,
-      killerHealth: isIntruders ? result.killerHealth ?? null : killerIsUnkillable ? null : killerHealth,
+      killerHealth: isIntruders || isOrganism ? result.killerHealth ?? null : killerIsUnkillable ? null : killerHealth,
       weaponUsed: weaponUsed || '',
       victimsSaved,
       victimsKilled,
@@ -498,7 +500,7 @@ export const GameOutcomeForm = ({
               preserveObservedExcess={isGrimlash}
               variant={finalGirlHealth === 0 ? "killed" : "saved"}
             />
-            {!killerIsUnkillable && !isIntruders && (result.killer!=='The Hunter'||hunterState(moduleState(entries,'hunter')).phase==='mark-x') && (
+            {!killerIsUnkillable && !isIntruders && !isOrganism && (result.killer!=='The Hunter'||hunterState(moduleState(entries,'hunter')).phase==='mark-x') && (
               <OutcomeNumberField
                 label={`Killer health (0–${maxKillerHealth})`}
                 accessibleLabel="Killer Health"
@@ -571,6 +573,11 @@ export const GameOutcomeForm = ({
             </div>
           )}
 
+          {isOrganism && <section className="outcome-panel outcome-module" aria-label="Organism ending review">
+            <h3>The Organism at the finish</h3>
+            <p>{organismFacts(moduleState(entries,ORGANISM_MODULE),entries)||"Roster unrecorded."}</p>
+            {result.killerHealth!=null&&<small className="block">Legacy Killer Health entry: {result.killerHealth}</small>}
+          </section>}
           {isOrganism && !isWin && <section className="outcome-panel outcome-module">
             <OutcomeChoices label="How did you lose?" value={organismLossType}
               onChange={value => setOrganismLossType(value as typeof organismLossType)} options={[["caught", "Caught by the Organism"], ["assimilated", "Assimilated"]]} />

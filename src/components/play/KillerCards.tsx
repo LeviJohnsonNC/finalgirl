@@ -1,3 +1,5 @@
+import {ORGANISM} from "@/lib/play/organism";
+import {OrganismFinaleControl} from "./OrganismControls";
 import { SLAYER, SLAYER_COLLAPSE } from '@/lib/play/slayer';
 import { SlayerCollapseControl } from './SlayerCollapseControl';
 import { HUNTER, hunterState, hunterHasReveal } from '@/lib/play/hunter';
@@ -108,7 +110,7 @@ export function KillerCards({
   const second = secondCards.find((card) => card.name === hans.secondPower);
   const content = (
     <>
-      {(typeOnly ? [typeOnly] : (["dark-power", "finale"] as CardType[])).map(
+      {(typeOnly ? [typeOnly] : (killer===ORGANISM?["finale"]:["dark-power", "finale"]) as CardType[]).map(
         (type) => {
           const cards = illustratedKillerCards(killer, type);
           const reveal = entries.find(
@@ -134,6 +136,7 @@ export function KillerCards({
                 </p>
               )}
               {selected && <RevealedCard card={selected} label={label} />}
+              {killer===ORGANISM&&type==="finale"&&<OrganismFinaleControl events={events} onEvent={onEvent} disabled={disabled} />}
               {killer === SLAYER && selected?.name === SLAYER_COLLAPSE && type === "finale" &&
                 <SlayerCollapseControl events={events} onEvent={onEvent} disabled={disabled} />}
               {!selected && (
@@ -238,7 +241,7 @@ export function KillerCards({
     <div className="module-reveals">{content}</div>
   ) : (
     <details className="module-card-section" data-module-control="reveals">
-      <summary>Dark Power &amp; Finale</summary>
+      <summary>{killer===ORGANISM?"Finale":"Dark Power & Finale"}</summary>
       {content}
     </details>
   );

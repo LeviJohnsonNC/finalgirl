@@ -1,3 +1,6 @@
+import {ORGANISM, ORGANISM_FORMS, ORGANISM_TERRORS} from "@/lib/play/organism";
+import {organismDeathAttackers} from "@/lib/play/death";
+import {organismArt} from "./organismArt";
 import { FALCONWOOD, FALCONWOOD_PEOPLE, missionByName } from "../../../supabase/functions/_shared/play/falconwood";
 import { FALCONWOOD_TERRORS } from "../../../supabase/functions/_shared/play/falconwoodCatalog";
 import { falconwoodArt } from './falconwoodArt';
@@ -112,6 +115,8 @@ export function DeathSceneDialog({
 
 const {characterImages}=useActiveImages();
   const facts = deathFacts(selection, events, eventId);
+  const organismAttackers=selection.killer===ORGANISM?organismDeathAttackers(events,eventId):[];
+  const linkedCasualty=events.some(event=>event.id===eventId&&event.kind==="killed"&&event.organismAction);
   const hunterDeathPhase=hunterState(hunterModuleState(hunterSummary(events.slice(0,events.findIndex(e=>e.id===eventId)+1)).entries,'hunter')).phase;
   const hunterDeathPhoto={unknown:'header','mark-v':'mark-v',countdown:'mark-v-shutdown','mark-x':'mark-x'}[hunterDeathPhase];
   const initial: PlayDetails = {
@@ -241,6 +246,7 @@ const {characterImages}=useActiveImages();
     }
   };
   const changeCount = (delta: 1 | -1) => {
+    if(linkedCasualty) return;
     if (onEvent(newPlayEvent({kind: "death-count", target: eventId, delta}))) {
       setMessage("");
       setResultError("");
@@ -269,6 +275,7 @@ const {characterImages}=useActiveImages();
   const woodsTerrorImage = woodsTerror?.location === WOODS ? woodsDeathImage(woodsTerror.name, values.room) : undefined;
   const piperCause = selection.location === WOODS && findPlayCard(selection, "event", values.eventCard)?.name === "Pied Piper";
   const cottageTerror=selection.location===WINGARD ? WINGARD_TERRORS.find(card=>card.name===values.terrorCard && card.fatal) : undefined;
+  const organismTerror=selection.killer===ORGANISM?ORGANISM_TERRORS.find(card=>card.death&&card.name===values.terrorCard):undefined;
   const cottageEvent=selection.location===WINGARD && suggestedDeathCards(selection,'event').some(card=>card.name===values.eventCard)
     ? WINGARD_EVENTS.find(card=>card.name===values.eventCard) : undefined;
   const eventNames = Array.from(
@@ -323,9 +330,9 @@ const {characterImages}=useActiveImages();
             </div>
             <div className="play-death-count" role="group" aria-label="Victims in this death">
               <span>Victims</span>
-              <button aria-label="Remove one victim from this death" disabled={scenes.busy || facts.quantity <= 1} onClick={() => changeCount(-1)}>−</button>
+              <button aria-label="Remove one victim from this death" disabled={linkedCasualty || scenes.busy || facts.quantity <= 1} onClick={() => changeCount(-1)}>−</button>
               <output aria-live="polite" aria-label="Victim count">{facts.quantity}</output>
-              <button aria-label="Add one victim to this death" disabled={scenes.busy || facts.quantity >= 50} onClick={() => changeCount(1)}>+</button>
+              <button aria-label="Add one victim to this death" disabled={linkedCasualty || scenes.busy || facts.quantity >= 50} onClick={() => changeCount(1)}>+</button>
               <span className="sr-only">Count changes are recorded immediately and can be undone in the timeline.</span>
             </div>
             <div
@@ -347,6 +354,7 @@ const {characterImages}=useActiveImages();
                   key={cause}
                   className={`play-cause-tile play-cause-tile--${cause}`}
                   aria-pressed={values.cause === cause}
+                  data-organism-photo={selection.killer===ORGANISM&&(cause==="killer"||cause==="terror"&&!!organismTerror)||undefined}
                   data-slayer-photo={selection.killer === SLAYER && (cause === "killer" || cause === "terror" && !!slayerTerror) || undefined}
                   data-wingard-photo={(cause==='terror' && !!cottageTerror || cause==='event' && !!cottageEvent) || undefined}
                   data-woods-photo={(cause === "terror" && !!woodsTerrorImage || cause === "event" && piperCause) || undefined}
@@ -363,6 +371,8 @@ const {characterImages}=useActiveImages();
                 >
                   {selection.location===MALL&&cause==='hazard'?<ModuleArtwork art={mallArt('wet-floors')}/>:selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
                     :cause==='event'&&cottageEvent ? <ModuleArtwork art={wingardArt(cottageEvent.id,true)} />
+                    :selection.killer===ORGANISM&&cause==="killer"?<ModuleArtwork art={organismArt(ORGANISM_FORMS.find(form=>form.name===values.attacker)?.id??"header")} />
+                    :cause==="terror"&&organismTerror?<ModuleArtwork art={organismArt(organismTerror.id,true)} />
                     :selection.killer===INTRUDERS&&cause==='killer'
                     ? <ModuleArtwork art={intruderArt(INTRUDER_ROSTER.find(p=>p.name===values.attacker)?.id??'header')} />
                     : selection.killer===INTRUDERS&&cause==='terror'&&INTRUDER_TERRORS.some(c=>c.name===values.terrorCard)
@@ -390,6 +400,9 @@ const {characterImages}=useActiveImages();
           </div>}
           {!reading && values.cause !== "unspecified" && (
             <div className="play-death-fields">
+              {selection.killer===ORGANISM&&(values.cause==="killer"||values.cause==="terror")&&<label>Who attacked?
+                <PlaySearch label="Death attacker" value={values.attacker??""} options={organismAttackers} onChange={value=>update("attacker",value)} placeholder="Choose a recorded form or leave unknown" />
+              </label>}
               {selection.killer===INTRUDERS&&(values.cause==='killer'||values.cause==='terror')&&(
                 <label>Who attacked? <PlaySelect aria-label="Death attacker" value={INTRUDER_ROSTER.some(p=>p.name===values.attacker)?values.attacker:''} onChange={event=>update('attacker',event.target.value)}>
                   <option value="">Unknown</option>

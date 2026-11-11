@@ -53,12 +53,8 @@ The creature's head is elongated and faceless, featuring a prominent, jagged jaw
 
 The surface of its body appears wet and visceral, as if it has recently emerged from a cocoon or a bloody encounter. It is positioned in a dark, claustrophobic industrial tunnel with circular concrete walls and wet, reflective floors.`,
 
-  "The Organism": `A grotesque, humanoid monstrosity standing roughly seven feet tall, with a massive, mutated physique that suggests a horrifying biological transformation. Its skin is a sickly, pale yellow-green, covered in weeping pustules, bulging cysts, and raw, red muscle tissue. The creature's most striking feature is a secondary, vertical maw splitting open its entire torso, lined with jagged, uneven teeth and filled with glistening, visceral gore.
+  "The Organism": `A concealed mimic that passes for an ordinary person until a physical reveal. Revealed forms differ: a tall asymmetric torso maw with tendrils, a stocky hooked-armed form, and a low splayed form with stacked eyes. Use tangible practical creature effects and depict only the forms supported by the scene’s facts.`,
 
-From its head and back, several slick, dark tentacles and fleshy, wing-like appendages protrude, writhing in the cold air. Its face is a distorted mask of agony, with wide, pale eyes and a jaw that has unhinged into a cluster of smaller, needle-like feelers. The creature wears the shredded, frozen remnants of dark blue trousers, indicating it may have once been human.
-
-The beast is hunched in a defensive yet aggressive stance amidst a blinding whiteout. Heavy snow cakes its malformed limbs and settles into the crevices of its mutated flesh. The background is a stark, desaturated blizzard that obscures all landmarks, creating an isolated and suffocating atmosphere. The overall aesthetic is one of high-concept body horror, blending visceral biological detail with a cold, unrelenting environment.`,
-  
   // Once Upon a Full Moon
   'Big Bad Wolf': WOLF_VISUAL,
 

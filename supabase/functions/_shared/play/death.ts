@@ -1,3 +1,4 @@
+import {ORGANISM, ORGANISM_MODULE, organismFacts, organismLiving} from "./organism.ts";
 import { FALCONWOOD, FALCONWOOD_MODULE, falconwoodFacts, falconwoodState, missionById, missionByName } from "./falconwood.ts";
 import { MALL, MALL_MODULE, mallFacts } from './sunnydaze.ts';
 import { SLAYER, SLAYER_MODULE, SLAYER_TERRORS, slayerFacts } from "./slayer.ts";
@@ -30,6 +31,7 @@ export function deathFacts(
   eventId: string,
 ) {
   if(!validPlayLog(events))return null;
+  if(selection.killer!==ORGANISM&&events.some(e=>e.moduleData?.module===ORGANISM_MODULE||e.organismReference)) return null;
   if (selection.location !== FALCONWOOD && events.some(e => e.moduleData?.module === FALCONWOOD_MODULE || e.falconwoodReference)) return null;
   const selectedMission = missionByName(selection.mission);
   if (selectedMission && events.some(e => e.falconwoodAction && e.falconwoodAction.mission !== selectedMission.id)) return null;
@@ -54,12 +56,13 @@ export function deathFacts(
   const falconwoodDeath = selection.location === FALCONWOOD && e.falconwoodReference;
   const woodsDeath = selection.location === WOODS && e.woodsReference;
   const wolfDeath = selection.killer === WOLF && e.wolfReference;
+  const organismDeath=selection.killer===ORGANISM&&e.organismReference;
   const intruderDeath=selection.killer===INTRUDERS && e.intruderReference;
   const wingardDeath = selection.location===WINGARD && e.wingardReference;
   const mallDeath=selection.location===MALL&&e.mallReference;
   const slayerDeath = selection.killer === SLAYER && e.slayerReference;
   const hunterDeath=selection.killer===HUNTER&&e.hunterReference;
-  const historical = falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath
+  const historical = falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
     ? summarizePlay(events.slice(0, events.findIndex(event => event.id === eventId) + 1)).entries
     : [];
   // The death's own fields reflect deliberate edits. Only the surrounding
@@ -118,6 +121,10 @@ export function deathFacts(
       context = { ...context, "big-bad-wolf": sorted };
     }
   }
+  if(organismDeath) {
+    const facts=organismFacts(moduleState(historical,ORGANISM_MODULE),historical);
+    if(facts) context={...context,[ORGANISM_MODULE]:{facts}};
+  }
   if (intruderDeath) {
     const state=moduleState(historical,INTRUDER_MODULE);
     if (Object.keys(state).length) {
@@ -144,6 +151,12 @@ export function deathFacts(
     ...(e.attacker && { attacker: e.attacker }),
     ...(context && { moduleContext: context }),
   };
+}
+export function organismDeathAttackers(events:readonly PlayEvent[],eventId:string) {
+  const index=events.findIndex(event=>event.id===eventId);
+  if(index<0) return [];
+  const entries=summarizePlay(events.slice(0,index)).entries;
+  return organismLiving(moduleState(entries,ORGANISM_MODULE)).flatMap(figure=>figure.form?[figure.form.name]:[]);
 }
 /** Narrative setting for an attributed Slayer victim attack. Preserve cached facts:
  * collapse is read from this death's frozen context, never the current tracker. */
@@ -246,6 +259,7 @@ export function detailsForCause(
   return {
     ...details,
     attacker:
+      killer===ORGANISM&&(cause==="killer"||cause==="terror") ? (details.attacker===ORGANISM?"":details.attacker??"") :
       intruderAttribution ? (INTRUDER_ROSTER.some(p=>p.name===details.attacker)?details.attacker:"") : cause === "killer"
         ? killer
         : cause === "minion"

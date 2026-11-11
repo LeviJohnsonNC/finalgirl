@@ -1,3 +1,4 @@
+import {ORGANISM,ORGANISM_MAX_BLOODLUST} from "@/lib/play/organism";
 import { SLAYER, SLAYER_BLOODLUST } from "@/lib/play/slayer";
 import { WOLF, WOLF_BLOODLUST } from "@/lib/play/bigBadWolf";
 import level0 from "@/assets/play/bloodlust/level-0.webp";
@@ -32,6 +33,7 @@ const photographs = [
  * Billy's board remains a documented source gap, so he uses the generic scale.
  */
 export const verifiedBloodlustMaximum: Readonly<Record<string, number>> = {
+  [ORGANISM]: ORGANISM_MAX_BLOODLUST,
   "The Hunter": 10,
   "The Intruders": 10,
   [SLAYER]: SLAYER_BLOODLUST.length - 1,

@@ -1,3 +1,4 @@
+import { ORGANISM, ORGANISM_SOURCE, ORGANISM_TERRORS, ORGANISM_ITEM } from "./organism.ts";
 import { FALCONWOOD } from "./falconwood.ts";
 import { FALCONWOOD_EVENTS, FALCONWOOD_ITEMS, FALCONWOOD_MISSION_ITEMS, FALCONWOOD_ROLES, FALCONWOOD_SOURCE, FALCONWOOD_SPACES, FALCONWOOD_TERRORS } from "./falconwoodCatalog.ts";
 import {MALL,MALL_EVENTS,MALL_TERRORS,MALL_ITEMS,MALL_SPACES,MALL_SOURCE} from './sunnydazeCatalog.ts';
@@ -164,14 +165,7 @@ export const PLAY_CARDS: readonly PlayCard[] = [
     location: "Camp Happy Trails",
     source: "Owner photo IMG_9324.jpg",
   })),
-  // One sample is visible in the published rulebook; icons beyond the quoted
-  // conditional are not inferred from incomplete PDF text extraction.
-  {
-    name: "Who can we trust?",
-    kind: "terror",
-    killer: "The Organism",
-    source: `${rules}#page=14`,
-  },
+  ...ORGANISM_TERRORS.map(card=>({...card,kind:"terror" as const,killer:ORGANISM,source:ORGANISM_SOURCE})),
 ];
 const normalize = (s: string) =>
   s
@@ -205,6 +199,7 @@ export function findPlayCard(
 /** Context-only Woods cards stay searchable as rules and accept historical free text. */
 export function suggestedDeathCards(selection: {killer:string;location:string;mission?:string|null}, kind: "terror" | "event") {
   return applicablePlayCards(selection, kind).filter(card => {
+    if (card.killer===ORGANISM) return ORGANISM_TERRORS.some(terror=>terror.name===card.name&&terror.death);
     if (card.location === FALCONWOOD && kind === "event") return ["Head Researcher", "Conspiracy Theorist"].includes(card.name);
     if(card.location===WINGARD)return kind==='event'
       ? ['Booby Traps','Escape Attempt','Marked for Death','Loser Boyfriend'].includes(card.name)
@@ -278,9 +273,6 @@ export function playMechanisms(selection: {
       ? ["Dark Waters", "Fire", "Star Crossed Lovers"]
       : []),
     ...(selection.location === "Station 2891" ? ["Frostbite"] : []),
-    ...(selection.killer === "The Organism"
-      ? ["Fast Organism", "Tough Organism", "Strong Organism"]
-      : []),
     ...(selection.location === "Carnival of Blood" ? [...CARNIVAL_TRAPS, ...CARNIVAL_ITEM_TRAPS].map(t=>t.name) : []),
     ...(selection.location === "Maple Lane" ? ["Fire", "Booby Trap", "Street traffic"] : []),
     ...(selection.location==='USS Konrad'?['Crusher','Incinerator','Airlock','Self Destruct','Hull breach','Gas leak','Faulty Wiring','Garbage Day']:[]),
@@ -314,5 +306,5 @@ export function selectionItems(selection:{killer:string;location:string;mission?
   const missionItem = selection.location === FALCONWOOD
     ? FALCONWOOD_MISSION_ITEMS.filter(item => item.name === (selection.mission === 'Missing Friend' ? 'Spell Book' : selection.mission === 'Survive the Hunt' ? 'Telekinesis' : ''))
     : [];
-  return [...playItems(selection.location), ...missionItem,...(selection.killer==='Poltergeist'?POLTERGEIST_ITEMS:[])];
+  return [...playItems(selection.location), ...missionItem,...(selection.killer===ORGANISM?[ORGANISM_ITEM]:[]),...(selection.killer==='Poltergeist'?POLTERGEIST_ITEMS:[])];
 }

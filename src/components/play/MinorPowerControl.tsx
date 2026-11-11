@@ -12,6 +12,7 @@ export function MinorPowerControl({
   onChange,
   className = "",
   previouslyRevealed = false,
+  observation,
   maxHealth = 2,
   disabled = false,
 }: {
@@ -25,6 +26,7 @@ export function MinorPowerControl({
   onChange: (health: number | null) => unknown;
   className?: string;
   previouslyRevealed?: boolean;
+  observation?: string;
 }) {
   const active = health !== undefined && health > 0;
   const status =
@@ -81,7 +83,7 @@ export function MinorPowerControl({
             <span className="cinematic-eyebrow">Minor Dark Power</span>
             <h3>{name}</h3>
             <p className="module-health-status" aria-live="polite">
-              {status}
+              {observation ? `${observation} · ${status}` : status}
             </p>
             <HealthTokens
               name={name}
