@@ -89,7 +89,7 @@ const TheEnd = ({
   const evomorphGuidance=result.killer==='Evomorph'?evomorphOpeningGuidance(endingModuleState(endingSummary(result.playEvents).entries,'evomorph').stage,false):undefined;
   const mall=useMemo(()=>result.location===MALL?mallReview(endingModuleState(endingSummary(result.playEvents).entries,MALL_MODULE)):undefined,[result.location,result.playEvents]);
   const hunter=useMemo(()=>result.killer==='The Hunter'?hunterReview(endingModuleState(endingSummary(result.playEvents).entries,'hunter')):undefined,[result.killer,result.playEvents]);
-  const endingVisualGuidance=[evomorphGuidance,result.killer===ORGANISM?"Depict only forms established by the recorded ending. Keep the selected location and Final Girl.":moduleContext?.visualGuidance].filter(Boolean).join('\n');
+  const endingVisualGuidance=[evomorphGuidance,result.killer===ORGANISM&&result.location==='Station 2891'?moduleContext?.visualGuidance:undefined,result.killer===ORGANISM?"Depict only forms established by the recorded ending. Keep the selected location and Final Girl.":moduleContext?.visualGuidance].filter(Boolean).join('\n');
   const isWin = result.outcome === 'won';
   const grimlashReview=useMemo(()=>result.killer==='Grimlash'?(formData.grimlashReview??{loss:(endingModuleState(endingSummary(result.playEvents).entries,'grimlash').loss??'unknown') as import('@/lib/play/grimlash').GrimlashLoss}):undefined,[result.killer,result.playEvents,formData.grimlashReview]);
   const shipReview=useMemo(()=>result.location==='USS Konrad'?{fate:konradState(endingModuleState(endingSummary(result.playEvents).entries,'konrad')).fate}:undefined,[result.location,result.playEvents]);

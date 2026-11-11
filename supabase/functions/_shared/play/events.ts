@@ -1,4 +1,4 @@
-import { STATION_MODULE, isInitialStation, resolveStationAction, stationParent, validStationAction, type StationAction } from './station.ts';
+import { STATION_MODULE, isInitialStation, resolveStationAction, stationParent, stationState, stationSummary, validStationAction, type StationAction } from './station.ts';
 import { ORGANISM_MODULE, ORGANISM_MAX_BLOODLUST, initialOrganism, isInitialOrganism, isOrganismCasualty, organismParent, resolveOrganismAction, sameOrganismChanges, validOrganismAction, type OrganismAction } from "./organism.ts";
 import { MALL_MODULE, describeMallAction, initialMall, isInitialMall, resolveMallAction, validMallAction, mallParent, mallState, type MallAction } from './sunnydaze.ts';
 import { FALCONWOOD_EFFECTS, FALCONWOOD_MODULE, falconwoodParent, falconwoodState, initialFalconwood, missionById, resolveFalconwoodAction, validFalconwoodAction, type FalconwoodAction } from "./falconwood.ts";
@@ -888,6 +888,18 @@ export function describeEvent(e: PlayEvent): string {
     case "moment":
       return `${e.text}${e.killerCard ? `: ${e.killerCard}` : ""}${e.detail ? `${e.killerCard ? ". " : ": "}${e.detail}` : ""}`;
     case "module":
+      if (e.moduleData?.module === STATION_MODULE) {
+        const state = stationState(e.moduleData.changes);
+        const action = e.stationAction;
+        if (!action) return 'Station 2891 setup recorded';
+        if (action.kind === 'confirm-rescue') return 'Station helicopter rescue effects resolved';
+        if (action.kind === 'upkeep') return 'Skipped Frostbite clearing resolved';
+        if (action.kind === 'breach') return action.status ? 'Station Lab wall updated' : 'Station Lab wall observation cleared';
+        if (action.kind === 'role' || action.kind === 'ally') return 'Station roster updated';
+        if (action.kind === 'frost' || action.kind === 'generator' || action.kind === 'storm') return 'Station weather observations updated';
+        if (action.kind === 'skidozer' || action.kind === 'cache') return 'Station equipment observations updated';
+        return stationSummary(state);
+      }
       if(e.mallAction)return describeMallAction(e.mallAction);
       if (e.falconwoodAction?.command === 'complete' || e.falconwoodAction?.command === 'attest' ||
           e.falconwoodAction?.command === 'progress-count' && e.moduleData && falconwoodState(e.moduleData.changes).complete) {

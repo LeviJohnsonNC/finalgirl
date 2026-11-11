@@ -9,6 +9,7 @@ import { moduleState } from '@/lib/play/modules';
 import { ModuleArtwork } from './ModuleArtwork';
 import type { ControlsProps } from './moduleDefinitions';
 import { useModuleRecord } from './useModuleRecord';
+import { StationEnvironment } from './StationEnvironment';
 import { stationArt } from './stationArt';
 import '@/styles/play-station.css';
 
@@ -100,6 +101,7 @@ export function StationControls({events,onEvent,blocked,stationFresh,startingEve
         {f && f.count === 0 && f.position !== 'helipad' && <button type="button" onClick={()=>commit({kind:'help'})}>Record rescue Event relocation</button>}
       </details>
     </section>
+    <StationEnvironment state={state} commit={commit}/>
     {message && <p role="alert">{message}</p>}
   </fieldset>;
 }
