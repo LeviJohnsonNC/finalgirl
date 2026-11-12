@@ -153,7 +153,7 @@ describe('The Organism',()=>{
     expect(await deathSignature(deathFacts(selection,sorted,death.id)!)).toBe(await deathSignature(original));
     expect(await deathSignature(deathFacts(selection,t.log,legacy.id)!)).toBe(await deathSignature(old));
     expect(deathFacts({...selection,killer:'Hans'},t.log,death.id)).toBeNull();
-    expect(playStoryBeats(t.log,selection)).toContain('6-HP form');
+    expect(playStoryBeats(t.log,selection)).toContain('Strong');
   });
 
   it('replaces stale creature guidance in the opening and Reshoot while preserving the selected cast',()=>{

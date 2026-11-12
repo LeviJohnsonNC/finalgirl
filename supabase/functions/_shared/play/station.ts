@@ -40,7 +40,7 @@ export type StationState = {
 };
 export type StationCommand =
   | ({ kind: 'depart' } & Group)
-  | { kind: 'move'; direction: 'outbound' | 'return'; source: Source; arrival?: 'action' | 'later' }
+  | { kind: 'move'; direction: 'outbound' | 'return'; source?: Source; arrival?: 'action' | 'later' }
   | { kind: 'land' | 'help' | 'confirm-rescue' | 'upkeep' | 'generator' }
   | { kind: 'flight-correction'; flight: Flight | null }
   | { kind: 'role'; id: Role; status: RoleState | null; correction?: true }
@@ -83,7 +83,7 @@ export function validStationAction(input: unknown): input is StationAction {
   switch (input.kind) {
     case 'depart': return allowed('count','roles') && validGroup(input);
     case 'move': return allowed('direction','source','arrival') && oneOf(['outbound','return'], input.direction) &&
-      oneOf(STATION_MOVE_SOURCES,input.source) && (input.arrival === undefined || oneOf(['action','later'],input.arrival));
+      (input.source === undefined || oneOf(STATION_MOVE_SOURCES,input.source)) && (input.arrival === undefined || oneOf(['action','later'],input.arrival));
     case 'land': case 'help': case 'confirm-rescue': case 'upkeep': case 'generator': return allowed();
     case 'flight-correction': return allowed('flight') && (input.flight === null || validFlight(input.flight));
     case 'role': return allowed('id','status','correction') && oneOf(roleIds,input.id) && nullable(roleStates,input.status) && (input.correction === undefined || input.correction === true);
@@ -184,7 +184,7 @@ function stationTransition(current: StationState, action: StationAction): Statio
       if (index < 1 || index >= STATION_ROUTE.length) return;
       const position = STATION_ROUTE[index];
       if (position === 'airport' && f.count !== 0) {
-        if (!action.arrival || action.arrival === 'later' && action.source !== 'Terror card') return;
+        if (!action.arrival || action.arrival === 'later' && action.source && action.source !== 'Terror card') return;
         if (action.arrival === 'action') rescue(s,f);
         else s.flight = {...f,position,pending:true,direction:undefined};
       } else {

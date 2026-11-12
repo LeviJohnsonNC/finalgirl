@@ -33,7 +33,7 @@ import helipad from '@/assets/play/photos/station-2891/helipad.webp';
 import type { ModuleArt } from './ModuleArtwork';
 
 export const stationArt = {
-  airport: {src:airport,position:'65% center'},
+  airport: {src:airport,position:'50% 58%'},
   banner: {src:banner,position:'62% 60%'},
   station: {src:departure,position:'70% 49%'},
   air: {src:flight,position:'55% 49%'},

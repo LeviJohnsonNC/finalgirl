@@ -17,9 +17,9 @@ const panic = 'This killer panics.';
 export const ORGANISM_FORMS = [
   {id:'tough',name:'Tough',hp:7,visual:'Tall, asymmetrical torso maw and amber shoulder nodules with wiry tendrils.',
     killerAction:heal, finaleAction:chase, attack:[1,1,1,1,2,2,2,3], move:[1,1,2,2,2,2,2,2], effects:['',victimMove,victimMove,event,horror,heal,horror,chase]},
-  {id:'six',name:'6-HP form',hp:6,visual:'Heavy shoulders, hooked arms and a compact skull-like face.',
+  {id:'six',name:'Strong',hp:6,visual:'Heavy shoulders, hooked arms and a compact skull-like face.',
     killerAction:victimAttack, finaleAction:chase, attack:[1,1,1,2,2,2,3,4], move:[1,1,1,1,1,2,2,2], effects:['',victimMove,horror,victimAttack,horror,heal,event,chase]},
-  {id:'five',name:'5-HP form',hp:5,visual:'Low, splayed silhouette with long bent limbs and eyes stacked over a low jaw.',
+  {id:'five',name:'Fast',hp:5,visual:'Low, splayed silhouette with long bent limbs and eyes stacked over a low jaw.',
     killerAction:panic, finaleAction:'Target the closest Final Girl or eligible Victim, move twice, then attack.', attack:[1,1,1,1,2,2,2,2], move:[1,2,2,2,2,3,3,3], effects:['',panic,panic,victimAttack,panic,event,heal,chase]},
 ] as const;
 export type OrganismForm = typeof ORGANISM_FORMS[number]['id'];
@@ -78,6 +78,8 @@ export const minorHealthKey = (card:Minor) => `minor.${card}.health`;
 const tokens:readonly Token[] = ['black','white','pending-black','pending-white','pending-unknown','defeated'];
 const statuses:readonly Status[] = ['exposed','safe','casualty','mutated'];
 const isColor = (value:unknown):value is OrganismColor => ORGANISM_COLORS.some(color=>color===value);
+const legacyFormNames = {five:'5-HP form',six:'6-HP form',tough:'Tough'} as const;
+export const organismFormByName = (name?: string) => ORGANISM_FORMS.find(form=>form.name===name||legacyFormNames[form.id]===name);
 const formById = (value:unknown) => ORGANISM_FORMS.find(form=>form.id===value);
 const validInt = (value:unknown,min:number,max:number):value is number =>
   typeof value==='number' && Number.isInteger(value) && value>=min && value<=max;
@@ -218,12 +220,12 @@ export function resolveOrganismAction(action:OrganismAction,state:Observation,en
 }
 
 export const organismColorLabel = (who:OrganismColor) => who[0].toUpperCase()+who.slice(1);
-export function organismFacts(state:Observation,entries:readonly Entry[] = []) {
+export function organismFacts(state:Observation,entries:readonly Entry[] = [], historicalLabels = false) {
   const roster = organismRoster(state).filter(figure=>figure.status).map(figure=>{
     const who=organismColorLabel(figure.who);
     if(figure.form) {
       const condition=figure.pending?'Final Health unresolved':figure.token==='defeated'?'defeated':figure.health===undefined?'Health unrecorded':`${figure.health} HP`;
-      return `${who}: ${figure.form.name} (${condition})`;
+      return `${who}: ${historicalLabels ? legacyFormNames[figure.form.id] : figure.form.name} (${condition})`;
     }
     return `${who}: ${figure.status==='casualty'?'confirmed casualty':figure.status==='safe'?'Safe test': 'Exposed'}`;
   });

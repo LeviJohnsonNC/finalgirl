@@ -1,6 +1,6 @@
 import {STATION, STATION_EVENTS, STATION_TERRORS, stationNameKey} from '../../../supabase/functions/_shared/play/stationCatalog';
 import {stationArt,stationTerrorArt} from './stationArt';
-import {ORGANISM, ORGANISM_FORMS, ORGANISM_TERRORS} from "@/lib/play/organism";
+import {ORGANISM, organismFormByName, ORGANISM_TERRORS} from "@/lib/play/organism";
 import {organismDeathAttackers} from "@/lib/play/death";
 import {organismArt} from "./organismArt";
 import { FALCONWOOD, FALCONWOOD_PEOPLE, missionByName } from "../../../supabase/functions/_shared/play/falconwood";
@@ -379,7 +379,7 @@ const {characterImages}=useActiveImages();
                 >
                   {stationTerror && cause==='terror' ? <ModuleArtwork art={stationTerrorArt[stationTerror.id]}/> : stationCauseArt && cause===values.cause ? <ModuleArtwork art={stationCauseArt}/> : selection.location===MALL&&cause==='hazard'?<ModuleArtwork art={mallArt('wet-floors')}/>:selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
                     :cause==='event'&&cottageEvent ? <ModuleArtwork art={wingardArt(cottageEvent.id,true)} />
-                    :selection.killer===ORGANISM&&cause==="killer"?<ModuleArtwork art={organismArt(ORGANISM_FORMS.find(form=>form.name===values.attacker)?.id??"header")} />
+                    :selection.killer===ORGANISM&&cause==="killer"?<ModuleArtwork art={organismArt(organismFormByName(values.attacker)?.id??"header")} />
                     :cause==="terror"&&organismTerror?<ModuleArtwork art={organismArt(organismTerror.id,true)} />
                     :selection.killer===INTRUDERS&&cause==='killer'
                     ? <ModuleArtwork art={intruderArt(INTRUDER_ROSTER.find(p=>p.name===values.attacker)?.id??'header')} />
@@ -409,7 +409,7 @@ const {characterImages}=useActiveImages();
           {!reading && values.cause !== "unspecified" && (
             <div className="play-death-fields">
               {selection.killer===ORGANISM&&(values.cause==="killer"||values.cause==="terror")&&<label>Who attacked?
-                <PlaySearch label="Death attacker" value={values.attacker??""} options={organismAttackers} onChange={value=>update("attacker",value)} placeholder="Choose a recorded form or leave unknown" />
+                <PlaySearch label="Death attacker" value={organismFormByName(values.attacker)?.name??values.attacker??""} options={organismAttackers} onChange={value=>update("attacker",value)} placeholder="Choose a recorded form or leave unknown" />
               </label>}
               {selection.killer===INTRUDERS&&(values.cause==='killer'||values.cause==='terror')&&(
                 <label>Who attacked? <PlaySelect aria-label="Death attacker" value={INTRUDER_ROSTER.some(p=>p.name===values.attacker)?values.attacker:''} onChange={event=>update('attacker',event.target.value)}>

@@ -7,12 +7,30 @@
 .station-hero-caption h3 { font-size: 1.32rem; font-family: var(--font-display, Georgia), serif; }
 .station-hero-caption p, .station-passengers { font-size: .88rem; }
 .station-route { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); list-style: none; margin: 0; padding: 0; gap: .3rem; }
-.station-route li { border-top: 2px solid #75635d; color: #daccc3; padding: .35rem .1rem; font-size: .76rem; text-align: center; }
-.station-route [aria-current] { border-color: #f2c68d; background: #b77d3f2c; color: #fff3e5; font-weight: 650; }
 .station-edit, .station-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem .75rem; }
 .station-edit label { display: inline-flex; align-items: center; gap: .45rem; font-size: .84rem; }
-.station-controls button:not(.play-illustrated-tile), .station-controls select { min-height: 44px; padding: .25rem .65rem; border: 1px solid #826b61; border-radius: .4rem; background: #2f252b; color: #f7e5ce; }
-.station-controls button:not(.play-illustrated-tile):disabled { opacity: .55; }
+.station-controls button:not(:where(.play-illustrated-tile, .module-outcomes button, .station-route button)), .station-controls select { min-height: 44px; padding: .25rem .65rem; border: 1px solid #826b61; border-radius: .4rem; background: #2f252b; color: #f7e5ce; }
+.station-controls button:not(:where(.play-illustrated-tile, .module-outcomes button, .station-route button)):disabled { opacity: .55; }
+.station-controls .station-route button {
+  width: 100%;
+  height: 100%;
+  padding: .35rem .2rem;
+  border: 0;
+  border-top: 2px solid #887468;
+  border-radius: 0 0 .3rem .3rem;
+  background: #251f20;
+  font-size: .78rem;
+  line-height: 1.25;
+}
+.station-controls .station-route button:disabled { background: transparent; opacity: .58; }
+.station-controls .station-route button[aria-current] {
+  border-color: #f2c68d;
+  background: #b77d3f2c;
+  color: #fff3e5;
+  font-weight: 650;
+  opacity: 1;
+}
+.station-controls .station-route button:hover:not(:disabled) { background: #48352d; border-color: #e2b689; }
 .station-controls summary { min-height: 44px; align-content: center; }
 .station-check { min-height: 44px; cursor: pointer; }
 .station-controls :is(button,select,summary,input):focus-visible { outline: 2px solid #ffc98d; outline-offset: 2px; }

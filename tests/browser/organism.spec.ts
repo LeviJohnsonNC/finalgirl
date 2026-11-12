@@ -23,22 +23,41 @@ test('Organism portrait reveal and tracked Health',async({page,archive},info)=>{
     };
   });
   await roster.getByRole('combobox',{name:'Revealed mutation'}).click();
-  await page.getByRole('option',{name:'Tough · 7 HP',exact:true}).click();
+  await page.getByRole('option',{name:'Tough',exact:true}).click();
   await expect(roster.getByRole('alert')).toContainText('could not be saved');
   await expect(red).toBeVisible();
   await page.evaluate(()=>(window as unknown as {restoreOrganismStorage:()=>void}).restoreOrganismStorage());
   await roster.getByRole('combobox',{name:'Revealed mutation'}).click();
-  await page.getByRole('option',{name:'Tough · 7 HP',exact:true}).click();
+  await page.getByRole('option',{name:'Tough',exact:true}).click();
   const tough=roster.getByRole('button',{name:'Red · Tough',exact:true});
   await expect(tough).toBeVisible();
   expect(await tough.locator('img').getAttribute('src')).not.toBe(exposedSource);
-  await expect(roster.getByRole('button',{name:'Edit mutation Health'})).toHaveText('7');
+  await expect(roster.getByLabel('Mutation Health',{exact:true})).toHaveText('7');
   for(const [width,height] of info.project.name==='mobile'?[[390,844],[320,568]]:[[1280,640],[1366,768],[1440,900]]){
     await page.setViewportSize({width,height});
     await roster.locator('img').evaluateAll(async images=>Promise.all(images.map(img=>(img as HTMLImageElement).decode())));
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
     await roster.screenshot({path:info.outputPath(`organism-roster-${width}.jpg`),type:'jpeg',quality:86,animations:'disabled',style:'.app-footer{visibility:hidden}'});
   }
+  await tough.click();
+  await expect(tough).toHaveAttribute('aria-pressed','false');
+  await expect(roster.getByLabel('Mutation Health',{exact:true})).toHaveCount(0);
+  await roster.getByRole('button',{name:'Correct record',exact:true}).click();
+  const correction=page.getByRole('dialog',{name:'Correct Organism record'});
+  await correction.getByRole('combobox',{name:'Organism color'}).click();
+  await page.getByRole('option',{name:'Red',exact:true}).click();
+  await correction.getByRole('spinbutton',{name:'Health'}).fill('1');
+  await correction.getByRole('button',{name:'Save observation'}).click();
+  await expect(correction).toBeHidden();
+  await tough.click();
+  await expect(roster.getByLabel('Mutation Health',{exact:true})).toHaveText('1');
+  await expect(roster.getByText('+1 Horror die')).toHaveCount(0);
+  await roster.getByRole('button',{name:'Decrease mutation Health'}).click();
+  const killed=roster.getByRole('button',{name:'Red · Tough · Killed',exact:true});
+  await expect(killed).toHaveAttribute('data-status','defeated');
+  await expect(roster.getByLabel('Mutation Health',{exact:true})).toHaveCount(0);
+  await undoLatestObservation(page);
+  await expect(tough).toBeVisible();
   const log:PlayEvent[]=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)!).playEvents,storageKey);
   expect(validPlayLog(log)).toBe(true);
   expect(summarizePlay(log)).toMatchObject({finalHorrorLevel:5,bloodlust:0,killed:0});
@@ -53,7 +72,7 @@ test('Organism records a forced casualty once and an unnamed Finale atomically',
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   const roster=page.getByRole('region',{name:'The Organism roster'});
   await roster.getByRole('button',{name:'Grey · Exposed'}).click();
-  await roster.getByText('Other test or correction',{exact:true}).click();
+  await roster.getByText('Other test results',{exact:true}).click();
   await roster.getByRole('button',{name:'Forced by an effect'}).click();
   await roster.getByRole('button',{name:'Safe',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'Gruesome Death',exact:true});
@@ -78,7 +97,7 @@ test('Organism records a forced casualty once and an unnamed Finale atomically',
   await panel.locator('details.module-card-section > summary').click();
   await panel.getByRole('button',{name:'Record Finale card name'}).click();
   await panel.getByRole('button',{name:'Record Finale assimilation'}).click();
-  for(const [color,form] of [['Grey','5-HP form'],['Red','Tough'],['Black','6-HP form']]){
+  for(const [color,form] of [['Grey','Fast'],['Red','Tough'],['Black','Strong']]){
     if(color!=='Black'){
       await panel.getByRole('combobox',{name:'Exposed Victim revealed'}).click();
       await page.getByRole('option',{name:color,exact:true}).click();
@@ -87,7 +106,7 @@ test('Organism records a forced casualty once and an unnamed Finale atomically',
     await page.getByRole('option',{name:form,exact:true}).click();
   }
   await panel.getByRole('button',{name:'Confirm assimilation'}).click();
-  await expect(roster.getByRole('button',{name:'Grey · 5-HP form'})).toBeVisible();
+  await expect(roster.getByRole('button',{name:'Grey · Fast'})).toBeVisible();
   await roster.locator('img').evaluateAll(async images=>Promise.all(images.map(img=>(img as HTMLImageElement).decode())));
   await roster.screenshot({path:info.outputPath('three-mutations.jpg'),type:'jpeg',quality:86,style:'.app-footer{visibility:hidden}'});
 
@@ -102,7 +121,7 @@ test('Organism records a forced casualty once and an unnamed Finale atomically',
   await expect(panel.getByRole('button',{name:'Record Finale assimilation'})).toHaveCount(0);
   await page.reload();
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
-  await expect(roster.getByRole('button',{name:'Black · 6-HP form'})).toBeVisible();
+  await expect(roster.getByRole('button',{name:'Black · Strong'})).toBeVisible();
 });
 
 test('legacy Organism resumes without invented Health, Horror or victim states',async({page,archive})=>{
@@ -134,7 +153,7 @@ test('Organism Finish and Rules use the source-backed roster and named Finale',a
   await roster.getByRole('button',{name:'Red · Exposed'}).click();
   await roster.getByRole('button',{name:'Assimilated',exact:true}).click();
   await roster.getByRole('combobox',{name:'Revealed mutation'}).click();
-  await page.getByRole('option',{name:'Tough · 7 HP',exact:true}).click();
+  await page.getByRole('option',{name:'Tough',exact:true}).click();
   await page.getByRole('button',{name:'Finale',exact:true}).click();
   const remember=page.locator('.play-moment-editor');
   await chooseKillerCard(remember,'Finale','Regenerative Assimilation');

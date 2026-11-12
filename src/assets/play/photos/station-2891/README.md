@@ -10,7 +10,7 @@ Original generated stills. Each WebP is a responsive runtime source shared by th
 | helipad.webp | Parked aircraft and station beacon |
 | departure.webp | Aircraft just clear of the station pad |
 | flight.webp | Aircraft above a snow ridge |
-| airport.webp | Aircraft at the remote hangar |
+| airport.webp | Aircraft at the Arctic Airport terminal with passengers, ramp crew and parked turboprops |
 | frostbite.webp | Gloved hand and frozen guide line |
 
 ## Equipment and conditions

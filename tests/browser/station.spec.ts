@@ -19,14 +19,16 @@ test('Station helicopter records a named passenger and resolves a delayed trip o
   const rescue = page.getByRole('region',{name:'Helicopter rescue'});
   await rescue.getByRole('combobox',{name:'Total passengers',exact:true}).selectOption('3');
   await rescue.getByLabel('Doctor aboard').check();
-  await rescue.getByRole('button',{name:'Transfer to Helicopter Card'}).click();
-  await rescue.getByRole('button',{name:'Move into the air'}).click();
-  await expect(rescue.getByRole('button',{name:'Fly back toward Station'})).toHaveCount(0);
-  await rescue.getByRole('combobox',{name:'Move from',exact:true}).selectOption('Terror card');
+  await rescue.getByRole('button',{name:'Departure',exact:true}).click();
+  await rescue.getByRole('button',{name:'In the air',exact:true}).click();
+  await expect(rescue.getByRole('button',{name:'Departure',exact:true})).toBeDisabled();
+  await rescue.getByRole('button',{name:'Arctic Airport',exact:true}).click();
   await rescue.getByRole('button',{name:'Arrive outside Action'}).click();
   await expect(rescue).toContainText('Rescue effects pending');
   await expect(rescue).toContainText('Doctor aboard');
-  await expect(rescue.getByRole('button',{name:'Fly back toward Station'})).toHaveCount(0);
+  await expect(rescue.locator('img')).toHaveAttribute('src',/airport-/);
+  await expect(rescue.getByRole('button',{name:'Arctic Airport',exact:true})).toHaveAttribute('aria-current','step');
+  await expect(rescue.getByRole('button',{name:'In the air',exact:true})).toBeDisabled();
   for (const [width,height] of info.project.name==='mobile' ? [[390,844],[320,568]] : [[1280,640],[1366,768],[1440,900]]) {
     await page.setViewportSize({width,height});
     await rescue.locator('img').evaluate(async img=>(img as HTMLImageElement).decode());
@@ -51,9 +53,9 @@ test('Station helicopter records a named passenger and resolves a delayed trip o
   await page.evaluate(()=>(window as unknown as {restoreStationStorage:()=>void}).restoreStationStorage());
   await rescue.getByRole('button',{name:'Apply rescue effects'}).click();
   await expect(rescue.getByRole('button',{name:'Apply rescue effects'})).toHaveCount(0);
-  await rescue.getByRole('button',{name:'Fly back toward Station'}).click();
-  await rescue.getByRole('button',{name:'Fly back toward Station'}).click();
-  await rescue.getByRole('button',{name:'Land at helipad'}).click();
+  await rescue.getByRole('button',{name:'In the air',exact:true}).click();
+  await rescue.getByRole('button',{name:'Departure',exact:true}).click();
+  await rescue.getByRole('button',{name:'Helipad',exact:true}).click();
   await expect(rescue).toContainText('Helipad · 0/3 aboard');
   const log = await page.evaluate(key=>JSON.parse(localStorage.getItem(key)!).playEvents as PlayEvent[],storageKey);
   expect(validPlayLog(log)).toBe(true);
@@ -113,7 +115,8 @@ test('Station renders equipment, roles, allies and Terror crops across states',a
   for(const role of STATION_ROLES) await crew.getByRole('button',{name:'Add '+role.name,exact:true}).click();
   await crew.getByRole('button',{name:'Mark Doctor left',exact:true}).click();
   await crew.getByRole('button',{name:'Add Doctor',exact:true}).click();
-  await crew.getByRole('button',{name:'Board Doctor',exact:true}).click();
+  await panel.getByRole('combobox',{name:'Total passengers',exact:true}).selectOption('1');
+  await panel.getByLabel('Doctor aboard').check();
   await expect(panel.getByLabel('Doctor aboard')).toBeChecked();
   await expect(panel.getByRole('combobox',{name:'Total passengers',exact:true})).toHaveValue('1');
   for(const ally of STATION_ALLIES) await allies.getByRole('button',{name:new RegExp(ally.name)}).click();
@@ -128,9 +131,9 @@ test('Station renders equipment, roles, allies and Terror crops across states',a
   for(const role of STATION_ROLES) await crew.getByRole('button',{name:`Mark ${role.name} killed`,exact:true}).click();
   await capture(crew,'station-crew-killed');
   for(const role of STATION_ROLES){
-    await crew.getByText(`Correct ${role.name} status`,{exact:true}).click();
-    await crew.getByRole('combobox',{name:'Status',exact:true}).selectOption('saved');
-    await crew.getByText(`Correct ${role.name} status`,{exact:true}).click();
+    const saved=crew.getByRole('button',{name:`Mark ${role.name} saved`,exact:true});
+    await saved.click();
+    await expect(saved).toHaveAttribute('aria-pressed','true');
   }
   await capture(crew,'station-crew-saved');
   await page.getByRole('button',{name:'Record one victim killed',exact:true}).click();
@@ -158,13 +161,13 @@ test('Station and Organism facts reach both ending requests while rescue is pend
   await openModule(page,STATION_MODULE);
   const rescue=page.getByRole('region',{name:'Helicopter rescue'});
   await rescue.getByRole('combobox',{name:'Total passengers',exact:true}).selectOption('1');
-  await rescue.getByRole('button',{name:'Transfer to Helicopter Card'}).click();
-  await rescue.getByRole('button',{name:'Move into the air'}).click();
-  await rescue.getByRole('combobox',{name:'Move from',exact:true}).selectOption('Terror card');
+  await rescue.getByRole('button',{name:'Departure',exact:true}).click();
+  await rescue.getByRole('button',{name:'In the air',exact:true}).click();
+  await rescue.getByRole('button',{name:'Arctic Airport',exact:true}).click();
   await rescue.getByRole('button',{name:'Arrive outside Action'}).click();
   const roster=page.getByRole('region',{name:'The Organism roster'});
   await roster.getByRole('button',{name:'Grey · Exposed'}).click();
-  await roster.getByText('Other test or correction',{exact:true}).click();
+  await roster.getByText('Other test results',{exact:true}).click();
   await roster.getByRole('button',{name:'Forced by an effect'}).click();
   await roster.getByRole('button',{name:'Safe',exact:true}).click();
   const death=page.getByRole('dialog',{name:'Gruesome Death',exact:true});
@@ -180,11 +183,11 @@ test('Station and Organism facts reach both ending requests while rescue is pend
   await death.getByRole('button',{name:'Save and exit',exact:true}).click();
   await roster.getByRole('button',{name:'Red · Exposed'}).click();
   const forced=roster.getByRole('button',{name:'Forced by an effect'});
-  if (!(await forced.isVisible())) await roster.getByText('Other test or correction',{exact:true}).click();
+  if (!(await forced.isVisible())) await roster.getByText('Other test results',{exact:true}).click();
   await forced.click();
   await roster.getByRole('button',{name:'Assimilated',exact:true}).click();
   await roster.getByRole('combobox',{name:'Revealed mutation'}).click();
-  await page.getByRole('option',{name:'Tough · 7 HP',exact:true}).click();
+  await page.getByRole('option',{name:'Tough',exact:true}).click();
   const observations=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)!).playEvents as PlayEvent[],storageKey);
   expect(observations.filter(event=>event.kind==='killed')).toHaveLength(1);
   expect(observations.some(event=>event.kind==='details'&&event.mechanism==='Lab explosion')).toBe(true);

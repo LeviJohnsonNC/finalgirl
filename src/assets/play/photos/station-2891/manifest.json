@@ -1,12 +1,12 @@
 {
   "airport": {
-    "source": "exec-5fbcf7e5-dd41-429a-8d9d-644b95b7109e.png",
+    "source": "exec-3db5fcec-6078-4228-88c3-a8c06a8e3a05.png",
     "nativeWidth": 1774,
     "nativeHeight": 887,
     "width": 1536,
     "height": 768,
-    "bytes": 113852,
-    "sha256": "e3c30ac701ad08f5647b1082c29dc832c606fd89355de27db683059f2c393e64"
+    "bytes": 147402,
+    "sha256": "2ae273b2c72afef395a778ab61dcb430784106a2b4abb7f4a93bef0d95c1a141"
   },
   "armory": {
     "source": "exec-1c8d05d0-99c9-40fb-8e6b-0e3444d32a71.png",

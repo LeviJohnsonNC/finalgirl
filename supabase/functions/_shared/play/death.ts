@@ -125,7 +125,8 @@ export function deathFacts(
     }
   }
   if(organismDeath) {
-    const facts=organismFacts(moduleState(historical,ORGANISM_MODULE),historical);
+    // These labels are part of the fingerprint of existing saved death scenes.
+    const facts=organismFacts(moduleState(historical,ORGANISM_MODULE),historical,true);
     if(facts) context={...context,[ORGANISM_MODULE]:{facts}};
   }
   if (stationDeath) {

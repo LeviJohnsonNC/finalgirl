@@ -1,8 +1,9 @@
 import {useState} from 'react';
 import {Minus, Plus} from 'lucide-react';
+import {Dialog, DialogContent, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
 import {
   ORGANISM, ORGANISM_COLORS, ORGANISM_FORMS, ORGANISM_MINORS, ORGANISM_MODULE,
-  isOrganismCasualty, minorHealthKey, minorOwnerKey, organismBonus, organismColorLabel,
+  isOrganismCasualty, minorHealthKey, minorOwnerKey, organismColorLabel,
   organismFinale, organismLiving, organismParent, organismRevealEffects, organismRoster, resolveOrganismAction,
   type OrganismAction, type OrganismAssignment, type OrganismColor, type OrganismCommand, type OrganismForm,
 } from '@/lib/play/organism';
@@ -36,7 +37,7 @@ function useOrganismRecord({events,onEvent}:RecordProps) {
 type Figure = ReturnType<typeof organismRoster>[number];
 function figureStatus(figure:Figure) {
   if(figure.pending) return `${figure.form?.name??'Mutation'} · Final Health pending`;
-  if(figure.token==='defeated') return `${figure.form?.name??'Mutation'} · Defeated`;
+  if(figure.token==='defeated') return `${figure.form?.name??'Mutation'} · Killed`;
   if(figure.form) return figure.form.name;
   if(figure.status==='safe') return 'Safe';
   if(figure.status==='casualty') return 'Killed';
@@ -44,7 +45,7 @@ function figureStatus(figure:Figure) {
 }
 function formOptions(roster:Figure[],who?:OrganismColor) {
   return ORGANISM_FORMS.filter(form=>!roster.some(figure=>figure.who!==who&&figure.form?.id===form.id))
-    .map(form=><option key={form.id} value={form.id}>{form.name}{form.id==='tough'?' · 7 HP':''}</option>);
+    .map(form=><option key={form.id} value={form.id}>{form.name}</option>);
 }
 export function OrganismRoster(props:RecordProps) {
   const {summary,state,send,message}=useOrganismRecord(props);
@@ -53,102 +54,115 @@ export function OrganismRoster(props:RecordProps) {
   const [source,setSource]=useState<'ordinary'|'forced'|'alone'>('ordinary');
   const [reveal,setReveal]=useState(false);
   const [correct,setCorrect]=useState(false);
-  const [healthInput,setHealthInput]=useState<string>();
+  const [correctionColor,setCorrectionColor]=useState<OrganismColor>();
   const [effects,setEffects]=useState<string[]>();
   const figure=roster.find(item=>item.who===focus);
   const health=figure?.health;
-  const minorHealth=figure&&ORGANISM_MINORS.some(card=>state[minorOwnerKey(card.id)]===figure.who&&Number(state[minorHealthKey(card.id)])>0);
   const name=figure&&organismColorLabel(figure.who);
   const select=(who:OrganismColor)=>{
-    setFocus(who);
+    setFocus(focus===who?undefined:who);
     setSource('ordinary');
     setReveal(false);
-    setCorrect(false);
     setEffects(undefined);
-    setHealthInput(undefined);
   };
-  const record=(command:OrganismCommand)=>{if(send(command)) {setReveal(false);setCorrect(false);setHealthInput(undefined);return true;}return false;};
-  return <section className="play-state play-state--organism" aria-label="The Organism roster">
-    <div className="organism-portraits">
-      {roster.map(item=>{
-        const status=figureStatus(item);
-        const art=organismArt(item.form?.id??`${item.who}-${item.status==='safe'?'safe':'exposed'}`);
-        return <button type="button" key={item.who} aria-label={`${organismColorLabel(item.who)} · ${status}`}
-          aria-pressed={focus===item.who} data-color={item.who} data-status={item.token==='defeated'?'defeated':item.status??'unknown'}
-          onClick={()=>select(item.who)}>
-          <img src={art.src} alt="" style={{objectPosition:art.position}} />
-          <span><strong>{organismColorLabel(item.who)}</strong><small>{status}</small></span>
-        </button>;
-      })}
-    </div>
-    {organismBonus(state)&&<div className="organism-bonus" role="status">+1 Horror die</div>}
-    {figure?.status==='exposed'&&!correct&&<div className="organism-actions" aria-label={`Test ${name} Exposed Victim`}>
-      {source!=='ordinary'&&<p>{source==='forced'?'Forced by an effect':'Are We Alone?'}</p>}
-      <div className="organism-action-row">
-        <button type="button" disabled={props.disabled} onClick={()=>{
-          if(source==='alone') setFocus(undefined);
-          else if(record({command:'safe',who:figure.who,source})) setFocus(undefined);
-        }}>Safe</button>
-        <button type="button" disabled={props.disabled} onClick={()=>setReveal(!reveal)} aria-expanded={reveal}>Assimilated</button>
+  const record=(command:OrganismCommand)=>{
+    if(props.disabled||!send(command)) return false;
+    setReveal(false);
+    return true;
+  };
+  const setHealth=(value:number)=>{
+    if(!figure?.form) return;
+    if(value>0) record({command:'health',who:figure.who,value});
+    else if(record({command:'observe-form',who:figure.who,form:figure.form.id,health:0,token:'defeated'})) {
+      setFocus(undefined);
+      setEffects(undefined);
+    }
+  };
+  const correctionFigure=roster.find(item=>item.who===correctionColor);
+  return <section className="organism-roster" aria-label="The Organism roster">
+    <div className="play-state play-state--organism">
+      <div className="organism-portraits">
+        {roster.map(item=>{
+          const status=figureStatus(item);
+          const art=organismArt(item.form?.id??`${item.who}-${item.status==='safe'?'safe':'exposed'}`);
+          return <button type="button" key={item.who} aria-label={`${organismColorLabel(item.who)} · ${status}`}
+            aria-pressed={focus===item.who} data-color={item.who} data-status={item.token==='defeated'?'defeated':item.status??'unknown'}
+            onClick={()=>select(item.who)}>
+            <img src={art.src} alt="" style={{objectPosition:art.position}} />
+            <span><strong>{organismColorLabel(item.who)}</strong><small>{status}</small></span>
+          </button>;
+        })}
       </div>
-      {reveal&&<PlaySelect aria-label="Revealed mutation" value="" onChange={event=>{
-        const form=event.target.value as OrganismForm;
-        if(record({command:'assimilate',who:figure.who,source,form}))
-          setEffects(organismRevealEffects(form,summary.bloodlust)?.slice()??['Use the physical Bloodlust marker and resolve the new form’s entry effects from the bottom.']);
-      }}><option value="" disabled>Choose the form revealed</option>{formOptions(roster)}</PlaySelect>}
-      <details className="organism-secondary"><summary>Other test or correction</summary>
+      {figure?.status==='exposed'&&<div className="organism-actions" aria-label={`Test ${name} Exposed Victim`}>
+        {source!=='ordinary'&&<p>{source==='forced'?'Forced by an effect':'Are We Alone?'}</p>}
         <div className="organism-action-row">
-          <button type="button" onClick={()=>setSource(source==='forced'?'ordinary':'forced')}>Forced by an effect</button>
-          <button type="button" onClick={()=>setSource(source==='alone'?'ordinary':'alone')}>Are We Alone?</button>
-          <button type="button" onClick={()=>setCorrect(true)}>Correct record</button>
-          {source==='forced'&&<button type="button" onClick={()=>{if(record({command:'safe',who:figure.who,source,alreadyCounted:true}))setFocus(undefined);}}>Safe · death already counted</button>}
+          <button type="button" disabled={props.disabled} onClick={()=>{
+            if(source==='alone') setFocus(undefined);
+            else if(record({command:'safe',who:figure.who,source})) setFocus(undefined);
+          }}>Safe</button>
+          <button type="button" disabled={props.disabled} onClick={()=>setReveal(!reveal)} aria-expanded={reveal}>Assimilated</button>
         </div>
-      </details>
-    </div>}
-    {figure?.form&&!figure.pending&&figure.token!=='defeated'&&!correct&&<>
-      <div className="play-state-control-bar">
-        <div className="play-state-caption"><span className="play-state-title">{name} Health</span>
-          {health===1&&(figure.token==='black'||figure.token==='white')&&<small className="play-state-unknown">Final Health</small>}
-        </div>
-        {healthInput!==undefined?<form onSubmit={event=>{
-          event.preventDefault();
-          if(healthInput!=='') record({command:'health',who:figure.who,value:Number(healthInput)});
-        }}><input aria-label="Set mutation Health" type="number" min={1} max={figure.form.hp} value={healthInput} onChange={e=>setHealthInput(e.target.value)} required />
-          <button type="submit">Set</button><button type="button" onClick={()=>setHealthInput(undefined)}>Cancel</button></form>
-          :<div className="play-state-stepper">
-            <button type="button" aria-label="Decrease mutation Health" disabled={props.disabled||health===undefined||health<=1}
-              onClick={()=>record({command:'health',who:figure.who,value:health!-1})}><Minus size={16}/></button>
-            <button type="button" aria-label="Edit mutation Health" disabled={props.disabled} onClick={()=>setHealthInput(health?.toString()??'')}>{health??'?'}</button>
+        {reveal&&<PlaySelect aria-label="Revealed mutation" value="" onChange={event=>{
+          const form=event.target.value as OrganismForm;
+          if(record({command:'assimilate',who:figure.who,source,form}))
+            setEffects(organismRevealEffects(form,summary.bloodlust)?.slice()??['Use the physical Bloodlust marker and resolve the new form’s entry effects from the bottom.']);
+        }}><option value="" disabled>Choose the form revealed</option>{formOptions(roster)}</PlaySelect>}
+        <details className="organism-secondary"><summary>Other test results</summary>
+          <div className="organism-action-row">
+            <button type="button" onClick={()=>setSource(source==='forced'?'ordinary':'forced')}>Forced by an effect</button>
+            <button type="button" onClick={()=>setSource(source==='alone'?'ordinary':'alone')}>Are We Alone?</button>
+            {source==='forced'&&<button type="button" onClick={()=>{if(record({command:'safe',who:figure.who,source,alreadyCounted:true}))setFocus(undefined);}}>Safe · death already counted</button>}
+          </div>
+        </details>
+      </div>}
+      {figure?.form&&!figure.pending&&figure.token!=='defeated'&&
+        <div className="play-state-control-bar">
+          <div className="play-state-caption"><span className="play-state-title">{name} Health</span></div>
+          <div className="play-state-stepper">
+            <button type="button" aria-label="Decrease mutation Health" disabled={props.disabled||health===undefined||health===0}
+              onClick={()=>health!==undefined&&setHealth(health-1)}><Minus size={16}/></button>
+            <output aria-label="Mutation Health">{health??'?'}</output>
             <button type="button" aria-label="Increase mutation Health" disabled={props.disabled||health===undefined||health>=figure.form.hp}
-              onClick={()=>record({command:'health',who:figure.who,value:health!+1})}><Plus size={16}/></button>
-          </div>}
-      </div>
-      <div className="organism-actions organism-action-row">
-        {health===1&&<button type="button" disabled={props.disabled||minorHealth} onClick={()=>record({command:'token-loss',who:figure.who})}>Record Final Health loss</button>}
-        <button type="button" className="organism-quiet" onClick={()=>setCorrect(true)}>Correct record</button>
-      </div>
-    </>}
-    {figure?.pending&&!correct&&<div className="organism-actions">
-      <p>{roster.some(item=>item.who!==figure.who&&item.form&&item.token!=='defeated')?'Resolve at phase end':'Resolve Final Health'}</p>
-      <PlaySelect aria-label="Final Health result" value="" onChange={e=>{if(e.target.value!=='')record({command:'token-result',who:figure.who,value:Number(e.target.value)});}}>
-        <option value="" disabled>Choose the physical result</option>
-        <option value="0">{figure.token==='pending-white'?'Spent white token · defeated':'Blank or spent · defeated'}</option>
-        {figure.token!=='pending-white'&&[1,2,3].map(hp=><option key={hp} value={hp}>Recovered with {hp} Health</option>)}
-      </PlaySelect>
-      <button type="button" className="organism-quiet" onClick={()=>setCorrect(true)}>Correct record</button>
-    </div>}
-    {figure&&!correct&&(!figure.status||figure.status==='safe'||figure.status==='casualty'||figure.token==='defeated')&&
-      <button type="button" className="organism-quiet organism-edit-state" onClick={()=>setCorrect(true)}>Record {name}’s current state</button>}
-    {figure&&correct&&<OrganismCorrection key={figure.who} figure={figure} roster={roster} onRecord={record} onCancel={()=>setCorrect(false)} />}
-    {effects&&effects.length>0&&<div className="organism-actions">
-      <details open><summary>Bloodlust effects on reveal</summary><ol>{effects.map((effect,index)=><li key={index}>{effect}</li>)}</ol></details>
-      <button type="button" className="organism-quiet" onClick={()=>setEffects(undefined)}>Done</button>
-    </div>}
-    {message&&<p role="alert" className="play-module-error">{message}</p>}
+              onClick={()=>health!==undefined&&setHealth(health+1)}><Plus size={16}/></button>
+          </div>
+        </div>
+      }
+      {figure?.pending&&<div className="organism-actions">
+        <p>{roster.some(item=>item.who!==figure.who&&item.form&&item.token!=='defeated')?'Resolve at phase end':'Resolve Final Health'}</p>
+        <PlaySelect aria-label="Final Health result" value="" onChange={e=>{if(e.target.value!=='')record({command:'token-result',who:figure.who,value:Number(e.target.value)});}}>
+          <option value="" disabled>Choose the physical result</option>
+          <option value="0">{figure.token==='pending-white'?'Spent white token · defeated':'Blank or spent · defeated'}</option>
+          {figure.token!=='pending-white'&&[1,2,3].map(hp=><option key={hp} value={hp}>Recovered with {hp} Health</option>)}
+        </PlaySelect>
+      </div>}
+      {effects&&effects.length>0&&<div className="organism-actions">
+        <details open><summary>Bloodlust effects on reveal</summary><ol>{effects.map((effect,index)=><li key={index}>{effect}</li>)}</ol></details>
+        <button type="button" className="organism-quiet" onClick={()=>setEffects(undefined)}>Done</button>
+      </div>}
+      {message&&!correct&&<p role="alert" className="play-module-error">{message}</p>}
+    </div>
+    <Dialog open={correct} onOpenChange={open=>{
+      if(open) setCorrectionColor(focus);
+      setCorrect(open);
+    }}>
+      <DialogTrigger asChild>
+        <button type="button" className="organism-quiet organism-correction-link" disabled={props.disabled}>Correct record</button>
+      </DialogTrigger>
+      <DialogContent className="organism-correction-dialog" aria-describedby={undefined}>
+        <DialogTitle>Correct Organism record</DialogTitle>
+        <PlaySelect aria-label="Organism color" value={correctionColor??''} onChange={e=>setCorrectionColor(e.target.value as OrganismColor)}>
+          <option value="">Choose a color</option>
+          {roster.map(item=><option key={item.who} value={item.who}>{organismColorLabel(item.who)}</option>)}
+        </PlaySelect>
+        {correctionFigure&&<OrganismCorrection key={correctionFigure.who} figure={correctionFigure} roster={roster}
+          onRecord={command=>{if(record(command)){setCorrect(false);setEffects(undefined);}}} onCancel={()=>setCorrect(false)} />}
+        {message&&<p role="alert" className="play-module-error">{message}</p>}
+      </DialogContent>
+    </Dialog>
   </section>;
 }
 
-function OrganismCorrection({figure,roster,onRecord,onCancel}:{figure:Figure;roster:Figure[];onRecord:(command:OrganismCommand)=>boolean;onCancel:()=>void}) {
+function OrganismCorrection({figure,roster,onRecord,onCancel}:{figure:Figure;roster:Figure[];onRecord:(command:OrganismCommand)=>void;onCancel:()=>void}) {
   const [status,setStatus]=useState(figure.status??'');
   const [form,setForm]=useState<OrganismForm|''>(figure.form?.id??'');
   const [hp,setHp]=useState(figure.health?.toString()??'');
@@ -156,7 +170,7 @@ function OrganismCorrection({figure,roster,onRecord,onCancel}:{figure:Figure;ros
   const out=token==='defeated'||token.startsWith('pending-');
   return <form className="organism-actions" onSubmit={event=>{
     event.preventDefault();
-    if(status==='mutated'&&form) onRecord({command:'observe-form',who:figure.who,form,token:token||null,health:out?0:hp===''?null:Number(hp)});
+    if(status==='mutated'&&form) onRecord({command:'observe-form',who:figure.who,form,token:hp==='0'&&!out?'defeated':token||null,health:out?0:hp===''?null:Number(hp)});
     if(status==='exposed'||status==='safe'||status==='casualty') onRecord({command:'observe',who:figure.who,status});
   }}>
     <PlaySelect aria-label="Observed victim status" value={status} onChange={e=>setStatus(e.target.value as typeof status)}>
@@ -171,9 +185,9 @@ function OrganismCorrection({figure,roster,onRecord,onCancel}:{figure:Figure;ros
       <PlaySelect aria-label="Observed Final Health token" value={token} onChange={e=>setToken(e.target.value as typeof token)}>
         <option value="">Token unrecorded</option><option value="black">Black token</option><option value="white">White token</option>
         <option value="pending-black">Black token pending</option><option value="pending-white">White token pending</option>
-        <option value="pending-unknown">Unrecorded token pending</option><option value="defeated">Defeated</option>
+        <option value="pending-unknown">Unrecorded token pending</option><option value="defeated">Killed</option>
       </PlaySelect>
-      {!out&&<label>Health <input type="number" min={1} max={ORGANISM_FORMS.find(item=>item.id===form)?.hp??7} value={hp} placeholder="Unknown" onChange={e=>setHp(e.target.value)}/></label>}
+      {!out&&<label>Health <input type="number" min={0} max={ORGANISM_FORMS.find(item=>item.id===form)?.hp??7} value={hp} placeholder="Unknown" onChange={e=>setHp(e.target.value)}/></label>}
     </>}
     <div className="organism-action-row"><button type="submit" disabled={!status||status==='mutated'&&!form}>Save observation</button>
       <button type="button" onClick={onCancel}>Cancel</button></div>
