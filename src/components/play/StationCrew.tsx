@@ -2,7 +2,6 @@ import { STATION_ROLES,type StationCommand,type StationState } from '../../../su
 import { CharacterControl } from './CharacterControl';
 import { stationCrewArt } from './stationArt';
 
-type Role = typeof STATION_ROLES[number]['id'];
 const states = [
   {value:'present',label:'In play'},
   {value:'aboard',label:'Aboard'},
@@ -11,10 +10,9 @@ const states = [
   {value:'left',label:'Left play'},
 ];
 
-export function StationCrew({state,commit,board}: {
+export function StationCrew({state,commit}: {
   state: StationState;
   commit: (action:StationCommand)=>boolean;
-  board: (id:Role)=>void;
 }) {
   return <section aria-label="Station special victims" className="station-grid">
     {STATION_ROLES.map(role=>{
@@ -23,19 +21,12 @@ export function StationCrew({state,commit,board}: {
       const art=stationCrewArt[role.id][value==='saved'||value==='killed'?value:'present'];
       return <div className="station-mechanic" key={role.id}>
         <CharacterControl name={role.name} value={aboard?'aboard':value} states={states} present="present" art={art}
-          showRules={false} showStatusEditor={false} reactivateFrom={['left']}
-          outcomes={value==='present'&&!aboard?['killed','left']:[]}
-          onChange={status=>commit({kind:'role',id:role.id,status:status as 'present'|'killed'|'left'})}/>
-        {value==='present'&&!aboard&&state.flight?.position==='helipad'&&
-          <button type="button" aria-label={`Board ${role.name}`} onClick={()=>board(role.id)}>Board helicopter</button>}
-        {value&&!aboard&&<details className="module-correction">
-          <summary>Correct {role.name} status</summary>
-          <div className="station-edit"><label>Status<select value={value}
-            onChange={e=>commit({kind:'role',id:role.id,status:(e.target.value||null) as typeof value|null,correction:true})}>
-            <option value="">Unrecorded</option>
-            {states.filter(s=>s.value!=='aboard').map(s=><option key={s.value} value={s.value}>{s.label}</option>)}
-          </select></label></div>
-        </details>}
+          showRules={false} showStatusEditor={false} allowOutcomeCorrections
+          outcomes={aboard?[]:['saved','killed','left']}
+          onChange={status=>commit({
+            kind:'role',id:role.id,status:status as 'present'|'saved'|'killed'|'left',
+            ...(status==='saved'||value==='saved'||value==='killed'?{correction:true}:{}),
+          })}/>
       </div>;
     })}
   </section>;

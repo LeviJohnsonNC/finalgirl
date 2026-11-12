@@ -39,6 +39,7 @@ import { useActiveImages } from "@/hooks/useActiveImages";
 import { LoreInfoModal } from '@/components/LoreInfoModal';
 import { usePersonalItem } from '@/contexts/PersonalItemsContext';
 import { PlaySearch } from "./PlaySearch";
+import { PlayHeaderPhoto } from "./PlayHeaderPhoto";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
@@ -300,11 +301,7 @@ export function PlayScreen(props: PlayScreenProps) {
   return (
     <div className="play-screen play-workspace">
       <header className="play-heading">
-        <img
-          className="play-hero-image"
-          src={props.imageUrl}
-          alt={`${finalGirl}'s night at ${location}`}
-        />
+        <PlayHeaderPhoto src={props.imageUrl} alt={`${finalGirl}'s night at ${location}`} />
         <div>
           <div className="play-character-heading">
             <p className="play-eyebrow">PLAY MODE</p>

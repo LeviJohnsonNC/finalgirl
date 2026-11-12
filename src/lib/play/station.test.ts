@@ -48,10 +48,10 @@ describe('Station 2891',()=>{
     expect(game.draft({kind:'depart',count:0,roles:['doctor']})).toBeUndefined();
     game.add({kind:'depart',count:3,roles:['doctor']});
     expect(game.draft({kind:'role',id:'doctor',status:'killed'})).toBeUndefined();
-    game.add({kind:'move',direction:'outbound',source:'Fly Faster!'});
+    game.add({kind:'move',direction:'outbound'});
     expect(game.draft({kind:'move',direction:'return',source:'Fly Faster!'})).toBeUndefined();
     expect(game.draft({kind:'help'})).toBeUndefined();
-    game.add({kind:'move',direction:'outbound',source:'Terror card',arrival:'later'});
+    game.add({kind:'move',direction:'outbound',arrival:'later'});
     expect(stationFacts(game.state())).toContain('rescue effects are still pending');
     expect(game.state().rescued).toBeUndefined();
     const sameTap=game.draft({kind:'confirm-rescue'})!;

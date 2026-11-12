@@ -1,3 +1,12 @@
+.organism-roster {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.organism-roster > .play-state { flex: 1; }
+.organism-correction-link { align-self: flex-start; text-decoration: underline; text-underline-offset: 3px; }
+.organism-correction-dialog .organism-actions { padding: 0; }
+.organism-correction-dialog label { display: flex; align-items: center; gap: .6rem; }
 .play-workspace .play-state--organism {
   display: flex;
   flex-direction: column;
@@ -64,14 +73,13 @@
 .organism-actions button:disabled { opacity: .55; }
 .organism-quiet, .organism-secondary { color: #d2b6c0; }
 .organism-secondary summary { cursor: pointer; }
-.organism-bonus { padding: 4px 8px; color: #e5c490; font-size: .74rem; }
 .organism-actions ol { list-style: decimal; margin: 6px 0 4px 1.25rem; font-size: .8rem; }
 .organism-actions input { max-width: 8rem; background: #1a1118; padding: .3rem; }
 @media(max-width: 639px) {
   .organism-portraits { min-height: 146px; }
 }
 
-.play-state--organism .play-state-stepper button { min-width: 44px; min-height: 44px; }
+.play-state--organism .play-state-stepper output { align-self: center; text-align: center; font: 400 28px/1 Georgia, serif; }
 
 
 /* Preserve the photograph's natural light while keeping the shared selected border. */
