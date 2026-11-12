@@ -34,5 +34,5 @@ export function headerCrop(imageRatio: number, frameRatio: number, faces: readon
   const x = cropPosition(Math.min(1, photoRatio / imageRatio), faces,
     face => face.x - face.width * 0.6, face => face.x + face.width * 0.6, 0.5);
   const y = cropPosition(Math.min(1, imageRatio / photoRatio), faces, headTop, headBottom, 0.2);
-  return { position: `${x}% ${y}%`, width: 100 * photoRatio / frameRatio };
+  return { position: `${x}% ${y}%`, width: 100 * (photoRatio / frameRatio) };
 }

@@ -24,6 +24,7 @@ it('follows the largest face in a narrow crop and uses a safe default without fa
   ];
   expect(xPercent(headerCrop(2, 1.25, faces).position)).toBeGreaterThan(80);
   expect(headerCrop(2, 1.25, [])).toEqual({ position: '50% 20%', width: 100 });
+  expect(headerCrop(0.8, 286 / 290, faces).width).toBe(100);
 });
 
 it('reduces the zoom when the main head is taller than the cover crop', () => {
