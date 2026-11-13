@@ -147,7 +147,7 @@ export function OrganismRoster(props:RecordProps) {
     }}>
       <DialogTrigger asChild>
         <button type="button" className="organism-correction-trigger" aria-label="Correct record"
-          title="Correct record" disabled={props.disabled}><Ellipsis size={21} aria-hidden="true" /></button>
+          title="Correct record" disabled={props.disabled}><Ellipsis size={16} aria-hidden="true" /></button>
       </DialogTrigger>
       <DialogContent className="organism-correction-dialog" aria-describedby={undefined}>
         <DialogTitle>Correct Organism record</DialogTitle>

@@ -8,20 +8,25 @@
 .organism-roster > .organism-correction-trigger {
   position: absolute;
   z-index: 1;
-  top: 6px;
-  right: 6px;
+  top: 1px;
+  right: 1px;
   display: grid;
-  place-items: center;
+  place-items: start end;
   width: 44px;
   height: 44px;
-  border: 1px solid #f5e8d566;
-  border-radius: 50%;
-  background: #150e13e8;
-  color: #f5e8d5;
+  padding: 5px 6px 0 0;
+  border: 0;
+  background: transparent;
+  color: #e9dccb;
 }
-.organism-correction-trigger:hover:not(:disabled) {
-  border-color: #f5e8d5;
-  background: #392430;
+.organism-correction-trigger svg {
+  filter: drop-shadow(0 1px 1px #150e13);
+}
+.organism-roster > .organism-correction-trigger:hover:not(:disabled) {
+  color: #fff8ea;
+}
+.organism-roster > .organism-correction-trigger:focus-visible {
+  outline-offset: -3px;
 }
 .organism-correction-dialog .organism-actions { padding: 0; }
 .organism-correction-dialog label { display: flex; align-items: center; gap: .6rem; }
