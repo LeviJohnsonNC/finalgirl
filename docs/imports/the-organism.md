@@ -87,3 +87,7 @@ Pilot one Exposed-to-Assimilated portrait swap and the three-tile populated rost
 ### Playtest polish
 
 The roster uses Fast (5 HP), Strong (6 HP) and Tough (7 HP), with existing form IDs and saved death fingerprints preserved. Clicking the selected portrait closes its controls. Zero health records a killed Organism in one observation, without adding a victim casualty. The **Correct record** dialog handles explicit corrections, and existing pending Final Health observations can still be resolved. The physical bonus die stays in Rules.
+
+### Play roster refinement, 2026-11-13
+
+The ellipsis at the top right of the portraits opens **Correct record** with mouse, touch or keyboard. It occupies no row in the tracker grid, and the portraits share the core tracker art’s minimum height on laptop, desktop and phone.

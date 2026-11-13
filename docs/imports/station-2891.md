@@ -74,3 +74,7 @@ Use the existing owner registry, `ModulePanel`, `IllustratedTile`, `CharacterCon
 ### Playtest polish
 
 Select a reachable route stop to move the helicopter. Passenger inputs stay at the helipad, and loaded arrivals still record Action phase timing and honor the return lock. A route click records movement with its source unrecorded. The Arctic Airport has its own populated terminal photograph. Station crew use the shared Saved, Killed and Left play controls. A manual Saved status changes the named portrait, while the flight flow alone records helicopter evacuations.
+
+### Play controls refinement, 2026-11-13
+
+The helicopter’s passenger total uses a compact labeled menu in boarding and flight correction. It retains 0–3 and Unrecorded. The Frostbite still is a static reminder to mark outdoor figures and apply damage on repeat exposure. Token tracking stays on the physical board. Historical token observations remain readable, and the Generator retains its separate Upkeep action. Frostbite remains available under Location hazard in Gruesome Death, with the same Station photograph.

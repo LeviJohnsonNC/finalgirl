@@ -71,6 +71,9 @@
 }
 
 .play-workspace .play-state-grid { align-items: stretch; }
+.play-workspace {
+  --tracker-photo-height: clamp(172px, calc(12.5vw - 8px), 232px);
+}
 .play-workspace .play-state {
   --tracker-button-top: #3d503a;
   --tracker-button-bottom: #19291b;
@@ -104,7 +107,7 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  height: 172px;
+  height: var(--tracker-photo-height);
   flex-shrink: 0;
 }
 .play-workspace .play-state .play-stat-portrait {
@@ -376,7 +379,7 @@
   .play-workspace .play-state-grid,
   .play-workspace .play-track-more[data-healthless=true] .play-state-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .play-workspace .play-state { min-height: 0; padding: 0; }
-  .play-workspace .play-state-picture { height: 188px; }
+  .play-workspace { --tracker-photo-height: 188px; }
   .play-workspace .play-moment-choices { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
   .play-workspace .play-moment-choices button { min-height: 116px; padding: 12px 10px; }
   .play-workspace .play-moment-choices strong { font-size: 17px; }

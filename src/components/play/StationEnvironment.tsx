@@ -1,35 +1,25 @@
 import { useState } from 'react';
 import {
-  STATION_OUTDOORS, STATION_ROLES, STATION_SPACES, STATION_FROST_TARGETS,
+  STATION_OUTDOORS, STATION_SPACES,
   type StationCommand, type StationState,
 } from '../../../supabase/functions/_shared/play/station';
 import { EventControl } from './EventControl';
 import { IllustratedTile } from './IllustratedTile';
+import { ModuleArtwork } from './ModuleArtwork';
 import { stationArt } from './stationArt';
 
 type Props = {state:StationState; commit:(action:StationCommand)=>boolean};
-const frostLabels = {
-  girl:'Final Girl',doctor:'Doctor',chef:'Chef',comms:'Comms Specialist',
-  killer:'Killer',enemy:'Tracked Enemy',victim:'Tracked Victim',
-};
-const frostOptions = {marked:'Frostbite',clear:'Clear'};
 const breachLabels = {intact:'Wall intact',open:'Breach recorded',keys:'Opened by Skidozer',accident:'Opened by Lab accident'};
 
-function Frostbite({state,commit}:Props) {
-  const [open,setOpen] = useState(false);
-  const targets = STATION_FROST_TARGETS.filter(id=>!STATION_ROLES.some(role=>role.id===id) ||
-    STATION_ROLES.some(role=>role.id===id && state.roles?.[role.id]==='present' && !state.flight?.roles.includes(role.id)));
+function FrostbiteReminder({state,commit}:Props) {
   return <div className="station-mechanic">
-    <IllustratedTile className="module-control-tile" title="Frostbite" art={stationArt.frostbite}
-      status={state.frost?.girl ? frostOptions[state.frost.girl] : 'Final Girl status unrecorded'}
-      aria-expanded={open} onClick={()=>setOpen(!open)}/>
-    {open && <div className="station-edit">
-      {targets.map(id=><label key={id}>{frostLabels[id]}
-        <select value={state.frost?.[id]??''} onChange={e=>commit({kind:'frost',target:id,status:(e.target.value || null) as 'marked'|'clear'|null})}>
-          <option value="">Unrecorded</option><option value="marked">Frostbite</option><option value="clear">Clear</option>
-        </select>
-      </label>)}
-    </div>}
+    <figure className="module-control-tile station-frostbite">
+      <ModuleArtwork art={stationArt.frostbite} />
+      <figcaption className="play-tile-caption">
+        <strong>Frostbite</strong>
+        <span>Mark outdoor figures. Those already marked lose 1 Health.</span>
+      </figcaption>
+    </figure>
     {state.generator ? <div className="station-actions">
       <button type="button" onClick={()=>commit({kind:'upkeep'})}>Record skipped Upkeep clearing</button>
     </div> : <details className="module-correction"><summary>Generator</summary>
@@ -45,7 +35,7 @@ export function StationEnvironment({state,commit}:Props) {
   const breached = state.breach && state.breach!=='intact';
   return <section aria-label="Station conditions">
     <div className="station-grid">
-      <Frostbite state={state} commit={commit}/>
+      <FrostbiteReminder state={state} commit={commit}/>
       <EventControl name="Heavy Storm" art={stationArt.storm} value={state.storm===undefined?undefined:state.storm?'active':'ended'}
         interaction="toggle" onActivate={()=>commit({kind:'storm',active:true})}
         onEnd={()=>commit({kind:'storm',active:false})} onClear={()=>commit({kind:'storm',active:null})}/>

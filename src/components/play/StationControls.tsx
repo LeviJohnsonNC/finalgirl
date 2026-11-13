@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import {
   initialStation, resolveStationAction, stationParent, stationState, stationSummary,
   STATION_MODULE, STATION_POSITIONS, STATION_ROLES, STATION_ROUTE,
@@ -28,10 +29,16 @@ function PassengerControls({state, count, roles, onCount, onRoles}: {
   onRoles: (roles: Role[]) => void;
 }) {
   return <>
-    <label>Total passengers<select value={count??''} onChange={e=>onCount(e.target.value===''?null:Number(e.target.value))}>
-      <option value="">Unrecorded</option>
-      {[0,1,2,3].map(n=><option key={n} value={n}>{n}</option>)}
-    </select></label>
+    <label className="station-passenger-count">
+      <span>Total passengers</span>
+      <span className="station-passenger-field">
+        <select value={count??''} onChange={e=>onCount(e.target.value===''?null:Number(e.target.value))}>
+          <option value="">Unrecorded</option>
+          {[0,1,2,3].map(n=><option key={n} value={n}>{n}</option>)}
+        </select>
+        <ChevronDown size={16} aria-hidden="true" />
+      </span>
+    </label>
     {STATION_ROLES.filter(role=>state.roles?.[role.id]==='present').map(role=>
       <label className="station-check" key={role.id}><input type="checkbox" checked={roles.includes(role.id)}
         onChange={e=>onRoles(e.target.checked?[...roles,role.id]:roles.filter(id=>id!==role.id))}/> {role.name} aboard</label>)}

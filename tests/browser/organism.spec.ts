@@ -33,22 +33,36 @@ test('Organism portrait reveal and tracked Health',async({page,archive},info)=>{
   await expect(tough).toBeVisible();
   expect(await tough.locator('img').getAttribute('src')).not.toBe(exposedSource);
   await expect(roster.getByLabel('Mutation Health',{exact:true})).toHaveText('7');
-  for(const [width,height] of info.project.name==='mobile'?[[390,844],[320,568]]:[[1280,640],[1366,768],[1440,900]]){
+  for(const [width,height] of info.project.name==='mobile'?[[390,844],[320,568]]:[[1280,640],[1366,768],[1440,900],[1920,1080],[2560,1440]]){
     await page.setViewportSize({width,height});
     await roster.locator('img').evaluateAll(async images=>Promise.all(images.map(img=>(img as HTMLImageElement).decode())));
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    const geometry = await page.locator('.play-workspace').evaluate(workspace => ({
+      width: workspace.clientWidth,
+      portraitHeight: workspace.querySelector('.organism-portraits')!.getBoundingClientRect().height,
+      healthPhotoHeight: workspace.querySelector('.play-state--finalGirlHealth .play-state-picture')!.getBoundingClientRect().height,
+    }));
+    expect(geometry.portraitHeight).toBeGreaterThanOrEqual(geometry.healthPhotoHeight);
+    if (width >= 1920) expect(geometry.width).toBeGreaterThan(width === 1920 ? 1500 : 1700);
+    if (width === 1920 || width === 1366 || width === 390) {
+      await page.evaluate(() => scrollTo(0, 0));
+      await page.screenshot({path:info.outputPath(`play-workspace-${width}.jpg`),type:'jpeg',quality:83,animations:'disabled'});
+    }
     await roster.screenshot({path:info.outputPath(`organism-roster-${width}.jpg`),type:'jpeg',quality:86,animations:'disabled',style:'.app-footer{visibility:hidden}'});
   }
   await tough.click();
   await expect(tough).toHaveAttribute('aria-pressed','false');
   await expect(roster.getByLabel('Mutation Health',{exact:true})).toHaveCount(0);
-  await roster.getByRole('button',{name:'Correct record',exact:true}).click();
+  const correct = roster.getByRole('button',{name:'Correct record',exact:true});
+  await correct.focus();
+  await correct.press('Enter');
   const correction=page.getByRole('dialog',{name:'Correct Organism record'});
   await correction.getByRole('combobox',{name:'Organism color'}).click();
   await page.getByRole('option',{name:'Red',exact:true}).click();
   await correction.getByRole('spinbutton',{name:'Health'}).fill('1');
   await correction.getByRole('button',{name:'Save observation'}).click();
   await expect(correction).toBeHidden();
+  await expect(correct).toBeFocused();
   await tough.click();
   await expect(roster.getByLabel('Mutation Health',{exact:true})).toHaveText('1');
   await expect(roster.getByText('+1 Horror die')).toHaveCount(0);

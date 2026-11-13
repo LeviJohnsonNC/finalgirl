@@ -512,7 +512,7 @@ const IndexContent = () => {
       </div>}
       
       {/* Main Content — one Suspense boundary covers every lazy page */}
-      <main className={isNarrationPage ? "narration-main relative z-10" : "container mx-auto px-3 sm:px-4 pt-24 sm:pt-32 pb-28 relative z-10"}>
+      <main className={isNarrationPage ? "narration-main relative z-10" : "container min-[1600px]:max-w-[min(92vw,1680px)] mx-auto px-3 sm:px-4 pt-24 sm:pt-32 pb-28 relative z-10"}>
         <Suspense fallback={<PageLoading />}>
           {activeGame && currentPage !== activeGame.phase && resumeNotice}
           {cloudPlay.conflict && cloudNotice}{renderPage()}

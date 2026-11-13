@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getFinalGirlReference } from '@/data/finalGirlReferences';
 
 interface Unlock { girl: string; unlocked: boolean }
-export interface PersonalItem { girl: string; name: string; effect: string }
+export interface PersonalItem { girl: string; name: string; effect: string; imagePath?: string }
 interface UnlockContext {
   owner: string | null; ready: boolean; revision: number; error: string | null; pending: number;
   isUnlocked: (girl: string) => boolean;
@@ -75,7 +75,7 @@ export function PersonalItemsProvider({ children }: { children: ReactNode }) {
   return <Context.Provider value={{owner,ready:Boolean(owner && state.owner===owner && !loading && !(failure?.owner===owner)),revision:state.revision,error:failure?.owner===owner?failure.message:queue.error,pending:queue.pending.length,isUnlocked,change,retry,refreshItems}}>{children}</Context.Provider>;
 }
 
-/** Secret text stays in memory, keyed to both account and authorization revision.
+/** Secret references stay in memory, keyed to both account and authorization revision.
  * No localStorage, query cache, prefetch, log, or public URL contains this data.
  */
 export function usePersonalItem(girl:string,enabled=true) {
@@ -90,9 +90,10 @@ export function usePersonalItem(girl:string,enabled=true) {
       try{
         const {data,error}=await rpc('get_final_girl_item',{p_girl:girl,p_owner:unlocks.owner});
         if(error)throw new Error('The item reference could not be reached.');
-        const item=data as unknown as PersonalItem|null;
+        const item=data as unknown as (Omit<PersonalItem, 'imagePath'> & {image_path?: unknown})|null;
         if(item && (item.girl!==girl || typeof item.name!=='string' || !item.name.trim() || typeof item.effect!=='string' || !item.effect.trim()))throw new Error('The item reference could not be verified.');
-        if(live)setState({key,item:item ? {girl:item.girl,name:item.name,effect:item.effect} : null,error:null});
+        const imagePath=typeof item?.image_path==='string' && /^[a-f0-9-]{36}\.webp$/.test(item.image_path) ? item.image_path : undefined;
+        if(live)setState({key,item:item ? {girl:item.girl,name:item.name,effect:item.effect,imagePath} : null,error:null});
       }catch(error){if(live)setState({key,item:null,error:error instanceof Error?error.message:'Reference unavailable.'});}
     })();
     return()=>{live=false;};
