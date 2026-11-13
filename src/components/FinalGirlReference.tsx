@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Heart, LockKeyhole, UnlockKeyhole, Zap } from "lucide-react";
 import { getFinalGirlReference } from "@/data/finalGirlReferences";
+import { supabase } from "@/integrations/supabase/client";
 import {
   usePersonalItem,
   usePersonalUnlocks,
+  type PersonalItem,
 } from "@/contexts/PersonalItemsContext";
 import {
   AlertDialog,
@@ -17,15 +19,67 @@ import {
 } from "@/components/ui/alert-dialog";
 import "@/styles/final-girl-reference.css";
 
+function PersonalItemCard({ item }: { item: PersonalItem }) {
+  const [photo, setPhoto] = useState<string>();
+
+  useEffect(() => {
+    const imagePath = item.imagePath;
+    if (!imagePath) return;
+    let live = true;
+    let objectUrl: string | undefined;
+    void (async () => {
+      try {
+        const { data, error } = await supabase.storage
+          .from("final-girl-secret-items")
+          .download(imagePath);
+        if (!live || error || !data?.size) return;
+        objectUrl = URL.createObjectURL(data);
+        setPhoto(objectUrl);
+      } catch {
+        // The verified text remains readable if private storage is unavailable.
+      }
+    })();
+    return () => {
+      live = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [item.imagePath]);
+
+  return photo ? (
+    <img
+      className="girl-personal-card"
+      src={photo}
+      alt={`${item.name} card. ${item.effect}`}
+      onError={() => setPhoto(undefined)}
+      onLoad={({ currentTarget: image }) => {
+        const panel = image.closest(".girl-reference-panels");
+        if (!panel) return;
+        const card = image.getBoundingClientRect();
+        const viewport = panel.getBoundingClientRect();
+        if (card.bottom > viewport.bottom) {
+          panel.scrollTop += Math.min(card.top - viewport.top - 8, card.bottom - viewport.bottom + 8);
+        }
+      }}
+    />
+  ) : (
+    <>
+      <h5>{item.name}</h5>
+      <p>{item.effect}</p>
+    </>
+  );
+}
+
 export function SecretItemReference({ name }: { name: string }) {
   const unlocks = usePersonalUnlocks();
   const unlocked = unlocks.isUnlocked(name);
   const { item, error, loading, retry } = usePersonalItem(name);
   const [confirm, setConfirm] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   return (
     <details
       className={`girl-info-panel girl-personal-item ${unlocked ? "is-unlocked" : ""}`}
       aria-label={`${name} personal item`}
+      onToggle={(event) => setExpanded(event.currentTarget.open)}
     >
       <summary className="girl-item-heading">
         <h4>
@@ -73,8 +127,9 @@ export function SecretItemReference({ name }: { name: string }) {
               </p>
             ) : item ? (
               <>
-                <h5>{item.name}</h5>
-                <p>{item.effect}</p>
+                {expanded && (
+                  <PersonalItemCard key={`${unlocks.owner}:${unlocks.revision}:${item.imagePath}`} item={item} />
+                )}
                 <p className="girl-reference-note">
                   Available in Play for {name}. Record finding or using it
                   separately.

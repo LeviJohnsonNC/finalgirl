@@ -455,10 +455,18 @@ body:has(.play-workspace) .app-shell {
 
 /* The dashboard has one document scroll, with the existing site footer. */
 .play-workspace {
-  max-width: 1120px;
+  max-width: clamp(1120px, calc(85vw - 104px), 1760px);
   color: #e6e1d6;
   font-size: 14px;
   isolation: isolate;
+}
+@media (min-width: 1440px) {
+  body:has(.play-workspace) main {
+    max-width: none;
+  }
+  .play-workspace .play-heading {
+    min-height: clamp(300px, 21vw, 380px);
+  }
 }
 .play-workspace::before {
   content: "";

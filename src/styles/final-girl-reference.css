@@ -65,6 +65,17 @@
   font-size: 0.95rem;
   font-weight: 600;
 }
+.girl-personal-card {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: clamp(160px, 36dvh, 352px);
+  object-fit: contain;
+  margin-inline: auto;
+  border-radius: 0.35rem;
+  box-shadow: 0 5px 15px #0009;
+}
 .girl-reference-action {
   min-height: 44px;
   justify-self: start;

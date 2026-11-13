@@ -158,6 +158,17 @@ test("confirmed unlock updates Play suggestions; relocking persists without dele
 }, info) => {
   archive.holdUnlock = true;
   await archive.install(page, { draft: { ...activeGame, playMode: true } });
+  let photoReads = 0;
+  await page.route("**/storage/v1/object/final-girl-secret-items/*.webp", (route) => {
+    if (route.request().method() === "OPTIONS") return route.fallback();
+    photoReads++;
+    expect(route.request().headers().authorization).toBe("Bearer test.access.token");
+    return route.fulfill({
+      headers: { "access-control-allow-origin": "*" },
+      contentType: "image/svg+xml",
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="320"><rect width="480" height="320" rx="12" fill="#1e1918"/><rect x="14" y="14" width="452" height="292" rx="8" fill="none" stroke="#c9a473" stroke-width="2"/><text x="240" y="80" text-anchor="middle" font-size="32" fill="#f4e0b8">Test card</text><path d="M185 155h110v85H185z" fill="#845e4e"/></svg>',
+    });
+  });
   await resume(page);
   const dialog = await characterInfo(page);
   await dialog.getByRole("button", { name: "Unlock personal item" }).click();
@@ -172,11 +183,22 @@ test("confirmed unlock updates Play suggestions; relocking persists without dele
   await expect.poll(() => Boolean(archive.releaseUnlock)).toBe(true);
   await expect(dialog.getByText("Locked", { exact: true })).toBeVisible();
   expect(archive.itemReads).toEqual([]);
+  expect(photoReads).toBe(0);
   archive.holdUnlock = false;
   archive.releaseUnlock!();
-  await expect(
-    dialog.getByRole("heading", { name: "Private test reference" }),
-  ).toBeVisible();
+  const card = dialog.getByRole("img", { name: /^Private test reference card/ });
+  await expect(card).toBeVisible();
+  await expect.poll(() => card.evaluate(img => (img as HTMLImageElement).naturalWidth)).toBe(480);
+  expect(photoReads).toBe(1);
+  await expect(dialog.getByRole("heading", { name: "Private test reference" })).toHaveCount(0);
+  const photoUrl = await card.getAttribute("src");
+  await dialog.locator(".girl-personal-item > summary").click();
+  await expect(card).toHaveCount(0);
+  await expect.poll(() => page.evaluate(async url => {
+    try { await fetch(url!); return false; } catch { return true; }
+  }, photoUrl)).toBe(true);
+  await dialog.locator(".girl-personal-item > summary").click();
+  await expect(card).toBeVisible();
   await expect(dialog.getByText(/Available in Play for Laurie/)).toBeVisible();
   await page.screenshot({
     path: info.outputPath("personal-item-unlocked.png"),
@@ -194,6 +216,7 @@ test("confirmed unlock updates Play suggestions; relocking persists without dele
   await characterInfo(page);
   await dialog.getByRole("button", { name: "Lock item again" }).click();
   await expect(dialog.getByText("Locked", { exact: true })).toBeVisible();
+  await expect(card).toHaveCount(0);
   await expect.poll(() => archive.unlocks.Laurie).toBe(false);
   await dialog.getByRole("button", { name: "Close", exact: true }).click();
   await page.reload();

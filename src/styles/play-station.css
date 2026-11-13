@@ -64,3 +64,39 @@
 }
 .station-edit > label { min-width: 0; max-width: 100%; }
 .station-edit select { min-width: 0; max-width: 100%; }
+
+.station-edit .station-passenger-count {
+  gap: .65rem;
+  padding: .25rem .3rem .25rem .75rem;
+  border: 1px solid #74615280;
+  border-radius: .5rem;
+  background: #191619;
+  color: #f1e2ce;
+  font-weight: 600;
+}
+.station-passenger-field { position: relative; min-width: 0; }
+.station-passenger-count .station-passenger-field select {
+  appearance: none;
+  padding: .25rem 1.9rem .25rem .65rem;
+  font-size: 1rem;
+  font-weight: 400;
+  color-scheme: dark;
+}
+.station-passenger-field svg {
+  position: absolute;
+  right: .6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #e2b689;
+}
+.play-module-content .station-controls .station-frostbite {
+  margin: 0;
+  border-color: #746152;
+  border-radius: .45rem;
+}
+.station-frostbite .play-tile-caption span {
+  color: #eee0cf;
+  font-size: .8rem;
+  line-height: 1.35;
+}

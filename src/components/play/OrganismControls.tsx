@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {Minus, Plus} from 'lucide-react';
+import {Ellipsis, Minus, Plus} from 'lucide-react';
 import {Dialog, DialogContent, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
 import {
   ORGANISM, ORGANISM_COLORS, ORGANISM_FORMS, ORGANISM_MINORS, ORGANISM_MODULE,
@@ -146,7 +146,8 @@ export function OrganismRoster(props:RecordProps) {
       setCorrect(open);
     }}>
       <DialogTrigger asChild>
-        <button type="button" className="organism-quiet organism-correction-link" disabled={props.disabled}>Correct record</button>
+        <button type="button" className="organism-correction-trigger" aria-label="Correct record"
+          title="Correct record" disabled={props.disabled}><Ellipsis size={21} aria-hidden="true" /></button>
       </DialogTrigger>
       <DialogContent className="organism-correction-dialog" aria-describedby={undefined}>
         <DialogTitle>Correct Organism record</DialogTitle>

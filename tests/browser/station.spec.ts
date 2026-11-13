@@ -94,13 +94,14 @@ test('Station renders equipment, roles, allies and Terror crops across states',a
     await subject.screenshot({path:info.outputPath(name+'.jpg'),type:'jpeg',quality:82,animations:'disabled',style:'.app-footer{visibility:hidden}'});
   };
   await capture(panel,'station-ready');
-  await conditions.getByRole('button',{name:/Frostbite/}).click();
-  await conditions.getByRole('combobox',{name:'Final Girl',exact:true}).selectOption('marked');
+  await expect(conditions.locator('figure').filter({hasText:'Frostbite'})).toBeVisible();
+  await expect(conditions.getByRole('button',{name:/Frostbite/})).toHaveCount(0);
+  await expect(conditions.getByRole('combobox',{name:'Final Girl',exact:true})).toHaveCount(0);
   await conditions.getByText('Generator',{exact:true}).click();
   await conditions.getByRole('button',{name:'Record next Upkeep exception'}).click();
   await expect(conditions.getByRole('button',{name:'Record skipped Upkeep clearing'})).toBeVisible();
   await conditions.getByRole('button',{name:'Record skipped Upkeep clearing'}).click();
-  await expect(conditions.getByRole('combobox',{name:'Final Girl',exact:true})).toHaveValue('marked');
+  await expect(conditions.getByRole('button',{name:'Record skipped Upkeep clearing'})).toHaveCount(0);
   await conditions.getByRole('button',{name:/Lab wall/}).click();
   await conditions.getByRole('combobox',{name:'Lab opening',exact:true}).selectOption('keys');
   await conditions.getByRole('combobox',{name:'Lab opening',exact:true}).selectOption('accident');
@@ -146,6 +147,8 @@ test('Station renders equipment, roles, allies and Terror crops across states',a
     await capture(terror,`station-terror-${card.id}`);
   }
   await dialog.getByRole('button',{name:'Location hazard',exact:true}).click();
+  await searchPick(page,'Death mechanism','Frostbite');
+  await expect(dialog.getByRole('button',{name:'Location hazard',exact:true}).locator('img')).toHaveAttribute('src',/frostbite/);
   await searchPick(page,'Death mechanism','Lab explosion');
   await expect(dialog.getByRole('button',{name:'Location hazard',exact:true}).locator('img')).toHaveAttribute('src',/lab-breached/);
 });

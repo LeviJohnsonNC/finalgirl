@@ -1,10 +1,28 @@
 .organism-roster {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 .organism-roster > .play-state { flex: 1; }
-.organism-correction-link { align-self: flex-start; text-decoration: underline; text-underline-offset: 3px; }
+.organism-roster > .organism-correction-trigger {
+  position: absolute;
+  z-index: 1;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #f5e8d566;
+  border-radius: 50%;
+  background: #150e13e8;
+  color: #f5e8d5;
+}
+.organism-correction-trigger:hover:not(:disabled) {
+  border-color: #f5e8d5;
+  background: #392430;
+}
 .organism-correction-dialog .organism-actions { padding: 0; }
 .organism-correction-dialog label { display: flex; align-items: center; gap: .6rem; }
 .play-workspace .play-state--organism {
@@ -16,7 +34,7 @@
 .organism-portraits {
   display: grid;
   grid-template-columns: repeat(3,minmax(0,1fr));
-  min-height: 160px;
+  min-height: var(--tracker-photo-height, 172px);
   gap: 2px;
   flex: 1 0 auto;
 }
@@ -75,10 +93,6 @@
 .organism-secondary summary { cursor: pointer; }
 .organism-actions ol { list-style: decimal; margin: 6px 0 4px 1.25rem; font-size: .8rem; }
 .organism-actions input { max-width: 8rem; background: #1a1118; padding: .3rem; }
-@media(max-width: 639px) {
-  .organism-portraits { min-height: 146px; }
-}
-
 .play-state--organism .play-state-stepper output { align-self: center; text-align: center; font: 400 28px/1 Georgia, serif; }
 
 
