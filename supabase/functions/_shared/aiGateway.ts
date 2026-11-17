@@ -1,11 +1,13 @@
-// Thin client for the Lovable AI Gateway (OpenAI-compatible surface).
+// Shared provider client for narrative text and artwork.
 //
-// Everything AI in this app goes through here so that retry, credit/rate-limit
+// Generation calls use this client so that retry, credit/rate-limit
 // handling and model fallback are written once. Callers get a typed
 // GatewayError they can map to a user-facing message.
 import {
   IMAGE_MODEL_CANDIDATES,
+  IMAGE_PROVIDER,
   TEXT_MODEL_CANDIDATES,
+  TEXT_PROVIDER,
   UTILITY_MODEL_CANDIDATES,
   usesResponsesApi,
 } from "./models.ts";
@@ -18,6 +20,7 @@ export const normalizeGeneratedText = (text: string): string => text.replace(/\u
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const RESPONSES_URL = "https://ai.gateway.lovable.dev/v1/responses";
+const OPENAI_API = "https://api.openai.com/v1";
 
 export type GatewayErrorKind =
   | "no_key"
@@ -68,11 +71,39 @@ export const userFacingMessage = (err: unknown): string => {
 export const statusFor = (err: unknown): number =>
   err instanceof GatewayError && (err.status === 429 || err.status === 402 || err.kind === "image_unavailable" || err.kind === "planning_unavailable") ? err.status : 500;
 
-const apiKey = () => {
-  const key = Deno.env.get("LOVABLE_API_KEY");
-  if (!key) throw new GatewayError("no_key", "LOVABLE_API_KEY is not configured");
+const apiKey = (provider: "lovable" | "openai" = "lovable") => {
+  const name = provider === "openai" ? "OPENAI_API_KEY" : "LOVABLE_API_KEY";
+  const key = Deno.env.get(name);
+  if (!key) throw new GatewayError("no_key", `${name} is not configured`);
   return key;
 };
+
+const CREDIT_CODES = new Set([
+  "credits", "insufficient_quota", "credit_balance_exhausted", "billing_hard_limit_reached",
+  "project_spend_limit_exceeded", "organization_spend_limit_exceeded", "organization_usage_limit_exceeded",
+]);
+const CONTENT_POLICY_CODES = new Set([
+  "content_policy", "content_policy_violation", "content_filter", "safety", "blocklist",
+  "prohibited_content", "spii", "image_safety", "image_prohibited_content", "moderation_blocked", "safety_violation",
+]);
+
+async function openAiHttpError(response: Response): Promise<GatewayError> {
+  const payload = await response.json().catch(() => null) as { error?: { code?: string; type?: string } } | null;
+  const codes = [payload?.error?.code, payload?.error?.type];
+  const status = response.status;
+  console.warn("OpenAI request failed", { status, requestId: response.headers.get("x-request-id") });
+  if (status === 402 || codes.some(code => code && CREDIT_CODES.has(code))) {
+    return new GatewayError("credits", "OpenAI credits or spend limit reached", 402);
+  }
+  if (codes.some(code => code && CONTENT_POLICY_CODES.has(code))) {
+    return new GatewayError("content_policy", "OpenAI declined the request", 400);
+  }
+  if (status === 429) return new GatewayError("rate_limit", "OpenAI rate limit", 429);
+  if (status === 404 || codes.includes("model_not_found")) {
+    return new GatewayError("model_unavailable", "OpenAI model unavailable", status);
+  }
+  return new GatewayError("upstream", `OpenAI request failed (${status})`, status);
+}
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -178,31 +209,34 @@ const postResponsesStream = async (
   user: string,
   signal?: AbortSignal,
   reasoningEffort?: "low",
+  maxTokens?: number,
 ): Promise<ReadableStream<Uint8Array>> => {
-  const key = apiKey();
-  const response = await fetch(RESPONSES_URL, {
+  const direct = TEXT_PROVIDER === "openai";
+  const key = apiKey(direct ? "openai" : "lovable");
+  const response = await fetch(direct ? `${OPENAI_API}/responses` : RESPONSES_URL, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${key}`,
-      "Lovable-API-Key": key,
       "Content-Type": "application/json",
-      "X-Lovable-AIG-SDK": "fetch",
+      ...(!direct && { "Lovable-API-Key": key, "X-Lovable-AIG-SDK": "fetch" }),
     },
     signal,
     body: JSON.stringify({
       model,
-      // No temperature / max_completion_tokens: these models reject a non-default
-      // temperature, and length limits live in the prompt text instead.
+      // The utility routes budget visible and reasoning tokens together on direct Responses calls.
       input: [
         { role: "system", content: [{ type: "input_text", text: system }] },
         { role: "user", content: [{ type: "input_text", text: user }] },
       ],
       stream: true,
       store: false,
+      ...(direct && maxTokens !== undefined && { max_output_tokens: maxTokens }),
       ...(reasoningEffort && { reasoning: { effort: reasoningEffort } }),
     }),
   });
 
+  if (direct && !response.ok) throw await openAiHttpError(response);
+  if (direct && !response.body) throw new GatewayError("empty_response", "OpenAI returned no stream");
   if (!response.ok || !response.body) {
     const text = await response.text().catch(() => "");
     console.error(
@@ -266,13 +300,12 @@ export const storyStreamError = (event: Record<string, unknown>): GatewayError |
   const reasons = [event.code, typeof error === 'object' ? error?.code : error, typeof error === 'object' ? error?.type : undefined,
     response?.error?.code, response?.incomplete_details?.reason, choices?.[0]?.finish_reason, choices?.[0]?.native_finish_reason,
     feedback?.blockReason, feedback?.block_reason].filter((v): v is string => typeof v === 'string').map(v => v.toLowerCase());
-  const policy = ['content_policy','content_filter','safety','blocklist','prohibited_content','spii','image_safety','image_prohibited_content'];
-  if (reasons.some(reason => policy.includes(reason)) || event.type === 'response.refusal.delta' || event.type === 'response.refusal.done' ||
+  if (reasons.some(reason => CONTENT_POLICY_CODES.has(reason)) || event.type === 'response.refusal.delta' || event.type === 'response.refusal.done' ||
     choices?.[0]?.delta?.refusal || choices?.[0]?.message?.refusal || response?.output?.some(item => item.content?.some(part => part.type === 'refusal')))
     return new GatewayError('content_policy', 'Provider declined the scene');
+  if (reasons.some(reason => CREDIT_CODES.has(reason))) return new GatewayError('credits','Credits or spend limit reached',402);
   if (reasons.some(reason => ['rate_limit','rate_limit_exceeded'].includes(reason))) return new GatewayError('rate_limit','Provider rate limit',429);
-  if (reasons.includes('credits')) return new GatewayError('credits','Credits depleted',402);
-  if (reasons.includes('model_unavailable')) return new GatewayError('model_unavailable','Model unavailable');
+  if (reasons.includes('model_unavailable') || reasons.includes('model_not_found')) return new GatewayError('model_unavailable','Model unavailable');
   const failure = terminalErrorMessage(event);
   if (failure || event.error) return new GatewayError(event.type === 'response.incomplete' || event.code === 'incomplete_response' ? 'incomplete_response' : 'upstream', 'Story stream did not complete');
   if (choices?.[0]?.finish_reason && !['stop','end_turn'].includes(choices[0].finish_reason.toLowerCase()))
@@ -338,7 +371,7 @@ const collectResponsesText = async (
   system: string,
   user: string,
   signal?: AbortSignal,
-  options?: { requireComplete?: boolean; reasoningEffort?: "low" },
+  options?: { requireComplete?: boolean; reasoningEffort?: "low"; maxTokens?: number },
 ): Promise<string> => {
   const upstream = await postResponsesStream(
     model,
@@ -346,6 +379,7 @@ const collectResponsesText = async (
     user,
     signal,
     options?.reasoningEffort,
+    options?.maxTokens,
   );
   const reader = upstream.getReader();
   const decoder = new TextDecoder();
@@ -423,6 +457,7 @@ export const generateText = async (opts: {
         {
           requireComplete: opts.requireComplete,
           reasoningEffort: opts.reasoningEffort,
+          maxTokens: opts.maxTokens,
         },
       );
       if (!text)
@@ -544,11 +579,57 @@ const imageCanFallback = (error: unknown): boolean => error instanceof GatewayEr
   error.kind === "upstream" && [500, 502, 503, 504].includes(error.status)
 );
 
+type ImageOptions = {
+  aspectRatio: "16:9" | "2:3";
+  references?: Array<{ name: string; url: string }>;
+};
+type ImagePart = { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } };
+type ImageContent = string | ImagePart[];
+
+async function generateOpenAiImage(model: string, content: ImageContent, size: string, signal: AbortSignal) {
+  const images = typeof content === "string" ? [] : content.flatMap(part =>
+    part.type === "image_url" ? [{ image_url: part.image_url.url }] : []);
+  const prompt = typeof content === "string" ? content : content
+    .filter(part => part.type === "text")
+    .map((part, index) => index === 0 ? part.text : `Image ${index} — ${part.text}`)
+    .join("\n");
+  try {
+    const response = await fetch(`${OPENAI_API}/images/${images.length ? "edits" : "generations"}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey("openai")}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model, prompt, size, quality: "high", output_format: "png", n: 1, ...(images.length && { images }) }),
+      signal,
+    });
+    if (!response.ok) throw await openAiHttpError(response);
+    const { data } = await response.json() as { data?: Array<{ b64_json?: string }> };
+    const base64 = data?.[0]?.b64_json;
+    if (typeof base64 !== "string" || !base64.startsWith("iVBORw0KGgo")) {
+      throw new GatewayError("empty_response", "OpenAI returned no PNG");
+    }
+    return { base64, mimeType: "image/png", model };
+  } catch (error) {
+    if (signal.aborted || error instanceof TypeError) {
+      throw new GatewayError("image_unavailable", "OpenAI image request interrupted", signal.aborted ? 504 : 503);
+    }
+    throw error;
+  }
+}
+
 export const generateImage = async (
   prompt: string,
   referenceImageUrl?: string,
-  options?: { aspectRatio: "16:9" | "2:3"; references?: Array<{ name: string; url: string }> },
+  options?: ImageOptions,
 ): Promise<{ base64: string; mimeType: string; model: string }> => {
+  const content: ImageContent = referenceImageUrl ? [
+    { type: "text", text: `${prompt}\nThe attached opening photograph is an IDENTITY reference only: match cast appearance, clothing, architecture and palette where consistent with the current named cast description. The current named cast identity overrides a contradictory person or clothing in an older generated opening. Make a new composition from the ending; translate into the requested painted medium. Do not copy the opening's pose, action or fate.` },
+    { type: "image_url", image_url: { url: referenceImageUrl } },
+  ] : options?.references?.length ? [
+    { type: "text", text: `${prompt}\nThe attached photographs are cast IDENTITY references: preserve the named person's face, skin tone, hair colour/texture/style and clothing; this named identity overrides contradictory continuity or shot descriptions. Incidental wounds, blood and held props in a reference do not establish injuries or possessions in this session. Preserve the named creature's physical construction. ${options?.aspectRatio==='2:3'?'Translate their identities into the requested painted poster medium, with a new composition.':'Photograph them together in the new shot under its available light, exposure and white balance.'} Match identity, not the reference's rendering style, skin processing, grain, grading or lighting. Translate stylized anatomy and materials into physically credible forms without changing the identity. Do not copy the portraits' poses, backgrounds or framing, or introduce another cast member.` },
+    ...options.references.flatMap<ImagePart>(reference => [
+      { type: "text", text: `Identity photograph: ${reference.name}` },
+      { type: "image_url", image_url: { url: reference.url } },
+    ]),
+  ] : prompt;
   // Match the theater at generation time rather than cropping saved artwork.
   const dimensions = options ? { image_config: { aspect_ratio: options.aspectRatio } } : {};
   // A slow 503 used to spend nearly two minutes retrying the same provider.
@@ -556,6 +637,11 @@ export const generateImage = async (
   // the edge request's 150-second idle limit. Never retry a successful image.
   const deadline = Date.now() + IMAGE_TOTAL_TIMEOUT_MS;
   try {
+    if (IMAGE_PROVIDER === "openai") {
+      const size = options?.aspectRatio === "16:9" ? "1536x864" : "1024x1536";
+      // One direct request leaves time for poster composition and storage.
+      return await generateOpenAiImage(IMAGE_MODEL_CANDIDATES[0], content, size, AbortSignal.timeout(IMAGE_TOTAL_TIMEOUT_MS));
+    }
     const { result, model } = await withModelFallback([...new Set(IMAGE_MODEL_CANDIDATES)], async (model) => {
       const remaining = deadline - Date.now();
       if (remaining <= 0) throw new GatewayError("image_unavailable", "Image generation deadline exceeded", 504);
@@ -569,16 +655,6 @@ export const generateImage = async (
           throw error;
         }
       };
-      const content = referenceImageUrl ? [
-        { type: "text", text: `${prompt}\nThe attached opening photograph is an IDENTITY reference only: match cast appearance, clothing, architecture and palette where consistent with the current named cast description. The current named cast identity overrides a contradictory person or clothing in an older generated opening. Make a new composition from the ending; translate into the requested painted medium. Do not copy the opening's pose, action or fate.` },
-        { type: "image_url", image_url: { url: referenceImageUrl } },
-      ] : options?.references?.length ? [
-        { type: "text", text: `${prompt}\nThe attached photographs are cast IDENTITY references: preserve the named person's face, skin tone, hair colour/texture/style and clothing; this named identity overrides contradictory continuity or shot descriptions. Incidental wounds, blood and held props in a reference do not establish injuries or possessions in this session. Preserve the named creature's physical construction. ${options?.aspectRatio==='2:3'?'Translate their identities into the requested painted poster medium, with a new composition.':'Photograph them together in the new shot under its available light, exposure and white balance.'} Match identity, not the reference's rendering style, skin processing, grain, grading or lighting. Translate stylized anatomy and materials into physically credible forms without changing the identity. Do not copy the portraits' poses, backgrounds or framing, or introduce another cast member.` },
-        ...options.references.flatMap(reference => [
-          { type: "text", text: `Identity photograph: ${reference.name}` },
-          { type: "image_url", image_url: { url: reference.url } },
-        ]),
-      ] : prompt;
       let data: Record<string, unknown>;
       try {
         data = await request(content);

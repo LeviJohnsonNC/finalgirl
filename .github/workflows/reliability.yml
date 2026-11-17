@@ -56,7 +56,8 @@ jobs:
       - run: deno check --no-config --no-lock --node-modules-dir=auto supabase/functions/*/index.ts
   browser-tests:
     name: browser (${{ matrix.project }}, shard ${{ matrix.shard }}/4)
-    runs-on: ubuntu-latest
+    # Playwright 1.56 provides Chromium for Ubuntu 24.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
