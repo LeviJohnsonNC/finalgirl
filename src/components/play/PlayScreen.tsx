@@ -1,5 +1,5 @@
 import { WOLFE, WOLFE_MODULE } from '../../../supabase/functions/_shared/play/wolfeCatalog';
-import { ampKey } from '../../../supabase/functions/_shared/play/wolfe';
+import { ampKey, wolfeAmped } from '../../../supabase/functions/_shared/play/wolfe';
 import { RATCHET_LADY, RATCHET_MODULE, RATCHET_MAX_BLOODLUST, RATCHET_HEALTH_STORAGE_MAX, SHIELD_OF_MADNESS, ratchetCount } from '../../../supabase/functions/_shared/play/ratchetLady';
 import {OrganismRoster} from "./OrganismControls";
 import {ORGANISM, ORGANISM_MAX_BLOODLUST} from "@/lib/play/organism";
@@ -202,7 +202,8 @@ export function PlayScreen(props: PlayScreenProps) {
   // Legacy sessions can use the catalog to bound new input without backfilling observations.
   const isRatchetLady = killer === RATCHET_LADY;
   const maniacs = isRatchetLady ? moduleState(summary.entries, RATCHET_MODULE).maniacs : undefined;
-  const resistance = location===WOLFE && moduleState(summary.entries,WOLFE_MODULE)[ampKey('resistance')];
+  const wolfe = location===WOLFE ? moduleState(summary.entries,WOLFE_MODULE) : undefined;
+  const resistance = wolfe && wolfeAmped(wolfe) && wolfe[ampKey('resistance')];
   const ratchetShield = ratchetCount(maniacs) && maniacs > 0 &&
     summary.entries.some(event => event.momentType === 'dark-power' && event.killerCard === SHIELD_OF_MADNESS);
   const trackerLimits = { ...stateLimits, ...(isRatchetLady && { killerHealth: RATCHET_HEALTH_STORAGE_MAX, bloodlust: RATCHET_MAX_BLOODLUST }), ...(killer===INTRUDERS&&{bloodlust:10}), ...(killer===ORGANISM&&{bloodlust:ORGANISM_MAX_BLOODLUST}), finalGirlHealth: observedFinalGirlMaxHealth(

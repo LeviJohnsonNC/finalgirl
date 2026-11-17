@@ -1,50 +1,70 @@
-.wolfe-controls { display:grid; gap:1.25rem; color:#eee4cf; }
+.wolfe-controls { display:grid; gap:1.4rem; color:#eee4cf; }
 .wolfe-controls section { display:grid; gap:.65rem; min-width:0; }
 .wolfe-controls h3 { font-family:var(--font-display, Georgia, serif); font-size:1.2rem; margin:0; }
 .wolfe-heading,.wolfe-row { display:flex; align-items:center; flex-wrap:wrap; gap:.45rem .75rem; }
 .wolfe-heading { justify-content:space-between; }
-.wolfe-row > button:disabled,.wolfe-preview > button:disabled,.wolfe-pill-count > button:disabled { opacity:.48; }
-.wolfe-row > button:not(.module-quiet-link),.wolfe-preview > button:not(.module-quiet-link),.wolfe-recipes > button {
+.wolfe-row > button:disabled,.wolfe-stepper > button:disabled { opacity:.42; }
+.wolfe-row > button:not(.module-quiet-link),.wolfe-recipes > button {
   min-height:44px; padding:.4rem .75rem; border:1px solid #665947; border-radius:.35rem; background:#231f19; color:#f0e5ce;
 }
 .wolfe-controls .module-quiet-link { min-height:44px; justify-self:start; }
-.wolfe-pill-photo { min-height:132px; position:relative; display:flex; align-items:flex-end; isolation:isolate; overflow:hidden; border:1px solid #574637; border-radius:.45rem; }
-.wolfe-pill-photo::after { position:absolute; inset:0; content:""; background:linear-gradient(0deg,#16110cee,transparent 80%); z-index:-1; }
-.wolfe-pill-photo > :first-child { position:absolute; inset:0; z-index:-2; }
-.wolfe-pill-caption { padding:.85rem; }
+.wolfe-controls button:focus-visible { outline:2px solid #dab780; outline-offset:-2px; }
+.wolfe-pill-tray {
+  position:relative; isolation:isolate; overflow:hidden; height:clamp(148px, 22vw, 274px);
+  border:1px solid #6c5d48; border-radius:.45rem; background:radial-gradient(ellipse, #283022, #121a13);
+}
+.wolfe-tray-surface { position:relative; height:100%; width:min(100%, clamp(296px, 44vw, 548px)); margin-inline:auto; }
+.wolfe-tray-surface > .play-module-art {
+  position:absolute; inset:0; width:100%; height:100%;
+  mask-image:linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+.wolfe-pill-slots { position:absolute; inset:22% 17% 22%; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); place-items:center; }
+.wolfe-pill-stack { display:grid; grid-template-areas:'tablets'; place-items:center; }
+.wolfe-pill-stack .wolfe-tablet { grid-area:tablets; width:clamp(25px,4.25vw,56px); filter:drop-shadow(2px 4px 3px #1a170ba6); }
+.wolfe-pill-stack .wolfe-tablet:nth-child(1) { transform:translate(-28%,-44%) rotate(-21deg); }
+.wolfe-pill-stack .wolfe-tablet:nth-child(2) { transform:translate(29%,4%) rotate(29deg); }
+.wolfe-pill-stack .wolfe-tablet:nth-child(3) { transform:translate(-31%,52%) rotate(71deg); }
+.wolfe-pill-stack .wolfe-tablet:only-child { transform:rotate(-21deg); }
+.wolfe-tray-unknown { position:absolute; bottom:.45rem; left:.65rem; padding:.16rem .45rem; border-radius:.2rem; background:#161a16df; }
 .wolfe-pill-counts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.45rem; }
-.wolfe-pill-count { min-width:0; display:flex; align-items:center; justify-content:space-between; gap:.3rem; padding-left:.5rem; border:1px solid #514638; background:#1b1915; border-radius:.35rem; font-size:.8rem; }
-.wolfe-pill-count span { display:inline-flex; align-items:center; gap:.3rem; }
-.wolfe-pill-count output { font-variant-numeric:tabular-nums; font-size:1rem; }
-.wolfe-pill-count button { min-height:44px; min-width:44px; border-left:1px solid #514638; font-size:1.1rem; }
-.wolfe-pill { width:.7rem; height:.7rem; border:1px solid #ffffff38; border-radius:50%; display:inline-block; flex:none; background:#dfb940; }
-.wolfe-pill[data-color="blue"] { background:#667ab7; }
-.wolfe-pill[data-color="pink"] { background:#e787a4; }
-.wolfe-pill[data-color="wild"] { background:linear-gradient(#e787a4 33%,#dfb940 33% 66%,#667ab7 66%); }
-.wolfe-recipes,.wolfe-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.6rem; }
+.wolfe-pill-count { min-width:0; display:grid; padding:.35rem .25rem 0; border:1px solid #514638; background:#1b1915; border-radius:.35rem; text-align:center; }
+.wolfe-pill-count > span { display:inline-flex; align-items:center; justify-content:center; gap:.35rem; font-size:.87rem; }
+.wolfe-stepper { display:grid; grid-template-columns:44px minmax(15px,1fr) 44px; align-items:center; text-align:center; }
+.wolfe-stepper output { font-variant-numeric:tabular-nums; font-size:1rem; }
+.wolfe-stepper button { min-height:44px; min-width:44px; font-size:1.22rem; }
+.wolfe-tablet { display:inline-grid; grid-template-areas:'tablet'; width:1.1rem; aspect-ratio:1; flex:none; }
+.wolfe-tablet img { display:block; grid-area:tablet; width:100%; height:100%; object-fit:contain; }
+.wolfe-tablet[data-color="blue"] img,.wolfe-tablet[data-color="wild"] img:nth-child(3) { filter:hue-rotate(167deg) saturate(1.22); }
+.wolfe-tablet[data-color="pink"] img,.wolfe-tablet[data-color="wild"] img:nth-child(2) { filter:hue-rotate(279deg) saturate(1.25); }
+.wolfe-tablet[data-color="wild"] img:nth-child(2) { clip-path:inset(0 0 65%); }
+.wolfe-tablet[data-color="wild"] img:nth-child(3) { clip-path:inset(65% 0 0); }
+.wolfe-recipes,.wolfe-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.6rem; align-items:start; }
 .wolfe-recipes > button { display:flex; align-items:center; justify-content:flex-start; text-align:left; gap:.5rem; }
-.wolfe-recipes > button span { display:flex; gap:.15rem; }
+.wolfe-recipes > button span { display:flex; flex-wrap:wrap; gap:.15rem; }
 .wolfe-recipes > button[aria-pressed="true"] { border-color:#b69463; background:#332820; }
 .wolfe-preview { grid-column:1/-1; padding:.6rem; border:1px solid #665947; border-radius:.35rem; }
-.wolfe-preview p { margin:.35rem 0; font-size:.92rem; }
+.wolfe-preview p,.wolfe-receipt { margin:0 0 .4rem; font-size:.92rem; }
 .wolfe-grid article,.wolfe-grid .play-illustrated-tile { width:100%; min-width:0; }
 .play-module-content .wolfe-controls .module-control-tile { aspect-ratio:2.2; min-height:140px; max-height:236px; }
 .play-module-content .wolfe-controls .module-event .module-control-tile { aspect-ratio:3.1; min-height:98px; max-height:164px; }
 .play-module-content .wolfe-choices .module-control-tile { aspect-ratio:3; min-height:82px; max-height:120px; }
 .wolfe-grid > article:not(.module-character,.module-event) { border:1px solid #514638; border-radius:.4rem; overflow:hidden; }
 .wolfe-grid > article:not(.module-character,.module-event) > .wolfe-row { padding-inline:.5rem; }
-.wolfe-choices .play-illustrated-tile img { filter:brightness(.62); }
-.wolfe-muted { color:#b4a795; }
-.wolfe-stun { display:grid; gap:.25rem; }
-.wolfe-form .wolfe-row { margin-top:.4rem; }
-@media(max-width:520px) {
+.wolfe-amped-picker-title { grid-column:1/-1; font-size:.92rem; }
+.wolfe-feature-actions { padding:.4rem .65rem; }
+.wolfe-riders { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; }
+.wolfe-riders .wolfe-stepper { min-width:108px; }
+.wolfe-controls .play-illustrated-tile[data-muted] img { filter:grayscale(1) brightness(.58); }
+@media(max-width:620px) {
   .wolfe-pill-counts { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:520px) {
   .wolfe-grid { grid-template-columns:minmax(0,1fr); }
   .wolfe-grid.wolfe-choices { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .play-module-content .wolfe-controls .module-control-tile { aspect-ratio:1.85; }
   .play-module-content .wolfe-choices .module-control-tile { min-height:105px; }
 }
-@media(max-width:350px) {
+@media(max-width:380px) {
   .wolfe-recipes { grid-template-columns:minmax(0,1fr); }
 }
 
@@ -54,6 +74,4 @@
 .play-death-modal--illustrated .play-cause-tile[data-wolfe-photo][aria-pressed="true"] > img { opacity:1; }
 .wolfe-controls .module-outcomes { flex-wrap:wrap; }
 .wolfe-controls .module-outcomes button { min-height:44px; min-width:44px; }
-
-.wolfe-recipe-photo { grid-column:1/-1; position:relative; height:76px; overflow:hidden; border-radius:.35rem; }
 .play-module-content .wolfe-controls .module-character:is([data-state="present"],[data-state="saved"],[data-state="killed"]) > .module-control-tile { opacity:1; }

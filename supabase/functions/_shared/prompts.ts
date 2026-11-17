@@ -92,7 +92,7 @@ function visualContinuity(ctx: SceneContext): string | undefined {
   });
 }
 
-const identityLock = (ctx: SceneContext): string => `CAST IDENTITY LOCK: The selected Final Girl is ${ctx.finalGirl}. Preserve her own face, skin tone, hair colour/texture/style, age range and established clothing from her named cast reference and current description. Never substitute a generic survivor or another Final Girl. Current named cast identity must override contradictory old continuity, story descriptions, shot descriptions and earlier generated images. An opening photograph with a different person is not identity authority. Reference bruises, blood, props and poses do not establish new injuries or possessions.`;
+const identityLock = (ctx: SceneContext): string => `CAST IDENTITY LOCK: The selected Final Girl is ${ctx.finalGirl}. Preserve her own face, skin tone, hair colour/texture/style, age range and established clothing from her named cast photograph. The photograph is the authority for her physical likeness; the current portrait-aligned description supports it. Keep her distinct facial proportions and identifying features even in profile or under different lighting. Never substitute a generic survivor or another Final Girl. Current named cast identity must override contradictory old continuity, story descriptions, shot descriptions and earlier generated images. An opening photograph with a different person is not identity authority. Reference bruises, blood, props and poses do not establish new injuries or possessions.`;
 const parseConcepts = (value: unknown): ShotPlan | null => {
   if (!value || typeof value !== 'object') return null;
   const { concepts, selected } = value as Record<string, unknown>;

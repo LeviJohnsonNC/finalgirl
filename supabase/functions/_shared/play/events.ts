@@ -1,5 +1,5 @@
 import { WOLFE_MODULE } from './wolfeCatalog.ts';
-import { isInitialWolfe, resolveWolfe, sameWolfe, validWolfeAction, wolfeCasualties, wolfeParent, type WolfeAction } from './wolfe.ts';
+import { isInitialWolfe, resolveWolfe, sameWolfe, validWolfeAction, wolfeCasualties, wolfeParent, wolfePillTrackers, type WolfeAction } from './wolfe.ts';
 import { RATCHET_MODULE, RATCHET_HEALTH_STORAGE_MAX, validRatchetAction, resolveRatchetAction, ratchetParent, type RatchetAction } from './ratchetLady.ts';
 import { STATION_MODULE, isInitialStation, resolveStationAction, stationParent, stationState, stationSummary, validStationAction, type StationAction } from './station.ts';
 import { ORGANISM_MODULE, ORGANISM_MAX_BLOODLUST, initialOrganism, isInitialOrganism, isOrganismCasualty, organismParent, resolveOrganismAction, sameOrganismChanges, validOrganismAction, type OrganismAction } from "./organism.ts";
@@ -905,6 +905,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       if(e.hunterAction.command==='reboot'&&before.phase==='mark-x'&&summary.killerHealth!==undefined)summary.killerHealth=Math.min(99,summary.killerHealth+4);
       if(e.hunterAction.command==='force-mark-x'&&before.phase==='mark-v')summary.bloodlust=10;
     }
+    if(e.kind==='module'&&e.wolfeAction?.command==='eat') Object.assign(summary,wolfePillTrackers(e.wolfeAction,summary));
     if(e.kind==='module'&&e.creechAction?.kind==='hunter'&&e.creechAction.bloodlust!==undefined)summary.bloodlust=e.creechAction.bloodlust;
     if(e.kind==='module' && e.moduleData?.module==='evomorph' && (e.moduleData.changes.initialized===true || (e.evomorphAction?.command==='evolve'&&e.moduleData.changes.stage==='adult'))) {
       const visible=summary.killerHealthTracking ?? summary.killerHealth!==undefined;
@@ -989,7 +990,7 @@ export function describeEvent(e: PlayEvent): string {
     case "moment":
       return `${e.text}${e.killerCard ? `: ${e.killerCard}` : ""}${e.detail ? `${e.killerCard ? ". " : ": "}${e.detail}` : ""}`;
     case "module":
-      if(e.wolfeAction?.command==='spend') return 'Pills consumed';
+      if(e.wolfeAction?.command==='eat'||e.wolfeAction?.command==='spend') return 'Pills consumed';
       if(e.wolfeAction?.command==='ram') return 'Hospital Gurney ram recorded';
       if(e.wolfeAction?.command==='spent') return 'Hospital Gurney marked spent';
       if (e.ratchetAction?.command === 'calm') return `Calmed ${e.ratchetAction.amount} ${e.ratchetAction.amount === 1 ? 'Maniac' : 'Maniacs'}`;
