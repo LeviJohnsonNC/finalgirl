@@ -27,6 +27,7 @@ export type WolfeCommand =
   | {command:'event';id:Ongoing;active:boolean}
   | {command:'person';id:Person;status:Status}
   | {command:'gurney';riders:number|null}
+  | {command:'clear-gurney'}
   | {command:'ram';riders:number}
   | {command:'spent'}
   | {command:'stun';enemy:string;count:number}
@@ -103,6 +104,7 @@ export function validWolfeAction(action:unknown):action is WolfeAction {
     case 'gurney': return a.riders===null||wolfeRiders(a.riders);
     case 'ram': return wolfeRiders(a.riders);
     case 'stun': return text(a.enemy,60)&&/^[a-z0-9.-]+$/.test(a.enemy)&&count(a.count,8);
+    case 'clear-gurney':
     case 'spent':
     case 'clear-stun': return true;
     default: return false;
@@ -111,6 +113,10 @@ export function validWolfeAction(action:unknown):action is WolfeAction {
 
 export function wolfeParent(entries:readonly PlayEvent[]) {
   return [...entries].reverse().find(event=>event.moduleData?.module===WOLFE_MODULE)?.id??'root';
+}
+export function lastWolfeGurneyObservation(entries:readonly PlayEvent[]) {
+  return [...entries].reverse().find(event=>
+    event.moduleData?.module===WOLFE_MODULE&&event.moduleData.changes.gurney!==undefined);
 }
 export function sameWolfe(a:ModuleState,b:ModuleState) {
   return Object.keys(a).length===Object.keys(b).length && Object.keys(a).every(key=>a[key]===b[key]);
@@ -149,6 +155,7 @@ export function resolveWolfe(a:WolfeAction,state:ModuleState,entries:readonly Pl
     case 'event': return state[activeKey(a.id)]===a.active?null:{[activeKey(a.id)]:a.active};
     case 'person': return state['person.'+a.id]===a.status?null:{['person.'+a.id]:a.status};
     case 'gurney': return state.gurney==='spent'?null:{gurney:a.riders??'unknown'};
+    case 'clear-gurney': return wolfeRiders(state.gurney)||state.gurney==='unknown'?{gurney:null}:null;
     case 'ram': return state.gurney===a.riders?{gurney:'spent'}:null;
     case 'spent': return state.gurney==='spent'?null:{gurney:'spent'};
     case 'stun': return {['stun.'+a.enemy]:a.count||null};

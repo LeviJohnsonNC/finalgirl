@@ -23,12 +23,18 @@ test('Wolfe pills and gurney share the durable play log',async ({page,archive},i
   await panel.getByRole('button',{name:'Eat Wild as Pink'}).click();
   await expect(panel.getByLabel('Wild held pills')).toHaveText('0');
   await panel.getByRole('button',{name:'Resistance',exact:true}).click();
-  await panel.getByRole('button',{name:/Hospital Gurney/}).click();
+  const gurneyTile=panel.getByRole('button',{name:/^Hospital Gurney/});
   const loadVictim=panel.getByRole('button',{name:'Add a victim to the gurney'});
+  await expect(loadVictim).toBeVisible();
+  await gurneyTile.click();
+  await expect(loadVictim).toBeHidden();
+  await gurneyTile.click();
   await loadVictim.click();
   await loadVictim.click();
   await expect(loadVictim).toBeDisabled();
-  await expect(panel.getByText('3 damage to the Enemy · 2 riders die')).toBeVisible();
+  const ramEffect=panel.getByText('Deal 3 damage to the target Enemy on the board · 2 riders die');
+  const ram=panel.getByRole('button',{name:'Ram gurney',exact:true});
+  await expect(ramEffect).toBeVisible();
 
   const sizes=info.project.name==='mobile'?[[390,844],[320,568]]:[[1280,640],[1366,768],[1440,900]];
   for(const [width,height] of sizes){
@@ -46,11 +52,11 @@ test('Wolfe pills and gurney share the durable play log',async ({page,archive},i
       write.call(this,name,data);
     };
   });
-  await panel.getByRole('button',{name:'Confirm ram'}).click();
+  await ram.click();
   await expect(panel.getByRole('status').last()).toContainText('could not be saved');
-  await expect(panel.getByText('3 damage to the Enemy · 2 riders die')).toBeVisible();
+  await expect(ramEffect).toBeVisible();
   await page.evaluate(()=>(window as unknown as {restoreWolfeStorage:()=>void}).restoreWolfeStorage());
-  await panel.getByRole('button',{name:'Confirm ram'}).click();
+  await ram.click();
   await expect(page.getByRole('dialog',{name:'Gruesome Death'})).toBeVisible();
   await expect(page.getByRole('button',{name:'Add one victim to this death'})).toBeDisabled();
   await page.getByRole('button',{name:'Cancel',exact:true}).click();
@@ -71,7 +77,9 @@ test('Wolfe pills and gurney share the durable play log',async ({page,archive},i
   let log:PlayEvent[]=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)!).playEvents,key);
   expect(validPlayLog(log)).toBe(true);
   expect(summarizePlay(log).killed).toBe(2);
-  await undoLatestObservation(page);
+  await panel.getByRole('button',{name:'Add yellow pill'}).click();
+  await panel.getByRole('button',{name:'Undo ram',exact:true}).click();
+  await expect(panel.getByLabel('Yellow held pills')).toHaveText('1');
   log=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)!).playEvents,key);
   expect(summarizePlay(log).killed).toBe(0);
   expect(moduleState(summarizePlay(log).entries,'wolfe').gurney).toBe(2);
@@ -141,6 +149,17 @@ test('Wolfe photographs and mixed-killer controls render together',async({page,a
     expect(clipped).toBe(false);
     await panel.screenshot({path:info.outputPath(`wolfe-populated-${width}.jpg`),style:'.app-footer{visibility:hidden}'});
   }
+  const gurneyCard=panel.getByRole('article',{name:'Hospital Gurney',exact:true});
+  await gurneyCard.getByRole('button',{name:'Undo spent',exact:true}).click();
+  await expect(gurneyCard.getByLabel('Gurney riders')).toHaveText('0');
+  await gurneyCard.getByRole('button',{name:'Add a victim to the gurney'}).click();
+  await gurneyCard.getByRole('button',{name:'Clear record',exact:true}).click();
+  await expect(gurneyCard.getByRole('button',{name:'Add Hospital Gurney'})).toBeVisible();
+  await gurneyCard.getByRole('button',{name:'Undo clear',exact:true}).click();
+  await expect(gurneyCard.getByLabel('Gurney riders')).toHaveText('1');
+  await gurneyCard.getByRole('button',{name:'Clear record',exact:true}).click();
+  await gurneyCard.getByRole('button',{name:'Add Hospital Gurney'}).click();
+  await expect(gurneyCard.getByLabel('Gurney riders')).toHaveText('0');
 });
 
 
