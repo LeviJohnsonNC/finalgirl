@@ -7,7 +7,7 @@ import {
   WOLFE,WOLFE_AMPED,WOLFE_EVENTS,WOLFE_ITEMS,WOLFE_MODULE,WOLFE_RECIPES,WOLFE_SETUPS,WOLFE_SIDE_EFFECTS,WOLFE_TERRORS,
 } from '../../../supabase/functions/_shared/play/wolfeCatalog';
 import {
-  emptyPills,initialWolfe,resolveWolfe,wolfeCasualties,wolfeOwnsLog,wolfeParent,wolfePills,wolfeRecipeOptions,type WolfeCommand,
+  emptyPills,initialWolfe,resolveWolfe,wolfeCasualties,wolfeAmped,wolfeOwnsLog,wolfeParent,wolfePills,wolfeRecipeOptions,type WolfeCommand,
 } from '../../../supabase/functions/_shared/play/wolfe';
 
 const selection={killer:'Ratchet Lady',location:WOLFE,finalGirl:'Heather'};
@@ -64,6 +64,57 @@ describe('Wolfe Asylum',()=>{
     t.act({command:'inventory',pills:{yellow:1,blue:1,pink:1,wild:1}});
     t.act({command:'spend',recipe:String(id)});
     expect(Object.values(wolfePills(t.state())!).reduce((a,b)=>a+b,0)).toBe(4-Number(size));
+  });
+
+  it('updates pill inventory, Health and Horror together, with ordered undo and restore',()=>{
+    const t=table();
+    t.log.push(newPlayEvent({kind:'state',field:'finalGirlHealth',value:2}),newPlayEvent({kind:'state',field:'finalHorrorLevel',value:2}));
+    t.act({command:'inventory',pills:{yellow:2,blue:2,pink:1,wild:0}});
+    t.act({command:'remove-pill',color:'yellow'});
+    expect(t.next({command:'remove-pill',color:'wild'})).toBeUndefined();
+    const heal=t.act({command:'eat',recipe:'yellow-blue',maxHealth:5});
+    expect(summarizePlay(t.log).finalGirlHealth).toBe(5);
+    expect(wolfePills(t.state())).toEqual({yellow:0,blue:1,pink:1,wild:0});
+    t.log.push(newPlayEvent({kind:'undo',target:heal.id}));
+    expect(validPlayLog(t.log)).toBe(true);
+    expect(summarizePlay(t.log).finalGirlHealth).toBe(2);
+    expect(wolfePills(t.state())?.yellow).toBe(1);
+    t.log.push(newPlayEvent({kind:'restore',target:heal.id}));
+    expect(validPlayLog(t.log)).toBe(true);
+    const calm=t.act({command:'eat',recipe:'blue-pink'});
+    expect(summarizePlay(t.log)).toMatchObject({finalGirlHealth:5,finalHorrorLevel:0});
+    t.log.push(newPlayEvent({kind:'undo',target:calm.id}));
+    expect(validPlayLog(t.log)).toBe(true);
+    expect(summarizePlay(t.log).finalHorrorLevel).toBe(2);
+  });
+
+  it('leaves legacy spends manual and caps one-pill healing without inventing unknown Health',()=>{
+    const t=table();
+    t.act({command:'inventory',pills:{yellow:3,blue:0,pink:0,wild:0}});
+    t.act({command:'eat',recipe:'yellow',maxHealth:5});
+    expect(summarizePlay(t.log).finalGirlHealth).toBeUndefined();
+    t.log.push(newPlayEvent({kind:'state',field:'finalGirlHealth',value:4}));
+    t.act({command:'spend',recipe:'yellow'});
+    expect(summarizePlay(t.log).finalGirlHealth).toBe(4);
+    t.act({command:'eat',recipe:'yellow',maxHealth:5});
+    expect(summarizePlay(t.log).finalGirlHealth).toBe(5);
+    t.act({command:'pickup',color:'yellow'});
+    t.act({command:'eat',recipe:'yellow',maxHealth:5});
+    expect(summarizePlay(t.log).finalGirlHealth).toBe(5);
+  });
+
+  it('toggles Amped in the old and new logs without losing revealed cards or the second Ultimate',()=>{
+    const t=table();
+    t.act({command:'amped',id:'final-girl-2',active:true});
+    t.act({command:'ultimate',name:'Veronica'});
+    expect(wolfeAmped(t.state())).toBe(true);
+    t.act({command:'toggle-amped',active:false});
+    expect(wolfeAmped(t.state())).toBe(false);
+    expect(t.state().secondUltimate).toBe('Veronica');
+    expect(playStoryBeats(t.log,selection)).not.toContain('Second Ultimate is from Veronica');
+    t.act({command:'amped',id:'resistance',active:true,enable:true});
+    expect(wolfeAmped(t.state())).toBe(true);
+    expect(playStoryBeats(t.log,selection)).toContain('Second Ultimate is from Veronica');
   });
 
   it('uses a Wild once, preserves exact tokens, and keeps Amped observations independent',()=>{

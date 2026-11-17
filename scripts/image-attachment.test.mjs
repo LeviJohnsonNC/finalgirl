@@ -109,7 +109,7 @@ function imageHandler({ rowExists = true, attachError = null, composeError = fal
 }
 const request = (sceneType = 'ending', fields = {}) => new Request('https://example.test', { method: 'POST', body: JSON.stringify({ ...fields, sceneType, killer: 'Billy the Bear', finalGirl: 'Rena', location: 'Buddyland', story: 'Rena held her flashlight toward the empty prize counter. Across the arcade, the bear began to move.', gameId: 'record', previousImageUrl: 'https://example.test/storage/v1/object/public/posters/game-posters/owner-A/old.png' }) });
 test('scene planning and rendering correct crossed caller identity for openings and posters', async () => {
-  for (const [finalGirl, anchor] of [['Cassie', 'purple hoodie'], ['Mandy', 'black mesh athletic top'], ['Alice', 'copper-red hair'], ['Selena', 'high round bun']]) {
+  for (const [finalGirl, anchor] of [['Cassie', 'purple hoodie'], ['Mandy', 'black mesh athletic top'], ['Alice', 'copper-red hair'], ['Selena', 'high round bun'], ['Sheila', 'round wire-frame glasses'], ['Kenzie', 'black choker with a silver ring'], ['Julie', 'brow-length bangs']]) {
     for (const sceneType of ['beginning', 'ending']) {
       const f = imageHandler();
       const body = { ...await request(sceneType).json(), finalGirl, finalGirlDescription: 'OBSOLETE_CALLER_IDENTITY', visualBible: JSON.stringify({finalGirl:'OBSOLETE_CONTINUITY: a different woman.',killer:'A bear with exposed mechanical joints.',location:'An arcade with old machines.',palette:'Amber lamps and dark painted walls.'}) };

@@ -69,7 +69,9 @@ describe('reviewed story facts survive every generation handoff', () => {
   });
   it('keeps names even when visual descriptions are absent; passes identity to continuity planning', () => {
     expect(buildBeginningPrompt({ ...cases[0], story })).toContain('Billy the Bear');
-    expect(buildVisualBiblePrompt({ ...cases[0], killerDescription: 'Orange-brown animatronic.', finalGirlDescription: 'Burgundy curls, turquoise pendant.' })).toContain('Burgundy curls');
+    const prompt = buildVisualBiblePrompt({ ...cases[0], killerDescription: 'Orange-brown animatronic.', finalGirlDescription: 'A stale description.' });
+    expect(prompt).toContain('burgundy-purple curls');
+    expect(prompt).not.toContain('A stale description.');
     expect(getKillerNarrativeRules('Dr. Fright')).toContain('supernatural Dream Doctor');
     expect(getKillerDescription('Dr. Fright')).toContain('milky-white eyes');
   });
@@ -122,7 +124,9 @@ describe('bounded art planning', () => {
       expect(parseVisualBible(fragment)).toBeUndefined();
       expect(buildBeginningPrompt({ ...cases[0], story, visualBible: fragment })).not.toContain(fragment);
     }
-    expect(buildBeginningPrompt({ ...cases[0], story, visualBible: record })).toContain(record);
+    const prompt = buildBeginningPrompt({ ...cases[0], story, visualBible: record });
+    expect(prompt).toContain(record.replace('Burgundy curls and a turquoise pendant.', 'Use the current named cast identity above.'));
+    expect(buildBeginningPrompt({ ...cases[0], finalGirl: 'Unknown', story, visualBible: record })).toContain(record);
   });
   it('applies the same physical photographic contract to planning and rendering without importing the example scene', () => {
     for (const cast of [
@@ -150,11 +154,13 @@ describe('bounded art planning', () => {
       expect(poster).not.toContain('consumer 35mm color-negative film camera');
     }
   });
-  it('keeps existing identity continuity while overriding inherited photographic processing instructions', () => {
+  it('keeps environment continuity while overriding stale portrait cues and inherited processing instructions', () => {
     const record = JSON.stringify({finalGirl:'Brown curls and a blue rain jacket.',killer:'Carved wooden mask and a feather mantle.',location:'Stone paths and tropical foliage.',palette:'Heavy teal/orange grading with artificial glow.'});
     const ctx = {killer:'Inkanyamba',finalGirl:'Barbara',location:'Sacred Groves',story,sceneType:'beginning' as const,visualBible:record};
     const photo = buildBeginningPrompt(ctx);
-    expect(photo).toContain(record);
+    expect(photo).toContain(record.replace('Brown curls and a blue rain jacket.', 'Use the current named cast identity above.'));
+    expect(photo).not.toContain('blue rain jacket');
+    expect(photo).toContain('copper-red tight curls');
     expect(photo).toContain('ignore inherited rendering-style, exposure and color-grading directions');
     expect(VISUAL_BIBLE_SYSTEM).toContain('not a mandatory global tint or color-grading recipe');
     expect(photo).toContain('no invented casualties, injuries, rescues, powers, weapons or defeated threat');

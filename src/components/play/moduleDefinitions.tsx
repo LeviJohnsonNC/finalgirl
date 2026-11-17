@@ -90,6 +90,7 @@ export interface ControlsProps {
   killer: string;
   location: string;
   finalGirl: string;
+  finalGirlStartingHealth?: number;
   events: PlayEvent[];
   onDeath?: (event:PlayEvent) => void;
   onEvent: (event: PlayEvent) => boolean;

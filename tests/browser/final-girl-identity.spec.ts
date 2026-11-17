@@ -6,6 +6,7 @@ const identities = [
   { name: 'Mandy', anchor: 'black athletic hand wraps', filmId: 's3-marrek-murders' },
   { name: 'Alice', anchor: 'wavy copper-red hair', filmId: 's1-creech-manor' },
   { name: 'Selena', anchor: 'high round bun', filmId: 's1-creech-manor' },
+  { name: 'Sheila', anchor: 'medium-brown skin', filmId: 's2-madness-in-dark', location: 'Wolfe Asylum', killer: 'Ratchet Lady' },
 ];
 
 for (const girl of identities) for (const legacy of [false, true]) test(`${girl.name} sends her reviewed identity on ${legacy ? 'legacy Reshoot' : 'fresh generation'}`, async ({ page, archive }, info) => {
@@ -14,7 +15,7 @@ for (const girl of identities) for (const legacy of [false, true]) test(`${girl.
   const bible = JSON.stringify({ finalGirl: 'A generic pale fighter in a mesh shirt.', killer: 'A masked figure in heavy work clothes.', location: 'A camp of old timber cabins.', palette: 'Cold moonlight across brown timber.' });
   await archive.install(page, { draft: {
     ...activeGame,
-    selection: { ...activeGame.selection, finalGirl: girl.name, filmId: girl.filmId },
+    selection: { ...activeGame.selection, finalGirl: girl.name, filmId: girl.filmId, ...(girl.location && { location: girl.location, killer: girl.killer }) },
     introStory: `${girl.name} stopped at the locked door. Somewhere beyond it a floorboard creaked.`,
     ...(legacy ? { sceneImageUrl: url, visualBible: bible } : {}),
   } });

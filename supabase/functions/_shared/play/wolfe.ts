@@ -18,9 +18,11 @@ const text = (s:unknown,max:number):s is string=>typeof s==='string' && s.trim()
 
 export type WolfeCommand =
   | {command:'inventory';pills:Pills}
-  | {command:'pickup';color:PillColor}
+  | {command:'pickup'|'remove-pill';color:PillColor}
   | {command:'spend';recipe:string;wildFor?:Exclude<PillColor,'wild'>}
-  | {command:'amped';id:string;active:boolean}
+  | {command:'eat';recipe:string;wildFor?:Exclude<PillColor,'wild'>;maxHealth?:number}
+  | {command:'amped';id:string;active:boolean;enable?:true}
+  | {command:'toggle-amped';active:boolean}
   | {command:'ultimate';name:string|null}
   | {command:'event';id:Ongoing;active:boolean}
   | {command:'person';id:Person;status:Status}
@@ -50,11 +52,14 @@ export function wolfeRecipeOptions(pills:Pills,id:string) {
   return [undefined,...(pills.wild?recipe.colors:[])].filter(wildFor=>
     recipe.colors.every(color=>color===wildFor||pills[color]>0));
 }
+export const wolfeAmped = (state:ModuleState) =>
+  state['amped.on'] === undefined ? WOLFE_AMPED.some(card=>state[ampKey(card.id)]) : state['amped.on'] === true;
+
 export function wolfeSummary(state:ModuleState) {
   const held=wolfeHeld(state);
   const amped=WOLFE_AMPED.filter(card=>state[ampKey(card.id)]).length;
   return [held===undefined?(state.startingPill?'Starting pill unrecorded':'Held pills unrecorded'):`${held} held ${held===1?'pill':'pills'}`,
-    ...(amped?[`${amped} Amped`]:[])].join(' · ');
+    ...(wolfeAmped(state)?[amped>1?`${amped} Amped`:'Amped']:[])].join(' · ');
 }
 
 export function initialWolfe(startingEvent?:string|null):ModuleState {
@@ -70,7 +75,7 @@ export function isInitialWolfe(state:ModuleState) {
   return [undefined,...WOLFE_EVENTS.map(e=>e.name)].some(event=>sameWolfe(state,initialWolfe(event)));
 }
 export function validWolfeField(key:string,value:unknown) {
-  if(key==='startingPill') return typeof value==='boolean';
+  if(key==='startingPill'||key==='amped.on') return typeof value==='boolean';
   if(key==='gurney') return value===null||value==='spent'||value==='unknown'||wolfeRiders(value);
   if(key==='secondUltimate') return value===null||text(value,70);
   if(key.startsWith('stun.')&&text(key.slice(5),60)) return value===null||count(value,8);
@@ -84,9 +89,14 @@ export function validWolfeAction(action:unknown):action is WolfeAction {
   if(!text(a.parent,50)) return false;
   switch(a.command) {
     case 'inventory': return !!a.pills && PILL_COLORS.every(color=>validPillCount(color,a.pills[color]));
-    case 'pickup': return PILL_COLORS.includes(a.color);
-    case 'spend': return WOLFE_RECIPES.some(r=>r.id===a.recipe&&(!a.wildFor||r.colors.some(c=>c===a.wildFor)));
-    case 'amped': return WOLFE_AMPED.some(card=>card.id===a.id)&&typeof a.active==='boolean';
+    case 'pickup':
+    case 'remove-pill': return PILL_COLORS.includes(a.color);
+    case 'eat':
+    case 'spend':
+      if(a.command==='eat'&&a.maxHealth!==undefined&&(!['yellow','yellow-blue'].includes(a.recipe)||!count(a.maxHealth,99)||a.maxHealth===0)) return false;
+      return WOLFE_RECIPES.some(r=>r.id===a.recipe&&(a.wildFor===undefined||r.colors.some(c=>c===a.wildFor)));
+    case 'toggle-amped': return typeof a.active==='boolean';
+    case 'amped': return WOLFE_AMPED.some(card=>card.id===a.id)&&typeof a.active==='boolean'&&(a.enable===undefined||a.enable===true&&a.active);
     case 'ultimate': return a.name===null||text(a.name,70);
     case 'event': return WOLFE_ONGOING.includes(a.id)&&typeof a.active==='boolean';
     case 'person': return WOLFE_PEOPLE.includes(a.id)&&statuses.includes(a.status);
@@ -110,11 +120,14 @@ export function resolveWolfe(a:WolfeAction,state:ModuleState,entries:readonly Pl
   switch(a.command) {
     case 'inventory':
       return {...Object.fromEntries(PILL_COLORS.map(color=>[pillKey(color),a.pills[color]])),startingPill:false};
-    case 'pickup': {
+    case 'pickup':
+    case 'remove-pill': {
       const held=wolfePills(state);
-      if(!held||!validPillCount(a.color,held[a.color]+1)) return null;
-      return {[pillKey(a.color)]:held[a.color]+1};
+      if(!held) return null;
+      const next=held[a.color]+(a.command==='pickup'?1:-1);
+      return validPillCount(a.color,next)?{[pillKey(a.color)]:next}:null;
     }
+    case 'eat':
     case 'spend': {
       const held=wolfePills(state);
       const recipe=WOLFE_RECIPES.find(r=>r.id===a.recipe);
@@ -124,9 +137,14 @@ export function resolveWolfe(a:WolfeAction,state:ModuleState,entries:readonly Pl
         return [pillKey(token),held[token]-1];
       }));
     }
-    case 'amped':
-      return !!state[ampKey(a.id)]===a.active?null:{[ampKey(a.id)]:a.active,
+    case 'toggle-amped':
+      return a.active===wolfeAmped(state)?null:{'amped.on':a.active};
+    case 'amped': {
+      const enable=a.enable&&!wolfeAmped(state);
+      if(!enable&&Boolean(state[ampKey(a.id)])===a.active) return null;
+      return {[ampKey(a.id)]:a.active,...(enable&&{'amped.on':true}),
         ...(a.id==='final-girl-2'&&!a.active&&{secondUltimate:null})};
+    }
     case 'ultimate': return state[ampKey('final-girl-2')]?{secondUltimate:a.name}:null;
     case 'event': return state[activeKey(a.id)]===a.active?null:{[activeKey(a.id)]:a.active};
     case 'person': return state['person.'+a.id]===a.status?null:{['person.'+a.id]:a.status};
@@ -140,6 +158,21 @@ export function resolveWolfe(a:WolfeAction,state:ModuleState,entries:readonly Pl
     }
   }
 }
+export const wolfePillHorrorReduction = (recipe:string) => recipe==='pink'?1:recipe==='blue-pink'?3:0;
+
+/** Replay only the new linked actions. Legacy spends already resolved benefits on the table. */
+export function wolfePillTrackers(action:WolfeAction, current:{finalGirlHealth?:number;finalHorrorLevel?:number}) {
+  if(action.command!=='eat') return {};
+  const {recipe,maxHealth}=action;
+  const {finalGirlHealth:health,finalHorrorLevel:horror}=current;
+  if(maxHealth!==undefined) {
+    if(recipe==='yellow-blue') return {finalGirlHealth:Math.max(health??0,maxHealth)};
+    if(recipe==='yellow'&&health!==undefined&&health<maxHealth) return {finalGirlHealth:health+1};
+  }
+  const reduction=wolfePillHorrorReduction(recipe);
+  if(horror!==undefined&&reduction) return {finalHorrorLevel:Math.max(0,horror-reduction)};
+  return {};
+}
 export const wolfeCasualties = (action:WolfeAction|undefined) => action?.command==='ram'?action.riders:0;
 export function wolfeOwnsLog(location:string|undefined,events:readonly PlayEvent[]) {
   return location===WOLFE || events.every(e=>e?.moduleData?.module!==WOLFE_MODULE && !e?.wolfeAction && !e?.wolfeReference);
@@ -147,8 +180,10 @@ export function wolfeOwnsLog(location:string|undefined,events:readonly PlayEvent
 export function wolfeFacts(state:ModuleState) {
   const held=wolfePills(state);
   const facts=held?[('Recorded held pills: '+PILL_COLORS.filter(c=>held[c]).map(c=>held[c]+' '+c).join(', ')).replace(/: $/,': none')+'.']:[];
-  for(const card of WOLFE_AMPED) if(state[ampKey(card.id)]) facts.push('Confirmed Amped card: '+card.name+'.');
-  if(state.secondUltimate) facts.push('Second Ultimate is from '+state.secondUltimate+'. The lead actor is unchanged.');
+  if(wolfeAmped(state)) {
+    for(const card of WOLFE_AMPED) if(state[ampKey(card.id)]) facts.push('Confirmed Amped card: '+card.name+'.');
+    if(state.secondUltimate) facts.push('Second Ultimate is from '+state.secondUltimate+'. The lead actor is unchanged.');
+  }
   for(const card of WOLFE_EVENTS) {
     if(state[activeKey(card.id)]) facts.push(card.name+' is recorded active. Its presence alone establishes no outcome.');
     if(state['person.'+card.id]) facts.push(card.name+' last recorded status: '+state['person.'+card.id]+'.');

@@ -1,11 +1,11 @@
 import {useState} from 'react';
 import {FEATURE_FILMS} from '@/types/gameData';
+import {observedFinalGirlMaxHealth} from '@/data/finalGirlReferences';
+import {getFinalGirlHealth} from '@/data/finalGirlHealth';
 import {newPlayEvent,summarizePlay} from '@/lib/play/events';
-import {INTRUDERS,INTRUDER_MODULE,INTRUDER_ROSTER,intruderFigure} from '@/lib/play/intruders';
-import {ORGANISM,ORGANISM_MODULE,organismLiving,organismColorLabel} from '@/lib/play/organism';
 import {moduleState} from '@/lib/play/modules';
-import {PILL_COLORS,WOLFE_AMPED,WOLFE_EVENTS,WOLFE_MODULE,WOLFE_ONGOING,WOLFE_PEOPLE,WOLFE_RECIPES,type Pills} from '../../../supabase/functions/_shared/play/wolfeCatalog';
-import {ampKey,emptyPills,resolveWolfe,validPillCount,wolfeCasualties,wolfeParent,wolfePills,wolfeRecipeOptions,wolfeRiders,type WolfeCommand} from '../../../supabase/functions/_shared/play/wolfe';
+import {PILL_COLORS,WOLFE_AMPED,WOLFE_EVENTS,WOLFE_MODULE,WOLFE_ONGOING,WOLFE_PEOPLE,WOLFE_RECIPES,type PillColor,type Pills} from '../../../supabase/functions/_shared/play/wolfeCatalog';
+import {ampKey,emptyPills,resolveWolfe,validPillCount,wolfeAmped,wolfeCasualties,wolfeParent,wolfePillHorrorReduction,wolfePills,wolfeRecipeOptions,wolfeRiders,type WolfeCommand} from '../../../supabase/functions/_shared/play/wolfe';
 import {CharacterControl} from './CharacterControl';
 import {EventControl} from './EventControl';
 import {IllustratedTile} from './IllustratedTile';
@@ -13,6 +13,7 @@ import {ModuleArtwork} from './ModuleArtwork';
 import {PlaySelect} from './PlaySelect';
 import {useModuleRecord} from './useModuleRecord';
 import {wolfeArt} from './wolfeArt';
+import pillPhoto from '@/assets/play/photos/wolfe/tablet.webp';
 import type {ControlsProps} from './moduleDefinitions';
 import '@/styles/play-wolfe.css';
 
@@ -24,8 +25,16 @@ const outcomes=[
 const personOutcomes=['saved','killed','left'];
 const eventName=(id:string)=>WOLFE_EVENTS.find(event=>event.id===id)!.name;
 
-export function WolfeControls({events,onEvent,onDeath,blocked,killer,finalGirl}:ControlsProps) {
-  const entries=summarizePlay(events).entries;
+function Tablet({color}:{color:PillColor}) {
+  return <i className="wolfe-tablet" data-color={color} aria-hidden="true">
+    <img src={pillPhoto} alt=""/>
+    {color==='wild'&&<><img src={pillPhoto} alt=""/><img src={pillPhoto} alt=""/></>}
+  </i>;
+}
+
+export function WolfeControls({events,onEvent,onDeath,blocked,killer,finalGirl,finalGirlStartingHealth}:ControlsProps) {
+  const summary=summarizePlay(events);
+  const {entries}=summary;
   const state=moduleState(entries,WOLFE_MODULE);
   const held=wolfePills(state);
   const {record,message}=useModuleRecord(events,onEvent);
@@ -36,24 +45,19 @@ export function WolfeControls({events,onEvent,onDeath,blocked,killer,finalGirl}:
   const [ampDetail,setAmpDetail]=useState('');
   const [eventsPicker,setEventsPicker]=useState(false);
   const [gurneyPanel,setGurneyPanel]=useState(false);
-  const [showStun,setShowStun]=useState(false);
-  const [enemy,setEnemy]=useState('killer');
-  const [stunCount,setStunCount]=useState(1);
+  const [receipt,setReceipt]=useState<{id:string;text:string}>();
+  const shownPills=held??inventory;
+  const canEat=!!held&&Object.values(held).some(Boolean);
   const selectedRecipe=WOLFE_RECIPES.find(card=>card.id===recipe);
   const payment=held?wolfeRecipeOptions(held,recipe):[];
+  const amped=wolfeAmped(state);
   const activeAmped=WOLFE_AMPED.filter(card=>state[ampKey(card.id)]);
   const gurney=state.gurney;
-  const tookPills=entries.some(e=>e.wolfeAction?.command==='spend'&&e.wolfeAction.recipe==='amped');
-  const linkedDeath=[...entries].reverse().find(e=>e.kind==='killed'&&e.wolfeAction?.command==='ram');
-  const stuns=Object.entries(state).filter(([key,value])=>key.startsWith('stun.')&&value);
-  const namedEnemies=killer===INTRUDERS
-    ? INTRUDER_ROSTER.filter(item=>!['dead','pending','reboot','escaped'].includes(intruderFigure(moduleState(entries,INTRUDER_MODULE),item.id).token??'')).map(item=>({id:item.id,label:item.name}))
-    : killer===ORGANISM
-      ? organismLiving(moduleState(entries,ORGANISM_MODULE)).map(figure=>({id:figure.who,label:organismColorLabel(figure.who)+' Organism'}))
-      : [{id:'killer',label:killer}];
-  const enemyChoices=[...namedEnemies,killer==='Ratchet Lady'?{id:'maniacs',label:'Maniacs'}:{id:'other-enemies',label:'Other Enemies'}];
-  const selectedEnemy=enemyChoices.some(item=>item.id===enemy)?enemy:enemyChoices[0].id;
-  const enemyLabel=(id:string)=>enemyChoices.find(item=>item.id===id)?.label??id.split('-').map(colorName).join(' ');
+  const lastGurneyOutcome=[...entries].reverse().find(entry=>entry.wolfeAction?.command==='ram'||entry.wolfeAction?.command==='spent');
+  const rammed=lastGurneyOutcome?.wolfeAction?.command==='ram';
+  const linkedDeath=rammed&&lastGurneyOutcome?.kind==='killed'?lastGurneyOutcome:undefined;
+  const gurneyActive=wolfeRiders(gurney)||gurney==='unknown';
+  const maxHealth=observedFinalGirlMaxHealth(finalGirl,events,finalGirlStartingHealth??getFinalGirlHealth(finalGirl),killer);
 
   function commit(command:WolfeCommand) {
     if(blocked) return false;
@@ -62,77 +66,144 @@ export function WolfeControls({events,onEvent,onDeath,blocked,killer,finalGirl}:
     if(!changes) return false;
     const moduleData={module:WOLFE_MODULE,changes} as const;
     const casualties=wolfeCasualties(action);
-    return record(newPlayEvent(casualties?{kind:'killed',quantity:casualties,cause:'event',eventCard:'Hospital Gurney',
-      mechanism:'Hospital Gurney ram',wolfeReference:true,wolfeAction:action,moduleData}:{kind:'module',wolfeAction:action,moduleData}));
+    const event=newPlayEvent(casualties?{kind:'killed',quantity:casualties,cause:'event',eventCard:'Hospital Gurney',
+      mechanism:'Hospital Gurney ram',wolfeReference:true,wolfeAction:action,moduleData}:{kind:'module',wolfeAction:action,moduleData});
+    return record(event)?event.id:false;
+  }
+
+  function adjustPill(color:PillColor,change:1|-1) {
+    if(held) return commit({command:change===1?'pickup':'remove-pill',color});
+    const next={...(inventory??emptyPills()),[color]:(inventory?.[color]??0)+change};
+    if(state.startingPill) return commit({command:'inventory',pills:next});
+    setInventory(next);
+  }
+
+  function eatPills(wildFor?:Exclude<PillColor,'wild'>) {
+    if(!selectedRecipe) return;
+    const healing=recipe==='yellow'||recipe==='yellow-blue';
+    const horror=wolfePillHorrorReduction(recipe);
+    const horrorBefore=summary.finalHorrorLevel;
+    const bonusTime=horrorBefore===undefined?0:Math.max(0,horror-horrorBefore);
+    const manual=healing&&(maxHealth===undefined||recipe==='yellow'&&summary.finalGirlHealth===undefined)
+      ||horror&&summary.finalHorrorLevel===undefined;
+    const draws=selectedRecipe.draws+(state['active.powerful-meds']?1:0);
+    const id=commit({command:'eat',recipe,wildFor,...(healing&&maxHealth!==undefined&&{maxHealth})});
+    if(!id) return;
+    const benefit=manual||recipe==='blue'||recipe==='yellow-pink'?`${selectedRecipe.benefit} on the board`:undefined;
+    const text=[benefit,
+      bonusTime?`Gain ${bonusTime} Time on the board`:undefined,
+      draws?`Draw ${draws} Side Effects ${draws===1?'card':'cards'}`:undefined,
+    ].filter(Boolean).join(' · ');
+    setReceipt({id,text});
+    setRecipe('');
+    setRecipes(false);
+    if(recipe==='amped')setAmpedPicker(true);
   }
 
   return <div className="wolfe-controls">
     <section aria-label="Pills">
-      <div className="wolfe-pill-photo">
-        <ModuleArtwork art={wolfeArt(!held?'pill-unknown':Object.values(held).some(Boolean)?'pill-held':'pill-empty')}/>
-        <div className="wolfe-pill-caption"><h3>Pills</h3>{!held&&<small>{state.startingPill?'Starting pill unrecorded':'Held pills unrecorded'}</small>}</div>
+      <h3>Pills</h3>
+      <div className="wolfe-pill-tray">
+        <div className="wolfe-tray-surface" aria-hidden="true">
+          <ModuleArtwork art={wolfeArt('medical-tray')}/>
+          <div className="wolfe-pill-slots">
+            {PILL_COLORS.map(color=><div key={color} className="wolfe-pill-stack">
+              {Array.from({length:shownPills?.[color]??0},(_,index)=><Tablet key={index} color={color}/>)}
+            </div>)}
+          </div>
+        </div>
+        {!held&&!inventory&&<small className="wolfe-tray-unknown">{state.startingPill?'Starting pill unrecorded':'Held pills unrecorded'}</small>}
       </div>
-      {!held&&(state.startingPill&&!inventory?
-        <div className="wolfe-row" aria-label="Starting pill color">{PILL_COLORS.map(color=>
-          <button key={color} disabled={blocked} onClick={()=>commit({command:'inventory',pills:{...emptyPills(),[color]:1}})}>
-            <i className="wolfe-pill" data-color={color}/>{colorName(color)}
-          </button>)}</div>:
-        <button className="module-quiet-link" onClick={()=>setInventory(inventory?undefined:emptyPills())}>Record held pills</button>)}
-      {held&&!inventory&&<div className="wolfe-pill-counts">{PILL_COLORS.map(color=><div className="wolfe-pill-count" key={color}>
-        <span><i className="wolfe-pill" data-color={color}/>{colorName(color)}</span>
-        <output aria-label={colorName(color)+' held pills'}>{held[color]}</output>
-        <button disabled={blocked||!validPillCount(color,held[color]+1)} aria-label={'Record '+color+' pill pickup'}
-          onClick={()=>commit({command:'pickup',color})}>+</button>
-      </div>)}</div>}
-      {inventory&&<form className="wolfe-form" onSubmit={event=>{
-        event.preventDefault();
-        if(commit({command:'inventory',pills:inventory}))setInventory(undefined);
-      }}>
-        <div className="wolfe-pill-counts">{PILL_COLORS.map(color=><label className="wolfe-pill-count" key={color}>
-          <span><i className="wolfe-pill" data-color={color}/>{colorName(color)}</span>
-          <PlaySelect aria-label={colorName(color)+' pill count'} value={String(inventory[color])} onChange={event=>setInventory({...inventory,[color]:+event.target.value})}>
-            {Array.from({length:color==='wild'?2:4},(_,i)=><option key={i}>{i}</option>)}
-          </PlaySelect>
-        </label>)}</div>
-        <div className="wolfe-row"><button disabled={blocked} type="submit">Save held pills</button><button type="button" onClick={()=>setInventory(undefined)}>Cancel</button></div>
-      </form>}
-      {held&&!inventory&&<div className="wolfe-row wolfe-pill-actions">
-        <button disabled={!Object.values(held).some(Boolean)} aria-expanded={recipes} onClick={()=>{setRecipes(!recipes);setRecipe('');}}>Spend pills</button>
-        <button className="module-quiet-link" onClick={()=>{setInventory(held);setRecipes(false);}}>Correct held pills</button>
-      </div>}
-      {held&&recipes&&<div className="wolfe-recipes" aria-label="Pill recipes">
-        <div className="wolfe-recipe-photo" aria-hidden="true"><ModuleArtwork art={wolfeArt('pill-reference')}/></div>
-        {WOLFE_RECIPES.filter(card=>wolfeRecipeOptions(held,card.id).length).map(card=><button key={card.id}
-          aria-pressed={card.id===recipe} onClick={()=>setRecipe(card.id===recipe?'':card.id)}>
-          <span>{card.colors.map(color=><i key={color} className="wolfe-pill" data-color={color} title={colorName(color)}/>)}</span>
-          <strong>{card.benefit}</strong>
-        </button>)}
+      <div className="wolfe-pill-counts">{PILL_COLORS.map(color=>{
+        const count=shownPills?.[color];
+        return <div className="wolfe-pill-count" key={color}>
+          <span><Tablet color={color}/>{colorName(color)}</span>
+          <div className="wolfe-stepper">
+            <button type="button" disabled={blocked||!count} aria-label={`Remove ${color} pill`} onClick={()=>adjustPill(color,-1)}>−</button>
+            <output aria-label={`${colorName(color)} held pills`}>{count??'?'}</output>
+            <button type="button" disabled={blocked||!validPillCount(color,(count??0)+1)} aria-label={`Add ${color} pill`} onClick={()=>adjustPill(color,1)}>+</button>
+          </div>
+        </div>;
+      })}</div>
+      <div className="wolfe-row">
+        {!held&&!state.startingPill&&<button disabled={blocked} onClick={()=>{
+          if(commit({command:'inventory',pills:inventory??emptyPills()}))setInventory(undefined);
+        }}>{inventory?'Save held pills':'Record empty tray'}</button>}
+        <button disabled={blocked||!canEat} aria-expanded={canEat&&recipes} onClick={()=>{setRecipes(!recipes);setRecipe('');}}>Eat pills</button>
+      </div>
+      {held&&canEat&&recipes&&<div className="wolfe-recipes" aria-label="Available pill recipes">
+        {WOLFE_RECIPES.map(card=>{
+          const options=wolfeRecipeOptions(held,card.id);
+          if(!options.length) return null;
+          const colors=card.colors.map(color=>color===options[0]?'wild':color);
+          return <button key={card.id} aria-pressed={card.id===recipe} aria-description={colors.map(colorName).join(' + ')}
+            onClick={()=>setRecipe(card.id===recipe?'':card.id)}>
+            <span>{colors.map(color=><Tablet key={color} color={color}/>)}</span>
+            <strong>{card.benefit}</strong>
+          </button>;
+        })}
         {selectedRecipe&&payment.length>0&&<div className="wolfe-preview">
           <p>{selectedRecipe.benefit} · {selectedRecipe.draws+(state['active.powerful-meds']?1:0)} Side Effects</p>
-          <div className="wolfe-row">{payment.map(wildFor=><button key={wildFor??'exact'} disabled={blocked} onClick={()=>{
-            if(commit({command:'spend',recipe,wildFor})) {
-              setRecipe('');setRecipes(false);
-              if(recipe==='amped')setAmpedPicker(true);
-            }
-          }}>{wildFor?`Spend Wild as ${colorName(wildFor)}`:'Confirm spend'}</button>)}</div>
+          <div className="wolfe-row">{payment.map(wildFor=><button key={wildFor??'exact'} disabled={blocked} onClick={()=>eatPills(wildFor)}>
+            {wildFor?`Eat Wild as ${colorName(wildFor)}`:'Confirm eating'}
+          </button>)}</div>
         </div>}
       </div>}
+      {receipt?.text&&entries.some(entry=>entry.id===receipt.id)&&<p role="status" className="wolfe-receipt">{receipt.text}</p>}
     </section>
 
-    <section aria-label="Amped">
-      <div className="wolfe-heading">
-        <h3>Amped</h3>
-        <button className="module-quiet-link" aria-expanded={ampedPicker} onClick={()=>setAmpedPicker(!ampedPicker)}>
-          {ampedPicker?'Hide choices':activeAmped.length?'Record another Amped':'Record Amped'}
-        </button>
+    <section aria-label="Amped and Hospital Gurney">
+      <div className="wolfe-grid">
+        <article className="wolfe-feature">
+          <IllustratedTile className="module-control-tile" art={wolfeArt('amped')} title="Amped" status={amped?'Active':'Inactive'}
+            data-muted={!amped||undefined} disabled={blocked} aria-label="Amped" aria-pressed={amped} onClick={()=>{
+              if(commit({command:'toggle-amped',active:!amped}))setAmpedPicker(!amped&&!activeAmped.length);
+            }}/>
+          {amped&&<div className="wolfe-row"><button className="module-quiet-link" aria-expanded={ampedPicker} onClick={()=>setAmpedPicker(!ampedPicker)}>
+            {ampedPicker?'Hide Amped cards':'Choose Amped cards'}
+          </button></div>}
+        </article>
+        <article className="wolfe-feature">
+          <IllustratedTile className="module-control-tile" art={wolfeArt(gurney==='spent'?'gurney-spent':`gurney-${wolfeRiders(gurney)?gurney:0}`)} title="Hospital Gurney"
+            status={gurney==='spent'?rammed?'Rammed':'Spent':gurney==='unknown'?'Riders unrecorded':wolfeRiders(gurney)?`${gurney} ${gurney===1?'rider':'riders'}`:'Unrecorded'}
+            data-muted={gurney===undefined||undefined} aria-expanded={gurneyPanel} disabled={blocked&&gurney===undefined}
+            aria-label={gurney===undefined?'Add Hospital Gurney':undefined}
+            onClick={()=>{
+              if(gurney===undefined) {
+                if(commit({command:'gurney',riders:0}))setGurneyPanel(true);
+              } else setGurneyPanel(!gurneyPanel);
+            }}/>
+          {gurneyPanel&&<div className="wolfe-feature-actions">
+            {gurneyActive&&<>
+              {wolfeRiders(gurney)?<div className="wolfe-riders">
+                <span>Victims aboard</span>
+                <div className="wolfe-stepper">
+                  <button disabled={blocked||gurney===0} aria-label="Remove a victim from the gurney" onClick={()=>commit({command:'gurney',riders:gurney-1})}>−</button>
+                  <output aria-label="Gurney riders">{gurney}</output>
+                  <button disabled={blocked||gurney===2} aria-label="Add a victim to the gurney" onClick={()=>commit({command:'gurney',riders:gurney+1})}>+</button>
+                </div>
+              </div>:<div className="wolfe-row">{[0,1,2].map(count=><button key={count} disabled={blocked} onClick={()=>commit({command:'gurney',riders:count})}>{count} aboard</button>)}</div>}
+              {wolfeRiders(gurney)&&<div className="wolfe-row">
+                <small>{1+gurney} damage to the Enemy{gurney>0&&` · ${gurney} ${gurney===1?'rider dies':'riders die'}`}</small>
+                <button disabled={blocked} onClick={()=>commit({command:'ram',riders:gurney})}>Confirm ram</button>
+              </div>}
+              <button className="module-quiet-link" disabled={blocked} onClick={()=>commit({command:'spent'})}>Mark spent</button>
+            </>}
+            {gurney==='spent'&&linkedDeath&&onDeath&&<button className="module-quiet-link" onClick={()=>onDeath(linkedDeath)}>Open Gruesome Death</button>}
+          </div>}
+        </article>
       </div>
-      {ampedPicker&&<div className="wolfe-grid wolfe-choices">
-        {WOLFE_AMPED.filter(card=>!state[ampKey(card.id)]).map(card=><IllustratedTile className="module-control-tile" key={card.id} art={wolfeArt(card.id)} title={card.name}
-          status="" disabled={blocked} onClick={()=>{if(commit({command:'amped',id:card.id,active:true}))setAmpedPicker(false);}}/>)}
+      {ampedPicker&&<div className="wolfe-grid wolfe-choices" aria-label="Amped cards">
+        <h4 className="wolfe-amped-picker-title">Choose the Amped card you drew</h4>
+        {WOLFE_AMPED.filter(card=>!state[ampKey(card.id)]).map(card=>
+          <IllustratedTile className="module-control-tile" key={card.id} art={wolfeArt(card.id)} title={card.name} status=""
+            data-muted disabled={blocked} onClick={()=>{
+              if(commit({command:'amped',id:card.id,active:true,...(!amped&&{enable:true})}))setAmpedPicker(false);
+            }}/>
+        )}
         {activeAmped.length===WOLFE_AMPED.length&&<small>All five cards recorded</small>}
       </div>}
-      {tookPills&&!activeAmped.length&&!ampedPicker&&<small className="wolfe-muted">Record the revealed card when ready.</small>}
-      <div className="wolfe-grid">
+      {amped&&activeAmped.length>0&&<div className="wolfe-grid">
         {activeAmped.map(card=><article key={card.id}>
           <IllustratedTile className="module-control-tile" art={wolfeArt(card.id)} title={card.name} status={card.id==='final-girl-2'&&state.secondUltimate?`${state.secondUltimate}’s Ultimate`:'Active'}
             aria-expanded={ampDetail===card.id} onClick={()=>setAmpDetail(ampDetail===card.id?'':card.id)}/>
@@ -145,7 +216,7 @@ export function WolfeControls({events,onEvent,onDeath,blocked,killer,finalGirl}:
             <button className="module-quiet-link" disabled={blocked} onClick={()=>commit({command:'amped',id:card.id,active:false})}>Clear record</button>
           </div>}
         </article>)}
-      </div>
+      </div>}
     </section>
     <section aria-label="Asylum events">
       <div className="wolfe-heading">
@@ -167,45 +238,7 @@ export function WolfeControls({events,onEvent,onDeath,blocked,killer,finalGirl}:
             value={status} showRules={false} showStatusEditor={false} outcomes={personOutcomes} allowOutcomeCorrections
             onChange={value=>{if(value)commit({command:'person',id,status:value as typeof outcomes[number]['value']});}}/>;
         })}
-        {(eventsPicker||gurney!==undefined)&&<article className="wolfe-gurney">
-          <IllustratedTile className="module-control-tile" art={wolfeArt(gurney==='spent'?'gurney-spent':`gurney-${wolfeRiders(gurney)?gurney:0}`)} title="Hospital Gurney"
-            status={gurney==='spent'?'Spent':wolfeRiders(gurney)?`${gurney} ${gurney===1?'rider':'riders'}`:gurney==='unknown'?'Riders unrecorded':'Unrecorded'}
-            aria-expanded={gurneyPanel} onClick={()=>setGurneyPanel(!gurneyPanel)}/>
-          {gurneyPanel&&<div className="wolfe-preview">
-            {gurney!=='spent'&&<>
-              <div className="wolfe-row">
-                <PlaySelect aria-label="Gurney riders" disabled={blocked} value={wolfeRiders(gurney)?String(gurney):''}
-                  onChange={event=>commit({command:'gurney',riders:event.target.value===''?null:+event.target.value})}>
-                  <option value="">Riders unrecorded</option>
-                  {[0,1,2].map(n=><option key={n} value={n}>{n} {n===1?'rider':'riders'}</option>)}
-                </PlaySelect>
-              </div>
-              {wolfeRiders(gurney)&&<><p>{1+gurney} damage to the Enemy · {gurney} {gurney===1?'rider dies':'riders die'}</p>
-                <button disabled={blocked} onClick={()=>commit({command:'ram',riders:gurney})}>Confirm ram</button></>}
-              <button className="module-quiet-link" disabled={blocked} onClick={()=>commit({command:'spent'})}>Record as spent</button>
-            </>}
-            {gurney==='spent'&&linkedDeath&&onDeath&&<button className="module-quiet-link" onClick={()=>onDeath(linkedDeath)}>Open Gruesome Death</button>}
-          </div>}
-        </article>}
       </div>
-    </section>
-    <section aria-label="Stunned Enemies">
-      <button className="module-quiet-link" aria-expanded={showStun} onClick={()=>setShowStun(!showStun)}>Stunned{stuns.length?` · ${stuns.reduce((total,[,value])=>total+Number(value),0)}`:''}</button>
-      {showStun&&<div className="wolfe-stun">
-        {stuns.map(([key,value])=><div className="wolfe-row" key={key}><span>{enemyLabel(key.slice(5))} · {value}</span>
-          <button className="module-quiet-link" disabled={blocked} onClick={()=>commit({command:'stun',enemy:key.slice(5),count:0})}>Clear</button>
-        </div>)}
-        <div className="wolfe-row">
-          <PlaySelect aria-label="Stunned Enemy" value={selectedEnemy} onChange={event=>{setEnemy(event.target.value);setStunCount(1);}}>
-            {enemyChoices.map(choice=><option key={choice.id} value={choice.id}>{choice.label}</option>)}
-          </PlaySelect>
-          {['other-enemies','maniacs'].includes(selectedEnemy)&&<PlaySelect aria-label="Number of Stunned Enemies" value={String(stunCount)} onChange={event=>setStunCount(+event.target.value)}>
-            {Array.from({length:selectedEnemy==='maniacs'?6:8},(_,i)=><option key={i}>{i+1}</option>)}
-          </PlaySelect>}
-          <button disabled={blocked} onClick={()=>commit({command:'stun',enemy:selectedEnemy,count:['maniacs','other-enemies'].includes(selectedEnemy)?stunCount:1})}>Record Stunned</button>
-        </div>
-        {!!stuns.length&&<button className="module-quiet-link" disabled={blocked} onClick={()=>commit({command:'clear-stun'})}>Clear at Upkeep</button>}
-      </div>}
     </section>
     {message&&<p role="status">{message}</p>}
   </div>;

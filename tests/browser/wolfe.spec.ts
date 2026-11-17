@@ -12,20 +12,22 @@ test('Wolfe pills and gurney share the durable play log',async ({page,archive},i
   await openModule(page,'wolfe');
   const panel=page.locator('.play-module-panel[data-module="wolfe"]');
   await expect(panel.getByText('Starting pill unrecorded',{exact:true}).last()).toBeVisible();
-  await panel.getByRole('button',{name:'Yellow',exact:true}).click();
-  await panel.getByRole('button',{name:'Record blue pill pickup'}).click();
-  await panel.getByRole('button',{name:'Record wild pill pickup'}).click();
+  await panel.getByRole('button',{name:'Add yellow pill',exact:true}).click();
+  await panel.getByRole('button',{name:'Add blue pill'}).click();
+  await panel.getByRole('button',{name:'Add wild pill'}).click();
   await panel.getByRole('button',{name:'Record an event'}).click();
   await panel.getByRole('button',{name:/Powerful Meds/}).click();
-  await panel.getByRole('button',{name:'Spend pills'}).click();
+  await panel.getByRole('button',{name:'Eat pills'}).click();
   await panel.getByRole('button',{name:'Draw an Amped card'}).click();
   await expect(panel.getByText('Draw an Amped card · 4 Side Effects')).toBeVisible();
-  await panel.getByRole('button',{name:'Spend Wild as Pink'}).click();
+  await panel.getByRole('button',{name:'Eat Wild as Pink'}).click();
   await expect(panel.getByLabel('Wild held pills')).toHaveText('0');
   await panel.getByRole('button',{name:'Resistance',exact:true}).click();
   await panel.getByRole('button',{name:/Hospital Gurney/}).click();
-  await panel.getByRole('combobox',{name:'Gurney riders'}).click();
-  await page.getByRole('option',{name:'2 riders'}).click();
+  const loadVictim=panel.getByRole('button',{name:'Add a victim to the gurney'});
+  await loadVictim.click();
+  await loadVictim.click();
+  await expect(loadVictim).toBeDisabled();
   await expect(panel.getByText('3 damage to the Enemy · 2 riders die')).toBeVisible();
 
   const sizes=info.project.name==='mobile'?[[390,844],[320,568]]:[[1280,640],[1366,768],[1440,900]];
@@ -87,9 +89,8 @@ test('resumed Wolfe with a different killer keeps holdings unknown',async({page,
   await openModule(page,'wolfe');
   const panel=page.locator('.play-module-panel[data-module="wolfe"]');
   await expect(panel.getByText('Held pills unrecorded',{exact:true}).last()).toBeVisible();
-  await panel.getByRole('button',{name:'Record held pills'}).click();
-  await panel.getByRole('button',{name:'Save held pills'}).click();
-  await expect(panel.getByRole('button',{name:'Spend pills'})).toBeDisabled();
+  await panel.getByRole('button',{name:'Record empty tray'}).click();
+  await expect(panel.getByRole('button',{name:'Eat pills'})).toBeDisabled();
 });
 
 test('Wolfe photographs and mixed-killer controls render together',async({page,archive},info)=>{
@@ -98,31 +99,39 @@ test('Wolfe photographs and mixed-killer controls render together',async({page,a
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   await openModule(page,'wolfe');
   const panel=page.locator('.play-module-panel[data-module="wolfe"]');
-  await panel.getByRole('button',{name:'Wild',exact:true}).click();
+  await panel.getByRole('button',{name:'Add wild pill',exact:true}).click();
+  await panel.getByRole('button',{name:'Amped',exact:true}).click();
   await panel.getByRole('button',{name:'Record an event'}).click();
   for(const name of ['Hannibal the Cannibal','Dr. Death'])
     await panel.getByRole('button',{name:'Add '+name,exact:true}).click();
   for(const name of ['Scratching and Biting','Medical Stockpile','Powerful Meds','Welcome to the Madhouse'])
     await panel.getByRole('button',{name:new RegExp(name)}).click();
   for(const name of ['Rapid Healing','Extreme Agility','Final Girl 2.0','Rabid Fury','Resistance']){
-    await panel.getByRole('button',{name:/^Record (another )?Amped$/}).click();
+    const choose=panel.getByRole('button',{name:'Choose Amped cards',exact:true});
+    if(await choose.isVisible()) await choose.click();
     await panel.getByRole('button',{name,exact:true}).click();
   }
   await panel.getByRole('button',{name:/^Final Girl 2.0/}).click();
   await panel.getByRole('combobox',{name:'Second Ultimate'}).click();
   await page.getByRole('option',{name:'Veronica',exact:true}).click();
   await expect(panel.getByText('Veronica’s Ultimate',{exact:true})).toBeVisible();
-  await panel.getByRole('button',{name:'Stunned',exact:true}).click();
-  await panel.getByRole('combobox',{name:'Stunned Enemy'}).click();
-  await page.getByRole('option',{name:'Baghead',exact:true}).click();
-  await panel.getByRole('button',{name:'Record Stunned'}).click();
-  await expect(panel.getByText('Baghead · 1',{exact:true})).toBeVisible();
+  await expect(panel.getByRole('button',{name:/^Stunned/})).toHaveCount(0);
   await panel.getByRole('button',{name:'Mark Dr. Death saved',exact:true}).click();
   await expect(panel.locator('.module-character').filter({hasText:'Dr. Death'}).locator('img')).toHaveAttribute('src',/dr-death-saved/);
   await panel.getByRole('button',{name:'Mark Dr. Death killed',exact:true}).click();
   await expect(panel.locator('.module-character').filter({hasText:'Dr. Death'}).locator('img')).toHaveAttribute('src',/dr-death-killed/);
-  await panel.getByRole('button',{name:'Clear at Upkeep'}).click();
-  await expect(panel.getByText('Baghead · 1',{exact:true})).toHaveCount(0);
+  const amped=panel.getByRole('button',{name:'Amped',exact:true});
+  const gurney=panel.getByRole('button',{name:'Add Hospital Gurney'});
+  expect((await amped.boundingBox())?.height).toBe((await gurney.boundingBox())?.height);
+  await amped.click();
+  await expect(amped).toHaveAttribute('aria-pressed','false');
+  await expect(panel.getByText('Veronica’s Ultimate',{exact:true})).toHaveCount(0);
+  await amped.click();
+  await expect(panel.getByText('Veronica’s Ultimate',{exact:true})).toBeVisible();
+  await gurney.click();
+  await expect(panel.getByLabel('Gurney riders')).toHaveText('0');
+  await panel.getByRole('button',{name:'Mark spent'}).click();
+  await expect(panel.getByText('Spent',{exact:true})).toBeVisible();
 
   const sizes=info.project.name==='mobile'?[[390,844],[320,568]]:[[1280,640],[1366,768],[1440,900]];
   for(const [width,height] of sizes){
@@ -132,4 +141,38 @@ test('Wolfe photographs and mixed-killer controls render together',async({page,a
     expect(clipped).toBe(false);
     await panel.screenshot({path:info.outputPath(`wolfe-populated-${width}.jpg`),style:'.app-footer{visibility:hidden}'});
   }
+});
+
+
+test('Wolfe tray shows actual pills and eating updates the existing tracker',async({page,archive},info)=>{
+  await archive.install(page,{draft:{...activeGame,selection:{...selection,finalGirlStartingHealth:5},playMode:true,coreTrackersVersion:1,wolfeSetupVersion:1,playEvents:[]}});
+  await page.goto('/');
+  await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  const health=page.getByRole('button',{name:'Set Final Girl health',exact:true});
+  await health.click();
+  const healthTracker=page.getByRole('group',{name:'Health tracker',exact:true});
+  await healthTracker.getByRole('textbox',{name:'Final Girl health value'}).fill('3');
+  await healthTracker.getByRole('button',{name:'Set',exact:true}).click();
+  await expect(health).toHaveText('3');
+  await openModule(page,'wolfe');
+  const panel=page.locator('.play-module-panel[data-module="wolfe"]');
+  const tray=panel.locator('.wolfe-pill-tray .wolfe-tablet');
+  await panel.getByRole('button',{name:'Add yellow pill'}).click();
+  await panel.getByRole('button',{name:'Add yellow pill'}).click();
+  await expect(tray).toHaveCount(2);
+  await panel.getByRole('button',{name:'Remove yellow pill'}).click();
+  await expect(tray).toHaveCount(1);
+  await panel.getByRole('button',{name:'Eat pills'}).click();
+  await expect(panel.getByRole('button',{name:'Move 1 space',exact:true})).toHaveCount(0);
+  await expect(panel.getByRole('button',{name:'Recover all Health',exact:true})).toHaveCount(0);
+  await panel.getByRole('button',{name:'Recover 1 Health',exact:true}).click();
+  await panel.getByRole('button',{name:'Confirm eating'}).click();
+  await expect(health).toHaveText('4');
+  await expect(tray).toHaveCount(0);
+  await undoLatestObservation(page);
+  await expect(health).toHaveText('3');
+  await expect(tray).toHaveCount(1);
+  for(const color of ['yellow','blue','pink','wild']) await panel.getByRole('button',{name:`Add ${color} pill`}).click();
+  await panel.locator('img').evaluateAll(images=>Promise.all(images.map(img=>(img as HTMLImageElement).decode())));
+  await panel.screenshot({path:info.outputPath('wolfe-tray-four-colors.jpg'),style:'.app-footer{visibility:hidden}'});
 });
