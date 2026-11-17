@@ -159,6 +159,7 @@ const IndexContent = () => {
     }
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
       coreTrackersVersion: 1,
+      ...(selection.location === "Wolfe Asylum" && {wolfeSetupVersion:1 as const}),
       ...(selection.killer === "Ratchet Lady" && {ratchetSetupVersion:1 as const}),
       ...(selection.location === FALCONWOOD && {falconwoodSetupVersion:1 as const}),
       ...(selection.location === WOODS && {woodsSetupVersion:1 as const}),

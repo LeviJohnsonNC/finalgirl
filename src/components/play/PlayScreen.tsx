@@ -1,3 +1,5 @@
+import { WOLFE, WOLFE_MODULE } from '../../../supabase/functions/_shared/play/wolfeCatalog';
+import { ampKey } from '../../../supabase/functions/_shared/play/wolfe';
 import { RATCHET_LADY, RATCHET_MODULE, RATCHET_MAX_BLOODLUST, RATCHET_HEALTH_STORAGE_MAX, SHIELD_OF_MADNESS, ratchetCount } from '../../../supabase/functions/_shared/play/ratchetLady';
 import {OrganismRoster} from "./OrganismControls";
 import {ORGANISM, ORGANISM_MAX_BLOODLUST} from "@/lib/play/organism";
@@ -200,6 +202,7 @@ export function PlayScreen(props: PlayScreenProps) {
   // Legacy sessions can use the catalog to bound new input without backfilling observations.
   const isRatchetLady = killer === RATCHET_LADY;
   const maniacs = isRatchetLady ? moduleState(summary.entries, RATCHET_MODULE).maniacs : undefined;
+  const resistance = location===WOLFE && moduleState(summary.entries,WOLFE_MODULE)[ampKey('resistance')];
   const ratchetShield = ratchetCount(maniacs) && maniacs > 0 &&
     summary.entries.some(event => event.momentType === 'dark-power' && event.killerCard === SHIELD_OF_MADNESS);
   const trackerLimits = { ...stateLimits, ...(isRatchetLady && { killerHealth: RATCHET_HEALTH_STORAGE_MAX, bloodlust: RATCHET_MAX_BLOODLUST }), ...(killer===INTRUDERS&&{bloodlust:10}), ...(killer===ORGANISM&&{bloodlust:ORGANISM_MAX_BLOODLUST}), finalGirlHealth: observedFinalGirlMaxHealth(
@@ -494,7 +497,7 @@ export function PlayScreen(props: PlayScreenProps) {
                   <div className="play-state-caption">
                     <span className="play-state-title">{trackerTitles[field]}</span>
                     {value === undefined && <small className="play-state-unknown">Not recorded</small>}
-                    {field === 'killerHealth' && ratchetShield && <small>Shield of Madness · {maniacs} {maniacs === 1 ? 'Maniac' : 'Maniacs'}</small>}
+                    {field === 'killerHealth' && ratchetShield && <small>Shield of Madness · {resistance ? 'Resistance active' : `${maniacs} ${maniacs===1?'Maniac':'Maniacs'}`}</small>}
                     {critical && <small className="play-critical-label">{value === 0 ? "No health remaining" : "Low health"}</small>}
                   </div>
                 {editingState === field ? (

@@ -1,3 +1,5 @@
+import { WOLFE_MODULE } from './wolfeCatalog.ts';
+import { isInitialWolfe, resolveWolfe, sameWolfe, validWolfeAction, wolfeCasualties, wolfeParent, type WolfeAction } from './wolfe.ts';
 import { RATCHET_MODULE, RATCHET_HEALTH_STORAGE_MAX, validRatchetAction, resolveRatchetAction, ratchetParent, type RatchetAction } from './ratchetLady.ts';
 import { STATION_MODULE, isInitialStation, resolveStationAction, stationParent, stationState, stationSummary, validStationAction, type StationAction } from './station.ts';
 import { ORGANISM_MODULE, ORGANISM_MAX_BLOODLUST, initialOrganism, isInitialOrganism, isOrganismCasualty, organismParent, resolveOrganismAction, sameOrganismChanges, validOrganismAction, type OrganismAction } from "./organism.ts";
@@ -68,6 +70,7 @@ export const isLockedPlayEvent = (e: PlayEvent): boolean =>
   (isPermanentMoment(e) && e.permanent === true) ||
   (e.kind === "module" && e.moduleData?.module === FALCONWOOD_MODULE && !e.falconwoodAction) ||
   (e.kind === "module" && e.moduleData?.module === STATION_MODULE && !e.stationAction) ||
+  (e.kind === "module" && e.moduleData?.module === WOLFE_MODULE && !e.wolfeAction) ||
   (e.kind === "module" && e.moduleData?.module === RATCHET_MODULE && !e.ratchetAction && e.moduleData.changes.maniacs === 2) ||
   (e.kind === "module" && e.moduleData?.module === ORGANISM_MODULE && !e.organismAction) ||
   (e.kind === "module" && e.moduleData?.module === SLAYER_MODULE && !e.slayerAction) ||
@@ -109,6 +112,8 @@ export interface PlayEvent extends PlayDetails {
   hunterReference?: true;
   stationAction?: StationAction;
   stationReference?: true;
+  wolfeAction?: WolfeAction;
+  wolfeReference?: true;
   ratchetAction?: RatchetAction;
   ratchetHealth?: true;
   ratchetReference?: true;
@@ -256,6 +261,14 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
   }
   if (e.inkanyambaReference !== undefined && (e.inkanyambaReference !== true || e.kind !== "moment" || !["dark-power", "finale"].includes(e.momentType!))) return false;
   if (e.wolfReference !== undefined && (e.wolfReference !== true || e.kind !== "killed")) return false;
+  if (e.wolfeReference !== undefined && (e.wolfeReference !== true || e.kind !== 'killed')) return false;
+  if (e.wolfeAction !== undefined && (e.moduleData?.module !== WOLFE_MODULE || !validWolfeAction(e.wolfeAction))) return false;
+  if (e.moduleData?.module === WOLFE_MODULE) {
+    if (!validModuleObservation(e.moduleData)) return false;
+    const casualties = wolfeCasualties(e.wolfeAction);
+    if (casualties ? e.kind !== 'killed' || e.quantity !== casualties || !e.wolfeReference || e.cause!=='event' || e.eventCard!=='Hospital Gurney' : e.kind !== 'module') return false;
+    if (!e.wolfeAction && !isInitialWolfe(e.moduleData.changes)) return false;
+  }
   if (e.moduleData?.module === RATCHET_MODULE && (e.kind !== 'module' || !validModuleObservation(e.moduleData))) return false;
   if (e.ratchetAction !== undefined && (!validRatchetAction(e.ratchetAction) || e.kind !== 'module' || e.moduleData?.module !== RATCHET_MODULE)) return false;
   if (e.ratchetHealth !== undefined && (e.ratchetHealth !== true || e.kind !== 'state' || e.field !== 'killerHealth' || !integer(e.value, RATCHET_HEALTH_STORAGE_MAX) || e.value! <= 99)) return false;
@@ -319,9 +332,44 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validRatchetHistory(log) && validStationHistory(log) && validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validOrganismHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validWolfeHistory(log) && validRatchetHistory(log) && validStationHistory(log) && validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validOrganismHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
+}
+export function canUndoWolfe(log:readonly PlayEvent[], target:string, restore=false) {
+  const original=log.find(event=>event.id===target);
+  if(original?.moduleData?.module!==WOLFE_MODULE) return true;
+  const summary=summarizePlay(log);
+  return !!original.wolfeAction && (restore
+    ? summary.inactive.has(target)&&wolfeParent(summary.entries)===original.wolfeAction.parent
+    : wolfeParent(summary.entries)===target);
+}
+function validWolfeHistory(log:readonly PlayEvent[]) {
+  const observations=new Map(log.filter(event=>event.moduleData?.module===WOLFE_MODULE).map(event=>[event.id,event]));
+  if(!observations.size) return true;
+  let seen=false;
+  for(const [index,event] of log.entries()) {
+    const target=event.target?observations.get(event.target):undefined;
+    if(target&&['reduce','death-count'].includes(event.kind)) return false;
+    if(wolfeCasualties(target?.wolfeAction)&&event.kind==='details'&&
+      (event.cause!=='event'||event.eventCard!==undefined&&event.eventCard!=='Hospital Gurney')) return false;
+    if(target&&(event.kind==='undo'||event.kind==='restore')) {
+      if(!canUndoWolfe(log.slice(0,index),target.id,event.kind==='restore')) return false;
+      continue;
+    }
+    const observation=observations.get(event.id);
+    if(!observation) continue;
+    const changes=observation.moduleData!.changes;
+    if(!observation.wolfeAction) {
+      if(seen||!isInitialWolfe(changes)) return false;
+    } else {
+      const entries=summarizePlay(log.slice(0,index)).entries;
+      const expected=resolveWolfe(observation.wolfeAction,moduleState(entries,WOLFE_MODULE),entries);
+      if(!expected||!sameWolfe(changes,expected)) return false;
+    }
+    seen=true;
+  }
+  return true;
 }
 function validRatchetHistory(log: readonly PlayEvent[]) {
   const observations = new Map(log.filter(event => event.moduleData?.module === RATCHET_MODULE).map(event => [event.id, event]));
@@ -878,7 +926,7 @@ export function canChangeDeathCount(log: readonly PlayEvent[], event: PlayEvent)
   if (event.kind !== "death-count" || !isPlayEvent(event)) return false;
   const summary = summarizePlay(log);
   const group = summary.entries.find(e => e.id === event.target && e.kind === "killed");
-  return Boolean(group && group.quantity! + event.delta! >= 1 && group.quantity! + event.delta! <= 50 &&
+  return Boolean(group && !wolfeCasualties(group.wolfeAction) && group.quantity! + event.delta! >= 1 && group.quantity! + event.delta! <= 50 &&
     summary.killed !== null && summary.killed + event.delta! >= 0 && summary.killed + event.delta! <= 999);
 }
 /** Correct the latest matching observation, never undo an unrelated action.
@@ -901,6 +949,8 @@ export function decrementPlay(
     const group = matching.kind === "death-count"
       ? s.entries.find(e => e.id === matching.target && e.kind === "killed")
       : matching;
+    if (group && wolfeCasualties(group.wolfeAction))
+      return canUndoWolfe(log,group.id)?{kind:'undo',target:group.id}:null;
     if (group?.quantity && group.quantity > 1)
       return matching.kind === "death-count"
         ? { kind: "death-count", target: group.id, delta: -1 }
@@ -939,6 +989,9 @@ export function describeEvent(e: PlayEvent): string {
     case "moment":
       return `${e.text}${e.killerCard ? `: ${e.killerCard}` : ""}${e.detail ? `${e.killerCard ? ". " : ": "}${e.detail}` : ""}`;
     case "module":
+      if(e.wolfeAction?.command==='spend') return 'Pills consumed';
+      if(e.wolfeAction?.command==='ram') return 'Hospital Gurney ram recorded';
+      if(e.wolfeAction?.command==='spent') return 'Hospital Gurney marked spent';
       if (e.ratchetAction?.command === 'calm') return `Calmed ${e.ratchetAction.amount} ${e.ratchetAction.amount === 1 ? 'Maniac' : 'Maniacs'}`;
       if (e.ratchetAction?.command === 'hold') return 'Hold Her Down effect recorded · Calm removed';
       if (e.ratchetAction?.command === 'correct-hold') return 'Calm removal corrected';
@@ -1003,6 +1056,7 @@ export function playStoryBeats(
       (/^buddy\..+\.status$/.test(key) && value === 'defeated') ||
       (/^victim\./.test(key) && value === 'killed'))) priority = 65;
     if(e.hunterAction&&(['repair','force-mark-x','destroy-ally'].includes(e.hunterAction.command)||e.hunterAction.command==='countdown'&&hunterState(e.moduleData!.changes).phase==='mark-x'||e.hunterAction.command==='ally-health'&&e.hunterAction.value===0))priority=65;
+    if (e.wolfeAction?.command === 'ram') priority=82;
     if (e.ratchetAction?.command === 'calm') priority = 65;
     if(e.organismAction?.command==="finale"||e.organismAction?.command==="assimilate") priority=85;
     if (e.slayerAction?.command === "collapse") priority = 90;

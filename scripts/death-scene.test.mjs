@@ -16,6 +16,8 @@ function moduleAt(path, imports) {
   new Function("require", "exports", code(path))((name) => {
     if(name==='./falconwood.ts'||name==='./play/falconwood.ts')return falconwood;
     if(name==='./slayer.ts'||name==='./play/slayer.ts')return slayer;
+    if(name==='./wolfeCatalog.ts'||name==='./play/wolfeCatalog.ts')return wolfeCatalog;
+    if(name==='./wolfe.ts')return wolfe;
     if(name==='./ratchetLady.ts'||name==='./play/ratchetLady.ts')return ratchetLady;
     if(name==='./organism.ts'||name==='./play/organism.ts')return organism;
     if(name==='./hunter.ts'||name==='./play/hunter.ts')return hunter;
@@ -28,6 +30,8 @@ function moduleAt(path, imports) {
   }, ex);
   return ex;
 }
+const wolfeCatalog=moduleAt('../supabase/functions/_shared/play/wolfeCatalog.ts',{});
+const wolfe=moduleAt('../supabase/functions/_shared/play/wolfe.ts',{});
 const ratchetLady=moduleAt('../supabase/functions/_shared/play/ratchetLady.ts',{});
 const stationCatalog=moduleAt('../supabase/functions/_shared/play/stationCatalog.ts',{});
 const station=moduleAt('../supabase/functions/_shared/play/station.ts',{});

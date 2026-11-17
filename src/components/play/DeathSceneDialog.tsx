@@ -1,3 +1,5 @@
+import { WOLFE, WOLFE_EVENTS, WOLFE_TERRORS } from '../../../supabase/functions/_shared/play/wolfeCatalog';
+import { wolfeArt } from './wolfeArt';
 import { RATCHET_LADY, RATCHET_TERRORS } from '../../../supabase/functions/_shared/play/ratchetLady';
 import { ratchetLadyArt } from './ratchetLadyArt';
 import {STATION, STATION_EVENTS, STATION_TERRORS, stationNameKey} from '../../../supabase/functions/_shared/play/stationCatalog';
@@ -120,7 +122,8 @@ export function DeathSceneDialog({
 const {characterImages}=useActiveImages();
   const facts = deathFacts(selection, events, eventId);
   const organismAttackers=selection.killer===ORGANISM?organismDeathAttackers(events,eventId):[];
-  const linkedCasualty=events.some(event=>event.id===eventId&&event.kind==="killed"&&event.organismAction);
+  const gurneyCasualty=events.some(event=>event.id===eventId&&event.kind==='killed'&&event.wolfeAction?.command==='ram');
+  const linkedCasualty=gurneyCasualty||events.some(event=>event.id===eventId&&event.kind==="killed"&&event.organismAction);
   const hunterDeathPhase=hunterState(hunterModuleState(hunterSummary(events.slice(0,events.findIndex(e=>e.id===eventId)+1)).entries,'hunter')).phase;
   const hunterDeathPhoto={unknown:'header','mark-v':'mark-v',countdown:'mark-v-shutdown','mark-x':'mark-x'}[hunterDeathPhase];
   const initial: PlayDetails = {
@@ -139,6 +142,13 @@ const {characterImages}=useActiveImages();
     ...initial,
     ...draft,
   }));
+  const wolfeTerror=selection.location===WOLFE&&WOLFE_TERRORS.find(card=>card.name===values.terrorCard&&card.death);
+  const wolfeEvent=selection.location===WOLFE&&WOLFE_EVENTS.find(card=>card.name===values.eventCard&&card.death);
+  const wolfeCauseArt=(cause:string)=>{
+    if(cause==='terror'&&wolfeTerror) return wolfeArt('death-'+wolfeTerror.id);
+    if(cause==='event'&&wolfeEvent) return wolfeArt(wolfeEvent.id==='gurney'?'gurney-spent':'death-'+wolfeEvent.id);
+    if(cause===values.cause&&values.mechanism==='Patient Gown'&&selection.location===WOLFE) return wolfeArt('death-gown');
+  };
   const stationTerror = selection.location === STATION && STATION_TERRORS.find(card=>stationNameKey(card.name)===stationNameKey(values.terrorCard??''));
   const stationCauseArt = selection.location === STATION
     ? values.mechanism === 'Frostbite' ? stationArt.frostbite
@@ -345,6 +355,7 @@ const {characterImages}=useActiveImages();
               <button aria-label="Remove one victim from this death" disabled={linkedCasualty || scenes.busy || facts.quantity <= 1} onClick={() => changeCount(-1)}>−</button>
               <output aria-live="polite" aria-label="Victim count">{facts.quantity}</output>
               <button aria-label="Add one victim to this death" disabled={linkedCasualty || scenes.busy || facts.quantity >= 50} onClick={() => changeCount(1)}>+</button>
+              {gurneyCasualty&&<small>To correct riders, undo the ram in the timeline.</small>}
               <span className="sr-only">Count changes are recorded immediately and can be undone in the timeline.</span>
             </div>
             <div
@@ -370,10 +381,11 @@ const {characterImages}=useActiveImages();
                     (cause === 'killer' || cause === 'minion' || cause === 'terror' && !!ratchetTerror) || undefined}
                   data-organism-photo={selection.killer===ORGANISM&&(cause==="killer"||cause==="terror"&&!!organismTerror)||undefined}
                   data-slayer-photo={selection.killer === SLAYER && (cause === "killer" || cause === "terror" && !!slayerTerror) || undefined}
+                  data-wolfe-photo={!!wolfeCauseArt(cause)||undefined}
                   data-wingard-photo={(cause==='terror' && !!cottageTerror || cause==='event' && !!cottageEvent) || undefined}
                   data-woods-photo={(cause === "terror" && !!woodsTerrorImage || cause === "event" && piperCause) || undefined}
                   data-wolf-photo={selection.killer === WOLF && (cause === "killer" || (cause === "terror" && !!wolfTerror)) || undefined}
-                  disabled={scenes.busy}
+                  disabled={scenes.busy || gurneyCasualty && cause!=='event'}
                   onClick={() => {
                     if (values.cause !== cause) {
                       setValues((previous) => detailsForCause({ ...previous, cause }, selection.killer));
@@ -383,7 +395,7 @@ const {characterImages}=useActiveImages();
                     }
                   }}
                 >
-                  {stationTerror && cause==='terror' ? <ModuleArtwork art={stationTerrorArt[stationTerror.id]}/> : stationCauseArt && cause===values.cause ? <ModuleArtwork art={stationCauseArt}/> : selection.location===MALL&&cause==='hazard'?<ModuleArtwork art={mallArt('wet-floors')}/>:selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
+                  {wolfeCauseArt(cause) ? <ModuleArtwork art={wolfeCauseArt(cause)!}/> : stationTerror && cause==='terror' ? <ModuleArtwork art={stationTerrorArt[stationTerror.id]}/> : stationCauseArt && cause===values.cause ? <ModuleArtwork art={stationCauseArt}/> : selection.location===MALL&&cause==='hazard'?<ModuleArtwork art={mallArt('wet-floors')}/>:selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
                     :cause==='event'&&cottageEvent ? <ModuleArtwork art={wingardArt(cottageEvent.id,true)} />
                     :selection.killer===RATCHET_LADY && cause==='killer' ? <ModuleArtwork art={ratchetLadyArt('banner')}/>
                     :selection.killer===RATCHET_LADY && cause==='minion' ? <ModuleArtwork art={ratchetLadyArt('maniacs-2')}/>
@@ -463,7 +475,8 @@ const {characterImages}=useActiveImages();
                   />
                 </label>
               )}
-              {values.cause === "event" && (
+              {values.cause==='event'&&gurneyCasualty&&<p>Hospital Gurney</p>}
+              {values.cause === "event" && !gurneyCasualty && (
                 <label>
                   Event
                   <PlaySearch

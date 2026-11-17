@@ -1,4 +1,5 @@
 export type RuleBlock =
+  | { type: 'wolfe-setups' }
   | { type: 'groves-setup'; setup: string }
   | { type: 'paragraph'; text: string }
   | { type: 'list'; ordered?: boolean; items: string[] }

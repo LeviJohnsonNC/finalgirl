@@ -1,3 +1,5 @@
+import { WOLFE } from './wolfeCatalog.ts';
+import { wolfeOwnsLog } from './wolfe.ts';
 import { RATCHET_LADY, RATCHET_MODULE, ratchetFacts, ratchetLogBelongsTo } from './ratchetLady.ts';
 import {STATION, STATION_MODULE, stationFacts, stationState} from './station.ts';
 import {ORGANISM, ORGANISM_MODULE, organismFacts, organismLiving} from "./organism.ts";
@@ -32,7 +34,7 @@ export function deathFacts(
   events: PlayEvent[],
   eventId: string,
 ) {
-  if(!validPlayLog(events) || !ratchetLogBelongsTo(selection.killer, events))return null;
+  if(!validPlayLog(events) || !wolfeOwnsLog(selection.location,events) || !ratchetLogBelongsTo(selection.killer, events))return null;
   if (selection.location !== STATION && events.some(e=>e.stationReference || e.moduleData?.module===STATION_MODULE)) return null;
   if(selection.killer!==ORGANISM&&events.some(e=>e.moduleData?.module===ORGANISM_MODULE||e.organismReference)) return null;
   if (selection.location !== FALCONWOOD && events.some(e => e.moduleData?.module === FALCONWOOD_MODULE || e.falconwoodReference)) return null;
@@ -67,12 +69,13 @@ export function deathFacts(
   const hunterDeath=selection.killer===HUNTER&&e.hunterReference;
   const stationDeath = selection.location === STATION && e.stationReference;
   const ratchetDeath = selection.killer === RATCHET_LADY && e.ratchetReference;
-  const historical = ratchetDeath || stationDeath || falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
+  const wolfeDeath = selection.location === WOLFE && e.wolfeReference;
+  const historical = wolfeDeath || ratchetDeath || stationDeath || falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
     ? summarizePlay(events.slice(0, events.findIndex(event => event.id === eventId) + 1)).entries
     : [];
   // The death's own fields reflect deliberate edits. Only the surrounding
   // context is frozen for newly recorded Woods deaths.
-  const contextEntries = woodsDeath
+  const contextEntries = woodsDeath || wolfeDeath
     ? historical : entries.slice(0, entries.indexOf(e) + 1);
   let context = moduleContext(
     selection,
@@ -97,6 +100,7 @@ export function deathFacts(
         : entry,
     ),
     false,
+    !!wolfeDeath,
   );
   const missionState = falconwoodDeath ? falconwoodState(moduleState(historical,FALCONWOOD_MODULE)) : undefined;
   if (missionState) {

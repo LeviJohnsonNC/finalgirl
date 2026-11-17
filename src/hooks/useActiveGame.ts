@@ -1,3 +1,5 @@
+import { WOLFE, WOLFE_MODULE } from '../../supabase/functions/_shared/play/wolfeCatalog';
+import { initialWolfe, resolveWolfe, wolfeOwnsLog, wolfeParent } from '../../supabase/functions/_shared/play/wolfe';
 import { RATCHET_LADY, RATCHET_MODULE, RATCHET_INITIAL, RATCHET_MAX_BLOODLUST, ratchetLogBelongsTo } from '../../supabase/functions/_shared/play/ratchetLady';
 import { STATION, STATION_MODULE, initialStation, resolveStationAction, stationParent } from '../../supabase/functions/_shared/play/station';
 import {MALL,MALL_MODULE,initialMall,resolveMallAction,mallParent} from '@/lib/play/sunnydaze';
@@ -96,7 +98,8 @@ export function useActiveGame() {
       if(event.kind==='undo'&&!canUndoEvomorph(log,event.target!))return previous;
       if (event.kind === 'death-count' && !canChangeDeathCount(log, event)) return previous;
       const isRatchetLady = previous.selection.killer === RATCHET_LADY;
-      if (!ratchetLogBelongsTo(previous.selection.killer, [event])) return previous;
+      if (event.moduleData?.module===WOLFE_MODULE&&!event.wolfeAction) return previous;
+      if (!wolfeOwnsLog(previous.selection.location,[event]) || !ratchetLogBelongsTo(previous.selection.killer, [event])) return previous;
       if (isRatchetLady && event.kind === 'state' && event.field === 'bloodlust' &&
           typeof event.value === 'number' && event.value > RATCHET_MAX_BLOODLUST) return previous;
       if (event.moduleData?.module === RATCHET_MODULE && !event.ratchetAction &&
@@ -130,6 +133,7 @@ export function useActiveGame() {
       let accepted = event.kind === "killed"
         ? {...event,...(isRatchetLady && {ratchetReference:true as const}),...(isOrganism && {organismReference:true as const}),...(isSlayer && {slayerReference:true as const}),...(isHunter && {hunterReference:true as const}),...(isIntruders && {intruderReference:true as const}),...(isWolf && {wolfReference:true as const}),...(previous.selection.location === WOODS && {woodsReference:true as const})}
         : event;
+      if (event.kind==='killed' && previous.selection.location===WOLFE) accepted={...accepted,wolfeReference:true};
       if (event.kind === 'killed' && isStation) accepted = {...accepted, stationReference:true};
       if(event.kind==='killed'&&previous.selection.location===MALL)accepted={...accepted,mallReference:true};
       if (event.kind === "killed" && isFalconwood) accepted = {...accepted, falconwoodReference: true};
@@ -166,6 +170,8 @@ export function useActiveGame() {
         if (changes) setup.push(newPlayEvent({kind:"module",moduleData:{module:WOODS_MODULE,changes}}));
       }
       const freshStation = !log.length && isStation && previous.stationSetupVersion === 1;
+      if (log.length === 0 && previous.wolfeSetupVersion === 1 && previous.selection.location === WOLFE)
+        setup.push(newPlayEvent({kind:'module',moduleData:{module:WOLFE_MODULE,changes:initialWolfe(previous.selection.startingEvent)}}));
       if (freshStation) setup.push(newPlayEvent({kind:'module', moduleData:{module:STATION_MODULE,changes:initialStation(previous.selection.startingEvent)}}));
       if(log.length===0 && previous.wingardSetupVersion===1 && previous.selection.location===WINGARD) {
         setup.push(newPlayEvent({kind:'module',moduleData:{module:WINGARD_MODULE,changes:initialWingard(previous.selection.startingEvent)}}));
@@ -206,6 +212,14 @@ export function useActiveGame() {
         if(Object.entries(changes).every(([key,value])=>value === null ? current[key] === undefined : current[key] === value)) return previous;
         accepted={...event,moduleData:{module:'maple',changes}};
         if (!isPlayEvent(accepted)) return previous;
+      }
+      if (event.wolfeAction) {
+        const entries=summarizePlay([...log,...baseline,...setup]).entries;
+        const action=log.length===0&&event.wolfeAction.parent==='root'
+          ? {...event.wolfeAction,parent:wolfeParent(entries)} : event.wolfeAction;
+        const changes=resolveWolfe(action,moduleState(entries,WOLFE_MODULE),entries);
+        if(!changes) return previous;
+        accepted={...accepted,wolfeAction:action,moduleData:{module:WOLFE_MODULE,changes}};
       }
       if (event.grovesAction) {
         const entries=summarizePlay([...log,...baseline,...setup]).entries;
@@ -331,6 +345,7 @@ export function useActiveGame() {
       if((event.konradAction||event.kind==='undo'||event.kind==='restore')&&[...log,...additions].some(e=>e.moduleData?.module==='konrad')&&!validPlayLog([...log,...additions]))return previous;
       if(previous.selection.location===MALL&&!validPlayLog([...log,...additions]))return previous;
       if (isFalconwood && !validPlayLog([...log, ...additions])) return previous;
+      if (previous.selection.location===WOLFE && !validPlayLog([...log,...additions])) return previous;
       if (isStation && !validPlayLog([...log,...additions])) return previous;
       if (isRatchetLady && !validPlayLog([...log,...additions])) return previous;
       if (isOrganism && !validPlayLog([...log,...additions])) return previous;
