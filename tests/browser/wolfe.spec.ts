@@ -173,6 +173,10 @@ test('Wolfe tray shows actual pills and eating updates the existing tracker',asy
   await expect(health).toHaveText('3');
   await expect(tray).toHaveCount(1);
   for(const color of ['yellow','blue','pink','wild']) await panel.getByRole('button',{name:`Add ${color} pill`}).click();
-  await panel.locator('img').evaluateAll(images=>Promise.all(images.map(img=>(img as HTMLImageElement).decode())));
+  await panel.locator('img').evaluateAll(images=>Promise.all(images.map(img=>{
+    const photo=img as HTMLImageElement;
+    photo.loading='eager';
+    return photo.decode();
+  })));
   await panel.screenshot({path:info.outputPath('wolfe-tray-four-colors.jpg'),style:'.app-footer{visibility:hidden}'});
 });
