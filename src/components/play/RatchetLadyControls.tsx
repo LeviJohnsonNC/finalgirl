@@ -41,7 +41,10 @@ export function RatchetLadyControls({ events, onEvent, blocked }: ControlsProps)
   const count = ratchetCount(state.maniacs) ? state.maniacs : undefined;
   const calmAvailable = !!count && !state.calmRemoved && finale?.killerCard !== HOLD_HER_DOWN;
   const setCount = (value: number) => {
-    if (value === count || send({ command: 'count', count: value })) setEditingCount(false);
+    if (value === count || send({ command: 'count', count: value })) {
+      setEditingCount(false);
+      setChoosingCalm(false);
+    }
   };
   const calm = (amount: 1 | 2) => {
     if (send({ command: 'calm', amount })) setChoosingCalm(false);
@@ -63,12 +66,19 @@ export function RatchetLadyControls({ events, onEvent, blocked }: ControlsProps)
             <button type="button" aria-label="Decrease Maniacs" disabled={blocked || !count}
               onClick={() => count && setCount(count - 1)}><Minus size={16} /></button>
             <button type="button" aria-label="Set Maniac count" aria-expanded={editingCount}
-              disabled={blocked} onClick={() => setEditingCount(!editingCount)}>{count ?? '?'}</button>
+              aria-description={count === undefined ? 'Count unrecorded' : `Current count: ${count}`}
+              disabled={blocked} onClick={() => { setChoosingCalm(false); setEditingCount(!editingCount); }}>
+              {count ?? '?'}
+            </button>
             <button type="button" aria-label="Increase Maniacs" disabled={blocked || count === undefined || count >= MAX_MANIACS}
               onClick={() => count !== undefined && setCount(count + 1)}><Plus size={16} /></button>
           </div>
           {calmAvailable && <button type="button" className="ratchet-action" disabled={blocked}
-            onClick={() => count === 1 ? calm(1) : setChoosingCalm(!choosingCalm)}>Calm</button>}
+            onClick={() => {
+              setEditingCount(false);
+              if (count === 1) calm(1);
+              else setChoosingCalm(!choosingCalm);
+            }}>Calm</button>}
         </div>
       </div>
       {editingCount && <div className="ratchet-record-row">
