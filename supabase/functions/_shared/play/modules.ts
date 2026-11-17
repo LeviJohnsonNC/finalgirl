@@ -1,3 +1,4 @@
+import { RATCHET_LADY, RATCHET_MODULE, RATCHET_POWERS, RATCHET_FINALES, validRatchetField } from './ratchetLady.ts';
 import { STATION, STATION_MODULE, stationFacts, stationState, validStationField } from './station.ts';
 import { ORGANISM, ORGANISM_MODULE, ORGANISM_FINALES, organismFacts, validOrganismField } from "./organism.ts";
 import { FALCONWOOD, FALCONWOOD_MODULE, falconwoodState, falconwoodFacts, validFalconwoodField } from "./falconwood.ts";
@@ -67,7 +68,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -89,6 +90,7 @@ type ObservedEvent = {
 
 /** Only owner-verified catalogs. Other killers can still record an unnamed reveal. */
 export function killerMomentCards(killer: string, type: string) {
+  if (killer === RATCHET_LADY) return [...(type === "dark-power" ? RATCHET_POWERS : type === "finale" ? RATCHET_FINALES : [])].sort((a,b) => a.name.localeCompare(b.name));
   if (killer === SLAYER) return [...(type === "dark-power" ? SLAYER_POWERS : type === "finale" ? SLAYER_FINALES : [])].sort((a,b) => a.name.localeCompare(b.name));
   if (killer === HUNTER) return [...(type==="dark-power"?HUNTER_POWERS:type==="finale"?HUNTER_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === ORGANISM) return type==="finale" ? [...ORGANISM_FINALES].sort((a,b)=>a.name.localeCompare(b.name)) : [];
@@ -183,6 +185,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === RATCHET_MODULE) return validRatchetField(key,value);
   if (module === MALL_MODULE) return validMallField(key,value);
   if (module === FALCONWOOD_MODULE) return validFalconwoodField(key, value);
   if (module === STATION_MODULE) return validStationField(key,value);
@@ -315,7 +318,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    ![STATION_MODULE, ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    ![RATCHET_MODULE, STATION_MODULE, ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||

@@ -28,7 +28,7 @@ const KILLER_MAX_HP: Record<string, number> = {
 
   // Season 2
   'Evomorph': 10,
-  'Ratchet Lady': 8,
+  'Ratchet Lady': 6,
   'Big Bad Wolf': 9,
 
   // Season 3

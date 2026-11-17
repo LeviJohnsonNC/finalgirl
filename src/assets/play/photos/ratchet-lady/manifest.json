@@ -1,0 +1,329 @@
+[
+  {
+    "id": "banner",
+    "source": "exec-25381f47-2845-404d-ade7-1a9a7f44a11d.png",
+    "sourceSha256": "12d353178b09d999497544e843ad19d31c69f6bb187e5b893bcbbb26985b7048",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/banner.webp",
+      "width": 1440,
+      "height": 810,
+      "bytes": 76964,
+      "sha256": "6b93084cb1d18f36028d69877964fa1d86a9dc345e58f52b3c4575589d6fc11e"
+    }
+  },
+  {
+    "id": "maniacs-0",
+    "source": "exec-954ca069-8555-495e-94d8-fa547507ec21.png",
+    "sourceSha256": "5fab0cf9ee0cc9ede4d8194f0f681d827de60c415af0bee7fc8998df4698dd6b",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/maniacs-0.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 50276,
+      "sha256": "21e8dfa2a9c0d217f58188bbf63d36c95c5b984b8ee5a82854eb9b8aeb87b6cc"
+    }
+  },
+  {
+    "id": "maniacs-2",
+    "source": "exec-2ad8aa0e-cf0e-4cc2-b006-e60982319b57.png",
+    "sourceSha256": "dfaa39f80b26511b5e7bafaf939444dea1e943152dbb94aaee810daa8c660b80",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/maniacs-2.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 47694,
+      "sha256": "8481bc29bc92c69c11d621aede714cd12b17f9b3722bec19f983a234f1634220"
+    }
+  },
+  {
+    "id": "maniacs-1",
+    "source": "exec-2521a4cf-49e2-4578-a03e-cd056214751f.png",
+    "sourceSha256": "dac8ff611b8b146d0939cb22e05453aa0503ee9063999a44519f657d7ac05e6f",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/maniacs-1.webp",
+      "width": 1280,
+      "height": 721,
+      "bytes": 54960,
+      "sha256": "f300e0f29a5958db4658df0fe1c23e81dcef678c69a0402eb7b14364239aa93e"
+    }
+  },
+  {
+    "id": "maniacs-3",
+    "source": "exec-4bd46f44-e0ae-45d7-a055-134fdfe4c276.png",
+    "sourceSha256": "c83b397be646d0231f5f8d2991f951b679fbcc59c246f166cab2680aa17e6beb",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/maniacs-3.webp",
+      "width": 1280,
+      "height": 721,
+      "bytes": 57150,
+      "sha256": "e3636f8917241b385bdd72c0f89d409b7e911bb2fd9fca56c14ccaeebbbc7d30"
+    }
+  },
+  {
+    "id": "maniacs-4",
+    "source": "exec-b23106f9-16b1-40a7-95c2-aff35489cf64.png",
+    "sourceSha256": "4a37bee87428a74f991680ccccfe46127c33bdd762d68442dc6784be813d8969",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/maniacs-4.webp",
+      "width": 1280,
+      "height": 721,
+      "bytes": 57142,
+      "sha256": "6fb71eaaba2893464993abf20c2ada52c3d60347055dc9656eabfabc88ed6bf5"
+    }
+  },
+  {
+    "id": "maniacs-5",
+    "source": "exec-f37ebded-46a3-4129-aee8-543c6bf6dbc3.png",
+    "sourceSha256": "9f16c6aa931a73000523a24abd9e7e92dfcfb562d7adb7dacd3f6fcb37594e4f",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/maniacs-5.webp",
+      "width": 1280,
+      "height": 720,
+      "bytes": 66394,
+      "sha256": "7aef710b2384da3ff41c173afea30b4c09b41e1124a5942766761096e2eb5c80"
+    }
+  },
+  {
+    "id": "maniacs-6",
+    "source": "exec-c5a45393-632b-4769-997e-c3353b629323.png",
+    "sourceSha256": "4476fe4b3a2d00a53630bf9705069a42e124c3039730e0285de04e119ab22ebe",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/maniacs-6.webp",
+      "width": 1280,
+      "height": 721,
+      "bytes": 67724,
+      "sha256": "77c7699ea0504b8ac0962a59fa898836fda384536be9f33fe87b668ef9a0d82b"
+    }
+  },
+  {
+    "id": "raining-maniacs",
+    "source": "exec-c2b4c656-f6c6-4f50-9054-63e18e899ace.png",
+    "sourceSha256": "ec9a89315e884789431a638e18afccb97f63e0ca9b82c59b02f9896de8c48f51",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/raining-maniacs.webp",
+      "width": 1152,
+      "height": 648,
+      "bytes": 43824,
+      "sha256": "6e662fd40960369f5086de690709dc092508d7b8235f0a932d1a5d23ed98d9bb"
+    },
+    "thumbnail": {
+      "file": "src/assets/play/photos/ratchet-lady/raining-maniacs-thumb.webp",
+      "width": 288,
+      "height": 162,
+      "bytes": 4016,
+      "sha256": "607facf0d0960df87ffcde82b37d3b41bdca63d55f657fd1d49667ae196666af"
+    }
+  },
+  {
+    "id": "feed-the-madness",
+    "source": "exec-6a8c9603-99ef-461d-ad82-771deec156db.png",
+    "sourceSha256": "4c691fe4bb36abc5a9b8b315bcd4814fc2378168817fbeb79557a1e8ca785026",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/feed-the-madness.webp",
+      "width": 1152,
+      "height": 648,
+      "bytes": 25792,
+      "sha256": "329f1d76af950766dcd439c216802200fa48063a975866e9adb8deedf62940eb"
+    },
+    "thumbnail": {
+      "file": "src/assets/play/photos/ratchet-lady/feed-the-madness-thumb.webp",
+      "width": 288,
+      "height": 162,
+      "bytes": 2642,
+      "sha256": "229428d18b93186035991fcfdf412ec0b241239d6fff2d8263ebabeb2aa3cd96"
+    }
+  },
+  {
+    "id": "hold-her-down",
+    "source": "exec-25d302f6-e821-44ba-8f6f-78be541b1af1.png",
+    "sourceSha256": "c4f4227130d3832c222d36c169b668d81b6a7b671bddbadc169870695fd5f373",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/hold-her-down.webp",
+      "width": 1152,
+      "height": 648,
+      "bytes": 46814,
+      "sha256": "5ae40e92ab1b997dd356610a35d7d49b8f767ba681a5a08251b1a6b4feaffe9a"
+    },
+    "thumbnail": {
+      "file": "src/assets/play/photos/ratchet-lady/hold-her-down-thumb.webp",
+      "width": 288,
+      "height": 162,
+      "bytes": 4272,
+      "sha256": "834ec313575f2bfecc6d77a588381e3206712d99e3afd9e2600b01bb6f55ab3a"
+    }
+  },
+  {
+    "id": "manic-burst",
+    "source": "exec-bae49ec3-ff73-426d-9eb0-953db88c8188.png",
+    "sourceSha256": "65ffcdd6a3bc3fd7bbbe23d7aca4d0c9232fc7bb1f7af9d28a777c6c13dd18da",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/manic-burst.webp",
+      "width": 1152,
+      "height": 648,
+      "bytes": 29090,
+      "sha256": "60b408a8b7ef875793fe2e48a1482957c715d1818cddc4251f9fc4f74edc73db"
+    },
+    "thumbnail": {
+      "file": "src/assets/play/photos/ratchet-lady/manic-burst-thumb.webp",
+      "width": 288,
+      "height": 162,
+      "bytes": 3634,
+      "sha256": "76898522ac10312b1dddca682081c3d0cc5fb96b7b284956de2a0e5cefc8e077"
+    }
+  },
+  {
+    "id": "dark-injection",
+    "source": "exec-5fc80691-60f4-4cdf-a527-d4b6c1950efe.png",
+    "sourceSha256": "6d5cd1f6c03f13b1ec8497f83f81f9e74333c2f39bd57a9a9b27ee47bf5397dc",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/dark-injection.webp",
+      "width": 1152,
+      "height": 648,
+      "bytes": 42932,
+      "sha256": "cab977bccae74c204dece7c5af5663554ae639cec9e63abb14a114e258d94648"
+    },
+    "thumbnail": {
+      "file": "src/assets/play/photos/ratchet-lady/dark-injection-thumb.webp",
+      "width": 288,
+      "height": 162,
+      "bytes": 4658,
+      "sha256": "c941c6ba2f86e613334dba52e5e2377c4f8bd3ff3f6816b6b5a2f5702429d9e5"
+    }
+  },
+  {
+    "id": "bloodfear",
+    "source": "exec-a3377180-1553-4e25-8676-7c8e9832adf7.png",
+    "sourceSha256": "87d5e96c31bebcb7e5694e6f3fc1c9458bb2eca04a2472b085b1e0a4c5b32661",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/bloodfear.webp",
+      "width": 1152,
+      "height": 648,
+      "bytes": 33856,
+      "sha256": "31763a5363061d1894c9e1c15ab9f8bc1da1c9eadd72420036af960fbb9ff2f5"
+    },
+    "thumbnail": {
+      "file": "src/assets/play/photos/ratchet-lady/bloodfear-thumb.webp",
+      "width": 288,
+      "height": 162,
+      "bytes": 3166,
+      "sha256": "7c9cdf7d0c482aaccebd33615b26742a4f3d09f7f5d735acd2c06d1b7c6e39e3"
+    }
+  },
+  {
+    "id": "shield-of-madness",
+    "source": "exec-9c1e7a60-f50b-4a1a-9b89-5a655a95851a.png",
+    "sourceSha256": "3c65baf5edb80e6998f1730163cc24bcd81d6f1a39b6a4af7532da4f140bb744",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/shield-of-madness.webp",
+      "width": 1152,
+      "height": 648,
+      "bytes": 51948,
+      "sha256": "227cba772f94edec915c28d022f8eccd5c81fb6b951b137ae01320a1df4dbe9b"
+    },
+    "thumbnail": {
+      "file": "src/assets/play/photos/ratchet-lady/shield-of-madness-thumb.webp",
+      "width": 288,
+      "height": 162,
+      "bytes": 4540,
+      "sha256": "56d3ddddd3abf886e28c654fe9c5f5c3093ccd56d5f086008b110a6ebd3f8d7a"
+    }
+  },
+  {
+    "id": "blood-drive",
+    "source": "exec-8771cb62-a3c3-4542-af4a-3c6cae04e59a.png",
+    "sourceSha256": "280c7c32530f62df2ac79e442e44f6870e8dd3e2a55dbfd114d23a261dac46ac",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/blood-drive.webp",
+      "width": 1152,
+      "height": 648,
+      "bytes": 44004,
+      "sha256": "627024bf9d4cb46d76be6a02d392347a9796fff4882f9d8879d862bc169b817d"
+    },
+    "thumbnail": {
+      "file": "src/assets/play/photos/ratchet-lady/blood-drive-thumb.webp",
+      "width": 288,
+      "height": 162,
+      "bytes": 4454,
+      "sha256": "281cd440d4abfe6e39498bcf60eff7739cff0486979a427128b168dd546acf7b"
+    }
+  },
+  {
+    "id": "insanity-lust",
+    "source": "exec-471fae0b-bab8-40ab-be40-164f6c8b0ab3.png",
+    "sourceSha256": "838d8fa707d1ee5ca63e078e7fa0206acb4a2904664553f6d6624c25ca6ed9ed",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/insanity-lust.webp",
+      "width": 1152,
+      "height": 648,
+      "bytes": 32940,
+      "sha256": "dd78d79209573f8b03db09bb32c68e26bc7ba856cd01511c89580ea663d984aa"
+    },
+    "thumbnail": {
+      "file": "src/assets/play/photos/ratchet-lady/insanity-lust-thumb.webp",
+      "width": 288,
+      "height": 162,
+      "bytes": 3486,
+      "sha256": "2befb7aef5392966104eb6005cb56ccaefea9a9a623a2ccf4a6197e19ab9e306"
+    }
+  },
+  {
+    "id": "keep-her-busy",
+    "source": "exec-667fddbf-a65d-42e1-a438-04b75ba5614a.png",
+    "sourceSha256": "3f0d384eb3ceb57e7a2da13ac2c89b1150c412954e41a7f7aef4a192ca9498e0",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/keep-her-busy.webp",
+      "width": 1152,
+      "height": 648,
+      "bytes": 72716,
+      "sha256": "31c291ed51e362caa838bd8ca2154861c1bea8d9e17bdba64572ad453c25bdcf"
+    }
+  },
+  {
+    "id": "join-us-or-die",
+    "source": "exec-6f0c17e5-f0a7-44eb-adb4-e26012a975c9.png",
+    "sourceSha256": "5a92f0e6cb69cb5e59bf6b5f4a4dc061ddb83fa5833a1b9279eec5463554c1c1",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/join-us-or-die.webp",
+      "width": 1152,
+      "height": 648,
+      "bytes": 68520,
+      "sha256": "9dbbacc59348f1eb1c4528306537873e3ad3e27c5978cf98da6e0949f49244ce"
+    }
+  },
+  {
+    "id": "leave-her-to-me",
+    "source": "exec-35d99368-5732-4d26-a423-97ca89694c04.png",
+    "sourceSha256": "9a5a0f3788a7e1af76ba9ddcd1574d18ea1f78b456511a053f8db7cc7030b55a",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/leave-her-to-me.webp",
+      "width": 1152,
+      "height": 648,
+      "bytes": 71304,
+      "sha256": "33b017edd9e9707ffbd95e830354dd9b8337d22bec33a6850bdb7065cc31b581"
+    }
+  },
+  {
+    "id": "tend-to-your-wounds",
+    "source": "exec-c0624382-40f6-4586-82c2-9968412e3dc9.png",
+    "sourceSha256": "a2c8df802b47d939d9a3047c3f2cd1f371eac0da80cd97bc2acf2e18b7882358",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/tend-to-your-wounds.webp",
+      "width": 1152,
+      "height": 648,
+      "bytes": 108102,
+      "sha256": "cb9027749ddf04f452bf8637c41cef7ab210ac20f390e2a515d70f022c27dc06"
+    }
+  },
+  {
+    "id": "bloodletting",
+    "source": "exec-c248edf6-add3-4f97-9819-8c76a1e0b689.png",
+    "sourceSha256": "ff4beb0280138ef65278e1a666f929a3e3197f3089bc1d4bdb985765aa8938b7",
+    "hero": {
+      "file": "src/assets/play/photos/ratchet-lady/bloodletting.webp",
+      "width": 1152,
+      "height": 648,
+      "bytes": 62876,
+      "sha256": "bea630fe592d2e2d133417106dd80e7f435f76881e62c44be1dc94d691db4a52"
+    }
+  }
+]

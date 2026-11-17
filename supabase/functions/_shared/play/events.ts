@@ -1,3 +1,4 @@
+import { RATCHET_MODULE, RATCHET_HEALTH_STORAGE_MAX, validRatchetAction, resolveRatchetAction, ratchetParent, type RatchetAction } from './ratchetLady.ts';
 import { STATION_MODULE, isInitialStation, resolveStationAction, stationParent, stationState, stationSummary, validStationAction, type StationAction } from './station.ts';
 import { ORGANISM_MODULE, ORGANISM_MAX_BLOODLUST, initialOrganism, isInitialOrganism, isOrganismCasualty, organismParent, resolveOrganismAction, sameOrganismChanges, validOrganismAction, type OrganismAction } from "./organism.ts";
 import { MALL_MODULE, describeMallAction, initialMall, isInitialMall, resolveMallAction, validMallAction, mallParent, mallState, type MallAction } from './sunnydaze.ts';
@@ -67,6 +68,7 @@ export const isLockedPlayEvent = (e: PlayEvent): boolean =>
   (isPermanentMoment(e) && e.permanent === true) ||
   (e.kind === "module" && e.moduleData?.module === FALCONWOOD_MODULE && !e.falconwoodAction) ||
   (e.kind === "module" && e.moduleData?.module === STATION_MODULE && !e.stationAction) ||
+  (e.kind === "module" && e.moduleData?.module === RATCHET_MODULE && !e.ratchetAction && e.moduleData.changes.maniacs === 2) ||
   (e.kind === "module" && e.moduleData?.module === ORGANISM_MODULE && !e.organismAction) ||
   (e.kind === "module" && e.moduleData?.module === SLAYER_MODULE && !e.slayerAction) ||
   (e.kind === "module" && e.moduleData?.module === "billy" && e.moduleData.changes.powerSourcesReady === true);
@@ -107,6 +109,9 @@ export interface PlayEvent extends PlayDetails {
   hunterReference?: true;
   stationAction?: StationAction;
   stationReference?: true;
+  ratchetAction?: RatchetAction;
+  ratchetHealth?: true;
+  ratchetReference?: true;
   organismAction?: OrganismAction;
   organismReference?: true;
   intruderAction?: IntruderAction;
@@ -251,6 +256,10 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
   }
   if (e.inkanyambaReference !== undefined && (e.inkanyambaReference !== true || e.kind !== "moment" || !["dark-power", "finale"].includes(e.momentType!))) return false;
   if (e.wolfReference !== undefined && (e.wolfReference !== true || e.kind !== "killed")) return false;
+  if (e.moduleData?.module === RATCHET_MODULE && (e.kind !== 'module' || !validModuleObservation(e.moduleData))) return false;
+  if (e.ratchetAction !== undefined && (!validRatchetAction(e.ratchetAction) || e.kind !== 'module' || e.moduleData?.module !== RATCHET_MODULE)) return false;
+  if (e.ratchetHealth !== undefined && (e.ratchetHealth !== true || e.kind !== 'state' || e.field !== 'killerHealth' || !integer(e.value, RATCHET_HEALTH_STORAGE_MAX) || e.value! <= 99)) return false;
+  if (e.ratchetReference !== undefined && (e.ratchetReference !== true || e.kind !== 'killed')) return false;
   if (e.permanent !== undefined && (e.permanent !== true || !isPermanentMoment(e))) return false;
   if (!uuid.test(e.id) || !integer(e.at, Number.MAX_SAFE_INTEGER)) return false;
   if (
@@ -286,7 +295,7 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
       return (
         STATE_FIELDS.includes(e.field!) &&
         (e.value === null ||
-          (integer(e.value, 99) &&
+          (integer(e.value, e.ratchetHealth ? RATCHET_HEALTH_STORAGE_MAX : 99) &&
             (e.field !== "finalHorrorLevel" ||
               (e.value! >= 0 && e.value! <= 7))))
       );
@@ -310,9 +319,51 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validStationHistory(log) && validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validOrganismHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validRatchetHistory(log) && validStationHistory(log) && validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validOrganismHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
+}
+function validRatchetHistory(log: readonly PlayEvent[]) {
+  const observations = new Map(log.filter(event => event.moduleData?.module === RATCHET_MODULE).map(event => [event.id, event]));
+  if (!observations.size) return true;
+  let initialized = false;
+
+  for (const [index, event] of log.entries()) {
+    const undo = event.kind === 'undo';
+    const restore = event.kind === 'restore';
+    const target = undo || restore ? observations.get(event.target!) : undefined;
+    const observation = target ?? observations.get(event.id);
+    if (!observation) continue;
+    const changes = observation.moduleData!.changes;
+    if (!observation.ratchetAction) {
+      if (typeof changes.maniacs !== 'number') {
+        if (Object.keys(changes).length !== 1 || !Object.keys(changes)[0].startsWith('minor.')) return false;
+        continue;
+      }
+      if (target || initialized || changes.maniacs !== 2 || Object.keys(changes).length !== 1 ||
+          log.slice(0, index).some(entry => entry.moduleData?.module === RATCHET_MODULE)) return false;
+      initialized = true;
+      continue;
+    }
+    const prefix = log.slice(0, index);
+    const summary = summarizePlay(prefix);
+    if (target && !prefix.includes(target)) return false;
+    if (undo) {
+      if (ratchetParent(summary.entries) !== target!.id) return false;
+      continue;
+    }
+    if (restore && !summary.inactive.has(target!.id)) return false;
+    const expected = resolveRatchetAction(observation.ratchetAction, moduleState(summary.entries, RATCHET_MODULE), summary.entries);
+    // A restored historical Hold effect retains its original reveal even if
+    // the name was cleared after the effect was recorded.
+    const finaleChanged = restore && observation.ratchetAction.command === 'hold' &&
+      ratchetParent(summary.entries) === observation.ratchetAction.parent &&
+      !moduleState(summary.entries, RATCHET_MODULE).calmRemoved &&
+      summary.entries.some(entry => entry.id === (observation.ratchetAction as { reveal: string }).reveal && entry.momentType === 'finale');
+    if (!finaleChanged && (!expected || Object.keys(expected).length !== Object.keys(changes).length ||
+        !Object.entries(expected).every(([key, value]) => changes[key] === value))) return false;
+  }
+  return true;
 }
 function validStationHistory(log: readonly PlayEvent[]) {
   const observations = new Map(log.filter(e => e.moduleData?.module === STATION_MODULE).map(e => [e.id,e]));
@@ -888,6 +939,9 @@ export function describeEvent(e: PlayEvent): string {
     case "moment":
       return `${e.text}${e.killerCard ? `: ${e.killerCard}` : ""}${e.detail ? `${e.killerCard ? ". " : ": "}${e.detail}` : ""}`;
     case "module":
+      if (e.ratchetAction?.command === 'calm') return `Calmed ${e.ratchetAction.amount} ${e.ratchetAction.amount === 1 ? 'Maniac' : 'Maniacs'}`;
+      if (e.ratchetAction?.command === 'hold') return 'Hold Her Down effect recorded · Calm removed';
+      if (e.ratchetAction?.command === 'correct-hold') return 'Calm removal corrected';
       if (e.moduleData?.module === STATION_MODULE) {
         const state = stationState(e.moduleData.changes);
         const action = e.stationAction;
@@ -949,6 +1003,7 @@ export function playStoryBeats(
       (/^buddy\..+\.status$/.test(key) && value === 'defeated') ||
       (/^victim\./.test(key) && value === 'killed'))) priority = 65;
     if(e.hunterAction&&(['repair','force-mark-x','destroy-ally'].includes(e.hunterAction.command)||e.hunterAction.command==='countdown'&&hunterState(e.moduleData!.changes).phase==='mark-x'||e.hunterAction.command==='ally-health'&&e.hunterAction.value===0))priority=65;
+    if (e.ratchetAction?.command === 'calm') priority = 65;
     if(e.organismAction?.command==="finale"||e.organismAction?.command==="assimilate") priority=85;
     if (e.slayerAction?.command === "collapse") priority = 90;
     if (e.slayerAction?.command === "cross" || e.slayerAction?.command === "pull") priority = 65;

@@ -16,6 +16,7 @@ function moduleAt(path, imports) {
   new Function("require", "exports", code(path))((name) => {
     if(name==='./falconwood.ts'||name==='./play/falconwood.ts')return falconwood;
     if(name==='./slayer.ts'||name==='./play/slayer.ts')return slayer;
+    if(name==='./ratchetLady.ts'||name==='./play/ratchetLady.ts')return ratchetLady;
     if(name==='./organism.ts'||name==='./play/organism.ts')return organism;
     if(name==='./hunter.ts'||name==='./play/hunter.ts')return hunter;
     if(name==='./sunnydaze.ts'||name==='./play/sunnydaze.ts')return mall;
@@ -27,6 +28,7 @@ function moduleAt(path, imports) {
   }, ex);
   return ex;
 }
+const ratchetLady=moduleAt('../supabase/functions/_shared/play/ratchetLady.ts',{});
 const stationCatalog=moduleAt('../supabase/functions/_shared/play/stationCatalog.ts',{});
 const station=moduleAt('../supabase/functions/_shared/play/station.ts',{});
 const mallCatalog=moduleAt('../supabase/functions/_shared/play/sunnydazeCatalog.ts',{});

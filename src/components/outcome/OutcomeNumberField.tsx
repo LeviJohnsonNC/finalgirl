@@ -11,6 +11,7 @@ interface OutcomeNumberFieldProps {
   variant?: string;
   prominent?: boolean;
   preserveObservedExcess?: boolean;
+  rejectOutOfRange?: boolean;
 }
 
 /** Blank is unknown, zero is a recorded observation. Neither is inferred. */
@@ -24,6 +25,7 @@ export function OutcomeNumberField({
   variant = "neutral",
   prominent = false,
   preserveObservedExcess = false,
+  rejectOutOfRange = false,
 }: OutcomeNumberFieldProps) {
   const id = useId();
   const bounded = (n: number) => Math.min(preserveObservedExcess ? Math.max(max,value??max) : max, Math.max(min, Math.trunc(n)));
@@ -67,6 +69,7 @@ export function OutcomeNumberField({
           onChange={(event) => {
             const text = event.target.value;
             const next = Number(text);
+            if (rejectOutOfRange && text && (!/^\d+$/.test(text) || next < min || next > max)) return;
             onChange(
               text.trim() === "" || !Number.isFinite(next)
                 ? null

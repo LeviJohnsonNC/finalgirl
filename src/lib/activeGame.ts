@@ -1,3 +1,4 @@
+import { RATCHET_LADY, RATCHET_MODULE, ratchetLogBelongsTo } from '../../supabase/functions/_shared/play/ratchetLady';
 import {MALL,MALL_MODULE,initialMall} from './play/sunnydaze';
 import { WINGARD, WINGARD_MODULE } from '../../supabase/functions/_shared/play/wingardCatalog';
 import { initialWingard } from '../../supabase/functions/_shared/play/wingardCottage';
@@ -16,6 +17,7 @@ export interface EndingFormData {
   falconwoodReview?: import("../../supabase/functions/_shared/play/falconwood").FalconwoodReview;
   slayerReview?: import("./play/slayer").SlayerReview;
   childrenOnBoardAtFinish?: number|null;
+  ratchetManiacCount?: number|null;
   tormentorReview?:{loss:import('../../supabase/functions/_shared/play/tormentor').TormentorLoss};
   grimlashReview?: {loss:import('../../supabase/functions/_shared/play/grimlash').GrimlashLoss};
   organismLoss?: "caught"|"assimilated";
@@ -30,6 +32,7 @@ export interface EndingFormData {
 export interface ActiveGame {
   /** New sessions initialize the always-visible core trackers once on first Play entry. */
   coreTrackersVersion?: 1;
+  ratchetSetupVersion?: 1;
   woodsSetupVersion?: 1;
   marrekSetupVersion?: 1;
   wingardSetupVersion?: 1;
@@ -77,6 +80,10 @@ export function isActiveGame(value: unknown): value is ActiveGame {
   const game = value as ActiveGame;
   if(game.mallSetupVersion!==undefined&&(game.mallSetupVersion!==1||game.selection?.location!==MALL))return false;
   if(game.playEvents?.some(e=>(e.mallReference||e.moduleData?.module===MALL_MODULE)&&game.selection?.location!==MALL||e.moduleData?.module===MALL_MODULE&&!e.mallAction&&(game.mallSetupVersion!==1||e.moduleData.changes.snapshot!==initialMall(game.selection?.startingEvent).snapshot)))return false;
+  if (game.ratchetSetupVersion !== undefined && (game.ratchetSetupVersion !== 1 || game.selection?.killer !== RATCHET_LADY)) return false;
+  if (Array.isArray(game.playEvents) && (!ratchetLogBelongsTo(game.selection?.killer, game.playEvents) ||
+      game.playEvents.some(event => event?.moduleData?.module === RATCHET_MODULE && !event.ratchetAction &&
+        typeof event.moduleData.changes?.maniacs === 'number' && game.ratchetSetupVersion !== 1))) return false;
   if(game.coreTrackersVersion!==undefined&&game.coreTrackersVersion!==1)return false;
   if (game.woodsSetupVersion !== undefined && (game.woodsSetupVersion !== 1 || game.selection?.location !== WOODS)) return false;
   if (Array.isArray(game.playEvents) && game.playEvents.some(event =>

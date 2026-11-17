@@ -1,3 +1,5 @@
+import { RATCHET_LADY, RATCHET_POWERS, RATCHET_FINALES } from '../../../supabase/functions/_shared/play/ratchetLady';
+import { ratchetLadyArt } from './ratchetLadyArt';
 import {ORGANISM, ORGANISM_FINALES} from "@/lib/play/organism";
 import {organismArt} from "./organismArt";
 import { SLAYER, SLAYER_POWERS, SLAYER_FINALES } from '@/lib/play/slayer';
@@ -70,6 +72,9 @@ export function illustratedKillerCards(
   type: "dark-power" | "finale",
 ): IllustratedKillerCard[] {
   const power = type === "dark-power";
+  if (killer === RATCHET_LADY) return [...(power ? RATCHET_POWERS : RATCHET_FINALES)]
+    .map(card => ({ ...card, art: ratchetLadyArt(card.id, true), heroArt: ratchetLadyArt(card.id) }))
+    .sort((a, b) => a.name.localeCompare(b.name));
   if(killer===ORGANISM) return power?[]:ORGANISM_FINALES.map(card=>({...card,art:organismArt(card.id,true),heroArt:organismArt(card.id)})).sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === SLAYER) return [...(power ? SLAYER_POWERS : SLAYER_FINALES)]
     .map(card => ({...card, art:slayerArt(card.id,true), heroArt:slayerArt(card.id)})).sort((a,b) => a.name.localeCompare(b.name));

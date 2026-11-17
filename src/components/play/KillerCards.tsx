@@ -1,3 +1,5 @@
+import { RATCHET_LADY } from '../../../supabase/functions/_shared/play/ratchetLady';
+import { RatchetFinaleControl } from './RatchetLadyControls';
 import {ORGANISM} from "@/lib/play/organism";
 import {OrganismFinaleControl} from "./OrganismControls";
 import { SLAYER, SLAYER_COLLAPSE } from '@/lib/play/slayer';
@@ -136,6 +138,8 @@ export function KillerCards({
                 </p>
               )}
               {selected && <RevealedCard card={selected} label={label} />}
+              {killer === RATCHET_LADY && type === 'finale' &&
+                <RatchetFinaleControl events={events} onEvent={onEvent} disabled={disabled} />}
               {killer===ORGANISM&&type==="finale"&&<OrganismFinaleControl events={events} onEvent={onEvent} disabled={disabled} />}
               {killer === SLAYER && selected?.name === SLAYER_COLLAPSE && type === "finale" &&
                 <SlayerCollapseControl events={events} onEvent={onEvent} disabled={disabled} />}

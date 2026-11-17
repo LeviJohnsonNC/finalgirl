@@ -80,8 +80,8 @@ test('special rules navigate from Now Playing without moving the page or recordi
 });
 
 test('a single applicable location opens directly and renders its setup diagrams', async ({ page, archive }, info) => {
-  archive.films = ['s1-sacred-groves', 's2-madness-in-dark'];
-  const groves = { ...selection, killer: 'Ratchet Lady', location: 'Sacred Groves', finalGirl: 'Adelaide', filmId: archive.films[0] };
+  archive.films = ['s1-sacred-groves', 's3-hell-to-pay'];
+  const groves = { ...selection, killer: 'Razorface', location: 'Sacred Groves', finalGirl: 'Adelaide', filmId: archive.films[0] };
   await archive.install(page, { draft: { ...activeGame, selection: groves } });
   await (await resumeGame(page)).click();
   const dialog = page.getByRole('dialog', { name: 'Special Rules', exact: true });
@@ -159,4 +159,23 @@ test('Sunnydaze placements and card effects reflow within the modal', async ({ p
       await expect(panel.getByRole('table').filter({ has: page.getByRole('columnheader', { name: 'Event', exact: true }) })).toBeInViewport();
     }
   }
+});
+
+test('Ratchet Lady rules follow the killer in a mixed game', async ({ page, archive }, info) => {
+  archive.films = ['s1-sacred-groves', 's2-madness-in-dark'];
+  await archive.install(page, { draft: { ...activeGame, selection: {
+    ...selection, killer: 'Ratchet Lady', location: 'Sacred Groves', finalGirl: 'Adelaide', filmId: archive.films[0],
+  } } });
+  if (info.project.name === 'mobile') await page.setViewportSize({width:320,height:568});
+  await (await resumeGame(page)).click();
+  const dialog = page.getByRole('dialog', { name: 'Special Rules', exact: true });
+  const panel = dialog.getByRole('tabpanel');
+  await expect(dialog.getByRole('button',{name:'Ratchet Lady',exact:true})).toHaveAttribute('aria-pressed','true');
+  await expect(panel).toContainText('6 Health');
+  await dialog.getByRole('tab',{name:'Rules',exact:true}).click();
+  await expect(panel).toContainText('Hold Her Down');
+  await expect(panel).toContainText('Join Us or Die!');
+  await expectNoHorizontalOverflow(panel);
+  await dialog.getByRole('button',{name:'Sacred Groves',exact:true}).click();
+  await expect(panel.getByRole('columnheader',{name:'Unleash Divine Wrath'})).toBeVisible();
 });

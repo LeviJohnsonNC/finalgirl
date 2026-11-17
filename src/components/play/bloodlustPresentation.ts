@@ -1,3 +1,4 @@
+import { RATCHET_LADY, RATCHET_MAX_BLOODLUST } from '../../../supabase/functions/_shared/play/ratchetLady';
 import {ORGANISM,ORGANISM_MAX_BLOODLUST} from "@/lib/play/organism";
 import { SLAYER, SLAYER_BLOODLUST } from "@/lib/play/slayer";
 import { WOLF, WOLF_BLOODLUST } from "@/lib/play/bigBadWolf";
@@ -33,6 +34,7 @@ const photographs = [
  * Billy's board remains a documented source gap, so he uses the generic scale.
  */
 export const verifiedBloodlustMaximum: Readonly<Record<string, number>> = {
+  [RATCHET_LADY]: RATCHET_MAX_BLOODLUST,
   [ORGANISM]: ORGANISM_MAX_BLOODLUST,
   "The Hunter": 10,
   "The Intruders": 10,

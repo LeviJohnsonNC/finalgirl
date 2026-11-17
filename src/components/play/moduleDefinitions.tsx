@@ -1,3 +1,6 @@
+import { RATCHET_LADY, RATCHET_MODULE, ratchetCount } from '../../../supabase/functions/_shared/play/ratchetLady';
+import { RatchetLadyControls } from './RatchetLadyControls';
+import { ratchetLadyArt } from './ratchetLadyArt';
 import { STATION, STATION_MODULE, initialStation, stationState, stationSummary } from '../../../supabase/functions/_shared/play/station';
 import { StationControls } from './StationControls';
 import { stationArt } from './stationArt';
@@ -96,7 +99,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -126,6 +129,10 @@ const stationDefinition: Definition = {id:STATION_MODULE,owner:'location',match:
   summary:(fields,props)=>stationSummary(stationState(!props.events.length&&props.stationFresh?initialStation(props.startingEvent):fields))};
 export const moduleDefinitions: Definition[] = [
  stationDefinition,
+ {id:RATCHET_MODULE, owner:'killer', match:RATCHET_LADY, title:RATCHET_LADY, art:ratchetLadyArt('banner'),
+  capabilities:['reveals','minor-power'], Controls:RatchetLadyControls,
+  summary:state=>ratchetCount(state.maniacs) ? `Maniacs ${state.maniacs}/6${state.calmRemoved ? ' · Calm removed' : ''}` :
+    state.calmRemoved ? 'Maniacs unrecorded · Calm removed' : 'Maniacs unrecorded'},
  {id:FALCONWOOD_MODULE,owner:'location',match:FALCONWOOD,title:'Inside Falconwood',art:falconwoodArt('header'),
   capabilities:[],Controls:FalconwoodControls,summary:(fields,props)=>{
     const state=falconwoodState(fields);

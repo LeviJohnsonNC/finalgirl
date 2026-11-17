@@ -1,3 +1,4 @@
+import { RATCHET_MODULE, ratchetParent } from '../../../supabase/functions/_shared/play/ratchetLady';
 import {MALL_MODULE,mallParent} from '@/lib/play/sunnydaze';
 import { canUndoFalconwood, validPlayLog, canUndoSlayer, validSlayerHistory, canUndoHunter, validHunterHistory } from "@/lib/play/events";
 import { WINGARD_MODULE } from '../../../supabase/functions/_shared/play/wingardCatalog';
@@ -61,6 +62,9 @@ export function PlayTimeline({
           const entry =
             summary.entries.find((e) => e.id === original.id) ?? original;
           const undone = summary.inactive.has(original.id);
+          const ratchetBlocked = original.moduleData?.module === RATCHET_MODULE && !!original.ratchetAction &&
+            (undone ? !validPlayLog([...events, newPlayEvent({kind:'restore',target:original.id})])
+              : ratchetParent(summary.entries) !== original.id);
           const falconwoodBlocked = original.moduleData?.module === 'falconwood' && (undone
             ? !validPlayLog([...events,newPlayEvent({kind:'restore',target:original.id})])
             : !canUndoFalconwood(events, original.id));
@@ -111,8 +115,8 @@ export function PlayTimeline({
                 {onToggle && entry.kind !== "start" && !isPermanentMoment(entry) && !isLockedPlayEvent(entry) && (
                   <button
                     type="button"
-                    disabled={falconwoodBlocked||mallBlocked||slayerBlocked||hunterBlocked||wingardBlocked||intruderBlocked||woodsBlocked||marrekBlocked||tormentorBlocked||shadyBlocked||konradBlocked||grimlashBlocked}
-                    title={falconwoodBlocked?"Undo or restore intervening Falconwood observations first":slayerBlocked?"Undo or restore intervening Slayer observations first":mallBlocked?"Undo or restore intervening Mall observations first":hunterBlocked?"Undo or restore intervening Hunter observations first":wingardBlocked?"Resolve intervening Cottage observations first":intruderBlocked?"Resolve intervening Intruder observations first":woodsBlocked?"Undo or restore intervening Storybook Woods observations first":marrekBlocked?'Undo or restore intervening Warehouse/Tormentor observations first':tormentorBlocked?'Undo or restore intervening Tormentor observations first':shadyBlocked?'Undo or restore the intervening Shady Acres observations first':grimlashBlocked?'Undo or restore the intervening Grimlash observations first':konradBlocked?"Undo or restore the intervening USS Konrad observations first":undefined}
+                    disabled={ratchetBlocked||falconwoodBlocked||mallBlocked||slayerBlocked||hunterBlocked||wingardBlocked||intruderBlocked||woodsBlocked||marrekBlocked||tormentorBlocked||shadyBlocked||konradBlocked||grimlashBlocked}
+                    title={ratchetBlocked?"Undo or restore intervening Maniac observations first":falconwoodBlocked?"Undo or restore intervening Falconwood observations first":slayerBlocked?"Undo or restore intervening Slayer observations first":mallBlocked?"Undo or restore intervening Mall observations first":hunterBlocked?"Undo or restore intervening Hunter observations first":wingardBlocked?"Resolve intervening Cottage observations first":intruderBlocked?"Resolve intervening Intruder observations first":woodsBlocked?"Undo or restore intervening Storybook Woods observations first":marrekBlocked?'Undo or restore intervening Warehouse/Tormentor observations first':tormentorBlocked?'Undo or restore intervening Tormentor observations first':shadyBlocked?'Undo or restore the intervening Shady Acres observations first':grimlashBlocked?'Undo or restore the intervening Grimlash observations first':konradBlocked?"Undo or restore the intervening USS Konrad observations first":undefined}
                     onClick={() => onToggle(original, undone)}
                     className="type-caption underline text-muted-foreground hover:text-foreground min-h-[44px]"
                   >

@@ -325,6 +325,7 @@ test("a failed provider request records the attempt without persisting provider 
 });
 
 const schemas = load("../supabase/functions/_shared/validation.ts", {
+  "./play/ratchetLady.ts": load("../supabase/functions/_shared/play/ratchetLady.ts"),
   "https://deno.land/x/zod@v3.22.4/mod.ts": { z },
   "./auth.ts": { corsHeaders: {} },
 });

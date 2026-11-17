@@ -1,3 +1,4 @@
+import { RATCHET_LADY, RATCHET_MODULE, RATCHET_MAX_BLOODLUST, RATCHET_HEALTH_STORAGE_MAX, SHIELD_OF_MADNESS, ratchetCount } from '../../../supabase/functions/_shared/play/ratchetLady';
 import {OrganismRoster} from "./OrganismControls";
 import {ORGANISM, ORGANISM_MAX_BLOODLUST} from "@/lib/play/organism";
 import {mallUnlocksUltimate} from '@/lib/play/sunnydaze';
@@ -197,7 +198,11 @@ export function PlayScreen(props: PlayScreenProps) {
       };
   const finalGirlMaxHealth = observedFinalGirlMaxHealth(finalGirl, events, props.finalGirlStartingHealth, killer);
   // Legacy sessions can use the catalog to bound new input without backfilling observations.
-  const trackerLimits = { ...stateLimits, ...(killer===INTRUDERS&&{bloodlust:10}), ...(killer===ORGANISM&&{bloodlust:ORGANISM_MAX_BLOODLUST}), finalGirlHealth: observedFinalGirlMaxHealth(
+  const isRatchetLady = killer === RATCHET_LADY;
+  const maniacs = isRatchetLady ? moduleState(summary.entries, RATCHET_MODULE).maniacs : undefined;
+  const ratchetShield = ratchetCount(maniacs) && maniacs > 0 &&
+    summary.entries.some(event => event.momentType === 'dark-power' && event.killerCard === SHIELD_OF_MADNESS);
+  const trackerLimits = { ...stateLimits, ...(isRatchetLady && { killerHealth: RATCHET_HEALTH_STORAGE_MAX, bloodlust: RATCHET_MAX_BLOODLUST }), ...(killer===INTRUDERS&&{bloodlust:10}), ...(killer===ORGANISM&&{bloodlust:ORGANISM_MAX_BLOODLUST}), finalGirlHealth: observedFinalGirlMaxHealth(
     finalGirl, events, props.finalGirlStartingHealth ?? startingValues.finalGirlHealth, killer,
   ) ?? stateLimits.finalGirlHealth };
   const [message, setMessage] = useState("");
@@ -296,7 +301,8 @@ export function PlayScreen(props: PlayScreenProps) {
       setMessage(`Use a whole number from 0 to ${trackerLimits[field]}.`);
       return;
     }
-    if (commit({ kind: "state", field, value })) setEditingState(null);
+    const ratchetHealth = isRatchetLady && field === "killerHealth" && value > 99 ? true : undefined;
+    if (commit({ kind: "state", field, value, ...(ratchetHealth && { ratchetHealth }) })) setEditingState(null);
   };
   return (
     <div className="play-screen play-workspace">
@@ -488,6 +494,7 @@ export function PlayScreen(props: PlayScreenProps) {
                   <div className="play-state-caption">
                     <span className="play-state-title">{trackerTitles[field]}</span>
                     {value === undefined && <small className="play-state-unknown">Not recorded</small>}
+                    {field === 'killerHealth' && ratchetShield && <small>Shield of Madness · {maniacs} {maniacs === 1 ? 'Maniac' : 'Maniacs'}</small>}
                     {critical && <small className="play-critical-label">{value === 0 ? "No health remaining" : "Low health"}</small>}
                   </div>
                 {editingState === field ? (
@@ -518,7 +525,7 @@ export function PlayScreen(props: PlayScreenProps) {
                     <div className="play-state-stepper">
                       <button
                         aria-label={`Decrease ${stateLabels[field]}`}
-                        disabled={value === undefined || value <= 0 || (field==="bloodlust"&&(killer===INTRUDERS||killer===ORGANISM)&&value>trackerLimits.bloodlust)}
+                        disabled={value === undefined || value <= 0 || (field==="bloodlust"&&(killer===INTRUDERS||killer===ORGANISM||isRatchetLady)&&value>trackerLimits.bloodlust)}
                         onClick={() => value !== undefined && setState(field, killer==='Grimlash'&&field==='finalGirlHealth'?value-1:Math.min(trackerLimits[field],value-1))}
                       >
                         <Minus size={16} />
