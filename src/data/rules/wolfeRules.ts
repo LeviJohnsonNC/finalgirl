@@ -40,6 +40,7 @@ export const wolfeRules:EntityRuleModule={
     ])},
     {type:'heading',level:3,text:'Stunned'},
     {type:'paragraph',text:'Place a Stun marker under the affected Enemy. During the next Killer phase they ignore movement icons but still resolve attacks. Remove remaining Stun markers during Upkeep.'},
+    {type:'paragraph',text:'Hannibal, Dr. Death and Dr. Sunshine are Special Victims. Follow their cards for exceptions. The standard follow, save and casualty rules otherwise apply.'},
     table('Amped card',WOLFE_AMPED),table('Side Effects card',WOLFE_SIDE_EFFECTS),
     table('Event',WOLFE_EVENTS),table('Terror',WOLFE_TERRORS),table('Item',WOLFE_ITEMS),
   ],

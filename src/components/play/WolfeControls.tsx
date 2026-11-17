@@ -21,6 +21,7 @@ const outcomes=[
   {value:'present',label:'In play'},{value:'saved',label:'Saved'},
   {value:'killed',label:'Killed'},{value:'left',label:'Left play'},
 ] as const;
+const personOutcomes=['saved','killed','left'];
 const eventName=(id:string)=>WOLFE_EVENTS.find(event=>event.id===id)!.name;
 
 export function WolfeControls({events,onEvent,onDeath,blocked,killer,finalGirl}:ControlsProps) {
@@ -161,10 +162,9 @@ export function WolfeControls({events,onEvent,onDeath,blocked,killer,finalGirl}:
             onEnd={()=>commit({command:'event',id,active:false})} onClear={()=>commit({command:'event',id,active:false})}/>)}
         {WOLFE_PEOPLE.map(id=>{
           const status=state['person.'+id] as typeof outcomes[number]['value']|undefined;
-          const available=id==='dr-death'?['killed','left']:['saved','killed','left'];
           return <CharacterControl key={id} className={eventsPicker||status?'':'hidden'} name={eventName(id)}
             art={wolfeArt(status==='saved'||status==='killed'?id+'-'+status:id)} present="present" states={outcomes}
-            value={status} showRules={false} showStatusEditor={false} outcomes={available} allowOutcomeCorrections
+            value={status} showRules={false} showStatusEditor={false} outcomes={personOutcomes} allowOutcomeCorrections
             onChange={value=>{if(value)commit({command:'person',id,status:value as typeof outcomes[number]['value']});}}/>;
         })}
         {(eventsPicker||gurney!==undefined)&&<article className="wolfe-gurney">

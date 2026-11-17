@@ -117,6 +117,10 @@ test('Wolfe photographs and mixed-killer controls render together',async({page,a
   await page.getByRole('option',{name:'Baghead',exact:true}).click();
   await panel.getByRole('button',{name:'Record Stunned'}).click();
   await expect(panel.getByText('Baghead · 1',{exact:true})).toBeVisible();
+  await panel.getByRole('button',{name:'Mark Dr. Death saved',exact:true}).click();
+  await expect(panel.locator('.module-character').filter({hasText:'Dr. Death'}).locator('img')).toHaveAttribute('src',/dr-death-saved/);
+  await panel.getByRole('button',{name:'Mark Dr. Death killed',exact:true}).click();
+  await expect(panel.locator('.module-character').filter({hasText:'Dr. Death'}).locator('img')).toHaveAttribute('src',/dr-death-killed/);
   await panel.getByRole('button',{name:'Clear at Upkeep'}).click();
   await expect(panel.getByText('Baghead · 1',{exact:true})).toHaveCount(0);
 
