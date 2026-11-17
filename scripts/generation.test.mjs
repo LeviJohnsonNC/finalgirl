@@ -377,3 +377,157 @@ test('an access block is not mistaken for a content-policy rejection',async()=>{
  await assert.rejects(exports.streamChat({system:'Original fiction',user:'Facts'}),error=>error.kind==='upstream');
  assert.equal(calls,1);
 });
+
+function providerFixture(flags = {}, respond) {
+  const env = { OPENAI_API_KEY: 'openai-key', LOVABLE_API_KEY: 'lovable-key', ...flags };
+  const deno = { env: { get: name => env[name] } };
+  const models = {}, provider = {}, calls = [];
+  new Function('exports', 'Deno', compile('../supabase/functions/_shared/models.ts'))(models, deno);
+  new Function('require', 'exports', 'Deno', 'fetch', compile('../supabase/functions/_shared/aiGateway.ts'))(
+    name => { assert.equal(name, './models.ts'); return models; }, provider, deno,
+    async (url, options) => {
+      const call = { url, headers: new Headers(options.headers), body: JSON.parse(options.body) };
+      calls.push(call);
+      return respond(call);
+    },
+  );
+  return { provider, calls, models };
+}
+
+const openAiText = (events = [{ type: 'response.output_text.delta', delta: 'Story text.' }, { type: 'response.completed' }]) =>
+  new Response(events.map(event => `data: ${JSON.stringify(event)}\n\n`).join(''));
+
+test('switches all text workloads to direct Responses while images can still use Lovable', async () => {
+  const { provider, calls, models } = providerFixture({ AI_TEXT_PROVIDER: 'openai' }, call =>
+    call.url.includes('api.openai.com') ? openAiText() : generatedImage());
+
+  const stream = await provider.streamChat({ system: 'System', user: 'Player facts' });
+  assert.equal(stream.model, 'gpt-5.6-sol');
+  const output = await new Response(stream.body).text();
+  assert.match(output, /Story text\./);
+  assert.match(output, /"finish_reason":"stop"/);
+  assert.match(output, /data: \[DONE\]/);
+
+  await provider.generateText(planOptions);
+  await provider.generateShotPlanText(planOptions);
+  await provider.generateText({ ...planOptions, candidates: models.DEATH_MODEL_CANDIDATES });
+  await provider.generateImage('Paint the hall');
+
+  assert.deepEqual(calls.map(call => [call.url, call.body.model]), [
+    ['https://api.openai.com/v1/responses', 'gpt-5.6-sol'],
+    ['https://api.openai.com/v1/responses', 'gpt-6-luna'],
+    ['https://api.openai.com/v1/responses', 'gpt-6-luna'],
+    ['https://api.openai.com/v1/responses', 'gpt-6-luna'],
+    ['https://ai.gateway.lovable.dev/v1/chat/completions', 'google/gemini-3-pro-image'],
+  ]);
+  for (const call of calls.slice(0, 4)) {
+    assert.equal(call.headers.get('authorization'), 'Bearer openai-key');
+    assert.equal(call.headers.has('lovable-api-key'), false);
+    assert.equal(call.body.store, false);
+    assert.equal(call.body.stream, true);
+  }
+  assert.equal(calls[1].body.max_output_tokens, 4000);
+  assert.deepEqual(calls[1].body.reasoning, { effort: 'low' });
+  assert.equal(calls[4].headers.get('authorization'), 'Bearer lovable-key');
+});
+
+test('switches images independently and preserves ordered identities and both aspect ratios', async () => {
+  const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lV8AAAAASUVORK5CYII=';
+  const { provider, calls } = providerFixture({ AI_IMAGE_PROVIDER: 'openai', OPENAI_IMAGE_MODEL: 'gpt-image-2.6-flare' }, call =>
+    call.url.includes('/images/') ? new Response(JSON.stringify({ data: [{ b64_json: png }] })) : openAiText());
+
+  const cast = [{ name: 'Sheila', url: 'data:image/jpeg;base64,AAA=' }, { name: 'The Ratchet Lady', url: 'data:image/jpeg;base64,BBB=' }];
+  const opening = await provider.generateImage('Photograph this scene', undefined, { aspectRatio: '16:9', references: cast });
+  await provider.generateImage('Paint the poster', own);
+  await provider.generateImage('Paint the poster without a reference');
+  const stream = await provider.streamChat({ system: 'System', user: 'Player facts' });
+  await new Response(stream.body).text();
+
+  assert.deepEqual(opening, { mimeType: 'image/png', base64: png, model: 'gpt-image-2.6-flare' });
+  assert.deepEqual(calls.map(call => call.url), [
+    'https://api.openai.com/v1/images/edits', 'https://api.openai.com/v1/images/edits',
+    'https://api.openai.com/v1/images/generations', 'https://ai.gateway.lovable.dev/v1/responses',
+  ]);
+  assert.deepEqual(calls.slice(0, 3).map(call => call.body.size), ['1536x864', '1024x1536', '1024x1536']);
+  assert.deepEqual(calls[0].body.images, cast.map(reference => ({ image_url: reference.url })));
+  assert.match(calls[0].body.prompt, /Image 1 — Identity photograph: Sheila\nImage 2 — Identity photograph: The Ratchet Lady/);
+  assert.deepEqual(calls[1].body.images, [{ image_url: own }]);
+  assert.equal(calls[2].body.images, undefined);
+  for (const call of calls.slice(0, 3)) {
+    assert.equal(call.headers.get('authorization'), 'Bearer openai-key');
+    assert.equal(call.body.output_format, 'png');
+    assert.equal(call.body.n, 1);
+  }
+  assert.equal(calls[3].headers.get('authorization'), 'Bearer lovable-key');
+  assert.equal(calls[3].body.model, 'openai/gpt-5.6-sol');
+});
+
+test('reports direct credit, rate, and policy errors without charging a fallback provider', async () => {
+  for (const [status, code, kind, appStatus] of [
+    [429, 'credit_balance_exhausted', 'credits', 402],
+    [429, 'rate_limit_exceeded', 'rate_limit', 429],
+    [400, 'moderation_blocked', 'content_policy', 500],
+    [503, 'server_error', 'image_unavailable', 503],
+  ]) {
+    const { provider, calls } = providerFixture({ AI_IMAGE_PROVIDER: 'openai' },
+      () => new Response(JSON.stringify({ error: { code, message: 'private provider details' } }), { status }));
+    await assert.rejects(provider.generateImage('Opening', own), error => {
+      assert.equal(error.kind, kind);
+      assert.equal(provider.statusFor(error), appStatus);
+      assert.doesNotMatch(error.message, /private/);
+      return true;
+    });
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].url, 'https://api.openai.com/v1/images/edits');
+  }
+});
+
+test('keeps OpenAI missing-key and midstream credit errors on the selected provider', async () => {
+  const missing = providerFixture({ AI_TEXT_PROVIDER: 'openai', OPENAI_API_KEY: undefined }, () => assert.fail('Unexpected request'));
+  await assert.rejects(missing.provider.streamChat({ system: 'System', user: 'Player facts' }), { kind: 'no_key' });
+  assert.equal(missing.calls.length, 0);
+
+  const exhausted = providerFixture({ AI_TEXT_PROVIDER: 'openai' }, () =>
+    openAiText([{ type: 'response.failed', response: { error: { code: 'project_spend_limit_exceeded' } } }]));
+  const stream = await exhausted.provider.streamChat({ system: 'System', user: 'Player facts' });
+  assert.match(await new Response(stream.body).text(), /"code":"credits"/);
+  assert.equal(exhausted.calls.length, 1);
+});
+
+test('the signed-in model probe checks OpenAI before cutover and redacts upstream failures', async () => {
+  let handler, rejected = false;
+  const probes = [];
+  const models = {}, deno = { env: { get: name => ({ OPENAI_API_KEY: 'openai-key' })[name] } };
+  new Function('exports', 'Deno', compile('../supabase/functions/_shared/models.ts'))(models, deno);
+  const modules = {
+    'https://deno.land/std@0.168.0/http/server.ts': { serve: fn => { handler = fn; } },
+    '../_shared/auth.ts': { getCorsHeaders: () => ({}) },
+    '../_shared/guard.ts': { requireUser: async req => req.headers.has('Authorization')
+      ? { ok: true } : { ok: false, response: new Response(null, { status: 401 }) } },
+    '../_shared/models.ts': models,
+  };
+  new Function('require', 'exports', 'Deno', 'fetch', compile('../supabase/functions/ai-capabilities/index.ts'))(
+    name => modules[name], {}, deno, async (url, options) => {
+      probes.push([url, new Headers(options.headers).get('authorization')]);
+      return rejected
+        ? new Response('provider details', { status: 403 })
+        : Response.json({ data: Object.values(models.OPENAI_MODELS).map(id => ({ id })) });
+    },
+  );
+
+  const endpoint = 'https://archive.example.test/functions/v1/ai-capabilities?provider=openai';
+  assert.equal((await handler(new Request(endpoint))).status, 401);
+  assert.equal(probes.length, 0);
+  const request = () => new Request(endpoint, { headers: { Authorization: 'Bearer session' } });
+  const data = await (await handler(request())).json();
+  assert.deepEqual(probes, [['https://api.openai.com/v1/models', 'Bearer openai-key']]);
+  assert.equal(data.activeTextProvider, 'lovable');
+  assert.equal(data.activeImageProvider, 'lovable');
+  assert.deepEqual(data.textCandidatesAvailable, ['gpt-5.6-sol', 'gpt-6-luna']);
+  assert.deepEqual(data.imageCandidatesAvailable, ['gpt-image-2.6-sunburst']);
+
+  rejected = true;
+  const failure = await handler(request());
+  assert.equal(failure.status, 502);
+  assert.deepEqual(await failure.json(), { error: 'Provider model listing failed', provider: 'openai', status: 403 });
+});
