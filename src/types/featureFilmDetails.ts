@@ -1,3 +1,4 @@
+import { WOLFE_EVENTS, WOLFE_SETUPS } from '../../supabase/functions/_shared/play/wolfeCatalog';
 import {STATION_EVENTS, STATION_SETUPS, stationSetupDescription} from '../../supabase/functions/_shared/play/stationCatalog';
 import { FALCONWOOD_EVENTS, FALCONWOOD_SETUPS, falconwoodSetupDescription } from "../../supabase/functions/_shared/play/falconwoodCatalog";
 import {MALL_SETUPS,MALL_EVENTS} from '../../supabase/functions/_shared/play/sunnydazeCatalog';
@@ -242,25 +243,8 @@ Many would call her eccentric because of how obsessive she is over time, but her
       description: `Constructed in 1899 by the eccentric oil baron and philanthropist Jebediah Wolfe, Wolfe Asylum was built to hold 300 patients, but by the 1950's was home to over 2,500 souls. Overcrowding was the least of its problems, however, as 'difficult' patients were routinely locked in cages, while others went unattended for weeks or were left to wander the dank halls completely naked.
 
 Before the reforms of the late '70s, Wolfe orderlies frequently performed lobotomies with ice picks, and electroshock treatment often resulted in death. Today, Wolfe Asylum claims to be a haven for the mentally ill, but some say it will never truly be free of its dark past.`,
-      setupCards: [
-        { name: 'A Solitary Life', description: 'A setup for Madness in the Dark featuring initial victim and token placement.' },
-        { name: 'Bingo Night', description: 'A setup for Madness in the Dark featuring initial victim and token placement.' },
-        { name: 'Madhouse Faceoff', description: 'A setup for Madness in the Dark featuring initial victim and token placement.' },
-        { name: 'Padded Rooms', description: 'A setup for Madness in the Dark featuring initial victim and token placement.' },
-        { name: 'The Dr. Is In', description: 'A setup for Madness in the Dark featuring initial victim and token placement.' }
-      ],
-      events: [
-        { name: 'Dangerous Addiction', description: 'Choose up to 2 Victims that do not share a space with you or each other. Place a facedown Pill token with both, one, or neither of them. For each Pill token you place, 1 Bloodlust.' },
-        { name: 'Dr. Death', description: 'Place Dr. Death in the Operating Theater. During the Upkeep phase, Dr. Death kills a Victim in his space. If there are none, move Dr. Death one space closer to the nearest Victim.' },
-        { name: 'Dr. Sunshine', description: 'Place Dr. Sunshine in the Doctor\'s Office. While Dr. Sunshine is in your space, whenever you take a Pill you may choose what color it is. If Dr. Sunshine is killed in your space, 4 Horror.' },
-        { name: 'Hannibal the Cannibal', description: 'Place Hannibal in Solitary Confinement along with 2 new Victims. During the Upkeep phase, Hannibal kills a Victim in his space. If there are none, panic Hannibal instead. If Hannibal is saved, 1 Horror. If Hannibal is killed, minus 1 Horror.' },
-        { name: 'Hospital Gurney', description: 'Place the Hospital Gurney token in your space. It can move with you and you can place up to 2 Victims on it. You can discard the Gurney to ram it into an Enemy in your space or an adjacent space to inflict 1 Damage plus one additional Damage for each Victim currently on the Gurney. The Victims are then killed.' },
-        { name: 'Medical Stockpile', description: 'The first time in a phase that you or an Enemy recover at least 1 Health, you or the Enemy recover an additional Health.' },
-        { name: 'Powerful Meds', description: 'Whenever you consume a Pill or Pills, draw an additional Side Effects card.' },
-        { name: 'Scratching And Biting', description: 'Whenever you save a Victim, make a Horror roll. If no stars, lose 1 Health.' },
-        { name: '"The New Patients Are Here!"', description: 'New patients arrive at the asylum, adding more victims to save.' },
-        { name: 'Welcome To The Madhouse', description: 'Place a Skull token in the Common Room. When you or an Enemy enters that space, you or it is dealt 1 Damage.' }
-      ]
+      setupCards: WOLFE_SETUPS.map(name=>({name,description:'Use the matching printed diagram. Place four face-down Pill tokens at the marked positions.'})),
+      events: WOLFE_EVENTS.map(card=>({name:card.name,description:card.effect})),
     },
     killer: {
       name: 'Ratchet Lady',

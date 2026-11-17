@@ -1,3 +1,4 @@
+import { WOLFE_VISUAL } from './play/wolfeCatalog.ts';
 import { SLAYER_VISUAL } from "./play/slayer.ts";
 import { WINGARD_VISUAL } from './play/wingardCatalog.ts';
 import { INTRUDER_VISUAL } from "./play/intruders.ts";
@@ -61,8 +62,7 @@ export const DEATH_LOCATION_CUES: Record<string, string> = {
   'Carnival of Blood': CARNIVAL_VISUAL,
   'Maple Lane':
     'A calm, middle-class suburban neighborhood at dusk or early night, centered on a four-way residential intersection. Modest single-family homes with pitched roofs and tidy lawns line the streets, their porch lights and interior lamps glowing warmly. Everything appears orderly, safe, and routine. Streetlights cast soft pools of amber light onto damp asphalt, creating reflective patches on the road surface. The streets are empty—no pedestrians, no moving cars—just stillness. The silence feels intentional rather than late.',
-  'Wolfe Asylum':
-    'An imposing, Victorian-era psychiatric hospital constructed from weathered, rough-hewn grey stone, set against a bleak and overcast sky. The building, identified by a rusted metal archway as "Wolfe Asylum - Est. 1899," dominates the landscape with its multi-story Gothic architecture, featuring steep gables, narrow windows—some boarded over—and a prominent central arched portico. The left wing is heavily draped in dark green ivy, while the rest of the stone appears soot-stained and neglected.',
+  'Wolfe Asylum': WOLFE_VISUAL,
   'Sunnydaze Mall':
     'A bustling two-story indoor shopping mall named "Sunny Daze Mall," characterized by a bright, airy atrium and a mix of niche retail stores overlooking a communal food court. The architecture features clean lines, stark white walls, and a large grid-like skylight that floods the central space with natural light, giving the interior a crisp, midday feel.',
   'Shady Acres':

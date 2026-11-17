@@ -1,3 +1,5 @@
+import { WOLFE, WOLFE_MODULE, WOLFE_ITEMS, WOLFE_VISUAL } from './wolfeCatalog.ts';
+import { validWolfeField, wolfeFacts, type WolfeAction } from './wolfe.ts';
 import { RATCHET_LADY, RATCHET_MODULE, RATCHET_POWERS, RATCHET_FINALES, validRatchetField } from './ratchetLady.ts';
 import { STATION, STATION_MODULE, stationFacts, stationState, validStationField } from './station.ts';
 import { ORGANISM, ORGANISM_MODULE, ORGANISM_FINALES, organismFacts, validOrganismField } from "./organism.ts";
@@ -68,10 +70,11 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
+  wolfeAction?: WolfeAction;
   wolfPowerMode?: WolfMode;
   intruderFinale?: string;
   intruderPower?: string;
@@ -185,6 +188,7 @@ function validField(
   key: string,
   value: unknown,
 ) {
+  if (module === WOLFE_MODULE) return validWolfeField(key,value);
   if (module === RATCHET_MODULE) return validRatchetField(key,value);
   if (module === MALL_MODULE) return validMallField(key,value);
   if (module === FALCONWOOD_MODULE) return validFalconwoodField(key, value);
@@ -318,7 +322,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    ![RATCHET_MODULE, STATION_MODULE, ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    ![WOLFE_MODULE, RATCHET_MODULE, STATION_MODULE, ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -423,7 +427,7 @@ export function moduleState(
       }
     }
     const observation = e.moduleData?.module === module ? e.moduleData : ["groves","creech"].includes(e.moduleData?.module ?? "") && e.linkedModule?.module === module ? e.linkedModule : undefined;
-    if (e.kind !== "module" || !validModuleObservation(observation)) continue;
+    if ((e.kind !== "module" && !(module===WOLFE_MODULE&&e.kind==='killed'&&e.wolfeAction?.command==='ram')) || !validModuleObservation(observation)) continue;
     for (const [key, value] of Object.entries(observation.changes)) {
       if (value === null) delete state[key];
       else state[key] = value;
@@ -573,8 +577,13 @@ export function moduleContext(
   selection: ModuleSelection,
   entries: readonly ObservedEvent[],
   includeWolf = true,
+  includeWolfe = true,
 ) {
   const context: Record<string, ModuleState> = {};
+  if(includeWolfe && selection.location===WOLFE) {
+    const facts=wolfeFacts(moduleState(entries,WOLFE_MODULE));
+    if(facts) context[WOLFE_MODULE]={facts};
+  }
   if (selection.location===MALL && entries.some(e=>e.moduleData?.module===MALL_MODULE)) context[MALL_MODULE]={facts:mallFacts(moduleState(entries,MALL_MODULE))};
   if (selection.killer === SLAYER && entries.some(e => e.moduleData?.module === SLAYER_MODULE)) {
     context.slayer = { facts: slayerFacts(moduleState(entries, SLAYER_MODULE)) };
@@ -660,6 +669,11 @@ export function moduleStoryBeats(
   selection: ModuleSelection,
   entries: readonly ObservedEvent[],
 ): string {
+  if (selection.location === WOLFE) {
+    const place=wolfeFacts(moduleState(entries,WOLFE_MODULE));
+    const threat=moduleStoryBeats({...selection,location:''},entries);
+    return [fitStoryText(place,threat?490:895),fitStoryText(threat,place?400:895)].filter(Boolean).join('\n');
+  }
   if (selection.location === FALCONWOOD) {
     const threat = moduleStoryBeats({...selection,location:''}, entries);
     const town = falconwoodFacts(falconwoodState(moduleState(entries,FALCONWOOD_MODULE)));
@@ -906,6 +920,10 @@ export function buddylandReferences(
   }
   if(selection.location===MALL){refs.push({name:MALL,effect:MALL_VISUAL});if(typeof context?.[MALL_MODULE]?.facts==='string')refs.push({name:'Mall observations',effect:context[MALL_MODULE].facts as string});}
   if(selection.location===WINGARD) refs.push({name:WINGARD,effect:WINGARD_VISUAL});
+  if(selection.location===WOLFE) {
+    refs.push({name:WOLFE,effect:WOLFE_VISUAL});
+    if(typeof context?.wolfe?.facts==='string') refs.push({name:'Wolfe Asylum observations',effect:context.wolfe.facts});
+  }
   if(selection.location==='Marrek Warehouse'){refs.push({name:'Marrek Warehouse',effect:MARREK_VISUAL});if(context?.marrek)refs.push({name:'Warehouse observations',effect:marrekFacts(marrekState(context.marrek)).join(' ')});}
   if(selection.killer===ORGANISM && typeof context?.organism?.facts==="string") refs.push({name:"Organism observations",effect:context.organism.facts});
   if(selection.killer===INTRUDERS && context?.intruders) refs.push({name:'Intruder observations',effect:intruderFacts(context.intruders)});
@@ -1138,7 +1156,7 @@ export function moduleItemBeats(
   entries: readonly ObservedEvent[],
 ) {
   const locationCatalog =
-    selection.location === MALL ? MALL_ITEMS : selection.location === WINGARD ? WINGARD_ITEMS : selection.location === "Marrek Warehouse" ? MARREK_ITEMS : selection.location === "Shady Acres" ? SHADY_ITEMS : selection.location === "USS Konrad" ? KONRAD_ITEMS : selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
+    selection.location === WOLFE ? WOLFE_ITEMS : selection.location === MALL ? MALL_ITEMS : selection.location === WINGARD ? WINGARD_ITEMS : selection.location === "Marrek Warehouse" ? MARREK_ITEMS : selection.location === "Shady Acres" ? SHADY_ITEMS : selection.location === "USS Konrad" ? KONRAD_ITEMS : selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
       ? CAMP_ITEMS
       : selection.location === "Carnival of Blood"
         ? CARNIVAL_ITEMS

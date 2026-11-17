@@ -1,3 +1,7 @@
+import { WOLFE, WOLFE_MODULE } from '../../../supabase/functions/_shared/play/wolfeCatalog';
+import { wolfeSummary } from '../../../supabase/functions/_shared/play/wolfe';
+import { WolfeControls } from './WolfeControls';
+import { wolfeArt } from './wolfeArt';
 import { RATCHET_LADY, RATCHET_MODULE, ratchetCount } from '../../../supabase/functions/_shared/play/ratchetLady';
 import { RatchetLadyControls } from './RatchetLadyControls';
 import { ratchetLadyArt } from './ratchetLadyArt';
@@ -87,6 +91,7 @@ export interface ControlsProps {
   location: string;
   finalGirl: string;
   events: PlayEvent[];
+  onDeath?: (event:PlayEvent) => void;
   onEvent: (event: PlayEvent) => boolean;
 }
 type State = ReturnType<typeof moduleState>;
@@ -99,7 +104,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -187,6 +192,7 @@ export const moduleDefinitions: Definition[] = [
  return describe(KONRAD_FUNCTIONS.map(f=>`system:${f.id}`),'systems on')+' · '+describe(KONRAD_SHAFTS.map(id=>`shaft:${id}`),'shafts open');
 },Controls:props=><KonradControls {...props}/>},
  {id:'evomorph',owner:'killer',match:'Evomorph',title:'The Evomorph',art:{src:evomorphBanner,fit:'slice',position:'65% center'},capabilities:['reveals','minor-power'],summary:state=>`${state.stage?String(state.stage).replace(/^./,s=>s.toUpperCase()):'Stage not recorded'} · ${state.presence==='vanished'?'Hidden':state.presence==='on-board'?'Visible':'Presence not recorded'}`,Controls:props=><EvomorphControls {...props}/>},
+ {id:WOLFE_MODULE,owner:'location',match:WOLFE,title:'Inside Wolfe Asylum',art:wolfeArt('banner'),capabilities:['character','event'],summary:wolfeSummary,Controls:props=><WolfeControls {...props}/>},
  {id:'creech',owner:'location',match:'Creech Manor',title:'Inside Creech Manor',art:{src:creechBanner,fit:'slice',position:'70% center'},capabilities:['character','event'],summary:state=>`Ladder: ${state.ladder??'not recorded'} · Helicopter: ${state['helicopter.used']===true?'used':state['event.helicopter']==='active'?'available':'not recorded'}`,Controls:props=><CreechControls {...props}/>},
   {id:'poltergeist',owner:'killer',match:'Poltergeist',title:'The Poltergeist',art:moduleBanners.poltergeist,capabilities:['objective','minor-effect','reveals'],summary:state=>`Carolyn: ${state.carolyn===undefined?'not recorded':String(state.carolyn).replace(/-/g,' ')} · Mr. Floppy: ${state.floppy===undefined?'not recorded':String(state.floppy).replace(/-/g,' ')}`,Controls:props=><PoltergeistControls {...props}/>},
   {id:"groves",owner:"location",match:"Sacred Groves",title:"Inside Sacred Groves",art: moduleBanners.groves,capabilities:["character","event"],summary:state=>`Divine Wrath ${typeof state.wrath === "number" ? `${state.wrath}/10` : "not recorded"}${state.finaleRevealed ? " · Finale active" : ""}`,Controls:props=><GrovesControls {...props}/>},

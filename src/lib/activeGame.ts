@@ -1,3 +1,5 @@
+import { WOLFE, WOLFE_MODULE } from '../../supabase/functions/_shared/play/wolfeCatalog';
+import { initialWolfe, sameWolfe, wolfeOwnsLog } from '../../supabase/functions/_shared/play/wolfe';
 import { RATCHET_LADY, RATCHET_MODULE, ratchetLogBelongsTo } from '../../supabase/functions/_shared/play/ratchetLady';
 import {MALL,MALL_MODULE,initialMall} from './play/sunnydaze';
 import { WINGARD, WINGARD_MODULE } from '../../supabase/functions/_shared/play/wingardCatalog';
@@ -33,6 +35,7 @@ export interface ActiveGame {
   /** New sessions initialize the always-visible core trackers once on first Play entry. */
   coreTrackersVersion?: 1;
   ratchetSetupVersion?: 1;
+  wolfeSetupVersion?: 1;
   woodsSetupVersion?: 1;
   marrekSetupVersion?: 1;
   wingardSetupVersion?: 1;
@@ -84,6 +87,10 @@ export function isActiveGame(value: unknown): value is ActiveGame {
   if (Array.isArray(game.playEvents) && (!ratchetLogBelongsTo(game.selection?.killer, game.playEvents) ||
       game.playEvents.some(event => event?.moduleData?.module === RATCHET_MODULE && !event.ratchetAction &&
         typeof event.moduleData.changes?.maniacs === 'number' && game.ratchetSetupVersion !== 1))) return false;
+  if(game.wolfeSetupVersion!==undefined&&(game.wolfeSetupVersion!==1||game.selection?.location!==WOLFE))return false;
+  if(Array.isArray(game.playEvents)&&(!wolfeOwnsLog(game.selection?.location,game.playEvents)||game.playEvents.some(event=>
+    event?.moduleData?.module===WOLFE_MODULE&&!event.wolfeAction&&
+      (game.wolfeSetupVersion!==1||!event.moduleData.changes||!sameWolfe(event.moduleData.changes,initialWolfe(game.selection?.startingEvent))))))return false;
   if(game.coreTrackersVersion!==undefined&&game.coreTrackersVersion!==1)return false;
   if (game.woodsSetupVersion !== undefined && (game.woodsSetupVersion !== 1 || game.selection?.location !== WOODS)) return false;
   if (Array.isArray(game.playEvents) && game.playEvents.some(event =>

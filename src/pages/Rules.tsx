@@ -1,3 +1,4 @@
+import { WOLFE_SETUPS } from '../../supabase/functions/_shared/play/wolfeCatalog';
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Search, ArrowLeft, ArrowRight, X, BookOpen, ChevronRight } from 'lucide-react';
 import { coreRules } from '@/data/rules/coreRules';
@@ -19,6 +20,7 @@ const CATEGORY_FILTERS: RuleCategory[] = ['ALL', 'CORE', 'TURN', 'COMBAT', 'KILL
 
 function blockToText(block: RuleBlock): string {
   switch (block.type) {
+    case "wolfe-setups": return WOLFE_SETUPS.join(" ");
     case "groves-setup": return block.setup;
     case 'paragraph':
     case 'heading':
