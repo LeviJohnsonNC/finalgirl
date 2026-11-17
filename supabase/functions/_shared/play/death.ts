@@ -1,3 +1,4 @@
+import { RATCHET_LADY, RATCHET_MODULE, ratchetFacts, ratchetLogBelongsTo } from './ratchetLady.ts';
 import {STATION, STATION_MODULE, stationFacts, stationState} from './station.ts';
 import {ORGANISM, ORGANISM_MODULE, organismFacts, organismLiving} from "./organism.ts";
 import { FALCONWOOD, FALCONWOOD_MODULE, falconwoodFacts, falconwoodState, missionById, missionByName } from "./falconwood.ts";
@@ -31,7 +32,7 @@ export function deathFacts(
   events: PlayEvent[],
   eventId: string,
 ) {
-  if(!validPlayLog(events))return null;
+  if(!validPlayLog(events) || !ratchetLogBelongsTo(selection.killer, events))return null;
   if (selection.location !== STATION && events.some(e=>e.stationReference || e.moduleData?.module===STATION_MODULE)) return null;
   if(selection.killer!==ORGANISM&&events.some(e=>e.moduleData?.module===ORGANISM_MODULE||e.organismReference)) return null;
   if (selection.location !== FALCONWOOD && events.some(e => e.moduleData?.module === FALCONWOOD_MODULE || e.falconwoodReference)) return null;
@@ -65,7 +66,8 @@ export function deathFacts(
   const slayerDeath = selection.killer === SLAYER && e.slayerReference;
   const hunterDeath=selection.killer===HUNTER&&e.hunterReference;
   const stationDeath = selection.location === STATION && e.stationReference;
-  const historical = stationDeath || falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
+  const ratchetDeath = selection.killer === RATCHET_LADY && e.ratchetReference;
+  const historical = ratchetDeath || stationDeath || falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
     ? summarizePlay(events.slice(0, events.findIndex(event => event.id === eventId) + 1)).entries
     : [];
   // The death's own fields reflect deliberate edits. Only the surrounding
@@ -123,6 +125,10 @@ export function deathFacts(
       const sorted = Object.fromEntries(Object.entries(wolf).sort(([a], [b]) => a.localeCompare(b)));
       context = { ...context, "big-bad-wolf": sorted };
     }
+  }
+  if (ratchetDeath) {
+    const facts = ratchetFacts(moduleState(historical, RATCHET_MODULE), undefined, historical);
+    context = { ...context, [RATCHET_MODULE]: { facts } };
   }
   if(organismDeath) {
     // These labels are part of the fingerprint of existing saved death scenes.
@@ -268,6 +274,7 @@ export function detailsForCause(
     ...details,
     attacker:
       killer===ORGANISM&&(cause==="killer"||cause==="terror") ? (details.attacker===ORGANISM?"":details.attacker??"") :
+      killer === RATCHET_LADY && cause === 'terror' ? details.attacker ?? '' :
       intruderAttribution ? (INTRUDER_ROSTER.some(p=>p.name===details.attacker)?details.attacker:"") : cause === "killer"
         ? killer
         : cause === "minion"

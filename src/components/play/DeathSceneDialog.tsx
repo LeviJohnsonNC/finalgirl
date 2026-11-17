@@ -1,3 +1,5 @@
+import { RATCHET_LADY, RATCHET_TERRORS } from '../../../supabase/functions/_shared/play/ratchetLady';
+import { ratchetLadyArt } from './ratchetLadyArt';
 import {STATION, STATION_EVENTS, STATION_TERRORS, stationNameKey} from '../../../supabase/functions/_shared/play/stationCatalog';
 import {stationArt,stationTerrorArt} from './stationArt';
 import {ORGANISM, organismFormByName, ORGANISM_TERRORS} from "@/lib/play/organism";
@@ -283,6 +285,8 @@ const {characterImages}=useActiveImages();
   const woodsTerrorImage = woodsTerror?.location === WOODS ? woodsDeathImage(woodsTerror.name, values.room) : undefined;
   const piperCause = selection.location === WOODS && findPlayCard(selection, "event", values.eventCard)?.name === "Pied Piper";
   const cottageTerror=selection.location===WINGARD ? WINGARD_TERRORS.find(card=>card.name===values.terrorCard && card.fatal) : undefined;
+  const ratchetTerror = selection.killer === RATCHET_LADY
+    ? RATCHET_TERRORS.find(card => card.death && card.name === values.terrorCard) : undefined;
   const organismTerror=selection.killer===ORGANISM?ORGANISM_TERRORS.find(card=>card.death&&card.name===values.terrorCard):undefined;
   const cottageEvent=selection.location===WINGARD && suggestedDeathCards(selection,'event').some(card=>card.name===values.eventCard)
     ? WINGARD_EVENTS.find(card=>card.name===values.eventCard) : undefined;
@@ -362,6 +366,8 @@ const {characterImages}=useActiveImages();
                   key={cause}
                   className={`play-cause-tile play-cause-tile--${cause}`}
                   aria-pressed={values.cause === cause}
+                  data-ratchet-photo={selection.killer === RATCHET_LADY &&
+                    (cause === 'killer' || cause === 'minion' || cause === 'terror' && !!ratchetTerror) || undefined}
                   data-organism-photo={selection.killer===ORGANISM&&(cause==="killer"||cause==="terror"&&!!organismTerror)||undefined}
                   data-slayer-photo={selection.killer === SLAYER && (cause === "killer" || cause === "terror" && !!slayerTerror) || undefined}
                   data-wingard-photo={(cause==='terror' && !!cottageTerror || cause==='event' && !!cottageEvent) || undefined}
@@ -379,6 +385,9 @@ const {characterImages}=useActiveImages();
                 >
                   {stationTerror && cause==='terror' ? <ModuleArtwork art={stationTerrorArt[stationTerror.id]}/> : stationCauseArt && cause===values.cause ? <ModuleArtwork art={stationCauseArt}/> : selection.location===MALL&&cause==='hazard'?<ModuleArtwork art={mallArt('wet-floors')}/>:selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
                     :cause==='event'&&cottageEvent ? <ModuleArtwork art={wingardArt(cottageEvent.id,true)} />
+                    :selection.killer===RATCHET_LADY && cause==='killer' ? <ModuleArtwork art={ratchetLadyArt('banner')}/>
+                    :selection.killer===RATCHET_LADY && cause==='minion' ? <ModuleArtwork art={ratchetLadyArt('maniacs-2')}/>
+                    :cause==='terror'&&ratchetTerror ? <ModuleArtwork art={ratchetLadyArt(ratchetTerror.id)}/>
                     :selection.killer===ORGANISM&&cause==="killer"?<ModuleArtwork art={organismArt(organismFormByName(values.attacker)?.id??"header")} />
                     :cause==="terror"&&organismTerror?<ModuleArtwork art={organismArt(organismTerror.id,true)} />
                     :selection.killer===INTRUDERS&&cause==='killer'
@@ -417,6 +426,13 @@ const {characterImages}=useActiveImages();
                   {INTRUDER_ROSTER.map(p=><option key={p.id} value={p.name}>{p.name}</option>)}
                 </PlaySelect></label>
               )}
+              {selection.killer === RATCHET_LADY && values.cause === 'terror' && (
+                <label>Who attacked?
+                  <PlaySearch label="Death attacker" value={values.attacker ?? ''}
+                    options={[RATCHET_LADY, 'Maniac']} onChange={value => update('attacker', value)}
+                    placeholder="Optional attacker" />
+                </label>
+              )}
               {values.cause === "minion" && (
                 <label>
                   Who attacked?
@@ -424,12 +440,12 @@ const {characterImages}=useActiveImages();
                     label="Death attacker"
                     value={values.attacker ?? ""}
                     onChange={(v) => update("attacker", v)}
-                    options={[...(selection.location === FALCONWOOD && selection.mission === "Survive the Hunt" ? ["Agent"] : []), ...(selection.location==='Shady Acres' ?['Child 1','Child 2','Child 3']:[]),...(
+                    options={[...(selection.killer === RATCHET_LADY ? ['Maniac'] : []), ...(selection.location === FALCONWOOD && selection.mission === "Survive the Hunt" ? ["Agent"] : []), ...(selection.location==='Shady Acres' ?['Child 1','Child 2','Child 3']:[]),...(
                       selection.killer === "Billy the Bear"
                         ? BUDDIES.map((b) => b.name)
                         : selection.killer === "Geppetto" ? ["Puppet", "Puppet 1", "Puppet 2", "Puppet 3"] : selection.killer === "Poltergeist" ? ["Behemoth","Clown Doll"] : [])]
                     }
-                    placeholder={selection.location===FALCONWOOD?"Choose or enter an Enemy":selection.location==='Shady Acres'?'Choose or enter an Enemy':selection.killer === "Geppetto" ? "Choose a Puppet or enter a minion" : "Choose a Buddy or enter a minion"}
+                    placeholder={selection.killer === RATCHET_LADY ? "Choose or enter a Minion" : selection.location===FALCONWOOD?"Choose or enter an Enemy":selection.location==='Shady Acres'?'Choose or enter an Enemy':selection.killer === "Geppetto" ? "Choose a Puppet or enter a minion" : "Choose a Buddy or enter a minion"}
                   />
                 </label>
               )}

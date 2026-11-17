@@ -1,3 +1,5 @@
+import { RATCHET_LADY, RATCHET_MODULE, ratchetFacts, ratchetCount } from '../../supabase/functions/_shared/play/ratchetLady';
+import { fitStoryText } from '../../supabase/functions/_shared/play/storyText';
 import {ORGANISM, ORGANISM_FINALES, organismFinale} from "@/lib/play/organism";
 import { missionById } from "../../supabase/functions/_shared/play/falconwood";
 import {MALL,MALL_MODULE,mallReview} from '@/lib/play/sunnydaze';
@@ -98,6 +100,14 @@ const TheEnd = ({
   const slayerReview = result.killer === "Slayer" ? formData.slayerReview : undefined;
   const tormentorReview=useMemo(()=>result.killer==='The Tormentor'?(formData.tormentorReview??{loss:tormentorState(endingModuleState(endingSummary(result.playEvents).entries,'tormentor')).loss}):undefined,[result.killer,result.playEvents,formData.tormentorReview]);
   const fate = reviewedCharacterFate(formData.finalGirlHealth ?? undefined,shipReview,tormentorReview);
+  const ratchetEnding = useMemo(() => {
+    if (result.killer !== RATCHET_LADY) return undefined;
+    const entries = endingSummary(result.playEvents).entries;
+    const recentCount = /Maniacs on board at end: ([0-6])(?:\.|$)/.exec(formData.gameHighlights)?.[1];
+    const legacyCount = recentCount === undefined ? undefined : Number(recentCount);
+    return ratchetFacts(endingModuleState(entries, RATCHET_MODULE),
+      formData.ratchetManiacCount === null || ratchetCount(formData.ratchetManiacCount) ? formData.ratchetManiacCount : legacyCount, entries);
+  }, [result.killer, result.playEvents, formData.ratchetManiacCount, formData.gameHighlights]);
   const endingKillerHealth = hunter&&hunter.phase!=='mark-x'||result.killer==='The Intruders'||result.killer===ORGANISM||isKillerUnkillable(result.killer) ? undefined : formData.killerHealth ?? undefined;
   const organismFinaleName=result.killer===ORGANISM?organismFinale(endingSummary(result.playEvents).entries)?.killerCard:undefined;
   const organismLoss=result.killer===ORGANISM&&result.outcome==="lost"?
@@ -148,13 +158,13 @@ const TheEnd = ({
       mission: getMissionByName(missionName),
       ...(hunter&&{hunterReview:hunter}),
       ...(mall&&{mallReview:mall}),
-      scenarioRules: [hunter&&hunterReviewFacts(hunter),result.killer===ORGANISM||result.killer==='Slayer'||result.killer==='The Hunter'||result.killer==='The Intruders'||result.killer==='Big Bad Wolf'||result.killer==='The Tormentor'||result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='Sunnydaze Mall'||result.location==='USS Konrad'||result.location==='Shady Acres'||result.location==='Storybook Woods'||result.location==='Station 2891'?playStoryBeats(result.playEvents,result):undefined, organismLossContext, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
+      scenarioRules: [ratchetEnding,hunter&&hunterReviewFacts(hunter),result.killer===ORGANISM||result.killer==='Slayer'||result.killer==='The Hunter'||result.killer==='The Intruders'||result.killer==='Big Bad Wolf'||result.killer==='The Tormentor'||result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='Sunnydaze Mall'||result.location==='USS Konrad'||result.location==='Shady Acres'||result.location==='Storybook Woods'||result.location==='Station 2891'?playStoryBeats(result.playEvents,result):undefined, organismLossContext, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
       gameId: result.id,
       previousImageUrl,
       draftPoster: true,
     });
     if (url && mounted.current) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
-  }, [isGenerating, error, awaitingRefresh, hunter, mall, missionName, falconwoodReview, slayerReview, tormentorReview, shipReview, grimlashReview, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, organismLossContext, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
+  }, [isGenerating, error, awaitingRefresh, hunter, mall, missionName, falconwoodReview, slayerReview, tormentorReview, shipReview, grimlashReview, ratchetEnding, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, organismLossContext, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
 
   // The poster develops on its own once the ending narration lands.
   //
@@ -229,7 +239,9 @@ const TheEnd = ({
         ...(formData.victimsSaved != null && { victimsSaved: formData.victimsSaved }),
         ...(formData.victimsKilled != null && { victimsKilled: formData.victimsKilled }),
         ...(formData.roundsPlayed != null && {roundsPlayed:formData.roundsPlayed}),
-        ...(result.playEvents?.length && {playSummary:playStoryBeats(result.playEvents, result)}),
+        ...((ratchetEnding || result.playEvents?.length) && {
+          playSummary:fitStoryText([ratchetEnding, result.playEvents?.length ? playStoryBeats(result.playEvents, result) : undefined].filter(Boolean).join('\n'), 1800),
+        }),
         ...(hunter&&{hunterReview:hunter}),
       ...(mall&&{mallReview:mall}),
         ...(shipReview&&{konradReview:shipReview}),

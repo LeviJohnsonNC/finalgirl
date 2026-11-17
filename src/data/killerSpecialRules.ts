@@ -69,8 +69,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
   },
 
   'Ratchet Lady': {
-    narrativeNote:
-      'A frantic, relentless killer who uses the asylum\'s dark corridors and the patients\' confusion to her advantage. The environment (Wolfe Asylum) is as much a trap as the killer herself.',
+    narrativeNote: 'The Ratchet Lady can recover above her starting Health. Her Maniacs are Minions. Preserve the selected location and describe conversions, rescues, healing, and deaths only when supported by the observed events.',
   },
 
   'Big Bad Wolf': {

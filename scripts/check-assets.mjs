@@ -507,3 +507,32 @@ for(const name of stationExpected){
   throw new Error('Invalid Station photograph: '+name);
 }
 console.log(`Verified ${stationImages.length} Station photographs and their runtime mappings.`);
+
+const ratchetFolder = 'src/assets/play/photos/ratchet-lady';
+const ratchetManifest = JSON.parse(readFileSync(join(ratchetFolder,'manifest.json'),'utf8'));
+const ratchetCards = ['raining-maniacs','feed-the-madness','hold-her-down','manic-burst','dark-injection',
+  'bloodfear','shield-of-madness','blood-drive','insanity-lust'];
+const ratchetExpected = new Set(['banner', ...Array.from({length:7}, (_, count) => 'maniacs-'+count),
+  ...ratchetCards, 'keep-her-busy','join-us-or-die','leave-her-to-me','tend-to-your-wounds','bloodletting']);
+const ratchetFiles = new Set();
+const ratchetSources = new Set();
+for (const photo of ratchetManifest) {
+  if (!ratchetExpected.delete(photo.id) || !/^exec-[a-f0-9-]+\.png$/.test(photo.source) ||
+      !/^[a-f0-9]{64}$/.test(photo.sourceSha256) || ratchetSources.has(photo.sourceSha256) ||
+      Boolean(photo.thumbnail) !== ratchetCards.includes(photo.id)) throw Error('Invalid Ratchet Lady source: ' + photo.id);
+  ratchetSources.add(photo.sourceSha256);
+  const width = photo.id === 'banner' ? 1440 : photo.id.startsWith('maniacs-') ? 1280 : 1152;
+  for (const [entry, suffix, expectedWidth, limit] of [[photo.hero,'',width,160*1024],[photo.thumbnail,'-thumb',288,24*1024]]) {
+    if (!entry) continue;
+    if (entry.file !== join(ratchetFolder,photo.id+suffix+'.webp') || ratchetFiles.has(entry.file)) throw Error('Unmapped Ratchet Lady photograph');
+    const bytes = readFileSync(entry.file);
+    const size = konradWebpDimensions(bytes);
+    if (size[0] !== expectedWidth || size.join() !== [entry.width,entry.height].join() ||
+        bytes.length !== entry.bytes || bytes.length > limit ||
+        createHash('sha256').update(bytes).digest('hex') !== entry.sha256) throw Error('Invalid Ratchet Lady photograph: ' + entry.file);
+    ratchetFiles.add(entry.file);
+  }
+}
+if (ratchetExpected.size || ratchetFiles.size !== 31 ||
+    images.some(file => file.startsWith(ratchetFolder+'/') && !ratchetFiles.has(file))) throw Error('Incomplete Ratchet Lady photography');
+console.log('Verified 22 original Ratchet Lady photographs and 9 chooser thumbnails.');

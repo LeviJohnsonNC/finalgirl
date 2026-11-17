@@ -1,3 +1,4 @@
+import { RATCHET_LADY, RATCHET_TERRORS, RATCHET_SOURCE } from './ratchetLady.ts';
 import {STATION, STATION_EVENTS, STATION_ITEMS, STATION_ROLES, STATION_SOURCE, STATION_SPACES, STATION_TERRORS, stationNameKey} from './stationCatalog.ts';
 import { ORGANISM, ORGANISM_SOURCE, ORGANISM_TERRORS, ORGANISM_ITEM } from "./organism.ts";
 import { FALCONWOOD } from "./falconwood.ts";
@@ -50,6 +51,7 @@ export interface PlayCard {
   source: string;
 }
 export const PLAY_CARDS: readonly PlayCard[] = [
+  ...RATCHET_TERRORS.map(card => ({...card, kind:'terror' as const, killer:RATCHET_LADY, source:RATCHET_SOURCE})),
  ...FALCONWOOD_TERRORS.map(card => ({...card,kind:"terror" as const,location:FALCONWOOD,source:FALCONWOOD_SOURCE})),
  ...FALCONWOOD_EVENTS.map(card => ({...card,kind:"event" as const,location:FALCONWOOD,source:FALCONWOOD_SOURCE})),
  ...MALL_EVENTS.map(card=>({...card,kind:"event" as const,location:MALL,source:MALL_SOURCE})),
@@ -139,6 +141,7 @@ export function findPlayCard(
 export function suggestedDeathCards(selection: {killer:string;location:string;mission?:string|null}, kind: "terror" | "event") {
   return applicablePlayCards(selection, kind).filter(card => {
     if (card.location===STATION && kind==='event') return card.name === STATION_EVENTS.find(event=>event.id==='lab-accident')?.name;
+    if (card.killer===RATCHET_LADY) return RATCHET_TERRORS.some(terror=>terror.name===card.name&&terror.death);
     if (card.killer===ORGANISM) return ORGANISM_TERRORS.some(terror=>terror.name===card.name&&terror.death);
     if (card.location === FALCONWOOD && kind === "event") return ["Head Researcher", "Conspiracy Theorist"].includes(card.name);
     if(card.location===WINGARD)return kind==='event'

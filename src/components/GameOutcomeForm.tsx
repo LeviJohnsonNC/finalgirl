@@ -1,3 +1,4 @@
+import { RATCHET_LADY, RATCHET_MODULE, RATCHET_HEALTH_STORAGE_MAX, ratchetCount } from '../../supabase/functions/_shared/play/ratchetLady';
 import {ORGANISM_MODULE,organismFacts} from "@/lib/play/organism";
 import { falconwoodReview, falconwoodReviewText, falconwoodState } from "../../supabase/functions/_shared/play/falconwood";
 import { slayerState } from "@/lib/play/slayer";
@@ -104,7 +105,7 @@ export const GameOutcomeForm = ({
   );
   // Get killer-specific HP and flags
   const maxKillerHealth = useMemo(
-    () => ['Geppetto', 'Inkanyamba', 'The Hunter'].includes(result.killer) ? Math.max(getKillerMaxHealth(result.killer), result.killerHealth ?? 0, Number(initialDraft?.killerHealth) || 0) : getKillerMaxHealth(result.killer),
+    () => result.killer === RATCHET_LADY ? RATCHET_HEALTH_STORAGE_MAX : ['Geppetto', 'Inkanyamba', 'The Hunter'].includes(result.killer) ? Math.max(getKillerMaxHealth(result.killer), result.killerHealth ?? 0, Number(initialDraft?.killerHealth) || 0) : getKillerMaxHealth(result.killer),
     [result.killer, result.killerHealth, initialDraft?.killerHealth],
   );
   const killerIsUnkillable = useMemo(
@@ -117,7 +118,7 @@ export const GameOutcomeForm = ({
   const polterPower=observed.power;
   const isOrganism = result.killer === 'The Organism';
   const isEvomorph = result.killer === 'Evomorph';
-  const isRatchetLady = result.killer === 'Ratchet Lady';
+  const isRatchetLady = result.killer === RATCHET_LADY;
   const isBigBadWolf = result.killer === 'Big Bad Wolf';
   const isIntruders = result.killer === 'The Intruders';
   const isBilly = result.killer === 'Billy the Bear';
@@ -212,10 +213,10 @@ export const GameOutcomeForm = ({
   const [evomorphStage, setEvomorphStage] = useDraftField<
     '' | 'Hatchling' | 'Youngling' | 'Adult'
   >('evomorphStage', observed.evomorph === 'adult' ? 'Adult' : observed.evomorph === 'youngling' ? 'Youngling' : observed.evomorph === 'hatchling' ? 'Hatchling' : '', initialDraft, onDraftChange);
-  // Ratchet Lady maniac count
+  const observedManiacs = isRatchetLady ? moduleState(entries, RATCHET_MODULE).maniacs : undefined;
   const [maniacCount, setManiacCount] = useDraftField<number | null>(
     'maniacCount',
-    null,
+    ratchetCount(observedManiacs) ? observedManiacs : null,
     initialDraft,
     onDraftChange,
   );
@@ -400,6 +401,7 @@ export const GameOutcomeForm = ({
       ...(result.killer==='The Tormentor'&&{tormentorReview:{loss:tormentorLoss}}),
       ...(isGrimlash&&{grimlashReview:{loss:grimLoss}}),
       ...(result.location==='USS Konrad'&&{konradReview:{fate:shipFate}}),
+      ...(isRatchetLady && {ratchetManiacCount: maniacCount}),
       ...(isOrganism&&!isWin&&organismLossType&&{organismLoss:organismLossType}),
       outcome: isWin ? 'won' : 'lost',
       finalHorrorLevel,
@@ -502,8 +504,9 @@ export const GameOutcomeForm = ({
             />
             {!killerIsUnkillable && !isIntruders && !isOrganism && (result.killer!=='The Hunter'||hunterState(moduleState(entries,'hunter')).phase==='mark-x') && (
               <OutcomeNumberField
-                label={`Killer health (0–${maxKillerHealth})`}
+                label={isRatchetLady ? "Killer health" : `Killer health (0–${maxKillerHealth})`}
                 accessibleLabel="Killer Health"
+                rejectOutOfRange={isRatchetLady}
                 value={killerHealth}
                 onChange={setKillerHealth}
                 max={maxKillerHealth}
@@ -592,7 +595,7 @@ export const GameOutcomeForm = ({
           {isRatchetLady && (
             <div className="outcome-panel outcome-module space-y-3">
               <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
-                Asylum Status
+                Maniacs
               </h3>
               <OutcomeNumberField label="Maniacs on board at finish" accessibleLabel="Maniacs on board at finish"
                 value={maniacCount} onChange={setManiacCount} max={6} />

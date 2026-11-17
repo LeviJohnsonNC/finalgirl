@@ -382,3 +382,22 @@ Deno.test("Station death fingerprints preserve the original observation after la
   assertEquals(await deathSignature(deathFacts(selection, reloaded, death.id)!), await deathSignature(original));
   assertEquals(deathFacts({ ...selection, location: "Maple Lane" }, reloaded, death.id), null);
 });
+
+Deno.test('both Ratchet Lady endings accept uncapped observed Health within storage bounds', () => {
+  const image = {
+    sceneType: 'ending', story: 'The corridor goes quiet as the doors close at the end of the film.',
+    killer: 'Ratchet Lady', location: 'Wolfe Asylum', finalGirl: 'Heather', outcome: 'lost',
+  };
+  const prose = {
+    introStory: image.story, killer: { name: image.killer }, location: { name: image.location },
+    finalGirl: { name: image.finalGirl }, outcome: 'lost',
+  };
+  for (const killerHealth of [21, 100, 2147483647]) {
+    assertEquals(SceneImageRequestSchema.safeParse({ ...image, killerHealth }).success, true);
+    assertEquals(EndingRequestSchema.safeParse({ ...prose, killerHealth }).success, true);
+  }
+  assertEquals(SceneImageRequestSchema.safeParse({ ...image, killerHealth: 2147483648 }).success, false);
+  assertEquals(EndingRequestSchema.safeParse({ ...prose, killerHealth: 2147483648 }).success, false);
+  assertEquals(SceneImageRequestSchema.safeParse({ ...image, killer: 'Hans', killerHealth: 21 }).success, false);
+  assertEquals(EndingRequestSchema.safeParse({ ...prose, killer: { name: 'Hans' }, killerHealth: 21 }).success, false);
+});
