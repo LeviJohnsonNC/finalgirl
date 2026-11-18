@@ -29,11 +29,25 @@ test('opening reader supports long stories, full-size photos, narration and resu
   await resume(page);
   await expect(page.locator('.narration-tagline, .narration-cast')).toHaveCount(0);
   const reader = page.getByRole('region', { name: 'Opening narration' });
+  const readerFrame = page.locator('.narration-reader');
+  const photoFrame = page.locator('.narration-photo-mount');
+  const narrate = page.getByRole('button', { name: 'Narrate', exact: true });
+  const specialRules = page.getByRole('button', { name: 'Special Rules', exact: true });
   const image = page.getByRole('img', { name: 'Scene still', exact: true });
   await image.evaluate((img: HTMLImageElement) => img.decode());
+  await expect(narrate).toHaveCSS('background-color', await specialRules.evaluate(el => getComputedStyle(el).backgroundColor));
   await page.screenshot({ path: testInfo.outputPath('opening.png'), fullPage: true });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   if (testInfo.project.name === 'desktop') {
+    for (const size of [{ width: 1672, height: 941 }, { width: 1440, height: 640 }, { width: 1024, height: 600 }]) {
+      await page.setViewportSize(size);
+      expect((await photoFrame.boundingBox())!.y).toBeCloseTo((await readerFrame.boundingBox())!.y, 0);
+      const footer = (await page.locator('.app-footer').boundingBox())!;
+      const tools = (await page.getByRole('button', { name: 'Reshoot', exact: true }).boundingBox())!;
+      expect(tools.y + tools.height).toBeLessThan(footer.y);
+    }
+    await page.screenshot({ path: testInfo.outputPath('opening-short.png'), fullPage: true });
+    await page.setViewportSize({ width: 1672, height: 941 });
     expect(await reader.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true);
     await reader.focus();
     await reader.press('End');
@@ -41,6 +55,7 @@ test('opening reader supports long stories, full-size photos, narration and resu
     await expect(page.getByRole('button', { name: 'WON', exact: true })).toBeInViewport();
   } else {
     expect(await reader.evaluate(el => getComputedStyle(el).maxHeight)).toBe('none');
+    expect((await photoFrame.boundingBox())!.y).toBeLessThan((await readerFrame.boundingBox())!.y);
   }
   await page.getByRole('button', { name: 'View scene still full size' }).click();
   await expect(page.getByRole('dialog').locator('img')).toHaveAttribute('src', stillUrl);
@@ -48,10 +63,15 @@ test('opening reader supports long stories, full-size photos, narration and resu
   await expect(page.getByRole('dialog').locator('p')).toHaveCount(0);
   if (testInfo.project.name === 'desktop') expect((await page.getByRole('dialog').boundingBox())!.width).toBeGreaterThan(1000);
   await page.getByRole('button', { name: 'Close', exact: true }).click();
-  await page.getByRole('button', { name: 'Narrate', exact: true }).click();
+  await narrate.click();
   await expect(page.getByRole('progressbar', { name: 'Narration progress' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Stop', exact: true })).toHaveAttribute('data-playing', 'true');
+  if (testInfo.project.name === 'desktop') {
+    expect((await photoFrame.boundingBox())!.y).toBeCloseTo((await readerFrame.boundingBox())!.y, 0);
+    await expect(page.getByRole('button', { name: 'WON', exact: true })).toBeInViewport();
+  }
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
-  await page.getByRole('button', { name: 'Special Rules', exact: true }).click();
+  await specialRules.click();
   const rules = page.getByRole('dialog', { name: 'Special Rules', exact: true });
   await expect(rules.getByRole('tabpanel').getByText(/place 4 Power Source tokens/)).toBeInViewport();
   await rules.getByRole('button', { name: 'Close', exact: true }).click();
@@ -107,8 +127,8 @@ test('ending gives its story the spare screen width and keeps record actions rea
       const spread = (await page.locator('.narration-layout--ending').boundingBox())!;
       expect(Math.abs(spread.x + spread.width / 2 - size.width / 2)).toBeLessThan(1);
       const panel = (await page.locator('.narration-reader').boundingBox())!;
-      const art = (await page.locator('.narration-art').boundingBox())!;
-      expect(Math.abs(panel.y - art.y)).toBeLessThan(1);
+      const frame = (await page.locator('.narration-photo-mount').boundingBox())!;
+      expect(Math.abs(panel.y - frame.y)).toBeLessThan(1);
       const save = (await page.getByRole('button', { name: 'Save to scrapbook', exact: true }).boundingBox())!;
       const narrate = (await page.getByRole('button', { name: 'Narrate', exact: true }).boundingBox())!;
       expect(Math.abs(save.y - narrate.y)).toBeLessThan(1);

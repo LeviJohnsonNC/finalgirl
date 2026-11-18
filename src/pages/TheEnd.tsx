@@ -324,7 +324,7 @@ const TheEnd = ({
             ? <button onClick={generateEnding} className="narration-button narration-button--primary">Update ending</button>
             : <button disabled={!canSaveEnding} onClick={() => onSave(endingStory!, posterImageUrl || undefined)}
                 className="narration-button narration-button--primary">Save to scrapbook</button>}
-          {endingStory && <button onClick={handleNarrate} disabled={isGenerating || Boolean(error)} className="narration-button narration-button--narrate">
+          {endingStory && <button onClick={handleNarrate} disabled={isGenerating || Boolean(error)} className="narration-button narration-button--quiet narration-button--narrate" data-playing={isPlaying || undefined}>
             {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : (isPlaying || isPaused) ? <VolumeX className="w-4 h-4" aria-hidden="true" /> : <Volume2 className="w-4 h-4" aria-hidden="true" />}
             {isNarrating ? 'Cancel narration' : isPlaying || isPaused ? 'Stop' : 'Narrate'}
           </button>}
