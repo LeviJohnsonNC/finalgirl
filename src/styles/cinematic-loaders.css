@@ -110,23 +110,8 @@
   .darkroom-loader::before, .darkroom-developed-print, .narration-photo-development--revealing { animation: none; }
 }
 
-/* Use the actual space left after the heading/controls, including short laptops.
-   The story alone scrolls after completion; the loader and actions always fit. */
+/* Fit the loader to the height supplied by the narration grid. */
 @media (min-width: 900px) and (min-height: 500px) {
-  .narration-layout.narration-layout--opening {
-    grid-template-rows: minmax(0, 1fr);
-    height: calc(100dvh - var(--app-footer-h, 44px));
-    padding-top: clamp(18px, 4vh, 40px); padding-bottom: 16px; align-items: stretch;
-  }
-  .narration-layout.narration-layout--opening.narration-layout--text-only { grid-template-columns: minmax(0, 820px); justify-content: center; }
-  .narration-layout--opening .narration-heading, .narration-layout--opening .narration-controls, .narration-reader-actions { flex-shrink: 0; }
-  .narration-layout--opening .narration-copy { display: flex; flex-direction: column; min-height: 0; }
-  .narration-layout--opening .narration-title { font-size: calc(clamp(34px, 7.3vh, 70px) * var(--title-fit, 1)); }
-  .narration-layout--opening .narration-controls { margin-top: clamp(10px, 2vh, 22px); gap: 8px; }
-  .narration-layout--opening .narration-button--primary { min-height: 48px; }
-  .narration-layout--opening .narration-reader { flex: 1; min-height: 0; }
-  .narration-layout--opening .narration-reader-scroll { flex: 1; min-height: 0; max-height: none; }
-  .narration-layout--opening .narration-art { display: flex; align-items: center; padding-top: 0; }
   .narration-reader-scroll:has(.blood-loader) { display: flex; padding: 10px 18px; }
   .narration-reader-state:has(.blood-loader) { width: 100%; height: 100%; min-height: 0; container-type: size; }
   .narration-reader-state .blood-loader { height: 100%; padding: 0; gap: 4px; }

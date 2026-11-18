@@ -356,8 +356,8 @@ const NowPlaying = ({
       controls={<>
         {onPlayEvent && <button onClick={() => onCheckpoint({ playMode: true })} className="narration-button narration-button--primary">Enter Play mode</button>}
         <div className="narration-control-row">
-          {story && <button onClick={handleNarrate} disabled={isGenerating} className="narration-button narration-button--narrate">
-            {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" /> : (isPlaying || isPaused) ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          {story && <button onClick={handleNarrate} disabled={isGenerating} className="narration-button narration-button--quiet narration-button--narrate" data-playing={isPlaying || undefined}>
+            {isNarrating ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : (isPlaying || isPaused) ? <VolumeX className="w-4 h-4" aria-hidden="true" /> : <Volume2 className="w-4 h-4" aria-hidden="true" />}
             {isNarrating ? 'Cancel narration' : isPlaying || isPaused ? 'Stop' : 'Narrate'}
           </button>}
           <SpecialRulesModal key={JSON.stringify([killer, location])} killer={killer} location={location}>

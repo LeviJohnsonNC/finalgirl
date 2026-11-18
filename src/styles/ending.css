@@ -51,17 +51,6 @@
   letter-spacing: .045em;
   white-space: normal;
 }
-.narration-layout--ending .narration-button--narrate {
-  border-color: hsl(var(--narration-paper) / 0.5);
-  background: hsl(var(--narration-ink) / 0.88);
-  box-shadow:
-    inset 0 1px hsl(var(--narration-paper) / 0.08),
-    0 3px 8px hsl(0 0% 0% / 0.3);
-}
-.narration-layout--ending .narration-button--narrate:hover:not(:disabled) {
-  background: hsl(var(--narration-paper) / 0.1);
-  border-color: hsl(var(--narration-paper) / 0.85);
-}
 /* Playback appears in a reserved line, so starting/stopping never moves prose. */
 .ending-transport {
   min-height: 44px;
@@ -87,7 +76,6 @@
   line-height: 1.45;
 }
 .narration-layout--ending .narration-art {
-  padding: 0;
   container-type: size;
 }
 .narration-layout--ending .narration-photo--poster {

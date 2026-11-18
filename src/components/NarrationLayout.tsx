@@ -28,12 +28,12 @@ export const NarrationLayout = ({ background, kind, heading, controls, children,
         {image && <aside className="narration-art" aria-label="Closing movie poster">{image}</aside>}
       </div>
     </> : <>
-      <div className="narration-copy">
+      <div className="narration-opening-header">
         <header className="narration-heading">{heading}</header>
         <div className="narration-controls">{controls}</div>
-        {children}
       </div>
       {image && <aside className="narration-art" aria-label="Opening scene photograph">{image}</aside>}
+      {children}
     </>}
   </section>
 );
@@ -81,31 +81,10 @@ interface NarrationReaderProps {
 }
 
 export const NarrationReader = ({ kind, story, isGenerating, generatingLabel, location, error, onRetry, actions }: NarrationReaderProps) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  useLayoutEffect(() => {
-    const scroll = scrollRef.current;
-    // The ending's grid supplies its height; the opening measures its stacked controls.
-    if (!scroll || kind === 'ending') return;
-    const resize = () => {
-      const footer = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-footer-h')) || 44;
-      const actionsHeight = scroll.nextElementSibling?.getBoundingClientRect().height ?? 0;
-      const space = window.innerHeight - scroll.getBoundingClientRect().top - footer - actionsHeight - 28;
-      scroll.style.setProperty('--reader-available', `${Math.max(200, space)}px`);
-    };
-    resize();
-    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(resize) : null;
-    const copy = scroll.closest('.narration-copy');
-    if (copy) observer?.observe(copy);
-    window.addEventListener('resize', resize);
-    let alive = true;
-    void document.fonts?.ready.then(() => { if (alive) resize(); });
-    return () => { alive = false; observer?.disconnect(); window.removeEventListener('resize', resize); };
-  }, [kind]);
-
   return (
   <div className="narration-reader">
     <div className="narration-reader-edge" aria-hidden="true" />
-    <div ref={scrollRef} className="narration-reader-scroll" role="region" aria-label={kind === 'opening' ? 'Opening narration' : 'Ending narration'} aria-busy={isGenerating} tabIndex={0}>
+    <div className="narration-reader-scroll" role="region" aria-label={kind === 'opening' ? 'Opening narration' : 'Ending narration'} aria-busy={isGenerating} tabIndex={0}>
       {isGenerating ? (
         <div className="narration-reader-state">
           <StoryFilmLoader location={location} label={generatingLabel ?? (kind === 'ending' ? 'Writing your final scene' : undefined)} />
