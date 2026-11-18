@@ -355,7 +355,7 @@ const {characterImages}=useActiveImages();
               <button aria-label="Remove one victim from this death" disabled={linkedCasualty || scenes.busy || facts.quantity <= 1} onClick={() => changeCount(-1)}>−</button>
               <output aria-live="polite" aria-label="Victim count">{facts.quantity}</output>
               <button aria-label="Add one victim to this death" disabled={linkedCasualty || scenes.busy || facts.quantity >= 50} onClick={() => changeCount(1)}>+</button>
-              {gurneyCasualty&&<small>To correct riders, undo the ram in the timeline.</small>}
+              {gurneyCasualty&&<small>To correct riders, use Undo ram on the Hospital Gurney.</small>}
               <span className="sr-only">Count changes are recorded immediately and can be undone in the timeline.</span>
             </div>
             <div

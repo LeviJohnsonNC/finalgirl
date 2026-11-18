@@ -1,6 +1,6 @@
 import {describe,expect,it} from 'vitest';
 import {deathFacts,deathSignature} from './death';
-import {canChangeDeathCount,decrementPlay,newPlayEvent,playStoryBeats,summarizePlay,validPlayLog} from './events';
+import {canChangeDeathCount,canUndoWolfe,decrementPlay,newPlayEvent,playStoryBeats,summarizePlay,validPlayLog} from './events';
 import {moduleItemBeats,moduleState} from './modules';
 import {suggestedDeathCards} from './catalog';
 import {
@@ -155,6 +155,47 @@ describe('Wolfe Asylum',()=>{
     t.log.push(newPlayEvent({kind:'restore',target:ram.id}));
     expect(validPlayLog(t.log)).toBe(true);
     expect(summarizePlay(t.log).killed).toBe(riders);
+  });
+
+  it('undoes and restores a ram across unrelated Asylum records',()=>{
+    const t=table('Hospital Gurney');
+    t.act({command:'gurney',riders:2});
+    const ram=t.act({command:'ram',riders:2});
+    expect(t.next({command:'clear-gurney'})).toBeUndefined();
+    t.act({command:'inventory',pills:{...emptyPills(),yellow:1}});
+    t.act({command:'event',id:'powerful-meds',active:true});
+
+    const undo=newPlayEvent({kind:'undo',target:ram.id});
+    t.log.push(undo);
+    expect(validPlayLog(t.log)).toBe(true);
+    expect(t.state()).toMatchObject({gurney:2,'active.powerful-meds':true});
+    expect(wolfePills(t.state())?.yellow).toBe(1);
+    expect(summarizePlay(t.log).killed).toBe(0);
+
+    const restore=newPlayEvent({kind:'restore',target:ram.id});
+    expect(validPlayLog([...t.log,restore])).toBe(true);
+    expect(summarizePlay([...t.log,restore]).killed).toBe(2);
+    t.act({command:'gurney',riders:1});
+    expect(canUndoWolfe(t.log,ram.id,true)).toBe(false);
+    expect(validPlayLog([...t.log,restore])).toBe(false);
+  });
+
+  it('clears a gurney and recovers unknown or recorded riders without adding deaths',()=>{
+    const t=table(undefined,true);
+    expect(t.next({command:'clear-gurney'})).toBeUndefined();
+    t.act({command:'gurney',riders:null});
+    const spent=t.act({command:'spent'});
+    t.log.push(newPlayEvent({kind:'undo',target:spent.id}));
+    expect(validPlayLog(t.log)).toBe(true);
+    expect(t.state().gurney).toBe('unknown');
+    expect(summarizePlay(t.log).killed).toBe(0);
+    t.act({command:'gurney',riders:1});
+    const clear=t.act({command:'clear-gurney'});
+    expect(t.state()).not.toHaveProperty('gurney');
+    t.act({command:'toggle-amped',active:true});
+    t.log.push(newPlayEvent({kind:'undo',target:clear.id}));
+    expect(validPlayLog(t.log)).toBe(true);
+    expect(t.state()).toMatchObject({gurney:1,'amped.on':true});
   });
 
   it('rejects stale actions and preserves historical context across later corrections',async()=>{

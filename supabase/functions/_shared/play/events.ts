@@ -1,5 +1,5 @@
 import { WOLFE_MODULE } from './wolfeCatalog.ts';
-import { isInitialWolfe, resolveWolfe, sameWolfe, validWolfeAction, wolfeCasualties, wolfeParent, wolfePillTrackers, type WolfeAction } from './wolfe.ts';
+import { isInitialWolfe, lastWolfeGurneyObservation, resolveWolfe, sameWolfe, validWolfeAction, wolfeCasualties, wolfeParent, wolfePillTrackers, type WolfeAction } from './wolfe.ts';
 import { RATCHET_MODULE, RATCHET_HEALTH_STORAGE_MAX, validRatchetAction, resolveRatchetAction, ratchetParent, type RatchetAction } from './ratchetLady.ts';
 import { STATION_MODULE, isInitialStation, resolveStationAction, stationParent, stationState, stationSummary, validStationAction, type StationAction } from './station.ts';
 import { ORGANISM_MODULE, ORGANISM_MAX_BLOODLUST, initialOrganism, isInitialOrganism, isOrganismCasualty, organismParent, resolveOrganismAction, sameOrganismChanges, validOrganismAction, type OrganismAction } from "./organism.ts";
@@ -337,12 +337,21 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
   );
 }
 export function canUndoWolfe(log:readonly PlayEvent[], target:string, restore=false) {
-  const original=log.find(event=>event.id===target);
+  const originalIndex=log.findIndex(event=>event.id===target);
+  const original=log[originalIndex];
   if(original?.moduleData?.module!==WOLFE_MODULE) return true;
+  if(!original.wolfeAction) return false;
   const summary=summarizePlay(log);
-  return !!original.wolfeAction && (restore
+  if(original.moduleData.changes.gurney!==undefined) {
+    const current=lastWolfeGurneyObservation(summary.entries)?.id;
+    if(!restore) return current===target;
+    if(!summary.inactive.has(target)) return false;
+    const before=summarizePlay(log.slice(0,originalIndex));
+    return current===lastWolfeGurneyObservation(before.entries)?.id;
+  }
+  return restore
     ? summary.inactive.has(target)&&wolfeParent(summary.entries)===original.wolfeAction.parent
-    : wolfeParent(summary.entries)===target);
+    : wolfeParent(summary.entries)===target;
 }
 function validWolfeHistory(log:readonly PlayEvent[]) {
   const observations=new Map(log.filter(event=>event.moduleData?.module===WOLFE_MODULE).map(event=>[event.id,event]));
@@ -993,6 +1002,7 @@ export function describeEvent(e: PlayEvent): string {
       if(e.wolfeAction?.command==='eat'||e.wolfeAction?.command==='spend') return 'Pills consumed';
       if(e.wolfeAction?.command==='ram') return 'Hospital Gurney ram recorded';
       if(e.wolfeAction?.command==='spent') return 'Hospital Gurney marked spent';
+      if(e.wolfeAction?.command==='clear-gurney') return 'Hospital Gurney record cleared';
       if (e.ratchetAction?.command === 'calm') return `Calmed ${e.ratchetAction.amount} ${e.ratchetAction.amount === 1 ? 'Maniac' : 'Maniacs'}`;
       if (e.ratchetAction?.command === 'hold') return 'Hold Her Down effect recorded · Calm removed';
       if (e.ratchetAction?.command === 'correct-hold') return 'Calm removal corrected';

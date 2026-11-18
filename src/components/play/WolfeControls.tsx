@@ -2,10 +2,10 @@ import {useState} from 'react';
 import {FEATURE_FILMS} from '@/types/gameData';
 import {observedFinalGirlMaxHealth} from '@/data/finalGirlReferences';
 import {getFinalGirlHealth} from '@/data/finalGirlHealth';
-import {newPlayEvent,summarizePlay} from '@/lib/play/events';
+import {canUndoWolfe,newPlayEvent,summarizePlay} from '@/lib/play/events';
 import {moduleState} from '@/lib/play/modules';
 import {PILL_COLORS,WOLFE_AMPED,WOLFE_EVENTS,WOLFE_MODULE,WOLFE_ONGOING,WOLFE_PEOPLE,WOLFE_RECIPES,type PillColor,type Pills} from '../../../supabase/functions/_shared/play/wolfeCatalog';
-import {ampKey,emptyPills,resolveWolfe,validPillCount,wolfeAmped,wolfeCasualties,wolfeParent,wolfePillHorrorReduction,wolfePills,wolfeRecipeOptions,wolfeRiders,type WolfeCommand} from '../../../supabase/functions/_shared/play/wolfe';
+import {ampKey,emptyPills,lastWolfeGurneyObservation,resolveWolfe,validPillCount,wolfeAmped,wolfeCasualties,wolfeParent,wolfePillHorrorReduction,wolfePills,wolfeRecipeOptions,wolfeRiders,type WolfeCommand} from '../../../supabase/functions/_shared/play/wolfe';
 import {CharacterControl} from './CharacterControl';
 import {EventControl} from './EventControl';
 import {IllustratedTile} from './IllustratedTile';
@@ -44,7 +44,7 @@ export function WolfeControls({events,onEvent,onDeath,blocked,killer,finalGirl,f
   const [ampedPicker,setAmpedPicker]=useState(false);
   const [ampDetail,setAmpDetail]=useState('');
   const [eventsPicker,setEventsPicker]=useState(false);
-  const [gurneyPanel,setGurneyPanel]=useState(false);
+  const [gurneyPanel,setGurneyPanel]=useState(true);
   const [receipt,setReceipt]=useState<{id:string;text:string}>();
   const shownPills=held??inventory;
   const canEat=!!held&&Object.values(held).some(Boolean);
@@ -53,9 +53,12 @@ export function WolfeControls({events,onEvent,onDeath,blocked,killer,finalGirl,f
   const amped=wolfeAmped(state);
   const activeAmped=WOLFE_AMPED.filter(card=>state[ampKey(card.id)]);
   const gurney=state.gurney;
-  const lastGurneyOutcome=[...entries].reverse().find(entry=>entry.wolfeAction?.command==='ram'||entry.wolfeAction?.command==='spent');
-  const rammed=lastGurneyOutcome?.wolfeAction?.command==='ram';
-  const linkedDeath=rammed&&lastGurneyOutcome?.kind==='killed'?lastGurneyOutcome:undefined;
+  const gurneyObservation=lastWolfeGurneyObservation(entries);
+  const gurneyCommand=gurneyObservation?.wolfeAction?.command;
+  const rammed=gurneyCommand==='ram';
+  const linkedDeath=rammed&&gurneyObservation?.kind==='killed'?gurneyObservation:undefined;
+  const gurneyUndo=gurney==='spent'?(rammed?'Undo ram':'Undo spent')
+    :gurneyCommand==='clear-gurney'?'Undo clear':undefined;
   const gurneyActive=wolfeRiders(gurney)||gurney==='unknown';
   const maxHealth=observedFinalGirlMaxHealth(finalGirl,events,finalGirlStartingHealth??getFinalGirlHealth(finalGirl),killer);
 
@@ -163,17 +166,17 @@ export function WolfeControls({events,onEvent,onDeath,blocked,killer,finalGirl,f
             {ampedPicker?'Hide Amped cards':'Choose Amped cards'}
           </button></div>}
         </article>
-        <article className="wolfe-feature">
+        <article className="wolfe-feature" aria-label="Hospital Gurney">
           <IllustratedTile className="module-control-tile" art={wolfeArt(gurney==='spent'?'gurney-spent':`gurney-${wolfeRiders(gurney)?gurney:0}`)} title="Hospital Gurney"
             status={gurney==='spent'?rammed?'Rammed':'Spent':gurney==='unknown'?'Riders unrecorded':wolfeRiders(gurney)?`${gurney} ${gurney===1?'rider':'riders'}`:'Unrecorded'}
-            data-muted={gurney===undefined||undefined} aria-expanded={gurneyPanel} disabled={blocked&&gurney===undefined}
+            data-muted={gurney===undefined||undefined} aria-expanded={gurney===undefined?undefined:gurneyPanel} disabled={blocked&&gurney===undefined}
             aria-label={gurney===undefined?'Add Hospital Gurney':undefined}
             onClick={()=>{
               if(gurney===undefined) {
                 if(commit({command:'gurney',riders:0}))setGurneyPanel(true);
               } else setGurneyPanel(!gurneyPanel);
             }}/>
-          {gurneyPanel&&<div className="wolfe-feature-actions">
+          {gurneyPanel&&(gurney!==undefined||gurneyUndo)&&<div className="wolfe-feature-actions">
             {gurneyActive&&<>
               {wolfeRiders(gurney)?<div className="wolfe-riders">
                 <span>Victims aboard</span>
@@ -184,12 +187,19 @@ export function WolfeControls({events,onEvent,onDeath,blocked,killer,finalGirl,f
                 </div>
               </div>:<div className="wolfe-row">{[0,1,2].map(count=><button key={count} disabled={blocked} onClick={()=>commit({command:'gurney',riders:count})}>{count} aboard</button>)}</div>}
               {wolfeRiders(gurney)&&<div className="wolfe-row">
-                <small>{1+gurney} damage to the Enemy{gurney>0&&` · ${gurney} ${gurney===1?'rider dies':'riders die'}`}</small>
-                <button disabled={blocked} onClick={()=>commit({command:'ram',riders:gurney})}>Confirm ram</button>
+                <small>Deal {1+gurney} damage to the target Enemy on the board{gurney>0&&` · ${gurney} ${gurney===1?'rider dies':'riders die'}`}</small>
+                <button disabled={blocked} onClick={()=>commit({command:'ram',riders:gurney})}>Ram gurney</button>
               </div>}
-              <button className="module-quiet-link" disabled={blocked} onClick={()=>commit({command:'spent'})}>Mark spent</button>
+              <div className="wolfe-row">
+                <button className="module-quiet-link" disabled={blocked} onClick={()=>commit({command:'spent'})}>Mark spent</button>
+                <button className="module-quiet-link" disabled={blocked} onClick={()=>commit({command:'clear-gurney'})}>Clear record</button>
+              </div>
             </>}
-            {gurney==='spent'&&linkedDeath&&onDeath&&<button className="module-quiet-link" onClick={()=>onDeath(linkedDeath)}>Open Gruesome Death</button>}
+            {gurneyUndo&&gurneyObservation&&<div className="wolfe-row">
+              <button className="module-quiet-link" disabled={blocked||!canUndoWolfe(events,gurneyObservation.id)}
+                onClick={()=>record(newPlayEvent({kind:'undo',target:gurneyObservation.id}))}>{gurneyUndo}</button>
+              {linkedDeath&&onDeath&&<button className="module-quiet-link" onClick={()=>onDeath(linkedDeath)}>Open Gruesome Death</button>}
+            </div>}
           </div>}
         </article>
       </div>
