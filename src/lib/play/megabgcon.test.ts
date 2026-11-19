@@ -80,6 +80,16 @@ describe("MegaBGCon physical companion", () => {
     expect(canUndoCon(t.log, crowd.id)).toBe(false);
   });
 
+  it("advances a known mixed killer’s Bloodlust without taking the track past its printed limit", () => {
+    const t = game();
+    t.log.push(newPlayEvent({ kind: "state", field: "bloodlust", value: 7 }));
+    const accident = { kind: "upkeep", booth, result: "accident", accident: "bloodlust", killer: "Ratchet Lady" } as const;
+    t.record(accident);
+    expect(t.summary().bloodlust).toBe(8);
+    t.record(accident);
+    expect(t.summary().bloodlust).toBe(8);
+  });
+
   it("advances Lunch Time only via explicit phase ends and rolls back a tracked Buggy hit", () => {
     const t = game();
     t.record({ kind: "event", event: "lunch", active: true });

@@ -151,6 +151,13 @@ export function conOutcome(a: ConAction) {
     return { kind: a.outcome, victim: "SWAG attendee", eventCard: "SWAG Roulette" };
 }
 
+// Printed positions checked against the app’s Bloodlust source ledger.
+const bloodlustCaps: Readonly<Record<string, number>> = {
+  "The Organism": 7, "Ratchet Lady": 8, "The Intruders": 10, [HUNTER]: 10,
+  "The Tormentor": 6, Grimlash: 8, Evomorph: 10, Hans: 10, "Dr. Fright": 9,
+  Inkanyamba: 8, Geppetto: 8, Poltergeist: 8, Slayer: 10, "Big Bad Wolf": 10,
+};
+
 function raisesConBloodlust(a: ConAction) {
   return a.kind === "upkeep" && a.accident === "bloodlust" ||
     a.kind === "person-outcome" && a.outcome === "killed" && a.person === "designer";
@@ -186,12 +193,7 @@ export function conTrackerChanges(a: ConAction, progress: Pick<PlaySummary, "ent
       time = next.time;
       terror = next.terror;
     } else {
-      const caps: Record<string, number> = {
-        "The Organism": 7, "The Ratchet Lady": 8, "The Intruders": 10, [HUNTER]: 10,
-        "The Tormentor": 6, Grimlash: 8, Evomorph: 10, Hans: 10, "Dr. Fright": 9,
-        Inkanyamba: 8, Geppetto: 8, Poltergeist: 8,
-      };
-      const max = caps[a.killer ?? ""];
+      const max = bloodlustCaps[a.killer ?? ""];
       if (max !== undefined && progress.bloodlust < max) changes.bloodlust = progress.bloodlust + 1;
     }
   }
