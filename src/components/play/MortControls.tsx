@@ -1058,7 +1058,7 @@ export function MortControls({
           </div>
         </details>
       )}
-      <details className="mort-secondary">
+      <details className="mort-secondary" data-module-control="reveals">
         <summary>
           Dark Power
           {state.power
