@@ -1,3 +1,6 @@
+import { MORT, MORT_MODULE, mortSummary } from '../../../supabase/functions/_shared/play/mort';
+import { MortControls } from './MortControls';
+import mortBanner from '@/assets/play/photos/mort/banner.webp';
 import { WOLFE, WOLFE_MODULE } from '../../../supabase/functions/_shared/play/wolfeCatalog';
 import { wolfeSummary } from '../../../supabase/functions/_shared/play/wolfe';
 import { WolfeControls } from './WolfeControls';
@@ -85,6 +88,7 @@ export interface ControlsProps {
   mission?: string | null;
   falconwoodFresh?: boolean;
   stationFresh?: boolean;
+  mortFresh?: boolean;
   setupScenario?: string | null;
   startingEvent?: string | null;
   killer: string;
@@ -105,7 +109,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -135,6 +139,8 @@ const stationDefinition: Definition = {id:STATION_MODULE,owner:'location',match:
   summary:(fields,props)=>stationSummary(stationState(!props.events.length&&props.stationFresh?initialStation(props.startingEvent):fields))};
 export const moduleDefinitions: Definition[] = [
  stationDefinition,
+ {id:MORT_MODULE,owner:'killer',match:MORT,title:MORT,art:{src:mortBanner,position:'74% 36%'},capabilities:['reveals'],Controls:MortControls,
+  summary:(_fields,props)=>mortSummary(summarizePlay(props?.events??[]).entries,props?.mortFresh === true && !props.events.length)},
  {id:RATCHET_MODULE, owner:'killer', match:RATCHET_LADY, title:RATCHET_LADY, art:ratchetLadyArt('banner'),
   capabilities:['reveals','minor-power'], Controls:RatchetLadyControls,
   summary:state=>ratchetCount(state.maniacs) ? `Maniacs ${state.maniacs}/6${state.calmRemoved ? ' · Calm removed' : ''}` :

@@ -172,6 +172,7 @@ const IndexContent = () => {
       ...(selection.killer === 'The Hunter' && {hunterSetupVersion:1 as const}),
       ...(selection.location === "Station 2891" && {stationSetupVersion:1 as const}),
       ...(selection.killer === "The Organism" && {organismSetupVersion:1 as const}),
+      ...(selection.killer === 'Mort the Teenage Dirtbag' && {mortSetupVersion:1 as const}),
       ...(selection.killer === 'The Intruders' && {intrudersSetupVersion:1 as const}),
       ...(selection.killer === 'Big Bad Wolf' && { wolfSetupVersion: 1 as const }),
       ...(selection.killer === 'The Tormentor' && {tormentorSetupVersion:1 as const}),
@@ -402,7 +403,7 @@ const IndexContent = () => {
               startingEvent={gameSelection.startingEvent}
               mission={gameSelection.mission}
               falconwoodFresh={activeGame.falconwoodSetupVersion === 1}
-              stationFresh={activeGame.stationSetupVersion === 1}
+              stationFresh={activeGame.stationSetupVersion === 1} mortFresh={activeGame.mortSetupVersion === 1}
               filmId={gameSelection.filmId}
               key={activeGame.id}
               sessionId={activeGame.id}

@@ -1,3 +1,4 @@
+import { MORT, mortFacts, mortOwnsLog } from './mort.ts';
 import { WOLFE } from './wolfeCatalog.ts';
 import { wolfeOwnsLog } from './wolfe.ts';
 import { RATCHET_LADY, RATCHET_MODULE, ratchetFacts, ratchetLogBelongsTo } from './ratchetLady.ts';
@@ -34,7 +35,7 @@ export function deathFacts(
   events: PlayEvent[],
   eventId: string,
 ) {
-  if(!validPlayLog(events) || !wolfeOwnsLog(selection.location,events) || !ratchetLogBelongsTo(selection.killer, events))return null;
+  if(!validPlayLog(events) || !wolfeOwnsLog(selection.location,events) || !ratchetLogBelongsTo(selection.killer, events) || !mortOwnsLog(selection.killer,events,selection.location))return null;
   if (selection.location !== STATION && events.some(e=>e.stationReference || e.moduleData?.module===STATION_MODULE)) return null;
   if(selection.killer!==ORGANISM&&events.some(e=>e.moduleData?.module===ORGANISM_MODULE||e.organismReference)) return null;
   if (selection.location !== FALCONWOOD && events.some(e => e.moduleData?.module === FALCONWOOD_MODULE || e.falconwoodReference)) return null;
@@ -62,6 +63,7 @@ export function deathFacts(
   const woodsDeath = selection.location === WOODS && e.woodsReference;
   const wolfDeath = selection.killer === WOLF && e.wolfReference;
   const organismDeath=selection.killer===ORGANISM&&e.organismReference;
+  const mortDeath=selection.killer===MORT && e.mortReference;
   const intruderDeath=selection.killer===INTRUDERS && e.intruderReference;
   const wingardDeath = selection.location===WINGARD && e.wingardReference;
   const mallDeath=selection.location===MALL&&e.mallReference;
@@ -70,7 +72,7 @@ export function deathFacts(
   const stationDeath = selection.location === STATION && e.stationReference;
   const ratchetDeath = selection.killer === RATCHET_LADY && e.ratchetReference;
   const wolfeDeath = selection.location === WOLFE && e.wolfeReference;
-  const historical = wolfeDeath || ratchetDeath || stationDeath || falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
+  const historical = mortDeath || wolfeDeath || ratchetDeath || stationDeath || falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
     ? summarizePlay(events.slice(0, events.findIndex(event => event.id === eventId) + 1)).entries
     : [];
   // The death's own fields reflect deliberate edits. Only the surrounding
@@ -129,6 +131,10 @@ export function deathFacts(
       const sorted = Object.fromEntries(Object.entries(wolf).sort(([a], [b]) => a.localeCompare(b)));
       context = { ...context, "big-bad-wolf": sorted };
     }
+  }
+  if (mortDeath) {
+    const facts=mortFacts(historical);
+    if (facts) context={...context,mort:{facts}};
   }
   if (ratchetDeath) {
     const facts = ratchetFacts(moduleState(historical, RATCHET_MODULE), undefined, historical);

@@ -1,3 +1,7 @@
+import { MORT, MORT_MAX_BLOODLUST, MORT_MAX_HEALTH, mortState } from '../../../supabase/functions/_shared/play/mort';
+import { MortPowerPicker, MortRevealEntry } from './MortControls';
+import { mortEvent } from '@/lib/play/mortRecord';
+import { mortPhoto } from './mortArt';
 import { WOLFE, WOLFE_MODULE } from '../../../supabase/functions/_shared/play/wolfeCatalog';
 import { ampKey, wolfeAmped } from '../../../supabase/functions/_shared/play/wolfe';
 import { RATCHET_LADY, RATCHET_MODULE, RATCHET_MAX_BLOODLUST, RATCHET_HEALTH_STORAGE_MAX, SHIELD_OF_MADNESS, ratchetCount } from '../../../supabase/functions/_shared/play/ratchetLady';
@@ -78,6 +82,7 @@ import { PlaySelect } from "./PlaySelect";
 import "@/styles/play-state-art.css";
 
 export interface PlayScreenProps {
+  mortFresh?: boolean;
   killer: string;
   location: string;
   finalGirl: string;
@@ -191,8 +196,12 @@ export function PlayScreen(props: PlayScreenProps) {
   const startingValues = playStartingValues(killer, finalGirl);
   const { characterImages, aiEnabled } = useActiveImages();
   const killerImage = characterImages[killer];
+  const mort=killer===MORT;
+  const mortLatest = mort ? summary.entries.slice(-1)[0] : undefined;
+  const mortProgress=mortState(summary.entries,props.mortFresh&&!events.length);
+  const mortFinaleArt=mortProgress.reveal?mortPhoto(`${mortProgress.reveal.suspect}-finale`):undefined;
   const hunter=hunterState(moduleState(summary.entries,'hunter'));
-  const killerPortrait = killer === 'The Hunter' && hunter.phase==='mark-x' ? hunterArt('mark-x') : killer === "Evomorph"
+  const killerPortrait = mortFinaleArt ? {src:mortFinaleArt,position:"50% 38%"} : killer === 'The Hunter' && hunter.phase==='mark-x' ? hunterArt('mark-x') : killer === "Evomorph"
     ? evomorphStageArt(moduleState(summary.entries, "evomorph").stage)
     : {
         src: killerImage,
@@ -206,13 +215,14 @@ export function PlayScreen(props: PlayScreenProps) {
   const resistance = wolfe && wolfeAmped(wolfe) && wolfe[ampKey('resistance')];
   const ratchetShield = ratchetCount(maniacs) && maniacs > 0 &&
     summary.entries.some(event => event.momentType === 'dark-power' && event.killerCard === SHIELD_OF_MADNESS);
-  const trackerLimits = { ...stateLimits, ...(isRatchetLady && { killerHealth: RATCHET_HEALTH_STORAGE_MAX, bloodlust: RATCHET_MAX_BLOODLUST }), ...(killer===INTRUDERS&&{bloodlust:10}), ...(killer===ORGANISM&&{bloodlust:ORGANISM_MAX_BLOODLUST}), finalGirlHealth: observedFinalGirlMaxHealth(
+  const trackerLimits = { ...stateLimits, ...(mort&&{killerHealth:MORT_MAX_HEALTH,bloodlust:MORT_MAX_BLOODLUST}), ...(isRatchetLady && { killerHealth: RATCHET_HEALTH_STORAGE_MAX, bloodlust: RATCHET_MAX_BLOODLUST }), ...(killer===INTRUDERS&&{bloodlust:10}), ...(killer===ORGANISM&&{bloodlust:ORGANISM_MAX_BLOODLUST}), finalGirlHealth: observedFinalGirlMaxHealth(
     finalGirl, events, props.finalGirlStartingHealth ?? startingValues.finalGirlHealth, killer,
   ) ?? stateLimits.finalGirlHealth };
   const [message, setMessage] = useState("");
   const [announcement, setAnnouncement] = useState("");
   const [finishOpen, setFinishOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [mortMoment,setMortMoment]=useState<"finale"|"dark-power"|null>(null);
   const [hunterRevealOpen,setHunterRevealOpen]=useState<"dark-power"|"finale"|null>(null);
   const [momentId, setMomentId] = useState<string | null>(null);
   const [editingState, setEditingState] = useState<StateField | null>(null);
@@ -277,6 +287,10 @@ export function PlayScreen(props: PlayScreenProps) {
   const pickMoment = (choice: (typeof moments)[number]) => {
     if (!saveMoment()) return;
     setHunterRevealOpen(null);
+    if (mort && (choice.type==='finale'||choice.type==='dark-power')) {
+      setMomentId(null); setMortMoment(mortMoment===choice.type?null:choice.type); return;
+    }
+    setMortMoment(null);
     const permanent = PERMANENT_MOMENTS.includes(choice.type);
     const existing = permanent && summary.entries.find(e => e.kind === "moment" && e.momentType === choice.type);
     if (existing) {
@@ -458,7 +472,8 @@ export function PlayScreen(props: PlayScreenProps) {
             if(field==="killerHealth"&&killer===ORGANISM) return <OrganismRoster key={field} events={events} onEvent={onEvent} />;
             if(field==="killerHealth"&&killer===INTRUDERS) return <IntruderRoster key={field} events={events} onEvent={onEvent} />;
             if(field==='killerHealth'&&killer==='The Hunter'&&['mark-v','countdown'].includes(hunter.phase))return <HunterCoreTracker key={field} events={events} onEvent={onEvent}/>;
-            const value = summary[field];
+            const disguised = mort && field==='killerHealth' && !mortProgress.reveal;
+            const value = disguised ? undefined : summary[field];
             const health = field === "finalGirlHealth" || field === "killerHealth";
             const critical = health && value !== undefined && value <= 2;
             const horror = value ?? startingValues.finalHorrorLevel;
@@ -497,11 +512,11 @@ export function PlayScreen(props: PlayScreenProps) {
                 <div className="play-state-control-bar">
                   <div className="play-state-caption">
                     <span className="play-state-title">{trackerTitles[field]}</span>
-                    {value === undefined && <small className="play-state-unknown">Not recorded</small>}
+                    {value === undefined && <small className="play-state-unknown">{disguised?(mortProgress.known?'Disguised · Health unrevealed':'Disguise unrecorded'):'Not recorded'}</small>}
                     {field === 'killerHealth' && ratchetShield && <small>Shield of Madness · {resistance ? 'Resistance active' : `${maniacs} ${maniacs===1?'Maniac':'Maniacs'}`}</small>}
                     {critical && <small className="play-critical-label">{value === 0 ? "No health remaining" : "Low health"}</small>}
                   </div>
-                {editingState === field ? (
+                {disguised ? <span aria-label="Mort’s Health is unrevealed">?</span> : editingState === field ? (
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -546,8 +561,8 @@ export function PlayScreen(props: PlayScreenProps) {
                       </button>
                       <button
                         aria-label={`Increase ${stateLabels[field]}`}
-                        disabled={value === undefined || value >= trackerLimits[field]}
-                        onClick={() => value !== undefined && setState(field, value + 1)}
+                        disabled={value === undefined || value >= trackerLimits[field] && !(mort && (field==='bloodlust'||field==='finalHorrorLevel'))}
+                        onClick={() => value !== undefined && (mort && (field==='bloodlust'||field==='finalHorrorLevel') ? commit(mortEvent({kind:'advance',track:field==='bloodlust'?'bloodlust':'horror'},summary.entries)) : setState(field, value + 1))}
                       >
                         <Plus size={16} />
                       </button>
@@ -558,6 +573,13 @@ export function PlayScreen(props: PlayScreenProps) {
             );
           })}
         </div>
+        {mortLatest && (mortLatest.mortTime || mortLatest.mortTerror || mortLatest.mortTokenPlaced) ? (
+          <p className="mort-preview mort-board-cue" role="status">
+            {mortLatest.mortTokenPlaced ? "Place the token on the Horror track. " : ""}
+            {mortLatest.mortTime ? `Lose ${mortLatest.mortTime} Time. ` : ""}
+            {mortLatest.mortTerror ? `Discard ${mortLatest.mortTerror} Terror ${mortLatest.mortTerror===1?'card':'cards'}.` : ""}
+          </p>
+        ) : null}
       </section>
       {props.deathPanel}
       <p className="sr-only" role="status">{announcement}</p>
@@ -566,9 +588,9 @@ export function PlayScreen(props: PlayScreenProps) {
           Remember this <span>The moments that made your night</span>
         </h2>
         <div className="play-moment-choices">
-          {orderedMoments.filter(choice=>!(killer===ORGANISM&&["dark-power","killer-revived"].includes(choice.type))&&(!(killer==='Poltergeist'||killer===INTRUDERS)||choice.type!=='killer-revived')&&!(killer==='The Hunter'&&['mark-v','countdown'].includes(hunter.phase)&&choice.type==='killer-revived')).map((choice) => {
+          {orderedMoments.filter(choice=>!(killer===ORGANISM&&["dark-power","killer-revived"].includes(choice.type))&&(!(killer==='Poltergeist'||killer===INTRUDERS)||choice.type!=='killer-revived')&&!(mort&&!mortProgress.reveal&&choice.type==='killer-revived')&&!(killer==='The Hunter'&&['mark-v','countdown'].includes(hunter.phase)&&choice.type==='killer-revived')).map((choice) => {
             const revealed = summary.entries.find(e => e.kind === "moment" && e.momentType === choice.type);
-            const active = PERMANENT_MOMENTS.includes(choice.type) && (!!revealed || choice.type==='ultimate-unlocked'&&mallUnlocksUltimate(summary.entries) || killer==='The Hunter'&&hunterHasReveal(hunter,choice.type));
+            const active = PERMANENT_MOMENTS.includes(choice.type) && (!!revealed || mort&&(choice.type==='finale'&&!!mortProgress.reveal||choice.type==='dark-power'&&!!mortProgress.power) || choice.type==='ultimate-unlocked'&&mallUnlocksUltimate(summary.entries) || killer==='The Hunter'&&hunterHasReveal(hunter,choice.type));
             const selectedArt = active && (choice.type === 'dark-power' || choice.type === 'finale')
               ? illustratedKillerCards(killer, choice.type).find(card => card.name === revealed?.killerCard)?.art : undefined;
             const ultimate = choice.type === "ultimate-unlocked";
@@ -579,6 +601,8 @@ export function PlayScreen(props: PlayScreenProps) {
             </button>;
           })}
         </div>
+        {mortMoment==='finale'&&<MortRevealEntry events={events} onEvent={onEvent} onClose={()=>setMortMoment(null)} fresh={props.mortFresh}/>}
+        {mortMoment==='dark-power'&&<MortPowerPicker events={events} onEvent={onEvent}/>}
         {hunterRevealOpen&&hunterHasReveal(hunter,hunterRevealOpen)&&<div className="play-moment-editor"><KillerCards killer={killer} events={events} onEvent={onEvent} typeOnly={hunterRevealOpen}/><button onClick={()=>setHunterRevealOpen(null)}>Record</button></div>}
         {moment && (
           <div className="play-moment-editor">

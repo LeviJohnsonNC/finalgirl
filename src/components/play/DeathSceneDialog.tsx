@@ -123,7 +123,7 @@ const {characterImages}=useActiveImages();
   const facts = deathFacts(selection, events, eventId);
   const organismAttackers=selection.killer===ORGANISM?organismDeathAttackers(events,eventId):[];
   const gurneyCasualty=events.some(event=>event.id===eventId&&event.kind==='killed'&&event.wolfeAction?.command==='ram');
-  const linkedCasualty=gurneyCasualty||events.some(event=>event.id===eventId&&event.kind==="killed"&&event.organismAction);
+  const linkedCasualty=gurneyCasualty||events.some(event=>event.id===eventId&&event.kind==="killed"&&(event.organismAction||event.mortAction));
   const hunterDeathPhase=hunterState(hunterModuleState(hunterSummary(events.slice(0,events.findIndex(e=>e.id===eventId)+1)).entries,'hunter')).phase;
   const hunterDeathPhoto={unknown:'header','mark-v':'mark-v',countdown:'mark-v-shutdown','mark-x':'mark-x'}[hunterDeathPhase];
   const initial: PlayDetails = {

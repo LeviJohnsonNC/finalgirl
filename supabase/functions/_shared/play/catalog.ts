@@ -1,3 +1,4 @@
+import { MORT, MORT_TERRORS } from './mort.ts';
 import { WOLFE, WOLFE_EVENTS, WOLFE_ITEMS, WOLFE_PEOPLE, WOLFE_TERRORS, WOLFE_SPACES, WOLFE_SOURCE } from './wolfeCatalog.ts';
 import { RATCHET_LADY, RATCHET_TERRORS, RATCHET_SOURCE } from './ratchetLady.ts';
 import {STATION, STATION_EVENTS, STATION_ITEMS, STATION_ROLES, STATION_SOURCE, STATION_SPACES, STATION_TERRORS, stationNameKey} from './stationCatalog.ts';
@@ -54,6 +55,7 @@ export interface PlayCard {
 export const PLAY_CARDS: readonly PlayCard[] = [
   ...WOLFE_EVENTS.map(card=>({...card,kind:'event' as const,location:WOLFE,source:WOLFE_SOURCE})),
   ...WOLFE_TERRORS.map(card=>({...card,kind:'terror' as const,location:WOLFE,source:WOLFE_SOURCE})),
+  ...MORT_TERRORS.map(card => ({...card, kind:'terror' as const, killer:MORT, source:'Shriek · Mort Terror cards'})),
   ...RATCHET_TERRORS.map(card => ({...card, kind:'terror' as const, killer:RATCHET_LADY, source:RATCHET_SOURCE})),
  ...FALCONWOOD_TERRORS.map(card => ({...card,kind:"terror" as const,location:FALCONWOOD,source:FALCONWOOD_SOURCE})),
  ...FALCONWOOD_EVENTS.map(card => ({...card,kind:"event" as const,location:FALCONWOOD,source:FALCONWOOD_SOURCE})),
@@ -145,6 +147,7 @@ export function suggestedDeathCards(selection: {killer:string;location:string;mi
   return applicablePlayCards(selection, kind).filter(card => {
     if (card.location===WOLFE) return (kind==='terror'?WOLFE_TERRORS:WOLFE_EVENTS).some(c=>c.name===card.name&&c.death);
     if (card.location===STATION && kind==='event') return card.name === STATION_EVENTS.find(event=>event.id==='lab-accident')?.name;
+    if (card.killer===MORT) return ['Everybody’s a Suspect','I Want to See What Your Insides Look Like!','A Mask in the Crowd','Meta Massacre','Trade-Off'].includes(card.name);
     if (card.killer===RATCHET_LADY) return RATCHET_TERRORS.some(terror=>terror.name===card.name&&terror.death);
     if (card.killer===ORGANISM) return ORGANISM_TERRORS.some(terror=>terror.name===card.name&&terror.death);
     if (card.location === FALCONWOOD && kind === "event") return ["Head Researcher", "Conspiracy Theorist"].includes(card.name);

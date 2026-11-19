@@ -1,3 +1,4 @@
+import { MORT, MORT_MODULE, canRecordMort, mortOwnsLog, mortParent, mortState } from '../../supabase/functions/_shared/play/mort';
 import { WOLFE, WOLFE_MODULE } from '../../supabase/functions/_shared/play/wolfeCatalog';
 import { initialWolfe, resolveWolfe, wolfeOwnsLog, wolfeParent } from '../../supabase/functions/_shared/play/wolfe';
 import { RATCHET_LADY, RATCHET_MODULE, RATCHET_INITIAL, RATCHET_MAX_BLOODLUST, ratchetLogBelongsTo } from '../../supabase/functions/_shared/play/ratchetLady';
@@ -26,7 +27,7 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 import { readStoredValue, useLocalStorage } from './useLocalStorage';
-import { validPlayLog, canUndoFalconwood, canUndoWingard, canUndoMarrek, canUndoTormentor, canUndoShady, canUndoGrimlash, canUndoKonrad, canUndoEvomorph, canChangeDeathCount, isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
+import { canUndoMort, validPlayLog, canUndoFalconwood, canUndoWingard, canUndoMarrek, canUndoTormentor, canUndoShady, canUndoGrimlash, canUndoKonrad, canUndoEvomorph, canChangeDeathCount, isPlayEvent, isPermanentMoment, newPlayEvent, summarizePlay, type PlayEvent } from '@/lib/play/events';
 import { ActiveGame, isActiveGame } from '@/lib/activeGame';
 import { resolveCreechAction } from '../../supabase/functions/_shared/play/creech';
 import { mapleLinkedChange } from '../../supabase/functions/_shared/play/maple';
@@ -71,6 +72,14 @@ export function useActiveGame() {
       // owns uniqueness, including two taps arriving before React renders.
       if (isPermanentMoment(event) && summarizePlay(previous.playEvents).entries.some(entry => entry.kind === 'moment' && entry.momentType === event.momentType)) return previous;
       const log = previous.playEvents ?? [];
+      const isMort = previous.selection.killer===MORT;
+      if (!mortOwnsLog(previous.selection.killer,[event],previous.selection.location) || event.kind==='undo' && !canUndoMort(log,event.target!) || event.kind==='restore' && !canUndoMort(log,event.target!,true)) return previous;
+      if (isMort) {
+        const state=mortState(summarizePlay(log).entries);
+        if (event.kind==='moment' && (event.momentType==='finale'||event.momentType==='dark-power'||event.momentType==='killer-revived'&&!state.reveal)) return previous;
+        if (event.kind==='state' && (event.field==='killerHealth' && (!state.reveal || Number(event.value)>26) || event.field==='bloodlust' && Number(event.value)>8)) return previous;
+        if (event.kind==='reduce' && log.some(e=>e.id===event.target&&e.mortAction)) return previous;
+      }
       if(event.kind==='undo'&&!canUndoWingard(log,event.target!))return previous;
       if((event.moduleData?.module===MALL_MODULE&&(!event.mallAction||previous.selection.location!==MALL))||(event.mallReference&&previous.selection.location!==MALL))return previous;
       const isStation = previous.selection.location === STATION;
@@ -131,7 +140,7 @@ export function useActiveGame() {
         if (Object.entries(changes).every(([key, value]) => state[key] === (value ?? undefined))) return previous;
       }
       let accepted = event.kind === "killed"
-        ? {...event,...(isRatchetLady && {ratchetReference:true as const}),...(isOrganism && {organismReference:true as const}),...(isSlayer && {slayerReference:true as const}),...(isHunter && {hunterReference:true as const}),...(isIntruders && {intruderReference:true as const}),...(isWolf && {wolfReference:true as const}),...(previous.selection.location === WOODS && {woodsReference:true as const})}
+        ? {...event,...(isMort && {mortReference:true as const}),...(isRatchetLady && {ratchetReference:true as const}),...(isOrganism && {organismReference:true as const}),...(isSlayer && {slayerReference:true as const}),...(isHunter && {hunterReference:true as const}),...(isIntruders && {intruderReference:true as const}),...(isWolf && {wolfReference:true as const}),...(previous.selection.location === WOODS && {woodsReference:true as const})}
         : event;
       if (event.kind==='killed' && previous.selection.location===WOLFE) accepted={...accepted,wolfeReference:true};
       if (event.kind === 'killed' && isStation) accepted = {...accepted, stationReference:true};
@@ -190,13 +199,15 @@ export function useActiveGame() {
       if (!log.length && freshSlayer) setup.push(newPlayEvent({kind:"module", moduleData:{module:SLAYER_MODULE, changes:initialSlayer()}}));
       const freshHunter=isHunter&&previous.hunterSetupVersion===1;
       if(!log.length&&freshHunter)setup.push(newPlayEvent({kind:'module',moduleData:{module:HUNTER_MODULE,changes:initialHunter()}}));
+      const freshMort = isMort && previous.mortSetupVersion === 1;
+      if (!log.length && freshMort) setup.push(newPlayEvent({kind:"module",moduleData:{module:MORT_MODULE,changes:{initialized:true}}}));
       const freshRatchet = isRatchetLady && previous.ratchetSetupVersion === 1;
       if (!log.length && freshRatchet) setup.push(newPlayEvent({kind:'module',moduleData:{module:RATCHET_MODULE,changes:RATCHET_INITIAL}}));
       const freshOrganism=isOrganism&&previous.organismSetupVersion===1;
       if(!log.length&&freshOrganism) setup.push(newPlayEvent({kind:"module",moduleData:{module:ORGANISM_MODULE,changes:initialOrganism()}}));
       const freshIntruders=isIntruders && previous.intrudersSetupVersion===1;
       if (!log.length && freshIntruders) setup.push(newPlayEvent({kind:'module',moduleData:{module:INTRUDER_MODULE,changes:initialIntruders()}}));
-      if (log.length === 0 && (!isRatchetLady||freshRatchet) && (!isIntruders||freshIntruders) && (!isOrganism||freshOrganism) && previous.coreTrackersVersion === 1 && (!isWolf || freshWolf) && (!isHunter || freshHunter) && (!isSlayer || freshSlayer)) {
+      if (log.length === 0 && (!isMort||freshMort) && (!isRatchetLady||freshRatchet) && (!isIntruders||freshIntruders) && (!isOrganism||freshOrganism) && previous.coreTrackersVersion === 1 && (!isWolf || freshWolf) && (!isHunter || freshHunter) && (!isSlayer || freshSlayer)) {
         const values = playStartingValues(previous.selection.killer, previous.selection.finalGirl);
         values.finalGirlHealth = previous.selection.finalGirlStartingHealth ?? values.finalGirlHealth;
         for (const field of ['finalGirlHealth', 'killerHealth', 'bloodlust', 'finalHorrorLevel'] as const) {
@@ -212,6 +223,14 @@ export function useActiveGame() {
         if(Object.entries(changes).every(([key,value])=>value === null ? current[key] === undefined : current[key] === value)) return previous;
         accepted={...event,moduleData:{module:'maple',changes}};
         if (!isPlayEvent(accepted)) return previous;
+      }
+      if (event.mortAction) {
+        const current = summarizePlay([...log,...baseline,...setup]);
+        const action = !log.length && freshMort && event.mortAction.parent==='root' ? {...event.mortAction,parent:mortParent(current.entries)} : event.mortAction;
+        if (action.kind==='location-minor' && action.location!==previous.selection.location) return previous;
+        if (!canRecordMort(action,mortState(current.entries),current.entries)) return previous;
+        if (action.kind==='advance' && (action.track==='horror'?current.finalHorrorLevel:current.bloodlust)===undefined) return previous;
+        accepted={...accepted,mortAction:action};
       }
       if (event.wolfeAction) {
         const entries=summarizePlay([...log,...baseline,...setup]).entries;
@@ -347,6 +366,7 @@ export function useActiveGame() {
       if (isFalconwood && !validPlayLog([...log, ...additions])) return previous;
       if (previous.selection.location===WOLFE && !validPlayLog([...log,...additions])) return previous;
       if (isStation && !validPlayLog([...log,...additions])) return previous;
+      if (isMort && !validPlayLog([...log,...additions])) return previous;
       if (isRatchetLady && !validPlayLog([...log,...additions])) return previous;
       if (isOrganism && !validPlayLog([...log,...additions])) return previous;
       if (isSlayer && !validPlayLog([...log, ...additions])) return previous;

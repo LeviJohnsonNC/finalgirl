@@ -1,0 +1,506 @@
+.mort-play {
+  min-width: 0;
+  border: 0;
+  color: #efe0c8;
+  --mort-line: #6d5441;
+  --mort-panel: #171316;
+  --mort-dim: #c5ab8c;
+}
+.mort-play h3,
+.mort-play h4 {
+  font-family: var(--font-display, Georgia, serif);
+  color: #f4e6d0;
+}
+.mort-play h4 {
+  font-size: 1.07rem;
+}
+.mort-heading,
+.mort-clue-strip,
+.mort-actions,
+.mort-options,
+.mort-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.mort-heading {
+  justify-content: space-between;
+  margin: 0.4rem 0 0.9rem;
+}
+.mort-heading h3 {
+  margin: 0.18rem 0 0;
+  font-size: clamp(1.65rem, 4vw, 2.4rem);
+  line-height: 1;
+}
+.mort-heading small,
+.mort-finale small,
+.mort-power-hero small {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #e9b993;
+  font-size: 0.68rem;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  font-weight: 650;
+}
+.mort-count {
+  color: #e8cdae;
+  font-size: 0.84rem;
+}
+.mort-clue-strip {
+  padding: 0.7rem;
+  margin-bottom: 1rem;
+  border: 1px solid #473b32;
+  background: #181416;
+  border-radius: 4px;
+}
+.mort-clue-strip > span {
+  width: 1.65rem;
+  height: 1.65rem;
+  display: inline-grid;
+  place-items: center;
+  border: 1px dashed #665343;
+  color: #d5bd9c;
+  font-size: 0.75rem;
+  border-radius: 50%;
+}
+.mort-clue-strip .mort-clue-found {
+  border-style: solid;
+  color: #ffe9c6;
+  background: #603330;
+}
+.mort-clue-strip button {
+  margin-left: auto;
+}
+.mort-play button:not(.mort-portrait),
+.mort-editor summary,
+.mort-ruled summary,
+.mort-secondary summary {
+  min-height: 44px;
+}
+.mort-play button:not(.mort-portrait) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.67rem;
+  border: 1px solid var(--mort-line);
+  border-radius: 4px;
+  background: #272124;
+  color: #f3e0c4;
+  font-size: 0.84rem;
+  line-height: 1.25;
+}
+.mort-play button:not(.mort-portrait):hover:not(:disabled) {
+  background-color: #473034;
+}
+.mort-play button:disabled {
+  opacity: 0.48;
+}
+.mort-play :is(button, select, summary, input):focus-visible {
+  outline: 2px solid #ffd5a4;
+  outline-offset: 3px;
+}
+.mort-play button.mort-primary {
+  border-color: #b66a5e;
+  background: #702e35;
+}
+.mort-play button.mort-link {
+  background: transparent;
+  border-color: transparent;
+  text-decoration: underline;
+  color: #e9c8a7;
+}
+.mort-lineup {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(0.45rem, 1vw, 0.9rem);
+}
+.mort-portrait {
+  min-width: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #72594b;
+  padding: 0.23rem;
+  background: linear-gradient(#302629, #1c1517);
+  border-radius: 4px;
+  text-align: left;
+  overflow: hidden;
+}
+.mort-portrait img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 4.6;
+  object-fit: cover;
+  object-position: 50% 43%;
+  background: #291f1b;
+  border-radius: 2px;
+}
+.mort-portrait > span {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.2rem;
+  text-align: center;
+  font-size: clamp(0.76rem, 1.35vw, 1.02rem);
+  font-family: Georgia, serif;
+  line-height: 1.2;
+  color: #f7e1c3;
+}
+.mort-portrait:hover,
+.mort-portrait[aria-expanded="true"],
+.mort-portrait[data-active="true"] {
+  border-color: #e7aa80;
+}
+.mort-portrait[data-active="true"] {
+  box-shadow:
+    inset 0 0 0 2px #a64b44,
+    0 0 20px #50292d55;
+}
+.mort-portrait b {
+  position: absolute;
+  top: 0.46rem;
+  left: 0.42rem;
+  border-radius: 2px;
+  background: #542830;
+  color: #fff2da;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.64rem;
+}
+.mort-portrait[data-out] img {
+  filter: grayscale(0.86) brightness(0.61);
+}
+.mort-portrait[data-out] {
+  border-color: #514743;
+}
+.mort-ruled summary,
+.mort-editor summary,
+.mort-secondary summary {
+  padding: 0.7rem 0;
+  cursor: pointer;
+  color: #e7c5a5;
+}
+.mort-ruled {
+  margin: 0.45rem 0;
+}
+.mort-fields,
+.mort-side {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+.mort-side {
+  margin: 0.85rem 0;
+}
+.mort-editor {
+  border: 1px solid #55453b;
+  border-radius: 4px;
+  padding: 0.8rem;
+  margin: 0 0 0.7rem;
+  background: linear-gradient(145deg, #272023, #181417);
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+}
+.mort-editor label:not(.mort-check) {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+.mort-editor label,
+.mort-editor p,
+.mort-finale-rules,
+.mort-quiet {
+  font-size: 0.83rem;
+  color: #e1cbb4;
+}
+.mort-editor select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+}
+.mort-actions select {
+  flex: 1 1 10rem;
+}
+.mort-editor h4 span {
+  float: right;
+}
+.mort-check {
+  display: flex;
+  gap: 0.55rem;
+  min-height: 44px;
+  align-items: center;
+}
+.mort-check input {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: #b36459;
+  flex-shrink: 0;
+}
+.mort-options button[aria-pressed="true"] {
+  background: #603037;
+  border-color: #d18f6a;
+}
+.mort-preview {
+  border-left: 2px solid #ad7457;
+  padding: 0.45rem 0.65rem;
+  background: #312225;
+  color: #f4dfc7;
+  font-size: 0.85rem;
+}
+.mort-profile {
+  margin-top: 0.6rem;
+}
+.mort-profile dl {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+}
+.mort-profile dl > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+.mort-profile dt {
+  color: #c9ad91;
+}
+.mort-profile dd {
+  margin: 0;
+}
+.mort-reveal-actions {
+  margin-bottom: 0.65rem;
+}
+.mort-finale,
+.mort-power-hero {
+  position: relative;
+  display: grid;
+  align-items: stretch;
+  min-height: 16rem;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid #926350;
+  border-radius: 5px;
+  background: radial-gradient(ellipse at 80% 40%, #3d2328, #130e13 66%);
+}
+.mort-finale {
+  animation: mort-develop 0.45s ease-out both;
+}
+.mort-finale > img,
+.mort-power-hero > img {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 57%;
+  object-fit: cover;
+  object-position: center 42%;
+  z-index: -2;
+}
+.mort-finale::before,
+.mort-power-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #171117 29%, #171117ee 40%, #17111700 73%);
+  z-index: -1;
+}
+.mort-finale-copy,
+.mort-power-hero > div {
+  grid-column: 1 / 2;
+  padding: clamp(1rem, 3.5vw, 3rem);
+  align-self: center;
+}
+.mort-finale-copy h3 {
+  font-size: clamp(1.6rem, 4vw, 3.8rem);
+  line-height: 1;
+  margin: 0.5rem 0;
+}
+.mort-finale-copy p,
+.mort-power-hero p {
+  font-size: 0.86rem;
+  color: #f0d4b8;
+}
+.mort-stats {
+  gap: 0.55rem 0.9rem;
+  margin-top: 0.9rem;
+  font-size: 0.72rem;
+}
+.mort-stats span {
+  white-space: nowrap;
+}
+.mort-stats strong {
+  color: #ffd9b0;
+  font-size: 1rem;
+}
+.mort-finale-rules {
+  margin: 0.8rem 0;
+  display: grid;
+  gap: 0.24rem;
+}
+.mort-secondary {
+  border-top: 1px solid #46352d;
+}
+.mort-power-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+.mort-play button.mort-power-choice {
+  padding: 0;
+  overflow: hidden;
+  justify-content: flex-start;
+  text-align: left;
+}
+.mort-power-choice img {
+  height: 3.5rem;
+  width: 28%;
+  object-fit: cover;
+  filter: saturate(0.58) brightness(0.72);
+}
+.mort-power-choice[aria-pressed="true"] img {
+  filter: none;
+}
+.mort-power-choice span {
+  padding: 0.2rem 0.35rem;
+}
+.mort-power-choice span small {
+  display: block;
+  color: #e5b58e;
+}
+.mort-power-hero {
+  min-height: 9rem;
+}
+.mort-power-hero > div {
+  padding: 1rem;
+}
+.mort-power-hero h4 {
+  margin: 0.4rem 0;
+}
+@keyframes mort-develop {
+  from {
+    opacity: 0.4;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 680px) {
+  .mort-lineup {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mort-portrait img {
+    aspect-ratio: 4 / 3.4;
+  }
+  .mort-fields,
+  .mort-side,
+  .mort-power-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mort-clue-strip button {
+    margin: 0.3rem 0 0;
+  }
+  .mort-finale {
+    min-height: 22rem;
+    align-items: end;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mort-finale > img {
+    width: 100%;
+    height: 81%;
+    object-position: center 37%;
+  }
+  .mort-finale::before {
+    background: linear-gradient(
+      0deg,
+      #171117 12%,
+      #171117ea 28%,
+      #17111700 73%
+    );
+  }
+  .mort-finale-copy {
+    align-self: end;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mort-finale {
+    animation: none;
+  }
+}
+.mort-clue-log {
+  color: #e7c5a5;
+  font-size: 0.83rem;
+  margin: -0.25rem 0 0.6rem;
+}
+.mort-clue-log summary {
+  min-height: 44px;
+  align-content: center;
+  cursor: pointer;
+}
+.mort-clue-log li {
+  padding: 0.24rem 0;
+}
+.mort-clue-log strong {
+  margin-right: 0.4rem;
+  color: #f4e2cf;
+}
+.mort-ruled[open] .mort-portrait[data-out] {
+  animation: mort-develop 0.25s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mort-ruled[open] .mort-portrait[data-out] {
+    animation: none;
+  }
+}
+.mort-finale {
+  scroll-margin-block: 5rem;
+}
+@media (min-width: 681px) {
+  .mort-finale {
+    min-height: clamp(17rem, 25vw, 22rem);
+  }
+  .mort-finale > img {
+    width: 52%;
+    object-position: center 31%;
+  }
+}
+@media (max-width: 680px) {
+  .mort-portrait img {
+    aspect-ratio: 4 / 3.7;
+    object-position: center 25%;
+  }
+  .mort-portrait[data-suspect="krampus"] img,
+  .mort-portrait[data-suspect="geppetto"] img {
+    object-position: center 0;
+  }
+}
+.mort-elimination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  margin: 0 0 0.65rem;
+  padding: 0.1rem 0.55rem;
+  border-left: 2px solid #c08967;
+  color: #f4dcbe;
+  background: #362628;
+  font-size: 0.85rem;
+  animation: mort-develop 0.25s ease-out both;
+}
+.mort-board-cue {
+  margin-top: 0.75rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mort-elimination {
+    animation: none;
+  }
+}
