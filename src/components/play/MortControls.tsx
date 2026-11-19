@@ -2,9 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, Clapperboard, Fingerprint, Search, Undo2 } from "lucide-react";
 import {
   MORT,
-  MORT_ATTACK,
   MORT_MINORS,
-  MORT_MOVE,
   MORT_POWERS,
   MORT_SUSPECTS,
   MORT_TRAITS,
@@ -1059,11 +1057,8 @@ export function MortControls({
         </summary>
         <MortPowerPicker events={events} onEvent={onEvent} blocked={blocked} />
       </details>
-      {!state.reveal && bloodlust !== undefined && (
-        <p className="mort-quiet">
-          Attack {MORT_ATTACK[bloodlust]} · Movement {MORT_MOVE[bloodlust]}
-          {state.horrorToken ? " · Horror overflow costs Time" : ""}
-        </p>
+      {!state.reveal && state.horrorToken && (
+        <p className="mort-quiet">Horror overflow costs Time</p>
       )}
     </fieldset>
   );
