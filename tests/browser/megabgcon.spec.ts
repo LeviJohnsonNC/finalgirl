@@ -2,6 +2,7 @@ import { activeGame, expect, test, userId } from "./fixtures";
 import { openModule } from "./play-helpers";
 import { newPlayEvent, summarizePlay, validPlayLog } from "../../src/lib/play/events";
 import { MORT } from "../../supabase/functions/_shared/play/mort";
+import { megabgconState } from "../../supabase/functions/_shared/play/megabgcon";
 
 const key = `final-girl-active-game-v1:${userId}`;
 const selection = {
@@ -19,18 +20,36 @@ async function start(page: import("@playwright/test").Page) {
   return page.locator('[data-module="megabgcon"]');
 }
 
-test("MegaBGCon supports fast Upkeep, save retry, persistent booth effects, and linked Buggy undo", async ({ page, archive }, info) => {
+test("MegaBGCon hides retired controls and replays saved effects alongside events and Buggy undo", async ({ page, archive }, info) => {
+  const moduleData = { module: "megabgcon", changes: { recorded: true } } as const;
+  const upkeep = newPlayEvent({
+    kind: "module", moduleData,
+    megabgconAction: { kind: "upkeep", previous: "root", killer: "Hans", booth: "Van Ryder Games", result: "wet-floor" },
+  });
+  const lookup = newPlayEvent({
+    kind: "module", moduleData,
+    megabgconAction: { kind: "lookup", previous: upkeep.id, booth: "Fortunate Fowl Games" },
+  });
+  const swag = newPlayEvent({
+    kind: "module", moduleData,
+    megabgconAction: { kind: "swag", previous: lookup.id, booths: ["Hatrock Games", "Soxley", "Van Ryder Games"] },
+  });
   await archive.install(page, { draft: {
-    ...activeGame, selection, playMode: true, coreTrackersVersion: 1,
+    ...activeGame, selection: { ...selection, startingEvent: "SWAG Roulette" },
+    playMode: true, coreTrackersVersion: 1,
     playEvents: [
       newPlayEvent({ kind: "start", saved: 0, killed: 0, round: 1 }),
       newPlayEvent({ kind: "state", field: "killerHealth", value: 12 }),
+      upkeep, lookup, swag,
     ],
   } });
   if (info.project.name === "mobile") await page.setViewportSize({ width: 320, height: 568 });
   const panel = await start(page);
-  await panel.getByRole("button", { name: "Record Upkeep" }).click();
-  await choose(page, "Booth drawn", "Hatrock Games");
+  await expect(panel.getByText(/Convention Floor|Record Upkeep|Record a Booth location|Undo last convention record|Last Booth location|Latest Upkeep|SWAG Roulette/i)).toHaveCount(0);
+  await expect(panel.getByRole("region", { name: "Active Booth effects" }).getByText("Van Ryder Games")).toBeVisible();
+
+  await panel.getByText("Ongoing Events", { exact: true }).click();
+  const lunch = panel.getByRole("button", { name: "Lunch Time! Not recorded" });
   await page.evaluate(() => {
     const write = Storage.prototype.setItem;
     Object.assign(window, { restoreConStorage: () => { Storage.prototype.setItem = write; } });
@@ -39,21 +58,11 @@ test("MegaBGCon supports fast Upkeep, save retry, persistent booth effects, and 
       write.call(this, name, data);
     };
   });
-  await panel.getByRole("button", { name: "1–3 · Victim arrived" }).click();
+  await lunch.click();
   await expect(panel.getByRole("alert")).toContainText("could not be saved");
-  await expect(panel.getByText("Latest Upkeep")).toHaveCount(0);
+  await expect(lunch).toBeVisible();
   await page.evaluate(() => (window as unknown as { restoreConStorage: () => void }).restoreConStorage());
-  await panel.getByRole("button", { name: "1–3 · Victim arrived" }).click();
-  await expect(panel.getByText("New attendee · Hatrock Games")).toBeVisible();
-  await panel.getByRole("button", { name: "Record Upkeep" }).click();
-  await choose(page, "Booth drawn", "Van Ryder Games");
-  await panel.getByRole("button", { name: "4–6 · Booth Event" }).click();
-  await choose(page, "Booth Event", "Wet Floor");
-  await panel.getByRole("button", { name: "Record result" }).click();
-  await expect(panel.getByRole("region", { name: "Active Booth effects" }).getByText("Van Ryder Games")).toBeVisible();
-
-  await panel.getByText("Ongoing Events", { exact: true }).click();
-  await panel.getByRole("button", { name: "Lunch Time! Not recorded" }).click();
+  await lunch.click();
   await panel.getByRole("button", { name: "End Action phase" }).click();
   await expect(panel.getByText("1 Action phase left")).toBeVisible();
   await panel.getByText("Medical Buggy", { exact: true }).first().click();
@@ -63,11 +72,17 @@ test("MegaBGCon supports fast Upkeep, save retry, persistent booth effects, and 
   await panel.getByRole("button", { name: "Undo Buggy hit" }).click();
   const saved = await page.evaluate(key => JSON.parse(localStorage.getItem(key)!), key);
   expect(validPlayLog(saved.playEvents)).toBe(true);
-  expect(summarizePlay(saved.playEvents).killerHealth).toBe(12);
+  const replayed = summarizePlay(saved.playEvents);
+  expect(replayed.killerHealth).toBe(12);
+  expect(megabgconState(replayed.entries)).toMatchObject({
+    lookup: "Fortunate Fowl Games",
+    effects: { "wet-floor": "Van Ryder Games" },
+    swag: [{ status: "active" }, { status: "active" }, { status: "active" }],
+  });
 
   await page.reload();
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
-  await expect(panel.getByText("Wet Floor · Van Ryder Games")).toBeVisible();
+  await expect(panel.getByRole("button", { name: "Wet Floor Van Ryder Games" })).toBeVisible();
   await expect(panel.getByText("Medical Buggy · In play")).toBeVisible();
   await panel.getByText("Special Victims", { exact: true }).click();
   await panel.getByRole("button", { name: "Add Game Designer" }).click();
@@ -97,35 +112,44 @@ test("MegaBGCon supports fast Upkeep, save retry, persistent booth effects, and 
       expect(tile!.x + tile!.width).toBeLessThanOrEqual(bounds!.x + bounds!.width + 1);
     }
   }
-  await panel.screenshot({ path: info.outputPath("convention-floor.png") });
+  await panel.screenshot({ path: info.outputPath("megabgcon-play.png") });
 });
 
-test("Mort shares one physical Suspect draw across three location records and closes Upkeep on reveal", async ({ page, archive }) => {
+test("Mort’s investigation and Finale coexist with MegaBGCon’s special victims", async ({ page, archive }) => {
   await archive.install(page, { draft: {
     ...activeGame, selection: { ...selection, killer: MORT, startingEvent: "Industry Bad Boy" },
     playMode: true, coreTrackersVersion: 1, mortSetupVersion: 1, playEvents: [],
   } });
   const panel = await start(page);
-  await expect(panel.locator(".con-starting")).toContainText("Industry Bad Boy");
-  await panel.getByRole("button", { name: "Record a Booth location" }).click();
-  await panel.getByText("For cards with Killer effects").click();
-  await panel.getByRole("link", { name: "Suspect bag draw" }).click();
+  const starter = panel.locator(".con-starting");
+  await expect(starter).toContainText("Industry Bad Boy");
+  await openModule(page, "mort");
+  const mort = page.getByRole("group", { name: "Mort investigation" });
   await choose(page, "Physically drawn suspect token", "Hans");
-  await page.getByRole("button", { name: "Record draw", exact: true }).click();
+  await mort.getByRole("button", { name: "Record draw", exact: true }).click();
 
-  for (const booth of ["Soxley", "Hatrock Games", "Van Ryder Games"]) {
-    if (booth !== "Soxley") await panel.getByRole("button", { name: "Record a Booth location" }).click();
-    await choose(page, "Booth drawn", booth);
-    await panel.getByRole("button", { name: "Record location", exact: true }).click();
-  }
-  await expect(page.locator("#mort-suspect-bag")).toContainText("Hans is the Active Killer");
-  await expect(panel.getByRole("button", { name: "Record Upkeep" })).toBeVisible();
-  await page.getByRole("button", { name: "Return token", exact: true }).click();
+  await starter.getByRole("button", { name: "Record arrival" }).click();
+  await choose(page, "Booth drawn", "Soxley");
+  await choose(page, "Role", "Friend");
+  await starter.locator(".con-editor").getByRole("button", { name: "Record arrival" }).click();
+  await expect(starter).toHaveCount(0);
+  await panel.getByText("Special Victims", { exact: true }).click();
+  await expect(panel.getByText("Placed at Soxley")).toBeVisible();
+  await expect(mort.locator("#mort-suspect-bag")).toContainText("Hans is the Active Killer");
+
+  await mort.getByRole("button", { name: "Return token", exact: true }).click();
+  const bloodlust = page.getByRole("button", { name: "Set Bloodlust", exact: true });
+  await bloodlust.click();
+  await page.getByLabel("Bloodlust value", { exact: true }).fill("1");
+  await page.getByRole("button", { name: "Set", exact: true }).click();
+  await expect(bloodlust).toHaveText("1");
+  await expect(mort.getByText(/Attack \d+ · Movement \d+/)).toHaveCount(0);
   await page.getByRole("region", { name: "Remember this" }).getByRole("button", { name: "Finale", exact: true }).click();
   await choose(page, "Confirmed disguise", "Hans");
   await choose(page, "Dark Power", "Anonymous Terror");
   await page.getByRole("checkbox", { name: "The Terror deck is exhausted and I confirmed the disguise" }).check();
   await page.getByRole("button", { name: "Reveal Mort", exact: true }).click();
-  await expect(panel.getByText("Booth draws ended · Finale in play")).toBeVisible();
-  await expect(panel.getByRole("button", { name: "Record Upkeep" })).toHaveCount(0);
+  await expect(mort.getByRole("heading", { name: "Mort as Hans" })).toBeVisible();
+  await expect(panel.getByText("Placed at Soxley")).toBeVisible();
+  await expect(panel.getByText(/Booth draws ended|Record Upkeep|SWAG Roulette/i)).toHaveCount(0);
 });

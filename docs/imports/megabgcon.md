@@ -14,14 +14,13 @@ MegaBGCon is the location from *Shriek* (`s4-shriek`). Its Play owner is `megabg
 | IMG_9609.jpeg | All 12 Booth cards and both copies of Create a Panic |
 | IMG_9611.jpeg | All eight location Terror cards |
 
-The component checklist and the card spread agree. The supplied photos do not show the three SWAG reward faces. Play records each token as sealed, rescued, or discarded and leaves the actual reward on the tabletop.
+The component checklist and the card spread agree. SWAG Roulette is resolved at the table. The supplied photos do not show the three SWAG reward faces.
 
 ## Play and integration
 
-- Record Upkeep after the physical roll, using either the direct arrival action or the Booth Event picker. A location-only draw uses the shorter Booth lookup and cannot produce an Upkeep event. The selected killer's Finale stops routine draws. Previously placed tokens keep their independent lifecycles.
-- A new or resumed game records only observed events. The existing starting Event selection offers an explicit recording action. Special Victims collect their printed Booth placement or role only when needed. Lunch Time advances on explicit Action phase endings. The two independent ongoing Events use the shared picture-toggle interaction. Players still roll, move figures, and manage physical decks.
-- Tragic Accident records a casualty or its empty-booth alternative as a single observation. The shared kill action leaves the usual tabletop consequences to the player. Explicit printed additions and supported items update the applicable tracked value atomically. The Buggy tracks placement and use, and can change known Health when the player confirms the affected Killer is represented by that tracker. Other Enemy damage is resolved at the table.
-- The case uses the actual selected cast and shared narrative context. The Location card helper goes to Mort's existing Suspect bag when applicable. A valid token can span several Booth lookups on the same card. A ruled-out token remains a Mort discard, leaving Booth and investigation state distinct.
+- The Convention Floor overview, Upkeep and generic Booth lookup, and SWAG Roulette controls were removed at the owner’s request. Resolve those draws and tokens at the table. Historical records still replay, and previously recorded persistent Booth effects can be cleared in Play.
+- A new or resumed game records only observed events. Supported starting Events offer an explicit recording action. Special Victims collect their printed Booth placement or role only when needed. Lunch Time advances on explicit Action phase endings. The two independent ongoing Events use the shared picture-toggle interaction. Players still roll, move figures, and manage physical decks.
+- The Medical Buggy tracks placement and use, and can change known Health when the player confirms the affected Killer is represented by that tracker. Other Enemy damage is resolved at the table.
 - The shared replay and owner validation apply to active games, death context and archive rows. Death facts freeze at the event, with existing historical signatures retained. No database migration or private opening-reference upload is needed. Deploy the changed frontend and consumers of `_shared/play`, especially death-scene functions, together.
 
 Original artwork and crop details are in the [Play artwork manifest](../../src/assets/play/photos/megabgcon/README.md).

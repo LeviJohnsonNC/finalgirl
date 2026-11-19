@@ -24,7 +24,7 @@ The seventeen double-sided clue cards and the sealed secret envelope were intent
 - The shared tracker accepts the Ratchet Lady disguise's 26 Health when Anonymous Terror doubles five missing clues. The app computes known track and Finale effects and provides explicit prompts for Time, Terror cards, dice, targeting and other physical actions.
 - Mort's Minors are independent of Location ownership. Slippery and Twisted Bond use a Health-free observation while Mort is disguised. The Finale clears that observation together with Mort's Minors while unrelated location controls remain in place.
 - Rules and card suggestions use the photographed effects. The closing form uses the logged disguise where present and keeps older manual records readable. The generated ending and new historical death facts use the pertinent observation, with the selected Final Girl identity and location passed through the existing contracts. A temporary draw or the last visible suspect does not identify the disguise in narration.
-- The [artwork manifest](../../src/assets/play/photos/mort/README.md) maps ten neutral suspect portraits, ten temporary Active Killer portraits, ten Finale photographs, seven power images and one banner. The game artwork remains separate from the licensed printed components.
+- The [artwork manifest](../../src/assets/play/photos/mort/README.md) maps ten neutral suspect portraits, ten temporary Active Killer portraits, ten Finale photographs, ten dossier portraits, one dossier backdrop, seven trait glyphs, seven power images and one banner. The game artwork remains separate from the licensed printed components.
 
 ## Verification and release
 
@@ -36,3 +36,10 @@ The shared edge changes reach ending/story/scene validation and historical death
 ## Active Killer portrait follow-up
 
 Each temporary Active Killer gets a new portrait in the existing lineup tile. The shot retains the suspect’s identifying costume and uses posture, distance and practical side light to distinguish the temporary state. Returning the token or undoing the draw restores the neutral portrait. The browser journey exercises all ten draws, a reload with an active token and Undo and the return to the lineup portraits. The 1280px laptop and 320px phone captures cover all ten crops and keep the Active Killer label below the image. The update ships with the frontend.
+
+
+## Suspect dossier follow-up
+
+The clue form records one of the five numbered Reminder tokens and the negative trait from the tabletop Clue Viewer. Used numbers remain visible and disabled. For a manual exclusion, open the suspect’s dossier and use Rule out suspect. A matching clue can attach that exclusion later without adding another Informant. Older manual clue entries remain readable.
+
+Each dossier shows the same seven traits used by clue matching and a new instant-print portrait of the lineup performer. A temporary Active Killer displays their active portrait in the lineup and dossier. The browser journeys check the full five-clue route, direct exclusions, all ten portraits, keyboard selection, and laptop and phone crops. The disguised Attack and Movement line was removed from Play. The printed chart remains in Rules and the Finale retains its display. This follow-up ships with the frontend.

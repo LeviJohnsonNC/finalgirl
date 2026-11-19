@@ -1,5 +1,4 @@
 import { MEGABGCON, MEGABGCON_MODULE } from "../../../supabase/functions/_shared/play/megabgconCatalog";
-import { conFinaleRevealed, megabgconState } from "../../../supabase/functions/_shared/play/megabgcon";
 import { MegaBGConControls } from "./MegaBGConControls";
 import { conArt } from "./megabgconArt";
 import { MORT, MORT_MODULE, mortSummary } from '../../../supabase/functions/_shared/play/mort';
@@ -204,11 +203,7 @@ export const moduleDefinitions: Definition[] = [
 },Controls:props=><KonradControls {...props}/>},
  {id:'evomorph',owner:'killer',match:'Evomorph',title:'The Evomorph',art:{src:evomorphBanner,fit:'slice',position:'65% center'},capabilities:['reveals','minor-power'],summary:state=>`${state.stage?String(state.stage).replace(/^./,s=>s.toUpperCase()):'Stage not recorded'} · ${state.presence==='vanished'?'Hidden':state.presence==='on-board'?'Visible':'Presence not recorded'}`,Controls:props=><EvomorphControls {...props}/>},
  {id:MEGABGCON_MODULE,owner:"location",match:MEGABGCON,title:"Inside MegaBGCon",art:conArt("banner"),capabilities:["character","event"],Controls:MegaBGConControls,
-  summary:(_state,props)=>{
-    const entries=summarizePlay(props?.events??[]).entries;
-    if (props && conFinaleRevealed(props.killer,entries)) return "Finale in play · Booth draws ended";
-    return megabgconState(entries).upkeep?.booth ?? "Convention Floor";
-  }},
+  summary:()=>""},
  {id:WOLFE_MODULE,owner:'location',match:WOLFE,title:'Inside Wolfe Asylum',art:wolfeArt('banner'),capabilities:['character','event'],summary:wolfeSummary,Controls:props=><WolfeControls {...props}/>},
  {id:'creech',owner:'location',match:'Creech Manor',title:'Inside Creech Manor',art:{src:creechBanner,fit:'slice',position:'70% center'},capabilities:['character','event'],summary:state=>`Ladder: ${state.ladder??'not recorded'} · Helicopter: ${state['helicopter.used']===true?'used':state['event.helicopter']==='active'?'available':'not recorded'}`,Controls:props=><CreechControls {...props}/>},
   {id:'poltergeist',owner:'killer',match:'Poltergeist',title:'The Poltergeist',art:moduleBanners.poltergeist,capabilities:['objective','minor-effect','reveals'],summary:state=>`Carolyn: ${state.carolyn===undefined?'not recorded':String(state.carolyn).replace(/-/g,' ')} · Mr. Floppy: ${state.floppy===undefined?'not recorded':String(state.floppy).replace(/-/g,' ')}`,Controls:props=><PoltergeistControls {...props}/>},

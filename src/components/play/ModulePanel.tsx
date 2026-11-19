@@ -19,7 +19,7 @@ export function ModulePanel({ id, title, kind, summary, art, preferenceKey, chil
     data-module={id} open={open}>
     <summary onClick={event => { event.preventDefault(); toggle(); }}>
       <ModuleArtwork art={art} />
-      <span className="play-module-heading"><small className="play-module-kind">{kind}</small><h2>{title}</h2><span className="play-module-summary">{summary}</span></span>
+      <span className="play-module-heading"><small className="play-module-kind">{kind}</small><h2>{title}</h2>{summary && <span className="play-module-summary">{summary}</span>}</span>
       <span className="play-module-frame" aria-hidden="true" />
       <span className="play-module-disclosure" aria-hidden="true"><ChevronDown className="play-module-chevron" /></span>
     </summary>

@@ -2,9 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, Clapperboard, Fingerprint, Search, Undo2 } from "lucide-react";
 import {
   MORT,
-  MORT_ATTACK,
   MORT_MINORS,
-  MORT_MOVE,
   MORT_POWERS,
   MORT_SUSPECTS,
   MORT_TRAITS,
@@ -32,6 +30,15 @@ import "@/styles/play-mort.css";
 
 const nameOf = (id: Suspect) => MORT_SUSPECTS.find((s) => s.id === id)!.name;
 const numbers = [1, 2, 3, 4, 5];
+const traitGlyphs = [
+  "mask",
+  "series",
+  "height",
+  "style",
+  "genre",
+  "villain",
+  "game",
+] as const;
 const toggle = <T,>(items: T[], item: T) =>
   items.includes(item) ? items.filter((i) => i !== item) : [...items, item];
 type Commit = (action: MortCommand) => boolean;
@@ -429,29 +436,25 @@ function ClueEditor({
     if (initialSource === "coerce")
       form.current?.scrollIntoView({ block: "nearest" });
   }, [initialSource]);
-  const [number, setNumber] = useState("");
+  const [number, setNumber] = useState<number>();
   const [source, setSource] = useState<"manual" | "interrogate" | "coerce">(
     initialSource,
   );
-  const [method, setMethod] = useState<"trait" | "manual">("trait");
   const [trait, setTrait] = useState("");
   const [value, setValue] = useState("");
-  const [selected, setSelected] = useState<Suspect[]>([]);
   const [discard, setDiscard] = useState<
     NonNullable<Extract<MortCommand, { kind: "clue" }>["discard"]> | ""
   >("");
   const matches =
-    method === "manual"
-      ? selected
-      : trait && value
-        ? mortMatches(state, Number(trait), value)
-        : [];
+    trait !== "" && value ? mortMatches(state, Number(trait), value) : [];
   const newlyExcluded = matches.filter((id) => !state.excluded.includes(id));
   const attached = matches.length - newlyExcluded.length;
   const total = state.excluded.length + newlyExcluded.length;
-  const available = state.clues.length < 5;
-  const legal =
-    available &&
+  const canApply =
+    number !== undefined &&
+    !state.clues.includes(number) &&
+    !state.active &&
+    (source !== "coerce" || state.informants > 0) &&
     matches.length > 0 &&
     total <= 9 &&
     (state.clues.length !== 4 || total === 9);
@@ -479,14 +482,15 @@ function ClueEditor({
       onSubmit={(e) => {
         e.preventDefault();
         if (
-          number &&
-          legal &&
+          number !== undefined &&
+          canApply &&
           commit({
             kind: "clue",
-            number: Number(number),
+            number,
             excluded: matches,
             source,
-            ...(method === "trait" ? { trait: Number(trait), value } : {}),
+            trait: Number(trait),
+            value,
             ...(discard && source !== "manual" ? { discard } : {}),
           })
         )
@@ -494,23 +498,26 @@ function ClueEditor({
       }}
     >
       <div className="mort-fields">
-        <label>
-          Clue number
-          <PlaySelect
-            aria-label="Clue number"
-            value={number}
-            onChange={(e) => setNumber(e.target.value)}
-          >
-            <option value="">Reminder token</option>
-            {numbers
-              .filter((n) => !state.clues.includes(n))
-              .map((n) => (
-                <option key={n} value={n}>
+        <fieldset className="mort-reminder-tokens">
+          <legend>Clue number</legend>
+          <div>
+            {numbers.map((n) => {
+              const found = state.clues.includes(n);
+              return (
+                <button
+                  key={n}
+                  type="button"
+                  aria-label={`Reminder token ${n}${found ? ", recorded" : ""}`}
+                  aria-pressed={!found && number === n}
+                  disabled={found}
+                  onClick={() => setNumber(number === n ? undefined : n)}
+                >
                   {n}
-                </option>
-              ))}
-          </PlaySelect>
-        </label>
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
         <label>
           How you found it
           <PlaySelect
@@ -526,82 +533,40 @@ function ClueEditor({
           </PlaySelect>
         </label>
       </div>
-      <div
-        className="mort-options"
-        role="group"
-        aria-label="How to rule out suspects"
-      >
-        <button
-          type="button"
-          aria-pressed={method === "trait"}
-          onClick={() => setMethod("trait")}
-        >
-          Match a trait
-        </button>
-        <button
-          type="button"
-          aria-pressed={method === "manual"}
-          onClick={() => setMethod("manual")}
-        >
-          Pick suspects
-        </button>
+      <div className="mort-fields">
+        <label>
+          Trait from the Viewer
+          <PlaySelect
+            aria-label="Trait from the Viewer"
+            value={trait}
+            onChange={(e) => {
+              setTrait(e.target.value);
+              setValue("");
+            }}
+          >
+            <option value="">Choose a trait</option>
+            {MORT_TRAITS.map((t, i) => (
+              <option key={t} value={i}>
+                {t}
+              </option>
+            ))}
+          </PlaySelect>
+        </label>
+        <label>
+          Mort does not have
+          <PlaySelect
+            aria-label="Mort does not have"
+            value={value}
+            disabled={trait === ""}
+            onChange={(e) => setValue(e.target.value)}
+          >
+            <option value="">Choose the excluded value</option>
+            {values.map((v) => (
+              <option key={v}>{v}</option>
+            ))}
+          </PlaySelect>
+        </label>
       </div>
-      {method === "trait" ? (
-        <div className="mort-fields">
-          <label>
-            Trait from the Viewer
-            <PlaySelect
-              aria-label="Trait from the Viewer"
-              value={trait}
-              onChange={(e) => {
-                setTrait(e.target.value);
-                setValue("");
-              }}
-            >
-              <option value="">Choose a trait</option>
-              {MORT_TRAITS.map((t, i) => (
-                <option key={t} value={i}>
-                  {t}
-                </option>
-              ))}
-            </PlaySelect>
-          </label>
-          <label>
-            Mort does not have
-            <PlaySelect
-              aria-label="Mort does not have"
-              value={value}
-              disabled={!trait}
-              onChange={(e) => setValue(e.target.value)}
-            >
-              <option value="">Choose the excluded value</option>
-              {values.map((v) => (
-                <option key={v}>{v}</option>
-              ))}
-            </PlaySelect>
-          </label>
-        </div>
-      ) : (
-        <div
-          className="mort-options"
-          role="group"
-          aria-label="Pick suspects to rule out"
-        >
-          {MORT_SUSPECTS.filter(
-            (s) =>
-              !state.excluded.includes(s.id) || state.unfiled.includes(s.id),
-          ).map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              aria-pressed={selected.includes(s.id)}
-              onClick={() => setSelected(toggle(selected, s.id))}
-            >
-              {s.name}
-            </button>
-          ))}
-        </div>
-      )}
       {discardOptions.length > 0 && source !== "manual" && (
         <label>
           Discard a Minor Dark Power after two successes
@@ -624,16 +589,12 @@ function ClueEditor({
           ? "Check the clue. At least one suspect must remain."
           : matches.length
             ? `${newlyExcluded.length ? `${newlyExcluded.map(nameOf).join(", ")} ${newlyExcluded.length === 1 ? "becomes an Informant" : "become Informants"}.` : ""}${attached ? ` ${attached} previously ruled out will be linked to this clue.` : ""}${source === "coerce" ? " Remove the Informant you coerced." : ""}${state.clues.length === 4 && total !== 9 ? " The fifth clue must leave one suspect." : ""}`
-            : value && method === "trait"
+            : value
               ? "No remaining suspect matches. Check your earlier exclusions."
-              : "Choose a trait value or select suspects to preview the result."}
+              : "Choose the excluded trait value to preview the clue."}
       </p>
       <div className="mort-actions">
-        <button
-          type="submit"
-          className="mort-primary"
-          disabled={!number || !legal}
-        >
+        <button type="submit" className="mort-primary" disabled={!canApply}>
           Apply clue
         </button>
         <button type="button" onClick={onClose}>
@@ -662,8 +623,7 @@ export function MortControls({
   const [person, setPerson] = useState<Suspect>();
   const profile = useRef<HTMLElement>(null);
   useEffect(() => {
-    if (person && matchMedia("(max-width:680px)").matches)
-      profile.current?.scrollIntoView({ block: "nearest" });
+    if (person) profile.current?.scrollIntoView({ block: "nearest" });
   }, [person]);
   const [lower, setLower] = useState(true);
   const bloodlust =
@@ -697,6 +657,7 @@ export function MortControls({
 
   const survivors = MORT_SUSPECTS.filter((s) => !state.excluded.includes(s.id));
   const out = MORT_SUSPECTS.filter((s) => state.excluded.includes(s.id));
+  const profileSuspect = survivors.find((s) => s.id === person);
   const clues = summary.entries.flatMap((e) =>
     e.mortAction?.kind === "clue" ? [e.mortAction] : [],
   );
@@ -821,36 +782,54 @@ export function MortControls({
                   );
                 })}
               </div>
-              {person && survivors.some((s) => s.id === person) && (
+              {profileSuspect && (
                 <section
-                  className="mort-editor mort-profile"
+                  className="mort-profile"
+                  data-active={state.active === profileSuspect.id}
                   ref={profile}
-                  aria-label={`Profile for ${nameOf(person)}`}
+                  aria-label={`Profile for ${profileSuspect.name}`}
                 >
-                  <h4>{nameOf(person)}</h4>
-                  <dl>
-                    {MORT_TRAITS.map((t, i) => (
-                      <div key={t}>
-                        <dt>{t}</dt>
-                        <dd>
-                          {
-                            MORT_SUSPECTS.find((s) => s.id === person)?.traits[
-                              i
-                            ]
-                          }
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
+                  <div className="mort-profile-photo">
+                    <img
+                      src={mortPhoto(
+                        `${profileSuspect.id}-${state.active === profileSuspect.id ? "active" : "profile"}`,
+                      )}
+                      alt=""
+                      width={640}
+                      height={704}
+                    />
+                  </div>
+                  <div className="mort-profile-traits">
+                    <h4>{profileSuspect.name}</h4>
+                    <dl>
+                      {MORT_TRAITS.map((trait, index) => (
+                        <div key={trait}>
+                          <dt>
+                            <span className="mort-trait-icon" aria-hidden="true">
+                              <img
+                                src={mortPhoto(`trait-${traitGlyphs[index]}`)}
+                                alt=""
+                                width={24}
+                                height={24}
+                              />
+                            </span>
+                            {trait}
+                          </dt>
+                          <dd>{profileSuspect.traits[index]}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
                   <button
                     type="button"
+                    className="mort-profile-ruleout"
                     disabled={Boolean(state.active) || survivors.length === 1}
                     onClick={() => {
-                      if (commit({ kind: "exclude", suspect: person }))
+                      if (commit({ kind: "exclude", suspect: profileSuspect.id }))
                         setPerson(undefined);
                     }}
                   >
-                    Rule out suspect
+                    <Search size={20} aria-hidden="true" /> Rule out suspect
                   </button>
                 </section>
               )}
@@ -1078,11 +1057,8 @@ export function MortControls({
         </summary>
         <MortPowerPicker events={events} onEvent={onEvent} blocked={blocked} />
       </details>
-      {!state.reveal && bloodlust !== undefined && (
-        <p className="mort-quiet">
-          Attack {MORT_ATTACK[bloodlust]} · Movement {MORT_MOVE[bloodlust]}
-          {state.horrorToken ? " · Horror overflow costs Time" : ""}
-        </p>
+      {!state.reveal && state.horrorToken && (
+        <p className="mort-quiet">Horror overflow costs Time</p>
       )}
     </fieldset>
   );

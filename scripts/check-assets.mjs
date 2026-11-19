@@ -539,23 +539,26 @@ console.log('Verified 22 original Ratchet Lady photographs and 9 chooser thumbna
 
 const mortFolder = 'src/assets/play/photos/mort';
 const mortSuspects = ['razorface', 'krampus', 'hans', 'hunter', 'tormentor', 'geppetto', 'wolf', 'ratchet', 'fright', 'baghead'];
+const mortTraitGlyphs = ['mask', 'series', 'height', 'style', 'genre', 'villain', 'game'].map(id => 'trait-' + id);
 const mortNames = new Set(['banner', 'anonymous', 'paranoia', 'whispers', 'snitches', 'notorious', 'stockholm', 'quick',
-  ...mortSuspects.flatMap(id => [id, `${id}-active`, `${id}-finale`])]);
+  'dossier-backdrop', ...mortTraitGlyphs, ...mortSuspects.flatMap(id => [id, `${id}-active`, `${id}-finale`, `${id}-profile`])]);
 const mortManifest = JSON.parse(readFileSync(join(mortFolder, 'manifest.json'), 'utf8'));
 const mortHashes = new Set();
 for (const photo of mortManifest) {
   const file = join(mortFolder, photo.file);
   if (!mortNames.delete(photo.id) || photo.file !== `${photo.id}.webp` || !/^exec-[a-f0-9-]+\.png$/.test(photo.source)) {
-    throw Error('Unmapped Mort photograph: ' + file);
+    throw Error('Unmapped Mort art: ' + file);
   }
   const bytes = readFileSync(file);
   const hash = createHash('sha256').update(bytes).digest('hex');
-  if (bytes.length !== photo.bytes || bytes.length > 125 * 1024 ||
+  const isGlyph = mortTraitGlyphs.includes(photo.id);
+  if (bytes.length !== photo.bytes || bytes.length > (isGlyph ? 4 : 125) * 1024 ||
+      (isGlyph && (photo.width !== 64 || photo.height !== 64)) ||
       konradWebpDimensions(bytes).join() !== [photo.width, photo.height].join() ||
-      hash !== photo.sha256 || mortHashes.has(hash)) throw Error('Invalid or duplicate Mort photograph: ' + file);
+      hash !== photo.sha256 || mortHashes.has(hash)) throw Error('Invalid or duplicate Mort art: ' + file);
   mortHashes.add(hash);
 }
 if (mortNames.size || images.filter(file => file.startsWith(mortFolder + '/')).length !== mortManifest.length) {
-  throw Error('Incomplete Mort photography');
+  throw Error('Incomplete Mort art');
 }
-console.log('Verified 38 Mort photographs across the lineup, Active Killers, Finales, powers and owner banner.');
+console.log('Verified 49 Mort photographs and seven trait glyphs.');
