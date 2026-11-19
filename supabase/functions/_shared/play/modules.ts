@@ -1,3 +1,5 @@
+import { MEGABGCON, MEGABGCON_MODULE, CON_VISUAL, CON_ITEMS } from "./megabgconCatalog.ts";
+import { conFacts, type ConAction } from "./megabgcon.ts";
 import { MORT, MORT_MODULE, mortFacts, type MortAction } from './mort.ts';
 import { WOLFE, WOLFE_MODULE, WOLFE_ITEMS, WOLFE_VISUAL } from './wolfeCatalog.ts';
 import { validWolfeField, wolfeFacts, type WolfeAction } from './wolfe.ts';
@@ -71,10 +73,11 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: typeof MEGABGCON_MODULE | typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
+  megabgconAction?: ConAction;
   mortAction?: MortAction;
   mortTokenPlaced?: boolean;
   wolfeAction?: WolfeAction;
@@ -325,7 +328,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    ![MORT_MODULE, WOLFE_MODULE, RATCHET_MODULE, STATION_MODULE, ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    ![MEGABGCON_MODULE, MORT_MODULE, WOLFE_MODULE, RATCHET_MODULE, STATION_MODULE, ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -334,6 +337,7 @@ export function validModuleObservation(
   )
     return false;
   const entries = Object.entries(m.changes);
+  if (m.module === MEGABGCON_MODULE) return entries.length === 1 && m.changes.recorded === true;
   if (m.module === MORT_MODULE) return entries.length === 1 && (m.changes.recorded === true || m.changes.initialized === true);
   if (m.module === "fright") return validFrightChanges(m.changes);
   return (
@@ -584,6 +588,10 @@ export function moduleContext(
   includeWolfe = true,
 ) {
   const context: Record<string, ModuleState> = {};
+  if (selection.location === MEGABGCON) {
+    const facts = conFacts(entries);
+    if (facts) context[MEGABGCON_MODULE] = { facts };
+  }
   if(includeWolfe && selection.location===WOLFE) {
     const facts=wolfeFacts(moduleState(entries,WOLFE_MODULE));
     if(facts) context[WOLFE_MODULE]={facts};
@@ -674,6 +682,11 @@ export function moduleStoryBeats(
   selection: ModuleSelection,
   entries: readonly ObservedEvent[],
 ): string {
+  if (selection.location === MEGABGCON) {
+    const place = conFacts(entries);
+    const threat = moduleStoryBeats({ ...selection, location: "" }, entries);
+    return [fitStoryText(place, threat ? 485 : 880), fitStoryText(threat, place ? 395 : 880)].filter(Boolean).join("\n");
+  }
   if (selection.killer === MORT) {
     const threat = mortFacts(entries);
     const place = moduleStoryBeats({...selection,killer:""}, entries);
@@ -934,6 +947,10 @@ export function buddylandReferences(
     refs.push({name:WOLFE,effect:WOLFE_VISUAL});
     if(typeof context?.wolfe?.facts==='string') refs.push({name:'Wolfe Asylum observations',effect:context.wolfe.facts});
   }
+  if (selection.location === MEGABGCON) {
+    refs.push({ name: MEGABGCON, effect: CON_VISUAL });
+    if (context?.[MEGABGCON_MODULE]?.facts) refs.push({ name: "Observed convention events", effect: String(context[MEGABGCON_MODULE].facts).slice(0, 500) });
+  }
   if(selection.location==='Marrek Warehouse'){refs.push({name:'Marrek Warehouse',effect:MARREK_VISUAL});if(context?.marrek)refs.push({name:'Warehouse observations',effect:marrekFacts(marrekState(context.marrek)).join(' ')});}
   if(selection.killer===ORGANISM && typeof context?.organism?.facts==="string") refs.push({name:"Organism observations",effect:context.organism.facts});
   if(selection.killer===MORT && typeof context?.mort?.facts==='string') refs.push({name:'Mort investigation',effect:context.mort.facts});
@@ -1167,7 +1184,7 @@ export function moduleItemBeats(
   entries: readonly ObservedEvent[],
 ) {
   const locationCatalog =
-    selection.location === WOLFE ? WOLFE_ITEMS : selection.location === MALL ? MALL_ITEMS : selection.location === WINGARD ? WINGARD_ITEMS : selection.location === "Marrek Warehouse" ? MARREK_ITEMS : selection.location === "Shady Acres" ? SHADY_ITEMS : selection.location === "USS Konrad" ? KONRAD_ITEMS : selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
+    selection.location === MEGABGCON ? CON_ITEMS : selection.location === WOLFE ? WOLFE_ITEMS : selection.location === MALL ? MALL_ITEMS : selection.location === WINGARD ? WINGARD_ITEMS : selection.location === "Marrek Warehouse" ? MARREK_ITEMS : selection.location === "Shady Acres" ? SHADY_ITEMS : selection.location === "USS Konrad" ? KONRAD_ITEMS : selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
       ? CAMP_ITEMS
       : selection.location === "Carnival of Blood"
         ? CARNIVAL_ITEMS

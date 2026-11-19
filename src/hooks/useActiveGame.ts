@@ -1,3 +1,5 @@
+import { MEGABGCON } from "../../supabase/functions/_shared/play/megabgconCatalog";
+import { conOwnsLog } from "../../supabase/functions/_shared/play/megabgcon";
 import { MORT, MORT_MODULE, canRecordMort, mortOwnsLog, mortParent, mortState } from '../../supabase/functions/_shared/play/mort';
 import { WOLFE, WOLFE_MODULE } from '../../supabase/functions/_shared/play/wolfeCatalog';
 import { initialWolfe, resolveWolfe, wolfeOwnsLog, wolfeParent } from '../../supabase/functions/_shared/play/wolfe';
@@ -108,6 +110,7 @@ export function useActiveGame() {
       if (event.kind === 'death-count' && !canChangeDeathCount(log, event)) return previous;
       const isRatchetLady = previous.selection.killer === RATCHET_LADY;
       if (event.moduleData?.module===WOLFE_MODULE&&!event.wolfeAction) return previous;
+      if (!conOwnsLog(previous.selection.location, previous.selection.killer, [event])) return previous;
       if (!wolfeOwnsLog(previous.selection.location,[event]) || !ratchetLogBelongsTo(previous.selection.killer, [event])) return previous;
       if (isRatchetLady && event.kind === 'state' && event.field === 'bloodlust' &&
           typeof event.value === 'number' && event.value > RATCHET_MAX_BLOODLUST) return previous;
@@ -142,6 +145,7 @@ export function useActiveGame() {
       let accepted = event.kind === "killed"
         ? {...event,...(isMort && {mortReference:true as const}),...(isRatchetLady && {ratchetReference:true as const}),...(isOrganism && {organismReference:true as const}),...(isSlayer && {slayerReference:true as const}),...(isHunter && {hunterReference:true as const}),...(isIntruders && {intruderReference:true as const}),...(isWolf && {wolfReference:true as const}),...(previous.selection.location === WOODS && {woodsReference:true as const})}
         : event;
+      if (event.kind === "killed" && previous.selection.location === MEGABGCON) accepted = { ...accepted, megabgconReference: true };
       if (event.kind==='killed' && previous.selection.location===WOLFE) accepted={...accepted,wolfeReference:true};
       if (event.kind === 'killed' && isStation) accepted = {...accepted, stationReference:true};
       if(event.kind==='killed'&&previous.selection.location===MALL)accepted={...accepted,mallReference:true};
@@ -364,6 +368,7 @@ export function useActiveGame() {
       if((event.konradAction||event.kind==='undo'||event.kind==='restore')&&[...log,...additions].some(e=>e.moduleData?.module==='konrad')&&!validPlayLog([...log,...additions]))return previous;
       if(previous.selection.location===MALL&&!validPlayLog([...log,...additions]))return previous;
       if (isFalconwood && !validPlayLog([...log, ...additions])) return previous;
+      if (previous.selection.location === MEGABGCON && !validPlayLog([...log, ...additions])) return previous;
       if (previous.selection.location===WOLFE && !validPlayLog([...log,...additions])) return previous;
       if (isStation && !validPlayLog([...log,...additions])) return previous;
       if (isMort && !validPlayLog([...log,...additions])) return previous;

@@ -26,6 +26,8 @@ function moduleAt(path, imports) {
     if(name==='./sunnydazeCatalog.ts')return mallCatalog;
     if(name==='./station.ts')return station;
     if(name==='./stationCatalog.ts')return stationCatalog;
+    if (name === './megabgconCatalog.ts') return conCatalog;
+    if (name === './megabgcon.ts') return convention;
     if (imports[name]) return imports[name];
     throw new Error("Unexpected import " + name);
   }, ex);
@@ -41,6 +43,8 @@ const mallCatalog=moduleAt('../supabase/functions/_shared/play/sunnydazeCatalog.
 const mall=moduleAt('../supabase/functions/_shared/play/sunnydaze.ts',{'./sunnydazeCatalog.ts':mallCatalog});
 const organism=moduleAt('../supabase/functions/_shared/play/organism.ts',{});
 const hunter=moduleAt('../supabase/functions/_shared/play/hunter.ts',{});
+const conCatalog = moduleAt('../supabase/functions/_shared/play/megabgconCatalog.ts', {});
+const convention = moduleAt('../supabase/functions/_shared/play/megabgcon.ts', { './megabgconCatalog.ts': conCatalog, './mort.ts': mort, './hunter.ts': hunter });
 const falconwood=moduleAt('../supabase/functions/_shared/play/falconwood.ts',{});
 const slayer=moduleAt('../supabase/functions/_shared/play/slayer.ts',{});
 const buddyland = moduleAt(

@@ -1,3 +1,4 @@
+import { conOwnsLog } from "../../supabase/functions/_shared/play/megabgcon";
 import { MORT, mortOwnsLog } from '../../supabase/functions/_shared/play/mort';
 import { WOLFE, WOLFE_MODULE } from '../../supabase/functions/_shared/play/wolfeCatalog';
 import { initialWolfe, sameWolfe, wolfeOwnsLog } from '../../supabase/functions/_shared/play/wolfe';
@@ -90,6 +91,7 @@ export function isActiveGame(value: unknown): value is ActiveGame {
       game.playEvents.some(event => event?.moduleData?.module === RATCHET_MODULE && !event.ratchetAction &&
         typeof event.moduleData.changes?.maniacs === 'number' && game.ratchetSetupVersion !== 1))) return false;
   if(game.wolfeSetupVersion!==undefined&&(game.wolfeSetupVersion!==1||game.selection?.location!==WOLFE))return false;
+  if (Array.isArray(game.playEvents) && !conOwnsLog(game.selection?.location, game.selection?.killer, game.playEvents)) return false;
   if(Array.isArray(game.playEvents)&&(!wolfeOwnsLog(game.selection?.location,game.playEvents)||game.playEvents.some(event=>
     event?.moduleData?.module===WOLFE_MODULE&&!event.wolfeAction&&
       (game.wolfeSetupVersion!==1||!event.moduleData.changes||!sameWolfe(event.moduleData.changes,initialWolfe(game.selection?.startingEvent))))))return false;

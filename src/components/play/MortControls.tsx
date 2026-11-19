@@ -875,7 +875,7 @@ export function MortControls({
                 </details>
               )}
               <div className="mort-side">
-                <section className="mort-editor">
+                <section className="mort-editor" id="mort-suspect-bag" tabIndex={-1}>
                   <h4>Suspect bag</h4>
                   {state.active ? (
                     <>
