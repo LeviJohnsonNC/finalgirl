@@ -1,3 +1,4 @@
+import { mortOwnsLog } from '../../supabase/functions/_shared/play/mort';
 import { ratchetLogBelongsTo } from '../../supabase/functions/_shared/play/ratchetLady';
 import type { Json } from '@/integrations/supabase/types';
 import {validPlayLog, type PlayEvent} from '@/lib/play/events';
@@ -171,7 +172,7 @@ const fromDbRow = (row: Record<string, unknown>): GameResult => ({
   sceneImageUrl: sanitizeStoredImageUrl(row.scene_image_url),
   visualBible: (row.visual_bible as string) || undefined,
   roundsPlayed: (row.rounds_played as number | null) ?? undefined,
-  playEvents: validPlayLog(row.play_events) && ratchetLogBelongsTo(row.killer as string, row.play_events) ? row.play_events : undefined,
+  playEvents: validPlayLog(row.play_events) && ratchetLogBelongsTo(row.killer as string, row.play_events) && mortOwnsLog(row.killer as string,row.play_events,row.location as string) ? row.play_events : undefined,
   hasLegacyPoster: row.has_legacy_poster === true,
   hasLegacyScene: row.has_legacy_scene === true,
 });

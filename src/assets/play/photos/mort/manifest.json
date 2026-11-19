@@ -1,0 +1,254 @@
+[
+  {
+    "id": "anonymous",
+    "file": "anonymous.webp",
+    "source": "exec-6691ad4b-c53c-4849-afb1-2e705d56d5a2.png",
+    "width": 900,
+    "height": 600,
+    "bytes": 30782,
+    "sha256": "7296be8875917a5b525cc411b3185b3f189c09ef0608e36e3aa5d151813b71c2"
+  },
+  {
+    "id": "baghead-finale",
+    "file": "baghead-finale.webp",
+    "source": "exec-d9e6590e-0217-497b-b5ee-bb6ad2148c2c.png",
+    "width": 756,
+    "height": 1024,
+    "bytes": 70568,
+    "sha256": "a4346588fb3d0af0ece453a9c44111c7f18b75dba5ac845da9873549f5018f62"
+  },
+  {
+    "id": "baghead",
+    "file": "baghead.webp",
+    "source": "exec-d9e6590e-0217-497b-b5ee-bb6ad2148c2c.png",
+    "width": 530,
+    "height": 718,
+    "bytes": 43414,
+    "sha256": "0d70b6ccd99098f619973606572c0955221e715380a4397c4b7bb0207f31b3f2"
+  },
+  {
+    "id": "banner",
+    "file": "banner.webp",
+    "source": "exec-c8a12981-c78e-43bf-9629-1807c9854c61.png",
+    "width": 1350,
+    "height": 900,
+    "bytes": 36178,
+    "sha256": "bdf8d4097d110db9a8818aac6a6079e623b37cae1b4df95e9203e517858b4b9d"
+  },
+  {
+    "id": "fright-finale",
+    "file": "fright-finale.webp",
+    "source": "exec-499fa5e6-5fcb-4ce1-8e79-dc2e97cb662d.png",
+    "width": 756,
+    "height": 1024,
+    "bytes": 68050,
+    "sha256": "88e62f5178def551edad8a709dcf0e3385766b26865c44d176d6e006b6744ca0"
+  },
+  {
+    "id": "fright",
+    "file": "fright.webp",
+    "source": "exec-499fa5e6-5fcb-4ce1-8e79-dc2e97cb662d.png",
+    "width": 530,
+    "height": 718,
+    "bytes": 59876,
+    "sha256": "59173a2880ea42b86d4522cd2646a276df35f5be152ba803a8eb328c6240ec05"
+  },
+  {
+    "id": "geppetto-finale",
+    "file": "geppetto-finale.webp",
+    "source": "exec-3fb2019e-6938-4405-858e-51ca6bca9f32.png",
+    "width": 756,
+    "height": 1024,
+    "bytes": 71718,
+    "sha256": "3351a2c3bfdec3c4e74fe0efece9e36add80061c62314d1821889405cd206937"
+  },
+  {
+    "id": "geppetto",
+    "file": "geppetto.webp",
+    "source": "exec-3fb2019e-6938-4405-858e-51ca6bca9f32.png",
+    "width": 530,
+    "height": 718,
+    "bytes": 49194,
+    "sha256": "cb114ed4c95e735c73bcbd9129914d6d6f7ac1dbf433ce486a7150f7303e4f4f"
+  },
+  {
+    "id": "hans-finale",
+    "file": "hans-finale.webp",
+    "source": "exec-9a91de36-18b1-47e2-b5da-6ac0069cee42.png",
+    "width": 756,
+    "height": 1024,
+    "bytes": 44494,
+    "sha256": "0e3ab54ce7f0cbaa28fffb5782a18e459e91ec0ed4c9462dccfc1a569394c635"
+  },
+  {
+    "id": "hans",
+    "file": "hans.webp",
+    "source": "exec-9a91de36-18b1-47e2-b5da-6ac0069cee42.png",
+    "width": 530,
+    "height": 718,
+    "bytes": 38892,
+    "sha256": "978117700f39f86d8df517ab0d59987f3ed34cb427195c52702b5f14f379a05e"
+  },
+  {
+    "id": "hunter-finale",
+    "file": "hunter-finale.webp",
+    "source": "exec-f4435e03-28c6-42b0-8943-b5a0c5fd5f0b.png",
+    "width": 756,
+    "height": 1024,
+    "bytes": 58722,
+    "sha256": "64c140a980a932fcead6b8c4af64a22d5dce14815c20d35f9509726640830408"
+  },
+  {
+    "id": "hunter",
+    "file": "hunter.webp",
+    "source": "exec-f4435e03-28c6-42b0-8943-b5a0c5fd5f0b.png",
+    "width": 530,
+    "height": 718,
+    "bytes": 41224,
+    "sha256": "f5d318765685c15ef0f803fccb6daad57f30793fee558f0716fb69f3e04152c9"
+  },
+  {
+    "id": "krampus-finale",
+    "file": "krampus-finale.webp",
+    "source": "exec-86cba304-3737-41fa-be9a-63e0a490243b.png",
+    "width": 756,
+    "height": 1024,
+    "bytes": 100390,
+    "sha256": "273e7a4d8fdc6900dddf759f97643a7485d9c1de31a52bd41b21103ba8364f5c"
+  },
+  {
+    "id": "krampus",
+    "file": "krampus.webp",
+    "source": "exec-86cba304-3737-41fa-be9a-63e0a490243b.png",
+    "width": 530,
+    "height": 718,
+    "bytes": 75728,
+    "sha256": "03fb29e51e9599cb8fa4a5d46730abee26ca68ff98129fed1cae7629ceb74b9d"
+  },
+  {
+    "id": "notorious",
+    "file": "notorious.webp",
+    "source": "exec-f50dff08-e990-4567-8cad-b1e32bb9561f.png",
+    "width": 900,
+    "height": 600,
+    "bytes": 23848,
+    "sha256": "1111ad4cc1e5cf39a7d0c6da304ea3215ec0517a84820a1b42e3fdd7747ea55e"
+  },
+  {
+    "id": "paranoia",
+    "file": "paranoia.webp",
+    "source": "exec-c91bf2e4-7da0-4dcb-895c-372729d41874.png",
+    "width": 900,
+    "height": 600,
+    "bytes": 25880,
+    "sha256": "e372427dc14ccd5adde2958ab4bd7bf68898ce0e321f68e99e2159040cfbe6c6"
+  },
+  {
+    "id": "quick",
+    "file": "quick.webp",
+    "source": "exec-4dfa5797-46c4-44af-99ea-83e662f983b7.png",
+    "width": 900,
+    "height": 600,
+    "bytes": 26898,
+    "sha256": "762ffde236d1703812f41ec05b4bf4f52d26f443533b81de0a762f09adee5aa4"
+  },
+  {
+    "id": "ratchet-finale",
+    "file": "ratchet-finale.webp",
+    "source": "exec-476c6313-0ce5-4e27-b43c-ba8b26c998ab.png",
+    "width": 756,
+    "height": 1024,
+    "bytes": 77846,
+    "sha256": "fa41fc67ba0399f737422f6d3b9c679da4cc8086426afb729840ed7ec3e53f98"
+  },
+  {
+    "id": "ratchet",
+    "file": "ratchet.webp",
+    "source": "exec-476c6313-0ce5-4e27-b43c-ba8b26c998ab.png",
+    "width": 530,
+    "height": 718,
+    "bytes": 46966,
+    "sha256": "66d31593c708c0d54248781a0abcf133b7ea5598a62b7d5ee4860a81814b2990"
+  },
+  {
+    "id": "razorface-finale",
+    "file": "razorface-finale.webp",
+    "source": "exec-07b6b875-81c5-4fc3-8946-c6d39087597c.png",
+    "width": 756,
+    "height": 1024,
+    "bytes": 73096,
+    "sha256": "e91b880e80e098092a91feb7bc10a8e1bb1429c1b1307713217b4e00da1c1a7f"
+  },
+  {
+    "id": "razorface",
+    "file": "razorface.webp",
+    "source": "exec-07b6b875-81c5-4fc3-8946-c6d39087597c.png",
+    "width": 530,
+    "height": 718,
+    "bytes": 40714,
+    "sha256": "da2fe7c2194ce232af8efcdc564c32ee9ed44bb1b30d0d84f04fc13d5caebbb8"
+  },
+  {
+    "id": "snitches",
+    "file": "snitches.webp",
+    "source": "exec-7a66630c-5fb8-4041-bc0d-028826c29c79.png",
+    "width": 900,
+    "height": 600,
+    "bytes": 32304,
+    "sha256": "cbef8ad09c4fb9d86eef10472b9e2198972d61fa2451d3e78528eb91b84d006a"
+  },
+  {
+    "id": "stockholm",
+    "file": "stockholm.webp",
+    "source": "exec-6347b5fa-827c-4758-bfc3-520b30aa30ee.png",
+    "width": 900,
+    "height": 600,
+    "bytes": 30144,
+    "sha256": "1189ec7f2417dd0529ce1f6268ae938f1902e80a8eae524afc83c2655062600c"
+  },
+  {
+    "id": "tormentor-finale",
+    "file": "tormentor-finale.webp",
+    "source": "exec-2d740943-f14b-4cf3-9cc3-a65ef2e5ea88.png",
+    "width": 756,
+    "height": 1024,
+    "bytes": 52958,
+    "sha256": "9274b30c57adc42d93dcff0f69c258d4a28bf24d71d2170beca520bfb0fa9aab"
+  },
+  {
+    "id": "tormentor",
+    "file": "tormentor.webp",
+    "source": "exec-2d740943-f14b-4cf3-9cc3-a65ef2e5ea88.png",
+    "width": 530,
+    "height": 718,
+    "bytes": 40540,
+    "sha256": "e2371400b18f5269e332ca614294876f39ac5ec762a09f019080d83c0a5e485a"
+  },
+  {
+    "id": "whispers",
+    "file": "whispers.webp",
+    "source": "exec-84a4948f-2a23-4f65-9525-1b6b09a9a829.png",
+    "width": 900,
+    "height": 600,
+    "bytes": 25890,
+    "sha256": "4967103b693500b6086dc7f91ed1ce1cea4a15bbb33a0be05a74997039ec12f3"
+  },
+  {
+    "id": "wolf-finale",
+    "file": "wolf-finale.webp",
+    "source": "exec-7f3cefa9-8c71-4a26-9706-3046227f51a3.png",
+    "width": 756,
+    "height": 1024,
+    "bytes": 57010,
+    "sha256": "55b787d3a53ee1b5687418c4c655397d85ee484122d0e7229af9eb12a1b2b4cd"
+  },
+  {
+    "id": "wolf",
+    "file": "wolf.webp",
+    "source": "exec-7f3cefa9-8c71-4a26-9706-3046227f51a3.png",
+    "width": 530,
+    "height": 718,
+    "bytes": 56206,
+    "sha256": "f4ce08bf1bfe0650de22f477224f88a08387cc78c879423c44d11c3add49b863"
+  }
+]

@@ -136,7 +136,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
   },
   'Mort the Teenage Dirtbag': {
     narrativeNote:
-      'Inspired by the Scream franchise. Mort uses multiple disguises and accomplices to confuse investigators—anyone at the convention could be the killer. The horror is paranoia and misdirection, not brute force. Ghost mask with one large eye, charcoal hoodie, red-and-black pants.',
+      'Mort is disguised as one of ten suspects. Gather clues and confirm the disguise to replace the Basic Finale with the matching suspect’s Finale.',
   },
 };
 

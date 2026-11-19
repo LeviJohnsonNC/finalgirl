@@ -1,3 +1,4 @@
+import { MORT, MORT_MAX_HEALTH } from './play/mort.ts';
 import { RATCHET_LADY, RATCHET_HEALTH_STORAGE_MAX } from './play/ratchetLady.ts';
 import { missionByName } from "./play/falconwood.ts";
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
@@ -82,7 +83,7 @@ export const SceneImageRequestSchema = z.object({
   gameId: z.string().uuid().optional(),
   referenceImageUrl: z.string().url().max(2000).optional(),
   previousImageUrl: z.string().url().max(2000).optional()
-}).refine(v => v.killer === RATCHET_LADY || (v.killerHealth ?? 0) <= 20, {message:'Killer Health exceeds the supported range',path:['killerHealth']})
+}).refine(v => v.killer === RATCHET_LADY || (v.killerHealth ?? 0) <= (v.killer===MORT?MORT_MAX_HEALTH:20), {message:'Killer Health exceeds the supported range',path:['killerHealth']})
 .refine(v => !v.falconwoodReview || v.location === 'Falconwood' && v.sceneType === 'ending' &&
   (v.outcome !== 'won' || v.falconwoodReview.complete === true) &&
   (!v.mission || missionByName(v.mission.name)?.id === v.falconwoodReview.mission),
@@ -154,7 +155,7 @@ export const EndingRequestSchema = z.object({
   playSummary:z.string().max(1800).optional(),
   konradReview:KonradReviewSchema.optional(),
   poltergeistReview:z.object({carolynRescued:z.literal(true).nullable(),floppyAtEscape:z.literal(true).nullable(),epicRequired:z.boolean().nullable(),escapeRoute:z.enum(['exit','helicopter']).nullable().optional()}).strict().optional()
-}).refine(v => v.killer.name === RATCHET_LADY || (v.killerHealth ?? 0) <= 20, {message:'Killer Health exceeds the supported range',path:['killerHealth']})
+}).refine(v => v.killer.name === RATCHET_LADY || (v.killerHealth ?? 0) <= (v.killer.name===MORT?MORT_MAX_HEALTH:20), {message:'Killer Health exceeds the supported range',path:['killerHealth']})
 .refine(v => !v.falconwoodReview || v.location.name === 'Falconwood' &&
   (v.outcome !== 'won' || v.falconwoodReview.complete === true) &&
   (!v.mission || missionByName(v.mission.name)?.id === v.falconwoodReview.mission),

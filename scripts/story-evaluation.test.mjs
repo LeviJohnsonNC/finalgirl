@@ -326,6 +326,7 @@ test("a failed provider request records the attempt without persisting provider 
 
 const schemas = load("../supabase/functions/_shared/validation.ts", {
   "./play/ratchetLady.ts": load("../supabase/functions/_shared/play/ratchetLady.ts"),
+  "./play/mort.ts": load("../supabase/functions/_shared/play/mort.ts"),
   "https://deno.land/x/zod@v3.22.4/mod.ts": { z },
   "./auth.ts": { corsHeaders: {} },
 });
@@ -570,4 +571,17 @@ test('old ending clients keep their one-attempt protocol and unknown protocol ve
 test('a request already cancelled starts no paid generation',async()=>{
  const h=harness(),abort=new AbortController();abort.abort();
  await assert.rejects(new Response(recovering(h,abort.signal)).text());assert.equal(h.calls.length,0);
+});
+
+test('Mort can carry 26 Health through ending prose and image validation', () => {
+  const story = 'Adrianne heard the stage door scrape open behind the empty registration desk.';
+  const killer = 'Mort the Teenage Dirtbag';
+  const location = 'MegaBGCon';
+  const finalGirl = 'Adrianne';
+  const prose = { introStory:story, outcome:'lost', killer:{name:killer}, location:{name:location}, finalGirl:{name:finalGirl}, killerHealth:26 };
+  const poster = { story, sceneType:'ending', outcome:'lost', killer, location, finalGirl, killerHealth:26 };
+  assert.equal(schemas.EndingRequestSchema.safeParse(prose).success, true);
+  assert.equal(schemas.SceneImageRequestSchema.safeParse(poster).success, true);
+  assert.equal(schemas.EndingRequestSchema.safeParse({...prose,killerHealth:27}).success, false);
+  assert.equal(schemas.SceneImageRequestSchema.safeParse({...poster,killer:'Hans'}).success, false);
 });

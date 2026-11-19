@@ -1,3 +1,5 @@
+import { MORT, MORT_FINALE_GUIDANCE, MORT_POWERS, MORT_SUSPECTS } from '../../../supabase/functions/_shared/play/mort';
+import { mortPhoto } from './mortArt';
 import { RATCHET_LADY, RATCHET_POWERS, RATCHET_FINALES } from '../../../supabase/functions/_shared/play/ratchetLady';
 import { ratchetLadyArt } from './ratchetLadyArt';
 import {ORGANISM, ORGANISM_FINALES} from "@/lib/play/organism";
@@ -72,6 +74,13 @@ export function illustratedKillerCards(
   type: "dark-power" | "finale",
 ): IllustratedKillerCard[] {
   const power = type === "dark-power";
+  if (killer === MORT) {
+    const cards = power ? MORT_POWERS : MORT_SUSPECTS.map(suspect => ({
+      id: suspect.id, name: `Mort as ${suspect.name}`, effect: MORT_FINALE_GUIDANCE[suspect.id],
+    }));
+    return cards.map(card => ({ ...card, art:{src:mortPhoto(power?card.id:`${card.id}-finale`)} }))
+      .sort((a,b)=>a.name.localeCompare(b.name));
+  }
   if (killer === RATCHET_LADY) return [...(power ? RATCHET_POWERS : RATCHET_FINALES)]
     .map(card => ({ ...card, art: ratchetLadyArt(card.id, true), heroArt: ratchetLadyArt(card.id) }))
     .sort((a, b) => a.name.localeCompare(b.name));

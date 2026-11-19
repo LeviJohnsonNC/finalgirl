@@ -1,3 +1,4 @@
+import { MORT } from '../../../supabase/functions/_shared/play/mort';
 import { RATCHET_LADY, RATCHET_SETUP } from '../../../supabase/functions/_shared/play/ratchetLady';
 import { ORGANISM, ORGANISM_SETUP } from "./organism";
 import { SLAYER, SLAYER_SETUP } from "./slayer";
@@ -25,6 +26,7 @@ export function playStartingValues(
     Geppetto: 8,
     'Dr. Fright': 9,
   };
+  if (killer === MORT) return { finalGirlHealth: getFinalGirlHealth(finalGirl), finalHorrorLevel:3, bloodlust:0 };
   if (killer === RATCHET_LADY) return {finalGirlHealth:getFinalGirlHealth(finalGirl),...RATCHET_SETUP};
   if (killer === ORGANISM) return {finalGirlHealth:getFinalGirlHealth(finalGirl),...ORGANISM_SETUP};
   if (killer === SLAYER) return {finalGirlHealth: getFinalGirlHealth(finalGirl), ...SLAYER_SETUP};

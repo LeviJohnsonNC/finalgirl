@@ -1,3 +1,4 @@
+import { MORT_ATTACK, MORT_MOVE, MORT_POWERS, MORT_SUSPECTS, MORT_TERRORS, MORT_FINALE_GUIDANCE } from '../../../supabase/functions/_shared/play/mort';
 import { wolfeRules, WOLFE_PROMPT_CONTEXT } from './wolfeRules';
 import { ratchetLadyRules, RATCHET_PROMPT_CONTEXT } from "./ratchetLadyRules";
 import {stationRules, STATION_PROMPT_CONTEXT} from './stationRules';
@@ -223,7 +224,7 @@ const mortTheTeenageDirtbag: EntityRuleModule = {
   ],
   rules: [
     { type: 'heading', level: 3, text: 'Suspects' },
-    { type: 'paragraph', text: 'You are attempting to figure out who Mort is actually masquerading as, but until you have eliminated all Suspects but one, it could be anyone! There are 10 Suspects, each dressed up as a different Victim, Final Girl, Enemy, or the Killer. For gameplay purposes, Suspects are not considered the Killer, an Enemy, or a Victim. They will never be targeted and cannot be damaged.' },
+    { type: 'paragraph', text: 'You are attempting to figure out who Mort is actually masquerading as, but until you have eliminated all Suspects but one, it could be anyone! There are 10 Suspects, each dressed up as a different Final Girl villain. For gameplay purposes, Suspects are not considered the Killer, an Enemy, or a Victim. They will never be targeted and cannot be damaged.' },
     { type: 'paragraph', text: 'Suspects have 7 attributes, listed on their respective Suspect card. These attributes are what will help you determine who Mort is actually disguised as.' },
     { type: 'heading', level: 3, text: 'Revealing Clues' },
     { type: 'paragraph', text: 'There are two new Action cards: Interrogate and Coerce. These cards can be used to reveal clues to identify which of the Suspects Mort is disguised as.' },
@@ -232,20 +233,31 @@ const mortTheTeenageDirtbag: EntityRuleModule = {
     { type: 'heading', level: 3, text: 'Interrogate & Coerce' },
     { type: 'paragraph', text: 'Interrogate can only be resolved while in a space with a Suspect. After successfully interrogating a Suspect, they will panic.' },
     { type: 'paragraph', text: 'Coerce can only be resolved while in a space with an Informant. After successfully coercing an Informant, you will remove them from the board.' },
+    { type: 'table', headers: ['Action', 'Cost', 'Two successes', 'One success', 'No successes'], rows: [
+      ['Interrogate', '3 Time', 'Panic the suspect, reveal a clue, lose 1 Time.', 'Panic the suspect, reveal a clue, lose 3 Time.', 'Raise Horror, lose 3 Time, panic the suspect, and return Interrogate to your hand.'],
+      ['Coerce', '2 Time', 'Remove the Informant and reveal a clue.', 'Remove the Informant, reveal a clue, and lose 1 Time.', 'Lose 2 Time.'],
+    ] },
     { type: 'heading', level: 3, text: 'Informants' },
-    { type: 'paragraph', text: 'Informants are considered Victims for ALL gameplay purposes with three exceptions: when you save an Informant, after receiving the reward from your Final Girl card, you may either reduce Horror or, after increasing Bloodlust, you must increase Horror once; if an Informant is killed, after increasing Bloodlust you follow normal rules but if there are less prominent Victims over normal Victims, they are less prominent.' },
+    { type: 'paragraph', text: 'Informants count as Victims. After the usual rescue reward, saving one lets you reduce Horror once. Killing one raises Bloodlust and then Horror once. When the Active Killer targets Victims and there is a tie, favor Informants.' },
     { type: 'heading', level: 3, text: 'Suspects Temporarily Acting as Killers' },
     { type: 'paragraph', text: 'Whenever you see the mask icon, draw a token out of the Suspect bag. The token will correspond to one of the ten Suspects, who will then temporarily become the Killer. Mort is a master of disguise and could be impersonating ANYONE, if only for a moment. Place the token back into the bag after resolving the Killer Action(s). That Suspect could become the Active Killer again on the same or future turn.' },
     { type: 'paragraph', text: 'When drawing a token, if the indicated Suspect has already been proven to NOT be Mort, nothing happens and the Killer Action effect is ignored. Instead, discard the token.' },
     { type: 'paragraph', text: 'For each Location card that requires you to resolve an action as the Killer, draw a token from the bag as if there was a mask icon present on the card. As long as that Suspect is still in the lineup, they will become the Active Killer for resolving ALL Killer Actions/effects on that card.' },
     { type: 'heading', level: 3, text: 'Horror Track Token' },
-    { type: 'paragraph', text: 'When Bloodlust reaches the highest space on the track, place the Horror Track token from the Killer board on top of the skull symbol at the end of the Horror Track on your Player board. From this point forward, if Horror exceeds its maximum level, instead of increasing Horror, you lose health instead.' },
+    { type: 'paragraph', text: 'When Bloodlust reaches the highest space on the track, place the Horror Track token from the Killer board on top of the skull symbol at the end of the Horror Track on your Player board. From this point forward, if Horror exceeds its maximum level, lose one Time in place of the usual Bloodlust increase.' },
+    { type: 'paragraph', text: 'Bloodlust runs from 0 to 8. Reveal the Dark Power at 4, discard the next Terror card at 5, increase Horror at 6, and place the Horror Track token at 8. On further increases at the top, increase Horror and discard the next Terror card.' },
+    { type: 'heading', level: 3, text: 'Confirming the Disguise' },
+    { type: 'paragraph', text: 'After all five clues are revealed, flip the Clue card and confirm its answer with the Viewer. Discard active Minor Dark Powers and remaining Terror cards. Replace the confirmed suspect with Mort, remove Informants, and replace the Basic Finale with the reverse of the Suspect card. Reveal the Dark Power if needed and use the Finale to set Mort’s Health, including the Final Health token.' },
     { type: 'heading', level: 3, text: 'Running Out of Terror Cards Before Revealing All Clues' },
     { type: 'paragraph', text: 'If the Finale is revealed normally when the Terror deck is exhausted, flip the Clue card over to its opposite side and reveal who Mort is disguised as. Replace that Suspect’s miniature with Mort’s miniature and flip their Suspect card over, replacing the Basic Finale card with the Suspect card. Then remove any remaining Suspects and Informant meeples from the Location board and discard their associated Suspect cards.' },
-    { type: 'paragraph', text: 'If the Dark Power hasn’t been revealed, reveal it immediately and discard any Minor Dark Powers in play.' },
+    { type: 'paragraph', text: 'Reveal the Dark Power if needed, discard active Minor Dark Powers, and use the disguise Finale for Health and any special consequences. Keep the count of unrevealed clues for the Finale. Anonymous Terror doubles the effective count.' },
     { type: 'heading', level: 3, text: 'Panic Phase' },
     { type: 'paragraph', text: 'Until Mort is revealed, Victims do not panic during the Panic phase.' },
-    { type: 'heading', level: 3, text: 'Mind Dark Powers' },
+    { type: 'heading', level: 3, text: 'Minor Dark Powers' },
+    { type: 'table', headers: ['Bloodlust', 'Attack', 'Movement'], rows: MORT_ATTACK.map((attack,i)=>[String(i),String(attack),String(MORT_MOVE[i])]) },
+    { type: 'table', headers: ['Disguise Finale', 'Base Health', 'Effect'], rows: MORT_SUSPECTS.map(s=>[s.name, s.id==='ratchet'?'6 + bonuses':String(s.health), MORT_FINALE_GUIDANCE[s.id]]) },
+    { type: 'table', headers: ['Dark Power', 'Effect'], rows: MORT_POWERS.map(p=>[p.name,p.effect]) },
+    { type: 'table', headers: ['Terror card', 'Copies', 'Effect'], rows: MORT_TERRORS.map(c=>[c.name,String(c.quantity),c.effect]) },
     { type: 'paragraph', text: 'Some Locations may have Minor Dark Powers that have spaces for Health markers on them. If one of these is drawn, do not place Health markers on it, as Mort cannot be attacked while he is disguised. Minor Dark Power cards that are drawn in this way may be discarded when you successfully resolve an Interrogate or a Coerce Action card with two successes.' },
   ],
 };
@@ -455,8 +467,8 @@ const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
   'Billy the Bear': BILLY_PROMPT_CONTEXT,
   Buddyland: BUDDYLAND_PROMPT_CONTEXT,
   'Mort the Teenage Dirtbag': {
-    narrativeGuidance: 'Mort is not openly present at first: he is hidden among ten costumed Suspects at MegaBGCon, and the story should emphasize paranoia, mistaken identity, clue-gathering, and convention attendees who might only be pretending to be victims, heroes, or killers. Do not reveal Mort’s true disguise in the opening unless the game state explicitly says he has been revealed.',
-    visualGuidance: 'Use a convention-floor slasher look: a hooded Ghostface-like mask with one oversized eye, charcoal hoodie, red-and-black pants, crowds of costumed boardgame fans, suspect miniatures, clue cards, and fluorescent convention lighting. If final killer identity is known, show that specific disguised suspect or reveal moment rather than generic Mort.',
+    narrativeGuidance: 'At the selected location, frame the threat through mistaken identity and sightings of costumed strangers. A temporary attacker is never proof of the disguise. Keep the disguise secret unless the relevant recorded game facts explicitly confirm it. Use the selected Final Girl’s established appearance.',
+    visualGuidance: 'Use candid 35mm photography with physically believable costume details and lighting from the selected setting. For MegaBGCon, use the convention’s fluorescent halls and costumed attendees. A glimpse of an anonymous mask can suggest Mort without identifying the disguise. Depict the confirmed disguise only at or after a recorded reveal.',
     rulesSummary: 'Mort begins disguised as one of ten Suspects. Players reveal clues through Interrogate and Coerce actions, eliminating Suspects and turning them into Informants. Suspects can temporarily act as the Killer when mask effects resolve. Mort is only truly revealed once enough clues are found or the Terror deck runs out.',
   },
   MegaBGCon: {

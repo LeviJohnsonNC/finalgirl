@@ -1,3 +1,4 @@
+import { MORT, mortOwnsLog } from '../../supabase/functions/_shared/play/mort';
 import { WOLFE, WOLFE_MODULE } from '../../supabase/functions/_shared/play/wolfeCatalog';
 import { initialWolfe, sameWolfe, wolfeOwnsLog } from '../../supabase/functions/_shared/play/wolfe';
 import { RATCHET_LADY, RATCHET_MODULE, ratchetLogBelongsTo } from '../../supabase/functions/_shared/play/ratchetLady';
@@ -44,6 +45,7 @@ export interface ActiveGame {
   stationSetupVersion?: 1;
   organismSetupVersion?: 1;
   intrudersSetupVersion?: 1;
+  mortSetupVersion?: 1;
   mallSetupVersion?:1;
   falconwoodSetupVersion?: 1;
   slayerSetupVersion?: 1;
@@ -127,6 +129,8 @@ export function isActiveGame(value: unknown): value is ActiveGame {
   if (Array.isArray(game.playEvents)&&game.playEvents.some(event=>
     ((event?.organismReference||event?.moduleData?.module==="organism")&&game.selection?.killer!=="The Organism")||
     (event?.moduleData?.module==="organism"&&!event.organismAction&&game.organismSetupVersion!==1))) return false;
+  if (game.mortSetupVersion !== undefined && (game.mortSetupVersion !== 1 || game.selection?.killer !== MORT)) return false;
+  if (Array.isArray(game.playEvents) && !mortOwnsLog(game.selection?.killer, game.playEvents, game.selection?.location)) return false;
   if (game.intrudersSetupVersion !== undefined && (game.intrudersSetupVersion !== 1 || game.selection?.killer !== "The Intruders")) return false;
   if (game.wolfSetupVersion !== undefined && (game.wolfSetupVersion !== 1 || game.selection?.killer !== "Big Bad Wolf")) return false;
   if (game.selection?.killer !== "Big Bad Wolf" && Array.isArray(game.playEvents) && game.playEvents.some(e => e?.moduleData?.module === "big-bad-wolf" || e?.wolfReference)) return false;

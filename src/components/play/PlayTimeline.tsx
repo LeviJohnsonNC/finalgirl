@@ -1,4 +1,4 @@
-import { canUndoWolfe } from '@/lib/play/events';
+import { canUndoMort, canUndoWolfe } from '@/lib/play/events';
 import { RATCHET_MODULE, ratchetParent } from '../../../supabase/functions/_shared/play/ratchetLady';
 import {MALL_MODULE,mallParent} from '@/lib/play/sunnydaze';
 import { canUndoFalconwood, validPlayLog, canUndoSlayer, validSlayerHistory, canUndoHunter, validHunterHistory } from "@/lib/play/events";
@@ -94,6 +94,7 @@ export function PlayTimeline({
           const shadyBlocked=original.moduleData?.module==='shady-acres'&&(undone?shadyParent(summary.entries)!==(original.shadyAction?.parent??'root'):!canUndoShady(events,original.id));
           const konradBlocked=original.moduleData?.module==='konrad'&&(undone?konradParent(summary.entries)!==(original.konradAction?.parent??'root'):!canUndoKonrad(events,original.id));
           const grimlashBlocked=original.moduleData?.module==='grimlash'&&(undone?grimlashParent(summary.entries)!==(original.grimlashAction?.parent??'root'):!canUndoGrimlash(events,original.id));
+          const mortBlocked=!canUndoMort(events,original.id,undone);
           const wolfeBlocked=!canUndoWolfe(events,original.id,undone);
           const round = "currentRound" in entry ? entry.currentRound : null;
           return (
@@ -117,8 +118,8 @@ export function PlayTimeline({
                 {onToggle && entry.kind !== "start" && !isPermanentMoment(entry) && !isLockedPlayEvent(entry) && (
                   <button
                     type="button"
-                    disabled={wolfeBlocked||ratchetBlocked||falconwoodBlocked||mallBlocked||slayerBlocked||hunterBlocked||wingardBlocked||intruderBlocked||woodsBlocked||marrekBlocked||tormentorBlocked||shadyBlocked||konradBlocked||grimlashBlocked}
-                    title={wolfeBlocked?"Undo or restore intervening Wolfe observations first":ratchetBlocked?"Undo or restore intervening Maniac observations first":falconwoodBlocked?"Undo or restore intervening Falconwood observations first":slayerBlocked?"Undo or restore intervening Slayer observations first":mallBlocked?"Undo or restore intervening Mall observations first":hunterBlocked?"Undo or restore intervening Hunter observations first":wingardBlocked?"Resolve intervening Cottage observations first":intruderBlocked?"Resolve intervening Intruder observations first":woodsBlocked?"Undo or restore intervening Storybook Woods observations first":marrekBlocked?'Undo or restore intervening Warehouse/Tormentor observations first':tormentorBlocked?'Undo or restore intervening Tormentor observations first':shadyBlocked?'Undo or restore the intervening Shady Acres observations first':grimlashBlocked?'Undo or restore the intervening Grimlash observations first':konradBlocked?"Undo or restore the intervening USS Konrad observations first":undefined}
+                    disabled={mortBlocked||wolfeBlocked||ratchetBlocked||falconwoodBlocked||mallBlocked||slayerBlocked||hunterBlocked||wingardBlocked||intruderBlocked||woodsBlocked||marrekBlocked||tormentorBlocked||shadyBlocked||konradBlocked||grimlashBlocked}
+                    title={mortBlocked?"Undo or restore dependent Mort observations first":wolfeBlocked?"Undo or restore intervening Wolfe observations first":ratchetBlocked?"Undo or restore intervening Maniac observations first":falconwoodBlocked?"Undo or restore intervening Falconwood observations first":slayerBlocked?"Undo or restore intervening Slayer observations first":mallBlocked?"Undo or restore intervening Mall observations first":hunterBlocked?"Undo or restore intervening Hunter observations first":wingardBlocked?"Resolve intervening Cottage observations first":intruderBlocked?"Resolve intervening Intruder observations first":woodsBlocked?"Undo or restore intervening Storybook Woods observations first":marrekBlocked?'Undo or restore intervening Warehouse/Tormentor observations first':tormentorBlocked?'Undo or restore intervening Tormentor observations first':shadyBlocked?'Undo or restore the intervening Shady Acres observations first':grimlashBlocked?'Undo or restore the intervening Grimlash observations first':konradBlocked?"Undo or restore the intervening USS Konrad observations first":undefined}
                     onClick={() => onToggle(original, undone)}
                     className="type-caption underline text-muted-foreground hover:text-foreground min-h-[44px]"
                   >

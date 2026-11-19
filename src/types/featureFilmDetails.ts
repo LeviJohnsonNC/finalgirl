@@ -642,7 +642,7 @@ The horror lies not in a monster lurking in the shadows, but in the realization 
     },
     killer: {
       name: 'Mort the Teenage Dirtbag',
-      description: `Mort the Teenage Dirtbag wears a charcoal hoodie, red-and-black pants, and a ghost mask with one large eye. Inspired by the 'Scream' series, Mort's powers revolve around multiple killers working together to confuse investigators as to their identities. As one witness described: "I saw this dude in a pig mask kill a guy! But then he disappeared, and then I saw him and ripped his mask off and it was my best bro Tom! And Tom was like, 'I didn't kill no one, what's your damage?' And then we saw a babe in one of those Tormentor outfits and she TOTALLY killed this other babe, and we tackled her, but then it was just some kid who swore she didn't kill anyone. So WHAT THE HELL IS GOING ON?" The horror of Mort is that anyone could be the killer—and by the time you figure out who's behind the mask, it might already be too late.`
+      description: `A masked slasher slips among costumed suspects. Follow the clues, rule out disguises, and find Mort before the Terror deck runs out.`
     }
   },
 };

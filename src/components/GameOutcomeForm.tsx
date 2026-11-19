@@ -1,3 +1,4 @@
+import { MORT, MORT_MAX_HEALTH, MORT_SUSPECTS, mortState } from '../../supabase/functions/_shared/play/mort';
 import { RATCHET_LADY, RATCHET_MODULE, RATCHET_HEALTH_STORAGE_MAX, ratchetCount } from '../../supabase/functions/_shared/play/ratchetLady';
 import {ORGANISM_MODULE,organismFacts} from "@/lib/play/organism";
 import { falconwoodReview, falconwoodReviewText, falconwoodState } from "../../supabase/functions/_shared/play/falconwood";
@@ -105,7 +106,7 @@ export const GameOutcomeForm = ({
   );
   // Get killer-specific HP and flags
   const maxKillerHealth = useMemo(
-    () => result.killer === RATCHET_LADY ? RATCHET_HEALTH_STORAGE_MAX : ['Geppetto', 'Inkanyamba', 'The Hunter'].includes(result.killer) ? Math.max(getKillerMaxHealth(result.killer), result.killerHealth ?? 0, Number(initialDraft?.killerHealth) || 0) : getKillerMaxHealth(result.killer),
+    () => result.killer === RATCHET_LADY ? RATCHET_HEALTH_STORAGE_MAX : result.killer === MORT ? MORT_MAX_HEALTH : ['Geppetto', 'Inkanyamba', 'The Hunter'].includes(result.killer) ? Math.max(getKillerMaxHealth(result.killer), result.killerHealth ?? 0, Number(initialDraft?.killerHealth) || 0) : getKillerMaxHealth(result.killer),
     [result.killer, result.killerHealth, initialDraft?.killerHealth],
   );
   const killerIsUnkillable = useMemo(
@@ -272,6 +273,8 @@ export const GameOutcomeForm = ({
   const [abbeyInfluence, setAbbeyInfluence] = useDraftField<
     '' | 'Blessings Dominated' | 'Curses Dominated' | 'Balanced'
   >('abbeyInfluence', '', initialDraft, onDraftChange);
+  const recordedMort = isShriek ? mortState(entries) : undefined;
+  const mortDisguise = recordedMort?.reveal && MORT_SUSPECTS.find(s=>s.id===recordedMort.reveal?.suspect)?.name;
   // Shriek / MegaBGCon
   const [mortRevealed, setMortRevealed] = useDraftField(
     'mortRevealed',
@@ -375,8 +378,8 @@ export const GameOutcomeForm = ({
     if (isAbbey && abbeyInfluence) highlights = [highlights, `L'Armes Abbey influence: ${abbeyInfluence}`].filter(Boolean).join('. ');
     if (isShriek) {
       const shriekParts = [
-        finalKillerIdentity !== 'Unknown' ? `Final killer identity: ${finalKillerIdentity}` : '',
-        mortRevealed === true ? 'Mort was revealed' : mortRevealed === false ? 'Mort remained hidden' : '',
+        mortDisguise ? `Confirmed disguise: Mort as ${mortDisguise}` : !recordedMort?.known && mortRevealed===true && finalKillerIdentity !== 'Unknown' ? `Final killer identity: ${finalKillerIdentity}` : '',
+        mortDisguise || !recordedMort?.known && mortRevealed===true ? 'Mort was revealed' : recordedMort?.known || mortRevealed===false ? 'Mort remained hidden' : '',
       ];
       highlights = [highlights, ...shriekParts].filter(Boolean).join('. ');
     }
@@ -406,7 +409,7 @@ export const GameOutcomeForm = ({
       outcome: isWin ? 'won' : 'lost',
       finalHorrorLevel,
       finalGirlHealth,
-      killerHealth: isIntruders || isOrganism ? result.killerHealth ?? null : killerIsUnkillable ? null : killerHealth,
+      killerHealth: isIntruders || isOrganism ? result.killerHealth ?? null : killerIsUnkillable || isShriek && recordedMort?.known && !mortDisguise ? null : killerHealth,
       weaponUsed: weaponUsed || '',
       victimsSaved,
       victimsKilled,
@@ -502,7 +505,7 @@ export const GameOutcomeForm = ({
               preserveObservedExcess={isGrimlash}
               variant={finalGirlHealth === 0 ? "killed" : "saved"}
             />
-            {!killerIsUnkillable && !isIntruders && !isOrganism && (result.killer!=='The Hunter'||hunterState(moduleState(entries,'hunter')).phase==='mark-x') && (
+            {!killerIsUnkillable && (!isShriek || !recordedMort?.known || !!mortDisguise) && !isIntruders && !isOrganism && (result.killer!=='The Hunter'||hunterState(moduleState(entries,'hunter')).phase==='mark-x') && (
               <OutcomeNumberField
                 label={isRatchetLady ? "Killer health" : `Killer health (0–${maxKillerHealth})`}
                 accessibleLabel="Killer Health"
@@ -751,28 +754,16 @@ export const GameOutcomeForm = ({
           {isShriek && (
             <div className="outcome-panel outcome-module space-y-3">
               <h3 className="font-display text-xs tracking-[0.15em] uppercase text-muted-foreground border-b border-border/50 pb-1.5">
-                Shriek Reveal
+                Mort’s disguise
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {recordedMort?.known ? <p>{mortDisguise?`Confirmed · Mort as ${mortDisguise}`:'Mort remained hidden'}</p> : <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <OutcomeSelect
                     value={finalKillerIdentity}
                     label="Final Killer Identity"
                     onValueChange={setFinalKillerIdentity}
                   >
-                    {[
-                      "Unknown",
-                      "Hans",
-                      "Geppetto",
-                      "Dr. Fright",
-                      "Inkanyamba",
-                      "Big Bad Wolf",
-                      "Ratchet Lady",
-                      "Evomorph",
-                      "The Organism",
-                      "The Intruders",
-                      "Mort",
-                    ].map((identity) => (
+                    {['Unknown',...MORT_SUSPECTS.map(s=>s.name),...(!['Unknown',...MORT_SUSPECTS.map(s=>s.name)].includes(finalKillerIdentity)?[finalKillerIdentity]:[])].map((identity) => (
                       <option key={identity} value={identity}>
                         {identity}
                       </option>
@@ -782,7 +773,7 @@ export const GameOutcomeForm = ({
                 <OutcomeChoices label="Mort reveal" value={mortRevealed === null ? '' : String(mortRevealed)}
                   onChange={value => setMortRevealed(value === '' ? null : value === 'true')}
                   options={[['true', 'Revealed'], ['false', 'Stayed hidden']]} />
-              </div>
+              </div>}
             </div>
           )}
 

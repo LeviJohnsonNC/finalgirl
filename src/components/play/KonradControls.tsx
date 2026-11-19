@@ -1,3 +1,4 @@
+import { MortLocationMinor } from './MortControls';
 import {useState} from 'react';
 import {newPlayEvent,summarizePlay} from '@/lib/play/events';
 import {moduleState} from '@/lib/play/modules';
@@ -22,7 +23,7 @@ function SwitchPicture({name,on,inactive,active,onChange}:{name:string;on:boolea
  </article>;
 }
 
-export function KonradControls({events,onEvent,blocked}:ControlsProps){
+export function KonradControls({events,onEvent,blocked,killer,location}:ControlsProps){
  const entries=summarizePlay(events).entries,state=moduleState(entries,'konrad'),s=konradState(state);
  const {record,message}=useModuleRecord(events,onEvent);
  const [validation,setValidation]=useState('');
@@ -62,6 +63,6 @@ export function KonradControls({events,onEvent,blocked}:ControlsProps){
    <SwitchPicture name="Remote Beacon" on={beaconOn} inactive="beacon" active="beacon" onChange={active=>commit({command:'beacon',status:active?'placed':'absent',space:null})}/>
    <SwitchPicture name="Hull breach" on={konradToggle(s,'breach')} inactive="breach" active="breach" onChange={active=>toggle('breach',active)}/>
   </div></section>
-  <section aria-label="Slippery Minor Dark Power"><h3>Slippery</h3><MinorPowerControl name="Slippery" health={s.slippery??undefined} maxHealth={2} art={()=>konradArt('slippery')} heroArt={konradArt('slippery')} previouslyRevealed={entries.some(e=>e.moduleData?.module==='konrad'&&konradState(e.moduleData.changes).slippery!==null)} onChange={value=>commit({command:'observe',key:'slippery',value})}/></section>
+  <section aria-label="Slippery Minor Dark Power"><h3>Slippery</h3><MortLocationMinor killer={killer} location={location} blocked={blocked} events={events} onEvent={onEvent} name="Slippery"><MinorPowerControl name="Slippery" health={s.slippery??undefined} maxHealth={2} art={()=>konradArt('slippery')} heroArt={konradArt('slippery')} previouslyRevealed={entries.some(e=>e.moduleData?.module==='konrad'&&konradState(e.moduleData.changes).slippery!==null)} onChange={value=>commit({command:'observe',key:'slippery',value})}/></MortLocationMinor></section>
  </fieldset>;
 }

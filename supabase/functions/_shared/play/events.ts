@@ -1,3 +1,4 @@
+import { MORT_MODULE, canRecordMort, describeMort, mortEventKind, mortParent, mortState, mortTrackerChanges, validMortAction, type MortAction } from './mort.ts';
 import { WOLFE_MODULE } from './wolfeCatalog.ts';
 import { isInitialWolfe, lastWolfeGurneyObservation, resolveWolfe, sameWolfe, validWolfeAction, wolfeCasualties, wolfeParent, wolfePillTrackers, type WolfeAction } from './wolfe.ts';
 import { RATCHET_MODULE, RATCHET_HEALTH_STORAGE_MAX, validRatchetAction, resolveRatchetAction, ratchetParent, type RatchetAction } from './ratchetLady.ts';
@@ -102,6 +103,8 @@ export interface PlayDetails {
   killerCard?: string;
 }
 export interface PlayEvent extends PlayDetails {
+  mortAction?: MortAction;
+  mortReference?: true;
   mallAction?: MallAction;
   mallReference?: true;
   falconwoodAction?: FalconwoodAction;
@@ -168,7 +171,7 @@ export interface PlaySummary {
   killerHealthTracking?: boolean;
   finalHorrorLevel?: number;
   bloodlust?: number;
-  entries: Array<PlayEvent & { currentRound: number | null; wolfPowerMode?: WolfMode; intruderFinale?: string; intruderPower?: string }>;
+  entries: Array<PlayEvent & { currentRound: number | null; wolfPowerMode?: WolfMode; intruderFinale?: string; intruderPower?: string; mortTokenPlaced?: boolean; mortTime?: number; mortTerror?: number }>;
   inactive: Set<string>;
 }
 const uuid =
@@ -222,6 +225,14 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
     (isOrganismCasualty(e.organismAction) ? e.kind!=="killed"||e.quantity!==1 : e.kind!=="module"))) return false;
   if (e.moduleData?.module===ORGANISM_MODULE && (!validModuleObservation(e.moduleData) ||
     (!e.organismAction && (e.kind!=="module" || !isInitialOrganism(e.moduleData.changes))))) return false;
+  if (e.mortReference !== undefined && (e.mortReference !== true || e.kind !== 'killed')) return false;
+  if (e.mortAction !== undefined && (e.moduleData?.module !== MORT_MODULE || !validMortAction(e.mortAction))) return false;
+  if (e.moduleData?.module === MORT_MODULE) {
+    if (!validModuleObservation(e.moduleData)) return false;
+    if (e.mortAction) {
+      if (e.moduleData.changes.recorded !== true || e.kind !== mortEventKind(e.mortAction) || (e.kind !== 'module' && e.quantity !== 1)) return false;
+    } else if (e.kind !== 'module' || e.moduleData.changes.initialized !== true) return false;
+  }
   if (e.intruderReference !== undefined && (e.kind !== 'killed' || e.intruderReference !== true)) return false;
   if (e.intruderAction !== undefined && (e.kind !== 'module' || e.moduleData?.module !== INTRUDER_MODULE || !validIntruderAction(e.intruderAction))) return false;
   if (e.moduleData?.module === INTRUDER_MODULE &&
@@ -332,10 +343,42 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validWolfeHistory(log) && validRatchetHistory(log) && validStationHistory(log) && validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validOrganismHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validMortHistory(log) && validWolfeHistory(log) && validRatchetHistory(log) && validStationHistory(log) && validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validOrganismHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
 }
+export function canUndoMort(log:readonly PlayEvent[], target:string, restore=false) {
+  const index = log.findIndex(event=>event.id===target);
+  const event = log[index];
+  if (event?.moduleData?.module!==MORT_MODULE) return true;
+  if (!event.mortAction) return false;
+  const summary = summarizePlay(log);
+  const related = new Set<StateField>();
+  if (event.mortAction.kind==='reveal') related.add('killerHealth');
+  if (event.mortAction.kind==='reveal' || event.mortAction.kind==='clue') related.add('finalGirlHealth');
+  if (event.mortAction.kind==='reveal' || event.mortAction.kind==='advance' || event.mortAction.kind==='informant') {
+    related.add('bloodlust'); related.add('finalHorrorLevel');
+  }
+  if (log.slice(index+1).some(e=>e.kind==='state' && related.has(e.field!) && !summary.inactive.has(e.id))) return false;
+  return restore ? summary.inactive.has(target) && canRecordMort(event.mortAction,mortState(summary.entries),summary.entries)
+    : mortParent(summary.entries)===target;
+}
+
+function validMortHistory(log:readonly PlayEvent[]) {
+  if (!log.some(e=>e.moduleData?.module===MORT_MODULE)) return true;
+  const moduleIds = new Set(log.filter(e=>e.moduleData?.module===MORT_MODULE).map(e=>e.id));
+  return log.every((event,i)=>{
+    if (event.target && moduleIds.has(event.target)) {
+      if (event.kind==='reduce'||event.kind==='death-count') return false;
+      if (event.kind==='undo'||event.kind==='restore') return canUndoMort(log.slice(0,i),event.target,event.kind==='restore');
+    }
+    if (event.moduleData?.module!==MORT_MODULE) return true;
+    const before=summarizePlay(log.slice(0,i));
+    const state=mortState(before.entries);
+    return event.mortAction ? canRecordMort(event.mortAction,state,before.entries) : mortParent(before.entries)==='root';
+  });
+}
+
 export function canUndoWolfe(log:readonly PlayEvent[], target:string, restore=false) {
   const originalIndex=log.findIndex(event=>event.id===target);
   const original=log[originalIndex];
@@ -839,6 +882,10 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     if(original.moduleData?.module==='grimlash'&&original.grimlashAction&&!resolveGrimlashAction(original.grimlashAction,moduleState(summary.entries,'grimlash'),summary.entries)){summary.inactive.add(original.id);continue;}
     if(original.moduleData?.module==='evomorph'&&original.evomorphAction&&!resolveEvomorphAction(original.evomorphAction,moduleState(summary.entries,'evomorph'),summary.entries)){summary.inactive.add(original.id);continue;}
     const e: PlaySummary['entries'][number] = { ...original, currentRound: summary.round };
+    delete e.mortTokenPlaced;
+    delete e.mortTime;
+    delete e.mortTerror;
+    if (e.mortAction && !canRecordMort(e.mortAction,mortState(summary.entries),summary.entries)) { summary.inactive.add(e.id); continue; }
     delete e.intruderFinale;
     delete e.intruderPower;
     const intruderReveal = e.kind==='moment' && (e.momentType==='finale' ? 'intruderFinale' : e.momentType==='dark-power' ? 'intruderPower' : undefined);
@@ -921,6 +968,17 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       summary.killerHealth=e.moduleData.changes.initialized===true?4:10;
       summary.killerHealthTracking=visible;
     }
+    if (e.mortAction) {
+      const previous = mortState(summary.entries);
+      const changes = mortTrackerChanges(e.mortAction,previous,summary);
+      summary.bloodlust=changes.bloodlust;
+      summary.finalHorrorLevel=changes.finalHorrorLevel;
+      summary.finalGirlHealth=changes.finalGirlHealth;
+      summary.killerHealth=changes.killerHealth;
+      if (changes.horrorToken && !previous.horrorToken) e.mortTokenPlaced=true;
+      if (changes.time) e.mortTime=changes.time;
+      if (changes.terror) e.mortTerror=changes.terror;
+    }
     if (e.kind === "state") {
       if(e.field==='killerHealth'&&summary.killerHealthTracking!==undefined)summary.killerHealthTracking=e.value!==null;
       if (e.value === null) delete summary[e.field!];
@@ -936,7 +994,7 @@ export function canChangeDeathCount(log: readonly PlayEvent[], event: PlayEvent)
   if (event.kind !== "death-count" || !isPlayEvent(event)) return false;
   const summary = summarizePlay(log);
   const group = summary.entries.find(e => e.id === event.target && e.kind === "killed");
-  return Boolean(group && !wolfeCasualties(group.wolfeAction) && group.quantity! + event.delta! >= 1 && group.quantity! + event.delta! <= 50 &&
+  return Boolean(group && !group.mortAction && !wolfeCasualties(group.wolfeAction) && group.quantity! + event.delta! >= 1 && group.quantity! + event.delta! <= 50 &&
     summary.killed !== null && summary.killed + event.delta! >= 0 && summary.killed + event.delta! <= 999);
 }
 /** Correct the latest matching observation, never undo an unrelated action.
@@ -959,6 +1017,7 @@ export function decrementPlay(
     const group = matching.kind === "death-count"
       ? s.entries.find(e => e.id === matching.target && e.kind === "killed")
       : matching;
+    if (group?.mortAction) return canUndoMort(log,group.id)?{kind:'undo',target:group.id}:null;
     if (group && wolfeCasualties(group.wolfeAction))
       return canUndoWolfe(log,group.id)?{kind:'undo',target:group.id}:null;
     if (group?.quantity && group.quantity > 1)
@@ -979,6 +1038,7 @@ export function decrementPlay(
   };
 }
 export function describeEvent(e: PlayEvent): string {
+  if(e.mortAction) return describeMort(e.mortAction);
   switch (e.kind) {
     case "start":
       return `Tracking began: ${e.saved} saved, ${e.killed} killed${e.round ? `, round ${e.round}` : ""}`;
