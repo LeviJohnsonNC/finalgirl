@@ -118,6 +118,7 @@ test("Mort investigation plays through the complete clue route and recovers from
   await expect(
     mort.getByText("Discard Baghead’s token and skip the Killer effect."),
   ).toBeVisible();
+  await expect(lineup.getByText("Active Killer")).toHaveCount(0);
   await choose(page, "Physically drawn suspect token", "Hans");
   await mort.getByRole("button", { name: "Record draw" }).click();
   await expect(lineup.getByText("Active Killer")).toBeVisible();
@@ -189,6 +190,68 @@ test("Mort investigation plays through the complete clue route and recovers from
       style: ".app-footer{visibility:hidden}",
     });
   }
+});
+
+test("every temporary Active Killer gets its own portrait and returns to the lineup photo", async ({
+  page,
+  archive,
+}, info) => {
+  test.slow();
+  const mobile = info.project.name === "mobile";
+  await page.setViewportSize(
+    mobile ? { width: 320, height: 568 } : { width: 1280, height: 640 },
+  );
+  await archive.install(page, { draft: newGame });
+  const resume = async () => {
+    await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
+    await openModule(page, "mort");
+  };
+  await page.goto("/");
+  await resume();
+
+  const mort = page.getByRole("group", { name: "Mort investigation" });
+  const lineup = mort.locator(".mort-lineup").first();
+  const activeUrls = new Set<string>();
+
+  for (const [index, suspect] of MORT_SUSPECTS.entries()) {
+    const tile = lineup.locator(`[data-suspect="${suspect.id}"]`);
+    const photo = tile.locator("img");
+    const neutralUrl = await photo.getAttribute("src");
+
+    await choose(page, "Physically drawn suspect token", suspect.name);
+    await mort.getByRole("button", { name: "Record draw", exact: true }).click();
+    await expect(lineup.locator('[data-active="true"]')).toHaveCount(1);
+    await expect(tile.getByText("Active Killer", { exact: true })).toBeVisible();
+    const activeUrl = await photo.evaluate(async (img: HTMLImageElement) => {
+      await img.decode();
+      return img.getAttribute("src")!;
+    });
+    expect(activeUrl).toMatch(new RegExp(`/${suspect.id}-active[.-]`));
+    expect(activeUrl).not.toBe(neutralUrl);
+    activeUrls.add(activeUrl);
+
+    if (index === 0) {
+      await page.reload();
+      await resume();
+      await expect(tile.getByText("Active Killer", { exact: true })).toBeVisible();
+      await expect(photo).toHaveAttribute("src", activeUrl);
+    }
+
+    await tile.screenshot({ path: info.outputPath(`${suspect.id}-active.jpg`) });
+    await mort.getByRole("button", { name: "Return token", exact: true }).click();
+    await expect(photo).toHaveAttribute("src", neutralUrl!);
+    await expect(lineup.locator('[data-active="true"]')).toHaveCount(0);
+
+    if (index === 0) {
+      const undo = mort.getByRole("button", { name: "Undo last Mort change" });
+      await undo.click();
+      await expect(photo).toHaveAttribute("src", activeUrl);
+      await mort.getByRole("button", { name: "Return token", exact: true }).click();
+      await expect(photo).toHaveAttribute("src", neutralUrl!);
+    }
+  }
+
+  expect(activeUrls.size).toBe(10);
 });
 
 test("Mort early Finale handles 26 Health and a mixed-location Minor Power", async ({

@@ -540,7 +540,7 @@ console.log('Verified 22 original Ratchet Lady photographs and 9 chooser thumbna
 const mortFolder = 'src/assets/play/photos/mort';
 const mortSuspects = ['razorface', 'krampus', 'hans', 'hunter', 'tormentor', 'geppetto', 'wolf', 'ratchet', 'fright', 'baghead'];
 const mortNames = new Set(['banner', 'anonymous', 'paranoia', 'whispers', 'snitches', 'notorious', 'stockholm', 'quick',
-  ...mortSuspects.flatMap(id => [id, `${id}-finale`])]);
+  ...mortSuspects.flatMap(id => [id, `${id}-active`, `${id}-finale`])]);
 const mortManifest = JSON.parse(readFileSync(join(mortFolder, 'manifest.json'), 'utf8'));
 const mortHashes = new Set();
 for (const photo of mortManifest) {
@@ -558,4 +558,4 @@ for (const photo of mortManifest) {
 if (mortNames.size || images.filter(file => file.startsWith(mortFolder + '/')).length !== mortManifest.length) {
   throw Error('Incomplete Mort photography');
 }
-console.log('Verified 28 Mort photographs across the lineup, Finales, powers and owner banner.');
+console.log('Verified 38 Mort photographs across the lineup, Active Killers, Finales, powers and owner banner.');
