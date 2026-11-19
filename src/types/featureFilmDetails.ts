@@ -1,3 +1,4 @@
+import { CON_EVENTS, CON_SETUPS } from "../../supabase/functions/_shared/play/megabgconCatalog";
 import { WOLFE_EVENTS, WOLFE_SETUPS } from '../../supabase/functions/_shared/play/wolfeCatalog';
 import {STATION_EVENTS, STATION_SETUPS, stationSetupDescription} from '../../supabase/functions/_shared/play/stationCatalog';
 import { FALCONWOOD_EVENTS, FALCONWOOD_SETUPS, falconwoodSetupDescription } from "../../supabase/functions/_shared/play/falconwoodCatalog";
@@ -620,25 +621,8 @@ The horror lies not in a monster lurking in the shadows, but in the realization 
     location: {
       name: 'MegaBGCon',
       description: `MegaBGCon is a sprawling board game convention packed wall-to-wall with booths, crowds, food vendors, and nonstop activity. What should feel like a celebration of gaming instead becomes a maze of noise, panic, and danger, with victims too overwhelmed to follow willingly and chaos erupting across the convention floor. The location is divided into Exhibit Areas, the Food Court, and General Areas, with crowded hallways, busy exits, and booth activity constantly introducing new people and new problems. MegaBGCon is convention chaos weaponized. The floor is crammed with search opportunities, parody booths, food, fans, and bottlenecks, but saving people here is harder than it looks. Victims won't simply follow along, booth activity keeps generating new trouble, and the packed hallways make every turn feel like a scramble to stay ahead of mounting panic.`,
-      setupCards: [
-        { name: 'Busiest Day', description: 'The event is packed to capacity with attendees.' },
-        { name: 'Family Day', description: 'The event is full of families.' },
-        { name: 'First Day', description: 'It is the first day of the convention.' },
-        { name: 'Last Day', description: 'It is the last day of the convention.' },
-        { name: 'Mega Events', description: 'The biggest event day—all the things are going on!' }
-      ],
-      events: [
-        { name: 'Annoying Reporter', description: '"This is Courtney Storm, on the scene!" An annoying reporter follows you around.' },
-        { name: 'Food Trucks Are Here!', description: '"Let\'s get some Island Noods!" Food trucks have arrived at the convention.' },
-        { name: 'Industry Bad Boy', description: '"Some love him, some hate him." He can either be your friend or your enemy.' },
-        { name: 'Lunch Time!', description: '"Let\'s go check out the food trucks!" It\'s lunch time at the convention.' },
-        { name: 'Media Starlet', description: '"I heard she has over 1 million subscribers OMG!" The media starlet shows up but won\'t follow you anywhere.' },
-        { name: 'Nervous Attendees', description: '"Something feels... off this year." The attendees are nervous and uneasy.' },
-        { name: 'Popular Game Designer', description: 'There is a board game booth with a popular Game Designer drawing crowds.' },
-        { name: 'Stampede', description: '"The doors are open. Go! Go! Go!" A stampede of attendees rushes through.' },
-        { name: 'SWAG Roulette', description: '"Don\'t open it until we leave. I want it to be a surprise!" Mystery swag bags are being distributed.' },
-        { name: 'Ticketed Events', description: '"Hand me your tickets and have a seat." Two new victims enter the location.' }
-      ]
+      setupCards: CON_SETUPS.map(name => ({ name, description: `Use the printed ${name} diagram for the convention’s starting placements.` })),
+      events: CON_EVENTS.map(card => ({ name: card.name, description: card.effect })),
     },
     killer: {
       name: 'Mort the Teenage Dirtbag',

@@ -1,3 +1,5 @@
+import { MEGABGCON, MEGABGCON_MODULE } from "./megabgconCatalog.ts";
+import { conFacts, conOwnsLog } from "./megabgcon.ts";
 import { MORT, mortFacts, mortOwnsLog } from './mort.ts';
 import { WOLFE } from './wolfeCatalog.ts';
 import { wolfeOwnsLog } from './wolfe.ts';
@@ -35,7 +37,7 @@ export function deathFacts(
   events: PlayEvent[],
   eventId: string,
 ) {
-  if(!validPlayLog(events) || !wolfeOwnsLog(selection.location,events) || !ratchetLogBelongsTo(selection.killer, events) || !mortOwnsLog(selection.killer,events,selection.location))return null;
+  if(!validPlayLog(events) || !conOwnsLog(selection.location,selection.killer,events) || !wolfeOwnsLog(selection.location,events) || !ratchetLogBelongsTo(selection.killer, events) || !mortOwnsLog(selection.killer,events,selection.location))return null;
   if (selection.location !== STATION && events.some(e=>e.stationReference || e.moduleData?.module===STATION_MODULE)) return null;
   if(selection.killer!==ORGANISM&&events.some(e=>e.moduleData?.module===ORGANISM_MODULE||e.organismReference)) return null;
   if (selection.location !== FALCONWOOD && events.some(e => e.moduleData?.module === FALCONWOOD_MODULE || e.falconwoodReference)) return null;
@@ -55,7 +57,7 @@ export function deathFacts(
   if(selection.location!=='USS Konrad'&&events.some(e=>e.moduleData?.module==='konrad'))return null;
   if(selection.killer!=='Evomorph'&&events.some(e=>e.moduleData?.module==='evomorph'))return null;
   if(events.some(e=>(e.moduleData?.module==='creech'&&selection.location!=='Creech Manor')||(e.linkedModule?.module==='poltergeist'&&selection.killer!=='Poltergeist')))return null;
-  if (!validPlayLog(events) || (selection.killer!=='Poltergeist' && events.some(e=>e.moduleData?.module==='poltergeist'))) return null;
+  if (!validPlayLog(events) || !conOwnsLog(selection.location,selection.killer,events) || (selection.killer!=='Poltergeist' && events.some(e=>e.moduleData?.module==='poltergeist'))) return null;
   const entries = summarizePlay(events).entries;
   const e = entries.find((e) => e.id === eventId && e.kind === "killed");
   if (!e) return null;
@@ -72,7 +74,8 @@ export function deathFacts(
   const stationDeath = selection.location === STATION && e.stationReference;
   const ratchetDeath = selection.killer === RATCHET_LADY && e.ratchetReference;
   const wolfeDeath = selection.location === WOLFE && e.wolfeReference;
-  const historical = mortDeath || wolfeDeath || ratchetDeath || stationDeath || falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
+  const conDeath = selection.location === MEGABGCON && e.megabgconReference;
+  const historical = conDeath || mortDeath || wolfeDeath || ratchetDeath || stationDeath || falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
     ? summarizePlay(events.slice(0, events.findIndex(event => event.id === eventId) + 1)).entries
     : [];
   // The death's own fields reflect deliberate edits. Only the surrounding
@@ -130,6 +133,14 @@ export function deathFacts(
       // Stable ordering across browser objects and JSONB reads.
       const sorted = Object.fromEntries(Object.entries(wolf).sort(([a], [b]) => a.localeCompare(b)));
       context = { ...context, "big-bad-wolf": sorted };
+    }
+  }
+  if (selection.location === MEGABGCON) {
+    const facts = conDeath ? conFacts(historical) : "";
+    if (facts) context = { ...context, [MEGABGCON_MODULE]: { facts } };
+    else if (context?.[MEGABGCON_MODULE]) {
+      delete context[MEGABGCON_MODULE];
+      if (!Object.keys(context).length) context = undefined;
     }
   }
   if (mortDeath) {

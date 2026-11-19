@@ -1,3 +1,4 @@
+import { CON_SPACES } from "../../supabase/functions/_shared/play/megabgconCatalog";
 import { WOLFE_SPACES } from '../../supabase/functions/_shared/play/wolfeCatalog';
 // Supplemental suggestions for boards without shared Play room catalogs.
 // Names come from Van Ryder Games' Series 2 and 3 Feature Film Rules
@@ -13,5 +14,5 @@ export const ENDING_BOARD_SPACES: Record<string, readonly string[]> = {
   ],
   Hellscape: ['The Nexus'],
   Utopia: ['Bunker', 'Crossroads', 'General Store', 'Water Tower'],
-  MegaBGCon: ['Exhibit Area', 'Food Court', 'Main Hallway', 'Dock'],
+  MegaBGCon: CON_SPACES,
 };

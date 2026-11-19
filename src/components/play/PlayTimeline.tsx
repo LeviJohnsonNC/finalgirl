@@ -1,4 +1,4 @@
-import { canUndoMort, canUndoWolfe } from '@/lib/play/events';
+import { canUndoCon, canUndoMort, canUndoWolfe } from '@/lib/play/events';
 import { RATCHET_MODULE, ratchetParent } from '../../../supabase/functions/_shared/play/ratchetLady';
 import {MALL_MODULE,mallParent} from '@/lib/play/sunnydaze';
 import { canUndoFalconwood, validPlayLog, canUndoSlayer, validSlayerHistory, canUndoHunter, validHunterHistory } from "@/lib/play/events";
@@ -95,7 +95,7 @@ export function PlayTimeline({
           const konradBlocked=original.moduleData?.module==='konrad'&&(undone?konradParent(summary.entries)!==(original.konradAction?.parent??'root'):!canUndoKonrad(events,original.id));
           const grimlashBlocked=original.moduleData?.module==='grimlash'&&(undone?grimlashParent(summary.entries)!==(original.grimlashAction?.parent??'root'):!canUndoGrimlash(events,original.id));
           const mortBlocked=!canUndoMort(events,original.id,undone);
-          const wolfeBlocked=!canUndoWolfe(events,original.id,undone);
+          const wolfeBlocked=!canUndoWolfe(events,original.id,undone) || !canUndoCon(events,original.id,undone);
           const round = "currentRound" in entry ? entry.currentRound : null;
           return (
             <li

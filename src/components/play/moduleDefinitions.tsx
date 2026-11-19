@@ -1,3 +1,7 @@
+import { MEGABGCON, MEGABGCON_MODULE } from "../../../supabase/functions/_shared/play/megabgconCatalog";
+import { conFinaleRevealed, megabgconState } from "../../../supabase/functions/_shared/play/megabgcon";
+import { MegaBGConControls } from "./MegaBGConControls";
+import { conArt } from "./megabgconArt";
 import { MORT, MORT_MODULE, mortSummary } from '../../../supabase/functions/_shared/play/mort';
 import { MortControls } from './MortControls';
 import mortBanner from '@/assets/play/photos/mort/banner.webp';
@@ -109,7 +113,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: typeof MEGABGCON_MODULE | typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -199,6 +203,12 @@ export const moduleDefinitions: Definition[] = [
  return describe(KONRAD_FUNCTIONS.map(f=>`system:${f.id}`),'systems on')+' · '+describe(KONRAD_SHAFTS.map(id=>`shaft:${id}`),'shafts open');
 },Controls:props=><KonradControls {...props}/>},
  {id:'evomorph',owner:'killer',match:'Evomorph',title:'The Evomorph',art:{src:evomorphBanner,fit:'slice',position:'65% center'},capabilities:['reveals','minor-power'],summary:state=>`${state.stage?String(state.stage).replace(/^./,s=>s.toUpperCase()):'Stage not recorded'} · ${state.presence==='vanished'?'Hidden':state.presence==='on-board'?'Visible':'Presence not recorded'}`,Controls:props=><EvomorphControls {...props}/>},
+ {id:MEGABGCON_MODULE,owner:"location",match:MEGABGCON,title:"Inside MegaBGCon",art:conArt("banner"),capabilities:["character","event"],Controls:MegaBGConControls,
+  summary:(_state,props)=>{
+    const entries=summarizePlay(props?.events??[]).entries;
+    if (props && conFinaleRevealed(props.killer,entries)) return "Finale in play · Booth draws ended";
+    return megabgconState(entries).upkeep?.booth ?? "Convention Floor";
+  }},
  {id:WOLFE_MODULE,owner:'location',match:WOLFE,title:'Inside Wolfe Asylum',art:wolfeArt('banner'),capabilities:['character','event'],summary:wolfeSummary,Controls:props=><WolfeControls {...props}/>},
  {id:'creech',owner:'location',match:'Creech Manor',title:'Inside Creech Manor',art:{src:creechBanner,fit:'slice',position:'70% center'},capabilities:['character','event'],summary:state=>`Ladder: ${state.ladder??'not recorded'} · Helicopter: ${state['helicopter.used']===true?'used':state['event.helicopter']==='active'?'available':'not recorded'}`,Controls:props=><CreechControls {...props}/>},
   {id:'poltergeist',owner:'killer',match:'Poltergeist',title:'The Poltergeist',art:moduleBanners.poltergeist,capabilities:['objective','minor-effect','reveals'],summary:state=>`Carolyn: ${state.carolyn===undefined?'not recorded':String(state.carolyn).replace(/-/g,' ')} · Mr. Floppy: ${state.floppy===undefined?'not recorded':String(state.floppy).replace(/-/g,' ')}`,Controls:props=><PoltergeistControls {...props}/>},

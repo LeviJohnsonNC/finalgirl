@@ -1,0 +1,64 @@
+.con-controls { display: grid; gap: 1.15rem; min-width: 0; }
+.con-controls section { min-width: 0; }
+.con-floor-heading, .con-actions, .con-starting { display: flex; gap: .65rem; align-items: center; flex-wrap: wrap; }
+.con-floor-heading { justify-content: space-between; margin-bottom: .55rem; }
+.con-floor-heading h3 { margin: 0; font-family: var(--font-display, Georgia, serif); font-size: 1.5rem; color: #f5ecdc; }
+.con-floor-heading p, .con-hint { margin: .3rem 0; font-size: .85rem; color: #c4b9a7; }
+.con-hint a, .con-starting a { text-decoration: underline; text-underline-offset: .18em; color: #fae7c7; }
+.con-controls button:not(.module-control-tile), .con-disclosure summary, .con-starting a { min-height: 44px; }
+.con-actions > button, .con-primary, .con-starting > button {
+  display: inline-flex; align-items: center; gap: .4rem; justify-content: center;
+  padding: .45rem .75rem; background: #27231e; border: 1px solid #655342; border-radius: .35rem; color: #f9ecd8;
+}
+.con-controls button.con-primary { background: #763225; border-color: #ad6651; }
+.con-controls button[aria-pressed=true]:not(.module-control-tile) { background: #503a23; border-color: #ba9d67; }
+.con-controls button:focus-visible, .con-controls a:focus-visible, .con-disclosure summary:focus-visible { outline: 2px solid #e5bd74; outline-offset: 3px; }
+.con-controls button:disabled:not(.module-control-tile) { opacity: .46; cursor: default; }
+.con-controls .module-quiet-link { background: none; border-color: transparent; padding-inline: 0; text-decoration: underline; text-underline-offset: .2em; }
+.con-result { display: grid; grid-template-columns: minmax(90px, 34%) minmax(0, 1fr); border: 1px solid #66533d; background: #211c16; border-radius: .45rem; overflow: hidden; min-height: 88px; }
+.con-result .play-module-art { width: 100%; height: 100%; min-height: 88px; max-height: 135px; position: static; object-fit: cover; }
+.con-result div { padding: .7rem .8rem; display: grid; align-content: center; gap: .2rem; overflow-wrap: anywhere; }
+.con-result small { letter-spacing: .1em; text-transform: uppercase; color: #c9ab84; }
+.con-result strong { color: #f9ecd8; font-family: Georgia, serif; font-size: 1.08rem; }
+.con-editor { border: 1px solid #5b4939; background: #1b1815; border-radius: .45rem; padding: .75rem; display: grid; gap: .65rem; margin-block: .4rem; min-width: 0; }
+.con-editor label { display: grid; gap: .35rem; color: #f4ebdc; font-size: .88rem; min-width: 0; }
+.con-editor select { min-height: 44px; max-width: 100%; }
+.con-receipt { margin: .3rem 0; color: #f8d3a0; font-size: .9rem; }
+.con-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; align-items: start; }
+.con-grid > * { min-width: 0; }
+.con-disclosure { border-top: 1px solid #514333; min-width: 0; }
+.con-disclosure > summary { color: #eee0c8; cursor: pointer; padding-block: .7rem; min-width: 0; }
+.con-disclosure .con-grid { margin-bottom: .2rem; }
+.con-starting { padding: .5rem .65rem; border: 1px solid #655342; border-radius: .35rem; justify-content: space-between; }
+.con-starting > .con-editor { flex: 1 0 100%; }
+.con-starting a { display: inline-flex; align-items: center; gap: .25rem; }
+.con-buggy { width: min(100%, 320px); }
+.con-controls .con-active-photo, .con-controls .module-control-tile { min-width: 0; }
+@media (max-width: 540px) { .con-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* Keep location effects and the cart shorter than the character portraits. */
+.play-module-content .con-controls .con-active-photo,
+.play-module-content .con-controls .con-lunch-photo,
+.play-module-content .con-controls .con-buggy {
+  aspect-ratio: 16 / 9;
+  border: 1px solid #655341;
+  border-radius: .4rem;
+}
+.play-module-content .con-controls .con-buggy {
+  max-width: 420px;
+}
+.con-controls .con-active-photo:disabled,
+.con-controls .con-lunch-photo:disabled,
+.con-controls .con-buggy[data-record="spent"]:disabled {
+  opacity: 1;
+}
+.con-controls .con-active-photo:disabled,
+.con-controls .con-swag-photo:disabled {
+  cursor: default;
+}
+.con-controls .con-grid .module-character[data-state="left"] img {
+  filter: grayscale(1) brightness(.64);
+}
+.play-module-content .con-controls .module-character[data-state="saved"] > .module-control-tile {
+  opacity: 1;
+}

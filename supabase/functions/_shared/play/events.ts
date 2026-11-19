@@ -1,3 +1,5 @@
+import { MEGABGCON_MODULE } from "./megabgconCatalog.ts";
+import { canRecordCon, conDescription, conOutcome, conTrackedFields, conTrackerChanges, megabgconState, validConAction, type ConAction } from "./megabgcon.ts";
 import { MORT_MODULE, canRecordMort, describeMort, mortEventKind, mortParent, mortState, mortTrackerChanges, validMortAction, type MortAction } from './mort.ts';
 import { WOLFE_MODULE } from './wolfeCatalog.ts';
 import { isInitialWolfe, lastWolfeGurneyObservation, resolveWolfe, sameWolfe, validWolfeAction, wolfeCasualties, wolfeParent, wolfePillTrackers, type WolfeAction } from './wolfe.ts';
@@ -115,6 +117,8 @@ export interface PlayEvent extends PlayDetails {
   hunterReference?: true;
   stationAction?: StationAction;
   stationReference?: true;
+  megabgconAction?: ConAction;
+  megabgconReference?: true;
   wolfeAction?: WolfeAction;
   wolfeReference?: true;
   ratchetAction?: RatchetAction;
@@ -272,6 +276,13 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
   }
   if (e.inkanyambaReference !== undefined && (e.inkanyambaReference !== true || e.kind !== "moment" || !["dark-power", "finale"].includes(e.momentType!))) return false;
   if (e.wolfReference !== undefined && (e.wolfReference !== true || e.kind !== "killed")) return false;
+  if (e.megabgconReference !== undefined && (e.megabgconReference !== true || e.kind !== "killed")) return false;
+  if (e.megabgconAction !== undefined || e.moduleData?.module === MEGABGCON_MODULE) {
+    if (e.moduleData?.module !== MEGABGCON_MODULE || !validModuleObservation(e.moduleData) || !validConAction(e.megabgconAction)) return false;
+    const outcome = conOutcome(e.megabgconAction);
+    if (outcome ? e.kind !== outcome.kind || e.quantity !== 1 || e.eventCard !== outcome.eventCard ||
+        (e.kind === "killed" && (!e.megabgconReference || e.cause !== "event")) : e.kind !== "module") return false;
+  }
   if (e.wolfeReference !== undefined && (e.wolfeReference !== true || e.kind !== 'killed')) return false;
   if (e.wolfeAction !== undefined && (e.moduleData?.module !== WOLFE_MODULE || !validWolfeAction(e.wolfeAction))) return false;
   if (e.moduleData?.module === WOLFE_MODULE) {
@@ -343,10 +354,38 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     Array.isArray(log) &&
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
-    validMortHistory(log) && validWolfeHistory(log) && validRatchetHistory(log) && validStationHistory(log) && validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validOrganismHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
+    validConHistory(log) && validMortHistory(log) && validWolfeHistory(log) && validRatchetHistory(log) && validStationHistory(log) && validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validOrganismHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
     new Set(log.map((e) => e.id)).size === log.length
   );
 }
+export function canUndoCon(log: readonly PlayEvent[], target: string, restore = false) {
+  const index = log.findIndex(e => e.id === target);
+  const action = log[index]?.megabgconAction;
+  if (!action) return true;
+  const summary = summarizePlay(log);
+  const fields = conTrackedFields(action);
+  if (log.slice(index + 1).some(e => !summary.inactive.has(e.id) && (
+    e.kind === "state" && e.field && fields.has(e.field) ||
+    !!e.mortAction && fields.size > 0 ||
+    e.kind === "adjust" && !!conOutcome(action)
+  ))) return false;
+  return restore
+    ? summary.inactive.has(target) && canRecordCon(action, summary)
+    : megabgconState(summary.entries).previous === target;
+}
+
+function validConHistory(log: readonly PlayEvent[]) {
+  const observed = new Set(log.filter(e => e.megabgconAction).map(e => e.id));
+  if (!observed.size) return true;
+  return log.every((e, index) => {
+    if (e.target && observed.has(e.target)) {
+      if (e.kind === "death-count" || e.kind === "reduce") return false;
+      if (e.kind === "undo" || e.kind === "restore") return canUndoCon(log.slice(0, index), e.target, e.kind === "restore");
+    }
+    return !e.megabgconAction || canRecordCon(e.megabgconAction, summarizePlay(log.slice(0, index)));
+  });
+}
+
 export function canUndoMort(log:readonly PlayEvent[], target:string, restore=false) {
   const index = log.findIndex(event=>event.id===target);
   const event = log[index];
@@ -961,6 +1000,13 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       if(e.hunterAction.command==='reboot'&&before.phase==='mark-x'&&summary.killerHealth!==undefined)summary.killerHealth=Math.min(99,summary.killerHealth+4);
       if(e.hunterAction.command==='force-mark-x'&&before.phase==='mark-v')summary.bloodlust=10;
     }
+    if (e.megabgconAction) {
+      const { changes, token, time, terror } = conTrackerChanges(e.megabgconAction, summary);
+      Object.assign(summary, changes);
+      if (token) e.mortTokenPlaced = true;
+      if (time) e.mortTime = time;
+      if (terror) e.mortTerror = terror;
+    }
     if(e.kind==='module'&&e.wolfeAction?.command==='eat') Object.assign(summary,wolfePillTrackers(e.wolfeAction,summary));
     if(e.kind==='module'&&e.creechAction?.kind==='hunter'&&e.creechAction.bloodlust!==undefined)summary.bloodlust=e.creechAction.bloodlust;
     if(e.kind==='module' && e.moduleData?.module==='evomorph' && (e.moduleData.changes.initialized===true || (e.evomorphAction?.command==='evolve'&&e.moduleData.changes.stage==='adult'))) {
@@ -994,7 +1040,7 @@ export function canChangeDeathCount(log: readonly PlayEvent[], event: PlayEvent)
   if (event.kind !== "death-count" || !isPlayEvent(event)) return false;
   const summary = summarizePlay(log);
   const group = summary.entries.find(e => e.id === event.target && e.kind === "killed");
-  return Boolean(group && !group.mortAction && !wolfeCasualties(group.wolfeAction) && group.quantity! + event.delta! >= 1 && group.quantity! + event.delta! <= 50 &&
+  return Boolean(group && !group.megabgconAction && !group.mortAction && !wolfeCasualties(group.wolfeAction) && group.quantity! + event.delta! >= 1 && group.quantity! + event.delta! <= 50 &&
     summary.killed !== null && summary.killed + event.delta! >= 0 && summary.killed + event.delta! <= 999);
 }
 /** Correct the latest matching observation, never undo an unrelated action.
@@ -1018,6 +1064,7 @@ export function decrementPlay(
       ? s.entries.find(e => e.id === matching.target && e.kind === "killed")
       : matching;
     if (group?.mortAction) return canUndoMort(log,group.id)?{kind:'undo',target:group.id}:null;
+    if (group?.megabgconAction) return canUndoCon(log, group.id) ? { kind: "undo", target: group.id } : null;
     if (group && wolfeCasualties(group.wolfeAction))
       return canUndoWolfe(log,group.id)?{kind:'undo',target:group.id}:null;
     if (group?.quantity && group.quantity > 1)
@@ -1039,6 +1086,7 @@ export function decrementPlay(
 }
 export function describeEvent(e: PlayEvent): string {
   if(e.mortAction) return describeMort(e.mortAction);
+  if (e.megabgconAction) return conDescription(e.megabgconAction);
   switch (e.kind) {
     case "start":
       return `Tracking began: ${e.saved} saved, ${e.killed} killed${e.round ? `, round ${e.round}` : ""}`;

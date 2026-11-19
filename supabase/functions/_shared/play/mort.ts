@@ -439,7 +439,10 @@ export function mortState(
 ): MortState {
   let s = { ...newMort(), known: fresh };
   for (const e of entries) {
-    if (e.moduleData?.module !== MORT_MODULE) continue;
+    if (e.moduleData?.module !== MORT_MODULE) {
+      if (e.mortTokenPlaced) s = { ...s, horrorToken: true };
+      continue;
+    }
     if (!e.mortAction) {
       s = newMort();
       continue;

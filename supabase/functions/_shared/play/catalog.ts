@@ -1,3 +1,4 @@
+import { MEGABGCON, MEGABGCON_SOURCE, BOOTH_EVENTS, CON_EVENTS, CON_ITEMS, CON_TERRORS, CON_SPACES, CON_PEOPLE } from "./megabgconCatalog.ts";
 import { MORT, MORT_TERRORS } from './mort.ts';
 import { WOLFE, WOLFE_EVENTS, WOLFE_ITEMS, WOLFE_PEOPLE, WOLFE_TERRORS, WOLFE_SPACES, WOLFE_SOURCE } from './wolfeCatalog.ts';
 import { RATCHET_LADY, RATCHET_TERRORS, RATCHET_SOURCE } from './ratchetLady.ts';
@@ -53,6 +54,8 @@ export interface PlayCard {
   source: string;
 }
 export const PLAY_CARDS: readonly PlayCard[] = [
+  ...[...CON_EVENTS, ...BOOTH_EVENTS].map(card => ({ ...card, kind: "event" as const, location: MEGABGCON, source: MEGABGCON_SOURCE })),
+  ...CON_TERRORS.map(card => ({ ...card, kind: "terror" as const, location: MEGABGCON, source: MEGABGCON_SOURCE })),
   ...WOLFE_EVENTS.map(card=>({...card,kind:'event' as const,location:WOLFE,source:WOLFE_SOURCE})),
   ...WOLFE_TERRORS.map(card=>({...card,kind:'terror' as const,location:WOLFE,source:WOLFE_SOURCE})),
   ...MORT_TERRORS.map(card => ({...card, kind:'terror' as const, killer:MORT, source:'Shriek · Mort Terror cards'})),
@@ -145,6 +148,7 @@ export function findPlayCard(
 /** Context-only Woods cards stay searchable as rules and accept historical free text. */
 export function suggestedDeathCards(selection: {killer:string;location:string;mission?:string|null}, kind: "terror" | "event") {
   return applicablePlayCards(selection, kind).filter(card => {
+    if (card.location === MEGABGCON) return kind === "event" ? card.name === "Tragic Accident" : CON_TERRORS.some(c => c.name === card.name && "death" in c);
     if (card.location===WOLFE) return (kind==='terror'?WOLFE_TERRORS:WOLFE_EVENTS).some(c=>c.name===card.name&&c.death);
     if (card.location===STATION && kind==='event') return card.name === STATION_EVENTS.find(event=>event.id==='lab-accident')?.name;
     if (card.killer===MORT) return ['Everybody’s a Suspect','I Want to See What Your Insides Look Like!','A Mask in the Crowd','Meta Massacre','Trade-Off'].includes(card.name);
@@ -174,6 +178,7 @@ export function playCardContext(
   });
 }
 export const PLAY_ROOMS: Record<string, readonly string[]> = {
+ [MEGABGCON]:CON_SPACES,
  [WOLFE]:[...WOLFE_SPACES,'Laundry Room'],
  [FALCONWOOD]:FALCONWOOD_SPACES,
  [WOODS]: WOODS_SPACES.map(space => space.name),
@@ -227,14 +232,14 @@ export function playMechanisms(selection: {
 export function playItems(
   location: string,
 ): readonly { name: string; effect: string }[] {
-  return location === WOLFE ? WOLFE_ITEMS : location === STATION ? STATION_ITEMS : location === FALCONWOOD ? FALCONWOOD_ITEMS : location === MALL ? MALL_ITEMS : location === WOODS ? WOODS_ITEMS : location === WINGARD ? WINGARD_ITEMS : location === "Marrek Warehouse" ? MARREK_ITEMS : location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
+  return location === MEGABGCON ? CON_ITEMS : location === WOLFE ? WOLFE_ITEMS : location === STATION ? STATION_ITEMS : location === FALCONWOOD ? FALCONWOOD_ITEMS : location === MALL ? MALL_ITEMS : location === WOODS ? WOODS_ITEMS : location === WINGARD ? WINGARD_ITEMS : location === "Marrek Warehouse" ? MARREK_ITEMS : location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
     ? CAMP_ITEMS
     : location === "Buddyland"
       ? BUDDYLAND_ITEMS
       : [];
 }
 export function playVictims(location: string): readonly { name: string }[] {
-  return location === WOLFE ? WOLFE_EVENTS.filter(event=>WOLFE_PEOPLE.some(id=>id===event.id)) : location === STATION ? STATION_ROLES : location === FALCONWOOD ? FALCONWOOD_ROLES : location===MALL?[{name:'Bart the Mall Cop'},{name:'The Savior’s Girl'}]:location === WOODS ? WOODS_PEOPLE : location === WINGARD ? WINGARD_PEOPLE : location === "Marrek Warehouse" ? MARREK_PEOPLE : location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
+  return location === MEGABGCON ? [...CON_PEOPLE.map(p => ({ name: p.person })), { name: "SWAG attendee" }] : location === WOLFE ? WOLFE_EVENTS.filter(event=>WOLFE_PEOPLE.some(id=>id===event.id)) : location === STATION ? STATION_ROLES : location === FALCONWOOD ? FALCONWOOD_ROLES : location===MALL?[{name:'Bart the Mall Cop'},{name:'The Savior’s Girl'}]:location === WOODS ? WOODS_PEOPLE : location === WINGARD ? WINGARD_PEOPLE : location === "Marrek Warehouse" ? MARREK_PEOPLE : location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
     ? CAMP_VICTIMS
     : location === "Buddyland"
       ? SPECIAL_VICTIMS

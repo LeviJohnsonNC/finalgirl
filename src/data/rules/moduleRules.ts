@@ -1,3 +1,4 @@
+import { megaBgCon, MEGABGCON_PROMPT_CONTEXT } from "./megaBGConRules";
 import { MORT_ATTACK, MORT_MOVE, MORT_POWERS, MORT_SUSPECTS, MORT_TERRORS, MORT_FINALE_GUIDANCE } from '../../../supabase/functions/_shared/play/mort';
 import { wolfeRules, WOLFE_PROMPT_CONTEXT } from './wolfeRules';
 import { ratchetLadyRules, RATCHET_PROMPT_CONTEXT } from "./ratchetLadyRules";
@@ -262,35 +263,6 @@ const mortTheTeenageDirtbag: EntityRuleModule = {
   ],
 };
 
-// ─── MegaBGCon (Location) — Shriek ─────────────────────────────────────────
-const megaBgCon: EntityRuleModule = {
-  entity: 'MegaBGCon',
-  kind: 'location',
-  filmId: 's4-shriek',
-  source: 'Shriek — Location Sheet',
-  credits: { design: 'A.J. Porfirio', art: 'Tyler Johnson' },
-  tags: ['megabgcon', 'shriek', 'booths', 'exhibit areas', 'food court', 'halways', 'convention', 'location'],
-  setup: [
-    { type: 'list', items: ['Shuffle the 12 Booth cards and make a facedown Booth deck.', 'Shuffle the 10 Booth Event cards and make a facedown Booth Event deck.', 'Add the 2 Create a Panic Action cards to the Action Tableau.', 'Place the Finale Reminder card underneath the Finale card facedown side facing up. It will only be used after the Finale is revealed.'] },
-  ],
-  rules: [
-    { type: 'heading', level: 3, text: 'Definitions' },
-    { type: 'list', items: ['Exhibit Areas: The yellow spaces marked with the booth icon are considered Exhibit Area spaces. Thematically, this is where the vendor booths are and where everyone wants to be!', 'Food Court: The Food Court is located in the bottom left-hand corner of the board.', 'General Areas: All remaining spaces not captured in the 2 areas above are considered the General Areas.'] },
-    { type: 'heading', level: 3, text: 'Restricted Victim Following' },
-    { type: 'paragraph', text: 'The Victims are having such a great time at the convention that they will not willingly follow you out of Exhibit Areas and into General Areas. You may not have ANY Victims follow you when moving from an Exhibit Area space to a General Area space. Instead, you will need to use the Create a Panic Action card to attempt to scare them from an Exhibit Area space to a General Area space. Victims could also panic and move from an Exhibit Area space per the normal rules during the Panic phase, or panicking from other effects.' },
-    { type: 'heading', level: 3, text: 'Main Hallway' },
-    { type: 'paragraph', text: 'When panicking someone from the Main Hallway, roll 2 dice instead of 1 to determine the direction they panic.' },
-    { type: 'heading', level: 3, text: 'Searching' },
-    { type: 'paragraph', text: 'At Mega Boardgame Con you can search in ANY space by resolving a Search Action card. The Item deck you draw from depends on the kind of space you are searching in: an Exhibit Area space, the Food Court space, or a General Area space.' },
-    { type: 'callout', variant: 'critical', title: 'Rules on Game Ambiguity', text: 'Because all spaces can be searched, there are no search icons on the spaces. However, each space is considered a search space for the purpose of effects that reference them. If unsure what to do in certain instances, apply the Rules on Game Ambiguity.' },
-    { type: 'heading', level: 3, text: 'Moving Through Hallways and Docks' },
-    { type: 'paragraph', text: 'Hallways and docks are sparsely populated and you can move to other connected hallways and docks quickly. If you intend to move to a space connected by this icon, you get +1 movement, but the first space you move to MUST be an adjacent space connected with the hallway icon.' },
-    { type: 'heading', level: 3, text: 'Booth Cards and Booth Events' },
-    { type: 'paragraph', text: 'During each Upkeep phase you will draw a Booth card. If you need to draw a Booth card but the deck is empty, shuffle the discard pile to create a new deck.' },
-    { type: 'list', items: ['1-3: Spawn a normal Victim in the space with the Booth. This represents a new attendee showing up to the convention.', '4-6: Draw a Booth Event card and apply its effects in the space with the Booth. Discard the Booth card after resolving it. Booth Event cards will instruct you as to whether or not the card should be discarded.'] },
-  ],
-};
-
 // ─── Wingard Cottage (Location) — A Knock at the Door ─────────────────────
 const wingardCottage: EntityRuleModule = {
   entity: WINGARD,
@@ -471,11 +443,7 @@ const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
     visualGuidance: 'Use candid 35mm photography with physically believable costume details and lighting from the selected setting. For MegaBGCon, use the convention’s fluorescent halls and costumed attendees. A glimpse of an anonymous mask can suggest Mort without identifying the disguise. Depict the confirmed disguise only at or after a recorded reveal.',
     rulesSummary: 'Mort begins disguised as one of ten Suspects. Players reveal clues through Interrogate and Coerce actions, eliminating Suspects and turning them into Informants. Suspects can temporarily act as the Killer when mask effects resolve. Mort is only truly revealed once enough clues are found or the Terror deck runs out.',
   },
-  MegaBGCon: {
-    narrativeGuidance: 'MegaBGCon is a busy boardgame convention where crowds resist leaving the fun. Exhibit Areas, the Food Court, booths, booth events, the Main Hallway, and sparse hallway/dock routes should shape the scene.',
-    visualGuidance: 'Depict a crowded boardgame convention: vendor booths, demo tables, banners, dice, boardgame boxes, miniatures, food court signage, hallways/docks, fluorescent overhead lighting, cosplay costumes, and crowded exhibit aisles.',
-    rulesSummary: 'Victims will not willingly follow from Exhibit Areas into General Areas and often need to be panicked out. Every space can be searched, with the item deck determined by area type. Booth cards and Booth Events trigger during Upkeep, and hallway/dock movement can be faster.',
-  },
+  MegaBGCon: MEGABGCON_PROMPT_CONTEXT,
   'The Intruders': INTRUDER_PROMPT_CONTEXT,
   [WINGARD]: {
     narrativeGuidance:'A lakeside family retreat with a buried history. Use the selected scenario and recorded events. Scavenging or improvised equipment may enter the story when observed.',
