@@ -9,6 +9,15 @@
     "sha256": "7296be8875917a5b525cc411b3185b3f189c09ef0608e36e3aa5d151813b71c2"
   },
   {
+    "id": "baghead-active",
+    "file": "baghead-active.webp",
+    "source": "exec-0f34ec08-dd8b-4402-893c-1970816c5770.png",
+    "width": 530,
+    "height": 719,
+    "bytes": 52998,
+    "sha256": "29bc2fc4b1456788e7f8556af94e8662aa4c9c5299895f2e4938474a56f35169"
+  },
+  {
     "id": "baghead-finale",
     "file": "baghead-finale.webp",
     "source": "exec-d9e6590e-0217-497b-b5ee-bb6ad2148c2c.png",
@@ -36,6 +45,15 @@
     "sha256": "bdf8d4097d110db9a8818aac6a6079e623b37cae1b4df95e9203e517858b4b9d"
   },
   {
+    "id": "fright-active",
+    "file": "fright-active.webp",
+    "source": "exec-283c90ab-7556-4765-9044-8af5a6fe9681.png",
+    "width": 530,
+    "height": 719,
+    "bytes": 60260,
+    "sha256": "96095c791bffcff412366782d07e6e631a100736bc73258d290c4f6f7e61914a"
+  },
+  {
     "id": "fright-finale",
     "file": "fright-finale.webp",
     "source": "exec-499fa5e6-5fcb-4ce1-8e79-dc2e97cb662d.png",
@@ -52,6 +70,15 @@
     "height": 718,
     "bytes": 59876,
     "sha256": "59173a2880ea42b86d4522cd2646a276df35f5be152ba803a8eb328c6240ec05"
+  },
+  {
+    "id": "geppetto-active",
+    "file": "geppetto-active.webp",
+    "source": "exec-3391a95e-9526-489f-be0a-f81196bce84f.png",
+    "width": 530,
+    "height": 719,
+    "bytes": 49572,
+    "sha256": "a2e2ed6a4d34e982d7b280aef13c75ebd6477888e77b52f4234143483d63d63f"
   },
   {
     "id": "geppetto-finale",
@@ -72,6 +99,15 @@
     "sha256": "cb114ed4c95e735c73bcbd9129914d6d6f7ac1dbf433ce486a7150f7303e4f4f"
   },
   {
+    "id": "hans-active",
+    "file": "hans-active.webp",
+    "source": "exec-586b1b40-ea30-43c6-99b1-5a07f97ad770.png",
+    "width": 530,
+    "height": 719,
+    "bytes": 34002,
+    "sha256": "50470de8f73b1f5a402923fa416fb4f15edb105378e05247a30926878d84fb41"
+  },
+  {
     "id": "hans-finale",
     "file": "hans-finale.webp",
     "source": "exec-9a91de36-18b1-47e2-b5da-6ac0069cee42.png",
@@ -90,6 +126,15 @@
     "sha256": "978117700f39f86d8df517ab0d59987f3ed34cb427195c52702b5f14f379a05e"
   },
   {
+    "id": "hunter-active",
+    "file": "hunter-active.webp",
+    "source": "exec-9a76b55b-141e-4068-86d3-20c455d704f4.png",
+    "width": 530,
+    "height": 719,
+    "bytes": 46590,
+    "sha256": "4ad933d61bcb963dd88ae9c9096978c7c6e3b79ad1c0d874ed6c5ad46e7fe000"
+  },
+  {
     "id": "hunter-finale",
     "file": "hunter-finale.webp",
     "source": "exec-f4435e03-28c6-42b0-8943-b5a0c5fd5f0b.png",
@@ -106,6 +151,15 @@
     "height": 718,
     "bytes": 41224,
     "sha256": "f5d318765685c15ef0f803fccb6daad57f30793fee558f0716fb69f3e04152c9"
+  },
+  {
+    "id": "krampus-active",
+    "file": "krampus-active.webp",
+    "source": "exec-105d5e9d-8ab5-4b5d-ab56-c5d7039c9d5b.png",
+    "width": 530,
+    "height": 719,
+    "bytes": 69378,
+    "sha256": "674910be3ad61e9480e2ce2f1e12ccd0418e72b69574fb8585964128eaf82795"
   },
   {
     "id": "krampus-finale",
@@ -153,6 +207,15 @@
     "sha256": "762ffde236d1703812f41ec05b4bf4f52d26f443533b81de0a762f09adee5aa4"
   },
   {
+    "id": "ratchet-active",
+    "file": "ratchet-active.webp",
+    "source": "exec-db96e6ac-52c5-4598-a78f-664ea8704863.png",
+    "width": 530,
+    "height": 719,
+    "bytes": 47948,
+    "sha256": "4b9bd58c033e88514c683bc691a099f48bdc953b0fc3288d21b22bc35bc1f1b0"
+  },
+  {
     "id": "ratchet-finale",
     "file": "ratchet-finale.webp",
     "source": "exec-476c6313-0ce5-4e27-b43c-ba8b26c998ab.png",
@@ -169,6 +232,15 @@
     "height": 718,
     "bytes": 46966,
     "sha256": "66d31593c708c0d54248781a0abcf133b7ea5598a62b7d5ee4860a81814b2990"
+  },
+  {
+    "id": "razorface-active",
+    "file": "razorface-active.webp",
+    "source": "exec-57c24c8c-15d7-4425-9d15-ef4c6035b257.png",
+    "width": 530,
+    "height": 719,
+    "bytes": 48934,
+    "sha256": "b2e48d5376e0f100365858529a4e8b8a1ae66a20d34e6ff497b8b21730b1b5d6"
   },
   {
     "id": "razorface-finale",
@@ -207,6 +279,15 @@
     "sha256": "1189ec7f2417dd0529ce1f6268ae938f1902e80a8eae524afc83c2655062600c"
   },
   {
+    "id": "tormentor-active",
+    "file": "tormentor-active.webp",
+    "source": "exec-e140a8ca-96c1-42a5-ade4-4d6de0cffd5b.png",
+    "width": 530,
+    "height": 719,
+    "bytes": 39392,
+    "sha256": "fa7298d94e269c2f2e91ea6298d6c868956bfd0045920927478f12affc30cea6"
+  },
+  {
     "id": "tormentor-finale",
     "file": "tormentor-finale.webp",
     "source": "exec-2d740943-f14b-4cf3-9cc3-a65ef2e5ea88.png",
@@ -232,6 +313,15 @@
     "height": 600,
     "bytes": 25890,
     "sha256": "4967103b693500b6086dc7f91ed1ce1cea4a15bbb33a0be05a74997039ec12f3"
+  },
+  {
+    "id": "wolf-active",
+    "file": "wolf-active.webp",
+    "source": "exec-90ee0fb9-54d1-4903-b90c-f720361b1ddc.png",
+    "width": 530,
+    "height": 719,
+    "bytes": 65848,
+    "sha256": "08f0037a1c857be1ff8fca252697c65d254f58e9634abb37a1687b3ba6cfbc8e"
   },
   {
     "id": "wolf-finale",

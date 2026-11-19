@@ -24,10 +24,15 @@ The seventeen double-sided clue cards and the sealed secret envelope were intent
 - The shared tracker accepts the Ratchet Lady disguise's 26 Health when Anonymous Terror doubles five missing clues. The app computes known track and Finale effects and provides explicit prompts for Time, Terror cards, dice, targeting and other physical actions.
 - Mort's Minors are independent of Location ownership. Slippery and Twisted Bond use a Health-free observation while Mort is disguised. The Finale clears that observation together with Mort's Minors while unrelated location controls remain in place.
 - Rules and card suggestions use the photographed effects. The closing form uses the logged disguise where present and keeps older manual records readable. The generated ending and new historical death facts use the pertinent observation, with the selected Final Girl identity and location passed through the existing contracts. A temporary draw or the last visible suspect does not identify the disguise in narration.
-- The [artwork manifest](../../src/assets/play/photos/mort/README.md) maps ten suspect photographs, ten Finale photographs, seven power images and one banner. The game artwork remains separate from the licensed printed components.
+- The [artwork manifest](../../src/assets/play/photos/mort/README.md) maps ten neutral suspect portraits, ten temporary Active Killer portraits, ten Finale photographs, seven power images and one banner. The game artwork remains separate from the licensed printed components.
 
 ## Verification and release
 
 Mort-specific unit tests cover both revelation routes for every disguise, event replay, trait matching, doubles, Informant outcomes, ownership, Minor Power cleanup and historical death facts. The browser scenarios exercise the five-clue investigation with save failure and retry, real asset loading, the early mixed-location Finale at 26 Health, and the outcome handoff. They use test sessions and mocked generation.
 
 The shared edge changes reach ending/story/scene validation and historical death facts. Deploy the corresponding edge functions with the frontend so the 26-Health ending request and new Play records are understood at both ends. No SQL migration or new private image reference is required for these Play photographs.
+
+
+## Active Killer portrait follow-up
+
+Each temporary Active Killer gets a new portrait in the existing lineup tile. The shot retains the suspect’s identifying costume and uses posture, distance and practical side light to distinguish the temporary state. Returning the token or undoing the draw restores the neutral portrait. The browser journey exercises all ten draws, a reload with an active token and Undo and the return to the lineup portraits. The 1280px laptop and 320px phone captures cover all ten crops and keep the Active Killer label below the image. The update ships with the frontend.

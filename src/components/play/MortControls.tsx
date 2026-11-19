@@ -792,23 +792,34 @@ export function MortControls({
                 />
               )}
               <div className="mort-lineup">
-                {survivors.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    className="mort-portrait"
-                    data-suspect={s.id}
-                    aria-expanded={person === s.id}
-                    data-active={state.active === s.id}
-                    onClick={() =>
-                      setPerson(person === s.id ? undefined : s.id)
-                    }
-                  >
-                    <img src={mortPhoto(s.id)} alt="" loading="lazy" />
-                    <span>{s.name}</span>
-                    {state.active === s.id && <b>Active Killer</b>}
-                  </button>
-                ))}
+                {survivors.map((suspect) => {
+                  const active = state.active === suspect.id;
+                  return (
+                    <button
+                      key={suspect.id}
+                      type="button"
+                      className="mort-portrait"
+                      data-suspect={suspect.id}
+                      aria-expanded={person === suspect.id}
+                      data-active={active}
+                      onClick={() =>
+                        setPerson(person === suspect.id ? undefined : suspect.id)
+                      }
+                    >
+                      <img
+                        src={mortPhoto(
+                          active ? `${suspect.id}-active` : suspect.id,
+                        )}
+                        alt=""
+                        loading={active ? "eager" : "lazy"}
+                      />
+                      <span>
+                        {suspect.name}
+                        {active && <b>Active Killer</b>}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
               {person && survivors.some((s) => s.id === person) && (
                 <section

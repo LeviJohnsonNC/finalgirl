@@ -162,15 +162,17 @@
     inset 0 0 0 2px #a64b44,
     0 0 20px #50292d55;
 }
+.mort-portrait[data-active="true"] > span {
+  align-content: center;
+  gap: 0.125rem;
+}
 .mort-portrait b {
-  position: absolute;
-  top: 0.46rem;
-  left: 0.42rem;
   border-radius: 2px;
   background: #542830;
   color: #fff2da;
-  padding: 0.2rem 0.4rem;
+  padding: 0.125rem 0.35rem;
   font-size: 0.64rem;
+  line-height: 1.15;
 }
 .mort-portrait[data-out] img {
   filter: grayscale(0.86) brightness(0.61);
