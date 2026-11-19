@@ -340,5 +340,167 @@
     "height": 718,
     "bytes": 56206,
     "sha256": "f4ce08bf1bfe0650de22f477224f88a08387cc78c879423c44d11c3add49b863"
+  },
+  {
+    "id": "baghead-profile",
+    "file": "baghead-profile.webp",
+    "source": "exec-1f46f9e0-5e76-4ed1-af0a-773cf125bc8d.png",
+    "width": 640,
+    "height": 704,
+    "bytes": 56624,
+    "sha256": "81c44f2119a42c85374f5e114e6092aaf3e86f84573f17014118a6c48071796c"
+  },
+  {
+    "id": "dossier-backdrop",
+    "file": "dossier-backdrop.webp",
+    "source": "exec-3955ac52-8af2-4194-a2e4-5f2abb1d6b4f.png",
+    "width": 1120,
+    "height": 544,
+    "bytes": 14556,
+    "sha256": "0c1fe8f73e59504a40d30161345b7591ff3320ad424d32c7e70a0f5642341ed0"
+  },
+  {
+    "id": "fright-profile",
+    "file": "fright-profile.webp",
+    "source": "exec-031c1563-e86e-44ed-893f-fef49ba675d9.png",
+    "width": 640,
+    "height": 704,
+    "bytes": 52470,
+    "sha256": "f97cb71fa2acc550646e68fec4b9b4f3bc69fe724389fa7d0e71a234e1bc78d6"
+  },
+  {
+    "id": "geppetto-profile",
+    "file": "geppetto-profile.webp",
+    "source": "exec-abca8f76-3319-471e-92c5-64a73288f186.png",
+    "width": 640,
+    "height": 704,
+    "bytes": 50312,
+    "sha256": "dbc5e76ff73a92ad8cb2e2c2e0d246e06706f957f794fda3471bb1b88c0d6b3e"
+  },
+  {
+    "id": "hans-profile",
+    "file": "hans-profile.webp",
+    "source": "exec-420fbd51-97a9-4604-b699-39b67979d37c.png",
+    "width": 640,
+    "height": 704,
+    "bytes": 43214,
+    "sha256": "4c29ed8848b0f99779e50ae90d204dd1c0bd85028c85fcc79a2dc30a4b485892"
+  },
+  {
+    "id": "hunter-profile",
+    "file": "hunter-profile.webp",
+    "source": "exec-7d304b33-f1b6-4991-a977-148d83132018.png",
+    "width": 640,
+    "height": 704,
+    "bytes": 41580,
+    "sha256": "9fdd7a3a75969d7abc817502154ea4799ad0fb479b044ec964b516de2941c6fb"
+  },
+  {
+    "id": "krampus-profile",
+    "file": "krampus-profile.webp",
+    "source": "exec-8adb221c-7cfb-4aaa-9da7-a922382778ee.png",
+    "width": 640,
+    "height": 704,
+    "bytes": 75230,
+    "sha256": "a1835ed292e7afd5124204fd0fa8937dbdec108af0ba9d887caf4b220b0247a3"
+  },
+  {
+    "id": "ratchet-profile",
+    "file": "ratchet-profile.webp",
+    "source": "exec-0edd6492-1fa9-4ebb-9fed-8df7143ae4d2.png",
+    "width": 640,
+    "height": 704,
+    "bytes": 49098,
+    "sha256": "63ed95447edb08787b6386d1b17fa9e99bd5b53089837c1992398f54f2a65c99"
+  },
+  {
+    "id": "razorface-profile",
+    "file": "razorface-profile.webp",
+    "source": "exec-812d7e60-8c0d-4450-bba8-97c0a9d983e9.png",
+    "width": 640,
+    "height": 704,
+    "bytes": 55456,
+    "sha256": "91cd06fdb487f13ca052faa18f988da5ba35861fb9280054019671931aa0d72e"
+  },
+  {
+    "id": "tormentor-profile",
+    "file": "tormentor-profile.webp",
+    "source": "exec-e8d68338-0b21-4e93-b486-63b3590488cf.png",
+    "width": 640,
+    "height": 704,
+    "bytes": 36910,
+    "sha256": "5f4c1f6da49f1136368411db90f1d009f31647c23303e4a37d3fdd670fa6ce0e"
+  },
+  {
+    "id": "trait-game",
+    "file": "trait-game.webp",
+    "source": "exec-e8bc6b3f-7be3-4688-88b2-440c9444a2b0.png",
+    "width": 64,
+    "height": 64,
+    "bytes": 1752,
+    "sha256": "9e1cf642146158740d06e548cda7f317944825e740d8ff8874e71ef56165d547"
+  },
+  {
+    "id": "trait-genre",
+    "file": "trait-genre.webp",
+    "source": "exec-e8bc6b3f-7be3-4688-88b2-440c9444a2b0.png",
+    "width": 64,
+    "height": 64,
+    "bytes": 2500,
+    "sha256": "ba61ae9f44e221cbdccb5d3fe71b03def12860f70e37a54d091aa14dd15c0df3"
+  },
+  {
+    "id": "trait-height",
+    "file": "trait-height.webp",
+    "source": "exec-e8bc6b3f-7be3-4688-88b2-440c9444a2b0.png",
+    "width": 64,
+    "height": 64,
+    "bytes": 1054,
+    "sha256": "382e03ed359d5ab29e678178394dfd7bd12e113e89dc47e87cea71b4ef855e06"
+  },
+  {
+    "id": "trait-mask",
+    "file": "trait-mask.webp",
+    "source": "exec-e8bc6b3f-7be3-4688-88b2-440c9444a2b0.png",
+    "width": 64,
+    "height": 64,
+    "bytes": 1950,
+    "sha256": "86f88591f379998b20cc818f9cdc5751e0a916b3161e9914e55efcbd019aacdf"
+  },
+  {
+    "id": "trait-series",
+    "file": "trait-series.webp",
+    "source": "exec-e8bc6b3f-7be3-4688-88b2-440c9444a2b0.png",
+    "width": 64,
+    "height": 64,
+    "bytes": 1622,
+    "sha256": "1c0f0152af1be4f19a3e7a1b44da0cb33cbd580454ee42ba778dd4c8a8fe07d3"
+  },
+  {
+    "id": "trait-style",
+    "file": "trait-style.webp",
+    "source": "exec-e8bc6b3f-7be3-4688-88b2-440c9444a2b0.png",
+    "width": 64,
+    "height": 64,
+    "bytes": 1408,
+    "sha256": "a09e5d52b6c7ef955351d45f66f4f3fb73a97a9a21705688430e45c3f1991246"
+  },
+  {
+    "id": "trait-villain",
+    "file": "trait-villain.webp",
+    "source": "exec-e8bc6b3f-7be3-4688-88b2-440c9444a2b0.png",
+    "width": 64,
+    "height": 64,
+    "bytes": 2102,
+    "sha256": "9b094f3d0241b67b602b9422fa97a1795b39d45bc29e0624e0e74b5229735985"
+  },
+  {
+    "id": "wolf-profile",
+    "file": "wolf-profile.webp",
+    "source": "exec-e64e61d5-23fa-4e2a-b41c-d6b629342f4e.png",
+    "width": 640,
+    "height": 704,
+    "bytes": 73896,
+    "sha256": "77c873e74bd5b098831503342474db760f44c0699bfc2786d967915235d0e568"
   }
 ]

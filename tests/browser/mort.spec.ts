@@ -8,6 +8,7 @@ import {
 import {
   MORT,
   MORT_SUSPECTS,
+  MORT_TRAITS,
   mortState,
 } from "../../supabase/functions/_shared/play/mort";
 
@@ -76,10 +77,45 @@ test("Mort investigation plays through the complete clue route and recovers from
     ).toBeLessThanOrEqual(width);
     await lineup.screenshot({ path: info.outputPath(`lineup-${width}.jpg`) });
   }
+  const form = mort.getByRole("form", { name: "Record a clue" });
+  const token = (number: number) =>
+    form.getByRole("button", { name: `Reminder token ${number}`, exact: true });
+  const apply = form.getByRole("button", { name: "Apply clue", exact: true });
+  const traitField = form.getByRole("combobox", {
+    name: "Trait from the Viewer",
+  });
   await mort.getByRole("button", { name: "Record clue", exact: true }).click();
-  await choose(page, "Clue number", "2");
+  await expect(form.getByRole("button", { name: "Pick suspects" })).toHaveCount(0);
+  const tokenTops = await form.getByRole("button", { name: /^Reminder token/ })
+    .evaluateAll((buttons) => buttons.map((button) => button.getBoundingClientRect().top));
+  expect(tokenTops).toHaveLength(5);
+  expect(new Set(tokenTops).size).toBe(1);
+  await expect(traitField).toHaveText("Choose a trait");
+  await form.getByRole("combobox", { name: "How you found it" }).click();
+  await expect(
+    page.getByRole("option", { name: "Coerce", exact: true }),
+  ).toBeDisabled();
+  await page.keyboard.press("Escape");
+  await choose(page, "Trait from the Viewer", "Mask or facepaint");
+  await expect(traitField).toHaveText("Mask or facepaint");
+  await expect(
+    form.getByRole("combobox", { name: "Mort does not have" }),
+  ).toBeEnabled();
   await choose(page, "Trait from the Viewer", "Favorite horror movie genre");
   await choose(page, "Mort does not have", "Comedy Horror");
+  await expect(apply).toBeDisabled();
+  await token(2).focus();
+  await page.keyboard.press("Space");
+  await expect(token(2)).toHaveAttribute("aria-pressed", "true");
+  await expect(apply).toBeEnabled();
+  await page.keyboard.press("Space");
+  await expect(token(2)).toHaveAttribute("aria-pressed", "false");
+  await expect(apply).toBeDisabled();
+  await token(2).click();
+  await form.screenshot({
+    path: info.outputPath("reminder-tokens.jpg"),
+    style: ".app-footer{visibility:hidden}",
+  });
   await expect(
     mort.getByText("H.U.N.T.E.R., Baghead become Informants."),
   ).toBeVisible();
@@ -109,10 +145,27 @@ test("Mort investigation plays through the complete clue route and recovers from
   await mort.getByRole("button", { name: "Undo last Mort change" }).click();
   await expect(lineup.getByRole("button")).toHaveCount(10);
   await mort.getByRole("button", { name: "Record clue", exact: true }).click();
-  await choose(page, "Clue number", "2");
+  await token(2).click();
   await choose(page, "Trait from the Viewer", "Favorite horror movie genre");
   await choose(page, "Mort does not have", "Comedy Horror");
-  await mort.getByRole("button", { name: "Apply clue", exact: true }).click();
+  await lineup.getByRole("button", { name: "H.U.N.T.E.R.", exact: true }).click();
+  const profile = mort.getByRole("region", { name: "Profile for H.U.N.T.E.R." });
+  await profile.getByRole("button", { name: "Rule out suspect" }).click();
+  await expect(lineup.getByRole("button")).toHaveCount(9);
+  await expect(
+    form.getByText(/1 previously ruled out will be linked/),
+  ).toBeVisible();
+  await apply.click();
+  await expect(lineup.getByRole("button")).toHaveCount(8);
+  const afterClue: PlayEvent[] = await page.evaluate(
+    (key) => JSON.parse(localStorage.getItem(key)!).playEvents,
+    key,
+  );
+  expect(mortState(summarizePlay(afterClue).entries)).toMatchObject({
+    clues: [2],
+    informants: 2,
+    unfiled: [],
+  });
   await choose(page, "Physically drawn suspect token", "Baghead");
   await mort.getByRole("button", { name: "Record draw" }).click();
   await expect(
@@ -123,11 +176,11 @@ test("Mort investigation plays through the complete clue route and recovers from
   await mort.getByRole("button", { name: "Record draw" }).click();
   await expect(lineup.getByText("Active Killer")).toBeVisible();
   await mort.getByRole("button", { name: "Return token" }).click();
-  for (const [number, names] of [
-    [1, ["Krampus", "Dr. Fright"]],
-    [3, ["Tormentor", "Geppetto"]],
-    [4, ["Big Bad Wolf"]],
-    [5, ["Razorface", "Ratchet Lady"]],
+  for (const [number, trait, value] of [
+    [1, "Mask or facepaint", "Facepaint"],
+    [3, "Series of origin", "Special"],
+    [4, "Favorite horror movie villain", "Ghosts"],
+    [5, "Favorite horror movie genre", "Gothic"],
   ] as const) {
     await mort
       .getByRole("button", {
@@ -135,14 +188,16 @@ test("Mort investigation plays through the complete clue route and recovers from
         exact: true,
       })
       .click();
-    await choose(page, "Clue number", String(number));
-    await mort.getByRole("button", { name: "Pick suspects" }).click();
-    const choices = mort.getByRole("group", {
-      name: "Pick suspects to rule out",
-    });
-    for (const name of names)
-      await choices.getByRole("button", { name, exact: true }).click();
-    await mort.getByRole("button", { name: "Apply clue", exact: true }).click();
+    await expect(
+      form.getByRole("button", {
+        name: "Reminder token 2, recorded",
+        exact: true,
+      }),
+    ).toBeDisabled();
+    await token(number).click();
+    await choose(page, "Trait from the Viewer", trait);
+    await choose(page, "Mort does not have", value);
+    await apply.click();
   }
   await expect(lineup.getByRole("button")).toHaveCount(1);
   await expect(
@@ -192,7 +247,7 @@ test("Mort investigation plays through the complete clue route and recovers from
   }
 });
 
-test("every temporary Active Killer gets its own portrait and returns to the lineup photo", async ({
+test("every suspect has a dossier and its own temporary Active Killer portrait", async ({
   page,
   archive,
 }, info) => {
@@ -212,11 +267,48 @@ test("every temporary Active Killer gets its own portrait and returns to the lin
   const mort = page.getByRole("group", { name: "Mort investigation" });
   const lineup = mort.locator(".mort-lineup").first();
   const activeUrls = new Set<string>();
+  const profileUrls = new Set<string>();
 
   for (const [index, suspect] of MORT_SUSPECTS.entries()) {
     const tile = lineup.locator(`[data-suspect="${suspect.id}"]`);
     const photo = tile.locator("img");
     const neutralUrl = await photo.getAttribute("src");
+
+    await tile.click();
+    const dossier = mort.getByRole("region", {
+      name: `Profile for ${suspect.name}`,
+      exact: true,
+    });
+    await expect(dossier.getByRole("heading")).toHaveText(suspect.name);
+    await expect(dossier.locator("dt")).toHaveText([...MORT_TRAITS]);
+    await expect(dossier.locator("dd")).toHaveText([...suspect.traits]);
+    const dossierPhoto = dossier.locator(".mort-profile-photo img");
+    const dossierUrl = await dossierPhoto.evaluate(
+      async (img: HTMLImageElement) => {
+        await img.decode();
+        return img.getAttribute("src")!;
+      },
+    );
+    expect(dossierUrl).toMatch(new RegExp(`/${suspect.id}-profile[.-]`));
+    profileUrls.add(dossierUrl);
+
+    if (suspect.id === "fright") {
+      const icons = await dossier.locator(".mort-trait-icon img").evaluateAll(
+        async (imgs) => {
+          const assets = imgs as HTMLImageElement[];
+          await Promise.all(assets.map((img) => img.decode()));
+          return assets.map((img) => img.currentSrc);
+        },
+      );
+      expect(new Set(icons).size).toBe(7);
+    }
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+    ).toBeLessThanOrEqual(mobile ? 320 : 1280);
+    await dossier.screenshot({
+      path: info.outputPath(`${suspect.id}-dossier.jpg`),
+      style: ".app-footer{visibility:hidden}",
+    });
 
     await choose(page, "Physically drawn suspect token", suspect.name);
     await mort.getByRole("button", { name: "Record draw", exact: true }).click();
@@ -229,17 +321,24 @@ test("every temporary Active Killer gets its own portrait and returns to the lin
     expect(activeUrl).toMatch(new RegExp(`/${suspect.id}-active[.-]`));
     expect(activeUrl).not.toBe(neutralUrl);
     activeUrls.add(activeUrl);
+    await expect(dossierPhoto).toHaveAttribute("src", activeUrl);
+    await expect(
+      dossier.getByRole("button", { name: "Rule out suspect" }),
+    ).toBeDisabled();
 
     if (index === 0) {
       await page.reload();
       await resume();
       await expect(tile.getByText("Active Killer", { exact: true })).toBeVisible();
       await expect(photo).toHaveAttribute("src", activeUrl);
+      await tile.click();
+      await expect(dossierPhoto).toHaveAttribute("src", activeUrl);
     }
 
     await tile.screenshot({ path: info.outputPath(`${suspect.id}-active.jpg`) });
     await mort.getByRole("button", { name: "Return token", exact: true }).click();
     await expect(photo).toHaveAttribute("src", neutralUrl!);
+    await expect(dossierPhoto).toHaveAttribute("src", dossierUrl);
     await expect(lineup.locator('[data-active="true"]')).toHaveCount(0);
 
     if (index === 0) {
@@ -252,6 +351,7 @@ test("every temporary Active Killer gets its own portrait and returns to the lin
   }
 
   expect(activeUrls.size).toBe(10);
+  expect(profileUrls.size).toBe(10);
 });
 
 test("Mort early Finale handles 26 Health and a mixed-location Minor Power", async ({

@@ -255,24 +255,181 @@
   color: #f4dfc7;
   font-size: 0.85rem;
 }
+.mort-reminder-tokens {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+.mort-reminder-tokens legend {
+  margin-bottom: 0.3rem;
+  color: #e1cbb4;
+  font-size: 0.83rem;
+}
+.mort-reminder-tokens > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.mort-play .mort-reminder-tokens button {
+  width: 44px;
+  padding: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 22%, #4a3b32, #20191b 75%);
+  box-shadow: inset 0 0 0 2px #1a1317, 0 2px 4px #100b0d;
+  font: bold 1rem Georgia, serif;
+}
+.mort-play .mort-reminder-tokens button[aria-pressed="true"] {
+  color: #fff1d9;
+  border-color: #fa6a87;
+  background: radial-gradient(circle at 35% 22%, #922841, #56182a 80%);
+  box-shadow: inset 0 0 0 2px #4c1726, 0 0 9px #ca345b50;
+}
+.mort-play .mort-reminder-tokens button:not(.mort-portrait):hover:not(:disabled) {
+  border-color: #efac98;
+}
+.mort-play .mort-reminder-tokens button:disabled {
+  text-decoration: line-through;
+}
 .mort-profile {
-  margin-top: 0.6rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr);
+  align-items: start;
+  gap: clamp(0.9rem, 2.1vw, 1.7rem);
+  margin-top: 0.9rem;
+  min-width: 0;
+  padding: clamp(0.8rem, 2.1vw, 1.5rem);
+  border: 1px solid #866251;
+  border-radius: 0.55rem;
+  background-color: #171015;
+  background-image:
+    linear-gradient(90deg, #141013 14%, #141013e8 56%, #14101354),
+    url("../assets/play/photos/mort/dossier-backdrop.webp");
+  background-position: right center;
+  background-size: cover;
+  box-shadow: inset 0 0 2rem #0503049c, 0 6px 20px #0006;
+}
+.mort-profile-photo {
+  position: relative;
+  margin: 0.6rem 0.4rem 0.4rem;
+  padding: 0.55rem 0.55rem 1.05rem;
+  transform: rotate(-3deg);
+  border: 1px solid #b6a07e;
+  border-radius: 3px;
+  background:
+    radial-gradient(ellipse at 0 100%, #884a345c, transparent 38%),
+    linear-gradient(125deg, #988164, #e3cdae 34%, #cab08d 67%, #9a7857);
+  box-shadow: 0 9px 20px #050203cf, inset 0 0 12px #79543b8c;
+}
+.mort-profile-photo::after {
+  content: "";
+  position: absolute;
+  width: 0.81rem;
+  height: 2.9rem;
+  top: -0.75rem;
+  left: 1.1rem;
+  border: 2px solid #c7b59b;
+  border-right-color: #5e5247;
+  border-radius: 1rem;
+  box-shadow: 1px 2px 6px #241914b5, inset 1px 0 2px #18141287;
+  transform: rotate(-16deg);
+  pointer-events: none;
+}
+.mort-profile-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1.1;
+  object-fit: cover;
+  object-position: center 38%;
+  border: 1px solid #68513e;
+  border-radius: 2px;
+  background: #211619;
+}
+.mort-profile[data-active="true"] .mort-profile-photo img {
+  object-position: center top;
+}
+.mort-play .mort-profile h4 {
+  margin-bottom: 0.5rem;
+  font-size: clamp(1.7rem, 3.9vw, 3rem);
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.mort-profile h4::after {
+  display: block;
+  content: "";
+  width: min(100%, 23rem);
+  height: 4px;
+  margin-top: 0.45rem;
+  background: linear-gradient(90deg, #ec234c, #7c132d 65%, transparent);
+  clip-path: polygon(0 36%, 21% 18%, 100% 0, 89% 65%, 3% 100%);
 }
 .mort-profile dl {
-  display: grid;
-  gap: 0.25rem;
-  font-size: 0.82rem;
+  margin: 0;
 }
 .mort-profile dl > div {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.4rem;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.22rem 0.25rem;
+  border-bottom: 1px solid #bd967b38;
+  background: linear-gradient(90deg, #231b21e6, #14101575 84%, #14101528);
 }
 .mort-profile dt {
-  color: #c9ad91;
+  display: flex;
+  align-items: center;
+  gap: clamp(0.35rem, 1.3vw, 0.75rem);
+  color: #dec3a5;
+  font-size: clamp(0.65rem, 1.2vw, 0.8rem);
+  line-height: 1.18;
+  font-weight: 750;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
+.mort-trait-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: clamp(2rem, 4vw, 3.2rem);
+  height: 1.85rem;
+  border: 1px solid #8c29404f;
+  border-radius: 6px;
+  background: linear-gradient(145deg, #361522, #211219);
+}
+.mort-trait-icon img {
+  width: 1.25rem;
+  height: 1.25rem;
+  object-fit: contain;
 }
 .mort-profile dd {
   margin: 0;
+  color: #fff1da;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: clamp(0.95rem, 1.6vw, 1.2rem);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.mort-play .mort-profile button.mort-profile-ruleout {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(100%, 38rem);
+  min-height: 48px;
+  background: linear-gradient(115deg, #371420, #6e1731 60%, #391321);
+  border: 1px solid #e34c70;
+  box-shadow: 0 2px 14px #a31c4638, inset 0 1px 2px #fecad036;
+  color: #ffead2;
+  text-transform: uppercase;
+  font-family: var(--font-display, Georgia, serif);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  gap: 0.7rem;
+}
+.mort-play .mort-profile button.mort-profile-ruleout:hover:not(:disabled) {
+  background: linear-gradient(115deg, #49152a, #8e1c3d 60%, #50172e);
+  box-shadow: 0 2px 16px #c5255d70, inset 0 1px 2px #fecad04d;
 }
 .mort-reveal-actions {
   margin-bottom: 0.65rem;
@@ -409,6 +566,26 @@
   }
   .mort-clue-strip button {
     margin: 0.3rem 0 0;
+  }
+  .mort-profile {
+    grid-template-columns: minmax(0, 1fr);
+    background-blend-mode: multiply, normal;
+  }
+  .mort-profile-photo {
+    justify-self: center;
+    width: min(70%, 14rem);
+  }
+  .mort-profile h4 {
+    text-align: center;
+  }
+  .mort-profile h4::after {
+    margin-inline: auto;
+  }
+  .mort-profile dl > div {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  }
+  .mort-profile dd {
+    font-size: 0.92rem;
   }
   .mort-finale {
     min-height: 22rem;
