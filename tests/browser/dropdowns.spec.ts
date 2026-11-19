@@ -76,7 +76,7 @@ test('revealed killer identities sort alphabetically and retain the selected ide
   await archive.install(page,{draft:{...activeGame,phase:'outcome',result,selection:{...activeGame.selection,killer:result.killer,location:result.location,finalGirl:result.finalGirl}}});
   await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   const identity=page.getByRole('combobox',{name:'Final Killer Identity',exact:true});await identity.click();
-  expect(await ordered(page)).toEqual(['Big Bad Wolf','Dr. Fright','Evomorph','Geppetto','Hans','Inkanyamba','Mort','Ratchet Lady','The Intruders','The Organism','Unknown']);
+  expect(await ordered(page)).toEqual(['Baghead','Big Bad Wolf','Dr. Fright','Geppetto','Hans','H.U.N.T.E.R.','Krampus','Ratchet Lady','Razorface','Tormentor','Unknown']);
   await page.getByRole('option',{name:'Geppetto',exact:true}).click();
   await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   await expect(identity).toHaveText('Geppetto');
