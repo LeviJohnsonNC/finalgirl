@@ -19,6 +19,7 @@ const load = (path, imports) => {
     if(name==='./wolfeCatalog.ts'||name==='./play/wolfeCatalog.ts')return wolfeCatalog;
     if(name==='./wolfe.ts')return wolfe;
     if(name==='./ratchetLady.ts'||name==='./play/ratchetLady.ts')return ratchetLady;
+    if(name==='./mort.ts'||name==='./play/mort.ts')return mort;
     if(name==='./hunter.ts'||name==='./play/hunter.ts')return hunter;
     if(name==='./sunnydaze.ts'||name==='./play/sunnydaze.ts')return mall;
     if(name==='./sunnydazeCatalog.ts')return mallCatalog;
@@ -33,6 +34,7 @@ const load = (path, imports) => {
 const wolfeCatalog=load('../supabase/functions/_shared/play/wolfeCatalog.ts',{});
 const wolfe=load('../supabase/functions/_shared/play/wolfe.ts',{});
 const ratchetLady=load('../supabase/functions/_shared/play/ratchetLady.ts',{});
+const mort=load('../supabase/functions/_shared/play/mort.ts',{});
 const stationCatalog=load('../supabase/functions/_shared/play/stationCatalog.ts',{});
 const station=load('../supabase/functions/_shared/play/station.ts',{});
 const mallCatalog=load('../supabase/functions/_shared/play/sunnydazeCatalog.ts',{});
