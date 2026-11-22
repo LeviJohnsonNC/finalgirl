@@ -172,15 +172,17 @@ test("illustrated shelf covers the catalog and opens truthful character details"
     await expect(
       dialog.getByRole("heading", { name, exact: true }),
     ).toBeVisible();
-    if (name !== "Melanie")
-      await expect(
-        dialog.getByText("Details aren’t available yet.", { exact: true }),
-      ).toBeVisible();
-    else
-      await expect(
-        dialog.getByRole("region", { name: "Melanie backstory" }),
-      ).toBeVisible();
-    await expect(dialog.locator(".girl-reference")).toHaveCount(0);
+    if (name === "Melanie") {
+      await expect(dialog.getByRole("region", { name: "Melanie backstory" })).toBeVisible();
+      await expect(dialog.getByText("5 starting health", { exact: true })).toBeVisible();
+      await dialog.locator(".girl-ability > summary").click();
+      await expect(dialog.getByText(/Once per Action phase, you may lose 1 Health/)).toBeVisible();
+      await expect(dialog.locator(".girl-rescue-rewards li")).toHaveCount(6);
+      await expect(dialog.locator(".girl-personal-item")).toHaveCount(0);
+    } else {
+      await expect(dialog.getByText("Details aren’t available yet.", { exact: true })).toBeVisible();
+      await expect(dialog.locator(".girl-reference")).toHaveCount(0);
+    }
     await dialog.getByRole("button", { name: "Close", exact: true }).click();
     await expect(trigger).toBeFocused();
   }
