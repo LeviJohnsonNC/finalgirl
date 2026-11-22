@@ -1,5 +1,6 @@
 import { activeGame, expect, test, userId } from "./fixtures";
 import { openModule } from "./play-helpers";
+import { deathFacts, deathSignature } from "../../src/lib/play/death";
 import {
   summarizePlay,
   validPlayLog,
@@ -50,6 +51,7 @@ test("Mort investigation plays through the complete clue route and recovers from
   const mort = page.getByRole("group", { name: "Mort investigation" });
   const lineup = mort.locator(".mort-lineup").first();
   await expect(lineup.getByRole("button")).toHaveCount(10);
+  await expect(lineup.locator("img").first()).toHaveCSS("filter", "grayscale(0.86) brightness(0.61)");
   await expect(page.getByText("Disguised · Health unrevealed")).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Set Horror", exact: true }),
@@ -157,6 +159,15 @@ test("Mort investigation plays through the complete clue route and recovers from
   ).toBeVisible();
   await apply.click();
   await expect(lineup.getByRole("button")).toHaveCount(8);
+  await mort.getByText("Ruled out · 2", { exact: true }).click();
+  const informants = mort.locator(".mort-ruled .mort-lineup");
+  await expect(informants.locator("img").first()).toHaveCSS("filter", "none");
+  await informants.locator("img").evaluateAll(images => Promise.all(images.map(image => (image as HTMLImageElement).decode())));
+  await informants.screenshot({
+    path: info.outputPath("discovered-informants.jpg"),
+    style: ".app-footer{visibility:hidden}",
+  });
+  await mort.getByText("Ruled out · 2", { exact: true }).click();
   const afterClue: PlayEvent[] = await page.evaluate(
     (key) => JSON.parse(localStorage.getItem(key)!).playEvents,
     key,
@@ -175,6 +186,7 @@ test("Mort investigation plays through the complete clue route and recovers from
   await choose(page, "Physically drawn suspect token", "Hans");
   await mort.getByRole("button", { name: "Record draw" }).click();
   await expect(lineup.getByText("Active Killer")).toBeVisible();
+  await expect(lineup.getByRole("button", { name: "Hans Active Killer" }).locator("img")).toHaveCSS("filter", "none");
   await mort.getByRole("button", { name: "Return token" }).click();
   for (const [number, trait, value] of [
     [1, "Mask or facepaint", "Facepaint"],
@@ -245,6 +257,53 @@ test("Mort investigation plays through the complete clue route and recovers from
       style: ".app-footer{visibility:hidden}",
     });
   }
+});
+
+test("Mort’s disguise is optional and saved with the individual death scene", async ({ page, archive }, info) => {
+  await archive.install(page, { draft: newGame });
+  await page.goto("/");
+  await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
+  await page.getByRole("button", { name: "Record one victim killed", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Gruesome Death" });
+  const field = dialog.getByRole("combobox", { name: "Mort’s disguise" });
+  const cause = (name: string) => dialog.getByRole("button", { name, exact: true });
+  await cause("Killer attack").click();
+  await expect(field).toHaveText("Choose a disguise");
+  await field.click();
+  const options = page.getByRole("option");
+  await expect(options).toHaveCount(MORT_SUSPECTS.length + 1);
+  expect((await options.allTextContents()).sort()).toEqual([
+    "Choose a disguise",
+    ...MORT_SUSPECTS.map(suspect => suspect.name),
+  ].sort());
+  await page.screenshot({ path: info.outputPath("mort-disguise-dropdown.png") });
+  await page.getByRole("option", { name: "Hans", exact: true }).click();
+  await cause("Terror card").click();
+  await expect(field).toHaveText("Hans");
+  await cause("Buddy / minion").click();
+  await expect(field).toHaveCount(0);
+  await expect(dialog.getByRole("combobox", { name: "Death attacker" })).toHaveText("Choose a Buddy or enter a minion");
+  await cause("Killer attack").click();
+  await expect(field).toHaveText("Choose a disguise");
+  await choose(page, "Mort’s disguise", "Ratchet Lady");
+  await cause("Gruesome Death").click();
+  await expect(dialog.getByRole("region", { name: "Generated death scene" })).toBeVisible();
+  await expect(dialog.locator(".play-death-context")).toContainText("Mort as Ratchet Lady");
+
+  const scene = archive.deathScenes[0];
+  const events = archive.sessions[0].state.playEvents as PlayEvent[];
+  const facts = deathFacts(newGame.selection, events, scene.event_id)!;
+  expect(facts).toMatchObject({ cause: "killer", attacker: "Mort as Ratchet Lady" });
+  expect(scene.signature).toBe(await deathSignature(facts));
+  expect(mortState(summarizePlay(events).entries).reveal).toBeUndefined();
+
+  await cause("Save and exit").click();
+  await page.reload();
+  await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
+  await page.getByRole("button", { name: "Latest death scene", exact: true }).click();
+  await cause("Edit death details").click();
+  await expect(field).toHaveText("Ratchet Lady");
+  expect(archive.calls.filter(name => name === "generate-death-scene")).toHaveLength(1);
 });
 
 test("every suspect has a dossier and its own temporary Active Killer portrait", async ({

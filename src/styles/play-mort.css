@@ -174,7 +174,7 @@
   font-size: 0.64rem;
   line-height: 1.15;
 }
-.mort-portrait[data-out] img {
+.mort-portrait[data-active="false"] img {
   filter: grayscale(0.86) brightness(0.61);
 }
 .mort-portrait[data-out] {

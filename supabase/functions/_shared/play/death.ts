@@ -1,6 +1,6 @@
 import { MEGABGCON, MEGABGCON_MODULE } from "./megabgconCatalog.ts";
 import { conFacts, conOwnsLog } from "./megabgcon.ts";
-import { MORT, mortFacts, mortOwnsLog } from './mort.ts';
+import { MORT, MORT_SUSPECTS, mortFacts, mortOwnsLog } from './mort.ts';
 import { WOLFE } from './wolfeCatalog.ts';
 import { wolfeOwnsLog } from './wolfe.ts';
 import { RATCHET_LADY, RATCHET_MODULE, ratchetFacts, ratchetLogBelongsTo } from './ratchetLady.ts';
@@ -32,6 +32,11 @@ export interface DeathSelection {
   finalGirl: string;
   mission?: string | null;
 }
+export const MORT_DEATH_DISGUISES = MORT_SUSPECTS.map(({ name }) => ({
+  name,
+  attacker: `Mort as ${name}`,
+}));
+
 export function deathFacts(
   selection: DeathSelection,
   events: PlayEvent[],
@@ -291,15 +296,20 @@ export function detailsForCause(
 ): PlayDetails {
   const cause = details.cause ?? "unspecified";
   const intruderAttribution=killer===INTRUDERS&&(cause==='killer'||cause==='terror');
+  const mortAttribution = killer === MORT && (cause === "killer" || cause === "terror");
+  const mortDisguise = killer === MORT
+    ? MORT_DEATH_DISGUISES.find(disguise => disguise.attacker === details.attacker)
+    : undefined;
   return {
     ...details,
     attacker:
       killer===ORGANISM&&(cause==="killer"||cause==="terror") ? (details.attacker===ORGANISM?"":details.attacker??"") :
       killer === RATCHET_LADY && cause === 'terror' ? details.attacker ?? '' :
+      mortAttribution ? (mortDisguise?.attacker ?? "") :
       intruderAttribution ? (INTRUDER_ROSTER.some(p=>p.name===details.attacker)?details.attacker:"") : cause === "killer"
         ? killer
         : cause === "minion"
-          ? (details.attacker ?? "")
+          ? (mortDisguise || (killer === MORT && details.attacker === MORT) ? "" : details.attacker ?? "")
           : "",
     terrorCard: cause === "terror" ? (details.terrorCard ?? "") : "",
     eventCard: cause === "event" ? (details.eventCard ?? "") : "",
