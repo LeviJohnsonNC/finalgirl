@@ -88,7 +88,7 @@ test('sources and permanent milestones persist without repeat recording or Undo'
   await expect(page.getByRole('button',{name:'Power source 2, Off. Turn on'})).toBeVisible();
   for(const name of ['Dark Power','Finale','Second wind','Back from the dead']) await expect(page.getByRole('button',{name,exact:true})).toHaveAttribute('aria-pressed','true');
 });
-test('horror bands and critical health change artwork without inventing death or revival', async ({page,archive},info) => {
+test('every Horror level and critical health show their own artwork', async ({page,archive},info) => {
   await archive.install(page,{draft});await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   await expect(page.getByRole('button',{name:'Session options'})).toBeVisible();
   for (const name of ['Read story','Narrate introduction','Finish game']) {
@@ -102,13 +102,19 @@ test('horror bands and critical health change artwork without inventing death or
     await page.getByRole('textbox',{name:`${label} value`,exact:true}).fill(String(value));
     await page.getByRole('button',{name:'Set',exact:true}).click();
   }
-  const horror = page.locator('.play-state--finalHorrorLevel');
-  const seen = new Set<string>();
-  for(const [value,band] of [[0,'low'],[1,'low'],[2,'mid'],[6,'mid'],[7,'high']] as const) {
-    await set('Horror',value);await expect(horror).toHaveAttribute('data-horror',band);
-    seen.add((await horror.locator('.play-stat-portrait').getAttribute('src'))!);
+  const horror = page.getByRole('group', { name: 'Horror tracker' });
+  const artwork = horror.locator('img');
+  const sourceFor = (level: number) => new RegExp(`/horror-${level}(?:-[\\w-]+)?\\.webp$`);
+  for (let level = 0; level <= 7; level++) {
+    await set('Horror', level);
+    await expect(horror).toHaveAttribute('data-horror-level', String(level));
+    await expect(artwork).toHaveAttribute('src', sourceFor(level));
+    await artwork.evaluate(img => (img as HTMLImageElement).decode());
+    await horror.screenshot({ path: info.outputPath(`horror-${level}.jpg`), animations: 'disabled', style: '.app-footer{visibility:hidden}' });
   }
-  expect(seen.size).toBe(3);
+  await page.reload();
+  await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
+  await expect(artwork).toHaveAttribute('src', sourceFor(7));
   await set('Final Girl health',2);await set('Killer health',1);
   await expect(page.locator('.play-state--finalGirlHealth')).toHaveAttribute('data-critical','true');
   await expect(page.locator('.play-state--killerHealth')).toHaveAttribute('data-critical','true');

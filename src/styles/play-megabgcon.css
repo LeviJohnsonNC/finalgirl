@@ -45,9 +45,9 @@
 .con-controls .con-active-photo:disabled {
   cursor: default;
 }
-.con-controls .con-grid .module-character[data-state="left"] img {
+.con-controls .module-character:is([data-state="unrecorded"], [data-state="left"]) .play-module-art {
   filter: grayscale(1) brightness(.64);
 }
-.play-module-content .con-controls .module-character[data-state="saved"] > .module-control-tile {
+.play-module-content .con-controls .module-character:is([data-state="active"], [data-state="saved"]) > .module-control-tile {
   opacity: 1;
 }

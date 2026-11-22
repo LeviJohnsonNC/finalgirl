@@ -3,6 +3,7 @@ import { openModule } from "./play-helpers";
 import { newPlayEvent, summarizePlay, validPlayLog } from "../../src/lib/play/events";
 import { MORT } from "../../supabase/functions/_shared/play/mort";
 import { megabgconState } from "../../supabase/functions/_shared/play/megabgcon";
+import { CON_PEOPLE } from "../../supabase/functions/_shared/play/megabgconCatalog";
 
 const key = `final-girl-active-game-v1:${userId}`;
 const selection = {
@@ -113,6 +114,26 @@ test("MegaBGCon hides retired controls and replays saved effects alongside event
     }
   }
   await panel.screenshot({ path: info.outputPath("megabgcon-play.png") });
+});
+
+test("MegaBGCon portraits brighten when each Special Victim is discovered", async ({ page, archive }, info) => {
+  await archive.install(page, { draft: { ...activeGame, selection, playMode: true, playEvents: [] } });
+  const panel = await start(page);
+  await panel.getByText("Special Victims", { exact: true }).click();
+  const roster = panel.locator("details").filter({ hasText: "Special Victims" });
+  for (const person of CON_PEOPLE) {
+    const undiscovered = roster.getByRole("button", { name: `Add ${person.person}`, exact: true });
+    await expect(undiscovered.locator("img")).toHaveCSS("filter", "grayscale(1) brightness(0.64)");
+    await undiscovered.click();
+    if (person.booth) await choose(page, "Booth drawn", "Soxley");
+    if (person.id === "bad-boy") await choose(page, "Role", "Friend");
+    await roster.getByRole("button", { name: "Record arrival", exact: true }).click();
+    const discovered = roster.getByRole("button", { name: person.person, exact: true });
+    await expect(discovered).toHaveCSS("opacity", "1");
+    await expect(discovered.locator("img")).toHaveCSS("filter", "none");
+  }
+  await roster.locator("img").evaluateAll(images => Promise.all(images.map(image => (image as HTMLImageElement).decode())));
+  await roster.screenshot({ path: info.outputPath("discovered-special-victims.jpg"), style: ".app-footer{visibility:hidden}" });
 });
 
 test("Mort’s investigation and Finale coexist with MegaBGCon’s special victims", async ({ page, archive }) => {

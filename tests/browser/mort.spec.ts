@@ -51,7 +51,7 @@ test("Mort investigation plays through the complete clue route and recovers from
   const mort = page.getByRole("group", { name: "Mort investigation" });
   const lineup = mort.locator(".mort-lineup").first();
   await expect(lineup.getByRole("button")).toHaveCount(10);
-  await expect(lineup.locator("img").first()).toHaveCSS("filter", "grayscale(0.86) brightness(0.61)");
+  await expect(lineup.locator("img").first()).toHaveCSS("filter", "none");
   await expect(page.getByText("Disguised · Health unrevealed")).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Set Horror", exact: true }),
@@ -160,13 +160,8 @@ test("Mort investigation plays through the complete clue route and recovers from
   await apply.click();
   await expect(lineup.getByRole("button")).toHaveCount(8);
   await mort.getByText("Ruled out · 2", { exact: true }).click();
-  const informants = mort.locator(".mort-ruled .mort-lineup");
-  await expect(informants.locator("img").first()).toHaveCSS("filter", "none");
-  await informants.locator("img").evaluateAll(images => Promise.all(images.map(image => (image as HTMLImageElement).decode())));
-  await informants.screenshot({
-    path: info.outputPath("discovered-informants.jpg"),
-    style: ".app-footer{visibility:hidden}",
-  });
+  const ruledOutPhoto = mort.locator(".mort-ruled .mort-lineup img").first();
+  await expect(ruledOutPhoto).toHaveCSS("filter", "grayscale(0.86) brightness(0.61)");
   await mort.getByText("Ruled out · 2", { exact: true }).click();
   const afterClue: PlayEvent[] = await page.evaluate(
     (key) => JSON.parse(localStorage.getItem(key)!).playEvents,

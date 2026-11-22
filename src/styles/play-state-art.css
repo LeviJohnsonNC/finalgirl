@@ -118,6 +118,7 @@
   object-position: center 28%;
 }
 .play-workspace .play-state .play-stat-art { object-position: center 45%; }
+.play-workspace .play-state--finalHorrorLevel .play-stat-art { object-position: center 75%; }
 /* The late Bloodlust moon faces sit high in the locked landscape composition. */
 .play-workspace .play-state--bloodlust .play-stat-art { object-position: center top; }
 .play-state--bloodlust[data-bloodlust-stage='unknown'] .play-stat-art {
@@ -241,7 +242,7 @@
   transform: scale(1.12);
 }
 .play-workspace .play-state[data-critical],
-.play-workspace .play-state[data-horror='high'] {
+.play-workspace .play-state[data-horror-level='7'] {
   border-color: #cf7557;
   box-shadow: inset 0 0 18px #a6311833, 0 0 12px #be392318;
 }
