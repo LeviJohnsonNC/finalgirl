@@ -174,3 +174,5 @@
   padding: 0.25rem;
   font-size: 0.85rem;
 }
+
+.girl-rescue-rewards { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,7.5rem),1fr)); gap:.3rem 1.25rem; padding-inline-start:1.1rem; list-style:disc; margin:.55rem 0 .75rem; }

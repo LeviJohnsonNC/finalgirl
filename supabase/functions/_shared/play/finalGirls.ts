@@ -13,6 +13,8 @@ export interface FinalGirlReference {
   startingRule?: string;
   ultimate: string;
   additionalReward: string;
+  dossierRescues?: number;
+  personalItem?: false;
 }
 const horror = 'Reduce Horror by 1';
 const health = 'Recover 1 health';
@@ -25,6 +27,10 @@ const guard = 'Take a Guard card';
 const twoMove = 'Move up to 2 spaces';
 const keepVictim = 'Place the saved Victim on this card.';
 export const FINAL_GIRL_REFERENCES: readonly FinalGirlReference[] = [
+  { name: 'Melanie', startingHealth: 5, ultimateHealth: 5, rescueRewards: [health,health,horror,twoMove,move,guard],
+    dossierRescues: 6, personalItem: false,
+    ultimate: 'Once per Action phase, you may lose 1 Health to deal 2 damage split as you choose among Enemies in your space.',
+    additionalReward: health },
   { name: 'Rena', startingHealth: 6, ultimateHealth: 6, rescueRewards: [guard,topItem,health,horror,move], ultimate: 'Once per Action phase, take one Action card costing 0 Time from your discard pile.', additionalReward: time },
   { name: 'Gwynn', startingHealth: 5, ultimateHealth: 5, rescueRewards: [horror,horror,horror,horror], ultimate: 'Once per turn, reduce Horror by 1 when you make a Horror Roll with only 1 die. You may choose to roll only 1 die regardless of the Horror level.', additionalReward: horror },
   { name: 'Janelle', startingHealth: 5, ultimateHealth: 5, rescueRewards: [horror,move,guard,health], ultimate: 'Place a Tracking marker on 0. After resolving a failure result on a Horror Roll OR saving a Victim, advance it one space to the right. When resolving an Action card that deals damage, you may increase the damage by the marked number, then return the marker to 0. Track values: 0, +1, +2, +3, +5.', additionalReward: horror },

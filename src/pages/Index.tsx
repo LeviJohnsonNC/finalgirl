@@ -1,3 +1,5 @@
+import { BirdsResultFields } from '@/components/BirdsResultFields';
+import { BIRDS, BIRDS_MODULE, birdsEventIncompatible, birdsParent, birdsReasonMatches, birdsResult, birdsReview, birdsState, isBirdsReason, isBirdsTarget, resolveBirdsAction, type BirdsReason, type BirdsReview, type BirdsTarget } from '../../supabase/functions/_shared/play/birds';
 import { FALCONWOOD, falconwoodReview, falconwoodReviewText, falconwoodState, missionByName } from "../../supabase/functions/_shared/play/falconwood";
 import { SLAYER, dimensionLabel } from "@/lib/play/slayer";
 import { sameEndingReview } from '@/lib/endingReview';
@@ -68,6 +70,8 @@ const IndexContent = () => {
   const { user, isLoading: authLoading } = useAuth();
   const owner = user?.id ?? 'guest';
   const sessionOwner = useRef(owner); sessionOwner.current = owner;
+  const [confirmBirds, setConfirmBirds] = useState<{id:string;outcome:'won'|'lost';finish:(reason:BirdsReason)=>void}|null>(null);
+  const [birdsFinishReason, setBirdsFinishReason] = useState<BirdsReason|''>('');
   const [confirmMissionWin,setConfirmMissionWin] = useState<{id:string; finish:() => void}|null>(null);
   const [discardTarget,setDiscardTarget] = useState<{owner:string;game:ActiveGame}|null>(null);
   const [setupReturn,setSetupReturn] = useState<{owner:string;selection:ActiveGame['selection']}|null>(null);
@@ -147,10 +151,15 @@ const IndexContent = () => {
 
   const handleStartGame = (selection: {
     killer: string; location: string; finalGirl: string;
-    setupScenario: string | null; startingEvent: string | null; mission: string | null;
+    setupScenario: string | null; startingEvent: string | null; mission: string | null; birdsRequired?:BirdsTarget;
   }) => {
     if (activeGame) {
       toast.error('Resume or discard the current game before casting a new one.');
+      return;
+    }
+    if (selection.killer === BIRDS && (!isBirdsTarget(selection.birdsRequired) ||
+        birdsEventIncompatible(selection.killer, selection.location, selection.startingEvent))) {
+      toast.error('Choose a Birds difficulty and redraw any incompatible starting Event.');
       return;
     }
     if (selection.location === FALCONWOOD && !missionByName(selection.mission)) {
@@ -192,27 +201,60 @@ const IndexContent = () => {
 
   const handleBackFromNowPlaying = goBack;
 
-  const handleGameEnd = (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, bible?: string, missionConfirmed = false) => {
-    const game = getCurrentGame();
+  const persistBirdsReview = (game:ActiveGame, review:BirdsReview) => {
+    const entries = summarizePlay(game.playEvents).entries;
+    const existing = birdsReview(birdsState(entries));
+    if (existing?.reason === review.reason && existing.required === review.required && existing.rescued === review.rescued) return game;
+    const birdsAction = {command:'review' as const, parent:birdsParent(entries,'review'), review};
+    const changes = resolveBirdsAction(birdsAction,entries);
+    if (!changes || !appendPlayEvent(game.id,newPlayEvent({kind:'module',birdsAction,moduleData:{module:BIRDS_MODULE,changes}}))) {
+      throw new Error('The Birds result could not be saved. Please retry.');
+    }
+    const current = getCurrentGame();
+    if (!current || current.id !== game.id) throw new Error('The Birds result could not be read. Please retry.');
+    return current;
+  };
+
+  const handleGameEnd = (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, bible?: string, missionConfirmed = false, birdsReason?: BirdsReason) => {
+    let game = getCurrentGame();
     if (!game || game.id !== activeGame?.id) return;
     try {
       const grimlashLost=game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(summarizePlay(game.playEvents).entries,'grimlash'));
       const tormentorLost=game.selection.killer==='The Tormentor'&&tormentorFatal(tormentorState(moduleState(summarizePlay(game.playEvents).entries,'tormentor')));
       const resolvedOutcome=tormentorLost||grimlashLost?'lost':game.selection.location==='USS Konrad'&&konradFatal(moduleState(summarizePlay(game.playEvents).entries,'konrad'))?'lost':outcome;
+      let birdsFinish: BirdsReview | undefined;
+      if (game.selection.killer === BIRDS) {
+        const entries = summarizePlay(game.playEvents).entries;
+        const state = birdsState(entries);
+        const previous = birdsReview(state);
+        const trackedWin = isBirdsTarget(state.required) && state.required === state.rescued && (!previous || previous.reason === 'rescued');
+        const reason = birdsReason ?? (resolvedOutcome === 'won' && trackedWin ? 'rescued' : undefined);
+        if (!reason || !birdsReasonMatches(resolvedOutcome,reason)) {
+          setBirdsFinishReason('');
+          setConfirmBirds({id:game.id,outcome:resolvedOutcome,finish:selected=>handleGameEnd(outcome,story,sceneImageUrl,bible,missionConfirmed,selected)});
+          return;
+        }
+        birdsFinish = birdsResult(entries,reason,game.selection.birdsRequired);
+      }
       if (game.selection.location === FALCONWOOD && resolvedOutcome === 'won' && !game.result) {
         const fields = moduleState(summarizePlay(game.playEvents).entries, 'falconwood');
         const confirmed = falconwoodState(fields).complete === true || game.formDraft?.missionCompleted === true;
         if (!confirmed && !missionConfirmed) {
-          setConfirmMissionWin({id:game.id,finish:() => handleGameEnd(outcome, story, sceneImageUrl, bible, true)});
+          setConfirmMissionWin({id:game.id,finish:() => handleGameEnd(outcome, story, sceneImageUrl, bible, true, birdsFinish?.reason)});
           return;
         }
         if (!confirmed && !updateFormDraft(game.id, {missionCompleted:true})) return;
       }
-      const result = game.result ?? recordGame({ outcome:resolvedOutcome, ...game.selection, ...trackedOutcome(game.playEvents),
+      if (birdsFinish) game = persistBirdsReview(game,birdsFinish);
+      const totals = trackedOutcome(game.playEvents);
+      if (birdsFinish) delete totals.killerHealth;
+      const result = game.result ?? recordGame({ outcome:resolvedOutcome, ...game.selection, ...totals,
         introStory: story, sceneImageUrl, visualBible: bible, finalGirlMaxHealth: observedFinalGirlMaxHealth(game.selection.finalGirl,game.playEvents,game.selection.finalGirlStartingHealth,game.selection.killer) }, game.id);
       recordedIds.current.add(game.id);
-      if (checkpoint(game.id, { phase: 'outcome', result, introStory: story, sceneImageUrl, visualBible: bible })) {
+      if (checkpoint(game.id, { phase: 'outcome', result, introStory: story, sceneImageUrl, visualBible: bible,
+        ...(birdsFinish && {formDraft:{...game.formDraft,birdsReason:birdsFinish.reason}}) })) {
         setConfirmMissionWin(null);
+        setConfirmBirds(null);
         setCurrentPage('outcome');
       }
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Could not save your game.'); }
@@ -245,7 +287,7 @@ const IndexContent = () => {
     if(game.selection.killer==='The Tormentor'&&formData.tormentorReview){const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'tormentor');if(tormentorState(state).loss!==formData.tormentorReview.loss){const action={parent:tormentorParent(en),command:'loss' as const,value:formData.tormentorReview.loss};const changes=resolveTormentorAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',tormentorAction:action,moduleData:{module:'tormentor',changes}})))throw new Error('The trap ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The reviewed trap ending is unavailable.');}}
     if(game.selection.killer==='Grimlash'&&formData.grimlashReview) {const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'grimlash');if(state.loss!==formData.grimlashReview.loss){const action={parent:grimlashParent(en),command:'loss' as const,value:formData.grimlashReview.loss,correction:true};const changes=resolveGrimlashAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',grimlashAction:action,moduleData:{module:'grimlash',changes}})))throw new Error('The Madness ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Madness ending is unavailable.');}}
     if(game.selection.location==='Shady Acres'&&formData.childrenOnBoardAtFinish!==undefined){const entries=summarizePlay(game.playEvents).entries,state=moduleState(entries,'shady-acres');if(shadyState(state).finishChildren!==formData.childrenOnBoardAtFinish){const action={parent:shadyParent(entries),command:'finish' as const,value:formData.childrenOnBoardAtFinish};const changes=resolveShadyAction(action,state,entries);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',shadyAction:action,moduleData:{module:'shady-acres',changes}})))throw new Error('The Children observation could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Children observation is unavailable.');}}
-    const {konradReview:_review,childrenOnBoardAtFinish:_children,ratchetManiacCount:_maniacCount,slayerReview,organismLoss:_organismLoss,falconwoodReview:submittedMission,...fields}=formData;
+    const {konradReview:_review,childrenOnBoardAtFinish:_children,ratchetManiacCount:_maniacCount,slayerReview,organismLoss:_organismLoss,falconwoodReview:submittedMission,birdsReview:submittedBirds,...fields}=formData;
     const finishDimension = game.selection.killer === SLAYER ? slayerReview?.finalDimension : undefined;
     const reviewedEntries=summarizePlay(game.playEvents).entries;
     const fatalEnding=game.selection.killer==='The Tormentor'&&tormentorFatal(tormentorState(moduleState(reviewedEntries,'tormentor')))||game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(reviewedEntries,'grimlash'))||game.selection.location==='USS Konrad'&&konradFatal(moduleState(reviewedEntries,'konrad'));
@@ -256,7 +298,16 @@ const IndexContent = () => {
     if (missionReview && outcome === 'won' && missionReview.complete !== true) {
       throw new Error('Confirm the Falconwood mission was completed before recording a win.');
     }
-    const review = { ...formData, outcome, ...(missionReview && {falconwoodReview:missionReview}) };
+    let reviewedBirds: BirdsReview | undefined;
+    if (game.selection.killer === BIRDS) {
+      if (!isBirdsReason(submittedBirds?.reason) || !birdsReasonMatches(outcome,submittedBirds.reason)) {
+        throw new Error('Confirm the physical Birds result before saving.');
+      }
+      reviewedBirds = birdsResult(reviewedEntries,submittedBirds.reason,game.selection.birdsRequired);
+      game = persistBirdsReview(game,reviewedBirds);
+      if (!game.result) throw new Error('The current result is unavailable. Please retry.');
+    }
+    const review = { ...formData, outcome, ...(reviewedBirds && {birdsReview:reviewedBirds}), ...(missionReview && {falconwoodReview:missionReview}) };
     const changed = !sameEndingReview(game.formData, review, game.result.outcome)
       || (game.result.playEvents?.length ?? 0) !== (game.playEvents?.length ?? 0);
     const hasOldEnding = Boolean(game.endingStory || game.posterImageUrl || game.endingNeedsRefresh);
@@ -402,6 +453,7 @@ const IndexContent = () => {
               setupScenario={gameSelection.setupScenario}
               startingEvent={gameSelection.startingEvent}
               mission={gameSelection.mission}
+              birdsRequired={activeGame.selection.birdsRequired}
               falconwoodFresh={activeGame.falconwoodSetupVersion === 1}
               stationFresh={activeGame.stationSetupVersion === 1} mortFresh={activeGame.mortSetupVersion === 1}
               filmId={gameSelection.filmId}
@@ -494,6 +546,23 @@ const IndexContent = () => {
 
   return (
     <div className={`app-shell min-h-screen bg-background relative overflow-x-hidden${isGameSession ? ' game-session' : ''}${isNarrationPage ? ' narration-session' : ''}`}>
+      <AlertDialog open={confirmBirds?.id === activeGame?.id && !!confirmBirds} onOpenChange={open=>{if(!open)setConfirmBirds(null);}}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Review Terror From Above result</AlertDialogTitle>
+            <AlertDialogDescription>Confirm what happened in your physical game.</AlertDialogDescription>
+          </AlertDialogHeader>
+          {confirmBirds && <BirdsResultFields outcome={confirmBirds.outcome} value={birdsFinishReason} onChange={setBirdsFinishReason} />}
+          <AlertDialogFooter>
+            <AlertDialogCancel>Back to Play</AlertDialogCancel>
+            <button type="button" className="min-h-[44px] rounded-md bg-primary px-4 text-primary-foreground disabled:opacity-50"
+              disabled={!confirmBirds || !birdsReasonMatches(confirmBirds.outcome,birdsFinishReason)}
+              onClick={()=>{if(confirmBirds && isBirdsReason(birdsFinishReason)){setConfirmBirds(null);confirmBirds.finish(birdsFinishReason);}}}>
+              Confirm result
+            </button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <AlertDialog open={confirmMissionWin?.id === activeGame?.id && !!confirmMissionWin} onOpenChange={open => {if (!open) setConfirmMissionWin(null);}}>
         <AlertDialogContent>
           <AlertDialogHeader>

@@ -4,9 +4,9 @@ import { getFinalGirlHealth,getLegacyFinalGirlHealth } from './finalGirlHealth';
 import { playStartingValues } from '@/lib/play/defaults';
 import { newPlayEvent,summarizePlay } from '@/lib/play/events';
 describe('photographed character references',()=>{
-  it('retains all 32 verified characters and the printed health exceptions without card images',()=>{
-    expect(FINAL_GIRL_REFERENCES).toHaveLength(32);
-    expect(new Set(FINAL_GIRL_REFERENCES.map(g=>g.name)).size).toBe(32);
+  it('retains all 33 verified characters and the printed health exceptions without card images',()=>{
+    expect(FINAL_GIRL_REFERENCES).toHaveLength(33);
+    expect(new Set(FINAL_GIRL_REFERENCES.map(g=>g.name)).size).toBe(33);
     for(const girl of FINAL_GIRL_REFERENCES){
       expect(girl.ultimate.length).toBeGreaterThan(30);
       expect(girl.additionalReward).toBeTruthy();

@@ -14,6 +14,8 @@ import { useState, useMemo } from 'react';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { useBufferedOutcomeDraft } from './outcome/useBufferedOutcomeDraft';
 import { OutcomeNumberField } from './outcome/OutcomeNumberField';
+import { BirdsResultFields } from './BirdsResultFields';
+import { BIRDS, birdsReasonMatches, birdsResult, birdsReview, birdsState, isBirdsReason, type BirdsReason } from '../../supabase/functions/_shared/play/birds';
 import { poltergeistPower } from '../../supabase/functions/_shared/play/poltergeist';
 import { ENDING_BOARD_SPACES } from '@/data/endingBoardSpaces';
 import { PLAY_ROOMS, selectionItems } from '@/lib/play/catalog';
@@ -86,6 +88,9 @@ export const GameOutcomeForm = ({
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [tormentorLoss,setTormentorLoss]=useDraftField<TormentorLoss>('tormentorLoss',observed.tormentor.loss,initialDraft,onDraftChange);
   const [shipFate,setShipFate]=useDraftField<KonradFate>('konradFate',observed.konrad.fate,initialDraft,onDraftChange);
+  const isBirds = result.killer === BIRDS;
+  const savedBirdsReview = isBirds ? birdsReview(birdsState(entries)) : undefined;
+  const [birdsReason,setBirdsReason] = useDraftField<BirdsReason|''>('birdsReason',savedBirdsReview?.reason ?? '',initialDraft,onDraftChange);
   const [reviewedOutcome,setReviewedOutcome]=useDraftField<'won'|'lost'>('reviewedOutcome',result.outcome,initialDraft,onDraftChange);
   const grimState=observed.grimlash;
   const [grimLoss,setGrimLoss]=useDraftField<GrimlashLoss>('grimlashLoss',(grimState.loss as GrimlashLoss)??'unknown',initialDraft,onDraftChange);
@@ -397,6 +402,7 @@ export const GameOutcomeForm = ({
       highlights = [highlights, ...falconParts].filter(Boolean).join('. ');
     }
     const formData: EndingFormData = {
+      ...(isBirds && isBirdsReason(birdsReason) && {birdsReview:birdsResult(entries,birdsReason,savedBirdsReview?.required ?? undefined)}),
       ...(isFalconwood && {falconwoodReview:falconwoodReview(recordedMission,result.mission,missionCompleted)}),
       ...(isSlayer && {slayerReview: {finalDimension: endingDimension === 'Our Dimension' ? 'our' :
         endingDimension === 'Mirror Dimension' ? 'mirror' : null}}),
@@ -447,10 +453,14 @@ export const GameOutcomeForm = ({
         <p>Review your final totals. Blank fields stay unrecorded.</p>
       </div>
       <section className="outcome-panel outcome-result" aria-label="Game result">
-        <OutcomeSelect label="Game result" value={isWin ? 'won' : 'lost'} onValueChange={value => setReviewedOutcome(value as 'won' | 'lost')}>
+        <OutcomeSelect label="Game result" value={isWin ? 'won' : 'lost'} onValueChange={value => {
+          if (isBirds && !birdsReasonMatches(value as 'won'|'lost',birdsReason)) setBirdsReason('');
+          setReviewedOutcome(value as 'won' | 'lost');
+        }}>
           <option value="won" disabled={fatalEnding}>Won</option>
           <option value="lost">Lost</option>
         </OutcomeSelect>
+        {isBirds && <BirdsResultFields outcome={isWin?'won':'lost'} value={birdsReason} onChange={setBirdsReason} />}
         {fatalEnding && <p role="status">Recorded {[
           fatalMall && 'Savior death', fatalShip && 'ship fate', fatalTormentor && 'trap outcome', fatalGrim && 'Harvest Madness',
         ].filter(Boolean).join(' and ')} requires a loss. Health and victim totals stay as recorded.</p>}
@@ -891,14 +901,14 @@ export const GameOutcomeForm = ({
       <div className="outcome-actions">
         <button
           type="button"
-          disabled={isFalconwood && isWin && missionCompleted !== true}
+          disabled={isFalconwood && isWin && missionCompleted !== true || isBirds && !birdsReasonMatches(isWin?'won':'lost',birdsReason)}
           onClick={handleContinue}
           className="outcome-continue"
         >
           Generate ending <ArrowRight size={21} aria-hidden="true" />
         </button>
         {onSaveResult && (
-          <button type="button" className="outcome-save-only" disabled={isFalconwood && isWin && missionCompleted !== true} onClick={() => {
+          <button type="button" className="outcome-save-only" disabled={isFalconwood && isWin && missionCompleted !== true || isBirds && !birdsReasonMatches(isWin?'won':'lost',birdsReason)} onClick={() => {
             if (textDraft.flush()) onSaveResult(buildFormData());
           }}>Save record only</button>
         )}

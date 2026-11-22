@@ -1,3 +1,4 @@
+import { BIRDS, BIRDS_SETUP, BIRDS_DIFFICULTIES, birdsEventIncompatible, type BirdsTarget } from '../../supabase/functions/_shared/play/birds';
 import { getMissionByName, locationHasMissions } from "@/data/falconwoodMissions";
 import { useState, useCallback, useMemo, useEffect, useRef, useLayoutEffect } from 'react';
 import { AlertTriangle, Play, Loader2, RotateCcw } from 'lucide-react';
@@ -17,7 +18,7 @@ interface CastingSelection {
 }
 
 interface CastingRoomProps {
-  initialSelection?: {killer:string;location:string;finalGirl:string;setupScenario:string|null;startingEvent:string|null;mission:string|null};
+  initialSelection?: {killer:string;location:string;finalGirl:string;setupScenario:string|null;startingEvent:string|null;mission:string|null;birdsRequired?:BirdsTarget};
   onStartGame: (selection: {
     killer: string;
     location: string;
@@ -25,6 +26,7 @@ interface CastingRoomProps {
     setupScenario: string | null;
     startingEvent: string | null;
     mission: string | null;
+    birdsRequired?: BirdsTarget;
   }) => void;
   onGoToArchive?: () => void;
 }
@@ -41,6 +43,12 @@ const CastingRoom = ({ onStartGame, onGoToArchive, initialSelection }: CastingRo
   // Track scenario selections
   const [selectedSetup, setSelectedSetup] = useState<string | null>(initialSelection?.setupScenario ?? null);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(initialSelection?.startingEvent ?? null);
+  const [birdsRequired, setBirdsRequired] = useState<BirdsTarget>(initialSelection?.birdsRequired ?? 2);
+  const isBirds = selection.killer === BIRDS;
+  const incompatibleEvent = birdsEventIncompatible(selection.killer, selection.location, selectedEvent);
+  useEffect(() => {
+    if (incompatibleEvent) setSelectedEvent(null);
+  }, [incompatibleEvent]);
   const [selectedMission, setSelectedMission] = useState<string | null>(initialSelection?.mission ?? null);
   const [previousLocation,setPreviousLocation] = useState(selection.location);
   useEffect(() => {
@@ -121,10 +129,11 @@ const CastingRoom = ({ onStartGame, onGoToArchive, initialSelection }: CastingRo
       location: selection.location,
       finalGirl: selection.finalGirl,
       setupScenario: selectedSetup,
-      startingEvent: selectedEvent,
+      startingEvent: incompatibleEvent ? null : selectedEvent,
+      ...(isBirds && {birdsRequired}),
       mission: locationHasMissions(selection.location) ? selectedMission : null,
     });
-  }, [isComplete, selection, selectedSetup, selectedEvent, selectedMission, onStartGame]);
+  }, [isComplete, selection, selectedSetup, selectedEvent, selectedMission, onStartGame, isBirds, birdsRequired, incompatibleEvent]);
 
   if (isLoading) {
     return (
@@ -233,13 +242,22 @@ const CastingRoom = ({ onStartGame, onGoToArchive, initialSelection }: CastingRo
         <section className="casting-console" aria-label="Scenario and playback">
           <ScenarioDropdowns
             selectedLocation={selection.location}
+            selectedKiller={selection.killer}
             setupValue={selectedSetup}
-            eventValue={selectedEvent}
+            eventValue={incompatibleEvent ? null : selectedEvent}
             missionValue={selectedMission}
             onSetupChange={setSelectedSetup}
             onEventChange={setSelectedEvent}
             onMissionChange={setSelectedMission}
           />
+          {isBirds && <div className="casting-birds-setup">
+            <label className="casting-console-label">Rescue difficulty
+              <select className="casting-console-select" value={birdsRequired} onChange={event=>setBirdsRequired(Number(event.target.value) as BirdsTarget)}>
+                {BIRDS_DIFFICULTIES.map(d=><option key={d.value} value={d.value}>{d.label} · {d.value} {d.value === 1 ? 'Special Victim' : 'Special Victims'}</option>)}
+              </select>
+            </label>
+            <details><summary>Birds setup</summary><p>{BIRDS_SETUP}</p></details>
+          </div>}
           <div className="casting-console-playback">
             <button
               type="button"

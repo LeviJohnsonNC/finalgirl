@@ -24,6 +24,7 @@ import { resolveGrimlashAction, validGrimlashAction, isInitialGrimlash, grimlash
 import { resolveKonradAction, validKonradAction, validKonradObservation, isInitialKonrad, konradParent, type KonradAction } from './konrad.ts';
 import { resolveEvomorphAction, validEvomorphAction, validEvomorphObservation, type EvomorphAction } from './evomorph.ts';
 import { validCreechAction, validCreechObservation, type CreechAction } from './creech.ts';
+import { BIRDS_MODULE, birdsLatest, birdsParent, initialBirds, isBirdsTarget, resolveBirdsAction, sameBirdsChanges, validBirdsAction, type BirdsAction } from './birds.ts';
 import { validPoltergeistObservation, validPoltergeistAction, type PoltergeistAction } from './poltergeist.ts';
 import { validGrovesAction, canLinkGrovesAction, type GrovesAction } from "./groves.ts";
 /** Immutable observations, shared by the app and edge runtime. */
@@ -71,6 +72,7 @@ export const isPermanentMoment = (e: Pick<PlayEvent, "kind" | "momentType">): bo
 /** New milestones carry an explicit lock. Legacy undone observations stay undone. */
 export const isLockedPlayEvent = (e: PlayEvent): boolean =>
   (isPermanentMoment(e) && e.permanent === true) ||
+  (e.moduleData?.module === BIRDS_MODULE && (!e.birdsAction || e.birdsAction.command === 'review')) ||
   (e.kind === "module" && e.moduleData?.module === FALCONWOOD_MODULE && !e.falconwoodAction) ||
   (e.kind === "module" && e.moduleData?.module === STATION_MODULE && !e.stationAction) ||
   (e.kind === "module" && e.moduleData?.module === WOLFE_MODULE && !e.wolfeAction) ||
@@ -142,6 +144,7 @@ export interface PlayEvent extends PlayDetails {
   konradAction?: KonradAction;
   creechAction?: CreechAction;
   poltergeistAction?: PoltergeistAction;
+  birdsAction?: BirdsAction;
   linkedModule?: ModuleObservation;
   /** Provenance for newly recorded Inkanyamba card facts; legacy death hashes stay unchanged. */
   inkanyambaReference?: true;
@@ -261,6 +264,14 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
   if(e.moduleData?.module==="konrad"&&(e.kind!=="module"||!validKonradObservation(e.konradAction,e.moduleData.changes)))return false;
   if(e.evomorphAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='evomorph'||!validEvomorphAction(e.evomorphAction)))return false;
   if(e.moduleData?.module==='evomorph'&&(e.kind!=='module'||!validEvomorphObservation(e.evomorphAction,e.moduleData.changes)))return false;
+  if (e.birdsAction !== undefined || e.moduleData?.module === BIRDS_MODULE) {
+    if (e.moduleData?.module !== BIRDS_MODULE || !validModuleObservation(e.moduleData)) return false;
+    if (e.birdsAction === undefined) {
+      const {required} = e.moduleData.changes;
+      if (e.kind !== 'module' || !isBirdsTarget(required) || !sameBirdsChanges(e.moduleData.changes, initialBirds(required))) return false;
+    } else if (!validBirdsAction(e.birdsAction) ||
+      (e.birdsAction.command === 'save' ? e.kind !== 'saved' || e.quantity !== 1 : e.kind !== 'module')) return false;
+  }
   if(e.moduleData?.module==='poltergeist' && (!validModuleObservation(e.moduleData)||!validPoltergeistObservation(e.poltergeistAction,e.moduleData.changes)))return false;
   if(e.poltergeistAction!==undefined && (e.kind!=='module'||e.moduleData?.module!=='poltergeist'||!validPoltergeistAction(e.poltergeistAction)))return false;
   if (e.grovesReference !== undefined && (e.grovesReference !== true || e.kind !== "moment" || e.momentType !== "finale")) return false;
@@ -355,9 +366,44 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
     validConHistory(log) && validMortHistory(log) && validWolfeHistory(log) && validRatchetHistory(log) && validStationHistory(log) && validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validOrganismHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
-    new Set(log.map((e) => e.id)).size === log.length
+    validBirdsHistory(log) && new Set(log.map((e) => e.id)).size === log.length
   );
 }
+export function canUndoBirds(log: readonly PlayEvent[], target: string, restore = false) {
+  const original = log.find(e => e.id === target);
+  if (original?.moduleData?.module !== BIRDS_MODULE) return true;
+  const action = original.birdsAction;
+  if (!action || action.command === 'review') return false;
+  const summary = summarizePlay(log);
+  if (action.command === 'save' && log.slice(log.indexOf(original)+1)
+      .some(e=>e.kind === 'adjust' && !summary.inactive.has(e.id))) return false;
+  return restore
+    ? summary.inactive.has(target) && birdsParent(summary.entries, action.command) === action.parent &&
+      Boolean(resolveBirdsAction(action, summary.entries))
+    : birdsLatest(summary.entries, action.command)?.id === target;
+}
+
+function validBirdsHistory(log: readonly PlayEvent[]) {
+  const observations = new Set(log.filter(e => e.moduleData?.module === BIRDS_MODULE).map(e => e.id));
+  if (!observations.size) return true;
+  let seeded = false;
+  return log.every((event, index) => {
+    if (event.target && observations.has(event.target)) {
+      if (event.kind === 'undo' || event.kind === 'restore') return canUndoBirds(log.slice(0, index), event.target, event.kind === 'restore');
+      if (event.kind === 'reduce' || event.kind === 'death-count') return false;
+    }
+    if (event.moduleData?.module !== BIRDS_MODULE) return true;
+    if (!event.birdsAction) {
+      if (seeded || log.slice(0,index).some(e => e.birdsAction && e.birdsAction.command !== 'review')) return false;
+      seeded = true;
+      return true;
+    }
+    const {entries, tracked} = summarizePlay(log.slice(0, index));
+    const changes = resolveBirdsAction(event.birdsAction, entries);
+    return Boolean((tracked || event.birdsAction.command === 'review') && changes && sameBirdsChanges(changes, event.moduleData.changes));
+  });
+}
+
 export function canUndoCon(log: readonly PlayEvent[], target: string, restore = false) {
   const index = log.findIndex(e => e.id === target);
   const action = log[index]?.megabgconAction;
@@ -972,7 +1018,10 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       summary.killed = e.killed!;
       summary.round = e.round ?? null;
     }
-    if (!summary.tracked) continue;
+    if (!summary.tracked) {
+      if (e.birdsAction?.command === 'review') summary.entries.push(e);
+      continue;
+    }
     if (isPermanentMoment(e)) {
       if (e.permanent && milestones.has(e.momentType!)) continue;
       milestones.add(e.momentType!);
@@ -1063,6 +1112,7 @@ export function decrementPlay(
     const group = matching.kind === "death-count"
       ? s.entries.find(e => e.id === matching.target && e.kind === "killed")
       : matching;
+    if (group?.birdsAction) return canUndoBirds(log, group.id) ? {kind:'undo',target:group.id} : null;
     if (group?.mortAction) return canUndoMort(log,group.id)?{kind:'undo',target:group.id}:null;
     if (group?.megabgconAction) return canUndoCon(log, group.id) ? { kind: "undo", target: group.id } : null;
     if (group && wolfeCasualties(group.wolfeAction))

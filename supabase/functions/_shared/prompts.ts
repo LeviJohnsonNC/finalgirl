@@ -13,6 +13,7 @@ import { NARRATIVE_QUANTITIES } from './narrativeStyle.ts';
 import { fallbackPosterDesign, parsePosterDesign, posterArtDirection, POSTER_DESIGN_MENU, type PosterDesign } from './posterDesign.ts';
 
 export interface SceneContext {
+  birdsReview?: import("./play/birds.ts").BirdsReview;
   hunterReview?:HunterReview;
   falconwoodReview?: import("./play/falconwood.ts").FalconwoodReview;
   slayerReview?: import("./play/slayer.ts").SlayerReview;

@@ -23,6 +23,7 @@ import {shadyParent,resolveShadyAction} from '@/lib/play/shadyAcres';
 import { grimlashParent, resolveGrimlashAction } from '@/lib/play/grimlash';
 import { konradParent, resolveKonradAction } from '../../supabase/functions/_shared/play/konrad';
 import { evomorphParent, resolveEvomorphAction } from '../../supabase/functions/_shared/play/evomorph';
+import { BIRDS, BIRDS_MODULE, BIRDS_MAX_BLOODLUST, birdsLogBelongsTo, initialBirds, isBirdsTarget, resolveBirdsAction, sameBirdsChanges } from '../../supabase/functions/_shared/play/birds';
 import { poltergeistParent, resolvePoltergeistAction } from '../../supabase/functions/_shared/play/poltergeist';
 import { resolveGrovesAction } from "../../supabase/functions/_shared/play/groves";
 import { useCallback } from 'react';
@@ -74,6 +75,20 @@ export function useActiveGame() {
       // owns uniqueness, including two taps arriving before React renders.
       if (isPermanentMoment(event) && summarizePlay(previous.playEvents).entries.some(entry => entry.kind === 'moment' && entry.momentType === event.momentType)) return previous;
       const log = previous.playEvents ?? [];
+      const isBirds = previous.selection.killer === BIRDS;
+      const firstPlayWrite = isBirds ? log.every(e => e.birdsAction?.command === 'review') : log.length === 0;
+      if (!birdsLogBelongsTo(previous.selection.killer, [event])) return previous;
+      if (isBirds && (event.kind === 'state' && (event.field === 'killerHealth' ||
+          event.field === 'bloodlust' && typeof event.value === 'number' && event.value > BIRDS_MAX_BLOODLUST) ||
+          event.kind === 'moment' && event.momentType === 'killer-revived')) return previous;
+      if (event.birdsAction?.command === 'review') {
+        // A physical result can be recorded without starting a digital Play log.
+        const next = [...log, event];
+        if (!validPlayLog(next)) return previous;
+        applied = true;
+        return {...previous, playEvents:next};
+      }
+      if (event.moduleData?.module === BIRDS_MODULE && !event.birdsAction) return previous;
       const isMort = previous.selection.killer===MORT;
       if (!mortOwnsLog(previous.selection.killer,[event],previous.selection.location) || event.kind==='undo' && !canUndoMort(log,event.target!) || event.kind==='restore' && !canUndoMort(log,event.target!,true)) return previous;
       if (isMort) {
@@ -154,6 +169,8 @@ export function useActiveGame() {
       if(previous.selection.killer==='Poltergeist' && ((event.kind==='state'&&event.field==='killerHealth') || (event.kind==='moment'&&event.momentType==='killer-revived'))) return previous;
       if (event.moduleData?.module === 'groves' && previous.selection.location !== 'Sacred Groves') return previous;
       if (event.linkedModule && !(event.moduleData?.module==='groves'&&previous.selection.location==='Sacred Groves'&&previous.selection.killer==='Inkanyamba') && !(event.moduleData?.module==='creech'&&previous.selection.location==='Creech Manor'&&previous.selection.killer==='Poltergeist')) return previous;
+      if (isBirds && isBirdsTarget(previous.selection.birdsRequired) && event.creechAction?.kind === 'event' &&
+          event.creechAction.id === 'hunters' && event.creechAction.active) return previous;
       if(event.moduleData?.module==='creech'&&(previous.selection.location!=='Creech Manor'||!event.creechAction||event.creechAction.parent!==(log[log.length-1]?.id??'root')))return previous;
       if (event.grovesAction && event.grovesAction.parent !== (log[log.length-1]?.id ?? 'root')) return previous;
       if (previous.selection.location === 'Sacred Groves' && event.kind === 'moment' && event.momentType === 'finale') accepted = {...accepted, grovesReference:true};
@@ -175,9 +192,12 @@ export function useActiveGame() {
         ? [newPlayEvent({ kind: 'start', saved: 0, killed: 0, round: 1 })] : [];
       // Persist setup and the first tap together. Never backfill an existing log:
       // a player may already have resolved, cleared or undone the starting state.
-      const setup = log.length === 0
+      const setup = firstPlayWrite
         ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1, previous.mapleSetupVersion === 1, previous.inkanyambaSetupVersion === 1, previous.grovesSetupVersion === 1, previous.poltergeistSetupVersion === 1, previous.creechSetupVersion === 1, previous.evomorphSetupVersion === 1, previous.konradSetupVersion === 1, previous.grimlashSetupVersion === 1, previous.shadySetupVersion === 1, previous.tormentorSetupVersion === 1, previous.marrekSetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
         : [];
+      if (isBirds && firstPlayWrite && isBirdsTarget(previous.selection.birdsRequired)) {
+        setup.push(newPlayEvent({kind:'module', moduleData:{module:BIRDS_MODULE, changes:initialBirds(previous.selection.birdsRequired)}}));
+      }
       if (log.length === 0 && previous.woodsSetupVersion === 1 && previous.selection.location === WOODS) {
         const changes = initialWoods(previous.selection.startingEvent);
         if (changes) setup.push(newPlayEvent({kind:"module",moduleData:{module:WOODS_MODULE,changes}}));
@@ -211,7 +231,7 @@ export function useActiveGame() {
       if(!log.length&&freshOrganism) setup.push(newPlayEvent({kind:"module",moduleData:{module:ORGANISM_MODULE,changes:initialOrganism()}}));
       const freshIntruders=isIntruders && previous.intrudersSetupVersion===1;
       if (!log.length && freshIntruders) setup.push(newPlayEvent({kind:'module',moduleData:{module:INTRUDER_MODULE,changes:initialIntruders()}}));
-      if (log.length === 0 && (!isMort||freshMort) && (!isRatchetLady||freshRatchet) && (!isIntruders||freshIntruders) && (!isOrganism||freshOrganism) && previous.coreTrackersVersion === 1 && (!isWolf || freshWolf) && (!isHunter || freshHunter) && (!isSlayer || freshSlayer)) {
+      if (firstPlayWrite && (!isBirds || isBirdsTarget(previous.selection.birdsRequired)) && (!isMort||freshMort) && (!isRatchetLady||freshRatchet) && (!isIntruders||freshIntruders) && (!isOrganism||freshOrganism) && previous.coreTrackersVersion === 1 && (!isWolf || freshWolf) && (!isHunter || freshHunter) && (!isSlayer || freshSlayer)) {
         const values = playStartingValues(previous.selection.killer, previous.selection.finalGirl);
         values.finalGirlHealth = previous.selection.finalGirlStartingHealth ?? values.finalGirlHealth;
         for (const field of ['finalGirlHealth', 'killerHealth', 'bloodlust', 'finalHorrorLevel'] as const) {
@@ -263,6 +283,11 @@ export function useActiveGame() {
         accepted={...event,moduleData:{module:'creech',changes:result.changes},...(result.linkedModule?{linkedModule:result.linkedModule}:{})};
         if(!result.linkedModule)delete accepted.linkedModule;
         if(!isPlayEvent(accepted))return previous;
+      }
+      if (event.birdsAction) {
+        const entries = summarizePlay([...log,...baseline,...setup]).entries;
+        const changes = resolveBirdsAction(event.birdsAction, entries);
+        if (!changes || !sameBirdsChanges(changes, event.moduleData!.changes)) return previous;
       }
       if(event.moduleData?.module==='poltergeist') {
         if(previous.selection.killer!=='Poltergeist'||!event.poltergeistAction)return previous;
@@ -371,6 +396,7 @@ export function useActiveGame() {
       if (previous.selection.location === MEGABGCON && !validPlayLog([...log, ...additions])) return previous;
       if (previous.selection.location===WOLFE && !validPlayLog([...log,...additions])) return previous;
       if (isStation && !validPlayLog([...log,...additions])) return previous;
+      if (isBirds && !validPlayLog([...log,...additions])) return previous;
       if (isMort && !validPlayLog([...log,...additions])) return previous;
       if (isRatchetLady && !validPlayLog([...log,...additions])) return previous;
       if (isOrganism && !validPlayLog([...log,...additions])) return previous;

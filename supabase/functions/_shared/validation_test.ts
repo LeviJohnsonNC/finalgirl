@@ -401,3 +401,17 @@ Deno.test('both Ratchet Lady endings accept uncapped observed Health within stor
   assertEquals(SceneImageRequestSchema.safeParse({ ...image, killer: 'Hans', killerHealth: 21 }).success, false);
   assertEquals(EndingRequestSchema.safeParse({ ...prose, killer: { name: 'Hans' }, killerHealth: 21 }).success, false);
 });
+
+Deno.test("Birds review is bounded and belongs to the matching ending", () => {
+  const introStory = "Melanie looked up at the dark sky as birds gathered above the empty houses.";
+  const ending = { introStory, outcome: "lost", killer:{name:"Birds"}, location:{name:"Camp Happy Trails"}, finalGirl:{name:"Melanie"} };
+  const image = { story:introStory, sceneType:"ending", outcome:"lost", killer:"Birds", location:"Camp Happy Trails", finalGirl:"Melanie" };
+  const birdsReview = { reason:"overrun-alive", required:2, rescued:1 };
+  assertEquals(EndingRequestSchema.safeParse({...ending,birdsReview}).success,true);
+  assertEquals(SceneImageRequestSchema.safeParse({...image,birdsReview}).success,true);
+  assertEquals(EndingRequestSchema.safeParse({...ending,birdsReview:{...birdsReview,rescued:3}}).success,false);
+  assertEquals(EndingRequestSchema.safeParse({...ending,killer:{name:"Hans"},birdsReview}).success,false);
+  assertEquals(EndingRequestSchema.safeParse({...ending,outcome:"won",birdsReview}).success,false);
+  assertEquals(SceneImageRequestSchema.safeParse({...image,sceneType:"beginning",birdsReview}).success,false);
+  assertEquals(SceneImageRequestSchema.safeParse({...image,outcome:undefined,birdsReview}).success,false);
+});

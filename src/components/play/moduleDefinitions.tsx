@@ -1,3 +1,6 @@
+import { BIRDS, BIRDS_MODULE, birdsSummary, type BirdsTarget } from '../../../supabase/functions/_shared/play/birds';
+import { BirdsControls } from './BirdsControls';
+import { birdsArt } from './birdsArt';
 import { MEGABGCON, MEGABGCON_MODULE } from "../../../supabase/functions/_shared/play/megabgconCatalog";
 import { MegaBGConControls } from "./MegaBGConControls";
 import { conArt } from "./megabgconArt";
@@ -88,6 +91,7 @@ import { FrightControls } from "./FrightControls";
 
 export interface ControlsProps {
   blocked?: boolean;
+  birdsRequired?: BirdsTarget;
   mission?: string | null;
   falconwoodFresh?: boolean;
   stationFresh?: boolean;
@@ -112,7 +116,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: typeof MEGABGCON_MODULE | typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: typeof BIRDS_MODULE | typeof MEGABGCON_MODULE | typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -206,6 +210,7 @@ export const moduleDefinitions: Definition[] = [
   summary:()=>""},
  {id:WOLFE_MODULE,owner:'location',match:WOLFE,title:'Inside Wolfe Asylum',art:wolfeArt('banner'),capabilities:['character','event'],summary:wolfeSummary,Controls:props=><WolfeControls {...props}/>},
  {id:'creech',owner:'location',match:'Creech Manor',title:'Inside Creech Manor',art:{src:creechBanner,fit:'slice',position:'70% center'},capabilities:['character','event'],summary:state=>`Ladder: ${state.ladder??'not recorded'} · Helicopter: ${state['helicopter.used']===true?'used':state['event.helicopter']==='active'?'available':'not recorded'}`,Controls:props=><CreechControls {...props}/>},
+  {id:BIRDS_MODULE,owner:'killer',match:BIRDS,title:'Terror From Above',art:birdsArt('banner'),capabilities:['objective','minor-effect','reveals'],summary:(state,props)=>birdsSummary(state,props?.birdsRequired),Controls:BirdsControls},
   {id:'poltergeist',owner:'killer',match:'Poltergeist',title:'The Poltergeist',art:moduleBanners.poltergeist,capabilities:['objective','minor-effect','reveals'],summary:state=>`Carolyn: ${state.carolyn===undefined?'not recorded':String(state.carolyn).replace(/-/g,' ')} · Mr. Floppy: ${state.floppy===undefined?'not recorded':String(state.floppy).replace(/-/g,' ')}`,Controls:props=><PoltergeistControls {...props}/>},
   {id:"groves",owner:"location",match:"Sacred Groves",title:"Inside Sacred Groves",art: moduleBanners.groves,capabilities:["character","event"],summary:state=>`Divine Wrath ${typeof state.wrath === "number" ? `${state.wrath}/10` : "not recorded"}${state.finaleRevealed ? " · Finale active" : ""}`,Controls:props=><GrovesControls {...props}/>},
   {id:"inkanyamba",owner:"killer",match:"Inkanyamba",title:"Inkanyamba · The Avenger",art: moduleBanners.inkanyamba,capabilities:["reveals","minor-power"],summary:state=>`Killer Wrath ${typeof state.wrath === "number" ? `${state.wrath}/10` : "not recorded"}`,Controls:props=><InkanyambaControls {...props}/>},

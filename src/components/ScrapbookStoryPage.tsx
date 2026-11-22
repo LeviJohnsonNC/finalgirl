@@ -1,3 +1,5 @@
+import { BIRDS, birdsReview, birdsReviewText, birdsState } from '../../supabase/functions/_shared/play/birds';
+import { summarizePlay } from '@/lib/play/events';
 import {RecordedDeathScenes} from '@/components/play/RecordedDeathScenes';
 import { PlayTimeline } from '@/components/play/PlayTimeline';
 import { GameResult } from '@/hooks/useGameHistory';
@@ -19,6 +21,8 @@ export const ScrapbookStoryPage = ({
   const maxFinalGirlHealth = game.finalGirlMaxHealth ?? getLegacyFinalGirlHealth(game.finalGirl);
   const isWin = game.outcome === 'won';
 
+  const reviewedBirds = game.killer === BIRDS && game.playEvents
+    ? birdsReview(birdsState(summarizePlay(game.playEvents).entries)) : undefined;
   return (
     <div className="story-page-content">
       {/* Date Header */}
@@ -126,7 +130,7 @@ export const ScrapbookStoryPage = ({
               </span>
             </div>
           )}
-          {game.killerHealth !== undefined && game.killerHealth > 0 && (
+          {game.killer !== BIRDS && game.killerHealth !== undefined && game.killerHealth > 0 && (
             <div className="footer-detail">
               <span className="detail-label">Killer HP:</span>
               <span className="detail-value">{game.killerHealth}</span>
@@ -161,6 +165,7 @@ export const ScrapbookStoryPage = ({
           FINAL ROUND // {game.roundsPlayed}
         </p>
       )}
+      {reviewedBirds && <p className="type-caption text-muted-foreground mt-3">{birdsReviewText(reviewedBirds)}</p>}
       {game.playEvents?.length ? (
         <details className="mt-4 border-t border-border pt-3">
           <summary className="font-vhs text-secondary cursor-pointer min-h-[44px]">
