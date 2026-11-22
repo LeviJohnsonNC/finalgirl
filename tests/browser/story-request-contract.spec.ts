@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import ts from 'typescript';
 import { z } from 'zod';
 import * as mort from '../../supabase/functions/_shared/play/mort';
+import * as birds from '../../supabase/functions/_shared/play/birds';
 import * as ratchetLady from '../../supabase/functions/_shared/play/ratchetLady';
 import * as falconwood from '../../supabase/functions/_shared/play/falconwood';
 import { test, expect, activeGame } from './fixtures';
@@ -19,6 +20,7 @@ new Function('require', 'exports', source)((name: string) => {
   if (name.includes('zod')) return { z };
   if (name === './auth.ts') return { corsHeaders: {} };
   if (name === './play/falconwood.ts') return falconwood;
+  if (name === './play/birds.ts') return birds;
   if (name === './play/ratchetLady.ts') return ratchetLady;
   if (name === './play/mort.ts') return mort;
   throw new Error(`Unexpected schema dependency: ${name}`);
