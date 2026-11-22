@@ -99,7 +99,7 @@ export const SelectionSlot = ({
           <SelectTrigger className="flex-1 vcr-button type-label">
             <SelectValue placeholder="SELECT" />
           </SelectTrigger>
-          <SelectContent className="glass-card border-border max-h-60">
+          <SelectContent>
             {options.map((option) => (
               <SelectItem 
                 key={option} 
