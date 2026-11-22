@@ -121,10 +121,10 @@ test('Station renders equipment, roles, allies and Terror crops across states',a
   await statusPick(page, panel.getByRole('combobox',{name:'Total passengers',exact:true}), '1');
   await panel.getByLabel('Doctor aboard').check();
   await expect(panel.getByLabel('Doctor aboard')).toBeChecked();
-  await expect(panel.getByRole('combobox',{name:'Total passengers',exact:true})).toHaveValue('1');
+  await expect(panel.getByRole('combobox',{name:'Total passengers',exact:true})).toHaveText('1');
   for(const ally of STATION_ALLIES) await allies.getByRole('button',{name:new RegExp(ally.name)}).click();
   await expect(panel.getByLabel('Doctor aboard')).toBeChecked();
-  await expect(panel.getByRole('combobox',{name:'Total passengers',exact:true})).toHaveValue('1');
+  await expect(panel.getByRole('combobox',{name:'Total passengers',exact:true})).toHaveText('1');
   const viewports = info.project.name === 'mobile' ? [[390,844],[320,568]] : [[1280,640],[1366,768],[1440,900]];
   for (const [width,height] of viewports) {
     await page.setViewportSize({width,height});
