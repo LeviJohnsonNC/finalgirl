@@ -6,12 +6,11 @@
   --mort-panel: #171316;
   --mort-dim: #c5ab8c;
 }
-.mort-play h3,
-.mort-play h4 {
+.mort-play :is(h3, h4):not(:where(.module-reveal-cards *, .module-minor-section *)) {
   font-family: var(--font-display, Georgia, serif);
   color: #f4e6d0;
 }
-.mort-play h4 {
+.mort-play h4:not(:where(.module-reveal-cards *, .module-minor-section *)) {
   font-size: 1.07rem;
 }
 .mort-heading,
@@ -34,8 +33,7 @@
   line-height: 1;
 }
 .mort-heading small,
-.mort-finale small,
-.mort-power-hero small {
+.mort-finale small {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -74,13 +72,12 @@
 .mort-clue-strip button {
   margin-left: auto;
 }
-.mort-play button:not(.mort-portrait),
+.mort-play button:not(.mort-portrait, :where(.module-reveal-cards *, .module-minor-section *)),
 .mort-editor summary,
-.mort-ruled summary,
-.mort-secondary summary {
+.mort-ruled summary {
   min-height: 44px;
 }
-.mort-play button:not(.mort-portrait) {
+.mort-play button:not(.mort-portrait, :where(.module-reveal-cards *, .module-minor-section *)) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -93,7 +90,7 @@
   font-size: 0.84rem;
   line-height: 1.25;
 }
-.mort-play button:not(.mort-portrait):hover:not(:disabled) {
+.mort-play button:not(.mort-portrait, :where(.module-reveal-cards *, .module-minor-section *)):hover:not(:disabled) {
   background-color: #473034;
 }
 .mort-play button:disabled {
@@ -181,8 +178,7 @@
   border-color: #514743;
 }
 .mort-ruled summary,
-.mort-editor summary,
-.mort-secondary summary {
+.mort-editor summary {
   padding: 0.7rem 0;
   cursor: pointer;
   color: #e7c5a5;
@@ -434,8 +430,7 @@
 .mort-reveal-actions {
   margin-bottom: 0.65rem;
 }
-.mort-finale,
-.mort-power-hero {
+.mort-finale {
   position: relative;
   display: grid;
   align-items: stretch;
@@ -450,8 +445,7 @@
 .mort-finale {
   animation: mort-develop 0.45s ease-out both;
 }
-.mort-finale > img,
-.mort-power-hero > img {
+.mort-finale > img {
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -462,16 +456,14 @@
   object-position: center 42%;
   z-index: -2;
 }
-.mort-finale::before,
-.mort-power-hero::before {
+.mort-finale::before {
   content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(90deg, #171117 29%, #171117ee 40%, #17111700 73%);
   z-index: -1;
 }
-.mort-finale-copy,
-.mort-power-hero > div {
+.mort-finale-copy {
   grid-column: 1 / 2;
   padding: clamp(1rem, 3.5vw, 3rem);
   align-self: center;
@@ -481,8 +473,7 @@
   line-height: 1;
   margin: 0.5rem 0;
 }
-.mort-finale-copy p,
-.mort-power-hero p {
+.mort-finale-copy p {
   font-size: 0.86rem;
   color: #f0d4b8;
 }
@@ -503,45 +494,6 @@
   display: grid;
   gap: 0.24rem;
 }
-.mort-secondary {
-  border-top: 1px solid #46352d;
-}
-.mort-power-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.55rem;
-}
-.mort-play button.mort-power-choice {
-  padding: 0;
-  overflow: hidden;
-  justify-content: flex-start;
-  text-align: left;
-}
-.mort-power-choice img {
-  height: 3.5rem;
-  width: 28%;
-  object-fit: cover;
-  filter: saturate(0.58) brightness(0.72);
-}
-.mort-power-choice[aria-pressed="true"] img {
-  filter: none;
-}
-.mort-power-choice span {
-  padding: 0.2rem 0.35rem;
-}
-.mort-power-choice span small {
-  display: block;
-  color: #e5b58e;
-}
-.mort-power-hero {
-  min-height: 9rem;
-}
-.mort-power-hero > div {
-  padding: 1rem;
-}
-.mort-power-hero h4 {
-  margin: 0.4rem 0;
-}
 @keyframes mort-develop {
   from {
     opacity: 0.4;
@@ -561,7 +513,7 @@
   }
   .mort-fields,
   .mort-side,
-  .mort-power-grid {
+  .mort-play .module-minor-grid {
     grid-template-columns: minmax(0, 1fr);
   }
   .mort-clue-strip button {

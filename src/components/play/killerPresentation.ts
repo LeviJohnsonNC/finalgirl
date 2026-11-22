@@ -81,7 +81,12 @@ export function illustratedKillerCards(
     const cards = power ? MORT_POWERS : MORT_SUSPECTS.map(suspect => ({
       id: suspect.id, name: `Mort as ${suspect.name}`, effect: MORT_FINALE_GUIDANCE[suspect.id],
     }));
-    return cards.map(card => ({ ...card, art:{src:mortPhoto(power?card.id:`${card.id}-finale`)} }))
+    return cards.map(card => {
+      const art = { src: mortPhoto(power ? card.id : `${card.id}-finale`) };
+      return power
+        ? { ...card, art: { ...art, fit: "slice" as const, position: "center 68%" }, heroArt: art }
+        : { ...card, art };
+    })
       .sort((a,b)=>a.name.localeCompare(b.name));
   }
   if (killer === RATCHET_LADY) return [...(power ? RATCHET_POWERS : RATCHET_FINALES)]

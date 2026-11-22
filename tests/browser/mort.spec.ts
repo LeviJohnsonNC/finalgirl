@@ -8,6 +8,8 @@ import {
 } from "../../src/lib/play/events";
 import {
   MORT,
+  MORT_MINORS,
+  MORT_POWERS,
   MORT_SUSPECTS,
   MORT_TRAITS,
   mortState,
@@ -406,6 +408,65 @@ test("every suspect has a dossier and its own temporary Active Killer portrait",
 
   expect(activeUrls.size).toBe(10);
   expect(profileUrls.size).toBe(10);
+});
+
+test("Mort uses the shared compact and revealed power cards on laptop and phone", async ({ page, archive }, info) => {
+  const mobile = info.project.name === "mobile";
+  await page.setViewportSize(mobile
+    ? { width: 320, height: 568 }
+    : { width: 1366, height: 768 });
+  await archive.install(page, { draft: newGame });
+  await page.goto("/");
+  await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
+  await openModule(page, "mort");
+  const mort = page.getByRole("group", { name: "Mort investigation" });
+  const minors = mort.locator(".module-minor-section");
+  await expect(minors).not.toHaveAttribute("open", "");
+  await minors.getByText("Minor Dark Powers", { exact: true }).click();
+  await expect(minors.locator(".module-minor-choice")).toHaveCount(MORT_MINORS.length);
+  await expect(minors.locator(".module-minor-choice img").first()).toHaveCSS("width", mobile ? "96px" : "150px");
+  const capture = async (section: typeof minors, filename: string) => {
+    for (const image of await section.locator("img").all()) {
+      await image.scrollIntoViewIfNeeded();
+      await image.evaluate((img) => (img as HTMLImageElement).decode());
+    }
+    await section.screenshot({ path: info.outputPath(`${filename}.jpg`), animations: "disabled", style: ".app-footer{visibility:hidden}" });
+  };
+  await capture(minors, "minor-choices");
+  await minors.getByRole("button", { name: "Reveal Quick Slash", exact: true }).click();
+  const quick = minors.getByRole("article", { name: "Quick Slash" });
+  await expect(quick.locator(".module-minor-scene")).toBeVisible();
+  await expect(quick.locator(".play-health-tokens")).toHaveCount(0);
+  await expect(minors.locator(".module-minor-choice")).toHaveCount(0);
+  await capture(quick, "minor-active");
+  await minors.getByRole("button", { name: "Add another Minor Power" }).click();
+  await minors.getByRole("button", { name: "Reveal Stockholm Syndrome" }).click();
+  await expect(minors.locator(".module-minor-scene")).toHaveCount(2);
+  await quick.getByRole("button", { name: "Discard Quick Slash" }).click();
+  await expect(minors.locator(".module-minor-scene")).toHaveCount(1);
+
+  await mort.locator(".module-card-section > summary").click();
+  const panel = mort.getByRole("region", { name: "Dark Power selection", exact: true });
+  const cards = panel.locator(".module-killer-card");
+  await expect(cards).toHaveCount(MORT_POWERS.length);
+  await expect(cards.locator("img").first()).toHaveCSS("height", mobile ? "76px" : "86px");
+  await expect(cards.locator("img").first()).toHaveCSS("object-fit", "cover");
+  await capture(panel, "power-choices");
+  await panel.getByRole("button", { name: "Choose Snitches Get Stitches" }).click();
+  const revealed = panel.locator(".module-revealed-hero");
+  await expect(revealed).toHaveAttribute("data-epic", "true");
+  await expect(cards).toHaveCount(0);
+  await capture(revealed, "power-revealed");
+
+  const moments = page.getByRole("region", { name: "Remember this", exact: true });
+  await moments.getByRole("button", { name: "Dark Power", exact: true }).click();
+  const chooser = moments.getByRole("region", { name: "Dark Power selection", exact: true });
+  await expect(chooser.locator(".module-revealed-hero h4")).toHaveText("Snitches Get Stitches");
+  await chooser.getByRole("button", { name: "Clear Dark Power card name" }).click();
+  await expect(cards).toHaveCount(MORT_POWERS.length);
+  await chooser.getByRole("button", { name: "Choose Toxic Whispers" }).click();
+  await expect(revealed.locator("h4")).toHaveText("Toxic Whispers");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width);
 });
 
 test("Mort early Finale handles 26 Health and a mixed-location Minor Power", async ({

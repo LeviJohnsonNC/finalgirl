@@ -21,7 +21,7 @@ import "@/styles/play-controls.css";
 import "@/styles/cinematic-controls.css";
 
 type CardType = "dark-power" | "finale";
-function Chooser({
+export function KillerCardChoices({
   cards,
   selected,
   disabled,
@@ -144,7 +144,7 @@ export function KillerCards({
               {killer === SLAYER && selected?.name === SLAYER_COLLAPSE && type === "finale" &&
                 <SlayerCollapseControl events={events} onEvent={onEvent} disabled={disabled} />}
               {!selected && (
-                <Chooser
+                <KillerCardChoices
                   cards={cards}
                   selected={selected}
                   disabled={(name) =>
@@ -173,7 +173,7 @@ export function KillerCards({
           <h3>Second Dark Power</h3>
           {second && <RevealedCard card={second} label="Second Dark Power" />}
           {(!second || editingSecond) && (
-            <Chooser
+            <KillerCardChoices
               cards={secondCards}
               selected={second}
               second
