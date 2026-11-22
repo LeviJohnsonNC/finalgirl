@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
 import {
   initialStation, resolveStationAction, stationParent, stationState, stationSummary,
   STATION_MODULE, STATION_POSITIONS, STATION_ROLES, STATION_ROUTE,
@@ -8,6 +7,7 @@ import {
 import { newPlayEvent, summarizePlay } from '@/lib/play/events';
 import { moduleState } from '@/lib/play/modules';
 import { ModuleArtwork } from './ModuleArtwork';
+import { PlaySelect } from './PlaySelect';
 import type { ControlsProps } from './moduleDefinitions';
 import { useModuleRecord } from './useModuleRecord';
 import { StationAllies } from './StationAllies';
@@ -32,11 +32,10 @@ function PassengerControls({state, count, roles, onCount, onRoles}: {
     <label className="station-passenger-count">
       <span>Total passengers</span>
       <span className="station-passenger-field">
-        <select value={count??''} onChange={e=>onCount(e.target.value===''?null:Number(e.target.value))}>
+        <PlaySelect aria-label="Total passengers" value={String(count ?? '')} onChange={e=>onCount(e.target.value===''?null:Number(e.target.value))}>
           <option value="">Unrecorded</option>
           {[0,1,2,3].map(n=><option key={n} value={n}>{n}</option>)}
-        </select>
-        <ChevronDown size={16} aria-hidden="true" />
+        </PlaySelect>
       </span>
     </label>
     {STATION_ROLES.filter(role=>state.roles?.[role.id]==='present').map(role=>
@@ -53,9 +52,9 @@ function FlightCorrection({state, submit}: {state: StationState; submit: (comman
   const hasPassengers=position!=='helipad'&&(position!=='airport'||pending);
   const selectedRoles=hasPassengers?roles.filter(id=>state.roles?.[id]==='present'):[];
   return <div className="station-edit">
-    <label>Position<select value={position} onChange={e=>{setPosition(e.target.value as Flight['position']);setPending(false);}}>
+    <label>Position<PlaySelect aria-label="Position" value={position} onChange={e=>{setPosition(e.target.value as Flight['position']);setPending(false);}}>
       {STATION_ROUTE.map(id=><option key={id} value={id}>{STATION_POSITIONS[id]}</option>)}
-    </select></label>
+    </PlaySelect></label>
     {position==='airport'&&<label className="station-check"><input type="checkbox" checked={pending} onChange={e=>setPending(e.target.checked)}/> Rescue effects pending</label>}
     {hasPassengers&&<PassengerControls state={state} count={count} roles={selectedRoles} onCount={setCount} onRoles={setRoles}/>}
     <div className="station-actions">

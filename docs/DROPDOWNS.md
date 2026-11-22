@@ -1,6 +1,8 @@
 # Product-wide dropdown behavior
 
-The shared Select renderer alphabetizes displayed option labels, using an English, case-insensitive natural comparison. Selected values, catalog data and saved identifiers are unchanged. This covers setup scenarios, starting events, missions, legacy selection slots, optional Play card reveals, outcome status/identity choices and the mobile Rules chapter picker. Empty/unknown choices sort by their visible labels too. Rules chapters retain their reading order in the main index and previous/next navigation.
+Use `Select` from `@/components/ui/select` for fixed choices, or `PlaySelect` and `OutcomeSelect` in their respective forms. Use `PlaySearch` for search within a catalog and `SuggestionInput` for editable text with suggestions. Action menus use `DropdownMenu` or `ContextMenu` from `@/components/ui`. These components carry the app's styling into the popup. CI lint rejects native select and datalist controls and direct imports of the Radix menu primitives in app code.
+
+The shared Select renderer alphabetizes displayed option labels, using an English, case-insensitive natural comparison. Empty and unknown choices sort by their visible labels too. Set `sortOptions={false}` on `SelectContent` when the order carries meaning, as with Birds rescue difficulty and the Special Rules jump menu. Rules chapters retain their reading order in the main index and previous/next navigation.
 
 Play's searchable pickers use the same ordering before and after filtering. Clear selection and custom-entry choices participate in that order. Search is available, but browsing the full list does not require it. The popover owns its modal scroll lock so an enclosing death dialog cannot cancel its wheel events.
 

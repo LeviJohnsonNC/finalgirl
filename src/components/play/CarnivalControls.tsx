@@ -18,6 +18,7 @@ import {
 import { IllustratedTile } from "./IllustratedTile";
 import type { ModuleArt } from "./ModuleArtwork";
 import { PlaySelect } from "./PlaySelect";
+import { SuggestionInput } from "@/components/ui/suggestion-input";
 import boardArt from "@/assets/play/carnival/board-traps.webp";
 import itemArt from "@/assets/play/carnival/item-traps.webp";
 import peopleArt from "@/assets/play/carnival/companions.webp";
@@ -69,6 +70,24 @@ const statuses: Record<string, string> = {
   active: "Active",
   cleared: "Cleared",
 };
+
+function TrapSpaceNote({ name, space, onSave }: {
+  name: string;
+  space: string;
+  onSave: (value: string | null) => void;
+}) {
+  const [draft, setDraft] = useState(space);
+  return <div className="carnival-space-note">
+    <span>Space note</span>
+    <SuggestionInput label={`${name} space`} value={draft} onChange={setDraft}
+      options={CARNIVAL_ROOMS} maxLength={100} placeholder="Attraction or board-space description"
+      onCommit={value => {
+        const note = value.trim();
+        if (note !== space) onSave(note || null);
+      }} />
+  </div>;
+}
+
 export function CarnivalControls({
   events,
   onEvent,
@@ -239,24 +258,9 @@ export function CarnivalControls({
                   </PlaySelect>
                 </label>
                 {placed && (
-                  <label>
-                    Space note
-                    <input
-                      aria-label={`${trap.name} space`}
-                      defaultValue={String(
-                        state[`trap.${trap.id}.space`] ?? "",
-                      )}
-                      key={String(state[`trap.${trap.id}.space`] ?? "")}
-                      list="carnival-spaces"
-                      maxLength={100}
-                      placeholder="Attraction or board-space description"
-                      onBlur={(e) => {
-                        const value = e.target.value.trim();
-                        if (value !== (state[`trap.${trap.id}.space`] ?? ""))
-                          record({ [`trap.${trap.id}.space`]: value || null });
-                      }}
-                    />
-                  </label>
+                  <TrapSpaceNote key={String(state[`trap.${trap.id}.space`] ?? "")}
+                    name={trap.name} space={String(state[`trap.${trap.id}.space`] ?? "")}
+                    onSave={space => record({ [`trap.${trap.id}.space`]: space })} />
                 )}
                 <p className="carnival-help">
                   Only correct a mistaken placement here. Discarding or
@@ -267,11 +271,6 @@ export function CarnivalControls({
           );
         })}
       </div>
-      <datalist id="carnival-spaces">
-        {CARNIVAL_ROOMS.map((room) => (
-          <option key={room} value={room} />
-        ))}
-      </datalist>
       {state.lastTerrorTrap && (
         <p className="carnival-help" role="status">
           Latest Terror Trap card:{" "}

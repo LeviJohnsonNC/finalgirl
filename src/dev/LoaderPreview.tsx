@@ -4,6 +4,7 @@ import { StoryFilmLoader } from '@/components/loaders/StoryFilmLoader';
 import { NarrationPhoto } from '@/components/NarrationPhoto';
 import mall from '@/assets/locations/ai/sunnydaze-mall.png';
 import { FEATURE_FILMS } from '@/types/gameData';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import '@/styles/narration.css';
 import '@/styles/ending.css';
 
@@ -19,10 +20,13 @@ export default function LoaderPreview() {
   return <main style={{ minHeight: '100vh', background: '#090807', color: '#dfd4c0', padding: 32 }}>
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 28 }}>
       <strong>Loader material study</strong>
-      <label>Location <select aria-label="Location" value={location} onChange={event => setLocation(event.target.value)}>
-        <option value="">Neutral leader</option>
-        {locations.map(name => <option key={name}>{name}</option>)}
-      </select></label>
+      <Select value={location || 'neutral'} onValueChange={value => setLocation(value === 'neutral' ? '' : value)}>
+        <SelectTrigger aria-label="Location" className="w-auto"><SelectValue /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="neutral">Neutral leader</SelectItem>
+          {locations.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+        </SelectContent>
+      </Select>
       {[undefined, 0, .48, .89, .99, 1.16, 2, 8, 20, 180, 300].map(t => <button key={t ?? 'live'} onClick={() => setTime(t)}>{t === undefined ? 'Live' : `${t}s`}</button>)}
       <button onClick={() => setKey(k => k + 1)}>Restart</button>
       <button onClick={() => { setGenerating(false); setUrl(mall); }}>Complete image</button>

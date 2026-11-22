@@ -6,6 +6,7 @@ import {
 import { EventControl } from './EventControl';
 import { IllustratedTile } from './IllustratedTile';
 import { ModuleArtwork } from './ModuleArtwork';
+import { PlaySelect } from './PlaySelect';
 import { stationArt } from './stationArt';
 
 type Props = {state:StationState; commit:(action:StationCommand)=>boolean};
@@ -43,10 +44,10 @@ export function StationEnvironment({state,commit}:Props) {
         <IllustratedTile className="module-control-tile" title="Lab wall" status={state.breach?breachLabels[state.breach]:'Breach status unrecorded'}
           art={breached?stationArt.labBreached:stationArt.labIntact}
           aria-expanded={labOpen} onClick={()=>setLabOpen(!labOpen)}/>
-        {labOpen && <div className="station-edit"><label>Lab opening<select value={state.breach??''}
+        {labOpen && <div className="station-edit"><label>Lab opening<PlaySelect aria-label="Lab opening" value={state.breach??''}
           onChange={e=>commit({kind:'breach',status:(e.target.value||null) as NonNullable<StationState['breach']>|null})}>
           <option value="">Unrecorded</option>{Object.entries(breachLabels).map(([id,label])=><option key={id} value={id}>{label}</option>)}
-        </select></label></div>}
+        </PlaySelect></label></div>}
       </div>
       <div className="station-mechanic">
         <IllustratedTile className="module-control-tile" title="Skidozer" status={state.skidozer
@@ -55,14 +56,14 @@ export function StationEnvironment({state,commit}:Props) {
           art={state.skidozer==='in-use'?stationArt.skidozerInUse:stationArt.skidozerParked}
           aria-expanded={skidozerOpen} onClick={()=>setSkidozerOpen(!skidozerOpen)}/>
         {skidozerOpen && <div className="station-edit">
-          <label>Skidozer state<select value={state.skidozer??''}
+          <label>Skidozer state<PlaySelect aria-label="Skidozer state" value={state.skidozer??''}
             onChange={e=>{const status=(e.target.value||null) as NonNullable<StationState['skidozer']>|null;commit({kind:'skidozer',status,space:status?state.skidozerSpace:undefined});}}>
             <option value="">Unrecorded</option><option value="parked">Parked</option><option value="in-use">In use</option>
-          </select></label>
-          {state.skidozer && <label>Outdoor position<select value={state.skidozerSpace??''}
+          </PlaySelect></label>
+          {state.skidozer && <label>Outdoor position<PlaySelect aria-label="Outdoor position" value={state.skidozerSpace??''}
             onChange={e=>commit({kind:'skidozer',status:state.skidozer!,space:(e.target.value||undefined) as StationState['skidozerSpace']})}>
             <option value="">Unrecorded</option>{STATION_OUTDOORS.map(space=><option value={space} key={space}>{STATION_SPACES[space]}</option>)}
-          </select></label>}
+          </PlaySelect></label>}
         </div>}
       </div>
       <div className="station-mechanic">
@@ -71,13 +72,13 @@ export function StationEnvironment({state,commit}:Props) {
           : state.cache==='hidden'?'Cache placed':state.cache==='unsearched'?'Cache absent':'Status unrecorded'}
           art={state.cache==='revealed'?stationArt.armory:stationArt.cache} aria-expanded={cacheOpen} onClick={()=>setCacheOpen(!cacheOpen)}/>
         {cacheOpen && <div className="station-edit">
-          <label>Cache state<select value={state.cache??''} onChange={e=>commit({kind:'cache',status:(e.target.value||null) as NonNullable<StationState['cache']>|null})}>
+          <label>Cache state<PlaySelect aria-label="Cache state" value={state.cache??''} onChange={e=>commit({kind:'cache',status:(e.target.value||null) as NonNullable<StationState['cache']>|null})}>
             <option value="">Unrecorded</option><option value="unsearched">Absent</option><option value="hidden">Cache placed</option><option value="revealed">Armory revealed</option>
-          </select></label>
-          {state.cache==='revealed' && <label>Armory position<select value={state.armorySpace??''}
+          </PlaySelect></label>
+          {state.cache==='revealed' && <label>Armory position<PlaySelect aria-label="Armory position" value={state.armorySpace??''}
             onChange={e=>commit({kind:'cache',status:'revealed',space:(e.target.value||undefined) as StationState['armorySpace']})}>
             <option value="">Unrecorded</option>{STATION_OUTDOORS.filter(space=>space!=='helipad').map(space=><option value={space} key={space}>{STATION_SPACES[space]}</option>)}
-          </select></label>}
+          </PlaySelect></label>}
         </div>}
       </div>
     </div>

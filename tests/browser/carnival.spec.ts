@@ -135,6 +135,11 @@ test("persistent trap placement survives cancellation, rounds, reload and Undo w
     .getByRole("button", { name: "Place Acid Pitfall Trap", exact: true })
     .click();
   const note = p.getByLabel("Acid Pitfall Trap space", { exact: true });
+  await note.click();
+  const spaces = page.getByRole("listbox", { name: "Acid Pitfall Trap space suggestions" });
+  await expect(spaces.locator("..")).toHaveClass(/themed-search-menu/);
+  await spaces.getByRole("option", { name: "Animal Cages", exact: true }).click();
+  await expect(note).toHaveValue("Animal Cages");
   await note.fill("Outer path by Animal Cages");
   await note.blur();
   await p

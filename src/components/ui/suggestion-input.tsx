@@ -5,11 +5,13 @@ import { compareDropdownLabels } from '@/lib/dropdownOrder';
 import '@/styles/dropdowns.css';
 
 /** Editable combobox with board suggestions and a free-text value. */
-export function SuggestionInput({ label, value, onChange, options, placeholder, browseLabel }: {
+export function SuggestionInput({ label, value, onChange, onCommit, options, maxLength, placeholder, browseLabel }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  onCommit?: (value: string) => void;
   options: readonly string[];
+  maxLength?: number;
   placeholder?: string;
   browseLabel?: string;
 }) {
@@ -30,6 +32,7 @@ export function SuggestionInput({ label, value, onChange, options, placeholder, 
 
   const pick = (option: string) => {
     onChange(option);
+    onCommit?.(option);
     setOpen(false);
     setQuery('');
     setActive(-1);
@@ -42,11 +45,13 @@ export function SuggestionInput({ label, value, onChange, options, placeholder, 
 
   return <Popover.Root open={open} onOpenChange={setOpen}>
     <Popover.Anchor asChild>
-      <div className="themed-suggestion-control">
+      <div className="themed-suggestion-control" onBlur={event => {
+        if (!event.currentTarget.contains(event.relatedTarget)) onCommit?.(value);
+      }}>
         <input ref={input} type="text" role="combobox" aria-label={label}
           aria-expanded={open} aria-autocomplete="list" aria-controls={open ? listId : undefined}
           aria-activedescendant={open && active >= 0 ? `${listId}-${active}` : undefined}
-          autoComplete="off" value={value} placeholder={placeholder}
+          autoComplete="off" value={value} maxLength={maxLength} placeholder={placeholder}
           onChange={event => {
             onChange(event.target.value);
             setQuery(event.target.value);

@@ -7,13 +7,14 @@ import { KillerCards } from './KillerCards';
 import { MinorPowerControl } from './MinorPowerControl';
 import { MinorPowerGroup } from './MinorPowerGroup';
 import { ModuleArtwork } from './ModuleArtwork';
+import { PlaySelect } from './PlaySelect';
 import { slayerArt } from './slayerArt';
 import { useSlayerRecord } from './useSlayerRecord';
 import type { ControlsProps } from './moduleDefinitions';
 import '@/styles/play-slayer.css';
 
 const dimensions = ['our','mirror'] as const;
-const DimensionOptions = () => <>{dimensions.map(value => <option key={value} value={value}>{dimensionLabel(value)}</option>)}</>;
+const dimensionOptions = dimensions.map(value => <option key={value} value={value}>{dimensionLabel(value)}</option>);
 
 export function SlayerControls({events, onEvent, blocked, location, mission}: ControlsProps) {
   const {entries, state, act, message} = useSlayerRecord(events, onEvent, blocked);
@@ -62,12 +63,12 @@ export function SlayerControls({events, onEvent, blocked, location, mission}: Co
         <summary>Record current dimension</summary>
         <div className="slayer-actions">
           {(['girl','slayer'] as const).filter(who => !state[who]).map(who => <label key={who}>{who === 'girl' ? 'Final Girl' : 'Slayer'}
-            <select aria-label={who === 'girl' ? 'Final Girl dimension' : 'Slayer dimension'} disabled={blocked}
+            <PlaySelect aria-label={who === 'girl' ? 'Final Girl dimension' : 'Slayer dimension'} disabled={blocked}
               value={state[who] ?? ''} onChange={e => {
                 if (isDimension(e.target.value)) act({command:'set-dimension',who,to:e.target.value});
               }}>
-              <option value="" disabled>Unrecorded</option><DimensionOptions/>
-            </select>
+              <option value="" disabled>Unrecorded</option>{dimensionOptions}
+            </PlaySelect>
           </label>)}
         </div>
       </details>}
@@ -85,10 +86,10 @@ export function SlayerControls({events, onEvent, blocked, location, mission}: Co
         {state.markers[openMarker].dimension === 'our' && <button type="button" className="slayer-primary"
           disabled={blocked} onClick={() => act({command:'pull',id:openMarker})}>Pulled into Mirror</button>}
         <label>Correct marker dimension
-          <select aria-label="Special Victim dimension" disabled={blocked} value={state.markers[openMarker].dimension ?? ''}
+          <PlaySelect aria-label="Special Victim dimension" disabled={blocked} value={state.markers[openMarker].dimension ?? ''}
             onChange={e => act({command:'set-marker',id:openMarker,to:isDimension(e.target.value) ? e.target.value : null})}>
-            <option value="">Unrecorded</option><DimensionOptions/>
-          </select>
+            <option value="">Unrecorded</option>{dimensionOptions}
+          </PlaySelect>
         </label>
         <button type="button" className="module-unnamed" disabled={blocked} onClick={() => {
           if (act({command:'untrack-marker',id:openMarker})) setOpenMarker(null);

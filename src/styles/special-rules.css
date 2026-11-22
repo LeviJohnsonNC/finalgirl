@@ -128,29 +128,13 @@
 .special-rules-dialog .special-rules-tabs .binder-tab { min-height: 44px; }
 
 .special-rules-topics {
-  position: relative;
   flex: 1 1 108px;
   min-width: 0;
   max-width: 240px;
   margin-left: auto;
-}
-
-.special-rules-topics select {
-  appearance: none;
-  width: 100%;
-  min-height: 44px;
-  padding: 8px 28px 8px 10px;
-  border: 1px solid hsl(var(--rules-muted) / .35);
-  border-radius: 1px;
-  background: hsl(var(--rules-surface));
-  color: hsl(var(--rules-ink));
-  color-scheme: dark;
-  cursor: pointer;
   font: 700 14px/1.2 var(--font-rules-title);
   letter-spacing: .04em;
 }
-
-.special-rules-topics svg { position: absolute; inset: 0 10px 0 auto; margin: auto 0; pointer-events: none; }
 
 .special-rules-scroll {
   flex: 1 1 auto;
@@ -271,7 +255,7 @@
   font: 400 11px/1.55 var(--font-rules-label);
 }
 
-.special-rules-dialog :is(button, select, [tabindex]):focus-visible {
+.special-rules-dialog :is(button, [tabindex]):focus-visible {
   outline: 2px solid hsl(var(--secondary));
   outline-offset: -3px;
 }

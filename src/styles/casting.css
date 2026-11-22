@@ -300,12 +300,12 @@
 }
 
 .casting-birds-setup { display:grid; grid-column:1 / -1; align-items:start; gap:.3rem 1rem; grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr)); padding:.25rem 0; }
-.casting-birds-setup label { flex-wrap:wrap; }
-.casting-birds-setup select { display:block; width:100%; }
+.casting-birds-setup .casting-console-select { height:auto; min-height:48px; padding-block:6px; }
+.casting-birds-setup .casting-console-select > span { white-space:normal; overflow-wrap:anywhere; }
 .casting-birds-setup details { font-size:.8rem; color:hsl(var(--muted-foreground)); }
 .casting-birds-setup p { margin:.05rem 0 .65rem; }
 
 @media (min-width:900px) and (min-height:600px) {
-  .casting-birds-setup { grid-template-columns:minmax(13rem, 1fr) minmax(0, 2.2fr); }
+  .casting-birds-setup { grid-template-columns:minmax(15.25rem, 1fr) minmax(0, 2.2fr); }
   .casting-birds-setup details { padding-top:1rem; }
 }

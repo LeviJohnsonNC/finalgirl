@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from './fixtures';
-import { openMinorPowers, openModule } from './play-helpers';
+import { openMinorPowers, openModule, statusPick } from './play-helpers';
 import { summarizePlay, type PlayEvent } from '../../src/lib/play/events';
 import { birdsState } from '../../supabase/functions/_shared/play/birds';
 
@@ -69,9 +69,23 @@ test('Birds casting keeps the separate location and excludes the incompatible st
   await startEvent.click();
   await expect(page.getByRole('option',{name:/Ghost Hunters/})).toBeDisabled();
   await page.getByRole('option',{name:'Helicopter Rescue',exact:true}).click();
-  const difficulty=page.getByLabel('Rescue difficulty');
-  await expect(difficulty).toHaveValue('2');
-  await difficulty.selectOption('3');
+  if (info.project.name === 'mobile') await page.setViewportSize({width:320,height:568});
+  const difficulty=page.getByRole('combobox',{name:'Rescue difficulty'});
+  await expect(difficulty).toHaveText('Normal · 2 Special Victims');
+  expect(await difficulty.locator('span').evaluate(label => label.scrollWidth <= label.clientWidth)).toBe(true);
+  await difficulty.press('Enter');
+  const menu=page.getByRole('listbox');
+  await expect(menu).toHaveClass(/themed-select-menu/);
+  await expect(menu).toHaveClass(/casting-console-menu/);
+  await expect(menu.getByRole('option')).toHaveText([
+    'Easy · 1 Special Victim', 'Normal · 2 Special Victims', 'Hard · 3 Special Victims',
+  ]);
+  await expect(menu.getByRole('option',{name:'Normal · 2 Special Victims'})).toBeFocused();
+  await page.screenshot({path:info.outputPath('birds-difficulty-menu.png'),animations:'disabled'});
+  await page.keyboard.press('ArrowDown');
+  await expect(menu.getByRole('option',{name:'Hard · 3 Special Victims'})).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(difficulty).toHaveText('Hard · 3 Special Victims');
   await page.getByText('Birds setup',{exact:true}).click();
   await expect(page.getByText(/Start with Horror 4 and Bloodlust at the bottom/)).toBeVisible();
   await page.getByRole('region',{name:'Scenario and playback'}).screenshot({path:info.outputPath('birds-casting.png'),animations:'disabled'});
@@ -119,10 +133,10 @@ test('the mission and rescue confirmations are independent and an overrun record
   await mission.getByRole('button',{name:'Back to Play'}).click();
   await page.getByRole('button',{name:'Finish game',exact:true}).click();
   await page.getByRole('button',{name:'Lost',exact:true}).click();
-  await rescue.getByLabel('Loss reason').selectOption('overrun-alive');
+  await statusPick(page,rescue.getByRole('combobox',{name:'Loss reason'}),'Board overrun · Final Girl alive');
   await rescue.getByRole('button',{name:'Confirm result'}).click();
   await expect(page.getByRole('heading',{name:'DEFEAT'})).toBeVisible();
-  await expect(page.getByLabel('Loss reason')).toHaveValue('overrun-alive');
+  await expect(page.getByRole('combobox',{name:'Loss reason'})).toHaveText('Board overrun · Final Girl alive');
   await page.getByRole('button',{name:'Save record only'}).click();
   await expect.poll(()=>archive.history[0]?.outcome).toBe('lost');
   const state=birdsState(summarizePlay(archive.history[0].play_events as PlayEvent[]).entries);

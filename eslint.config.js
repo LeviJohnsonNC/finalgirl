@@ -23,5 +23,24 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
     },
   },
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/**/*.test.{ts,tsx}", "src/components/ui/{select,dropdown-menu,context-menu}.tsx"],
+    rules: {
+      "no-restricted-syntax": ["error", {
+        selector: "JSXOpeningElement[name.name='select']",
+        message: "Use the shared Select, PlaySelect, or OutcomeSelect so the whole dropdown uses the app theme.",
+      }, {
+        selector: "JSXOpeningElement[name.name='datalist'], JSXOpeningElement[name.name='input'] > JSXAttribute[name.name='list']",
+        message: "Use SuggestionInput for themed suggestions with free text.",
+      }],
+      "no-restricted-imports": ["error", {
+        paths: ["select", "dropdown-menu", "context-menu"].map(name => ({
+          name: `@radix-ui/react-${name}`,
+          message: `Use @/components/ui/${name} for the shared menu theme.`,
+        })),
+      }],
+    },
+  },
 );
 
