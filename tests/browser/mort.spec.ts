@@ -450,6 +450,7 @@ test("Mort uses the shared compact and revealed power cards on laptop and phone"
   const cards = panel.locator(".module-killer-card");
   await expect(cards).toHaveCount(MORT_POWERS.length);
   await expect(cards.locator("img").first()).toHaveCSS("height", mobile ? "76px" : "86px");
+  await expect(cards.locator("img").first()).toHaveCSS("object-fit", "cover");
   await capture(panel, "power-choices");
   await panel.getByRole("button", { name: "Choose Snitches Get Stitches" }).click();
   const revealed = panel.locator(".module-revealed-hero");
