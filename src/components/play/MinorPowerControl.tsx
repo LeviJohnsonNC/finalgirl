@@ -3,43 +3,48 @@ import { ModuleArtwork, type ModuleArt } from "./ModuleArtwork";
 import "@/styles/play-controls.css";
 import "@/styles/cinematic-controls.css";
 
-export function MinorPowerControl({
-  name,
-  health,
-  art,
-  heroArt,
-  choiceArt,
-  onChange,
-  className = "",
-  previouslyRevealed = false,
-  observation,
-  maxHealth = 2,
-  disabled = false,
-}: {
+type MinorPowerProps = {
   name: string;
-  health?: number;
-  maxHealth?: number;
   disabled?: boolean;
-  art: (health: number) => ModuleArt;
   heroArt?: ModuleArt;
   choiceArt?: ModuleArt;
-  onChange: (health: number | null) => unknown;
   className?: string;
-  previouslyRevealed?: boolean;
-  observation?: string;
-}) {
-  const active = health !== undefined && health > 0;
-  const status =
-    health === undefined
-      ? previouslyRevealed
-        ? "Revealed earlier · health not recorded"
-        : "Not recorded"
-      : health === 0
-        ? `Removed · 0/${maxHealth} health`
-        : `${health}/${maxHealth} health`;
+} & (
+  | {
+      mode?: "health";
+      health?: number;
+      maxHealth?: number;
+      art: (health: number) => ModuleArt;
+      onChange: (health: number | null) => unknown;
+      previouslyRevealed?: boolean;
+      observation?: string;
+    }
+  | {
+      mode: "presence";
+      active: boolean;
+      art: ModuleArt;
+      onChange: (active: boolean) => unknown;
+    }
+);
+
+export function MinorPowerControl(props: MinorPowerProps) {
+  const { name, heroArt, choiceArt, className = "", disabled = false } = props;
+  const presence = props.mode === "presence";
+  const health = presence ? undefined : props.health;
+  const maxHealth = (!presence ? props.maxHealth : undefined) ?? 2;
+  const previouslyRevealed = !presence && props.previouslyRevealed;
+  const active = presence ? props.active : health !== undefined && health > 0;
+  const showScene = active || health !== undefined;
+  const status = active && presence ? "Active"
+    : health === undefined ? (previouslyRevealed ? "Revealed earlier · health not recorded" : "Not recorded")
+    : health === 0 ? `Removed · 0/${maxHealth} health`
+    : `${health}/${maxHealth} health`;
+  const recordLabel = presence ? "Discard" : "Clear record";
+  const reveal = () => presence ? props.onChange(true) : props.onChange(maxHealth);
+  const clear = () => presence ? props.onChange(false) : props.onChange(null);
   const picture = (
     <ModuleArtwork
-      art={heroArt ?? { ...art(health ?? maxHealth), fit: "meet" }}
+      art={heroArt ?? (presence ? props.art : { ...props.art(health ?? maxHealth), fit: "meet" })}
     />
   );
   return (
@@ -49,7 +54,7 @@ export function MinorPowerControl({
       className={`module-minor module-cinematic-minor ${className}`}
       data-active={active}
       data-state={
-        health === undefined
+        presence && active ? "active" : health === undefined
           ? "unrecorded"
           : health === 0
             ? "removed"
@@ -58,13 +63,13 @@ export function MinorPowerControl({
               : "full"
       }
     >
-      {health === undefined ? (
+      {!showScene ? (
         <button
           type="button"
           className="module-minor-choice"
           disabled={disabled}
           aria-label={`${previouslyRevealed ? "Record full health for" : "Reveal"} ${name}`}
-          onClick={() => onChange(maxHealth)}
+          onClick={reveal}
         >
           <span className="module-minor-art">{choiceArt ? <ModuleArtwork art={choiceArt} /> : picture}</span>
           <span className="module-minor-choice-copy">
@@ -83,27 +88,31 @@ export function MinorPowerControl({
             <span className="cinematic-eyebrow">Minor Dark Power</span>
             <h3>{name}</h3>
             <p className="module-health-status" aria-live="polite">
-              {observation ? `${observation} · ${status}` : status}
+              {!presence && props.observation ? `${props.observation} · ${status}` : status}
             </p>
-            <HealthTokens
-              name={name}
-              health={health}
-              maxHealth={maxHealth}
-              disabled={disabled}
-              onChange={onChange}
-            />
+            {!presence && health !== undefined && (
+              <HealthTokens
+                name={name}
+                health={health}
+                maxHealth={maxHealth}
+                disabled={disabled}
+                onChange={props.onChange}
+              />
+            )}
           </div>
         </div>
       )}
-      <button
-        type="button"
-        className="module-minor-clear"
-        disabled={disabled}
-        aria-label={`Clear record: ${name}`}
-        onClick={() => onChange(null)}
-      >
-        Clear record
-      </button>
+      {(!presence || active) && (
+        <button
+          type="button"
+          className="module-minor-clear"
+          disabled={disabled}
+          aria-label={presence ? `Discard ${name}` : `Clear record: ${name}`}
+          onClick={clear}
+        >
+          {recordLabel}
+        </button>
+      )}
     </article>
   );
 }

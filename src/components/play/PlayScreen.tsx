@@ -610,7 +610,13 @@ export function PlayScreen(props: PlayScreenProps) {
           })}
         </div>
         {mortMoment==='finale'&&<MortRevealEntry events={events} onEvent={onEvent} onClose={()=>setMortMoment(null)} fresh={props.mortFresh}/>}
-        {mortMoment==='dark-power'&&<MortPowerPicker events={events} onEvent={onEvent}/>}
+        {mortMoment === 'dark-power' && (
+          <div className="play-moment-editor">
+            <div className="module-reveals">
+              <MortPowerPicker events={events} onEvent={onEvent} />
+            </div>
+          </div>
+        )}
         {hunterRevealOpen&&hunterHasReveal(hunter,hunterRevealOpen)&&<div className="play-moment-editor"><KillerCards killer={killer} events={events} onEvent={onEvent} typeOnly={hunterRevealOpen}/><button onClick={()=>setHunterRevealOpen(null)}>Record</button></div>}
         {moment && (
           <div className="play-moment-editor">

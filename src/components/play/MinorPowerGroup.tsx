@@ -22,12 +22,14 @@ export function MinorPowerGroup({
 }) {
   const cards = Children.toArray(children).filter(isValidElement) as Card[];
   const recorded = cards.filter(
-    (card) => card.props.health !== undefined || card.props.previouslyRevealed,
+    ({ props }) => props.mode === "presence"
+      ? props.active
+      : props.health !== undefined || props.previouslyRevealed,
   );
   const signature = recorded
     .map(
-      (card) =>
-        `${card.props.name}:${card.props.health === undefined ? "unknown" : "known"}`,
+      ({ props }) =>
+        `${props.name}:${props.mode !== "presence" && props.health === undefined ? "unknown" : "known"}`,
     )
     .join("|");
   const [editingFor, setEditingFor] = useState<string | null>(null);

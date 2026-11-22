@@ -22,6 +22,11 @@ import {
   type PlayEvent,
 } from "@/lib/play/events";
 import { PlaySelect } from "./PlaySelect";
+import { KillerCardChoices } from "./KillerCards";
+import { illustratedKillerCards } from "./killerPresentation";
+import { MinorPowerControl } from "./MinorPowerControl";
+import { MinorPowerGroup } from "./MinorPowerGroup";
+import { RevealedCard } from "./RevealedCard";
 import { useModuleRecord } from "./useModuleRecord";
 import type { ControlsProps } from "./moduleDefinitions";
 import { mortEvent } from "@/lib/play/mortRecord";
@@ -270,26 +275,21 @@ export function MortPowerPicker({
   const entries = summarizePlay(events).entries;
   const state = mortState(entries);
   const { record, message } = useModuleRecord(events, onEvent);
-  const power = MORT_POWERS.find((p) => p.id === state.power);
+  const cards = illustratedKillerCards(MORT, "dark-power");
+  const selected = cards.find((card) => card.id === state.power);
   const save = (power: (typeof MORT_POWERS)[number]["id"] | null) =>
     record(mortEvent({ kind: "power", power }, entries));
   return (
-    <div className="mort-play mort-powers">
-      {power ? (
+    <section className="module-reveal-cards" aria-label="Dark Power selection">
+      {selected ? (
         <>
-          <article className="mort-power-hero">
-            <img src={mortPhoto(power.id)} alt="" />
-            <div>
-              <small>
-                {"epic" in power ? "Epic Dark Power" : "Dark Power"}
-              </small>
-              <h4>{power.name}</h4>
-              <p>{power.effect}</p>
-            </div>
-          </article>
+          <RevealedCard card={selected} label="Dark Power" />
+          <p className="module-control-help">{selected.effect}</p>
           {!state.reveal && (
             <button
-              className="mort-link"
+              className="module-unnamed"
+              type="button"
+              aria-label="Clear Dark Power card name"
               disabled={blocked}
               onClick={() => save(null)}
             >
@@ -298,25 +298,17 @@ export function MortPowerPicker({
           )}
         </>
       ) : (
-        <div className="mort-power-grid">
-          {MORT_POWERS.map((p) => (
-            <button
-              key={p.id}
-              className="mort-power-choice"
-              disabled={blocked}
-              onClick={() => save(p.id)}
-            >
-              <img src={mortPhoto(p.id)} alt="" />
-              <span>
-                {p.name}
-                {"epic" in p && <small>Epic</small>}
-              </span>
-            </button>
-          ))}
-        </div>
+        <KillerCardChoices
+          cards={cards}
+          disabled={() => Boolean(blocked)}
+          choose={(name) => {
+            const power = MORT_POWERS.find((card) => card.name === name);
+            if (power) save(power.id);
+          }}
+        />
       )}
       {message && <p role="alert">{message}</p>}
-    </div>
+    </section>
   );
 }
 
@@ -1014,41 +1006,21 @@ export function MortControls({
         last?.mortAction?.kind !== "exclude" &&
         undoButton}
       {!state.reveal && state.known && (
-        <details className="mort-secondary">
-          <summary>
-            Minor Dark Powers
-            {state.minors.length ? ` · ${state.minors.length} active` : ""}
-          </summary>
-          <div className="mort-power-grid">
-            {MORT_MINORS.map((minor) => (
-              <button
-                key={minor.id}
-                className="mort-power-choice"
-                type="button"
-                aria-pressed={state.minors.includes(minor.id)}
-                onClick={() =>
-                  commit({
-                    kind: "minor",
-                    minor: minor.id,
-                    active: !state.minors.includes(minor.id),
-                  })
-                }
-              >
-                <img src={mortPhoto(minor.id)} alt="" />
-                <span>
-                  {minor.name}
-                  <small>
-                    {state.minors.includes(minor.id)
-                      ? "Active · click to discard"
-                      : "Record revealed power"}
-                  </small>
-                </span>
-              </button>
-            ))}
-          </div>
-        </details>
+        <MinorPowerGroup className="module-minor-grid">
+          {MORT_MINORS.map((minor) => (
+            <MinorPowerControl
+              key={minor.id}
+              mode="presence"
+              name={minor.name}
+              art={{ src: mortPhoto(minor.id) }}
+              active={state.minors.includes(minor.id)}
+              disabled={blocked}
+              onChange={(active) => commit({ kind: "minor", minor: minor.id, active })}
+            />
+          ))}
+        </MinorPowerGroup>
       )}
-      <details className="mort-secondary" data-module-control="reveals">
+      <details className="module-card-section" data-module-control="reveals">
         <summary>
           Dark Power
           {state.power
