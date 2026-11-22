@@ -1,4 +1,5 @@
 import { WOLFE, WOLFE_EVENTS, WOLFE_TERRORS } from '../../../supabase/functions/_shared/play/wolfeCatalog';
+import { MORT } from '../../../supabase/functions/_shared/play/mort';
 import { wolfeArt } from './wolfeArt';
 import { RATCHET_LADY, RATCHET_TERRORS } from '../../../supabase/functions/_shared/play/ratchetLady';
 import { ratchetLadyArt } from './ratchetLadyArt';
@@ -71,6 +72,7 @@ import {
   deathCauseLabels,
   detailsForCause,
   isCompleteDeathText,
+  MORT_DEATH_DISGUISES,
   type DeathSelection,
 } from "@/lib/play/death";
 import {
@@ -142,6 +144,11 @@ const {characterImages}=useActiveImages();
     ...initial,
     ...draft,
   }));
+  const showMortDisguise = selection.killer === MORT &&
+    (values.cause === "killer" || values.cause === "terror");
+  const mortDisguise = showMortDisguise
+    ? MORT_DEATH_DISGUISES.find(disguise => disguise.attacker === values.attacker)
+    : undefined;
   const wolfeTerror=selection.location===WOLFE&&WOLFE_TERRORS.find(card=>card.name===values.terrorCard&&card.death);
   const wolfeEvent=selection.location===WOLFE&&WOLFE_EVENTS.find(card=>card.name===values.eventCard&&card.death);
   const wolfeCauseArt=(cause:string)=>{
@@ -339,7 +346,12 @@ const {characterImages}=useActiveImages();
         <div className="play-death-body" data-mode={reading ? "reading" : "editing"}>
           {reading ? (
             <div className="play-death-context">
-              <p><strong>{facts.quantity} {facts.quantity === 1 ? "victim" : "victims"}</strong> · {deathCauseLabels[facts.cause]}{facts.room ? ` · ${facts.room}` : ""}</p>
+              <p>
+                <strong>{facts.quantity} {facts.quantity === 1 ? "victim" : "victims"}</strong>
+                {` · ${deathCauseLabels[facts.cause]}`}
+                {mortDisguise && ` · ${mortDisguise.attacker}`}
+                {facts.room && ` · ${facts.room}`}
+              </p>
               <button className="play-death-edit" disabled={scenes.busy} onClick={() => {
                 setEditingDetails(true);
                 requestAnimationFrame(() => document.getElementById("play-cause-first")?.focus({ preventScroll: true }));
@@ -429,6 +441,22 @@ const {characterImages}=useActiveImages();
           </div>}
           {!reading && values.cause !== "unspecified" && (
             <div className="play-death-fields">
+              {showMortDisguise && (
+                <label>
+                  Mort’s disguise
+                  <PlaySelect
+                    aria-label="Mort’s disguise"
+                    value={mortDisguise?.attacker ?? ""}
+                    disabled={scenes.busy}
+                    onChange={event => update("attacker", event.target.value)}
+                  >
+                    <option value="">Choose a disguise</option>
+                    {MORT_DEATH_DISGUISES.map(({ name, attacker }) => (
+                      <option key={attacker} value={attacker}>{name}</option>
+                    ))}
+                  </PlaySelect>
+                </label>
+              )}
               {selection.killer===ORGANISM&&(values.cause==="killer"||values.cause==="terror")&&<label>Who attacked?
                 <PlaySearch label="Death attacker" value={organismFormByName(values.attacker)?.name??values.attacker??""} options={organismAttackers} onChange={value=>update("attacker",value)} placeholder="Choose a recorded form or leave unknown" />
               </label>}
