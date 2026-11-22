@@ -8,6 +8,7 @@
   text-align: left;
 }
 .themed-select-menu,
+.themed-action-menu,
 .themed-search-menu {
   color: #eee6d5;
   background: linear-gradient(135deg, #1b2520, #0d1512);
@@ -17,7 +18,13 @@
   max-width: calc(100vw - 24px);
 }
 .themed-select-menu { max-height: min(360px, 60dvh, var(--radix-select-content-available-height, 60dvh)); }
-.themed-select-menu [role='option'] {
+.themed-action-menu {
+  max-height: min(360px, 60dvh, var(--radix-dropdown-menu-content-available-height, var(--radix-context-menu-content-available-height, 60dvh)));
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.themed-select-menu [role='option'],
+.themed-action-menu :is([role='menuitem'], [role='menuitemcheckbox'], [role='menuitemradio']) {
   min-height: 44px;
   padding-block: 10px;
   white-space: normal;
@@ -25,8 +32,10 @@
   font-size: 16px;
   cursor: pointer;
 }
-.themed-select-menu [role='option'][data-highlighted] { background: #354338; color: #fff1cf; }
+.themed-select-menu [role='option'][data-highlighted],
+.themed-action-menu [data-highlighted] { background: #354338; color: #fff1cf; }
 .themed-select-menu [data-radix-select-viewport],
+.themed-action-menu,
 .themed-search-menu :is([cmdk-list], .themed-suggestion-list),
 .casting-picker-scroll {
   /* Let WebKit's explicitly sized rail render persistently on macOS too. */
@@ -37,12 +46,15 @@
 }
 /* Radix deliberately hides native Select scrollbars; restore the real draggable rail. */
 .themed-select-menu [data-radix-select-viewport]::-webkit-scrollbar,
+.themed-action-menu::-webkit-scrollbar,
 .themed-search-menu :is([cmdk-list], .themed-suggestion-list)::-webkit-scrollbar,
 .casting-picker-scroll::-webkit-scrollbar { display: block; width: 10px; }
 .themed-select-menu [data-radix-select-viewport]::-webkit-scrollbar-track,
+.themed-action-menu::-webkit-scrollbar-track,
 .themed-search-menu :is([cmdk-list], .themed-suggestion-list)::-webkit-scrollbar-track,
 .casting-picker-scroll::-webkit-scrollbar-track { background: #0c1410; }
 .themed-select-menu [data-radix-select-viewport]::-webkit-scrollbar-thumb,
+.themed-action-menu::-webkit-scrollbar-thumb,
 .themed-search-menu :is([cmdk-list], .themed-suggestion-list)::-webkit-scrollbar-thumb,
 .casting-picker-scroll::-webkit-scrollbar-thumb { background: #a18c62; border: 2px solid #0c1410; border-radius: 8px; }
 .themed-search-menu { z-index: 100; padding: 0; overflow: hidden; width: var(--radix-popover-trigger-width); min-width: min(240px, calc(100vw - 24px)); }

@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
 import { activeGame, expect, selection, test, userId } from './fixtures';
+import { statusPick } from './play-helpers';
 
 test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -61,7 +62,7 @@ test('special rules navigate from Now Playing without moving the page or recordi
   await expect(panel.getByRole('heading', { name: 'The Savior and targeting', exact: true })).toBeInViewport();
   const pageScroll = await page.evaluate(() => scrollY);
   const topics = dialog.getByRole('combobox', { name: 'Jump to topic' });
-  await topics.selectOption({ label: 'Exiting the mall' });
+  await statusPick(page, topics, 'Exiting the mall');
   const exits = panel.getByRole('heading', { name: 'Exiting the mall', exact: true });
   await expect(exits).toBeFocused();
   await expect(exits).toBeInViewport();
@@ -90,7 +91,7 @@ test('a single applicable location opens directly and renders its setup diagrams
   const panel = dialog.getByRole('tabpanel');
   const diagram = panel.getByRole('img', { name: /setup diagram/ }).last();
   const heading = panel.getByRole('heading', { name: 'Worship Service', exact: true });
-  await dialog.getByRole('combobox', { name: 'Jump to setup' }).selectOption({ label: 'Worship Service' });
+  await statusPick(page, dialog.getByRole('combobox', { name: 'Jump to setup' }), 'Worship Service');
   await expect(heading).toBeFocused();
   await expect(heading).toBeInViewport();
   await diagram.scrollIntoViewIfNeeded();
@@ -120,7 +121,7 @@ test('Sunnydaze placements and card effects reflow within the modal', async ({ p
     await page.setViewportSize({ width, height });
     await dialog.getByRole('tab', { name: 'Setup', exact: true }).click();
     const setupJump = dialog.getByRole('combobox', { name: 'Jump to setup' });
-    await setupJump.selectOption({ label: 'Setup card placements' });
+    await statusPick(page, setupJump, 'Setup card placements');
     await expect(panel.getByRole('heading', { name: 'Setup card placements' })).toBeFocused();
     const placements = panel.getByRole('list', { name: 'Setup', exact: true });
     await expect(placements).toBeInViewport();
@@ -133,16 +134,16 @@ test('Sunnydaze placements and card effects reflow within the modal', async ({ p
     await expectNoHorizontalOverflow(panel);
     expect(await panel.evaluate((reader) => reader.clientHeight)).toBeGreaterThan(height / 2);
     await page.screenshot({ path: info.outputPath(`sunnydaze-placements-${width}.png`) });
-    await setupJump.selectOption({ label: 'Family Dinner' });
+    await statusPick(page, setupJump, 'Family Dinner');
     const lastSetup = placements.locator(':scope > li').last();
     await expect(lastSetup).toBeFocused();
     await expect(lastSetup.getByText('Family Dinner', { exact: true })).toBeInViewport();
-    await setupJump.selectOption({ label: 'Start of setup' });
+    await statusPick(page, setupJump, 'Start of setup');
     await expect(panel.getByRole('heading', { name: 'Setup checklist' })).toBeInViewport();
 
     await dialog.getByRole('tab', { name: 'Rules', exact: true }).click();
     const topics = dialog.getByRole('combobox', { name: 'Jump to topic' });
-    await topics.selectOption({ label: 'Savior cards and Upkeep' });
+    await statusPick(page, topics, 'Savior cards and Upkeep');
     const savior = panel.getByRole('list', { name: 'Savior card', exact: true });
     await expect(savior.locator(':scope > li')).toHaveCount(8);
     await expect(savior.locator('dt').nth(4)).toHaveText('I Believe You!');
@@ -151,7 +152,7 @@ test('Sunnydaze placements and card effects reflow within the modal', async ({ p
     await expect(dialog.getByRole('button', { name: 'Close' })).toBeInViewport();
     await expectNoHorizontalOverflow(panel);
     await page.screenshot({ path: info.outputPath(`sunnydaze-savior-${width}.png`) });
-    await topics.selectOption({ label: 'Events' });
+    await statusPick(page, topics, 'Events');
     if (width < 560) {
       await expect(panel.getByRole('list', { name: 'Event', exact: true })).toBeInViewport();
       await expect(panel.getByRole('table')).toHaveCount(0);

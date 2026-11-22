@@ -23,7 +23,7 @@
 .birds-actions button:disabled,.birds-quiet button:disabled { opacity:.45; }
 .birds-quiet button { color:hsl(var(--muted-foreground)); text-decoration:underline; text-underline-offset:3px; font-size:.8rem; }
 .birds-correction { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr)); gap:.45rem; align-items:end; }
-.birds-correction label,.birds-review-loss { display:grid; gap:.3rem; }
+.birds-correction label { display:grid; gap:.3rem; }
 .birds-wall { display:grid; gap:.45rem; }
 .birds-wall > .birds-quiet { padding-inline:1rem; }
 .birds-spawn { padding:.1rem .8rem .65rem; border:1px solid hsl(var(--border)); border-radius:.375rem; }
@@ -34,4 +34,3 @@
 .birds-spawn dt { color:#e1bd87; font-weight:700; }
 .birds-review-check { display:flex; gap:.65rem; min-height:44px; align-items:center; cursor:pointer; }
 .birds-review-check input { width:1.25rem; height:1.25rem; accent-color:hsl(var(--primary)); }
-.birds-review-loss select,.casting-birds-setup select { min-height:44px; max-width:100%; color:hsl(var(--foreground)); background:hsl(var(--background)); border:1px solid hsl(var(--border)); border-radius:.375rem; padding:.25rem .55rem; }

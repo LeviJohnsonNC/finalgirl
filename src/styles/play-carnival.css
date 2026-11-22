@@ -174,7 +174,8 @@
   padding: 10px 0;
   font-size: 12px;
 }
-.carnival-traps article label {
+.carnival-traps article label,
+.carnival-space-note {
   display: grid;
   gap: 5px;
   margin: 8px 0;

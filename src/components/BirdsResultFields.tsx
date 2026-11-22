@@ -1,5 +1,6 @@
 import '@/styles/play-birds.css';
 import { BIRDS_LOSS_CHOICES, type BirdsReason } from '../../supabase/functions/_shared/play/birds';
+import { OutcomeSelect } from './outcome/OutcomeSelect';
 
 export function BirdsResultFields({outcome, value, onChange}: {
   outcome:'won'|'lost'; value:BirdsReason|''; onChange:(value:BirdsReason|'')=>void;
@@ -11,12 +12,9 @@ export function BirdsResultFields({outcome, value, onChange}: {
     </label>
   );
   return (
-    <label className="birds-review-loss">
-      <span>Loss reason</span>
-      <select value={value === 'rescued' ? '' : value} onChange={event=>onChange(event.target.value as BirdsReason|'')}>
-        <option value="">Choose the physical result</option>
-        {BIRDS_LOSS_CHOICES.map(choice=><option key={choice.value} value={choice.value}>{choice.label}</option>)}
-      </select>
-    </label>
+    <OutcomeSelect label="Loss reason" value={value === 'rescued' ? '' : value} onValueChange={next => onChange(next as BirdsReason | '')}>
+      <option value="">Choose the physical result</option>
+      {BIRDS_LOSS_CHOICES.map(choice=><option key={choice.value} value={choice.value}>{choice.label}</option>)}
+    </OutcomeSelect>
   );
 }

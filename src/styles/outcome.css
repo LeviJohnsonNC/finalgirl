@@ -548,7 +548,6 @@ body:has(.outcome-review) main {
 }
 .outcome-select-menu {
   max-width: calc(100vw - 24px);
-  max-height: min(360px, 60dvh);
   border: 1px solid #8c9c817d;
   border-radius: 3px;
   background: #101a16;

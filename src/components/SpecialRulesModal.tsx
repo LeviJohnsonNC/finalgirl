@@ -1,7 +1,7 @@
 import { useId, useRef, useState, type ReactNode } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
-import { ChevronDown } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RuleBlock } from '@/components/rules/RuleBlock';
 import { getChapterArt } from '@/components/rules/chapterArt';
 import { buildEntityChapter, ENTITY_RULE_MODULES, type EntityRuleModule } from '@/data/rules/moduleRules';
@@ -32,6 +32,8 @@ export const SpecialRulesModal = ({ killer, location, children }: SpecialRulesMo
   const [view, setView] = useState('setup');
   const topicPrefix = useId();
   const readerRef = useRef<HTMLDivElement>(null);
+  const jumpMenuOpen = useRef(false);
+  const pendingTopic = useRef<string | null>(null);
   const active = modules.find((m) => m.kind === activeKind) ?? modules[0];
   if (!active) return null;
 
@@ -94,19 +96,31 @@ export const SpecialRulesModal = ({ killer, location, children }: SpecialRulesMo
                 </Tabs.List>
               )}
               {showTopics && (
-                <label className="special-rules-topics">
-                  <select aria-label={jumpLabel} value="" onChange={(event) => jumpToTopic(event.target.value)}>
-                    <option value="" disabled>{jumpLabel}</option>
-                    <option value="start">{activeView === 'setup' ? 'Start of setup' : 'Start of rules'}</option>
-                    {topics.map(({ id, title }) => <option key={id} value={id}>{title}</option>)}
+                <Select value="" onOpenChange={open => { jumpMenuOpen.current = open; }} onValueChange={id => {
+                  if (jumpMenuOpen.current) pendingTopic.current = id;
+                  else jumpToTopic(id);
+                }}>
+                  <SelectTrigger className="special-rules-topics" aria-label={jumpLabel}>
+                    <SelectValue placeholder={jumpLabel} />
+                  </SelectTrigger>
+                  <SelectContent sortOptions={false} onCloseAutoFocus={event => {
+                    const id = pendingTopic.current;
+                    if (!id) return;
+                    pendingTopic.current = null;
+                    // Move focus after the menu releases its focus trap.
+                    event.preventDefault();
+                    jumpToTopic(id);
+                  }}>
+                    <SelectItem value="start">{activeView === 'setup' ? 'Start of setup' : 'Start of rules'}</SelectItem>
+                    {topics.map(({ id, title }) => <SelectItem key={id} value={id}>{title}</SelectItem>)}
                     {placementTopics.length > 0 && (
-                      <optgroup label="Setup cards">
-                        {placementTopics.map(({ id, title }) => <option key={id} value={id}>{title}</option>)}
-                      </optgroup>
+                      <SelectGroup>
+                        <SelectLabel>Setup cards</SelectLabel>
+                        {placementTopics.map(({ id, title }) => <SelectItem key={id} value={id}>{title}</SelectItem>)}
+                      </SelectGroup>
                     )}
-                  </select>
-                  <ChevronDown size={15} aria-hidden="true" />
-                </label>
+                  </SelectContent>
+                </Select>
               )}
             </div>
           )}

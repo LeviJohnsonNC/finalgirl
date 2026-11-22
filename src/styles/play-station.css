@@ -9,7 +9,7 @@
 .station-route { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); list-style: none; margin: 0; padding: 0; gap: .3rem; }
 .station-edit, .station-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem .75rem; }
 .station-edit label { display: inline-flex; align-items: center; gap: .45rem; font-size: .84rem; }
-.station-controls button:not(:where(.play-illustrated-tile, .module-outcomes button, .station-route button)), .station-controls select { min-height: 44px; padding: .25rem .65rem; border: 1px solid #826b61; border-radius: .4rem; background: #2f252b; color: #f7e5ce; }
+.station-controls button:not(:where(.play-illustrated-tile, .module-outcomes button, .station-route button)) { min-height: 44px; padding: .25rem .65rem; border: 1px solid #826b61; border-radius: .4rem; background: #2f252b; color: #f7e5ce; }
 .station-controls button:not(:where(.play-illustrated-tile, .module-outcomes button, .station-route button)):disabled { opacity: .55; }
 .station-controls .station-route button {
   width: 100%;
@@ -33,7 +33,7 @@
 .station-controls .station-route button:hover:not(:disabled) { background: #48352d; border-color: #e2b689; }
 .station-controls summary { min-height: 44px; align-content: center; }
 .station-check { min-height: 44px; cursor: pointer; }
-.station-controls :is(button,select,summary,input):focus-visible { outline: 2px solid #ffc98d; outline-offset: 2px; }
+.station-controls :is(button,summary,input):focus-visible { outline: 2px solid #ffc98d; outline-offset: 2px; }
 .station-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .75rem; }
 @media (max-width: 570px) {
   .station-grid { grid-template-columns: 1fr; }
@@ -63,7 +63,7 @@
   .play-module-content .station-controls .station-grid .module-control-tile { aspect-ratio: 2; }
 }
 .station-edit > label { min-width: 0; max-width: 100%; }
-.station-edit select { min-width: 0; max-width: 100%; }
+.station-edit .play-select-trigger { min-width: 0; max-width: 100%; }
 
 .station-edit .station-passenger-count {
   gap: .65rem;
@@ -74,21 +74,11 @@
   color: #f1e2ce;
   font-weight: 600;
 }
-.station-passenger-field { position: relative; min-width: 0; }
-.station-passenger-count .station-passenger-field select {
-  appearance: none;
-  padding: .25rem 1.9rem .25rem .65rem;
+.station-passenger-field { min-width: 0; }
+.station-passenger-count .station-passenger-field .play-select-trigger {
+  min-width: 3.5rem;
   font-size: 1rem;
   font-weight: 400;
-  color-scheme: dark;
-}
-.station-passenger-field svg {
-  position: absolute;
-  right: .6rem;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: #e2b689;
 }
 .play-module-content .station-controls .station-frostbite {
   margin: 0;

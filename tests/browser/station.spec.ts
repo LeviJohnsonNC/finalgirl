@@ -1,7 +1,9 @@
 import {test,expect,activeGame,userId} from './fixtures';
-import {openModule,searchPick} from './play-helpers';
+import {openModule,searchPick,statusPick} from './play-helpers';
 import {newPlayEvent,validPlayLog,type PlayEvent} from '../../src/lib/play/events';
 import {initialStation,resolveStationAction,STATION_MODULE,STATION_ROLES,STATION_ALLIES,STATION_TERRORS,type StationAction} from '../../supabase/functions/_shared/play/station';
+
+import {STATION_SPACES} from '../../supabase/functions/_shared/play/stationCatalog';
 
 const storageKey = `final-girl-active-game-v1:${userId}`;
 
@@ -17,7 +19,7 @@ test('Station helicopter records a named passenger and resolves a delayed trip o
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   await openModule(page,STATION_MODULE);
   const rescue = page.getByRole('region',{name:'Helicopter rescue'});
-  await rescue.getByRole('combobox',{name:'Total passengers',exact:true}).selectOption('3');
+  await statusPick(page, rescue.getByRole('combobox',{name:'Total passengers',exact:true}), '3');
   await rescue.getByLabel('Doctor aboard').check();
   await rescue.getByRole('button',{name:'Departure',exact:true}).click();
   await rescue.getByRole('button',{name:'In the air',exact:true}).click();
@@ -103,26 +105,26 @@ test('Station renders equipment, roles, allies and Terror crops across states',a
   await conditions.getByRole('button',{name:'Record skipped Upkeep clearing'}).click();
   await expect(conditions.getByRole('button',{name:'Record skipped Upkeep clearing'})).toHaveCount(0);
   await conditions.getByRole('button',{name:/Lab wall/}).click();
-  await conditions.getByRole('combobox',{name:'Lab opening',exact:true}).selectOption('keys');
-  await conditions.getByRole('combobox',{name:'Lab opening',exact:true}).selectOption('accident');
+  await statusPick(page, conditions.getByRole('combobox',{name:'Lab opening',exact:true}), 'Opened by Skidozer');
+  await statusPick(page, conditions.getByRole('combobox',{name:'Lab opening',exact:true}), 'Opened by Lab accident');
   await conditions.getByRole('button',{name:/Skidozer/}).click();
-  await conditions.getByRole('combobox',{name:'Skidozer state',exact:true}).selectOption('in-use');
-  await conditions.getByRole('combobox',{name:'Outdoor position',exact:true}).selectOption('west');
+  await statusPick(page, conditions.getByRole('combobox',{name:'Skidozer state',exact:true}), 'In use');
+  await statusPick(page, conditions.getByRole('combobox',{name:'Outdoor position',exact:true}), STATION_SPACES.west);
   await conditions.getByRole('button',{name:/Hidden Weapons Cache/}).click();
-  await conditions.getByRole('combobox',{name:'Cache state',exact:true}).selectOption('hidden');
-  await conditions.getByRole('combobox',{name:'Cache state',exact:true}).selectOption('revealed');
-  await conditions.getByRole('combobox',{name:'Armory position',exact:true}).selectOption('east');
+  await statusPick(page, conditions.getByRole('combobox',{name:'Cache state',exact:true}), 'Cache placed');
+  await statusPick(page, conditions.getByRole('combobox',{name:'Cache state',exact:true}), 'Armory revealed');
+  await statusPick(page, conditions.getByRole('combobox',{name:'Armory position',exact:true}), STATION_SPACES.east);
   await conditions.getByRole('button',{name:/Heavy Storm/}).click();
   for(const role of STATION_ROLES) await crew.getByRole('button',{name:'Add '+role.name,exact:true}).click();
   await crew.getByRole('button',{name:'Mark Doctor left',exact:true}).click();
   await crew.getByRole('button',{name:'Add Doctor',exact:true}).click();
-  await panel.getByRole('combobox',{name:'Total passengers',exact:true}).selectOption('1');
+  await statusPick(page, panel.getByRole('combobox',{name:'Total passengers',exact:true}), '1');
   await panel.getByLabel('Doctor aboard').check();
   await expect(panel.getByLabel('Doctor aboard')).toBeChecked();
-  await expect(panel.getByRole('combobox',{name:'Total passengers',exact:true})).toHaveValue('1');
+  await expect(panel.getByRole('combobox',{name:'Total passengers',exact:true})).toHaveText('1');
   for(const ally of STATION_ALLIES) await allies.getByRole('button',{name:new RegExp(ally.name)}).click();
   await expect(panel.getByLabel('Doctor aboard')).toBeChecked();
-  await expect(panel.getByRole('combobox',{name:'Total passengers',exact:true})).toHaveValue('1');
+  await expect(panel.getByRole('combobox',{name:'Total passengers',exact:true})).toHaveText('1');
   const viewports = info.project.name === 'mobile' ? [[390,844],[320,568]] : [[1280,640],[1366,768],[1440,900]];
   for (const [width,height] of viewports) {
     await page.setViewportSize({width,height});
@@ -163,7 +165,7 @@ test('Station and Organism facts reach both ending requests while rescue is pend
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   await openModule(page,STATION_MODULE);
   const rescue=page.getByRole('region',{name:'Helicopter rescue'});
-  await rescue.getByRole('combobox',{name:'Total passengers',exact:true}).selectOption('1');
+  await statusPick(page, rescue.getByRole('combobox',{name:'Total passengers',exact:true}), '1');
   await rescue.getByRole('button',{name:'Departure',exact:true}).click();
   await rescue.getByRole('button',{name:'In the air',exact:true}).click();
   await rescue.getByRole('button',{name:'Arctic Airport',exact:true}).click();

@@ -5,6 +5,7 @@ import { AlertTriangle, Play, Loader2, RotateCcw } from 'lucide-react';
 import { CastingSlot } from '@/components/CastingSlot';
 import { CastingPicker } from '@/components/CastingPicker';
 import { ScenarioDropdowns } from '@/components/ScenarioDropdowns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { GameIcon } from '@/components/GameIcon';
 import { getOwnedContent } from '@/types/gameData';
 import { useOwnedFilms } from '@/hooks/useOwnedFilms';
@@ -251,11 +252,19 @@ const CastingRoom = ({ onStartGame, onGoToArchive, initialSelection }: CastingRo
             onMissionChange={setSelectedMission}
           />
           {isBirds && <div className="casting-birds-setup">
-            <label className="casting-console-label">Rescue difficulty
-              <select className="casting-console-select" value={birdsRequired} onChange={event=>setBirdsRequired(Number(event.target.value) as BirdsTarget)}>
-                {BIRDS_DIFFICULTIES.map(d=><option key={d.value} value={d.value}>{d.label} · {d.value} {d.value === 1 ? 'Special Victim' : 'Special Victims'}</option>)}
-              </select>
-            </label>
+            <div className="casting-console-field">
+              <span className="casting-console-label">Rescue difficulty</span>
+              <Select value={String(birdsRequired)} onValueChange={value => setBirdsRequired(Number(value) as BirdsTarget)}>
+                <SelectTrigger className="casting-console-select" aria-label="Rescue difficulty"><SelectValue /></SelectTrigger>
+                <SelectContent className="casting-console-menu" side="top" sortOptions={false}>
+                  {BIRDS_DIFFICULTIES.map(({ value, label }) => (
+                    <SelectItem key={value} value={String(value)} className="casting-console-option">
+                      {label} · {value} {value === 1 ? 'Special Victim' : 'Special Victims'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <details><summary>Birds setup</summary><p>{BIRDS_SETUP}</p></details>
           </div>}
           <div className="casting-console-playback">

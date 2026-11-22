@@ -1,5 +1,5 @@
 import { test, expect, activeGame, userId } from "./fixtures";
-import { openMinorPowers, chooseKillerCard, openModule, searchPick } from "./play-helpers";
+import { openMinorPowers, chooseKillerCard, openModule, searchPick, statusPick } from "./play-helpers";
 import { summarizePlay, type PlayEvent } from "../../src/lib/play/events";
 import { moduleState } from "../../src/lib/play/modules";
 import { SLAYER_POWERS, SLAYER_FINALES, SLAYER_MINORS, SLAYER_TERRORS, slayerState } from "../../src/lib/play/slayer";
@@ -227,7 +227,7 @@ test("Slayer rules fit a narrow screen and an old game keeps its unknown tracker
   const reader = dialog.getByRole("tabpanel");
   await expect(reader).toContainText("11 Health");
   await dialog.getByRole("tab",{name:"Rules",exact:true}).click();
-  await dialog.getByRole("combobox",{name:"Jump to topic"}).selectOption({label:"Bloodlust"});
+  await statusPick(page, dialog.getByRole("combobox",{name:"Jump to topic"}), "Bloodlust");
   await expect(reader.getByRole("table").first()).toBeVisible();
   const overflow = await reader.evaluate(element =>
     [element,...Array.from(element.querySelectorAll(".rule-table-wrap,.rule-record-fields,dd"))].some(
