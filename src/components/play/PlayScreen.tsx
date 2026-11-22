@@ -24,9 +24,14 @@ import { ModuleArtwork } from './ModuleArtwork';
 import { FinalGirlHealthPortrait } from './FinalGirlHealthPortrait';
 import { observedFinalGirlMaxHealth } from '@/data/finalGirlReferences';
 import { playStartingValues } from "@/lib/play/defaults";
-import horrorLow from "@/assets/play/states/horror-low.webp";
-import horrorMid from "@/assets/play/states/horror-mid.webp";
-import horrorHigh from "@/assets/play/states/horror-high.webp";
+import horror0 from "@/assets/play/states/horror-0.webp";
+import horror1 from "@/assets/play/states/horror-1.webp";
+import horror2 from "@/assets/play/states/horror-2.webp";
+import horror3 from "@/assets/play/states/horror-3.webp";
+import horror4 from "@/assets/play/states/horror-4.webp";
+import horror5 from "@/assets/play/states/horror-5.webp";
+import horror6 from "@/assets/play/states/horror-6.webp";
+import horror7 from "@/assets/play/states/horror-7.webp";
 import criticalHealth from "@/assets/play/states/critical-health.webp";
 import { bloodlustBackground } from "./bloodlustPresentation";
 import momentItem from "@/assets/play/moment-item.webp";
@@ -117,6 +122,7 @@ const trackerTitles: Record<StateField, string> = {
   finalGirlHealth: 'Health', killerHealth: 'Killer Health', finalHorrorLevel: 'Horror', bloodlust: 'Bloodlust',
 };
 const orderedStateFields: StateField[] = ["finalGirlHealth", "killerHealth", "bloodlust", "finalHorrorLevel"];
+const horrorArtwork = [horror0, horror1, horror2, horror3, horror4, horror5, horror6, horror7];
 const stateLimits: Record<StateField, number> = {
   finalGirlHealth: 10,
   killerHealth: 20,
@@ -476,11 +482,12 @@ export function PlayScreen(props: PlayScreenProps) {
             const value = disguised ? undefined : summary[field];
             const health = field === "finalGirlHealth" || field === "killerHealth";
             const critical = health && value !== undefined && value <= 2;
-            const horror = value ?? startingValues.finalHorrorLevel;
-            const horrorBand = horror <= 1 ? "low" : horror === 7 ? "high" : "mid";
+            const horrorLevel = field === "finalHorrorLevel"
+              ? value ?? startingValues.finalHorrorLevel
+              : undefined;
             const bloodlust = field === "bloodlust" ? bloodlustBackground(killer, value) : undefined;
             return (
-              <div key={field} className={`play-state play-state--${field}`} role="group" aria-label={`${trackerTitles[field]} tracker`} data-critical={critical || undefined} data-horror={field === "finalHorrorLevel" ? horrorBand : undefined} data-bloodlust-stage={bloodlust ? bloodlust.stage ?? "unknown" : undefined}>
+              <div key={field} className={`play-state play-state--${field}`} role="group" aria-label={`${trackerTitles[field]} tracker`} data-critical={critical || undefined} data-horror-level={horrorLevel} data-bloodlust-stage={bloodlust ? bloodlust.stage ?? "unknown" : undefined}>
                 <div className="play-state-picture" aria-hidden="true">
                 {field === 'finalGirlHealth' && <FinalGirlHealthPortrait name={finalGirl}
                   health={value} maximum={finalGirlMaxHealth} original={characterImages[finalGirl]} aiEnabled={aiEnabled} />}
@@ -493,10 +500,10 @@ export function PlayScreen(props: PlayScreenProps) {
                       data-evomorph-stage={killer === "Evomorph" ? String(moduleState(summary.entries, "evomorph").stage ?? "unknown") : undefined}
                     />
                   )}
-                {field === "finalHorrorLevel" && (
+                {horrorLevel !== undefined && (
                   <img
                     className="play-stat-portrait play-stat-art"
-                    src={horrorBand === "low" ? horrorLow : horrorBand === "high" ? horrorHigh : horrorMid}
+                    src={horrorArtwork[horrorLevel] ?? horrorArtwork[startingValues.finalHorrorLevel]}
                     alt=""
                   />
                 )}
