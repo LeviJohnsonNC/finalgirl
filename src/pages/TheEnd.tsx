@@ -95,6 +95,7 @@ const TheEnd = ({
   const isWin = result.outcome === 'won';
   const grimlashReview=useMemo(()=>result.killer==='Grimlash'?(formData.grimlashReview??{loss:(endingModuleState(endingSummary(result.playEvents).entries,'grimlash').loss??'unknown') as import('@/lib/play/grimlash').GrimlashLoss}):undefined,[result.killer,result.playEvents,formData.grimlashReview]);
   const shipReview=useMemo(()=>result.location==='USS Konrad'?{fate:konradState(endingModuleState(endingSummary(result.playEvents).entries,'konrad')).fate}:undefined,[result.location,result.playEvents]);
+  const birdsReview = result.killer === 'Birds' ? formData.birdsReview : undefined;
   const falconwoodReview = result.location === "Falconwood" ? formData.falconwoodReview : undefined;
   const missionName = result.location === "Falconwood" ? result.mission ?? missionById(falconwoodReview?.mission)?.name : undefined;
   const slayerReview = result.killer === "Slayer" ? formData.slayerReview : undefined;
@@ -150,6 +151,7 @@ const TheEnd = ({
       ...(shipReview&&{konradReview:shipReview}),
        ...(grimlashReview&&{grimlashReview}),
       ...(tormentorReview&&{tormentorReview}),
+      ...(birdsReview && {birdsReview}),
       ...(falconwoodReview && {falconwoodReview}),
       ...(slayerReview && {slayerReview}),
       introStory,
@@ -164,7 +166,7 @@ const TheEnd = ({
       draftPoster: true,
     });
     if (url && mounted.current) { setPosterImageUrl(url); checkpointRef.current({ posterImageUrl: url }); }
-  }, [isGenerating, error, awaitingRefresh, hunter, mall, missionName, falconwoodReview, slayerReview, tormentorReview, shipReview, grimlashReview, ratchetEnding, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, organismLossContext, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
+  }, [isGenerating, error, awaitingRefresh, hunter, mall, missionName, birdsReview, falconwoodReview, slayerReview, tormentorReview, shipReview, grimlashReview, ratchetEnding, result, moduleContext?.rulesSummary, moduleContext?.narrativeGuidance, introStory, sceneImageUrl, formData.finalGirlHealth, endingKillerHealth, organismLossContext, visualBible, generateImage, evomorphGuidance, endingVisualGuidance]);
 
   // The poster develops on its own once the ending narration lands.
   //
@@ -247,6 +249,7 @@ const TheEnd = ({
         ...(shipReview&&{konradReview:shipReview}),
        ...(grimlashReview&&{grimlashReview}),
       ...(tormentorReview&&{tormentorReview}),
+        ...(birdsReview && {birdsReview}),
         ...(falconwoodReview && {falconwoodReview}),
         ...(slayerReview && {slayerReview}),
         ...(result.killer==='Poltergeist'&&formData.poltergeistReview&&{poltergeistReview:formData.poltergeistReview}),

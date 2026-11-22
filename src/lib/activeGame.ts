@@ -3,6 +3,7 @@ import { MORT, mortOwnsLog } from '../../supabase/functions/_shared/play/mort';
 import { WOLFE, WOLFE_MODULE } from '../../supabase/functions/_shared/play/wolfeCatalog';
 import { initialWolfe, sameWolfe, wolfeOwnsLog } from '../../supabase/functions/_shared/play/wolfe';
 import { RATCHET_LADY, RATCHET_MODULE, ratchetLogBelongsTo } from '../../supabase/functions/_shared/play/ratchetLady';
+import { BIRDS, BIRDS_MODULE, birdsEventIncompatible, birdsLogBelongsTo, isBirdsReview, isBirdsTarget, type BirdsReview, type BirdsTarget } from '../../supabase/functions/_shared/play/birds';
 import {MALL,MALL_MODULE,initialMall} from './play/sunnydaze';
 import { WINGARD, WINGARD_MODULE } from '../../supabase/functions/_shared/play/wingardCatalog';
 import { initialWingard } from '../../supabase/functions/_shared/play/wingardCottage';
@@ -16,8 +17,10 @@ export interface GameSelection {
   setupScenario: string | null; startingEvent: string | null; mission: string | null;
   filmId: string | null;
   finalGirlStartingHealth?: number;
+  birdsRequired?: BirdsTarget;
 }
 export interface EndingFormData {
+  birdsReview?: BirdsReview;
   falconwoodReview?: import("../../supabase/functions/_shared/play/falconwood").FalconwoodReview;
   slayerReview?: import("./play/slayer").SlayerReview;
   childrenOnBoardAtFinish?: number|null;
@@ -84,6 +87,14 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  const target = game.selection?.birdsRequired;
+  if (target !== undefined && (game.selection?.killer !== BIRDS || !isBirdsTarget(target) ||
+      birdsEventIncompatible(game.selection.killer, game.selection.location, game.selection.startingEvent))) return false;
+  if (Array.isArray(game.playEvents) && (!birdsLogBelongsTo(game.selection?.killer, game.playEvents) ||
+      game.playEvents.some(e => e?.moduleData?.module === BIRDS_MODULE && !e.birdsAction &&
+        (target === undefined || target !== e.moduleData.changes?.required)))) return false;
+  if (game.formData?.birdsReview !== undefined &&
+      (game.selection?.killer !== BIRDS || !isBirdsReview(game.formData.birdsReview))) return false;
   if(game.mallSetupVersion!==undefined&&(game.mallSetupVersion!==1||game.selection?.location!==MALL))return false;
   if(game.playEvents?.some(e=>(e.mallReference||e.moduleData?.module===MALL_MODULE)&&game.selection?.location!==MALL||e.moduleData?.module===MALL_MODULE&&!e.mallAction&&(game.mallSetupVersion!==1||e.moduleData.changes.snapshot!==initialMall(game.selection?.startingEvent).snapshot)))return false;
   if (game.ratchetSetupVersion !== undefined && (game.ratchetSetupVersion !== 1 || game.selection?.killer !== RATCHET_LADY)) return false;

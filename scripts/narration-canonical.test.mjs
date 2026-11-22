@@ -14,6 +14,7 @@ const code = (path) =>
 const load = (path, imports) => {
   const ex = {};
   new Function('require', 'exports', code(path))((name) => {
+    if(name==='./birds.ts'||name==='./play/birds.ts')return birds;
     if(name==='./falconwood.ts'||name==='./play/falconwood.ts')return falconwood;
     if(name==='./slayer.ts'||name==='./play/slayer.ts')return slayer;
     if(name==='./wolfeCatalog.ts'||name==='./play/wolfeCatalog.ts')return wolfeCatalog;
@@ -31,6 +32,7 @@ const load = (path, imports) => {
   }, ex);
   return ex;
 };
+const birds=load('../supabase/functions/_shared/play/birds.ts',{});
 const wolfeCatalog=load('../supabase/functions/_shared/play/wolfeCatalog.ts',{});
 const wolfe=load('../supabase/functions/_shared/play/wolfe.ts',{});
 const ratchetLady=load('../supabase/functions/_shared/play/ratchetLady.ts',{});

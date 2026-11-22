@@ -1,3 +1,4 @@
+import { BIRDS, birdsReviewText, type BirdsReview } from './play/birds.ts';
 import { falconwoodReviewText, type FalconwoodReview } from "./play/falconwood.ts";
 import { dimensionLabel, type SlayerReview } from "./play/slayer.ts";
 import type {MallReview} from './play/sunnydaze.ts';
@@ -15,6 +16,7 @@ export function characterFate(health?: number): 'survived' | 'died' | 'unknown' 
 }
 
 export function endingFacts(facts: {
+  birdsReview?: BirdsReview;
   mallReview?:MallReview;
   falconwoodReview?:FalconwoodReview;
   slayerReview?:SlayerReview;
@@ -23,7 +25,13 @@ export function endingFacts(facts: {
 }): string {
   const killer=typeof facts.killer==='string'?facts.killer:facts.killer?.name;
   const healthless=killer==='Poltergeist';
+  const birds = killer === BIRDS ? facts.birdsReview : undefined;
+  const girlFate = killer === BIRDS
+    ? birds?.reason === 'overrun-alive' ? 'survived' : birds?.reason === 'died' ? 'died'
+      : birds?.reason === 'rescued' && (facts.finalGirlHealth ?? 0)>0 ? 'survived' : 'unknown'
+    : reviewedCharacterFate(facts.finalGirlHealth,facts.konradReview,facts.tormentorReview);
   return [
+    ...(birds ? [`Reviewed Terror From Above result: ${birdsReviewText(birds)} This review takes precedence over earlier progress or stale health. The fate of the flock beyond the result is unrecorded.`] : []),
     ...(facts.falconwoodReview ? [`Reviewed Falconwood mission at finish: ${falconwoodReviewText(facts.falconwoodReview)} Use this result over earlier progress. A completed mission does not establish how it was completed, the Final Girl's survival, or how the Killer was defeated.`] : []),
     ...(facts.mallReview?[`Reviewed Sunnydaze Savior: ${facts.mallReview.savior}; Health ${facts.mallReview.health??'unrecorded'}; Trust position ${facts.mallReview.trust??'unrecorded'} (0 bottom, 3 highest). Exit reward ${facts.mallReview.exitReward??'unrecorded'}. He is a separate male Ally, never the selected Final Girl or an ordinary Victim. His death means immediate game loss, not the Final Girl’s death. An exited Savior is safe from subsequent on-board effects; his escape does not itself defeat the Killer. Unknown is not absence or death.`]:[]),
     ...(killer === 'Slayer' && facts.slayerReview
@@ -36,9 +44,9 @@ export function endingFacts(facts: {
     ...(facts.grimlashReview?[`Grimlash Madness loss record: ${facts.grimlashReview.loss}. Skull or Telluric means a game loss, not necessarily physical death, zero Health or a Victim casualty. Unknown is not a loss. Do not invent Children outside Shady Acres.`]:[]),
     ...(facts.konradReview?[`Reviewed USS Konrad ship fate: ${facts.konradReview.fate}. Airlock-loss and explosion-loss mean the Final Girl died and lost regardless of stale positive Health or Killer death. Survived means survival of this hazard only, not victory, escape or Killer death. Unknown establishes no ship fate.`]:[]),
     `Game result: ${facts.outcome ?? 'unrecorded'}. This is an objective result, not proof of anyone's survival.`,
-    `Final Girl fate: ${reviewedCharacterFate(facts.finalGirlHealth,facts.konradReview,facts.tormentorReview)} (reviewed health ${facts.finalGirlHealth ?? 'unrecorded'}).`,
-    killer==='The Hunter'&&facts.hunterReview&&facts.hunterReview.phase!=='mark-x'?'Hunter Health belongs to Mark X only. Current Mark V damage uses Cybernetic Parts. Any legacy scalar is not evidence of either model’s fate.':killer==='The Intruders'?'Use individual Intruder observations and confirmed fates. No combined Killer Health applies. Pending Final Health does not establish death.':killer==='The Organism'?'Use the recorded mutation roster and individual Health. Pending Final Health does not establish defeat.':healthless?'Poltergeist has no Health and cannot be killed. Historical numerical Health inputs are inapplicable.':`Killer health remaining: ${facts.killerHealth ?? 'unrecorded'}; maximum health is unknown.`,
-    'A win at zero Final Girl health is a sacrifice, not a living survivor. A loss with positive health does not mean she died. With unrecorded health, leave her ultimate survival open.',
+    `Final Girl fate: ${girlFate} (reviewed health ${facts.finalGirlHealth ?? 'unrecorded'}).`,
+    killer===BIRDS?'The flock consists of individual Minions. No shared Health or Final Health token applies.':killer==='The Hunter'&&facts.hunterReview&&facts.hunterReview.phase!=='mark-x'?'Hunter Health belongs to Mark X only. Current Mark V damage uses Cybernetic Parts. Any legacy scalar is not evidence of either model’s fate.':killer==='The Intruders'?'Use individual Intruder observations and confirmed fates. No combined Killer Health applies. Pending Final Health does not establish death.':killer==='The Organism'?'Use the recorded mutation roster and individual Health. Pending Final Health does not establish defeat.':healthless?'Poltergeist has no Health and cannot be killed. Historical numerical Health inputs are inapplicable.':`Killer health remaining: ${facts.killerHealth ?? 'unrecorded'}; maximum health is unknown.`,
+    killer===BIRDS?'Use the explicit rescue or loss review to describe the result. Ignore any generic inference that zero Health alone confirms death.':'A win at zero Final Girl health is a sacrifice, not a living survivor. A loss with positive health does not mean she died. With unrecorded health, leave her ultimate survival open.',
     'Positive health ordinarily establishes life at the recorded instant, not escape or safety. An explicitly recorded unique module ending (including a terminal Final Girl Death Trap or assimilation) takes priority over generic health-based survival/death inference.',
     ...(healthless&&facts.poltergeistReview?[`Final reviewed rescue (takes precedence over earlier observations): Carolyn escape ${facts.poltergeistReview.carolynRescued===true?'confirmed':'unconfirmed'}; Mr. Floppy at escape ${facts.poltergeistReview.floppyAtEscape===true?'confirmed':'unconfirmed'}; Epic requirement ${facts.poltergeistReview.epicRequired===null?'unknown':facts.poltergeistReview.epicRequired?'required':'not required'}. Unconfirmed means unknown, not failure. Do not infer an additional rescue, loss or death.`]:[]),
     ...(facts.poltergeistReview?.escapeRoute?[`Reviewed Carolyn rescue route: ${facts.poltergeistReview.escapeRoute}. Helicopter is not an Exit. Preserve the reported game result separately; do not adjudicate the unresolved Epic interaction.`]:[]),

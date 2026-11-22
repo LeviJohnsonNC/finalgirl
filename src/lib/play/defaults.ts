@@ -1,3 +1,4 @@
+import { BIRDS } from '../../../supabase/functions/_shared/play/birds';
 import { MORT } from '../../../supabase/functions/_shared/play/mort';
 import { RATCHET_LADY, RATCHET_SETUP } from '../../../supabase/functions/_shared/play/ratchetLady';
 import { ORGANISM, ORGANISM_SETUP } from "./organism";
@@ -36,7 +37,7 @@ export function playStartingValues(
   if(killer==='The Tormentor')return {finalGirlHealth:getFinalGirlHealth(finalGirl),killerHealth:7,finalHorrorLevel:3,bloodlust:0};
   return {
     finalGirlHealth: getFinalGirlHealth(finalGirl),
-    ...(killer!=='Poltergeist'&&{killerHealth:killerHealth[killer]??10}),
+    ...(killer!=='Poltergeist'&&killer!==BIRDS&&{killerHealth:killerHealth[killer]??10}),
     finalHorrorLevel: killer === 'Poltergeist' ? 3 : 4,
     bloodlust: 0,
   };

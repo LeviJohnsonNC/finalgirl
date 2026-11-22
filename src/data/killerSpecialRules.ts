@@ -1,3 +1,4 @@
+import { BIRDS_GUIDANCE } from '../../supabase/functions/_shared/play/birds';
 import { SLAYER_RULE_GUIDANCE } from "@/lib/play/slayer";
 import { INTRUDER_PROMPT_CONTEXT } from "./rules/intruderRules";
 /**
@@ -49,10 +50,10 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
   // ── Season 1 Vignettes ────────────────────────────────────────────────────
 
   'Birds': {
-    narrativeNote:
-      'A vignette killer — not a single entity but a swarming flock of birds. There is no physical body to fight or kill; survival is about avoiding the swarm and outlasting it. No location to explore — the threat is everywhere and nowhere.',
+    narrativeNote: BIRDS_GUIDANCE,
     isVignette: true,
-    winCondition: 'Survive long enough for the flock to disperse. There is no killing the threat.',
+    winCondition: 'Save all required vignette Special Victims.',
+    lossCondition: 'The Final Girl dies or every board space reaches three Birds.',
   },
 
   // ── Season 2 ─────────────────────────────────────────────────────────────

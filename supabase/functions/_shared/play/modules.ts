@@ -24,6 +24,7 @@ import { validKonradField, canonicalKonradSnapshot, initialKonrad, konradFacts }
 import { KONRAD_ITEMS } from './konradCatalog.ts';
 import { EVOMORPH_POWERS, EVOMORPH_FINALES, EVOMORPH_AMBUSH, validEvomorphField, initialEvomorph, evomorphFacts } from './evomorph.ts';
 import { validCreechField, creechFacts, creechStartingObservations, CREECH_EVENTS, CREECH_ITEMS, CREECH_PEOPLE } from './creech.ts';
+import { BIRDS, BIRDS_MODULE, BIRDS_POWERS, BIRDS_FINALES, BIRD_WALL, birdsReview, birdsReviewText, birdsState, birdsSummary, validBirdsField } from './birds.ts';
 import { POLTERGEIST_ITEMS, POLTERGEIST_POWERS, POLTERGEIST_FINALES, POLTERGEIST_MINORS, validPoltergeistField, poltergeistFacts, poltergeistPower } from './poltergeist.ts';
 import { validGrovesField, grovesLabel, grovesValue, grovesFacts, GROVES_EVENTS, GROVES_ITEMS, GROVES_VISUAL, GROVES_PEOPLE } from "./groves.ts";
 import { INKANYAMBA_POWERS, INKANYAMBA_FINALES, INKANYAMBA_MINOR_POWERS, validInkanyambaField, inkanyambaFacts } from "./inkanyamba.ts";
@@ -73,7 +74,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: typeof MEGABGCON_MODULE | typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: typeof BIRDS_MODULE | typeof MEGABGCON_MODULE | typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -108,6 +109,7 @@ export function killerMomentCards(killer: string, type: string) {
   if(killer==='The Tormentor')return [...(type==='dark-power'?TORMENTOR_POWERS:type==='finale'?TORMENTOR_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if(killer==='Grimlash')return [...(type==='dark-power'?GRIMLASH_POWERS:type==='finale'?GRIMLASH_FINALES:[])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Evomorph") return [...(type === "dark-power" ? EVOMORPH_POWERS : type === "finale" ? EVOMORPH_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
+  if (killer === BIRDS) return [...(type === "dark-power" ? BIRDS_POWERS : type === "finale" ? BIRDS_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Poltergeist") return [...(type === "dark-power" ? POLTERGEIST_POWERS : type === "finale" ? POLTERGEIST_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Inkanyamba") return [...(type === "dark-power" ? INKANYAMBA_POWERS : type === "finale" ? INKANYAMBA_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === "Dr. Fright") return [...(type === "dark-power" ? FRIGHT_POWERS : type === "finale" ? FRIGHT_FINALES : [])].sort((a,b)=>a.name.localeCompare(b.name));
@@ -213,6 +215,7 @@ function validField(
   if (module === "konrad") return validKonradField(key,value);
   if (module === "evomorph") return validEvomorphField(key,value);
   if (module === "creech") return validCreechField(key,value);
+  if (module === BIRDS_MODULE) return validBirdsField(key,value);
   if (module === "poltergeist") return validPoltergeistField(key,value);
   if (module === "groves") return validGrovesField(key, value);
   if (module === "inkanyamba") return validInkanyambaField(key, value);
@@ -328,7 +331,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    ![MEGABGCON_MODULE, MORT_MODULE, WOLFE_MODULE, RATCHET_MODULE, STATION_MODULE, ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    ![BIRDS_MODULE, MEGABGCON_MODULE, MORT_MODULE, WOLFE_MODULE, RATCHET_MODULE, STATION_MODULE, ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -351,6 +354,7 @@ export function moduleState(
   entries: readonly ObservedEvent[],
   module: ModuleObservation["module"],
 ): ModuleState {
+  if (module === BIRDS_MODULE) return birdsState(entries);
   if (module === "fright") { const state=frightState(entries); if(!state) return {}; const {eventId:_id,...snapshot}=state; return {snapshot:JSON.stringify(snapshot),sleep:state.sleep,mode:state.mode,progress:state.path.length,...frightPublic(entries)}; }
   const state: ModuleState = {};
   if (module === INTRUDER_MODULE || module === ORGANISM_MODULE) {
@@ -570,6 +574,12 @@ export function describeModule(observation: ModuleObservation) {
   if(observation.module === "konrad") return konradFacts(observation.changes).join(" ") || "USS Konrad state recorded";
   if(observation.module === "evomorph") return evomorphFacts(observation.changes);
   if(observation.module==='creech')return creechFacts(observation.changes).join(' ') || Object.entries(observation.changes).filter(([k])=>k!=='initialized').map(([k,v])=>`${k.replace(/\./g,' ')}: ${v??'not recorded'}`).join('; ');
+  if (observation.module === BIRDS_MODULE) {
+    const review = birdsReview(observation.changes);
+    if (review) return birdsReviewText(review);
+    if (observation.changes.wall !== undefined) return typeof observation.changes.wall === 'number' ? `Bird Wall: ${observation.changes.wall}/5` : 'Bird Wall updated';
+    return 'Special Victim progress updated';
+  }
   if(observation.module==='poltergeist')return Object.entries(observation.changes).filter(([k])=>!['initialized','minorsRemoved'].includes(k)).map(([k,v])=>`${fieldLabel('poltergeist',k)}: ${v===null?'not recorded':String(v).replace(/-/g,' ')}`).join('; ');
   if (observation.module === "groves") return Object.entries(observation.changes).map(([key,value])=>`${grovesLabel(key)}: ${grovesValue(key,value)}`).join("; ");
   if (observation.module === "maple") return Object.entries(observation.changes).map(([key,value])=>`${mapleLabel(key)}: ${mapleValue(key,value)}`).join("; ");
@@ -622,6 +632,7 @@ export function moduleContext(
   for (const module of [
     "creech",
     "poltergeist",
+    BIRDS_MODULE,
     "groves",
     "inkanyamba",
     "billy",
@@ -633,7 +644,7 @@ export function moduleContext(
     "maple",
   ] as const) {
     const applies =
-      module === "creech" ? selection.location === "Creech Manor" : module === "poltergeist" ? selection.killer === "Poltergeist" : module === "groves" ? selection.location === "Sacred Groves" : module === "inkanyamba" ? selection.killer === "Inkanyamba" : module === "maple" ? selection.location === "Maple Lane" : module === "carnival"
+      module === BIRDS_MODULE ? selection.killer === BIRDS : module === "creech" ? selection.location === "Creech Manor" : module === "poltergeist" ? selection.killer === "Poltergeist" : module === "groves" ? selection.location === "Sacred Groves" : module === "inkanyamba" ? selection.killer === "Inkanyamba" : module === "maple" ? selection.location === "Maple Lane" : module === "carnival"
         ? selection.location === "Carnival of Blood"
         : module === "geppetto"
           ? selection.killer === "Geppetto"
@@ -807,6 +818,10 @@ export function moduleStoryBeats(
   }
   const lines: string[] = [];
   if(context.evomorph) {const s=context.evomorph;lines.push(`Evomorph ${s.stage??'stage unknown'}, ${s.presence??'presence unknown'}${s.ambushId?`; Ambush face ${s.ambushFace??'unknown'} / ${s.ambushId}`:''}.`);lines.push(evomorphFacts(s,entries));}
+  if (context.birds) {
+    const review = birdsReview(context.birds);
+    lines.push(review ? birdsReviewText(review) : birdsSummary(context.birds));
+  }
   if(context.poltergeist) lines.push(poltergeistFacts(context.poltergeist,poltergeistPower(entries)));
   if (context.inkanyamba) lines.push(...inkanyambaFacts(context.inkanyamba));
   if (context.fright) {
@@ -961,6 +976,10 @@ export function buddylandReferences(
     for(const e of GROVES_EVENTS) if(context?.groves?.[`event.${e.id}`] === "active") refs.push({name:e.name,effect:`${e.effect} Activation alone does not prove any conditional effect occurred.`});
   }
   if (selection.killer === 'Evomorph' && context?.evomorph) refs.push({name:'Evomorph observations',effect:evomorphFacts(context.evomorph)});
+  if (selection.killer === BIRDS && context?.birds) {
+    const wall = context.birds.wall;
+    if (typeof wall === 'number' && wall < 5) refs.push({name:BIRD_WALL.name,effect:BIRD_WALL.effect});
+  }
   if (selection.killer === "Poltergeist" && context?.poltergeist) {
     const state=context.poltergeist;
     if(attacker==='Clown Doll'||attacker==='Behemoth') refs.push({name:attacker,effect:'A temporary Terror-card apparition. It disappears after the encounter. It is not an ordinary Victim or a permanent Minion. Its presence alone establishes no killing.'});

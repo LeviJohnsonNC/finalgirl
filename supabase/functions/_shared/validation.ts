@@ -1,5 +1,6 @@
 import { MORT, MORT_MAX_HEALTH } from './play/mort.ts';
 import { RATCHET_LADY, RATCHET_HEALTH_STORAGE_MAX } from './play/ratchetLady.ts';
+import { BIRDS, birdsReasonMatches, isBirdsReview } from './play/birds.ts';
 import { missionByName } from "./play/falconwood.ts";
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 import { corsHeaders } from './auth.ts';
@@ -10,6 +11,11 @@ const SlayerReviewSchema = z.object({finalDimension:z.enum(["our","mirror"]).nul
 const TormentorReviewSchema=z.object({loss:z.enum(['unknown','none','trap-terminal','no-escape','endless-traps'])}).strict();
 const TormentorOpeningSchema=z.enum(['fresh-v1','legacy-unknown']);
 const GrimlashReviewSchema=z.object({loss:z.enum(['none','unknown','skull','telluric'])}).strict();
+const BirdsReviewSchema = z.object({
+  reason:z.enum(['rescued','overrun-alive','overrun','died','unrecorded']),
+  required:z.union([z.literal(1),z.literal(2),z.literal(3)]).nullable(),
+  rescued:z.number().int().min(0).max(3).nullable(),
+}).strict().refine(isBirdsReview);
 const FalconwoodReviewSchema = z.object({
   mission: z.enum(['father','friend','hunt','lab','code']).optional(),
   complete: z.boolean().nullable(),
@@ -57,6 +63,7 @@ export const SceneImageRequestSchema = z.object({
   hunterReview:HunterReviewSchema.optional(),
   marrekOpening:TormentorOpeningSchema.optional(),
   tormentorOpening:TormentorOpeningSchema.optional(),
+  birdsReview:BirdsReviewSchema.optional(),
   falconwoodReview:FalconwoodReviewSchema.optional(),
   slayerReview:SlayerReviewSchema.optional(),
   tormentorReview:TormentorReviewSchema.optional(),
@@ -84,6 +91,7 @@ export const SceneImageRequestSchema = z.object({
   referenceImageUrl: z.string().url().max(2000).optional(),
   previousImageUrl: z.string().url().max(2000).optional()
 }).refine(v => v.killer === RATCHET_LADY || (v.killerHealth ?? 0) <= (v.killer===MORT?MORT_MAX_HEALTH:20), {message:'Killer Health exceeds the supported range',path:['killerHealth']})
+.refine(v => !v.birdsReview || v.killer === BIRDS && v.sceneType === 'ending' && v.outcome !== undefined && birdsReasonMatches(v.outcome, v.birdsReview.reason), {message:'Birds review must match its ending result'})
 .refine(v => !v.falconwoodReview || v.location === 'Falconwood' && v.sceneType === 'ending' &&
   (v.outcome !== 'won' || v.falconwoodReview.complete === true) &&
   (!v.mission || missionByName(v.mission.name)?.id === v.falconwoodReview.mission),
@@ -119,6 +127,7 @@ export const EndingRequestSchema = z.object({
   mallReview:MallReviewSchema.optional(),
   hunterReview:HunterReviewSchema.optional(),
   endingStreamVersion: z.literal(1).optional(),
+  birdsReview:BirdsReviewSchema.optional(),
   falconwoodReview:FalconwoodReviewSchema.optional(),
   slayerReview:SlayerReviewSchema.optional(),
   tormentorReview:TormentorReviewSchema.optional(),
@@ -156,6 +165,7 @@ export const EndingRequestSchema = z.object({
   konradReview:KonradReviewSchema.optional(),
   poltergeistReview:z.object({carolynRescued:z.literal(true).nullable(),floppyAtEscape:z.literal(true).nullable(),epicRequired:z.boolean().nullable(),escapeRoute:z.enum(['exit','helicopter']).nullable().optional()}).strict().optional()
 }).refine(v => v.killer.name === RATCHET_LADY || (v.killerHealth ?? 0) <= (v.killer.name===MORT?MORT_MAX_HEALTH:20), {message:'Killer Health exceeds the supported range',path:['killerHealth']})
+.refine(v => !v.birdsReview || v.killer.name === BIRDS && birdsReasonMatches(v.outcome, v.birdsReview.reason), {message:'Birds review must match its ending result'})
 .refine(v => !v.falconwoodReview || v.location.name === 'Falconwood' &&
   (v.outcome !== 'won' || v.falconwoodReview.complete === true) &&
   (!v.mission || missionByName(v.mission.name)?.id === v.falconwoodReview.mission),

@@ -210,12 +210,16 @@ export function FinalGirlReference({
           </summary>
           <div className="girl-panel-content">
             <p>{ref.ultimate}</p>
+            {ref.dossierRescues && <>
+              <p>Unlock after saving {ref.dossierRescues} Victims. Choose an unused reward for each rescue.</p>
+              <ul className="girl-rescue-rewards">{ref.rescueRewards.map((reward,index)=><li key={index}>{reward}</li>)}</ul>
+            </>}
             <p className="girl-reference-note">
               Additional Victims saved: {ref.additionalReward}
             </p>
           </div>
         </details>
-        <SecretItemReference key={name} name={name} />
+        {ref.personalItem !== false && <SecretItemReference key={name} name={name} />}
       </div>
     </div>
   );

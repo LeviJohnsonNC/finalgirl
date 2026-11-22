@@ -1,3 +1,4 @@
+import { birdsArt } from '@/components/play/birdsArt';
 import type { RuleChapter } from '@/data/rules/types';
 import cabin from '@/assets/rules/cabin.webp';
 import archive from '@/assets/rules/archive.webp';
@@ -19,6 +20,7 @@ const entityArt = import.meta.glob<string>([
 
 /** Reuse the entity's portrait/location art for owned special-rule files. */
 export function getChapterArt(chapter: RuleChapter): string {
+  if (chapter.id === 'ch-killer-birds') return birdsArt('banner').src;
   if (coreArt[chapter.id]) return coreArt[chapter.id];
   const slug = chapter.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const folder = chapter.id.startsWith('ch-location-') ? 'locations' : 'characters';

@@ -15,6 +15,7 @@ const DEFAULT_SETTINGS: ImageSettings = {
 };
 
 export interface GenerateImageContext {
+  birdsReview?: import("../../supabase/functions/_shared/play/birds").BirdsReview;
   slayerReview?: import("@/lib/play/slayer").SlayerReview;
   mallReview?:import('@/lib/play/sunnydaze').MallReview;
   hunterReview?:import('@/lib/play/hunter').HunterReview;

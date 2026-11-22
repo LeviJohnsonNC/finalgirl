@@ -1,3 +1,4 @@
+import type { BirdsTarget } from '../../supabase/functions/_shared/play/birds';
 import {STATION, STATION_EVENTS, stationNameKey, stationSetup, stationSetupDescription} from '../../supabase/functions/_shared/play/stationCatalog';
 import {marrekOpeningGuidance} from '@/lib/play/marrekWarehouse';
 import {tormentorOpeningGuidance} from '@/lib/play/tormentor';
@@ -64,6 +65,7 @@ interface NowPlayingProps {
   /** Falconwood only: the Mission that must be completed to win. */
   mission?: string | null;
   falconwoodFresh?: boolean;
+  birdsRequired?: BirdsTarget;
   stationFresh?: boolean;
   mortFresh?: boolean;
   filmId: string | null;
@@ -83,6 +85,7 @@ const NowPlaying = ({
   startingEvent,
   mission,
   falconwoodFresh,
+  birdsRequired,
   stationFresh,
   mortFresh,
   filmId,
@@ -340,7 +343,7 @@ const NowPlaying = ({
     onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying || isPaused} hasStory={Boolean(story)}
     showDeathDetails={showDeathPanel} onShowDeathDetails={enabled => onCheckpoint({showDeathPanel: enabled})}
     drafts={playDrafts} onDraft={saveDraft}
-    moduleControls={<ModuleControls mission={mission} falconwoodFresh={falconwoodFresh} stationFresh={stationFresh} mortFresh={mortFresh} setupScenario={setupScenario} startingEvent={startingEvent} sessionId={sessionId} killer={killer} location={location} finalGirl={finalGirl} finalGirlStartingHealth={finalGirlStartingHealth} events={playEvents} onEvent={recordPlayEvent} onDeath={event=>setDeathEventId(event.id)} blocked={playSyncBlocked} />}
+    moduleControls={<ModuleControls birdsRequired={birdsRequired} mission={mission} falconwoodFresh={falconwoodFresh} stationFresh={stationFresh} mortFresh={mortFresh} setupScenario={setupScenario} startingEvent={startingEvent} sessionId={sessionId} killer={killer} location={location} finalGirl={finalGirl} finalGirlStartingHealth={finalGirlStartingHealth} events={playEvents} onEvent={recordPlayEvent} onDeath={event=>setDeathEventId(event.id)} blocked={playSyncBlocked} />}
     deathPanel={deathEventId && syncPlayNow ? <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl,mission}} events={playEvents} getEvents={getPlayEvents} eventId={deathEventId} draft={playDrafts[deathEventId]} onDraft={saveDraft} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/> : undefined}
     onDeath={event=>setDeathEventId(event.id)}/>;
 

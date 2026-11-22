@@ -1,3 +1,4 @@
+import { BIRDS, birdsEventIncompatible } from '../../supabase/functions/_shared/play/birds';
 import { useState, useMemo, useId } from 'react';
 import { Dices, Crosshair, Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -22,13 +23,14 @@ interface ScenarioDropdownsProps {
   eventValue?: string | null;
   missionValue?: string | null;
   selectedLocation: string | null;
+  selectedKiller?: string | null;
   onSetupChange?: (setup: string | null) => void;
   onEventChange?: (event: string | null) => void;
   onMissionChange?: (mission: string | null) => void;
 }
 
 const ScenarioDropdownsForLocation = ({ 
-  selectedLocation, 
+  selectedLocation, selectedKiller = null,
   onSetupChange, 
   onEventChange,
   onMissionChange, setupValue, eventValue, missionValue
@@ -104,7 +106,7 @@ const ScenarioDropdownsForLocation = ({
       {/* Event Dropdown */}
       <div className="casting-console-field casting-console-field--event">
         <Select 
-          value={selectedEvent || undefined} 
+          value={selectedKiller === BIRDS ? selectedEvent ?? '' : selectedEvent || undefined}
           onValueChange={handleEventChange}
           disabled={events.length === 0}
         >
@@ -116,9 +118,10 @@ const ScenarioDropdownsForLocation = ({
               <SelectItem 
                 key={event.name} 
                 value={event.name}
+                disabled={birdsEventIncompatible(selectedKiller, selectedLocation, event.name)}
                 className="casting-console-option"
               >
-                {event.name}
+                {event.name}{birdsEventIncompatible(selectedKiller, selectedLocation, event.name) ? ' · redraw for Birds' : ''}
               </SelectItem>
             ))}
           </SelectContent>

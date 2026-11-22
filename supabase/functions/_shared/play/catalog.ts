@@ -20,6 +20,7 @@ import { GRIMLASH_TERRORS } from './grimlash.ts';
 import { KONRAD_ITEMS, KONRAD_EVENTS, KONRAD_TERRORS, KONRAD_SPACES, KONRAD_PEOPLE, KONRAD_SOURCE } from './konradCatalog.ts';
 import { EVOMORPH_TERRORS } from './evomorph.ts';
 import { CREECH_ITEMS, CREECH_EVENTS, CREECH_TERRORS, CREECH_SPACES, CREECH_PEOPLE, CREECH_SOURCE } from './creech.ts';
+import { BIRDS_TERRORS } from './birds.ts';
 import { POLTERGEIST_ITEMS, POLTERGEIST_TERRORS } from './poltergeist.ts';
 import { GROVES_EVENTS, GROVES_ITEMS, GROVES_PEOPLE, GROVES_SPACES, GROVES_SOURCE, GROVES_TERRORS } from "./groves.ts";
 import { INKANYAMBA_TERRORS } from "./inkanyamba.ts";
@@ -83,6 +84,7 @@ export const PLAY_CARDS: readonly PlayCard[] = [
   ...EVOMORPH_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...CREECH_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...CREECH_EVENTS.map(c=>({...c,kind:"event" as const,location:"Creech Manor",source:CREECH_SOURCE})),
+  ...BIRDS_TERRORS.map(card=>({...card,kind:"terror" as const})),
   ...POLTERGEIST_TERRORS.map(card=>({...card,kind:"terror" as const})),
   ...GROVES_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...GROVES_EVENTS.map(c=>({...c,kind:"event" as const,location:"Sacred Groves",source:GROVES_SOURCE})),
