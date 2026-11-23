@@ -34,9 +34,12 @@ this import.
   the hidden objective and verified starting tracks in the same durable write.
   Legacy sessions may record a correction from unknown. Casting marks Creech
   Manor’s Ghost Hunters as incompatible and supports compatible starting Events.
-- **Play.** Objective progress, ordinary totals and tracks remain separately
-  visible. One live Special Victim save advances the objective and shared
-  saved total, with one Undo. Objective corrections leave shared totals alone.
+- **Play.** The rescue objective shows the target and one slot per required
+  Special Victim. The placement action asks which tabletop trigger occurred,
+  then switches to recording rescues. Completing all slots highlights the
+  objective. A missing record offers a direct correction action. One live
+  Special Victim save advances the objective and shared saved total, with one
+  Undo. Objective corrections leave shared totals alone.
   Bird Wall has its own token count and stays removed at five until corrected
   or undone. The spawn reference lives in the Rules chapter. Resolve the tabletop
   position, victims, eligibility, dice and attack outcomes on the board.
