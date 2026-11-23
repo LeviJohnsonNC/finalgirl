@@ -328,7 +328,7 @@ export const getOwnedContent = (ownedFilms: string[]) => {
 
   return {
     killers: [...new Set(owned.map(f => f.killer))],
-    locations: [...new Set(owned.map(f => f.location))],
+    locations: [...new Set(owned.map(f => f.location).filter(Boolean))],
     finalGirls: [...new Set(owned.flatMap(f => f.finalGirls))],
   };
 };
