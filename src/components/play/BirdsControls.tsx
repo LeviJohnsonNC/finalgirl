@@ -1,7 +1,7 @@
 import { mallUnlocksUltimate } from '@/lib/play/sunnydaze';
 import { useState } from 'react';
 import {
-  BIRDS, BIRDS_MODULE, BIRDS_DIFFICULTIES, BIRDS_SPAWN_SPACES, BIRDS_FINALES, BIRD_WALL,
+  BIRDS, BIRDS_MODULE, BIRDS_DIFFICULTIES, BIRD_WALL,
   birdsLatest, birdsParent, birdsState, birdsSummary, initialBirds,
   isBirdsTarget, resolveBirdsAction, type BirdsAction,
 } from '../../../supabase/functions/_shared/play/birds';
@@ -33,7 +33,6 @@ export function BirdsControls({events,onEvent,blocked,birdsRequired}:ControlsPro
   const wall = typeof state.wall === 'number' ? state.wall : undefined;
   const latestObjective = birdsLatest(entries,'save');
   const latestWall = birdsLatest(entries,'count-wall');
-  const finale = BIRDS_FINALES.find(card=>card.name === entries.find(e=>e.momentType === 'finale')?.killerCard);
   const ready = Boolean(state.arrival && state.arrival !== 'hidden');
   const won = actualTarget !== undefined && actualTarget === actualRescued;
   const ultimateRecorded = entries.some(e=>e.kind === 'moment' && e.momentType === 'ultimate-unlocked') || mallUnlocksUltimate(entries);
@@ -138,11 +137,6 @@ export function BirdsControls({events,onEvent,blocked,birdsRequired}:ControlsPro
       </article>
     </MinorPowerSection>
     <KillerCards killer={BIRDS} events={events} onEvent={onEvent} disabled={blocked} />
-    <details className="birds-spawn"><summary>Spawn Birds reference</summary>
-      <p>{finale?.effect ?? 'The Minion Action starts the Killer phase with a spawn. Follow the printed action strip and applicable card effects.'}</p>
-      <p>Assign one die to quantity and one to placement unless a card changes the roll. A space holds up to three Birds. Place overflow in adjacent spaces and work outward if needed.</p>
-      <dl>{BIRDS_SPAWN_SPACES.map((v,i)=><div key={v}><dt>{i+1}</dt><dd>{v}</dd></div>)}</dl>
-    </details>
     {message && <p role="alert">{message}</p>}
   </section>;
 }

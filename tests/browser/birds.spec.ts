@@ -15,6 +15,7 @@ test('Birds rescue syncs both counters and survives reload', async ({page,archiv
   await openModule(page,'birds');
   const birds = page.locator('[data-module="birds"]');
   await expect(birds.getByText(/Special Victims hidden · target 2/)).toBeVisible();
+  await expect(birds.getByText('Spawn Birds reference', {exact:true})).toHaveCount(0);
   const readLog = () => page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents as PlayEvent[],key);
   await expect.poll(async ()=>{
     const summary=summarizePlay(await readLog());
