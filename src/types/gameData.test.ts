@@ -71,6 +71,14 @@ describe("getOwnedContent", () => {
     expect(result.finalGirls).toHaveLength(6);
   });
 
+  it("excludes empty vignette locations while keeping their casting options", () => {
+    const result = getOwnedContent(['s1-terror-from-above', 's4-buddyland']);
+
+    expect(result.locations).toEqual(['Buddyland']);
+    expect(result.killers).toContain('Birds');
+    expect(result.finalGirls).toContain('Melanie');
+  });
+
   it("handles non-existent film IDs gracefully", () => {
     const result = getOwnedContent(['non-existent-film', 's1-camp-happy-trails']);
     expect(result.killers).toHaveLength(1);
