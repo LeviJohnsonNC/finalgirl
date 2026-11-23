@@ -38,7 +38,7 @@ this import.
   visible. One live Special Victim save advances the objective and shared
   saved total, with one Undo. Objective corrections leave shared totals alone.
   Bird Wall has its own token count and stays removed at five until corrected
-  or undone. The spawn panel is a read-only reference. Resolve the tabletop
+  or undone. The spawn reference lives in the Rules chapter. Resolve the tabletop
   position, victims, eligibility, dice and attack outcomes on the board.
 - **Finish.** Confirm an off-app result before the first archive write. A
   logged rescue win can prefill the review. Loss reason distinguishes overrun
