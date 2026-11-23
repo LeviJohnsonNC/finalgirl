@@ -15,6 +15,11 @@ short Play header. The Collection cover and Melanie identity assets are pre-exis
 | `endless-swarm.webp` | Crows massing along a country lane and fence |
 | `fowl-agression.webp` | Crows diving past a doorway at dusk |
 | `bird-wall.webp` | Crows crowding an open gate and path |
+| `rescue.webp` | Crows outside a rain-streaked shelter window at dusk |
+
+The Rescue objective uses a 1500 × 844 WebP encoded from the 1672 × 941
+generated frame `exec-67d65914-7514-4a1f-bf9f-08d9cc03a536.png`. Its responsive
+crop uses a 69% horizontal and 53% vertical focal point.
 
 The scenes evoke the card effects. People and places in the art do not establish
 the active cast, Location, placement, harm, or rescue. Asset and card IDs stay

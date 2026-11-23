@@ -1,6 +1,6 @@
 import { test, expect, activeGame, userId } from './fixtures';
 import { openMinorPowers, openModule, statusPick } from './play-helpers';
-import { summarizePlay, type PlayEvent } from '../../src/lib/play/events';
+import { newPlayEvent, summarizePlay, type PlayEvent } from '../../src/lib/play/events';
 import { birdsState } from '../../supabase/functions/_shared/play/birds';
 
 const key = `final-girl-active-game-v1:${userId}`;
@@ -14,14 +14,31 @@ test('Birds rescue syncs both counters and survives reload', async ({page,archiv
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   await openModule(page,'birds');
   const birds = page.locator('[data-module="birds"]');
-  await expect(birds.getByText(/Special Victims hidden · target 2/)).toBeVisible();
+  const objective = birds.locator('[data-module-control="objective"]');
+  const place = objective.getByRole('button',{name:'Special Victims placed'});
+  const record = objective.getByRole('button',{name:'Record rescue'});
+  const lastVictim = objective.getByRole('button',{name:'No normal Victims remain'});
+  const slots = objective.locator('.birds-rescue-slots span');
+  if (info.project.name === 'mobile') await page.setViewportSize({width:320,height:568});
+  await expect(objective.getByRole('heading',{name:'Rescue 2 Special Victims'})).toBeVisible();
+  await expect(objective.getByRole('status')).toHaveText('Special Victims hidden');
+  await expect(slots).toHaveCount(2);
+  await expect(lastVictim).toHaveCount(0);
   await expect(birds.getByText('Spawn Birds reference', {exact:true})).toHaveCount(0);
   const readLog = () => page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents as PlayEvent[],key);
   await expect.poll(async ()=>{
     const summary=summarizePlay(await readLog());
     return [summary.finalGirlHealth,summary.finalHorrorLevel,summary.bloodlust,summary.killerHealth];
   }).toEqual([5,4,0,undefined]);
-  await birds.getByRole('button',{name:'No normal Victims remain'}).click();
+  await objective.scrollIntoViewIfNeeded();
+  await objective.locator('img').evaluate((image: HTMLImageElement) => image.decode());
+  await objective.screenshot({path:info.outputPath('birds-rescue-waiting.png'),animations:'disabled',style:'.app-footer {visibility:hidden}'});
+  const beforePlacement = await readLog();
+  await place.click();
+  await expect(place).toHaveAttribute('aria-expanded','true');
+  expect(await readLog()).toEqual(beforePlacement);
+  await lastVictim.click();
+  await expect(record).toBeFocused();
   await page.evaluate(k=>{
     const original=Storage.prototype.setItem;
     Object.assign(window,{restoreBirdsWrite:()=>{Storage.prototype.setItem=original;}});
@@ -30,24 +47,61 @@ test('Birds rescue syncs both counters and survives reload', async ({page,archiv
       return original.call(this,name,value);
     };
   },key);
-  await birds.getByRole('button',{name:'Record Special Victim rescued'}).click();
+  await record.click();
   await expect(birds.getByRole('alert')).toContainText('could not be saved');
   await expect(birds.getByRole('status')).toContainText('0 of 2 rescued');
+  await expect(slots.first()).toHaveAttribute('data-state','pending');
   await page.evaluate(()=>(window as unknown as {restoreBirdsWrite:()=>void}).restoreBirdsWrite());
-  await birds.getByRole('button',{name:'Record Special Victim rescued'}).click();
+  await record.click();
   await expect(birds.getByRole('status')).toContainText('1 of 2 rescued');
+  await expect(slots.first()).toHaveAttribute('data-state','rescued');
   await expect.poll(async()=>summarizePlay(await readLog()).saved).toBe(1);
-  await birds.getByRole('button',{name:'Undo rescue observation'}).click();
+  await objective.getByRole('button',{name:'Undo',exact:true}).click();
   await expect(birds.getByRole('status')).toContainText('0 of 2 rescued');
   await expect.poll(async()=>summarizePlay(await readLog()).saved).toBe(0);
-  await birds.getByRole('button',{name:'Record Special Victim rescued'}).click();
+  await record.click();
   await page.reload();
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   await openModule(page,'birds');
   await expect(birds.getByRole('status')).toContainText('1 of 2 rescued');
   await expect(page.getByText('Killer Health',{exact:true})).toHaveCount(0);
-  expect(birdsState(summarizePlay(await readLog()).entries)).toMatchObject({rescued:1,required:2});
+  expect(birdsState(summarizePlay(await readLog()).entries)).toMatchObject({rescued:1,required:2,arrival:'normal-victims-gone'});
   await birds.screenshot({path:info.outputPath('birds-rescue.png'),animations:'disabled',style:'.app-footer {visibility:hidden}'});
+  await record.click();
+  await expect(objective.getByRole('status')).toHaveText('All Special Victims rescued');
+  await expect(record).toHaveCount(0);
+  await expect(objective.locator('[data-state="rescued"]')).toHaveCount(2);
+  await expect.poll(async()=>summarizePlay(await readLog()).saved).toBe(2);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await objective.screenshot({path:info.outputPath('birds-rescue-complete.png'),animations:'disabled',style:'.app-footer {visibility:hidden}'});
+});
+
+test('a resumed Birds game can complete its missing rescue record', async ({page,archive}) => {
+  await archive.install(page,{draft:{
+    ...newDraft,
+    selection:{...newDraft.selection,birdsRequired:undefined},
+    playEvents:[newPlayEvent({kind:'start',saved:3,killed:0,round:2})],
+  }});
+  await page.goto('/');
+  await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  await openModule(page,'birds');
+  const objective = page.locator('[data-module="birds"] [data-module-control="objective"]');
+  await expect(objective.getByRole('status')).toHaveText('Rescue progress unrecorded');
+  await expect(objective.locator('.birds-rescue-slots')).toHaveCount(0);
+  await objective.getByRole('button',{name:'Complete rescue record'}).click();
+  await statusPick(page,objective.getByRole('combobox',{name:'Rescue target'}),'Hard · 3');
+  await statusPick(page,objective.getByRole('combobox',{name:'Special Victims status'}),'Entered play · trigger unrecorded');
+  await statusPick(page,objective.getByRole('combobox',{name:'Number of Special Victims rescued'}),'1');
+  await objective.getByRole('button',{name:'Save correction'}).click();
+  await expect(objective.getByRole('heading',{name:'Rescue 3 Special Victims'})).toBeVisible();
+  await expect(objective.getByRole('status')).toHaveText('1 of 3 rescued');
+  await expect(objective.locator('[data-state="rescued"]')).toHaveCount(1);
+  await expect(objective.locator('[data-state="pending"]')).toHaveCount(2);
+  const readLog = () => page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents as PlayEvent[],key);
+  expect(summarizePlay(await readLog()).saved).toBe(3);
+  await objective.getByRole('button',{name:'Record rescue'}).click();
+  await expect(objective.getByRole('status')).toHaveText('2 of 3 rescued');
+  expect(summarizePlay(await readLog()).saved).toBe(4);
 });
 
 test('Birds casting keeps the separate location and excludes the incompatible starting Event', async ({page,archive},info) => {
@@ -164,7 +218,9 @@ test('Bird Wall and every selected reveal render with their own artwork', async 
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   await openModule(page,'birds');
   const panel=page.locator('[data-module="birds"]');
-  await panel.getByRole('button',{name:'Ultimate unlocked',exact:true}).click();
+  const objective=panel.locator('[data-module-control="objective"]');
+  await objective.getByRole('button',{name:'Special Victims placed'}).click();
+  await objective.getByRole('button',{name:'Ultimate unlocked',exact:true}).click();
   await expect(panel.getByRole('status')).toHaveText('0 of 2 rescued');
   await openMinorPowers(panel);
   await panel.getByRole('button',{name:'Record Bird Wall revealed'}).click();
@@ -201,6 +257,7 @@ test('Bird Wall and every selected reveal render with their own artwork', async 
   await page.getByRole('button',{name:'Dark Power',exact:true}).click();
   await expect(page.locator('.play-moment-editor')).toContainText('They’re Just Waiting to Strike');
   const logs=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents as PlayEvent[],key);
+  expect(birdsState(summarizePlay(logs).entries).arrival).toBe('ultimate');
   expect(logs.filter(e=>e.kind==='moment'&&e.momentType==='dark-power')).toHaveLength(1);
   expect(logs.filter(e=>e.kind==='moment'&&e.momentType==='finale')).toHaveLength(1);
 });
