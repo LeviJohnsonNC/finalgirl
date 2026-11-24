@@ -1062,6 +1062,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     if (razorfaceAction?.kind === 'purge') {
       if (razorfaceAction.girlHealth !== undefined) summary.finalGirlHealth = razorfaceAction.girlHealth;
       if (razorfaceAction.killerHealth !== undefined) summary.killerHealth = razorfaceAction.killerHealth;
+      if (razorfaceAction.horror !== undefined) summary.finalHorrorLevel = razorfaceAction.horror;
     }
     if (razorfaceAction?.kind === 'token')
       summary.killerHealth = razorfaceAction.result === 'revived' ? razorfaceAction.health : 0;

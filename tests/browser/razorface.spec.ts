@@ -88,11 +88,15 @@ test('replacement remains separate from a purge, and the clear state allows revi
   await expect(objective.getByRole('button',{name:'Record Final Health result'})).toHaveCount(0);
   await objective.getByRole('button',{name:/The Gift of Pain/}).click();
   await objective.getByRole('button',{name:'Replace Affliction',exact:true}).click();
-  await statusPick(page,objective.getByRole('combobox',{name:'Replacement Affliction'}),'A Delicious Sacrifice');
+  await statusPick(page,objective.getByRole('combobox',{name:'Replacement Affliction'}),'A Lamb to the Slaughter');
   await objective.getByRole('button',{name:'Record replacement',exact:true}).click();
   await expect(objective.getByText('1 in play',{exact:true})).toBeVisible();
-  await objective.getByRole('button',{name:/A Delicious Sacrifice/}).click();
+  await objective.getByRole('button',{name:/A Lamb to the Slaughter/}).click();
+  await objective.getByText('Record Horror after effects').click();
+  await objective.getByLabel('Horror',{exact:true}).fill('6');
   await objective.getByRole('button',{name:'Record purge',exact:true}).click();
+  const logAfterPurge = await page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents as PlayEvent[],key);
+  expect(summarizePlay(logAfterPurge).finalHorrorLevel).toBe(6);
   await expect(objective.getByText('Final Health can be revealed',{exact:true})).toBeVisible();
   await objective.locator('.razorface-release img').evaluate((image:HTMLImageElement) => image.decode());
   await objective.screenshot({path:info.outputPath('afflictions-cleared.png'), animations:'disabled',style:'.app-footer, [data-sonner-toaster] { visibility:hidden; }'});

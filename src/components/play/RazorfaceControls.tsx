@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowDown, Check, ChevronDown, Link2, Plus, Unlink2 } from 'lucide-react';
 import {
   AFFLICTIONS, RAZORFACE, RAZORFACE_MINORS, RAZORFACE_MODULE, affliction, razorfaceAvailable, razorfaceEntry,
-  razorfaceLatest, razorfaceState, type AfflictionId, type RazorfaceCommand,
+  razorfaceLatest, razorfaceState, raisesHorrorOnPurge, type AfflictionId, type RazorfaceCommand,
 } from '../../../supabase/functions/_shared/play/razorface';
 import { newPlayEvent, summarizePlay } from '@/lib/play/events';
 import { KillerCards } from './KillerCards';
@@ -29,7 +29,7 @@ export function RazorfaceControls({events, onEvent, blocked = false, razorfaceFr
   const [panel, setPanel] = useState<Panel | null>(null);
   const [selection, setSelection] = useState<AfflictionId[]>([]);
   const [newTurn, setNewTurn] = useState(false);
-  const [health, setHealth] = useState({girl:'', killer:''});
+  const [health, setHealth] = useState({girl:'', killer:'', horror:''});
   const [replacement, setReplacement] = useState<AfflictionId | ''>('');
   const [reason, setReason] = useState<'impossible' | 'exchange'>('impossible');
   const [revive, setRevive] = useState('');
@@ -58,7 +58,7 @@ export function RazorfaceControls({events, onEvent, blocked = false, razorfaceFr
     setOpen(open === id ? null : id);
     setPanel(null);
     setNewTurn(false);
-    setHealth({girl:'',killer:''});
+    setHealth({girl:'',killer:'',horror:''});
   };
   const save = (command: RazorfaceCommand) => {
     if (disabled || command.kind === 'purge' && [command.girlHealth, command.killerHealth].some(
@@ -69,7 +69,7 @@ export function RazorfaceControls({events, onEvent, blocked = false, razorfaceFr
       setPanel(null);
       setOpen(null);
       setNewTurn(false);
-      setHealth({girl:'',killer:''});
+      setHealth({girl:'',killer:'',horror:''});
       setRequiredDrawFailed(false);
     }
   };
@@ -79,7 +79,9 @@ export function RazorfaceControls({events, onEvent, blocked = false, razorfaceFr
     const expanded = card.id === open;
     const showGirlHealth = lifeDrain || card.id === 'the-gift-of-pain';
     const showKillerHealth = lifeDrain || card.id === 'experience-unbound';
-    const healthValid = [health.girl, health.killer].every(value => value === '' || /^\d{1,2}$/.test(value));
+    const showHorror = raisesHorrorOnPurge(card.id);
+    const inputsValid = [health.girl, health.killer].every(value => value === '' || /^\d{1,2}$/.test(value)) &&
+      (health.horror === '' || /^[0-7]$/.test(health.horror));
     return <article className="razorface-card" data-expanded={expanded} data-affliction={card.id} key={card.id}>
       <button type="button" className="razorface-card-trigger" aria-expanded={expanded} onClick={() => openCard(card.id)}>
         <span className="razorface-art-frame"><ModuleArtwork art={razorfaceArt(card.id)} /></span>
@@ -93,11 +95,14 @@ export function RazorfaceControls({events, onEvent, blocked = false, razorfaceFr
         </div>
         {lifeDrain && <p className="razorface-effect">Life Drain · You lose 1 Health and Razorface recovers 1.</p>}
         {state.minors.length > 0 && <p className="razorface-effect">This purge discards {state.minors.length === 1 ? 'the active Minor Dark Power' : 'both active Minor Dark Powers'}.</p>}
-        {(showGirlHealth || showKillerHealth) && <details className="module-correction">
-          <summary>Record Health after effects</summary>
+        {(showGirlHealth || showKillerHealth || showHorror) && <details className="module-correction">
+          <summary>{showHorror ? showGirlHealth || showKillerHealth ? 'Record trackers after effects' : 'Record Horror after effects' : 'Record Health after effects'}</summary>
           <div className="razorface-health-fields">
             {showGirlHealth && <label>Final Girl Health
               <input type="number" min={0} max={99} step={1} value={health.girl} onChange={event => setHealth({...health, girl:event.target.value})} />
+            </label>}
+            {showHorror && <label>Horror
+              <input type="number" min={0} max={7} step={1} value={health.horror} onChange={event => setHealth({...health,horror:event.target.value})} />
             </label>}
             {showKillerHealth && <label>Killer Health
               <input type="number" min={0} max={99} step={1} value={health.killer} onChange={event => setHealth({...health, killer:event.target.value})} />
@@ -109,10 +114,11 @@ export function RazorfaceControls({events, onEvent, blocked = false, razorfaceFr
           ? <label className="razorface-check"><input type="checkbox" checked={newTurn} onChange={event => setNewTurn(event.target.checked)} /> This is a new turn since the last purge.</label>
           : <p className="razorface-effect">One purge per turn during the Action phase.</p>}
         <div className="razorface-actions">
-          <button type="button" className="razorface-primary" disabled={disabled || !healthValid || state.purged.length > 0 && !newTurn}
+          <button type="button" className="razorface-primary" disabled={disabled || !inputsValid || state.purged.length > 0 && !newTurn}
             onClick={() => save({kind:'purge', card:card.id, newTurn,
               ...(showGirlHealth && health.girl !== '' && {girlHealth:Number(health.girl)}),
-              ...(showKillerHealth && health.killer !== '' && {killerHealth:Number(health.killer)})})}>Record purge</button>
+              ...(showKillerHealth && health.killer !== '' && {killerHealth:Number(health.killer)}),
+              ...(showHorror && health.horror !== '' && {horror:Number(health.horror)})})}>Record purge</button>
           <button type="button" className="razorface-text" disabled={disabled} onClick={() => choose('replace')}>Replace Affliction</button>
         </div>
         {panel === 'replace' && <div className="razorface-editor">
@@ -128,18 +134,18 @@ export function RazorfaceControls({events, onEvent, blocked = false, razorfaceFr
           </PlaySelect>
           <button type="button" className="razorface-primary" disabled={disabled || !replacement}
             onClick={() => {if(replacement) save({kind:'replace', card:card.id, replacement, reason});}}>Record replacement</button>
-          {reason === 'impossible' && renderExhaustion(card.id)}
+          {renderExhaustion(card.id)}
         </div>}
       </div>}
     </article>;
   };
 
-  function renderExhaustion(impossible?: AfflictionId) {
+  function renderExhaustion(discarded?: AfflictionId) {
     return <div className="razorface-exhaustion">
       <label className="razorface-check"><input type="checkbox" checked={requiredDrawFailed}
         onChange={event => setRequiredDrawFailed(event.target.checked)} /> A required draw failed because the deck was empty.</label>
       {requiredDrawFailed && <button type="button" className="razorface-primary" disabled={disabled}
-        onClick={() => save({kind:'exhausted', impossible})}>Record Affliction deck loss</button>}
+        onClick={() => save({kind:'exhausted', ...(discarded && {discarded,reason})})}>Record Affliction deck loss</button>}
     </div>;
   }
   const availableForEditor = panel === 'draw' ? available : AFFLICTIONS.filter(card =>

@@ -16,6 +16,7 @@ export const AFFLICTIONS = [
   {id:'torturous-embrace', name:'Torturous Embrace', requirement:'You or Razorface have exactly one Health left.', effect:'Discard an Item of your choice. If you have none, end the Action phase.'},
 ] as const;
 export type AfflictionId = typeof AFFLICTIONS[number]['id'];
+export const raisesHorrorOnPurge = (id: AfflictionId) => id === 'explorers-of-the-flesh' || id === 'a-lamb-to-the-slaughter';
 export const affliction = (id: unknown) => AFFLICTIONS.find(card => card.id === id);
 const isAffliction = (id: unknown): id is AfflictionId => affliction(id) !== undefined;
 
@@ -57,9 +58,9 @@ type RazorfaceCommand =
   | {kind:'setup'|'correct'; cards: AfflictionId[]}
   | {kind:'draw'; card: AfflictionId}
   | {kind:'replace'; card: AfflictionId; replacement: AfflictionId; reason:'impossible'|'exchange'}
-  | {kind:'purge'; card: AfflictionId; newTurn: boolean; girlHealth?: number; killerHealth?: number}
+  | {kind:'purge'; card: AfflictionId; newTurn: boolean; girlHealth?: number; killerHealth?: number; horror?: number}
   | {kind:'minor'; card: MinorId; present: boolean}
-  | {kind:'exhausted'; impossible?: AfflictionId}
+  | {kind:'exhausted'; discarded?: AfflictionId; reason?: 'impossible'|'exchange'}
   | {kind:'token'; result:'revived'; health:number}
   | {kind:'token'; result:'defeated'; tabletop?: true};
 export type RazorfaceAction = RazorfaceCommand & {parent: string};
@@ -92,11 +93,16 @@ export function parseRazorfaceAction(value: unknown): RazorfaceAction | null {
       ? {kind:action.kind, parent:action.parent, card:action.card, replacement:action.replacement, reason:action.reason} : null;
     case 'purge': return isAffliction(action.card) && typeof action.newTurn === 'boolean' &&
       (action.girlHealth === undefined || isHealth(action.girlHealth)) &&
-      (action.killerHealth === undefined || isHealth(action.killerHealth))
-      ? {kind:action.kind, parent:action.parent, card:action.card, newTurn:action.newTurn, girlHealth:action.girlHealth, killerHealth:action.killerHealth} : null;
+      (action.killerHealth === undefined || isHealth(action.killerHealth)) &&
+      (action.horror === undefined || isHealth(action.horror) && action.horror <= 7)
+      ? {kind:action.kind, parent:action.parent, card:action.card, newTurn:action.newTurn,
+        girlHealth:action.girlHealth, killerHealth:action.killerHealth, horror:action.horror} : null;
     case 'minor': return isMinor(action.card) && typeof action.present === 'boolean' ? {kind:action.kind, parent:action.parent, card:action.card, present:action.present} : null;
-    case 'exhausted': return action.impossible === undefined || isAffliction(action.impossible)
-      ? {kind:action.kind, parent:action.parent, impossible:action.impossible} : null;
+    case 'exhausted': {
+      if (action.discarded === undefined) return {kind:action.kind, parent:action.parent};
+      return isAffliction(action.discarded) && (action.reason === 'impossible' || action.reason === 'exchange')
+        ? {kind:action.kind, parent:action.parent, discarded:action.discarded, reason:action.reason} : null;
+    }
     case 'token': return action.result === 'defeated' ? {kind:action.kind, parent:action.parent, result:action.result, ...(action.tabletop === true && {tabletop:true as const})}
       : action.result === 'revived' && isHealth(action.health) && action.health >= 1 && action.health <= 3
       ? {kind:action.kind, parent:action.parent, result:action.result, health:action.health} : null;
@@ -121,8 +127,8 @@ function applyAction(state: RazorfaceState, action: RazorfaceAction): RazorfaceS
       removed:action.reason === 'impossible' ? [...state.removed, action.card] : state.removed};
     case 'purge': return {...state, active:active.filter(card => card !== action.card), purged:[...state.purged, action.card], minors:[]};
     case 'minor': return {...state, minors:action.present ? [...state.minors, action.card] : state.minors.filter(id => id !== action.card)};
-    case 'exhausted': return {...state, active:action.impossible ? active.filter(card => card !== action.impossible) : state.active,
-      removed:action.impossible ? [...state.removed, action.impossible] : state.removed, result:'exhausted'};
+    case 'exhausted': return {...state, active:action.discarded ? active.filter(card => card !== action.discarded) : state.active,
+      removed:action.discarded && action.reason === 'impossible' ? [...state.removed, action.discarded] : state.removed, result:'exhausted'};
     case 'token': return {...state, result:action.result,
       ...(action.result === 'defeated' && action.tabletop === true && {active:[],minors:[]})};
   }
@@ -154,10 +160,11 @@ export function razorfaceLegal(action: RazorfaceAction, entries: readonly PlayEv
       const drain = entries.some(entry => entry.momentType === 'dark-power' && entry.killerCard === 'Life Drain');
       return state.active?.includes(action.card) && (state.purged.length === 0 || action.newTurn) &&
         (action.girlHealth === undefined || drain || action.card === 'the-gift-of-pain') &&
-        (action.killerHealth === undefined || drain || action.card === 'experience-unbound');
+        (action.killerHealth === undefined || drain || action.card === 'experience-unbound') &&
+        (action.horror === undefined || raisesHorrorOnPurge(action.card));
     }
     case 'minor': return action.present ? Boolean(state.active?.length) && !state.minors.includes(action.card) : state.minors.includes(action.card);
-    case 'exhausted': return action.impossible === undefined || state.active?.includes(action.impossible);
+    case 'exhausted': return action.discarded === undefined || state.active?.includes(action.discarded);
     case 'token': return action.result === 'defeated' && action.tabletop === true ||
       (state.active?.length === 0 || state.result === 'revived' && action.result === 'defeated') && (killerHealth === undefined || killerHealth <= 1) &&
       (action.result === 'defeated' || state.result !== 'revived');

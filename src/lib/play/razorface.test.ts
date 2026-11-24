@@ -79,6 +79,17 @@ describe('Razorface observations', () => {
     expect(canUndoRazorface(game.log,purge.id)).toBe(false);
   });
 
+  it('records resulting Horror in the purge and restores its prior value on Undo', () => {
+    const game = table();
+    game.log.push(newPlayEvent({kind:'state',field:'finalHorrorLevel',value:5}));
+    game.act({kind:'correct',cards:['explorers-of-the-flesh']});
+    const purge = game.act({kind:'purge',card:'explorers-of-the-flesh',newTurn:false,horror:6})!;
+    expect(game.summary().finalHorrorLevel).toBe(6);
+    game.log.push(newPlayEvent({kind:'undo',target:purge.id}));
+    expect(validPlayLog(game.log)).toBe(true);
+    expect(game.summary().finalHorrorLevel).toBe(5);
+  });
+
   it('records exhaustion only after a required draw fails and can confirm a physical win', () => {
     const game = table();
     game.act({kind:'correct',cards:[]});
