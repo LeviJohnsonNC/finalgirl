@@ -1,3 +1,4 @@
+import { HELLSCAPE, HELLSCAPE_MODULE } from "./hellscape.ts";
 import { MEGABGCON, MEGABGCON_MODULE } from "./megabgconCatalog.ts";
 import { RAZORFACE, RAZORFACE_MODULE, razorfaceFacts } from './razorface.ts';
 import { BIRDS, BIRDS_MODULE, birdsLogBelongsTo, birdsState } from './birds.ts';
@@ -44,6 +45,7 @@ export function deathFacts(
   events: PlayEvent[],
   eventId: string,
 ) {
+  if ((selection.location !== HELLSCAPE || selection.killer === BIRDS) && events.some(event => event.moduleData?.module === HELLSCAPE_MODULE)) return null;
   if (selection.killer !== RAZORFACE && events.some(event => event.moduleData?.module === RAZORFACE_MODULE)) return null;
   if(!birdsLogBelongsTo(selection.killer,events) || !validPlayLog(events) || !conOwnsLog(selection.location,selection.killer,events) || !wolfeOwnsLog(selection.location,events) || !ratchetLogBelongsTo(selection.killer, events) || !mortOwnsLog(selection.killer,events,selection.location))return null;
   if (selection.location !== STATION && events.some(e=>e.stationReference || e.moduleData?.module===STATION_MODULE)) return null;
@@ -115,6 +117,18 @@ export function deathFacts(
     false,
     !!wolfeDeath,
   );
+  // Hellscape roles are frozen at the event. Undo can correct the current
+  // roster without rewriting the setting of an earlier saved death.
+  if (selection.location === HELLSCAPE) {
+    const deathIndex = events.findIndex(event => event.id === eventId);
+    const snapshot = moduleState(summarizePlay(events.slice(0, deathIndex + 1)).entries, HELLSCAPE_MODULE);
+    if (Object.keys(snapshot).length) context = {...context, [HELLSCAPE_MODULE]: snapshot};
+    else if (context?.[HELLSCAPE_MODULE]) {
+      delete context[HELLSCAPE_MODULE];
+      if (!Object.keys(context).length) context = undefined;
+    }
+  }
+
   const missionState = falconwoodDeath ? falconwoodState(moduleState(historical,FALCONWOOD_MODULE)) : undefined;
   if (missionState) {
     const facts = falconwoodFacts({...missionState, mission:missionState.mission ?? selectedMission?.id});

@@ -250,3 +250,46 @@ body:has(.rules-cinema) main { padding-bottom: calc(var(--app-footer-h, 64px) + 
 @media (max-width: 639px) {
   .rules-cinema::before { background-position: center, 62% center; }
 }
+
+.hellscape-upkeep-guide {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 236px), 1fr));
+  gap: .75rem;
+  margin: .85rem 0;
+}
+
+.hellscape-upkeep-result {
+  margin: 0;
+  padding: .8rem;
+  border: 1px solid rgba(190, 140, 112, .36);
+  border-radius: 6px;
+  background: #211514;
+  color: #eddecb;
+}
+
+.hellscape-dice-example {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  margin-bottom: .6rem;
+}
+
+.hellscape-die {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 1px solid #a46e57;
+  border-radius: 4px;
+  background: #68382f;
+  font-size: 1.15rem;
+  color: #f3e4d3;
+}
+
+.hellscape-dice-example strong {
+  margin-left: .3rem;
+  font-family: var(--font-title);
+  font-size: 1.05rem;
+}
+
+.hellscape-upkeep-result figcaption { font-size: .875rem; line-height: 1.45; }

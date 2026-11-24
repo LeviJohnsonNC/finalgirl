@@ -1,3 +1,4 @@
+import { HellscapeUpkeepGuide } from "./HellscapeUpkeepGuide";
 import { WolfeSetupReference } from './WolfeSetupReference';
 import { GrovesBoard } from "../play/GrovesBoard";
 import { RuleBlock as RuleBlockType, GlossaryTerm as GlossaryTermType } from '@/data/rules/types';
@@ -98,6 +99,7 @@ function RuleRecords({ block, renderCell, jumpId }: {
 
 export const RuleBlock = ({ block, glossary, onJumpTo, jumpId, inModal }: RuleBlockProps) => {
   switch (block.type) {
+    case "hellscape-upkeep": return <HellscapeUpkeepGuide />;
     case "wolfe-setups": return <WolfeSetupReference/>;
     case "groves-setup": return <GrovesBoard setup={block.setup}/>;
     case 'paragraph':

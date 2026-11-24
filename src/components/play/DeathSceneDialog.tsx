@@ -548,7 +548,7 @@ const {characterImages}=useActiveImages();
                   }
                   options={[
                     "Regular victim",
-                    ...playVictims(selection.location).filter(v => selection.location !== FALCONWOOD ||
+                    ...playVictims(selection.location, selection.killer).filter(v => selection.location !== FALCONWOOD ||
                       FALCONWOOD_PEOPLE.some(name => name === v.name) || missionByName(selection.mission)?.friend === v.name
                     ).map(v => v.name),
                   ]}

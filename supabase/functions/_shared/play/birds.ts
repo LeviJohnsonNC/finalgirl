@@ -1,3 +1,4 @@
+import { HELLSCAPE, HELLSCAPE_PEOPLE } from "./hellscape.ts";
 import type { PlayEvent } from './events.ts';
 import type { ModuleState } from './modules.ts';
 
@@ -35,7 +36,8 @@ export const BIRDS_GUIDANCE = 'The Birds are a flock of usually stationary Minio
 export function birdsEventIncompatible(killer: string | null, location: string | null, event?: string | null) {
   if (killer !== BIRDS || !event) return false;
   const name = event.trim().toLowerCase();
-  return location === 'Creech Manor' && name === 'ghost hunters';
+  return (location === 'Creech Manor' && name === 'ghost hunters') ||
+    (location === HELLSCAPE && HELLSCAPE_PEOPLE.some(person => person.name.toLowerCase() === name));
 }
 
 export const BIRDS_ARRIVALS = ['hidden', 'ultimate', 'normal-victims-gone', 'observed'] as const;

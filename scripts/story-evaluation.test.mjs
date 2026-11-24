@@ -13,6 +13,7 @@ const compile = (path) =>
 function load(path, dependencies = {}) {
   const exports = {};
   new Function("exports", "require", compile(path))(exports, (name) => {
+    if(name==='./hellscape.ts'||name==='./play/hellscape.ts')return hellscape;
     if(name==='./birds.ts'||name==='./play/birds.ts')return birds;
     if(name==='./falconwood.ts'||name==='./play/falconwood.ts')return falconwood;
     if(name==='./slayer.ts'||name==='./play/slayer.ts')return slayer;
@@ -22,6 +23,7 @@ function load(path, dependencies = {}) {
   });
   return exports;
 }
+const hellscape=load('../supabase/functions/_shared/play/hellscape.ts',{});
 const birds=load('../supabase/functions/_shared/play/birds.ts',{});
 const hunter=load('../supabase/functions/_shared/play/hunter.ts');
 const falconwood=load('../supabase/functions/_shared/play/falconwood.ts',{});

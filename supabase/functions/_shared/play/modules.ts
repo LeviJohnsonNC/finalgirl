@@ -1,3 +1,4 @@
+import { HELLSCAPE, HELLSCAPE_MODULE, HELLSCAPE_PEOPLE, hellscapeFacts, hellscapePerson, validHellscapeObservation } from "./hellscape.ts";
 import { MEGABGCON, MEGABGCON_MODULE, CON_VISUAL, CON_ITEMS } from "./megabgconCatalog.ts";
 import { conFacts, type ConAction } from "./megabgcon.ts";
 import { MORT, MORT_MODULE, mortFacts, type MortAction } from './mort.ts';
@@ -75,7 +76,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: typeof RAZORFACE_MODULE | typeof BIRDS_MODULE | typeof MEGABGCON_MODULE | typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: typeof HELLSCAPE_MODULE | typeof RAZORFACE_MODULE | typeof BIRDS_MODULE | typeof MEGABGCON_MODULE | typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -333,7 +334,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    ![RAZORFACE_MODULE, BIRDS_MODULE, MEGABGCON_MODULE, MORT_MODULE, WOLFE_MODULE, RATCHET_MODULE, STATION_MODULE, ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    ![HELLSCAPE_MODULE, RAZORFACE_MODULE, BIRDS_MODULE, MEGABGCON_MODULE, MORT_MODULE, WOLFE_MODULE, RATCHET_MODULE, STATION_MODULE, ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -342,6 +343,7 @@ export function validModuleObservation(
   )
     return false;
   const entries = Object.entries(m.changes);
+  if (m.module === HELLSCAPE_MODULE) return validHellscapeObservation(m.changes);
   if (m.module === RAZORFACE_MODULE) return entries.length === 1 && parseRazorfaceAction(m.changes.action) !== null;
   if (m.module === MEGABGCON_MODULE) return entries.length === 1 && m.changes.recorded === true;
   if (m.module === MORT_MODULE) return entries.length === 1 && (m.changes.recorded === true || m.changes.initialized === true);
@@ -577,6 +579,10 @@ export function describeModule(observation: ModuleObservation) {
   if(observation.module === "konrad") return konradFacts(observation.changes).join(" ") || "USS Konrad state recorded";
   if(observation.module === "evomorph") return evomorphFacts(observation.changes);
   if(observation.module==='creech')return creechFacts(observation.changes).join(' ') || Object.entries(observation.changes).filter(([k])=>k!=='initialized').map(([k,v])=>`${k.replace(/\./g,' ')}: ${v??'not recorded'}`).join('; ');
+  if (observation.module === HELLSCAPE_MODULE) {
+    return hellscapeFacts(observation.changes) ||
+      `${hellscapePerson(Object.keys(observation.changes)[0])?.name ?? HELLSCAPE} record cleared`;
+  }
   if (observation.module === RAZORFACE_MODULE) {
     const action = parseRazorfaceAction(observation.changes.action);
     return action ? describeRazorface(action) : 'Razorface observation';
@@ -698,12 +704,21 @@ export function moduleContext(
           delete state[`trap.${trap.id}.space`];
     if (Object.keys(state).length) context[module] = state;
   }
+  if (selection.location === HELLSCAPE && selection.killer !== BIRDS) {
+    const state = moduleState(entries, HELLSCAPE_MODULE);
+    if (Object.keys(state).length) context[HELLSCAPE_MODULE] = state;
+  }
   return Object.keys(context).length ? context : undefined;
 }
 export function moduleStoryBeats(
   selection: ModuleSelection,
   entries: readonly ObservedEvent[],
 ): string {
+  if (selection.location === HELLSCAPE) {
+    const people = selection.killer === BIRDS ? "" : hellscapeFacts(moduleState(entries, HELLSCAPE_MODULE));
+    const killer = moduleStoryBeats({ ...selection, location: "" }, entries);
+    return [people, fitStoryText(killer, 885 - people.length)].filter(Boolean).join("\n");
+  }
   if (selection.location === MEGABGCON) {
     const place = conFacts(entries);
     const threat = moduleStoryBeats({ ...selection, location: "" }, entries);
@@ -1052,6 +1067,13 @@ export function moduleReferences(
   mechanism?: string,
 ) {
   const refs = buddylandReferences(selection, context, attacker);
+  if (selection.location === HELLSCAPE) {
+    const state = context?.[HELLSCAPE_MODULE];
+    const facts = state && hellscapeFacts(state);
+    if (facts) refs.push({name: "Hellscape observations before this scene", effect: facts});
+    const person = selection.killer === BIRDS ? undefined : HELLSCAPE_PEOPLE.find(role => role.name === victim);
+    if (person) refs.push({name: person.name, effect: `${person.effect} The death record identifies this Victim. It does not establish any reward or other casualty.`});
+  }
   if (selection.location === FALCONWOOD && typeof context?.falconwood?.facts === "string") {
     refs.push({name:"Falconwood mission observations",effect:context.falconwood.facts});
     if (attacker === 'Agent') refs.push({name:'Agent',effect:'A human agent on the Hunt, separate from ordinary Victims and Minions. Only the explicit death record establishes a casualty.'});

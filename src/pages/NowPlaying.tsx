@@ -19,7 +19,7 @@ import { getMissionByName } from '@/data/falconwoodMissions';
 import { streamChatCompletion } from '@/lib/streamChatCompletion';
 
 import { useNarration } from '@/hooks/useNarration';
-import { getFilmDetails } from '@/types/featureFilmDetails';
+import { getFilmDetails, getLocationDetails } from '@/types/featureFilmDetails';
 import { getFilmIdByKiller, getFilmIdByLocation, getFilmIdByFinalGirl, FEATURE_FILMS } from '@/types/gameData';
 import { useActiveImages } from '@/hooks/useActiveImages';
 import { getKillerNarrativeRules } from '@/data/killerSpecialRules';
@@ -231,11 +231,10 @@ const NowPlaying = ({
       const finalGirlFilmId = getFilmIdByFinalGirl(finalGirl);
 
       const killerFilmDetails = killerFilmId ? getFilmDetails(killerFilmId) : null;
-      const locationFilmDetails = locationFilmId ? getFilmDetails(locationFilmId) : null;
       const finalGirlFilmDetails = finalGirlFilmId ? getFilmDetails(finalGirlFilmId) : null;
 
       const killerDetails = killerFilmDetails?.killer;
-      const locationDetails = locationFilmDetails?.location;
+      const locationDetails = locationFilmId ? getLocationDetails(locationFilmId) : undefined;
       const stationSetupCard = location === STATION ? stationSetup(setupScenario) : undefined;
       const stationEventCard = location === STATION ? STATION_EVENTS.find(event=>stationNameKey(event.name)===stationNameKey(startingEvent??'')) : undefined;
       const finalGirlDetails = finalGirlFilmDetails?.finalGirls?.find(fg => fg.name === finalGirl);

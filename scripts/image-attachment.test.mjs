@@ -31,8 +31,12 @@ function openingWith(entries) {
 }
 new Function('require', 'exports', compile('../supabase/functions/_shared/openingReferences.ts'))(
   name => { if (name === './openingReferenceManifest.ts') return manifest; throw new Error('Unexpected opening import: ' + name); }, opening);
-const birds = {};
-new Function('exports', compile('../supabase/functions/_shared/play/birds.ts'))(birds);
+const hellscape = {}, birds = {};
+new Function('exports', compile('../supabase/functions/_shared/play/hellscape.ts'))(hellscape);
+new Function('require', 'exports', compile('../supabase/functions/_shared/play/birds.ts'))(name => {
+  assert.equal(name, './hellscape.ts');
+  return hellscape;
+}, birds);
 new Function('require','exports', compile('../supabase/functions/_shared/storyFacts.ts'))(name=>{if(name==='./play/birds.ts')return birds;if(name==='./play/slayer.ts')return slayerIdentity;if(name==='./play/falconwood.ts')return falconwood;assert.equal(name,'./play/hunter.ts');return hunterIdentity;},storyFacts);
 new Function('exports', compile('../supabase/functions/_shared/narrativeStyle.ts'))(narrativeStyle);
 const marrekIdentity = {};

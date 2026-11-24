@@ -1,3 +1,4 @@
+import { HELLSCAPE } from "../../supabase/functions/_shared/play/hellscape";
 import { RATCHET_LADY, RATCHET_MODULE, ratchetFacts, ratchetCount } from '../../supabase/functions/_shared/play/ratchetLady';
 import { fitStoryText } from '../../supabase/functions/_shared/play/storyText';
 import {ORGANISM, ORGANISM_FINALES, organismFinale} from "@/lib/play/organism";
@@ -91,7 +92,7 @@ const TheEnd = ({
   const evomorphGuidance=result.killer==='Evomorph'?evomorphOpeningGuidance(endingModuleState(endingSummary(result.playEvents).entries,'evomorph').stage,false):undefined;
   const mall=useMemo(()=>result.location===MALL?mallReview(endingModuleState(endingSummary(result.playEvents).entries,MALL_MODULE)):undefined,[result.location,result.playEvents]);
   const hunter=useMemo(()=>result.killer==='The Hunter'?hunterReview(endingModuleState(endingSummary(result.playEvents).entries,'hunter')):undefined,[result.killer,result.playEvents]);
-  const endingVisualGuidance=[evomorphGuidance,(result.killer===ORGANISM&&result.location==='Station 2891'||result.location==='Wolfe Asylum')?moduleContext?.visualGuidance:undefined,result.killer===ORGANISM?"Depict only forms established by the recorded ending. Keep the selected location and Final Girl.":moduleContext?.visualGuidance].filter(Boolean).join('\n');
+  const endingVisualGuidance=[evomorphGuidance,(result.killer===ORGANISM&&['Station 2891', HELLSCAPE].includes(result.location)||result.location==='Wolfe Asylum')?moduleContext?.visualGuidance:undefined,result.killer===ORGANISM?"Depict only forms established by the recorded ending. Keep the selected location and Final Girl.":moduleContext?.visualGuidance].filter(Boolean).join('\n');
   const isWin = result.outcome === 'won';
   const grimlashReview=useMemo(()=>result.killer==='Grimlash'?(formData.grimlashReview??{loss:(endingModuleState(endingSummary(result.playEvents).entries,'grimlash').loss??'unknown') as import('@/lib/play/grimlash').GrimlashLoss}):undefined,[result.killer,result.playEvents,formData.grimlashReview]);
   const shipReview=useMemo(()=>result.location==='USS Konrad'?{fate:konradState(endingModuleState(endingSummary(result.playEvents).entries,'konrad')).fate}:undefined,[result.location,result.playEvents]);
@@ -160,7 +161,7 @@ const TheEnd = ({
       mission: getMissionByName(missionName),
       ...(hunter&&{hunterReview:hunter}),
       ...(mall&&{mallReview:mall}),
-      scenarioRules: [ratchetEnding,hunter&&hunterReviewFacts(hunter),result.killer==='Razorface'||result.killer===ORGANISM||result.killer==='Slayer'||result.killer==='The Hunter'||result.killer==='The Intruders'||result.killer==='Big Bad Wolf'||result.killer==='The Tormentor'||result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='Sunnydaze Mall'||result.location==='USS Konrad'||result.location==='Shady Acres'||result.location==='Storybook Woods'||result.location==='Station 2891'||result.location==='Wolfe Asylum'?playStoryBeats(result.playEvents,result):undefined, organismLossContext, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
+      scenarioRules: [ratchetEnding,hunter&&hunterReviewFacts(hunter),result.killer==='Razorface'||result.killer===ORGANISM||result.killer==='Slayer'||result.killer==='The Hunter'||result.killer==='The Intruders'||result.killer==='Big Bad Wolf'||result.killer==='The Tormentor'||result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='Sunnydaze Mall'||result.location==='USS Konrad'||result.location==='Shady Acres'||result.location===HELLSCAPE||result.location==='Storybook Woods'||result.location==='Station 2891'||result.location==='Wolfe Asylum'?playStoryBeats(result.playEvents,result):undefined, organismLossContext, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
       gameId: result.id,
       previousImageUrl,
       draftPoster: true,

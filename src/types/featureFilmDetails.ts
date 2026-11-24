@@ -1,3 +1,4 @@
+import { HELLSCAPE, HELLSCAPE_EVENTS, HELLSCAPE_SETUPS, HELLSCAPE_VISUAL } from "../../supabase/functions/_shared/play/hellscape";
 import { CON_EVENTS, CON_SETUPS } from "../../supabase/functions/_shared/play/megabgconCatalog";
 import { WOLFE_EVENTS, WOLFE_SETUPS } from '../../supabase/functions/_shared/play/wolfeCatalog';
 import {STATION_EVENTS, STATION_SETUPS, stationSetupDescription} from '../../supabase/functions/_shared/play/stationCatalog';
@@ -635,12 +636,25 @@ export const getFilmDetails = (filmId: string): FeatureFilmDetail | undefined =>
   return FEATURE_FILM_DETAILS[filmId];
 };
 
+const hellscapeDetails: LocationDetail = {
+  name: HELLSCAPE,
+  description: HELLSCAPE_VISUAL,
+  setupCards: HELLSCAPE_SETUPS.map(card => ({
+    name: card.name,
+    description: `After placing the eight tile Victims, add ${card.victims.map(([count, space]) => `${count} at ${space}`).join(', ')}. Final Girl starts at ${card.girl}, Killer at ${card.killer}.`,
+  })),
+  events: HELLSCAPE_EVENTS.map(card => ({name: card.name, description: card.effect})),
+};
+
+export const getLocationDetails = (filmId: string): LocationDetail | undefined =>
+  filmId === 's3-hell-to-pay' ? hellscapeDetails : FEATURE_FILM_DETAILS[filmId]?.location;
+
 // Helper to get setup cards for a location
 export const getSetupCardsForLocation = (filmId: string): { name: string; description: string }[] => {
-  return FEATURE_FILM_DETAILS[filmId]?.location?.setupCards ?? [];
+  return getLocationDetails(filmId)?.setupCards ?? [];
 };
 
 // Helper to get events for a location
 export const getEventsForLocation = (filmId: string): { name: string; description: string }[] => {
-  return FEATURE_FILM_DETAILS[filmId]?.location?.events ?? [];
+  return getLocationDetails(filmId)?.events ?? [];
 };

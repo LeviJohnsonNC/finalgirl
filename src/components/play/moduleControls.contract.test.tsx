@@ -33,7 +33,10 @@ describe("registered modules use their declared shared interactions", () => {
             module.owner === "location" ? module.match : "Camp Happy Trails"
           }
           finalGirl="Laurie"
-          events={[]}
+          events={module.id === "hellscape"
+            ? [newPlayEvent({kind: "start", saved: 0, killed: 0, round: 1}),
+              newPlayEvent({kind: "module", moduleData: {module: "hellscape", changes: {"person.peon": "in-play"}}})]
+            : []}
           onEvent={onEvent}
         />,
       );

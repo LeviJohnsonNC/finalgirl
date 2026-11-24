@@ -1,3 +1,4 @@
+import { HELLSCAPE, HELLSCAPE_SPACES } from "../../supabase/functions/_shared/play/hellscape";
 import { CON_SPACES } from "../../supabase/functions/_shared/play/megabgconCatalog";
 import { WOLFE_SPACES } from '../../supabase/functions/_shared/play/wolfeCatalog';
 // Supplemental suggestions for boards without shared Play room catalogs.
@@ -12,7 +13,7 @@ export const ENDING_BOARD_SPACES: Record<string, readonly string[]> = {
   Falconwood: [
     'Best Friend’s House', 'Community Pool', 'Fanghorn Forest', 'Library', 'School', 'Town Fair',
   ],
-  Hellscape: ['The Nexus'],
+  [HELLSCAPE]: HELLSCAPE_SPACES,
   Utopia: ['Bunker', 'Crossroads', 'General Store', 'Water Tower'],
   MegaBGCon: CON_SPACES,
 };
