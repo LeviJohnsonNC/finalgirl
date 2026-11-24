@@ -20,6 +20,7 @@ import { GRIMLASH_TERRORS } from './grimlash.ts';
 import { KONRAD_ITEMS, KONRAD_EVENTS, KONRAD_TERRORS, KONRAD_SPACES, KONRAD_PEOPLE, KONRAD_SOURCE } from './konradCatalog.ts';
 import { EVOMORPH_TERRORS } from './evomorph.ts';
 import { CREECH_ITEMS, CREECH_EVENTS, CREECH_TERRORS, CREECH_SPACES, CREECH_PEOPLE, CREECH_SOURCE } from './creech.ts';
+import { RAZORFACE, RAZORFACE_SOURCE, RAZORFACE_TERRORS } from './razorface.ts';
 import { BIRDS_TERRORS } from './birds.ts';
 import { POLTERGEIST_ITEMS, POLTERGEIST_TERRORS } from './poltergeist.ts';
 import { GROVES_EVENTS, GROVES_ITEMS, GROVES_PEOPLE, GROVES_SPACES, GROVES_SOURCE, GROVES_TERRORS } from "./groves.ts";
@@ -84,6 +85,7 @@ export const PLAY_CARDS: readonly PlayCard[] = [
   ...EVOMORPH_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...CREECH_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...CREECH_EVENTS.map(c=>({...c,kind:"event" as const,location:"Creech Manor",source:CREECH_SOURCE})),
+  ...RAZORFACE_TERRORS.map(card=>({...card,kind:'terror' as const,killer:RAZORFACE,source:RAZORFACE_SOURCE})),
   ...BIRDS_TERRORS.map(card=>({...card,kind:"terror" as const})),
   ...POLTERGEIST_TERRORS.map(card=>({...card,kind:"terror" as const})),
   ...GROVES_TERRORS.map(c=>({...c,kind:"terror" as const})),
@@ -154,6 +156,7 @@ export function suggestedDeathCards(selection: {killer:string;location:string;mi
     if (card.location===WOLFE) return (kind==='terror'?WOLFE_TERRORS:WOLFE_EVENTS).some(c=>c.name===card.name&&c.death);
     if (card.location===STATION && kind==='event') return card.name === STATION_EVENTS.find(event=>event.id==='lab-accident')?.name;
     if (card.killer===MORT) return ['Everybody’s a Suspect','I Want to See What Your Insides Look Like!','A Mask in the Crowd','Meta Massacre','Trade-Off'].includes(card.name);
+    if (card.killer === RAZORFACE) return RAZORFACE_TERRORS.some(terror => terror.name === card.name && 'death' in terror && terror.death);
     if (card.killer===RATCHET_LADY) return RATCHET_TERRORS.some(terror=>terror.name===card.name&&terror.death);
     if (card.killer===ORGANISM) return ORGANISM_TERRORS.some(terror=>terror.name===card.name&&terror.death);
     if (card.location === FALCONWOOD && kind === "event") return ["Head Researcher", "Conspiracy Theorist"].includes(card.name);

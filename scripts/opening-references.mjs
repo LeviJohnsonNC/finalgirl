@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 const catalog = readFileSync('src/types/gameData.ts', 'utf8');
 const finalGirls = new Set([...catalog.matchAll(/finalGirls: *\[([^\]]+)\]/g)].flatMap(([,names])=>[...names.matchAll(/'([^']+)'/g)].map(([,name])=>name)));
 const registry = catalog.split('const CHARACTER_FILES:')[1].split('};')[0];
-const portraits = Object.fromEntries([...registry.matchAll(/'([^']+)': '([^']+)[.]png'/g)].filter(([,name])=>finalGirls.has(name) || ['Billy the Bear','Inkanyamba','Poltergeist','Grimlash','The Tormentor','Big Bad Wolf','The Hunter','Slayer'].includes(name)).map(([,name,file])=>[name,file]));
+const portraits = Object.fromEntries([...registry.matchAll(/'([^']+)': '([^']+)[.]png'/g)].filter(([,name])=>finalGirls.has(name) || ['Julie','Billy the Bear','Inkanyamba','Poltergeist','Grimlash','The Tormentor','Big Bad Wolf','The Hunter','Slayer'].includes(name)).map(([,name,file])=>[name,file]));
 portraits['The Hunter · Mark X']='../play/photos/hunter/mark-x.webp';
 const slug = name => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const stage = 'build/opening-references';
@@ -27,13 +27,13 @@ for (const [name, file] of Object.entries(portraits)) {
   const bytes = execFileSync(process.env.OPENING_IMAGEMAGICK || 'magick', [source, '-auto-orient', '-resize', '768x768>', '-strip', '-quality', '90', 'jpeg:-']);
   const digest = createHash('sha256').update(bytes).digest('hex');
   // Keep the prior Grimlash object valid for already-deployed consumers.
-  const path = ['Grimlash','The Tormentor','Big Bad Wolf','The Hunter','The Hunter · Mark X','Slayer'].includes(name) ? `${slug(name)}-${digest.slice(0,16)}.jpg` : `${slug(name)}.jpg`;
+  const path = ['Grimlash','The Tormentor','Big Bad Wolf','The Hunter','The Hunter · Mark X','Slayer','Christie'].includes(name) ? `${slug(name)}-${digest.slice(0,16)}.jpg` : `${slug(name)}.jpg`;
   writeFileSync(`${stage}/${path}`, bytes);
   if(name==='The Tormentor'){mkdirSync('supabase/reference-assets',{recursive:true});writeFileSync('supabase/reference-assets/tormentor.jpg',bytes);}
   if (name === 'The Hunter' || name === 'The Hunter · Mark X') {
     mkdirSync('supabase/reference-assets',{recursive:true});writeFileSync(`supabase/reference-assets/${slug(name)}.jpg`,bytes);
   }
-  if (name === 'Big Bad Wolf' || name === 'Slayer') {
+  if (name === 'Big Bad Wolf' || name === 'Slayer' || name === 'Christie') {
     mkdirSync('supabase/reference-assets', { recursive: true });
     writeFileSync(`supabase/reference-assets/${slug(name)}.jpg`, bytes);
   }

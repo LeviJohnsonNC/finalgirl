@@ -68,6 +68,7 @@ interface NowPlayingProps {
   birdsRequired?: BirdsTarget;
   stationFresh?: boolean;
   mortFresh?: boolean;
+  razorfaceFresh?: boolean;
   filmId: string | null;
   onBack: () => void;
   onGameEnd: (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, visualBible?: string) => void;
@@ -88,6 +89,7 @@ const NowPlaying = ({
   birdsRequired,
   stationFresh,
   mortFresh,
+  razorfaceFresh,
   filmId,
   onBack,
   onGameEnd,
@@ -343,7 +345,7 @@ const NowPlaying = ({
     onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying || isPaused} hasStory={Boolean(story)}
     showDeathDetails={showDeathPanel} onShowDeathDetails={enabled => onCheckpoint({showDeathPanel: enabled})}
     drafts={playDrafts} onDraft={saveDraft}
-    moduleControls={<ModuleControls birdsRequired={birdsRequired} mission={mission} falconwoodFresh={falconwoodFresh} stationFresh={stationFresh} mortFresh={mortFresh} setupScenario={setupScenario} startingEvent={startingEvent} sessionId={sessionId} killer={killer} location={location} finalGirl={finalGirl} finalGirlStartingHealth={finalGirlStartingHealth} events={playEvents} onEvent={recordPlayEvent} onDeath={event=>setDeathEventId(event.id)} blocked={playSyncBlocked} />}
+    moduleControls={<ModuleControls birdsRequired={birdsRequired} mission={mission} falconwoodFresh={falconwoodFresh} stationFresh={stationFresh} razorfaceFresh={razorfaceFresh} mortFresh={mortFresh} setupScenario={setupScenario} startingEvent={startingEvent} sessionId={sessionId} killer={killer} location={location} finalGirl={finalGirl} finalGirlStartingHealth={finalGirlStartingHealth} events={playEvents} onEvent={recordPlayEvent} onDeath={event=>setDeathEventId(event.id)} blocked={playSyncBlocked} />}
     deathPanel={deathEventId && syncPlayNow ? <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl,mission}} events={playEvents} getEvents={getPlayEvents} eventId={deathEventId} draft={playDrafts[deathEventId]} onDraft={saveDraft} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/> : undefined}
     onDeath={event=>setDeathEventId(event.id)}/>;
 

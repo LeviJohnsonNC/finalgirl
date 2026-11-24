@@ -24,6 +24,7 @@ import { resolveGrimlashAction, validGrimlashAction, isInitialGrimlash, grimlash
 import { resolveKonradAction, validKonradAction, validKonradObservation, isInitialKonrad, konradParent, type KonradAction } from './konrad.ts';
 import { resolveEvomorphAction, validEvomorphAction, validEvomorphObservation, type EvomorphAction } from './evomorph.ts';
 import { validCreechAction, validCreechObservation, type CreechAction } from './creech.ts';
+import { RAZORFACE_MODULE, razorfaceEntry, razorfaceLatest, razorfaceLegal } from './razorface.ts';
 import { BIRDS_MODULE, birdsLatest, birdsParent, initialBirds, isBirdsTarget, resolveBirdsAction, sameBirdsChanges, validBirdsAction, type BirdsAction } from './birds.ts';
 import { validPoltergeistObservation, validPoltergeistAction, type PoltergeistAction } from './poltergeist.ts';
 import { validGrovesAction, canLinkGrovesAction, type GrovesAction } from "./groves.ts";
@@ -264,6 +265,8 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
   if(e.moduleData?.module==="konrad"&&(e.kind!=="module"||!validKonradObservation(e.konradAction,e.moduleData.changes)))return false;
   if(e.evomorphAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!=='evomorph'||!validEvomorphAction(e.evomorphAction)))return false;
   if(e.moduleData?.module==='evomorph'&&(e.kind!=='module'||!validEvomorphObservation(e.evomorphAction,e.moduleData.changes)))return false;
+  if (e.linkedModule?.module === RAZORFACE_MODULE ||
+      e.moduleData?.module === RAZORFACE_MODULE && (e.kind !== 'module' || !validModuleObservation(e.moduleData))) return false;
   if (e.birdsAction !== undefined || e.moduleData?.module === BIRDS_MODULE) {
     if (e.moduleData?.module !== BIRDS_MODULE || !validModuleObservation(e.moduleData)) return false;
     if (e.birdsAction === undefined) {
@@ -366,9 +369,34 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
     validConHistory(log) && validMortHistory(log) && validWolfeHistory(log) && validRatchetHistory(log) && validStationHistory(log) && validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validOrganismHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
-    validBirdsHistory(log) && new Set(log.map((e) => e.id)).size === log.length
+    validBirdsHistory(log) && validRazorfaceHistory(log) && new Set(log.map((e) => e.id)).size === log.length
   );
 }
+export function canUndoRazorface(log: readonly PlayEvent[], target: string, restore = false) {
+  const original = log.find(entry => entry.id === target);
+  const action = original && razorfaceEntry(original);
+  if (!action) return true;
+  const summary = summarizePlay(log);
+  if (restore) return summary.inactive.has(target) && razorfaceLegal(action, summary.entries, summary.killerHealth);
+  return razorfaceLatest(summary.entries)?.id === target;
+}
+
+function validRazorfaceHistory(log: readonly PlayEvent[]) {
+  const ids = new Set(log.filter(event => event.moduleData?.module === RAZORFACE_MODULE).map(event => event.id));
+  if (!ids.size) return true;
+  return log.every((event, index) => {
+    if (event.target && ids.has(event.target)) {
+      if (event.kind === 'undo' || event.kind === 'restore')
+        return canUndoRazorface(log.slice(0, index), event.target, event.kind === 'restore');
+      return false;
+    }
+    const action = razorfaceEntry(event);
+    if (!action) return true;
+    const summary = summarizePlay(log.slice(0, index));
+    return (summary.tracked || action.kind === 'token') && razorfaceLegal(action, summary.entries, summary.killerHealth);
+  });
+}
+
 export function canUndoBirds(log: readonly PlayEvent[], target: string, restore = false) {
   const original = log.find(e => e.id === target);
   if (original?.moduleData?.module !== BIRDS_MODULE) return true;
@@ -1019,13 +1047,25 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       summary.round = e.round ?? null;
     }
     if (!summary.tracked) {
-      if (e.birdsAction?.command === 'review') summary.entries.push(e);
+      const result = razorfaceEntry(e);
+      if (result?.kind === 'token' && result.result === 'defeated') {
+        summary.killerHealth = 0;
+        summary.entries.push(e);
+      } else if (e.birdsAction?.command === 'review') summary.entries.push(e);
       continue;
     }
     if (isPermanentMoment(e)) {
       if (e.permanent && milestones.has(e.momentType!)) continue;
       milestones.add(e.momentType!);
     }
+    const razorfaceAction = razorfaceEntry(e);
+    if (razorfaceAction?.kind === 'purge') {
+      if (razorfaceAction.girlHealth !== undefined) summary.finalGirlHealth = razorfaceAction.girlHealth;
+      if (razorfaceAction.killerHealth !== undefined) summary.killerHealth = razorfaceAction.killerHealth;
+      if (razorfaceAction.horror !== undefined) summary.finalHorrorLevel = razorfaceAction.horror;
+    }
+    if (razorfaceAction?.kind === 'token')
+      summary.killerHealth = razorfaceAction.result === 'revived' ? razorfaceAction.health : 0;
     if (e.kind === "adjust") {
       summary.saved = e.saved!;
       summary.killed = e.killed!;
@@ -1225,6 +1265,9 @@ export function playStoryBeats(
       (/^buddy\..+\.status$/.test(key) && value === 'defeated') ||
       (/^victim\./.test(key) && value === 'killed'))) priority = 65;
     if(e.hunterAction&&(['repair','force-mark-x','destroy-ally'].includes(e.hunterAction.command)||e.hunterAction.command==='countdown'&&hunterState(e.moduleData!.changes).phase==='mark-x'||e.hunterAction.command==='ally-health'&&e.hunterAction.value===0))priority=65;
+    const razorface = razorfaceEntry(e);
+    if (razorface?.kind === 'exhausted' || razorface?.kind === 'token') priority = 90;
+    if (razorface?.kind === 'purge' || razorface?.kind === 'replace') priority = 74;
     if (e.wolfeAction?.command === 'ram') priority=82;
     if (e.ratchetAction?.command === 'calm') priority = 65;
     if(e.organismAction?.command==="finale"||e.organismAction?.command==="assimilate") priority=85;

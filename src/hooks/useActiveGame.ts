@@ -23,6 +23,7 @@ import {shadyParent,resolveShadyAction} from '@/lib/play/shadyAcres';
 import { grimlashParent, resolveGrimlashAction } from '@/lib/play/grimlash';
 import { konradParent, resolveKonradAction } from '../../supabase/functions/_shared/play/konrad';
 import { evomorphParent, resolveEvomorphAction } from '../../supabase/functions/_shared/play/evomorph';
+import { RAZORFACE, RAZORFACE_MODULE, RAZORFACE_MAX_BLOODLUST, razorfaceEntry } from '../../supabase/functions/_shared/play/razorface';
 import { BIRDS, BIRDS_MODULE, BIRDS_MAX_BLOODLUST, birdsLogBelongsTo, initialBirds, isBirdsTarget, resolveBirdsAction, sameBirdsChanges } from '../../supabase/functions/_shared/play/birds';
 import { poltergeistParent, resolvePoltergeistAction } from '../../supabase/functions/_shared/play/poltergeist';
 import { resolveGrovesAction } from "../../supabase/functions/_shared/play/groves";
@@ -77,6 +78,18 @@ export function useActiveGame() {
       const log = previous.playEvents ?? [];
       const isBirds = previous.selection.killer === BIRDS;
       const firstPlayWrite = isBirds ? log.every(e => e.birdsAction?.command === 'review') : log.length === 0;
+      const isRazorface = previous.selection.killer === RAZORFACE;
+      if (event.moduleData?.module === RAZORFACE_MODULE && !isRazorface) return previous;
+      if (isRazorface && event.kind === 'state' && event.field === 'bloodlust' &&
+          typeof event.value === 'number' && event.value > RAZORFACE_MAX_BLOODLUST) return previous;
+      const razorfaceAction = razorfaceEntry(event);
+      if (razorfaceAction?.kind === 'token' && razorfaceAction.result === 'defeated' &&
+          razorfaceAction.tabletop && !summarizePlay(log).tracked) {
+        const next = [...log,event];
+        if (!validPlayLog(next)) return previous;
+        applied = true;
+        return {...previous, playEvents:next};
+      }
       if (!birdsLogBelongsTo(previous.selection.killer, [event])) return previous;
       if (isBirds && (event.kind === 'state' && (event.field === 'killerHealth' ||
           event.field === 'bloodlust' && typeof event.value === 'number' && event.value > BIRDS_MAX_BLOODLUST) ||
@@ -231,7 +244,7 @@ export function useActiveGame() {
       if(!log.length&&freshOrganism) setup.push(newPlayEvent({kind:"module",moduleData:{module:ORGANISM_MODULE,changes:initialOrganism()}}));
       const freshIntruders=isIntruders && previous.intrudersSetupVersion===1;
       if (!log.length && freshIntruders) setup.push(newPlayEvent({kind:'module',moduleData:{module:INTRUDER_MODULE,changes:initialIntruders()}}));
-      if (firstPlayWrite && (!isBirds || isBirdsTarget(previous.selection.birdsRequired)) && (!isMort||freshMort) && (!isRatchetLady||freshRatchet) && (!isIntruders||freshIntruders) && (!isOrganism||freshOrganism) && previous.coreTrackersVersion === 1 && (!isWolf || freshWolf) && (!isHunter || freshHunter) && (!isSlayer || freshSlayer)) {
+      if (firstPlayWrite && (!isBirds || isBirdsTarget(previous.selection.birdsRequired)) && (!isMort||freshMort) && (!isRatchetLady||freshRatchet) && (!isIntruders||freshIntruders) && (!isOrganism||freshOrganism) && previous.coreTrackersVersion === 1 && (!isRazorface || previous.razorfaceSetupVersion === 1) && (!isWolf || freshWolf) && (!isHunter || freshHunter) && (!isSlayer || freshSlayer)) {
         const values = playStartingValues(previous.selection.killer, previous.selection.finalGirl);
         values.finalGirlHealth = previous.selection.finalGirlStartingHealth ?? values.finalGirlHealth;
         for (const field of ['finalGirlHealth', 'killerHealth', 'bloodlust', 'finalHorrorLevel'] as const) {
@@ -396,6 +409,7 @@ export function useActiveGame() {
       if (previous.selection.location === MEGABGCON && !validPlayLog([...log, ...additions])) return previous;
       if (previous.selection.location===WOLFE && !validPlayLog([...log,...additions])) return previous;
       if (isStation && !validPlayLog([...log,...additions])) return previous;
+      if (isRazorface && !validPlayLog([...log,...additions])) return previous;
       if (isBirds && !validPlayLog([...log,...additions])) return previous;
       if (isMort && !validPlayLog([...log,...additions])) return previous;
       if (isRatchetLady && !validPlayLog([...log,...additions])) return previous;

@@ -1,3 +1,4 @@
+import { RAZORFACE, RAZORFACE_MAX_BLOODLUST, razorfaceState } from '../../../supabase/functions/_shared/play/razorface';
 import { BIRDS, BIRDS_MAX_BLOODLUST } from '../../../supabase/functions/_shared/play/birds';
 import { MORT, MORT_MAX_BLOODLUST, MORT_MAX_HEALTH, mortState } from '../../../supabase/functions/_shared/play/mort';
 import { MortPowerPicker, MortRevealEntry } from './MortControls';
@@ -216,13 +217,14 @@ export function PlayScreen(props: PlayScreenProps) {
       };
   const finalGirlMaxHealth = observedFinalGirlMaxHealth(finalGirl, events, props.finalGirlStartingHealth, killer);
   // Legacy sessions can use the catalog to bound new input without backfilling observations.
+  const razorface = killer === RAZORFACE ? razorfaceState(summary.entries) : null;
   const isRatchetLady = killer === RATCHET_LADY;
   const maniacs = isRatchetLady ? moduleState(summary.entries, RATCHET_MODULE).maniacs : undefined;
   const wolfe = location===WOLFE ? moduleState(summary.entries,WOLFE_MODULE) : undefined;
   const resistance = wolfe && wolfeAmped(wolfe) && wolfe[ampKey('resistance')];
   const ratchetShield = ratchetCount(maniacs) && maniacs > 0 &&
     summary.entries.some(event => event.momentType === 'dark-power' && event.killerCard === SHIELD_OF_MADNESS);
-  const trackerLimits = { ...stateLimits, ...(killer===BIRDS&&{bloodlust:BIRDS_MAX_BLOODLUST}), ...(mort&&{killerHealth:MORT_MAX_HEALTH,bloodlust:MORT_MAX_BLOODLUST}), ...(isRatchetLady && { killerHealth: RATCHET_HEALTH_STORAGE_MAX, bloodlust: RATCHET_MAX_BLOODLUST }), ...(killer===INTRUDERS&&{bloodlust:10}), ...(killer===ORGANISM&&{bloodlust:ORGANISM_MAX_BLOODLUST}), finalGirlHealth: observedFinalGirlMaxHealth(
+  const trackerLimits = { ...stateLimits, ...(razorface&&{bloodlust:RAZORFACE_MAX_BLOODLUST}), ...(killer===BIRDS&&{bloodlust:BIRDS_MAX_BLOODLUST}), ...(mort&&{killerHealth:MORT_MAX_HEALTH,bloodlust:MORT_MAX_BLOODLUST}), ...(isRatchetLady && { killerHealth: RATCHET_HEALTH_STORAGE_MAX, bloodlust: RATCHET_MAX_BLOODLUST }), ...(killer===INTRUDERS&&{bloodlust:10}), ...(killer===ORGANISM&&{bloodlust:ORGANISM_MAX_BLOODLUST}), finalGirlHealth: observedFinalGirlMaxHealth(
     finalGirl, events, props.finalGirlStartingHealth ?? startingValues.finalGirlHealth, killer,
   ) ?? stateLimits.finalGirlHealth };
   const [message, setMessage] = useState("");
@@ -522,7 +524,9 @@ export function PlayScreen(props: PlayScreenProps) {
                     <span className="play-state-title">{trackerTitles[field]}</span>
                     {value === undefined && <small className="play-state-unknown">{disguised?(mortProgress.known?'Disguised · Health unrevealed':'Disguise unrecorded'):'Not recorded'}</small>}
                     {field === 'killerHealth' && ratchetShield && <small>Shield of Madness · {resistance ? 'Resistance active' : `${maniacs} ${maniacs===1?'Maniac':'Maniacs'}`}</small>}
-                    {critical && <small className="play-critical-label">{value === 0 ? "No health remaining" : "Low health"}</small>}
+                    {field === 'killerHealth' && razorface && razorface.result === undefined && value !== undefined && value <= 1 &&
+                      <small>{razorface.active === undefined ? 'Final Health protection unrecorded' : razorface.active.length ? 'Final Health protected' : 'Resolve the Final Health token at the table'}</small>}
+                    {critical && !(field === 'killerHealth' && razorface && razorface.result !== 'defeated' && value === 0) && <small className="play-critical-label">{value === 0 ? "No health remaining" : "Low health"}</small>}
                   </div>
                 {disguised ? <span aria-label="Mort’s Health is unrevealed">?</span> : editingState === field ? (
                   <form
@@ -552,7 +556,9 @@ export function PlayScreen(props: PlayScreenProps) {
                     <div className="play-state-stepper">
                       <button
                         aria-label={`Decrease ${stateLabels[field]}`}
-                        disabled={value === undefined || value <= 0 || (field==="bloodlust"&&(killer===INTRUDERS||killer===ORGANISM||isRatchetLady)&&value>trackerLimits.bloodlust)}
+                        disabled={value === undefined || value <= 0 || (
+                          field === 'killerHealth' && value === 1 && razorface?.result === undefined && Boolean(razorface?.active?.length)
+                        ) || (field==="bloodlust"&&(killer===INTRUDERS||killer===ORGANISM||isRatchetLady)&&value>trackerLimits.bloodlust)}
                         onClick={() => value !== undefined && setState(field, killer==='Grimlash'&&field==='finalGirlHealth'?value-1:Math.min(trackerLimits[field],value-1))}
                       >
                         <Minus size={16} />
@@ -596,7 +602,7 @@ export function PlayScreen(props: PlayScreenProps) {
           Remember this <span>The moments that made your night</span>
         </h2>
         <div className="play-moment-choices">
-          {orderedMoments.filter(choice=>!(killer===ORGANISM&&["dark-power","killer-revived"].includes(choice.type))&&(!(killer==='Poltergeist'||killer===BIRDS||killer===INTRUDERS)||choice.type!=='killer-revived')&&!(mort&&!mortProgress.reveal&&choice.type==='killer-revived')&&!(killer==='The Hunter'&&['mark-v','countdown'].includes(hunter.phase)&&choice.type==='killer-revived')).map((choice) => {
+          {orderedMoments.filter(choice=>!(killer===ORGANISM&&["dark-power","killer-revived"].includes(choice.type))&&(!(killer==='Poltergeist'||killer===BIRDS||killer===INTRUDERS||killer===RAZORFACE)||choice.type!=='killer-revived')&&!(mort&&!mortProgress.reveal&&choice.type==='killer-revived')&&!(killer==='The Hunter'&&['mark-v','countdown'].includes(hunter.phase)&&choice.type==='killer-revived')).map((choice) => {
             const revealed = summary.entries.find(e => e.kind === "moment" && e.momentType === choice.type);
             const active = PERMANENT_MOMENTS.includes(choice.type) && (!!revealed || mort&&(choice.type==='finale'&&!!mortProgress.reveal||choice.type==='dark-power'&&!!mortProgress.power) || choice.type==='ultimate-unlocked'&&mallUnlocksUltimate(summary.entries) || killer==='The Hunter'&&hunterHasReveal(hunter,choice.type));
             const selectedArt = active && (choice.type === 'dark-power' || choice.type === 'finale')
@@ -621,7 +627,7 @@ export function PlayScreen(props: PlayScreenProps) {
         {moment && (
           <div className="play-moment-editor">
             {isReveal && <KillerCards killer={killer} events={events} onEvent={onEvent} typeOnly={moment.momentType as "dark-power" | "finale"} />}
-            {isReveal && killer !== WOLF && killer !== INTRUDERS && killer !== ORGANISM && killer !== 'The Hunter' && killer !== 'Slayer' && momentCards.length > 0 && (
+            {isReveal && killer !== RAZORFACE && killer !== WOLF && killer !== INTRUDERS && killer !== ORGANISM && killer !== 'The Hunter' && killer !== 'Slayer' && momentCards.length > 0 && (
               <label>
                 {moment.momentType === "dark-power"
                   ? "Which Dark Power?"

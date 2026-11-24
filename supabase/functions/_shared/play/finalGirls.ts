@@ -27,6 +27,13 @@ const guard = 'Take a Guard card';
 const twoMove = 'Move up to 2 spaces';
 const keepVictim = 'Place the saved Victim on this card.';
 export const FINAL_GIRL_REFERENCES: readonly FinalGirlReference[] = [
+  // Hell to Pay: IMG_9628 (starting faces), IMG_9627 (Ultimate faces).
+  { name: 'Kenzie', startingHealth: 5, ultimateHealth: 5, rescueRewards: [move,move,horror,health,twoTime], dossierRescues: 5,
+    ultimate: 'Once each Planning phase, you may buy all copies of one named Action card from the tableau for the cost of a single copy.',
+    additionalReward: horror },
+  { name: 'Christie', startingHealth: 5, ultimateHealth: 5, rescueRewards: [health,move,'Reduce Horror by 2',twoTime], dossierRescues: 4,
+    ultimate: 'In the Killer phase, draw two Terror cards in place of the usual one. Resolve one of your choice and shuffle the other into the deck.',
+    additionalReward: move },
   { name: 'Melanie', startingHealth: 5, ultimateHealth: 5, rescueRewards: [health,health,horror,twoMove,move,guard],
     dossierRescues: 6, personalItem: false,
     ultimate: 'Once per Action phase, you may lose 1 Health to deal 2 damage split as you choose among Enemies in your space.',

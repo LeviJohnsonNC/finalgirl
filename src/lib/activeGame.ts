@@ -3,6 +3,7 @@ import { MORT, mortOwnsLog } from '../../supabase/functions/_shared/play/mort';
 import { WOLFE, WOLFE_MODULE } from '../../supabase/functions/_shared/play/wolfeCatalog';
 import { initialWolfe, sameWolfe, wolfeOwnsLog } from '../../supabase/functions/_shared/play/wolfe';
 import { RATCHET_LADY, RATCHET_MODULE, ratchetLogBelongsTo } from '../../supabase/functions/_shared/play/ratchetLady';
+import { RAZORFACE, RAZORFACE_MODULE } from '../../supabase/functions/_shared/play/razorface';
 import { BIRDS, BIRDS_MODULE, birdsEventIncompatible, birdsLogBelongsTo, isBirdsReview, isBirdsTarget, type BirdsReview, type BirdsTarget } from '../../supabase/functions/_shared/play/birds';
 import {MALL,MALL_MODULE,initialMall} from './play/sunnydaze';
 import { WINGARD, WINGARD_MODULE } from '../../supabase/functions/_shared/play/wingardCatalog';
@@ -21,6 +22,7 @@ export interface GameSelection {
 }
 export interface EndingFormData {
   birdsReview?: BirdsReview;
+  razorfaceDefeated?: true;
   falconwoodReview?: import("../../supabase/functions/_shared/play/falconwood").FalconwoodReview;
   slayerReview?: import("./play/slayer").SlayerReview;
   childrenOnBoardAtFinish?: number|null;
@@ -40,6 +42,7 @@ export interface ActiveGame {
   /** New sessions initialize the always-visible core trackers once on first Play entry. */
   coreTrackersVersion?: 1;
   ratchetSetupVersion?: 1;
+  razorfaceSetupVersion?: 1;
   wolfeSetupVersion?: 1;
   woodsSetupVersion?: 1;
   marrekSetupVersion?: 1;
@@ -87,6 +90,10 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if (game.selection?.killer !== RAZORFACE &&
+      game.playEvents?.some(event => event?.moduleData?.module === RAZORFACE_MODULE)) return false;
+  if (game.razorfaceSetupVersion !== undefined &&
+      (game.razorfaceSetupVersion !== 1 || game.selection?.killer !== RAZORFACE)) return false;
   const target = game.selection?.birdsRequired;
   if (target !== undefined && (game.selection?.killer !== BIRDS || !isBirdsTarget(target) ||
       birdsEventIncompatible(game.selection.killer, game.selection.location, game.selection.startingEvent))) return false;

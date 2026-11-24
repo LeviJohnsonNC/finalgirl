@@ -19,6 +19,7 @@ export function playStartingValues(
   finalGirl: string,
 ): Record<Exclude<StateField,'killerHealth'>, number> & {killerHealth?:number} {
   const killerHealth: Record<string, number> = {
+    Razorface: 9,
     Grimlash: 10,
     Evomorph: 4,
     Inkanyamba: 9,
@@ -38,7 +39,7 @@ export function playStartingValues(
   return {
     finalGirlHealth: getFinalGirlHealth(finalGirl),
     ...(killer!=='Poltergeist'&&killer!==BIRDS&&{killerHealth:killerHealth[killer]??10}),
-    finalHorrorLevel: killer === 'Poltergeist' ? 3 : 4,
+    finalHorrorLevel: killer === 'Poltergeist' ? 3 : killer === 'Razorface' ? 5 : 4,
     bloodlust: 0,
   };
 }

@@ -49,6 +49,7 @@
 // the-hunter.png SHA-256: 99eec4700d235a45cfa8553fe8cd7a1420dcda5081f9b71de9262b7d044e60fb
 // ../play/photos/hunter/mark-x.webp.png SHA-256: b57c0e35c24454e5d8fd57701a63053f421a76f8289e8750c37406faf721fd68
 // src/assets/casting-killers/slayer.webp SHA-256: 67387a5f2bce6e56be247f6d41c859a4ddd130ca6a08649c0434894f5ddc4928
+// christie.png SHA-256: 87734536352be57aeafeb1609963f1eab5a4499f85830518ffd40854e38deca5
 export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: string }> = {
   "Billy the Bear": {
     "path": "billy-the-bear.jpg",
@@ -241,5 +242,9 @@ export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: 
   "Slayer": {
     "path": "slayer-c6b40295a85e5ae8.jpg",
     "sha256": "c6b40295a85e5ae8c4ea2bfd7df528840c9e38ab061434cb364cb1ee19040a48"
+  },
+  "Christie": {
+    "path": "christie-f046e1bd197c499d.jpg",
+    "sha256": "f046e1bd197c499dec7ca97969251f02387d63614b3076135cf4054fd2a96fda"
   }
 };

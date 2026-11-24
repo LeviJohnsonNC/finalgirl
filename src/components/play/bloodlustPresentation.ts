@@ -1,3 +1,4 @@
+import { RAZORFACE, RAZORFACE_MAX_BLOODLUST } from '../../../supabase/functions/_shared/play/razorface';
 import { BIRDS, BIRDS_MAX_BLOODLUST } from '../../../supabase/functions/_shared/play/birds';
 import { RATCHET_LADY, RATCHET_MAX_BLOODLUST } from '../../../supabase/functions/_shared/play/ratchetLady';
 import {ORGANISM,ORGANISM_MAX_BLOODLUST} from "@/lib/play/organism";
@@ -35,6 +36,7 @@ const photographs = [
  * Billy's board remains a documented source gap, so he uses the generic scale.
  */
 export const verifiedBloodlustMaximum: Readonly<Record<string, number>> = {
+  [RAZORFACE]: RAZORFACE_MAX_BLOODLUST,
   [BIRDS]: BIRDS_MAX_BLOODLUST,
   [RATCHET_LADY]: RATCHET_MAX_BLOODLUST,
   [ORGANISM]: ORGANISM_MAX_BLOODLUST,

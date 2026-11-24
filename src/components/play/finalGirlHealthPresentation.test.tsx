@@ -29,8 +29,8 @@ describe('Final Girl health photographs', () => {
     expect(observedFinalGirlMaxHealth('Kate', [ultimate])).toBeUndefined();
   });
 
-  it('covers every concrete catalog Final Girl with her own two photographs', () => {
-    const names = [...new Set(FEATURE_FILMS.flatMap(film => film.finalGirls))].filter(name => name !== 'TBD').sort();
+  it('covers every current Final Girl and legacy Julie with two photographs', () => {
+    const names = [...new Set([...FEATURE_FILMS.flatMap(film => film.finalGirls), 'Julie'])].filter(name => name !== 'TBD').sort();
     expect(manifest.map(entry => entry.name).sort()).toEqual(names);
     const paths = new Set<string>();
     for (const name of names) for (const [health, maximum] of [[5, 5], [1, 5]]) {

@@ -160,6 +160,7 @@ const CHARACTER_FILES: Record<string, string> = {
   'Janelle': 'janelle.png',
   'Slayer': 'slayer.png',
   'Kenzie': 'kenzie.png',
+  'Christie': 'christie.png',
   'Julie': 'julie.png',
   'Razorface': 'razorface.png',
   'Mandy': 'mandy.png',
@@ -301,7 +302,7 @@ const BASE_FEATURE_FILMS: Omit<FeatureFilm, 'boxArt' | 'boxArtAi'>[] = [
   // Season 3
   { id: 's3-falconwood-files', name: 'The Falconwood Files', season: 3, killer: 'Slayer', location: 'Falconwood', finalGirls: ['Octavia', 'Janelle'] },
   { id: 's3-killer-from-tomorrow', name: 'The Killer from Tomorrow', season: 3, killer: 'The Hunter', location: 'Sunnydaze Mall', finalGirls: ['Kat', 'Tali'] },
-  { id: 's3-hell-to-pay', name: 'Hell to Pay', season: 3, killer: 'Razorface', location: 'Hellscape', finalGirls: ['Kenzie', 'Julie'] },
+  { id: 's3-hell-to-pay', name: 'Hell to Pay', season: 3, killer: 'Razorface', location: 'Hellscape', finalGirls: ['Kenzie', 'Christie'] },
   { id: 's3-marrek-murders', name: 'The Marrek Murders', season: 3, killer: 'The Tormentor', location: 'Marrek Warehouse', finalGirls: ['Mandy', 'Cassie'] },
   { id: 's3-dont-make-sound', name: "Don't Make a Sound", season: 3, killer: 'The Eyeless', location: 'Utopia', finalGirls: ['Meghan', 'Ronda'] },
   { id: 's3-terror-from-destiny', name: 'Terror From Destiny', season: 3, killer: 'Destiny', location: '', finalGirls: ['Gabrielle'], isVignette: true },
