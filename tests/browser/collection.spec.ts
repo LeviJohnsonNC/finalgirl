@@ -162,7 +162,8 @@ test("illustrated shelf covers the catalog and opens truthful character details"
   const vignette = page.locator('[data-film-id="s1-terror-from-above"]');
   await expect(vignette.locator(".collection-girl-link")).toHaveCount(1);
   await expect(vignette).toContainText("Your choice");
-  for (const name of ["Kenzie", "Julie", "Meghan", "Ronda", "Melanie"]) {
+  await expect(page.getByRole("button", { name: "View Julie info", exact: true })).toHaveCount(0);
+  for (const name of ["Kenzie", "Christie", "Meghan", "Ronda", "Melanie"]) {
     const trigger = page.getByRole("button", {
       name: `View ${name} info`,
       exact: true,
@@ -179,6 +180,11 @@ test("illustrated shelf covers the catalog and opens truthful character details"
       await expect(dialog.getByText(/Once per Action phase, you may lose 1 Health/)).toBeVisible();
       await expect(dialog.locator(".girl-rescue-rewards li")).toHaveCount(6);
       await expect(dialog.locator(".girl-personal-item")).toHaveCount(0);
+    } else if (name === "Kenzie" || name === "Christie") {
+      await expect(dialog.getByText("5 starting health", { exact: true })).toBeVisible();
+      await dialog.locator(".girl-ability > summary").click();
+      await expect(dialog.getByText(name === "Kenzie" ? /cost of a single copy/ : /shuffle the other into the deck/)).toBeVisible();
+      await expect(dialog.locator(".girl-rescue-rewards li")).toHaveCount(name === "Kenzie" ? 5 : 4);
     } else {
       await expect(dialog.getByText("Details aren’t available yet.", { exact: true })).toBeVisible();
       await expect(dialog.locator(".girl-reference")).toHaveCount(0);
