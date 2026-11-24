@@ -81,8 +81,8 @@ test('special rules navigate from Now Playing without moving the page or recordi
 });
 
 test('a single applicable location opens directly and renders its setup diagrams', async ({ page, archive }, info) => {
-  archive.films = ['s1-sacred-groves', 's3-hell-to-pay'];
-  const groves = { ...selection, killer: 'Razorface', location: 'Sacred Groves', finalGirl: 'Adelaide', filmId: archive.films[0] };
+  archive.films = ['s1-sacred-groves', 's3-dont-make-sound'];
+  const groves = { ...selection, killer: 'The Eyeless', location: 'Sacred Groves', finalGirl: 'Adelaide', filmId: archive.films[0] };
   await archive.install(page, { draft: { ...activeGame, selection: groves } });
   await (await resumeGame(page)).click();
   const dialog = page.getByRole('dialog', { name: 'Special Rules', exact: true });
