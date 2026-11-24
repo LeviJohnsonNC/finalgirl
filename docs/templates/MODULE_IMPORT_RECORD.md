@@ -11,7 +11,7 @@ Read [the approved standard](../MODULE_STANDARD.md), [actual references](../refe
 - Requested scope; related import record:
 - Source batch complete or more photos expected; next owner/batch boundary:
 - Stage: source review / partial implementation / implemented / verified / deployed:
-- Relevant branch/PR/commit; last reviewed date:
+- Relevant branch/PR/commit and last reviewed date. For stacked imports, give each PR’s target branch and the verified integrated `main` revision when landed.
 - Existing support audited; verified parts to retain:
 
 ## Evidence ledger
@@ -36,7 +36,7 @@ Mark each row done with evidence, inapplicable with a reason, or partial/blocked
 
 | Surface                                                               | Status and implementation/evidence |
 | --------------------------------------------------------------------- | ---------------------------------- |
-| Selection, IDs, ownership and casting                                 |                                    |
+| Box contents, stable IDs, ownership, casting picker and shuffle       |                                    |
 | Rules, setup and search                                               |                                    |
 | Canonical card/space/entity catalogs                                  |                                    |
 | Registered illustrated Play panel and mechanics                       |                                    |
@@ -55,9 +55,9 @@ Mark each row done with evidence, inapplicable with a reason, or partial/blocked
 - Shared controls/capabilities used:
 - Mechanic-specific exceptions and rules justification:
 - Whole-card lifecycle: legal inactive/unknown/active/multiple/resolved/restored states, stable size/order, explicit outcome corrections, Left play restoration and Undo:
-- Player purpose and minimum useful observation for each tracker; required consequences/linked previews retained and reason; board details, redundant inputs/Rules/setup/reminders omitted:
+- For each Play control, complete “When [event] happens on the board, I use [control] to [result].” Include the smallest fact worth recording, its linked consequences, and any lookup left in Rules. For objectives, show the goal, progress, next action, and how players confirm completion tracked on the board.
 - Assets/atlas mapping and reviewed crops (link art README):
-- Fit with the current card, death-dialog and ending standards:
+- Name the shipped control used for comparison. Record what you saw side by side on laptop and phone across entry points, including choice size, revealed art and actions. Note any mechanic-specific difference and check the death dialog and ending against their existing standards when affected.
 
 ### Interaction/state map
 
@@ -79,6 +79,7 @@ Link the owner's asset README; use rows for every required image/state or unambi
 |                        |                               |                                       |                                                  |                                                    |
 
 - Verified physical track range and state-image mapping; unverified fallback/legacy handling:
+- For stateful artwork, identify the owner and entity, the trigger and appearance, the Undo result, and any nearby portraits that should keep their own treatment.
 - Existing art deliberately retained and reason:
 - Complete visible state-art set (as applicable: held/available, recipe/crafted, saved/killed, active/deactivated/sprung); identity continuity and female Final Girl hands/body constraints:
 - Actual loaded laptop/phone comparison to the approved pack: every distinct image in each named surface, including shallow crops; complete-panel review for tiny images, duplicate controls, inconsistent sizing and clipped internal bounds; fixes and remaining gaps:
@@ -89,11 +90,13 @@ Link the owner's asset README; use rows for every required image/state or unambi
 | ------------------------------------------------ | ------------------------- | ------------- | ------------------------------------------ |
 | Catalog accuracy and rule corrections            |                           |               |                                            |
 | Domain/legacy/setup/Undo/failure/retry/ownership |                           |               |                                            |
-| Shared controls and mixed films                  |                           |               |                                            |
+| Shared controls and a mixed-owner interaction    |                           |               |                                            |
 | Rules, Play, death/cache/narration, ending       |                           |               |                                            |
 | Laptop: 1280×640, 1366×768, 1440×900             |                           |               |                                            |
 | Phone: 320×568, 390×844                          |                           |               |                                            |
 | Source/asset/build/CI gates                      |                           |               |                                            |
+
+Describe the mid-game scenario actually played, from the active starting state through an action, an unrelated action, reload, and correction or Undo. Record the linked totals or outcomes and whether the intervening action survived.
 
 Keep CI mocks separate from any live provider or physical-device verification. Link evidence for the final committed implementation, not only an earlier iteration. Wait for final-head required CI before the completed handoff; do not silently omit related starting-event expectations when shared interactions change. Record intentional skips and limitations.
 
