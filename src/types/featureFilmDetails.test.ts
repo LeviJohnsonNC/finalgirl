@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { FEATURE_FILMS } from "./gameData";
 import { 
   FEATURE_FILM_DETAILS, 
   getFilmDetails, 
@@ -38,12 +39,13 @@ describe("FEATURE_FILM_DETAILS data", () => {
     }
   });
 
-  it("final girls have backstories", () => {
-    const campHappyTrails = FEATURE_FILM_DETAILS['s1-camp-happy-trails'];
-    for (const fg of campHappyTrails.finalGirls) {
-      expect(fg.name).toBeTruthy();
-      expect(fg.backstory).toBeTruthy();
-      expect(fg.backstory.length).toBeGreaterThan(50);
+  it("gives every named Final Girl a non-placeholder backstory under her own film", () => {
+    for (const film of FEATURE_FILMS) {
+      for (const name of film.finalGirls.filter(name => name !== 'TBD')) {
+        const detail = getFilmDetails(film.id)?.finalGirls.find(girl => girl.name === name);
+        expect(detail?.backstory, name).toBeTruthy();
+        expect(detail?.backstory, name).not.toMatch(/no detailed backstory|details aren’t available/i);
+      }
     }
   });
 
