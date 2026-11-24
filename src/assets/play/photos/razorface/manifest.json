@@ -14,11 +14,25 @@
     "sha256": "218004452e847b7e51ef9174bbccb8e14d21fd6dabece7416486cf4b9b8585bb"
   },
   {
+    "id": "experience-unbound-afflicted",
+    "source": "exec-bfb44967-042b-4778-8c03-184dce1d37d5.png",
+    "width": 900,
+    "height": 600,
+    "sha256": "8c10ada9840d78273d06f2c2166510b82cad7118cec3e3716e3925daa05dedd3"
+  },
+  {
     "id": "the-gift-of-pain",
     "source": "exec-83ab6e1f-c4d4-4a8f-9300-c65cc8b72e4d.png",
     "width": 900,
     "height": 600,
     "sha256": "0093b4085728095e222c2491219b0fc624a48945bf57dcfd4ef031e12d54a674"
+  },
+  {
+    "id": "the-gift-of-pain-purged",
+    "source": "exec-ea447a43-c1f6-4054-872a-fc11b5f63bb0.png",
+    "width": 900,
+    "height": 600,
+    "sha256": "31e0df89b545ebcaa7fedbb262d9e5ece7a1b2a9ffbc2a155bf3b9fbbdd12ace"
   },
   {
     "id": "explorers-of-the-flesh",
@@ -28,11 +42,25 @@
     "sha256": "d99ad654b48bb00432bfda3d7ad2ac49d2cc69f187f3d6708c1b60cadc614cad"
   },
   {
+    "id": "explorers-of-the-flesh-purged",
+    "source": "exec-746419f3-1315-4b5a-95e4-ab564cd11bc7.png",
+    "width": 900,
+    "height": 600,
+    "sha256": "dc12c8f1d483026d4a30cab10b298881aa5f0fd965a4e5e9bab2af39314cbee8"
+  },
+  {
     "id": "a-waste-of-good-suffering",
     "source": "exec-680fcb20-4f21-48c3-b85e-f5f4504bdf2e.png",
     "width": 900,
     "height": 600,
     "sha256": "b7b2499c84fe291e7dcab7e7642b67ca35ea228d58aace5dca8dcb7d97737ffa"
+  },
+  {
+    "id": "a-waste-of-good-suffering-purged",
+    "source": "exec-0f0d8ed3-42c9-4d3d-a4ed-3a469aa398a3.png",
+    "width": 900,
+    "height": 600,
+    "sha256": "efe9b17bd432ba7d5fd29127e0acef5d7ad2fa32ea0265b936bbd3e96abf38c8"
   },
   {
     "id": "a-delicious-sacrifice",
@@ -42,11 +70,25 @@
     "sha256": "9ce28ba453db9895959fb1c6b1a552ee78e8e75517295f1ee26f8e18971f8703"
   },
   {
+    "id": "a-delicious-sacrifice-purged",
+    "source": "exec-e62ddeda-f416-4d17-9354-1dad1782a44e.png",
+    "width": 900,
+    "height": 600,
+    "sha256": "9b710836a924b35737838bcc4d944cfc712a10849df2c8ab40212f0ad091772f"
+  },
+  {
     "id": "you-call-i-come",
     "source": "exec-62dc3bbf-942c-48f0-8d9f-f89645d7fb9e.png",
     "width": 900,
     "height": 600,
     "sha256": "ed9d798b72613b8ef785c928eca90b54e66a013d6aed3f0fb0852f58603b768a"
+  },
+  {
+    "id": "you-call-i-come-purged",
+    "source": "exec-f76c87e4-1aaf-406e-8365-b1b2a7e359b6.png",
+    "width": 900,
+    "height": 600,
+    "sha256": "7ee426b648bfff41973b441552a599ec1f469914d7a456bbbced7bd14d2555c2"
   },
   {
     "id": "a-lamb-to-the-slaughter",
@@ -56,11 +98,25 @@
     "sha256": "0df2e3f0f30582fc843af5c3eab2699f8fc9d4bde044d19b8efc39e0d3027c8c"
   },
   {
+    "id": "a-lamb-to-the-slaughter-purged",
+    "source": "exec-29645b69-3464-4de5-ad50-8c784edae125.png",
+    "width": 900,
+    "height": 600,
+    "sha256": "7c5f5f9a4a39ab7e9883ce2da522c7d4382828198cc77dbb749891a53244480a"
+  },
+  {
     "id": "torturous-embrace",
     "source": "exec-463e0309-37c0-4d8c-a926-ce5c075cf6e9.png",
     "width": 900,
     "height": 600,
     "sha256": "cc8a2b5b84c24097cf96e8aaec177356636ce18931588e0b7bebc774ff2fee25"
+  },
+  {
+    "id": "torturous-embrace-purged",
+    "source": "exec-5700d2f8-ca5e-4c60-8e34-586203d0a5ac.png",
+    "width": 900,
+    "height": 600,
+    "sha256": "7c7e6488bcfa45730ea54c6f9cda95aeb38fcbaa202edcbec4efed2d28fce531"
   },
   {
     "id": "unbound",

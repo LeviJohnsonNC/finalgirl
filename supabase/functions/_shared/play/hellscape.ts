@@ -7,17 +7,14 @@ export const HELLSCAPE_VISUAL = "A shifting underground labyrinth of worn limest
 export const HELLSCAPE_PEOPLE = [
   {
     id: "peon", name: "Masochistic Peon", color: "ivory",
-    reminder: "End of Action together? You may take 1 Health from the Peon.",
     effect: "Replace the closest Victim with the Peon and give the Event card 4 Health. At the end of Action, if the Peon shares your space, you may transfer 1 of that Health to yourself. Attacks also reduce its Health. The Peon dies when its last Health marker is gone. Discard the Event when the Peon leaves play.",
   },
   {
     id: "wretch", name: "Curious Wretch", color: "blue",
-    reminder: "Moves at least one space: lose 1 Time. Saved: lower Horror by 1 and recover 1 Health.",
     effect: "Replace the closest Victim with the Wretch. When the Wretch moves at least one space, lose 1 Time. On rescue, decrease Horror by 1 and recover 1 Health. Discard the Event when the Wretch leaves play.",
   },
   {
     id: "seeker", name: "Sadistic Seeker", color: "orange",
-    reminder: "Shares your space in Upkeep: lose 1 Health. Dies in your space: lower Horror by 4.",
     effect: "Replace the closest Victim with the Seeker. If the Seeker shares your space during Upkeep, lose 1 Health. If the Seeker dies in your space, decrease Horror by 4. Discard the Event when the Seeker leaves play.",
   },
 ] as const;

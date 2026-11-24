@@ -4,7 +4,6 @@
   min-width: 0;
 }
 
-.hellscape-toolbar,
 .hellscape-choices {
   display: flex;
   flex-wrap: wrap;
@@ -35,13 +34,7 @@
   outline-offset: 2px;
 }
 
-.hellscape-rules-link { min-height: 44px; }
-.hellscape-picker {
-  display: grid;
-  gap: .55rem;
-  color: #d8c5b0;
-  font-size: .875rem;
-}
+.hellscape-record { justify-self: start; }
 
 .hellscape-choices button {
   border-left: 3px solid var(--hellscape-role, #af9c86);
@@ -71,13 +64,9 @@
 }
 
 .hellscape-person .module-control-tile { aspect-ratio: 16 / 9; }
+.hellscape-person .module-control-tile:disabled { opacity: 1; }
 .hellscape-person .module-outcomes { flex-wrap: wrap; }
 .hellscape-person .module-outcomes button { min-height: 44px; }
-.hellscape-person .module-active-reminder {
-  border-left-color: var(--hellscape-role);
-  color: #e6d4bc;
-  line-height: 1.4;
-}
 .hellscape-history > summary {
   display: list-item;
   width: fit-content;

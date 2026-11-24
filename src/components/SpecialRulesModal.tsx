@@ -11,7 +11,6 @@ import '@/styles/special-rules.css';
 interface SpecialRulesModalProps {
   killer: string;
   location: string;
-  initialView?: "setup" | "rules";
   children: ReactNode;
 }
 
@@ -27,10 +26,10 @@ function getApplicableSpecialRules(killer: string, location: string) {
   );
 }
 
-export const SpecialRulesModal = ({ killer, location, initialView = "setup", children }: SpecialRulesModalProps) => {
+export const SpecialRulesModal = ({ killer, location, children }: SpecialRulesModalProps) => {
   const modules = getApplicableSpecialRules(killer, location);
   const [activeKind, setActiveKind] = useState(modules[0]?.kind);
-  const [view, setView] = useState<string>(initialView);
+  const [view, setView] = useState("setup");
   const topicPrefix = useId();
   const readerRef = useRef<HTMLDivElement>(null);
   const jumpMenuOpen = useRef(false);

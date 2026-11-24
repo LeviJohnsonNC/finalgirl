@@ -572,6 +572,9 @@ const razorfaceThumbnails = [
 const razorfaceNames = new Set([
   'banner', 'experience-unbound', 'the-gift-of-pain', 'explorers-of-the-flesh', 'a-waste-of-good-suffering',
   'a-delicious-sacrifice', 'you-call-i-come', 'a-lamb-to-the-slaughter', 'torturous-embrace', 'unbound',
+  'experience-unbound-afflicted', 'the-gift-of-pain-purged', 'explorers-of-the-flesh-purged',
+  'a-waste-of-good-suffering-purged', 'a-delicious-sacrifice-purged', 'you-call-i-come-purged',
+  'a-lamb-to-the-slaughter-purged', 'torturous-embrace-purged',
   ...razorfaceThumbnails,
 ]);
 const razorfaceHashes = new Set();
@@ -596,7 +599,8 @@ for (const photo of razorfaceManifest) {
     }
   }
 }
-if (razorfaceNames.size || images.filter(file => file.startsWith(razorfaceFolder + '/')).length !== 28) {
+if (razorfaceNames.size ||
+    images.filter(file => file.startsWith(razorfaceFolder + '/')).length !== razorfaceManifest.length + razorfaceThumbnails.length) {
   throw Error('Incomplete Razorface art');
 }
-console.log('Verified all 19 Razorface photographs and nine chooser thumbnails.');
+console.log('Verified all 27 Razorface photographs and nine chooser thumbnails.');

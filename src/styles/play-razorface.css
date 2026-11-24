@@ -8,7 +8,7 @@
   border-radius: 6px;
   padding: clamp(12px, 2.3vw, 28px);
 }
-.razorface-heading, .razorface-actions, .razorface-card-label {
+.razorface-heading, .razorface-actions {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -27,7 +27,7 @@
   letter-spacing: .035em;
   color: #f4e2c6;
 }
-.razorface-heading p, .razorface-card-details p, .razorface-release p {
+.razorface-heading p, .razorface-release p {
   color: var(--razorface-muted);
   margin: 5px 0 0;
 }
@@ -52,7 +52,6 @@
   align-items: stretch;
   gap: 14px;
 }
-.razorface-grid:has([data-expanded="true"]) { align-items: start; }
 .razorface-grid > .razorface-card:only-child { width: min(100%, 520px); }
 .razorface-card {
   min-width: 0;
@@ -60,14 +59,10 @@
   border: 1px solid #75553f;
   border-radius: 4px;
   background: #191614;
+  display: grid;
+  grid-template-rows: auto 1fr;
 }
-.razorface-card[data-expanded="true"] { border-color: #d19b64; }
-.razorface-card-trigger {
-  text-align: left;
-  width: 100%;
-  display: block;
-}
-.razorface-card-trigger:focus-visible { outline-offset: -3px; }
+.razorface-card[data-state="purged"] { border-color: #b08a55; }
 .razorface-art-frame {
   display: block;
   overflow: hidden;
@@ -83,26 +78,42 @@
   pointer-events: none;
 }
 .razorface-art-frame img, .razorface-picker img, .razorface-release img { width: 100%; height: 100%; display: block; }
-.razorface-card-label {
-  flex-wrap: nowrap;
-  padding: 11px 12px 0;
-  align-items: baseline;
+.razorface-card-body {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 10px;
+  padding: 11px 12px 12px;
+}
+.razorface-card-body h4 {
   color: #f4ddc5;
   font: 700 clamp(.98rem, 1.5vw, 1.21rem)/1.18 Georgia, serif;
 }
-.razorface-card-label svg { flex-shrink: 0; color: var(--razorface-brass); align-self: center; }
-.razorface-card[data-expanded="true"] .razorface-card-label svg { transform: rotate(180deg); }
-.razorface-card-requirement {
-  display: block;
-  min-height: 3.75rem;
-  padding: 7px 12px 12px;
-  font-size: .86rem;
-  line-height: 1.4;
-  color: var(--razorface-muted);
+.razorface-purge, .razorface-purged {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid;
+  border-radius: 4px;
+  font-size: .9rem;
+  font-weight: 700;
 }
-.razorface-card-details { border-top: 1px solid #75553f; padding: 12px; }
-.razorface-requirement-effect { display: flex; align-items: flex-start; gap: 8px; }
-.razorface-requirement-effect svg { margin-top: 3px; flex-shrink: 0; color: var(--razorface-brass); }
+.razorface-purge {
+  background: linear-gradient(#643722, #422318);
+  border-color: #a57957;
+  color: #fff1df;
+}
+.razorface-purge:hover:not(:disabled) {
+  background: linear-gradient(#814c30, #592e1f);
+  border-color: #ffd09a;
+}
+.razorface-purge:focus-visible { outline: 2px solid #ffd09a; outline-offset: 2px; }
+.razorface-purged {
+  background: #31291c;
+  border-color: #97784f;
+  color: #f5d7a0;
+}
 .razorface-effect, .razorface-check, .razorface-editor { font-size: .88rem; }
 .razorface-actions { justify-content: flex-start; margin-top: 12px; }
 .razorface-primary, .razorface-text {
@@ -137,6 +148,7 @@
 .razorface-picker svg { flex-shrink: 0; margin-left: auto; }
 .razorface-picker img { width: 44px; height: 44px; flex-shrink: 0; }
 .razorface-release {
+  margin-top: 14px;
   position: relative;
   min-height: 175px;
   display: grid;
@@ -151,13 +163,10 @@
 .razorface-release div { padding: 16px; }
 .razorface-release strong { color: #ffe3b8; font: bold 1.45rem Georgia, serif; }
 .razorface-objective[data-cleared="true"] .razorface-status { color: #ffe8b9; box-shadow: 0 0 20px #cb8d3930; }
-.razorface-health-fields { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 8px; }
-.razorface-health-fields label { display: grid; gap: 4px; }
-.razorface-health-fields input { min-height: 44px; min-width: 75px; background: #110d0b; border: 1px solid #946846; padding: 5px; }
 .razorface-objective > .module-minors { margin-top: 8px; }
 
 @media (prefers-reduced-motion: no-preference) {
-  .razorface-release { animation: razorface-release 420ms ease-out both; }
+  .razorface-card[data-state="purged"] img, .razorface-release { animation: razorface-release 420ms ease-out both; }
   @keyframes razorface-release {
     from { opacity: .4; transform: translateY(4px); }
     to { opacity: 1; transform: translateY(0); }
