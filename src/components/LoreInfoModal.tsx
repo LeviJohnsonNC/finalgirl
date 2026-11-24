@@ -56,6 +56,7 @@ const getLoreDetails = (
       if (finalGirl) {
         return {
           backstory: finalGirl.backstory,
+          backstorySource: finalGirl.backstorySource,
           visualDescription: FINAL_GIRL_DESCRIPTIONS[name],
           filmName: FEATURE_FILMS.find((f) => f.id === filmDetails.filmId)
             ?.name,
@@ -182,7 +183,11 @@ function LoreInfoContent({
             aria-label={`${name} character details`}
           >
             {lore?.backstory && (
-              <CharacterBackstory name={name} text={lore.backstory} />
+              <CharacterBackstory
+                name={name}
+                text={lore.backstory}
+                appOriginal={lore.backstorySource === "app-original"}
+              />
             )}
             {!lore?.backstory && !getFinalGirlReference(name) && (
               <CharacterBackstory
@@ -263,10 +268,12 @@ function CharacterBackstory({
   name,
   text,
   unavailable = false,
+  appOriginal = false,
 }: {
   name: string;
   text: string;
   unavailable?: boolean;
+  appOriginal?: boolean;
 }) {
   const scrollRef = useRef<HTMLElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
@@ -299,7 +306,10 @@ function CharacterBackstory({
         data-more-below={moreBelow || undefined}
       >
         <div ref={copyRef}>
-          <h3>{unavailable ? "Character details" : "Backstory"}</h3>
+          <h3>
+            {unavailable ? "Character details" : "Backstory"}
+            {appOriginal && <span className="girl-backstory-source">App original</span>}
+          </h3>
           {text.split(/\n\s*\n/).map((paragraph, index) => (
             <p key={index}>{paragraph}</p>
           ))}

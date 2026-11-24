@@ -22,6 +22,7 @@ import { BUDDYLAND_DETAILS } from '@/data/buddyland';
 export interface FinalGirlDetail {
   name: string;
   backstory: string;
+  backstorySource?: 'app-original';
   ultimateAbility?: string;
   additionalSaveReward?: string;
 }
@@ -532,6 +533,68 @@ The Tormentor was never interested in the act of killing for its own sake. What 
 The Tormentor exists more as an absence than a presence. She normally isn't seen at all—only felt through sprung traps, locked corridors, and victims suspended in cruel limbo. When she finally reveals herself, she is almost anticlimactic: not a towering monster, not an unstoppable force, but the calm author of everything that has already gone wrong. By the time she is confronted face to face, the Tormentor has usually done what she came to do. The question is no longer whether the killer can be stopped—but whether stopping her still means anything.`
     }
   },
+  's3-hell-to-pay': {
+    filmId: 's3-hell-to-pay',
+    finalGirls: [
+      {
+        name: 'Kenzie',
+        // Owner reference screenshots IMG_9639–9640.
+        backstory: `Kenzie split her time between school and evening shifts at the mall. At home, her father kept to himself, and she had learned to sleep through the odd sounds from his locked study. After he disappeared, she and her mother went through the room. Among the books on the occult, they found a large blade neither of them recognized.
+
+Months passed without a lead. Kenzie began reading the books and eventually worked out a ritual that used the blade. It opened a door she couldn’t shut from where she stood. If she wanted it closed, she would have to go through.`,
+      },
+      {
+        name: 'Christie',
+        // Owner reference screenshots IMG_9641–9642.
+        backstory: `Christie’s trust fund paid for parties all over the world. She spent most of her time chasing the next high or coming down from the last one, with little thought for the people she hurt. One night she drove while drunk. What happened on the road came back to her only in fragments. She couldn’t tell whether she’d died, killed someone, or both.
+
+In Hellscape’s maze, Christie found herself thinking about what she could do for someone else. She couldn’t change whatever happened on the road. If there was a way to spare others this place, she wanted to find it.`,
+      },
+    ],
+    location: {
+      name: HELLSCAPE,
+      description: HELLSCAPE_VISUAL,
+      setupCards: HELLSCAPE_SETUPS.map(card => ({
+        name: card.name,
+        description: `After placing the eight tile Victims, add ${card.victims.map(([count, space]) => `${count} at ${space}`).join(', ')}. Final Girl starts at ${card.girl}, Killer at ${card.killer}.`,
+      })),
+      events: HELLSCAPE_EVENTS.map(card => ({ name: card.name, description: card.effect })),
+    },
+    killer: {
+      name: 'Razorface',
+      description: 'A ritualistic figure in a black leather harness, with metal pins set in a precise pattern across his face.',
+    },
+  },
+  's3-dont-make-sound': {
+    filmId: 's3-dont-make-sound',
+    finalGirls: [
+      {
+        name: 'Meghan',
+        // Owner reference screenshot IMG_9637.
+        backstory: `Growing up in Utopia taught Meghan to handle trouble herself. She was tired of the desert and ready for a life beyond the little town. Her parents saw it differently. They’d spent years preparing for the end of the world, and to them, leaving the place they’d prepared made no sense.
+
+Meghan had made up her mind to go. Then the kind of disaster her parents had always talked about arrived for real, and even getting out of town seemed impossible.`,
+      },
+      {
+        name: 'Ronda',
+        // Owner reference screenshot IMG_9638.
+        backstory: `Ronda Carter came to Utopia from Hammond University. She was studying archaeology and planned to spend about a month taking seismic readings for her research. She’d expected the evenings to drag. Instead, she found she liked meeting the locals, even when her style made them a little wary of her.
+
+Over time, the people of Utopia warmed to Ronda. By the time other strangers came to town, she knew enough of the people there to understand what they stood to lose.`,
+      },
+    ],
+    location: {
+      name: 'Utopia',
+      description: 'An isolated desert town with weathered storefronts and a small community shaped by the harsh landscape.',
+      setupCards: [],
+      events: [],
+    },
+    killer: {
+      name: 'The Eyeless',
+      description: 'A sightless creature that hunts by sound. In a quiet desert town, even a small noise can give someone away.',
+    },
+  },
+
   // Vignette: Terror From Above (Season 1)
   's1-terror-from-above': {
     filmId: 's1-terror-from-above',
@@ -568,6 +631,7 @@ Kill if and when you must, but never believe you are safe. For there are always 
     finalGirls: [
       {
         name: 'Patsy',
+        // Confirmed against owner reference screenshot IMG_9643.
         backstory: `Patsy had never had a violent interaction in her whole life. There was an aggressive survival instinct laying dormant inside of her that would be awoken one day when the dead started rising from their graves.
 
 Patsy would have her innocence stolen, not by the living, but by the dead. And oh it would awaken a rage inside of her. She just found out she was expecting her first child. She had to survive. THEY had to survive.`
@@ -592,6 +656,7 @@ Destiny doesn't represent a traditional physical killer. There is no masked murd
     finalGirls: [
       {
         name: 'Gabrielle',
+        // Confirmed against owner reference screenshot IMG_9644.
         backstory: `Gabrielle always had an overactive imagination. Her parents had her professionally tested multiple times, thinking she was gifted or neurodivergent or "special" in some way. The tests always came back negative, the doctors insisting her daydreams and "visions" were normal for her age.
 
 And then one day Gabby's visions saved her life and the life of her friends. Or so she thought.`
@@ -612,11 +677,17 @@ The horror lies not in a monster lurking in the shadows, but in the realization 
     finalGirls: [
       {
         name: 'Adrianne',
-        backstory: 'No detailed backstory available yet.'
+        backstorySource: 'app-original',
+        backstory: `Adrianne earned her rent repairing props for a community theatre. She could tell which actor had handled a mask by the way they’d shortened the strap. She took a table at MegaBGCon to sell a few of her own pieces, hoping to make enough to replace the sewing machine she’d been borrowing from the theatre.
+
+Late in the afternoon, a volunteer asked her to fix a torn costume. Adrianne sent her behind the exhibitors’ curtain to fetch the matching fabric and heard something heavy hit the floor. A masked attendee came back through the curtain carrying the volunteer’s walkie-talkie. When Adrianne asked where she was, the attendee set it down and walked away.`,
       },
       {
         name: 'Maureen',
-        backstory: 'No detailed backstory available yet.'
+        backstorySource: 'app-original',
+        backstory: `Maureen spent her weekdays answering calls at a local radio station. She knew how to keep a nervous caller talking and how to tell when someone else had come into the room. At MegaBGCon she’d agreed to run the charity auction. Her younger brother had donated the first game he’d ever published, and she’d promised to get him a good opening bid.
+
+Ten minutes before the auction, a woman at the microphone asked for help. Someone cut the sound halfway through her sentence. Around Maureen, people laughed and started clapping. She could still see the woman’s hand gripping the microphone stand. Maureen put her brother’s game down and went to the stage.`,
       }
     ],
     location: {
@@ -636,18 +707,8 @@ export const getFilmDetails = (filmId: string): FeatureFilmDetail | undefined =>
   return FEATURE_FILM_DETAILS[filmId];
 };
 
-const hellscapeDetails: LocationDetail = {
-  name: HELLSCAPE,
-  description: HELLSCAPE_VISUAL,
-  setupCards: HELLSCAPE_SETUPS.map(card => ({
-    name: card.name,
-    description: `After placing the eight tile Victims, add ${card.victims.map(([count, space]) => `${count} at ${space}`).join(', ')}. Final Girl starts at ${card.girl}, Killer at ${card.killer}.`,
-  })),
-  events: HELLSCAPE_EVENTS.map(card => ({name: card.name, description: card.effect})),
-};
-
 export const getLocationDetails = (filmId: string): LocationDetail | undefined =>
-  filmId === 's3-hell-to-pay' ? hellscapeDetails : FEATURE_FILM_DETAILS[filmId]?.location;
+  getFilmDetails(filmId)?.location;
 
 // Helper to get setup cards for a location
 export const getSetupCardsForLocation = (filmId: string): { name: string; description: string }[] => {

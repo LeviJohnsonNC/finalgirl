@@ -263,6 +263,13 @@
   text-transform: uppercase;
   letter-spacing: -0.015em;
 }
+.final-girl-dialog .girl-backstory-source {
+  display: inline-block;
+  margin-left: .75em;
+  color: #665851;
+  font: 600 11px/1.4 "Dossier Serif", Georgia, serif;
+  letter-spacing: .04em;
+}
 .final-girl-dialog .girl-backstory p {
   margin: 0 0 17px;
   color: #34302c;

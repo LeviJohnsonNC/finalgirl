@@ -147,7 +147,7 @@ test("module cards show the supplied Buddyland cover, blurb and complete cast on
 test("illustrated shelf covers the catalog and opens truthful character details", async ({
   page,
   archive,
-}) => {
+}, info) => {
   await archive.install(page);
   await page.goto("/");
   await page.getByRole("button", { name: "Collection", exact: true }).click();
@@ -163,7 +163,18 @@ test("illustrated shelf covers the catalog and opens truthful character details"
   await expect(vignette.locator(".collection-girl-link")).toHaveCount(1);
   await expect(vignette).toContainText("Your choice");
   await expect(page.getByRole("button", { name: "View Julie info", exact: true })).toHaveCount(0);
-  for (const name of ["Kenzie", "Christie", "Meghan", "Ronda", "Melanie"]) {
+  const excerpts = {
+    Kenzie: "locked study",
+    Christie: "trust fund",
+    Meghan: "ready for a life beyond",
+    Ronda: "Hammond University",
+    Adrianne: "community theatre",
+    Maureen: "charity auction",
+    Patsy: "expecting her first child",
+    Gabrielle: "daydreams",
+    Melanie: "",
+  };
+  for (const [name, excerpt] of Object.entries(excerpts)) {
     const trigger = page.getByRole("button", {
       name: `View ${name} info`,
       exact: true,
@@ -173,8 +184,16 @@ test("illustrated shelf covers the catalog and opens truthful character details"
     await expect(
       dialog.getByRole("heading", { name, exact: true }),
     ).toBeVisible();
+    const bio = dialog.getByRole("region", { name: `${name} backstory` });
+    await expect(bio).toBeVisible();
+    if (excerpt) await expect(bio).toContainText(excerpt);
+    const appOriginal = name === "Adrianne" || name === "Maureen";
+    await expect(bio.getByText("App original", { exact: true })).toHaveCount(appOriginal ? 1 : 0);
+    if (appOriginal) {
+      await expect(dialog.locator(".girl-ability")).toHaveCount(1);
+      await dialog.screenshot({ path: info.outputPath(`${name.toLowerCase()}-dossier.png`) });
+    }
     if (name === "Melanie") {
-      await expect(dialog.getByRole("region", { name: "Melanie backstory" })).toBeVisible();
       await expect(dialog.getByText("5 starting health", { exact: true })).toBeVisible();
       await dialog.locator(".girl-ability > summary").click();
       await expect(dialog.getByText(/Once per Action phase, you may lose 1 Health/)).toBeVisible();
@@ -185,8 +204,7 @@ test("illustrated shelf covers the catalog and opens truthful character details"
       await dialog.locator(".girl-ability > summary").click();
       await expect(dialog.getByText(name === "Kenzie" ? /cost of a single copy/ : /shuffle the other into the deck/)).toBeVisible();
       await expect(dialog.locator(".girl-rescue-rewards li")).toHaveCount(name === "Kenzie" ? 5 : 4);
-    } else {
-      await expect(dialog.getByText("Details aren’t available yet.", { exact: true })).toBeVisible();
+    } else if (!appOriginal) {
       await expect(dialog.locator(".girl-reference")).toHaveCount(0);
     }
     await dialog.getByRole("button", { name: "Close", exact: true }).click();

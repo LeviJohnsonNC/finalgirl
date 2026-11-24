@@ -68,6 +68,15 @@ describe('gameplay without AI dependencies', () => {
     expect(JSON.stringify(body)).toContain('Six Victims');
     expect(JSON.stringify(body)).toContain('1 Time');
   });
+  it('uses the selected Final Girl’s biography even at another film’s location', async () => {
+    mock.stream.mockResolvedValue('Kenzie stood at the edge of the camp.');
+    render(<NowPlaying killer="Hans" location="Camp Happy Trails" finalGirl="Kenzie" sessionId={result.id} filmId="s1-camp-happy-trails" setupScenario={null} startingEvent={null} onBack={vi.fn()} onCheckpoint={vi.fn()} onGameEnd={vi.fn()} />);
+    await waitFor(() => expect(mock.stream).toHaveBeenCalled());
+    expect(mock.stream.mock.calls[0][0].body).toMatchObject({
+      finalGirl: { name: 'Kenzie', backstory: expect.stringContaining('locked study') },
+      location: { name: 'Camp Happy Trails' },
+    });
+  });
   it('repairs fragmentary saved continuity for Reshoot without rerolling the saved story', async () => {
     let complete: (value: string) => void;
     mock.bible.mockReturnValue(new Promise<string>(resolve => { complete = resolve; }));
