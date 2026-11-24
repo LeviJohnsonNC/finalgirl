@@ -1,3 +1,4 @@
+import { razorfaceRules, RAZORFACE_PROMPT_CONTEXT } from './razorfaceRules';
 import { birdsRules, BIRDS_PROMPT_CONTEXT } from './birdsRules';
 import { megaBgCon, MEGABGCON_PROMPT_CONTEXT } from "./megaBGConRules";
 import { MORT_ATTACK, MORT_MOVE, MORT_POWERS, MORT_SUSPECTS, MORT_TERRORS, MORT_FINALE_GUIDANCE } from '../../../supabase/functions/_shared/play/mort';
@@ -410,7 +411,7 @@ const falconwood: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [birdsRules,ratchetLadyRules,wolfeRules,stationRules,organismRules,mallRules,hunterRules,tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolfRules, shadyAcres, mortTheTeenageDirtbag, megaBgCon, intruderRules, wingardCottage, falconwood, slayerRules, marrekRules];
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [razorfaceRules,birdsRules,ratchetLadyRules,wolfeRules,stationRules,organismRules,mallRules,hunterRules,tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolfRules, shadyAcres, mortTheTeenageDirtbag, megaBgCon, intruderRules, wingardCottage, falconwood, slayerRules, marrekRules];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -419,6 +420,7 @@ export interface ModulePromptContext {
 }
 
 const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
+  Razorface:RAZORFACE_PROMPT_CONTEXT,
   Birds:BIRDS_PROMPT_CONTEXT,
   "The Organism":ORGANISM_PROMPT_CONTEXT,
   "Ratchet Lady":RATCHET_PROMPT_CONTEXT,

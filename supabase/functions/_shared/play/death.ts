@@ -1,4 +1,5 @@
 import { MEGABGCON, MEGABGCON_MODULE } from "./megabgconCatalog.ts";
+import { RAZORFACE, RAZORFACE_MODULE, razorfaceFacts } from './razorface.ts';
 import { BIRDS, BIRDS_MODULE, birdsLogBelongsTo, birdsState } from './birds.ts';
 import { conFacts, conOwnsLog } from "./megabgcon.ts";
 import { MORT, MORT_SUSPECTS, mortFacts, mortOwnsLog } from './mort.ts';
@@ -43,6 +44,7 @@ export function deathFacts(
   events: PlayEvent[],
   eventId: string,
 ) {
+  if (selection.killer !== RAZORFACE && events.some(event => event.moduleData?.module === RAZORFACE_MODULE)) return null;
   if(!birdsLogBelongsTo(selection.killer,events) || !validPlayLog(events) || !conOwnsLog(selection.location,selection.killer,events) || !wolfeOwnsLog(selection.location,events) || !ratchetLogBelongsTo(selection.killer, events) || !mortOwnsLog(selection.killer,events,selection.location))return null;
   if (selection.location !== STATION && events.some(e=>e.stationReference || e.moduleData?.module===STATION_MODULE)) return null;
   if(selection.killer!==ORGANISM&&events.some(e=>e.moduleData?.module===ORGANISM_MODULE||e.organismReference)) return null;
@@ -133,6 +135,12 @@ export function deathFacts(
       const state = birdsState(prefix);
       context = {...context,birds:Object.fromEntries(Object.entries(state).sort(([a],[b])=>a.localeCompare(b)))};
     }
+  }
+  if (selection.killer === RAZORFACE) {
+    if (context?.razorface) delete context.razorface;
+    const atDeath = summarizePlay(events.slice(0, events.findIndex(entry => entry.id === eventId) + 1)).entries;
+    const facts = razorfaceFacts(atDeath);
+    if (facts) context = {...context, razorface:{facts}};
   }
   if(context?.hunter)delete context.hunter;
   if(hunterDeath&&historical.some(e=>e.moduleData?.module===HUNTER_MODULE))context={...context,hunter:{facts:hunterFacts(moduleState(historical,HUNTER_MODULE),historical)}};

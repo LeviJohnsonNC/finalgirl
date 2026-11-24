@@ -434,3 +434,15 @@ test('Slayer uses the reviewed private opening JPEG and retains the selected Fin
   assert.equal(refs[0].name,'Slayer');
   await assert.rejects(opening.openingReferences('Unknown','Slayer',async () => new Uint8Array([255,216,255,217])), /does not match/);
 });
+
+test('Christie’s opening uses her own reviewed JPEG and preserves legacy Julie', async () => {
+  const bytes = new Uint8Array(readFileSync(new URL('../supabase/reference-assets/christie.jpg',import.meta.url)));
+  const [reference] = await opening.openingReferences('Christie','Hans',async path=>{
+    assert.match(path,/^christie-[0-9a-f]{16}\.jpg$/);
+    return bytes;
+  },false);
+  assert.equal(reference.name,'Christie');
+  assert.match(reference.url,/^data:image\/jpeg;base64,/);
+  assert.deepEqual(opening.openingReferenceNames('Julie','Razorface',false),['Julie']);
+  assert.deepEqual(opening.openingReferenceNames('Kenzie','Razorface',false),['Kenzie']);
+});

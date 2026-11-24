@@ -231,6 +231,31 @@
     "origin": "center bottom"
   },
   {
+    "name": "Christie",
+    "slug": "christie",
+    "original": "src/assets/characters/ai/christie.png",
+    "originalSha256": "87734536352be57aeafeb1609963f1eab5a4499f85830518ffd40854e38deca5",
+    "position": "center 40%",
+    "healthy": {
+      "source": "exec-50c37844-08d8-4778-8517-cbf8d7d7542c.png",
+      "nativeWidth": 1536,
+      "nativeHeight": 1024,
+      "width": 768,
+      "height": 512,
+      "sha256": "8ae68211f3c7680c378a24cb709fe4fdefacdc604b8e6fd3061b466e0e0a56ae"
+    },
+    "critical": {
+      "source": "exec-23bec07b-40dc-4b45-87c9-c547b391b34e.png",
+      "nativeWidth": 1536,
+      "nativeHeight": 1024,
+      "width": 768,
+      "height": 512,
+      "sha256": "dab2edf65c488b6eace2dcbd3ec2822db5ce31b7e869831ad4e76b2afa37fa0a"
+    },
+    "scale": 1,
+    "origin": "center bottom"
+  },
+  {
     "name": "Ellen",
     "slug": "ellen",
     "original": "src/assets/characters/ai/ellen.png",

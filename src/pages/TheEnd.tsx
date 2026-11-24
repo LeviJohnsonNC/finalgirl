@@ -160,7 +160,7 @@ const TheEnd = ({
       mission: getMissionByName(missionName),
       ...(hunter&&{hunterReview:hunter}),
       ...(mall&&{mallReview:mall}),
-      scenarioRules: [ratchetEnding,hunter&&hunterReviewFacts(hunter),result.killer===ORGANISM||result.killer==='Slayer'||result.killer==='The Hunter'||result.killer==='The Intruders'||result.killer==='Big Bad Wolf'||result.killer==='The Tormentor'||result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='Sunnydaze Mall'||result.location==='USS Konrad'||result.location==='Shady Acres'||result.location==='Storybook Woods'||result.location==='Station 2891'||result.location==='Wolfe Asylum'?playStoryBeats(result.playEvents,result):undefined, organismLossContext, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
+      scenarioRules: [ratchetEnding,hunter&&hunterReviewFacts(hunter),result.killer==='Razorface'||result.killer===ORGANISM||result.killer==='Slayer'||result.killer==='The Hunter'||result.killer==='The Intruders'||result.killer==='Big Bad Wolf'||result.killer==='The Tormentor'||result.killer==='Evomorph'||result.killer==='Grimlash'||result.location==='Sunnydaze Mall'||result.location==='USS Konrad'||result.location==='Shady Acres'||result.location==='Storybook Woods'||result.location==='Station 2891'||result.location==='Wolfe Asylum'?playStoryBeats(result.playEvents,result):undefined, organismLossContext, evomorphGuidance, getKillerNarrativeRules(result.killer), moduleContext?.rulesSummary, moduleContext?.narrativeGuidance].filter(Boolean).join('\n'),
       gameId: result.id,
       previousImageUrl,
       draftPoster: true,

@@ -1,4 +1,5 @@
 import { BirdsResultFields } from '@/components/BirdsResultFields';
+import { RAZORFACE, RAZORFACE_MODULE, razorfaceLatest, razorfaceState } from '../../supabase/functions/_shared/play/razorface';
 import { BIRDS, BIRDS_MODULE, birdsEventIncompatible, birdsParent, birdsReasonMatches, birdsResult, birdsReview, birdsState, isBirdsReason, isBirdsTarget, resolveBirdsAction, type BirdsReason, type BirdsReview, type BirdsTarget } from '../../supabase/functions/_shared/play/birds';
 import { FALCONWOOD, falconwoodReview, falconwoodReviewText, falconwoodState, missionByName } from "../../supabase/functions/_shared/play/falconwood";
 import { SLAYER, dimensionLabel } from "@/lib/play/slayer";
@@ -70,6 +71,7 @@ const IndexContent = () => {
   const { user, isLoading: authLoading } = useAuth();
   const owner = user?.id ?? 'guest';
   const sessionOwner = useRef(owner); sessionOwner.current = owner;
+  const [confirmRazorface, setConfirmRazorface] = useState<{id:string;finish:()=>void}|null>(null);
   const [confirmBirds, setConfirmBirds] = useState<{id:string;outcome:'won'|'lost';finish:(reason:BirdsReason)=>void}|null>(null);
   const [birdsFinishReason, setBirdsFinishReason] = useState<BirdsReason|''>('');
   const [confirmMissionWin,setConfirmMissionWin] = useState<{id:string; finish:() => void}|null>(null);
@@ -168,6 +170,7 @@ const IndexContent = () => {
     }
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
       coreTrackersVersion: 1,
+      ...(selection.killer === RAZORFACE && {razorfaceSetupVersion:1 as const}),
       ...(selection.location === "Wolfe Asylum" && {wolfeSetupVersion:1 as const}),
       ...(selection.killer === "Ratchet Lady" && {ratchetSetupVersion:1 as const}),
       ...(selection.location === FALCONWOOD && {falconwoodSetupVersion:1 as const}),
@@ -215,13 +218,25 @@ const IndexContent = () => {
     return current;
   };
 
-  const handleGameEnd = (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, bible?: string, missionConfirmed = false, birdsReason?: BirdsReason) => {
+  const persistRazorfaceVictory = (game: ActiveGame) => {
+    const entries = summarizePlay(game.playEvents).entries;
+    const action = {kind:'token', result:'defeated', tabletop:true, parent:razorfaceLatest(entries)?.id ?? 'root'};
+    if (!appendPlayEvent(game.id,newPlayEvent({kind:'module',moduleData:{module:RAZORFACE_MODULE,changes:{action:JSON.stringify(action)}}})))
+      throw new Error('The tabletop result could not be saved. Please retry.');
+    const current = getCurrentGame();
+    if (!current || current.id !== game.id) throw new Error('The saved tabletop result is unavailable.');
+    return current;
+  };
+
+  const handleGameEnd = (outcome: 'won' | 'lost', story?: string, sceneImageUrl?: string, bible?: string, missionConfirmed = false, birdsReason?: BirdsReason, razorfaceConfirmed = false) => {
     let game = getCurrentGame();
     if (!game || game.id !== activeGame?.id) return;
     try {
       const grimlashLost=game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(summarizePlay(game.playEvents).entries,'grimlash'));
       const tormentorLost=game.selection.killer==='The Tormentor'&&tormentorFatal(tormentorState(moduleState(summarizePlay(game.playEvents).entries,'tormentor')));
-      const resolvedOutcome=tormentorLost||grimlashLost?'lost':game.selection.location==='USS Konrad'&&konradFatal(moduleState(summarizePlay(game.playEvents).entries,'konrad'))?'lost':outcome;
+      const razorfaceEntries = game.selection.killer === RAZORFACE ? summarizePlay(game.playEvents).entries : undefined;
+      const razorfaceResult = razorfaceEntries && razorfaceState(razorfaceEntries).result;
+      const resolvedOutcome=tormentorLost||grimlashLost||razorfaceResult==='exhausted'?'lost':game.selection.location==='USS Konrad'&&konradFatal(moduleState(summarizePlay(game.playEvents).entries,'konrad'))?'lost':outcome;
       let birdsFinish: BirdsReview | undefined;
       if (game.selection.killer === BIRDS) {
         const entries = summarizePlay(game.playEvents).entries;
@@ -236,15 +251,24 @@ const IndexContent = () => {
         }
         birdsFinish = birdsResult(entries,reason,game.selection.birdsRequired);
       }
+      if (razorfaceEntries && resolvedOutcome === 'won' && !game.result && razorfaceResult !== 'defeated') {
+        if (!razorfaceConfirmed) {
+          setConfirmRazorface({id:game.id,finish:()=>handleGameEnd(outcome,story,sceneImageUrl,bible,missionConfirmed,birdsReason,true)});
+          return;
+        }
+        setConfirmRazorface(null);
+      }
       if (game.selection.location === FALCONWOOD && resolvedOutcome === 'won' && !game.result) {
         const fields = moduleState(summarizePlay(game.playEvents).entries, 'falconwood');
         const confirmed = falconwoodState(fields).complete === true || game.formDraft?.missionCompleted === true;
         if (!confirmed && !missionConfirmed) {
-          setConfirmMissionWin({id:game.id,finish:() => handleGameEnd(outcome, story, sceneImageUrl, bible, true, birdsFinish?.reason)});
+          setConfirmMissionWin({id:game.id,finish:() => handleGameEnd(outcome, story, sceneImageUrl, bible, true, birdsFinish?.reason, razorfaceConfirmed)});
           return;
         }
         if (!confirmed && !updateFormDraft(game.id, {missionCompleted:true})) return;
       }
+      if (razorfaceConfirmed && razorfaceEntries && resolvedOutcome === 'won' && !game.result && razorfaceResult !== 'defeated')
+        game = persistRazorfaceVictory(game);
       if (birdsFinish) game = persistBirdsReview(game,birdsFinish);
       const totals = trackedOutcome(game.playEvents);
       if (birdsFinish) delete totals.killerHealth;
@@ -287,16 +311,22 @@ const IndexContent = () => {
     if(game.selection.killer==='The Tormentor'&&formData.tormentorReview){const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'tormentor');if(tormentorState(state).loss!==formData.tormentorReview.loss){const action={parent:tormentorParent(en),command:'loss' as const,value:formData.tormentorReview.loss};const changes=resolveTormentorAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',tormentorAction:action,moduleData:{module:'tormentor',changes}})))throw new Error('The trap ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The reviewed trap ending is unavailable.');}}
     if(game.selection.killer==='Grimlash'&&formData.grimlashReview) {const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'grimlash');if(state.loss!==formData.grimlashReview.loss){const action={parent:grimlashParent(en),command:'loss' as const,value:formData.grimlashReview.loss,correction:true};const changes=resolveGrimlashAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',grimlashAction:action,moduleData:{module:'grimlash',changes}})))throw new Error('The Madness ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Madness ending is unavailable.');}}
     if(game.selection.location==='Shady Acres'&&formData.childrenOnBoardAtFinish!==undefined){const entries=summarizePlay(game.playEvents).entries,state=moduleState(entries,'shady-acres');if(shadyState(state).finishChildren!==formData.childrenOnBoardAtFinish){const action={parent:shadyParent(entries),command:'finish' as const,value:formData.childrenOnBoardAtFinish};const changes=resolveShadyAction(action,state,entries);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',shadyAction:action,moduleData:{module:'shady-acres',changes}})))throw new Error('The Children observation could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Children observation is unavailable.');}}
-    const {konradReview:_review,childrenOnBoardAtFinish:_children,ratchetManiacCount:_maniacCount,slayerReview,organismLoss:_organismLoss,falconwoodReview:submittedMission,birdsReview:submittedBirds,...fields}=formData;
+    const {razorfaceDefeated,konradReview:_review,childrenOnBoardAtFinish:_children,ratchetManiacCount:_maniacCount,slayerReview,organismLoss:_organismLoss,falconwoodReview:submittedMission,birdsReview:submittedBirds,...fields}=formData;
     const finishDimension = game.selection.killer === SLAYER ? slayerReview?.finalDimension : undefined;
     const reviewedEntries=summarizePlay(game.playEvents).entries;
-    const fatalEnding=game.selection.killer==='The Tormentor'&&tormentorFatal(tormentorState(moduleState(reviewedEntries,'tormentor')))||game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(reviewedEntries,'grimlash'))||game.selection.location==='USS Konrad'&&konradFatal(moduleState(reviewedEntries,'konrad'));
+    const razorfaceResult = game.selection.killer === RAZORFACE ? razorfaceState(reviewedEntries).result : undefined;
+    const fatalEnding=razorfaceResult==='exhausted'||game.selection.killer==='The Tormentor'&&tormentorFatal(tormentorState(moduleState(reviewedEntries,'tormentor')))||game.selection.killer==='Grimlash'&&grimlashFatal(moduleState(reviewedEntries,'grimlash'))||game.selection.location==='USS Konrad'&&konradFatal(moduleState(reviewedEntries,'konrad'));
     const outcome = fatalEnding ? 'lost' : formData.outcome ?? game.result.outcome;
     const missionReview = game.selection.location === FALCONWOOD && (game.falconwoodSetupVersion === 1 || submittedMission)
       ? falconwoodReview(falconwoodState(moduleState(reviewedEntries, 'falconwood')), game.selection.mission, submittedMission?.complete)
       : undefined;
     if (missionReview && outcome === 'won' && missionReview.complete !== true) {
       throw new Error('Confirm the Falconwood mission was completed before recording a win.');
+    }
+    if (game.selection.killer === RAZORFACE && outcome === 'won' && game.result.outcome !== 'won' && razorfaceResult !== 'defeated') {
+      if (razorfaceDefeated !== true) throw new Error('Confirm you cleared the Afflictions and defeated Razorface at the table.');
+      game = persistRazorfaceVictory(game);
+      if (!game.result) throw new Error('The reviewed result is unavailable.');
     }
     let reviewedBirds: BirdsReview | undefined;
     if (game.selection.killer === BIRDS) {
@@ -307,13 +337,15 @@ const IndexContent = () => {
       game = persistBirdsReview(game,reviewedBirds);
       if (!game.result) throw new Error('The current result is unavailable. Please retry.');
     }
-    const review = { ...formData, outcome, ...(reviewedBirds && {birdsReview:reviewedBirds}), ...(missionReview && {falconwoodReview:missionReview}) };
+    const review = { ...formData, outcome,
+      ...(game.selection.killer === RAZORFACE && outcome === 'won' && (razorfaceDefeated || razorfaceResult === 'defeated') && {killerHealth:0}), ...(reviewedBirds && {birdsReview:reviewedBirds}), ...(missionReview && {falconwoodReview:missionReview}) };
     const changed = !sameEndingReview(game.formData, review, game.result.outcome)
       || (game.result.playEvents?.length ?? 0) !== (game.playEvents?.length ?? 0);
     const hasOldEnding = Boolean(game.endingStory || game.posterImageUrl || game.endingNeedsRefresh);
     const clearEnding = nextPhase === 'outcome' || changed;
     const updates = {
       ...fields, outcome, playEvents: game.playEvents,
+      ...(game.selection.killer === RAZORFACE && outcome === 'won' && (razorfaceDefeated || razorfaceResult === 'defeated') && {killerHealth:0}),
       ...((finishDimension || missionReview) && {gameHighlights: [fields.gameHighlights,
         finishDimension && `Ended in: ${dimensionLabel(finishDimension)}`,
         missionReview && falconwoodReviewText(missionReview)].filter(Boolean).join(" ")}),
@@ -455,6 +487,7 @@ const IndexContent = () => {
               mission={gameSelection.mission}
               birdsRequired={activeGame.selection.birdsRequired}
               falconwoodFresh={activeGame.falconwoodSetupVersion === 1}
+              razorfaceFresh={activeGame.razorfaceSetupVersion === 1}
               stationFresh={activeGame.stationSetupVersion === 1} mortFresh={activeGame.mortSetupVersion === 1}
               filmId={gameSelection.filmId}
               key={activeGame.id}
@@ -546,6 +579,18 @@ const IndexContent = () => {
 
   return (
     <div className={`app-shell min-h-screen bg-background relative overflow-x-hidden${isGameSession ? ' game-session' : ''}${isNarrationPage ? ' narration-session' : ''}`}>
+      <AlertDialog open={confirmRazorface?.id === activeGame?.id && !!confirmRazorface} onOpenChange={open=>{if(!open)setConfirmRazorface(null);}}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Razorface’s defeat</AlertDialogTitle>
+            <AlertDialogDescription>Confirm that you cleared all Afflictions and defeated Razorface at the table.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Back to Play</AlertDialogCancel>
+            <button type="button" className="min-h-[44px] rounded-md bg-primary px-4 text-primary-foreground" onClick={()=>confirmRazorface?.finish()}>Confirm tabletop win</button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <AlertDialog open={confirmBirds?.id === activeGame?.id && !!confirmBirds} onOpenChange={open=>{if(!open)setConfirmBirds(null);}}>
         <AlertDialogContent>
           <AlertDialogHeader>

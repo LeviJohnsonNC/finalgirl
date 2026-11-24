@@ -1,3 +1,4 @@
+import { RAZORFACE, razorfaceState } from '../../supabase/functions/_shared/play/razorface';
 import { MORT, MORT_MAX_HEALTH, MORT_SUSPECTS, mortState } from '../../supabase/functions/_shared/play/mort';
 import { RATCHET_LADY, RATCHET_MODULE, RATCHET_HEALTH_STORAGE_MAX, ratchetCount } from '../../supabase/functions/_shared/play/ratchetLady';
 import {ORGANISM_MODULE,organismFacts} from "@/lib/play/organism";
@@ -100,8 +101,12 @@ export const GameOutcomeForm = ({
   const fatalShip=result.location==='USS Konrad'&&['airlock-loss','explosion-loss'].includes(shipFate);
   const fatalTormentor=result.killer==='The Tormentor'&&!['none','unknown'].includes(tormentorLoss);
   const fatalMall=result.location===MALL&&mallState(moduleState(entries,MALL_MODULE)).savior==='killed';
-  const fatalEnding=fatalMall||fatalGrim||fatalShip||fatalTormentor;
+  const razorfaceResult = result.killer === RAZORFACE ? razorfaceState(entries).result : undefined;
+  const fatalRazorface = razorfaceResult === 'exhausted';
+  const [razorfaceDefeated,setRazorfaceDefeated] = useDraftField<boolean>('razorfaceDefeated',false,initialDraft,onDraftChange);
+  const fatalEnding=fatalMall||fatalGrim||fatalShip||fatalTormentor||fatalRazorface;
   const isWin = !fatalEnding && reviewedOutcome === 'won';
+  const needsRazorfaceReview = result.killer === RAZORFACE && isWin && result.outcome !== 'won' && razorfaceResult !== 'defeated';
   const billyState = observed.billy;
 
   // Session snapshots include observed Ultimate changes; old games keep their denominator.
@@ -402,6 +407,7 @@ export const GameOutcomeForm = ({
       highlights = [highlights, ...falconParts].filter(Boolean).join('. ');
     }
     const formData: EndingFormData = {
+      ...(needsRazorfaceReview && razorfaceDefeated && {razorfaceDefeated:true as const}),
       ...(isBirds && isBirdsReason(birdsReason) && {birdsReview:birdsResult(entries,birdsReason,savedBirdsReview?.required ?? undefined)}),
       ...(isFalconwood && {falconwoodReview:falconwoodReview(recordedMission,result.mission,missionCompleted)}),
       ...(isSlayer && {slayerReview: {finalDimension: endingDimension === 'Our Dimension' ? 'our' :
@@ -461,8 +467,12 @@ export const GameOutcomeForm = ({
           <option value="lost">Lost</option>
         </OutcomeSelect>
         {isBirds && <BirdsResultFields outcome={isWin?'won':'lost'} value={birdsReason} onChange={setBirdsReason} />}
+        {needsRazorfaceReview && <label className="flex min-h-[44px] items-center gap-2">
+          <input type="checkbox" checked={razorfaceDefeated} onChange={event=>setRazorfaceDefeated(event.target.checked)} />
+          I cleared all Afflictions and defeated Razorface at the table.
+        </label>}
         {fatalEnding && <p role="status">Recorded {[
-          fatalMall && 'Savior death', fatalShip && 'ship fate', fatalTormentor && 'trap outcome', fatalGrim && 'Harvest Madness',
+          fatalRazorface && 'Affliction deck exhaustion', fatalMall && 'Savior death', fatalShip && 'ship fate', fatalTormentor && 'trap outcome', fatalGrim && 'Harvest Madness',
         ].filter(Boolean).join(' and ')} requires a loss. Health and victim totals stay as recorded.</p>}
       </section>
       <div className="outcome-counters" aria-label="Final game totals">
@@ -901,14 +911,14 @@ export const GameOutcomeForm = ({
       <div className="outcome-actions">
         <button
           type="button"
-          disabled={isFalconwood && isWin && missionCompleted !== true || isBirds && !birdsReasonMatches(isWin?'won':'lost',birdsReason)}
+          disabled={needsRazorfaceReview && !razorfaceDefeated || isFalconwood && isWin && missionCompleted !== true || isBirds && !birdsReasonMatches(isWin?'won':'lost',birdsReason)}
           onClick={handleContinue}
           className="outcome-continue"
         >
           Generate ending <ArrowRight size={21} aria-hidden="true" />
         </button>
         {onSaveResult && (
-          <button type="button" className="outcome-save-only" disabled={isFalconwood && isWin && missionCompleted !== true || isBirds && !birdsReasonMatches(isWin?'won':'lost',birdsReason)} onClick={() => {
+          <button type="button" className="outcome-save-only" disabled={needsRazorfaceReview && !razorfaceDefeated || isFalconwood && isWin && missionCompleted !== true || isBirds && !birdsReasonMatches(isWin?'won':'lost',birdsReason)} onClick={() => {
             if (textDraft.flush()) onSaveResult(buildFormData());
           }}>Save record only</button>
         )}

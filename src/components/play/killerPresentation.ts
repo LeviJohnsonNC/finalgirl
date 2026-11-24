@@ -1,3 +1,5 @@
+import { RAZORFACE, RAZORFACE_POWERS, RAZORFACE_FINALES } from '../../../supabase/functions/_shared/play/razorface';
+import { razorfaceArt } from './razorfaceArt';
 import { BIRDS, BIRDS_POWERS, BIRDS_FINALES } from '../../../supabase/functions/_shared/play/birds';
 import { birdsArt } from './birdsArt';
 import { MORT, MORT_FINALE_GUIDANCE, MORT_POWERS, MORT_SUSPECTS } from '../../../supabase/functions/_shared/play/mort';
@@ -76,6 +78,8 @@ export function illustratedKillerCards(
   type: "dark-power" | "finale",
 ): IllustratedKillerCard[] {
   const power = type === "dark-power";
+  if (killer === RAZORFACE) return [...(power ? RAZORFACE_POWERS : RAZORFACE_FINALES)]
+    .map(card => ({...card, epic:"epic" in card && card.epic === true, art:razorfaceArt(card.id,true), heroArt:razorfaceArt(card.id)}));
   if (killer === BIRDS) return (power ? BIRDS_POWERS : BIRDS_FINALES).map(card=>({...card,art:birdsArt(card.id)})).sort((a,b)=>a.name.localeCompare(b.name));
   if (killer === MORT) {
     const cards = power ? MORT_POWERS : MORT_SUSPECTS.map(suspect => ({

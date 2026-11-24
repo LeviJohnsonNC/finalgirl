@@ -26,6 +26,7 @@ export const REVIEWED_FINAL_GIRL_IDENTITIES: Readonly<Record<string, string>> = 
   Julie: 'A young woman with wavy, shoulder-length dark hair, voluminous layers and brow-length bangs. She wears a light-wash denim jacket with a grey T-shirt beneath it.',
   Kat: 'A fair-skinned adult woman with dark-blond hair swept back from her face. She wears gold-rimmed aviator sunglasses and a green jacket.',
   Kate: 'A fair-skinned woman with dark brown eyes and loose, straight black hair to the shoulders. She wears a heavy olive-brown parka with a thick fur-edged hood.',
+  Christie: 'An adult woman with tousled collarbone-length dark brown waves, freckled fair skin and a charcoal denim jacket over a faded burgundy shirt.',
   Kenzie: 'A young woman with a medium complexion, dark eyes and long black hair swept to one side, with an undercut on the other. She wears dark clothing and a black choker with a silver ring.',
   Laurie: 'A fair-skinned woman with light blue eyes, an angular face and straight shoulder-length dark-blond hair worn loose with a side part. She wears a light-colored blouse.',
   Maureen: 'An adult woman with an olive complexion, dark eyes and long straight black hair with a side part. She wears a deep red blazer over a grey top.',

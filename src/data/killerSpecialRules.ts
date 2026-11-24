@@ -98,10 +98,7 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
       'The Hunter begins as Mark V, a red-hooded, blue-jacketed cybernetic assassin. Its three initial cybernetic parts are damaged and removed instead of ordinary Health. When shut down it leaves recoverable parts and a two-token countdown before the female android Mark X arrives. Mark V can be repaired as an Ally; if that Ally is permanently destroyed it cannot be repaired again. Mark X has the 15-Health track. Keep the two models, their identities, reveal paths, recorded damage and fates distinct. Never invent an arrival, part recovery, repair, attack, or injury.',
   },
 
-  'Razorface': {
-    narrativeNote:
-      'A ritualistic, pain-worshipping killer who moves through his hellish domain with calm purpose. Violence is ceremony to him.',
-  },
+  Razorface: { narrativeNote: 'Razorface brings the Affliction deck to the chosen Location. A purge is a confirmed tabletop action. His Final Health token stays hidden while Afflictions remain. A required draw from the exhausted deck can cause a loss without establishing the Final Girl’s fate. Use recorded facts only.' },
 
   'The Tormentor': {narrativeNote:'The Tormentor begins off-board and remains unseen until Finale; she arrives at the beginning of the next Killer phase. Separate Victim and Final Girl Death Traps drive the pressure. Trapped subjects normally cannot be targeted unless the printed Finale says otherwise. Keep the selected location; only explicit recorded trap effects and outcomes happened.'},
 

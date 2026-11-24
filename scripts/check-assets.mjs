@@ -562,3 +562,41 @@ if (mortNames.size || images.filter(file => file.startsWith(mortFolder + '/')).l
   throw Error('Incomplete Mort art');
 }
 console.log('Verified 49 Mort photographs and seven trait glyphs.');
+
+const razorfaceFolder = 'src/assets/play/photos/razorface';
+const razorfaceManifest = JSON.parse(readFileSync(join(razorfaceFolder, 'manifest.json'), 'utf8'));
+const razorfaceThumbnails = [
+  'helleport', 'soulbound', 'life-drain', 'infinite-despair', 'chains-of-torment', 'taste-our-pleasures',
+  'i-feast-on-your-pain', 'the-pain-of-judgment', 'the-pain-of-salvation',
+];
+const razorfaceNames = new Set([
+  'banner', 'experience-unbound', 'the-gift-of-pain', 'explorers-of-the-flesh', 'a-waste-of-good-suffering',
+  'a-delicious-sacrifice', 'you-call-i-come', 'a-lamb-to-the-slaughter', 'torturous-embrace', 'unbound',
+  ...razorfaceThumbnails,
+]);
+const razorfaceHashes = new Set();
+for (const photo of razorfaceManifest) {
+  const path = join(razorfaceFolder, `${photo.id}.webp`);
+  const needsThumb = razorfaceThumbnails.includes(photo.id);
+  if (!razorfaceNames.delete(photo.id) || !/^exec-[a-f0-9-]+\.png$/.test(photo.source) ||
+      photo.width !== 900 || photo.height !== 600 || needsThumb !== Boolean(photo.thumbSha256)) {
+    throw Error('Unmapped Razorface art: ' + path);
+  }
+  const bytes = readFileSync(path);
+  if (bytes.length > 145 * 1024 || konradWebpDimensions(bytes).join() !== '900,600' ||
+      createHash('sha256').update(bytes).digest('hex') !== photo.sha256 || razorfaceHashes.has(photo.sha256)) {
+    throw Error('Invalid or duplicate Razorface art: ' + path);
+  }
+  razorfaceHashes.add(photo.sha256);
+  if (needsThumb) {
+    const thumbnail = readFileSync(join(razorfaceFolder, `${photo.id}-thumb.webp`));
+    if (thumbnail.length > 45 * 1024 || konradWebpDimensions(thumbnail)[0] !== 320 ||
+        createHash('sha256').update(thumbnail).digest('hex') !== photo.thumbSha256) {
+      throw Error('Invalid Razorface thumbnail: ' + photo.id);
+    }
+  }
+}
+if (razorfaceNames.size || images.filter(file => file.startsWith(razorfaceFolder + '/')).length !== 28) {
+  throw Error('Incomplete Razorface art');
+}
+console.log('Verified all 19 Razorface photographs and nine chooser thumbnails.');
