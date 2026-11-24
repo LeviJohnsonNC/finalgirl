@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { newPlayEvent, summarizePlay, type PlayEvent } from "../../src/lib/play/events";
 import { activeGame, expect, test, userId } from "./fixtures";
-import { openHistory, openModule, searchPick, statusPick } from "./play-helpers";
+import { openHistory, openModule, searchPick } from "./play-helpers";
 
 const key = `final-girl-active-game-v1:${userId}`;
 const selection = {...activeGame.selection, killer: "Razorface", location: "Hellscape",
@@ -53,19 +53,12 @@ test("records a starting Victim and a later Event, retries and corrects after re
   await expect(module.getByRole("button", {name: "Record Masochistic Peon", exact: true})).toBeVisible();
   await expect(module.locator(".hellscape-person")).toHaveCount(0);
   await module.screenshot({path: info.outputPath("hellscape-empty.png"), animations: "disabled"});
-  await module.getByRole("button", {name: "Hellscape rules", exact: true}).click();
-  const dialog = page.getByRole("dialog", {name: "Special Rules"});
-  await expect(dialog.getByRole("tab", {name: "Rules", exact: true})).toHaveAttribute("aria-selected", "true");
-  await expect(dialog.getByText(/Matching symbols: flip/)).toBeVisible();
-  await dialog.screenshot({path: info.outputPath("hellscape-rules.png"), animations: "disabled"});
-  await dialog.getByRole("tab", {name: "Setup", exact: true}).click();
-  await expect(dialog.getByText("Top-right Exit", {exact: true})).toBeVisible();
-  await dialog.getByRole("button", {name: "Close", exact: true}).click();
+  await expect(module.getByRole("button", {name: "Hellscape rules", exact: true})).toHaveCount(0);
   expect(await log(page)).toEqual(empty);
 
   await module.getByRole("button", {name: "Record Masochistic Peon", exact: true}).click();
   await module.getByRole("button", {name: /Masochistic Peon Starting Event/}).click();
-  await expect(module.getByText(/End of Action together/)).toBeVisible();
+  await expect(module.getByText(/End of Action together|Change status/)).toHaveCount(0);
   await module.getByRole("button", {name: "Record Special Victim", exact: true}).click();
   await module.getByRole("button", {name: "Curious Wretch", exact: true}).click();
   await page.getByRole("button", {name: "Decrease Horror", exact: true}).click();
@@ -87,7 +80,7 @@ test("records a starting Victim and a later Event, retries and corrects after re
   await expect(module.getByRole("alert")).toContainText("could not be saved");
   await expect(save).toBeVisible();
   await save.click();
-  await expect(module.getByRole("status")).toHaveText(/Wretch saved/);
+  await expect(module.getByText(/Lower Horror by/)).toHaveCount(0);
   const after = summarizePlay(await log(page));
   expect([after.saved, after.killed, after.finalHorrorLevel]).toEqual([before.saved, before.killed, before.finalHorrorLevel]);
   await page.reload();
@@ -95,8 +88,7 @@ test("records a starting Victim and a later Event, retries and corrects after re
   await module.getByText("Recorded outcomes", {exact: true}).click();
   const wretch = module.locator(".hellscape-person").filter({hasText: "Curious Wretch"});
   await expect(wretch).toHaveAttribute("data-state", "saved");
-  await wretch.getByText("Change status", {exact: false}).click();
-  await statusPick(page, wretch.getByRole("combobox", {name: "Curious Wretch status"}), "Killed");
+  await wretch.getByRole("button", {name: "Mark Curious Wretch killed", exact: true}).click();
   await expect(wretch).toHaveAttribute("data-state", "killed");
   await openHistory(page);
   await page.getByRole("button", {name: /^Undo Curious Wretch: killed/}).click();
@@ -134,13 +126,8 @@ test("loaded artwork, actions and quiet disclosure fit the five viewport sizes",
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await module.screenshot({path: info.outputPath(`hellscape-${width}.png`), animations: "disabled",
       style: ".app-footer, [data-sonner-toaster] { visibility: hidden; }"});
-    await module.getByRole("button", {name: "Hellscape rules", exact: true}).click();
-    const dialog = page.getByRole("dialog", {name: "Special Rules"});
-    const guide = dialog.locator(".hellscape-upkeep-guide");
-    await expect(guide).toBeVisible();
-    expect(await guide.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
-    await dialog.screenshot({path: info.outputPath(`hellscape-rules-${width}.png`), animations: "disabled"});
-    await dialog.getByRole("button", {name: "Close", exact: true}).click();
+    await expect(module.getByRole("button", {name: "Hellscape rules", exact: true})).toHaveCount(0);
+    await expect(module.locator(".module-active-reminder, .module-correction")).toHaveCount(0);
   }
   await page.getByRole("button", {name: "Record one victim killed", exact: true}).click();
   await page.getByRole("button", {name: "Terror card", exact: true}).click();

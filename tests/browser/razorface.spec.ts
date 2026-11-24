@@ -38,11 +38,12 @@ test('showcase records a purge, preserves other play and restores effects after 
   await module.locator('.module-card-section > summary').click();
   await module.getByText('Life Drain',{exact:true}).click();
   await expect.poll(async () => (await read()).some(e => e.killerCard === 'Life Drain')).toBe(true);
-  await gift.getByRole('button',{name:/The Gift of Pain/}).click();
-  await expect(gift.getByText(/Life Drain/)).toBeVisible();
-  await gift.screenshot({path:info.outputPath('affliction-purge.png'),animations:'disabled',style:'.app-footer { visibility:hidden; }'});
-  await gift.getByText('Record Health after effects').click();
-  await gift.getByLabel('Final Girl Health',{exact:true}).fill('3');
+  await expect(module.locator('.module-minor[data-active="true"]')).toHaveCount(2);
+  await expect(module.locator('.module-minor').getByRole('group', {name:/health/i})).toHaveCount(0);
+  await expect(gift).toHaveAttribute('data-state','afflicted');
+  const afflictedArt = await gift.locator('img').getAttribute('src');
+  const purge = gift.getByRole('button',{name:'Mark The Gift of Pain purged',exact:true});
+  await expect(gift.getByText(/Life Drain|Purge effect/)).toHaveCount(0);
   await page.evaluate(k=>{
     const original=Storage.prototype.setItem;
     Storage.prototype.setItem=function(name,value){
@@ -55,22 +56,29 @@ test('showcase records a purge, preserves other play and restores effects after 
       return original.call(this,name,value);
     };
   }, key);
-  await gift.getByRole('button',{name:'Record purge',exact:true}).click();
-  await expect(gift).toBeVisible();
+  await purge.click();
+  await expect(gift).toHaveAttribute('data-state','afflicted');
   expect((await state()).minors).toHaveLength(2);
-  await gift.getByRole('button',{name:'Record purge',exact:true}).click();
-  await expect(gift).toHaveCount(0);
+  await purge.click();
+  await expect(gift).toHaveAttribute('data-state','purged');
+  await expect(gift.locator('img')).not.toHaveAttribute('src',afflictedArt!);
+  await expect(purge).toHaveCount(0);
+  await gift.locator('img').evaluate((image:HTMLImageElement)=>image.decode());
+  await gift.screenshot({path:info.outputPath('affliction-purge.png'),animations:'disabled',style:'.app-footer { visibility:hidden; }'});
   expect((await state()).minors).toEqual([]);
-  expect(summarizePlay(await read()).finalGirlHealth).toBe(3);
+  expect(summarizePlay(await read()).finalGirlHealth).toBe(5);
+  await page.getByRole('button',{name:'Decrease Final Girl health',exact:true}).click();
   await page.getByRole('button',{name:'Decrease Horror',exact:true}).click();
   await page.reload();
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
   await openModule(page,'razorface');
+  await expect(gift).toHaveAttribute('data-state','purged');
   await objective.getByRole('button',{name:'Undo purge',exact:true}).click();
-  await expect(gift).toBeVisible();
+  await expect(gift).toHaveAttribute('data-state','afflicted');
+  await expect(gift.locator('img')).toHaveAttribute('src',afflictedArt!);
   expect((await state()).minors).toHaveLength(2);
   const after = summarizePlay(await read());
-  expect([after.finalGirlHealth,after.finalHorrorLevel]).toEqual([5,4]);
+  expect([after.finalGirlHealth,after.finalHorrorLevel]).toEqual([4,4]);
 });
 
 test('replacement remains separate from a purge, and the clear state allows revival', async ({page,archive},info) => {
@@ -86,17 +94,13 @@ test('replacement remains separate from a purge, and the clear state allows revi
   await openModule(page,'razorface');
   const objective = page.getByRole('region',{name:'Afflictions'});
   await expect(objective.getByRole('button',{name:'Record Final Health result'})).toHaveCount(0);
-  await objective.getByRole('button',{name:/The Gift of Pain/}).click();
-  await objective.getByRole('button',{name:'Replace Affliction',exact:true}).click();
+  await objective.getByRole('button',{name:'Replace an Affliction',exact:true}).click();
   await statusPick(page,objective.getByRole('combobox',{name:'Replacement Affliction'}),'A Lamb to the Slaughter');
   await objective.getByRole('button',{name:'Record replacement',exact:true}).click();
   await expect(objective.getByText('1 in play',{exact:true})).toBeVisible();
-  await objective.getByRole('button',{name:/A Lamb to the Slaughter/}).click();
-  await objective.getByText('Record Horror after effects').click();
-  await objective.getByLabel('Horror',{exact:true}).fill('6');
-  await objective.getByRole('button',{name:'Record purge',exact:true}).click();
-  const logAfterPurge = await page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents as PlayEvent[],key);
-  expect(summarizePlay(logAfterPurge).finalHorrorLevel).toBe(6);
+  await objective.getByRole('button',{name:'Mark A Lamb to the Slaughter purged',exact:true}).click();
+  await expect(objective.locator('[data-affliction="a-lamb-to-the-slaughter"]')).toHaveAttribute('data-state','purged');
+  await expect(objective.locator('[data-affliction="the-gift-of-pain"]')).toHaveCount(0);
   await expect(objective.getByText('Final Health can be revealed',{exact:true})).toBeVisible();
   await objective.locator('.razorface-release img').evaluate((image:HTMLImageElement) => image.decode());
   await objective.screenshot({path:info.outputPath('afflictions-cleared.png'), animations:'disabled',style:'.app-footer, [data-sonner-toaster] { visibility:hidden; }'});
@@ -106,28 +110,40 @@ test('replacement remains separate from a purge, and the clear state allows revi
   await expect(objective.getByText('Final Health revealed',{exact:true})).toBeVisible();
 });
 
-test('every Affliction loads unique art in a populated module without clipping',async ({page,archive},info)=>{
+test('all sixteen Affliction images load and the mixed states fit five viewport sizes', async ({page,archive},info)=>{
   const log = [newPlayEvent({kind:'start',saved:0,killed:0,round:null}), observed(AFFLICTIONS.map(card=>card.id))];
   await archive.install(page,{draft:{...draft,playEvents:log}});
   await page.goto('/');
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  await openModule(page,'razorface');
+  const objective=page.getByRole('region',{name:'Afflictions'});
+  const images=objective.locator('.razorface-card img');
+  const paths=()=>images.evaluateAll(async elements=>Promise.all(elements.map(async element=>{
+    const image=element as HTMLImageElement;
+    await image.decode();
+    return image.currentSrc;
+  })));
+
+  await expect(images).toHaveCount(8);
+  const before = await paths();
+  for (const card of AFFLICTIONS.filter((_,index)=>index%2===0))
+    await objective.getByRole('button',{name:`Mark ${card.name} purged`,exact:true}).click();
+
   const sizes=info.project.name==='mobile'?[[320,568],[390,844]]:[[1280,640],[1366,768],[1440,900]];
   for (const [width,height] of sizes) {
     await page.setViewportSize({width,height});
-    await openModule(page,'razorface');
-    const objective=page.getByRole('region',{name:'Afflictions'});
-    const images=objective.locator('.razorface-card img');
-    await expect(images).toHaveCount(8);
-    const sources=await images.evaluateAll(async elements=>Promise.all(elements.map(async element=>{
-      const image=element as HTMLImageElement;
-      await image.decode();
-      return image.currentSrc;
-    })));
-    expect(new Set(sources).size).toBe(8);
+    await expect(objective.locator('[data-affliction][data-state="purged"]')).toHaveCount(4);
+    expect(new Set(await paths()).size).toBe(8);
     expect(await objective.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
-    if(width===1366||width===320) await objective.screenshot({path:info.outputPath(`afflictions-${width}.png`),animations:'disabled',style:'.app-footer, [data-sonner-toaster] { visibility:hidden; }'});
+    await objective.locator('.razorface-grid').screenshot({path:info.outputPath(`afflictions-${width}.png`),animations:'disabled',
+      style:'.app-footer, [data-sonner-toaster] { visibility:hidden; }'});
   }
+  for (const card of AFFLICTIONS.filter((_,index)=>index%2===1))
+    await objective.getByRole('button',{name:`Mark ${card.name} purged`,exact:true}).click();
+  await expect(objective.locator('[data-affliction][data-state="purged"]')).toHaveCount(8);
+  expect(new Set([...before, ...await paths()]).size).toBe(16);
+  await expect(objective.getByText('Final Health can be revealed',{exact:true})).toBeVisible();
 });
 
 test('exhaustion forces a loss with both Razorface and Falconwood on the table', async ({page,archive}) => {
@@ -140,8 +156,7 @@ test('exhaustion forces a loss with both Razorface and Falconwood on the table',
   await openModule(page,'falconwood');
   const objective = page.getByRole('region',{name:'Afflictions'});
   await expect(page.locator('[data-module="falconwood"]')).toBeVisible();
-  await objective.getByRole('button',{name:/A Waste of Good Suffering/}).click();
-  await objective.getByRole('button',{name:'Replace Affliction',exact:true}).click();
+  await objective.getByRole('button',{name:'Replace an Affliction',exact:true}).click();
   await objective.getByRole('checkbox',{name:/A required draw failed/}).check();
   await objective.getByRole('button',{name:'Record Affliction deck loss',exact:true}).click();
   await expect(objective.getByText('Affliction deck exhausted',{exact:true})).toBeVisible();
