@@ -1,3 +1,4 @@
+import { HELLSCAPE, HELLSCAPE_MODULE } from "../../supabase/functions/_shared/play/hellscape";
 import { conOwnsLog } from "../../supabase/functions/_shared/play/megabgcon";
 import { MORT, mortOwnsLog } from '../../supabase/functions/_shared/play/mort';
 import { WOLFE, WOLFE_MODULE } from '../../supabase/functions/_shared/play/wolfeCatalog';
@@ -90,6 +91,8 @@ export interface ActiveGame {
 export function isActiveGame(value: unknown): value is ActiveGame {
   if (!value || typeof value !== 'object') return false;
   const game = value as ActiveGame;
+  if ((game.selection?.location !== HELLSCAPE || game.selection?.killer === BIRDS) &&
+      Array.isArray(game.playEvents) && game.playEvents.some(event => event?.moduleData?.module === HELLSCAPE_MODULE)) return false;
   if (game.selection?.killer !== RAZORFACE &&
       game.playEvents?.some(event => event?.moduleData?.module === RAZORFACE_MODULE)) return false;
   if (game.razorfaceSetupVersion !== undefined &&

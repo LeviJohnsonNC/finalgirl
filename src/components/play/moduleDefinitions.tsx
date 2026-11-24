@@ -1,3 +1,6 @@
+import { HELLSCAPE, HELLSCAPE_MODULE, HELLSCAPE_PEOPLE } from "../../../supabase/functions/_shared/play/hellscape";
+import { HellscapeControls } from "./HellscapeControls";
+import hellscapeNexus from "@/assets/play/photos/hellscape/banner.webp";
 import { RAZORFACE, RAZORFACE_MODULE, razorfaceState } from '../../../supabase/functions/_shared/play/razorface';
 import { RazorfaceControls } from './RazorfaceControls';
 import { razorfaceArt } from './razorfaceArt';
@@ -120,7 +123,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: typeof RAZORFACE_MODULE | typeof BIRDS_MODULE | typeof MEGABGCON_MODULE | typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: typeof HELLSCAPE_MODULE | typeof RAZORFACE_MODULE | typeof BIRDS_MODULE | typeof MEGABGCON_MODULE | typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -150,6 +153,11 @@ const stationDefinition: Definition = {id:STATION_MODULE,owner:'location',match:
   summary:(fields,props)=>stationSummary(stationState(!props.events.length&&props.stationFresh?initialStation(props.startingEvent):fields))};
 export const moduleDefinitions: Definition[] = [
  stationDefinition,
+ {id: HELLSCAPE_MODULE, owner: "location", match: HELLSCAPE, title: "Inside Hellscape",
+  art: {src: hellscapeNexus, position: "50% 52%"}, capabilities: ["character"], Controls: HellscapeControls,
+  summary: state => Object.keys(state).length
+    ? peopleSummary(state, HELLSCAPE_PEOPLE, "person", "in-play")
+    : "The Nexus"},
  {id:RAZORFACE_MODULE,owner:'killer',match:RAZORFACE,title:RAZORFACE,art:razorfaceArt('banner'),
   capabilities:['objective','reveals','minor-power'],Controls:RazorfaceControls,summary:(_fields,props)=>{
     const state = razorfaceState(summarizePlay(props.events).entries);

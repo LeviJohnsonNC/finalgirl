@@ -1,3 +1,4 @@
+import nexus from "@/assets/play/photos/hellscape/banner.webp";
 import { birdsArt } from '@/components/play/birdsArt';
 import type { RuleChapter } from '@/data/rules/types';
 import cabin from '@/assets/rules/cabin.webp';
@@ -10,6 +11,7 @@ import minions from '@/assets/characters/ai/zombies.png';
 export const rulebookArt = { cabin, archive, dice, weapon };
 
 const coreArt: Record<string, string> = {
+  'ch-location-hellscape': nexus,
   'ch-overview': cabin, 'ch-boards': archive, 'ch-game-turn': dice,
   'ch-attacking': weapon, 'ch-bloodlust': hans, 'ch-tokens-cards': dice,
   'ch-minions': minions, 'ch-items': weapon, 'ch-end': cabin, 'ch-glossary': archive,

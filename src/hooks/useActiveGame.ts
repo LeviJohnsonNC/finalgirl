@@ -1,3 +1,4 @@
+import { HELLSCAPE, HELLSCAPE_MODULE } from "../../supabase/functions/_shared/play/hellscape";
 import { MEGABGCON } from "../../supabase/functions/_shared/play/megabgconCatalog";
 import { conOwnsLog } from "../../supabase/functions/_shared/play/megabgcon";
 import { MORT, MORT_MODULE, canRecordMort, mortOwnsLog, mortParent, mortState } from '../../supabase/functions/_shared/play/mort';
@@ -194,6 +195,12 @@ export function useActiveGame() {
         const changes = event.moduleData.changes;
         if (changes.miracleResolved === true && (state.miracleResolved === true || state.finale !== 'we-need-a-miracle' || changes.wrath !== 10)) return previous;
         if (Object.entries(changes).every(([key,value]) => value === null ? state[key] === undefined : state[key] === value)) return previous;
+      }
+      if (event.moduleData?.module === HELLSCAPE_MODULE) {
+        if (previous.selection.location !== HELLSCAPE || isBirds) return previous;
+        const current = moduleState(summarizePlay(log).entries, HELLSCAPE_MODULE);
+        const [key, value] = Object.entries(event.moduleData.changes)[0];
+        if (value === null ? current[key] === undefined : current[key] === value) return previous;
       }
       if (event.moduleData?.module === 'maple' && previous.selection.location !== 'Maple Lane') return previous;
       if (event.moduleData?.module === 'fright') {

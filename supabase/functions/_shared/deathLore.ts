@@ -1,3 +1,4 @@
+import { HELLSCAPE_VISUAL } from "./play/hellscape.ts";
 import { WOLFE_VISUAL } from './play/wolfeCatalog.ts';
 import { SLAYER_VISUAL } from "./play/slayer.ts";
 import { WINGARD_VISUAL } from './play/wingardCatalog.ts';
@@ -55,8 +56,7 @@ export const DEATH_LOCATION_CUES: Record<string, string> = {
     'A desolate, sun-scorched desert outpost comprised of weathered, single-story structures huddled together against the encroaching dunes. The town feels like a relic of the mid-20th century, forgotten by time and buried under layers of fine, orange sand. The buildings are modest and functional, built from wood and corrugated metal that has rusted and bleached under an unforgiving sun. In the foreground, a prominent, splintering wooden sign stands tall, bearing the ironically optimistic greeting: "WELCOME TO UTOPIA – POP.',
   'Marrek Warehouse':
     'A massive industrial monolith of rust and corrugated metal that looms over the landscape, appearing less like a functional storage facility and more like a graveyard for heavy industry. The exterior is a patchwork of oxidization and weathered steel, suggesting a structure that has been abandoned by time but remains standing through sheer, stubborn mass. Inside, the air is thick and heavy, carrying the sharp, metallic scent of hydraulic fluid mixed with centuries of settled dust.',
-  Hellscape:
-    'A cavernous, soot-stained industrial foundry defined by heavy iron structures, massive overhead support beams, and a floor of reinforced metal grating. The environment is thick with age and grime, feeling oppressive and sweltering—a place where the scale of the machinery dwarfs the people operating it. At the center of the scene is a pit of incandescent molten metal, radiating an intense, blinding orange glow that serves as the primary light source.',
+  Hellscape: HELLSCAPE_VISUAL,
   'Camp Happy Trails':
     'A secluded lakeside summer camp set deep in a forest, composed of small wooden cabins arranged loosely around a central dirt path and communal fire pit. The camp feels modest, old-fashioned, and slightly neglected rather than abandoned—structures are intact but weathered, with peeling wood, uneven steps, and soft yellow light glowing from cabin windows. At the heart of the camp is a large circular fire pit surrounded by rough-hewn log benches. The fire burns steadily, casting long, flickering shadows across the ground and nearby trees.',
   'Carnival of Blood': CARNIVAL_VISUAL,

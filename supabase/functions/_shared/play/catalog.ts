@@ -1,3 +1,4 @@
+import { HELLSCAPE, HELLSCAPE_EVENTS, HELLSCAPE_ITEMS, HELLSCAPE_PEOPLE, HELLSCAPE_SOURCE, HELLSCAPE_SPACES, HELLSCAPE_TERRORS } from "./hellscape.ts";
 import { MEGABGCON, MEGABGCON_SOURCE, BOOTH_EVENTS, CON_EVENTS, CON_ITEMS, CON_TERRORS, CON_SPACES, CON_PEOPLE } from "./megabgconCatalog.ts";
 import { MORT, MORT_TERRORS } from './mort.ts';
 import { WOLFE, WOLFE_EVENTS, WOLFE_ITEMS, WOLFE_PEOPLE, WOLFE_TERRORS, WOLFE_SPACES, WOLFE_SOURCE } from './wolfeCatalog.ts';
@@ -21,7 +22,7 @@ import { KONRAD_ITEMS, KONRAD_EVENTS, KONRAD_TERRORS, KONRAD_SPACES, KONRAD_PEOP
 import { EVOMORPH_TERRORS } from './evomorph.ts';
 import { CREECH_ITEMS, CREECH_EVENTS, CREECH_TERRORS, CREECH_SPACES, CREECH_PEOPLE, CREECH_SOURCE } from './creech.ts';
 import { RAZORFACE, RAZORFACE_SOURCE, RAZORFACE_TERRORS } from './razorface.ts';
-import { BIRDS_TERRORS } from './birds.ts';
+import { BIRDS, BIRDS_TERRORS, birdsEventIncompatible } from './birds.ts';
 import { POLTERGEIST_ITEMS, POLTERGEIST_TERRORS } from './poltergeist.ts';
 import { GROVES_EVENTS, GROVES_ITEMS, GROVES_PEOPLE, GROVES_SPACES, GROVES_SOURCE, GROVES_TERRORS } from "./groves.ts";
 import { INKANYAMBA_TERRORS } from "./inkanyamba.ts";
@@ -85,6 +86,8 @@ export const PLAY_CARDS: readonly PlayCard[] = [
   ...EVOMORPH_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...CREECH_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...CREECH_EVENTS.map(c=>({...c,kind:"event" as const,location:"Creech Manor",source:CREECH_SOURCE})),
+  ...HELLSCAPE_EVENTS.map(card => ({...card, kind: "event" as const, location: HELLSCAPE, source: HELLSCAPE_SOURCE})),
+  ...HELLSCAPE_TERRORS.map(card => ({...card, kind: "terror" as const, location: HELLSCAPE, source: HELLSCAPE_SOURCE})),
   ...RAZORFACE_TERRORS.map(card=>({...card,kind:'terror' as const,killer:RAZORFACE,source:RAZORFACE_SOURCE})),
   ...BIRDS_TERRORS.map(card=>({...card,kind:"terror" as const})),
   ...POLTERGEIST_TERRORS.map(card=>({...card,kind:"terror" as const})),
@@ -133,6 +136,7 @@ export function applicablePlayCards(
   return PLAY_CARDS.filter(
     (card) =>
       card.kind === kind &&
+      !(card.location === HELLSCAPE && kind === "event" && birdsEventIncompatible(selection.killer, selection.location, card.name)) &&
       (card.location !== FALCONWOOD || card.name !== "Survive the Hunt" || selection.mission === "Survive the Hunt") &&
       (card.killer === selection.killer ||
         card.location === selection.location),
@@ -156,6 +160,9 @@ export function suggestedDeathCards(selection: {killer:string;location:string;mi
     if (card.location===WOLFE) return (kind==='terror'?WOLFE_TERRORS:WOLFE_EVENTS).some(c=>c.name===card.name&&c.death);
     if (card.location===STATION && kind==='event') return card.name === STATION_EVENTS.find(event=>event.id==='lab-accident')?.name;
     if (card.killer===MORT) return ['Everybody’s a Suspect','I Want to See What Your Insides Look Like!','A Mask in the Crowd','Meta Massacre','Trade-Off'].includes(card.name);
+    if (card.location === HELLSCAPE) return kind === "event"
+      ? card.name === "Masochistic Peon"
+      : HELLSCAPE_TERRORS.some(terror => terror.name === card.name && terror.death);
     if (card.killer === RAZORFACE) return RAZORFACE_TERRORS.some(terror => terror.name === card.name && 'death' in terror && terror.death);
     if (card.killer===RATCHET_LADY) return RATCHET_TERRORS.some(terror=>terror.name===card.name&&terror.death);
     if (card.killer===ORGANISM) return ORGANISM_TERRORS.some(terror=>terror.name===card.name&&terror.death);
@@ -183,6 +190,7 @@ export function playCardContext(
   });
 }
 export const PLAY_ROOMS: Record<string, readonly string[]> = {
+ [HELLSCAPE]:HELLSCAPE_SPACES,
  [MEGABGCON]:CON_SPACES,
  [WOLFE]:[...WOLFE_SPACES,'Laundry Room'],
  [FALCONWOOD]:FALCONWOOD_SPACES,
@@ -237,13 +245,15 @@ export function playMechanisms(selection: {
 export function playItems(
   location: string,
 ): readonly { name: string; effect: string }[] {
+  if (location === HELLSCAPE) return HELLSCAPE_ITEMS;
   return location === MEGABGCON ? CON_ITEMS : location === WOLFE ? WOLFE_ITEMS : location === STATION ? STATION_ITEMS : location === FALCONWOOD ? FALCONWOOD_ITEMS : location === MALL ? MALL_ITEMS : location === WOODS ? WOODS_ITEMS : location === WINGARD ? WINGARD_ITEMS : location === "Marrek Warehouse" ? MARREK_ITEMS : location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
     ? CAMP_ITEMS
     : location === "Buddyland"
       ? BUDDYLAND_ITEMS
       : [];
 }
-export function playVictims(location: string): readonly { name: string }[] {
+export function playVictims(location: string, killer?: string): readonly { name: string }[] {
+  if (location === HELLSCAPE) return killer === BIRDS ? [] : HELLSCAPE_PEOPLE;
   return location === MEGABGCON ? [...CON_PEOPLE.map(p => ({ name: p.person })), { name: "SWAG attendee" }] : location === WOLFE ? WOLFE_EVENTS.filter(event=>WOLFE_PEOPLE.some(id=>id===event.id)) : location === STATION ? STATION_ROLES : location === FALCONWOOD ? FALCONWOOD_ROLES : location===MALL?[{name:'Bart the Mall Cop'},{name:'The Savior’s Girl'}]:location === WOODS ? WOODS_PEOPLE : location === WINGARD ? WINGARD_PEOPLE : location === "Marrek Warehouse" ? MARREK_PEOPLE : location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
     ? CAMP_VICTIMS
     : location === "Buddyland"

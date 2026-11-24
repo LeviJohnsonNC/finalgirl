@@ -1,3 +1,4 @@
+import { HELLSCAPE_VISUAL } from "../../supabase/functions/_shared/play/hellscape";
 import { WINGARD_VISUAL } from '../../supabase/functions/_shared/play/wingardCatalog';
 import { WOODS_VISUAL } from "../../supabase/functions/_shared/play/storybookWoods";
 import { GROVES_VISUAL } from "../../supabase/functions/_shared/play/groves";
@@ -29,19 +30,7 @@ Key elements: Arid desert setting with rolling sand dunes and a town buried in d
   'Marrek Warehouse': `A shipping and fulfillment warehouse with tall steel pallet racks, cardboard cartons and concrete working aisles. The Main Entrance and two Loading Docks have timed security locks. Supply Cage, Receiving Area and Manager’s Office hold the search decks. The open central working floor is called The Pit; it is not a literal hole or depression. A forklift begins there, usable only when its Keys are found. Available fluorescent light, worn real materials and long rack sightlines make this an exposed and unsettling place. The selected Killer remains independent of the location.`,
 
   // Season 3 - Hell to Pay
-  'Hellscape': `A cavernous, soot-stained industrial foundry defined by heavy iron structures, massive overhead support beams, and a floor of reinforced metal grating. The environment is thick with age and grime, feeling oppressive and sweltering—a place where the scale of the machinery dwarfs the people operating it.
-
-At the center of the scene is a pit of incandescent molten metal, radiating an intense, blinding orange glow that serves as the primary light source. Constant streams of sparks erupt from the liquid fire, swirling around massive, blackened gears and heavy industrial chains that loom over the work area.
-
-Four laborers, clad in heavy, soot-streaked work coats and dark beanies, stand along a rusted safety railing. They lean over the edge with a mix of exhaustion and wary vigilance, their forms silhouetted against the fiery light. Their presence suggests a routine that is as monotonous as it is life-threatening.
-
-The background is a murky expanse of industrial pipes and massive cylindrical machinery, partially obscured by a dense, swirling fog of grey smoke and steam. These elements create a claustrophobic sense of isolation within the vast, dark space, as if the factory extends infinitely into the shadows.
-
-The lighting is high-contrast and dramatic; the fiery brilliance of the molten iron clashes with the deep, ink-black shadows of the surrounding mill. Visibility is limited by the haze, making the environment feel unpredictable and hazardous.
-
-The atmosphere is heavy, hot, and menacing—a landscape of fire and iron where the air feels thick with the smell of sulfur and the constant, rhythmic roar of heavy industry.
-
-Key elements: Cavernous iron foundry with heavy industrial machinery. Central pit of glowing molten metal and flying sparks. Workers in soot-covered gear leaning on a metal railing. Dense haze of steam, smoke, and grime. Dramatic, high-contrast lighting from the liquid fire.`,
+  Hellscape: HELLSCAPE_VISUAL,
   "Camp Happy Trails": `A secluded lakeside summer camp set deep in a forest, composed of small wooden cabins arranged loosely around a central dirt path and communal fire pit. The camp feels modest, old-fashioned, and slightly neglected rather than abandoned—structures are intact but weathered, with peeling wood, uneven steps, and soft yellow light glowing from cabin windows.
 
 At the heart of the camp is a large circular fire pit surrounded by rough-hewn log benches. The fire burns steadily, casting long, flickering shadows across the ground and nearby trees. The firelight creates a false sense of warmth and safety.

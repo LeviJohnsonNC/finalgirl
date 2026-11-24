@@ -1,3 +1,4 @@
+import { hellscapeRules, HELLSCAPE_PROMPT_CONTEXT } from "./hellscapeRules";
 import { razorfaceRules, RAZORFACE_PROMPT_CONTEXT } from './razorfaceRules';
 import { birdsRules, BIRDS_PROMPT_CONTEXT } from './birdsRules';
 import { megaBgCon, MEGABGCON_PROMPT_CONTEXT } from "./megaBGConRules";
@@ -411,7 +412,7 @@ const falconwood: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [razorfaceRules,birdsRules,ratchetLadyRules,wolfeRules,stationRules,organismRules,mallRules,hunterRules,tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolfRules, shadyAcres, mortTheTeenageDirtbag, megaBgCon, intruderRules, wingardCottage, falconwood, slayerRules, marrekRules];
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [razorfaceRules,hellscapeRules,birdsRules,ratchetLadyRules,wolfeRules,stationRules,organismRules,mallRules,hunterRules,tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolfRules, shadyAcres, mortTheTeenageDirtbag, megaBgCon, intruderRules, wingardCottage, falconwood, slayerRules, marrekRules];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -448,6 +449,7 @@ const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
     rulesSummary: 'Mort begins disguised as one of ten Suspects. Players reveal clues through Interrogate and Coerce actions, eliminating Suspects and turning them into Informants. Suspects can temporarily act as the Killer when mask effects resolve. Mort is only truly revealed once enough clues are found or the Terror deck runs out.',
   },
   MegaBGCon: MEGABGCON_PROMPT_CONTEXT,
+  Hellscape: HELLSCAPE_PROMPT_CONTEXT,
   'The Intruders': INTRUDER_PROMPT_CONTEXT,
   [WINGARD]: {
     narrativeGuidance:'A lakeside family retreat with a buried history. Use the selected scenario and recorded events. Scavenging or improvised equipment may enter the story when observed.',
