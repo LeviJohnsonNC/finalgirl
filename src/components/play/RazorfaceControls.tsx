@@ -77,7 +77,7 @@ export function RazorfaceControls({events, onEvent, blocked = false, razorfaceFr
               onClick={() => {
                 // A click records an already-resolved tabletop purge, including its turn timing.
                 save({kind:'purge', card:card.id, newTurn:state.purged.length > 0});
-              }}><Unlink2 size={16} aria-hidden />Purged</button>}
+              }}><span><Unlink2 size={16} aria-hidden />Purged</span></button>}
       </div>
     </article>;
   };
