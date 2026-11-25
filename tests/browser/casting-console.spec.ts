@@ -69,6 +69,7 @@ test('console selections, keyboard access and responsive frame', async ({ page, 
   await play.click();
   await expect.poll(() => archive.generationRequests.some(r => r.name === 'generate-story')).toBe(true);
   const request = archive.generationRequests.find(r => r.name === 'generate-story')!;
+  expect(Number.isInteger(request.body.openingTake)).toBe(true);
   expect(JSON.stringify(request.body)).toContain('The Bonfire');
   expect(JSON.stringify(request.body)).toContain('Secret Tunnel');
 });

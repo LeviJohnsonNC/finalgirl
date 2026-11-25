@@ -428,6 +428,7 @@ export const GameOutcomeForm = ({
       roundsPlayed,
       endingSubLocation: endingSubLocation || '',
       gameHighlights: highlights,
+      ...(gameHighlights.trim() && { playerHighlight: gameHighlights.trim() }),
       ...(isPoltergeist&&{poltergeistReview:{carolynRescued:foundCarolyn?true:null,floppyAtEscape:foundMrFloppy?true:null,epicRequired:polterPower.known?polterPower.epic:null,...(result.location==='Creech Manor'?{escapeRoute:!foundCarolyn?null:escapeRoute==='helicopter'?'helicopter' as const:escapeRoute==='exit'?'exit' as const:null}:{})}}),
     };
     return formData;

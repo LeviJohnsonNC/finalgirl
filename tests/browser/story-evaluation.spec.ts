@@ -203,6 +203,8 @@ test("ending diagnostics retain full gameplay and reviewed result while the mode
   await page.getByRole("button", { name: "RESUME GAME" }).click();
   await page.getByRole("button", { name: "WON", exact: true }).first().click();
   await page.getByLabel("Weapon Used", { exact: true }).fill("Axe");
+  const highlight = "I held the kitchen door until the last counselor was clear.";
+  await page.getByLabel("Game Highlights", { exact: true }).fill(highlight);
   await page.getByRole("button", { name: "Generate ending", exact: true }).click();
   await expect
     .poll(() =>
@@ -218,6 +220,7 @@ test("ending diagnostics retain full gameplay and reviewed result while the mode
   });
   expect(body.introStory).toBe(activeGame.introStory);
   expect(body.weaponUsed).toBe("Axe");
+  expect(body.playerHighlight).toBe(highlight);
   expect(typeof body.playSummary).toBe("string");
 });
 

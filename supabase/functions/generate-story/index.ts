@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getCorsHeaders } from "../_shared/auth.ts";
 import { StoryRequestSchema, validateRequest } from "../_shared/validation.ts";
 import { requireUser } from "../_shared/guard.ts";
-import { OPENING_SYSTEM, buildOpeningUser } from "../_shared/storyPrompts.ts";
+import { openingSystemForTake, buildOpeningUser } from "../_shared/storyPrompts.ts";
 import { statusFor, userFacingMessage } from "../_shared/aiGateway.ts";
 
 import { generateEvaluatedStory } from "../_shared/storyEvaluation.ts";
@@ -26,8 +26,9 @@ serve(async (req) => {
     const validation = validateRequest(StoryRequestSchema, body, cors);
     if (!validation.success) return validation.error;
 
-    const systemPrompt = OPENING_SYSTEM;
-    const userPrompt = buildOpeningUser(validation.data);
+    const { openingTake, ...world } = validation.data;
+    const systemPrompt = openingSystemForTake(openingTake);
+    const userPrompt = buildOpeningUser(world);
 
     const { body: stream, model } = await generateEvaluatedStory({
       guard,

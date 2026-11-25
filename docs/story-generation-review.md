@@ -1,5 +1,19 @@
 # Story and artwork direction
 
+## Replay and ending comparison (2026-11-25)
+
+New games rotate through five discovery directions per account, browser, killer and location. The active game stores its direction across retries and resumes. Clients without a saved direction receive a server-selected one. The review keeps the player's highlights distinct from automatic module notes. Both the normal ending and the off-screen rewrite use the decisive observation and preserve unknown roles, causes and requirements.
+
+Deploy `generate-story` and `generate-ending`, then publish the frontend. New evaluation versions are `2026-11-25-opening-v3`, `2026-11-25-ending-v4` and `2026-11-25-ending-aftermath-v2`.
+
+To compare prose, choose one complete opening and three complete endings from a private export. Pass their 1-based row positions in export order with the opening first. For a recovered ending, include the preceding primary attempt in the export. The default run validates the recorded inputs and builds prompts locally.
+
+```sh
+deno run --allow-read scripts/compare-story-samples.ts "$EXPORT_PATH" "$OPENING" "$ENDING_ONE" "$ENDING_TWO" "$ENDING_THREE"
+```
+
+For six paid generations, set `AI_TEXT_PROVIDER=openai` and supply the project's `OPENAI_API_KEY` in the environment. Add `--allow-env --allow-net=api.openai.com --allow-write` before the script path and `--live` at the end. The comparison uses the app's text gateway and explicit completion checks. Read the three openings together. For each anonymous ending pair, choose which better preserves the player's decision and flag any invented identity, cause or objective. Open the separate answer key after scoring. The script saves samples to a private temporary directory and never writes to a game.
+
 ## Ending policy-block recovery (2026-11-05)
 
 New ending clients send `endingStreamVersion:1`. On an explicit provider content-filter/refusal signal, `generate-ending` records the failed attempt and tries one different, non-graphic aftermath prompt on the same selected model. The rewrite keeps reviewed outcomes, individual fates, mission, quantities, notes and selected Play summary, while omitting inherited opening prose, descriptive biographies and killer/location descriptions. All harm remains off-screen; the prompt must not change the result or invent a rescue/survival to make it gentler. A second block stops with useful copy. Ordinary outages, rate limits, exhausted credits, length limits and missing completion never trigger this rewrite. No policy-driven provider switching or unchanged-prompt retry loop.

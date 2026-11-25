@@ -22,6 +22,8 @@ export interface GameSelection {
   birdsRequired?: BirdsTarget;
 }
 export interface EndingFormData {
+  /** Unaugmented text from the highlights field on this review. */
+  playerHighlight?: string;
   birdsReview?: BirdsReview;
   razorfaceDefeated?: true;
   falconwoodReview?: import("../../supabase/functions/_shared/play/falconwood").FalconwoodReview;
@@ -40,6 +42,7 @@ export interface EndingFormData {
   endingSubLocation: string; gameHighlights: string;
 }
 export interface ActiveGame {
+  openingTake?: number;
   /** New sessions initialize the always-visible core trackers once on first Play entry. */
   coreTrackersVersion?: 1;
   ratchetSetupVersion?: 1;

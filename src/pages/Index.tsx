@@ -36,6 +36,7 @@ const Scrapbooks = lazy(() => import('./Scrapbooks'));
 const Stats = lazy(() => import('./Stats'));
 const Rules = lazy(() => import('./Rules'));
 const Lobby = lazy(() => import('./Lobby'));
+import { openingRotation } from '@/lib/storyRequestContext';
 import type { EndingFormData, ActiveGame } from '@/lib/activeGame';
 import { useActiveGame } from '@/hooks/useActiveGame';
 import { usePageNavigation } from '@/hooks/usePageNavigation';
@@ -168,7 +169,8 @@ const IndexContent = () => {
       toast.error("Choose a Falconwood mission before starting.");
       return;
     }
-    if (saveActiveGame({ version: 1, id: crypto.randomUUID(), phase: 'nowPlaying',
+    const rotation = openingRotation(owner, selection.killer, selection.location);
+    if (saveActiveGame({ version: 1, id: crypto.randomUUID(), openingTake: rotation.take, phase: 'nowPlaying',
       coreTrackersVersion: 1,
       ...(selection.killer === RAZORFACE && {razorfaceSetupVersion:1 as const}),
       ...(selection.location === "Wolfe Asylum" && {wolfeSetupVersion:1 as const}),
@@ -199,7 +201,10 @@ const IndexContent = () => {
       ...(selection.killer === 'Dr. Fright' && {frightSetupVersion: 1 as const}),
       ...(selection.location === 'Maple Lane' && {mapleSetupVersion: 1 as const}),
       ...(selection.location === 'Carnival of Blood' && {carnivalSetupVersion: 1 as const}),
-      selection: { ...selection, mission: selection.location === FALCONWOOD ? selection.mission : null, filmId: getFilmIdByLocation(selection.location), finalGirlStartingHealth: getFinalGirlHealth(selection.finalGirl) } })) setCurrentPage('nowPlaying');
+      selection: { ...selection, mission: selection.location === FALCONWOOD ? selection.mission : null, filmId: getFilmIdByLocation(selection.location), finalGirlStartingHealth: getFinalGirlHealth(selection.finalGirl) } })) {
+      rotation.remember();
+      setCurrentPage('nowPlaying');
+    }
   };
 
   const handleBackFromNowPlaying = goBack;
@@ -311,7 +316,7 @@ const IndexContent = () => {
     if(game.selection.killer==='The Tormentor'&&formData.tormentorReview){const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'tormentor');if(tormentorState(state).loss!==formData.tormentorReview.loss){const action={parent:tormentorParent(en),command:'loss' as const,value:formData.tormentorReview.loss};const changes=resolveTormentorAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',tormentorAction:action,moduleData:{module:'tormentor',changes}})))throw new Error('The trap ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The reviewed trap ending is unavailable.');}}
     if(game.selection.killer==='Grimlash'&&formData.grimlashReview) {const en=summarizePlay(game.playEvents).entries,state=moduleState(en,'grimlash');if(state.loss!==formData.grimlashReview.loss){const action={parent:grimlashParent(en),command:'loss' as const,value:formData.grimlashReview.loss,correction:true};const changes=resolveGrimlashAction(action,state,en);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',grimlashAction:action,moduleData:{module:'grimlash',changes}})))throw new Error('The Madness ending could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Madness ending is unavailable.');}}
     if(game.selection.location==='Shady Acres'&&formData.childrenOnBoardAtFinish!==undefined){const entries=summarizePlay(game.playEvents).entries,state=moduleState(entries,'shady-acres');if(shadyState(state).finishChildren!==formData.childrenOnBoardAtFinish){const action={parent:shadyParent(entries),command:'finish' as const,value:formData.childrenOnBoardAtFinish};const changes=resolveShadyAction(action,state,entries);if(!changes||!appendPlayEvent(game.id,newPlayEvent({kind:'module',shadyAction:action,moduleData:{module:'shady-acres',changes}})))throw new Error('The Children observation could not be saved. Please retry.');game=getCurrentGame();if(!game?.result)throw new Error('The saved Children observation is unavailable.');}}
-    const {razorfaceDefeated,konradReview:_review,childrenOnBoardAtFinish:_children,ratchetManiacCount:_maniacCount,slayerReview,organismLoss:_organismLoss,falconwoodReview:submittedMission,birdsReview:submittedBirds,...fields}=formData;
+    const {playerHighlight:_playerHighlight,razorfaceDefeated,konradReview:_review,childrenOnBoardAtFinish:_children,ratchetManiacCount:_maniacCount,slayerReview,organismLoss:_organismLoss,falconwoodReview:submittedMission,birdsReview:submittedBirds,...fields}=formData;
     const finishDimension = game.selection.killer === SLAYER ? slayerReview?.finalDimension : undefined;
     const reviewedEntries=summarizePlay(game.playEvents).entries;
     const razorfaceResult = game.selection.killer === RAZORFACE ? razorfaceState(reviewedEntries).result : undefined;
@@ -492,6 +497,7 @@ const IndexContent = () => {
               filmId={gameSelection.filmId}
               key={activeGame.id}
               sessionId={activeGame.id}
+              openingTake={activeGame.openingTake}
               marrekFreshSetup={activeGame.marrekSetupVersion === 1}
               tormentorFreshSetup={activeGame.tormentorSetupVersion === 1}
               evomorphFreshSetup={activeGame.evomorphSetupVersion === 1}

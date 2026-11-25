@@ -29,7 +29,7 @@ export function generateEndingWithRecovery(
           const result = await generateEvaluatedStory({
             ...options, ...prompt, signal,
             ...(attempt === 1 && {candidates:[model!]}),
-            promptVersion: attempt === 0 ? '2026-11-05-ending-v3' : '2026-11-05-ending-aftermath-v1',
+            ...(attempt === 1 && {promptVersion:'2026-11-25-ending-aftermath-v2'}),
           });
           model = result.model;
           await options.guard.logUsage({model, kind:'ending'});

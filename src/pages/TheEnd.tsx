@@ -255,6 +255,7 @@ const TheEnd = ({
         ...(slayerReview && {slayerReview}),
         ...(result.killer==='Poltergeist'&&formData.poltergeistReview&&{poltergeistReview:formData.poltergeistReview}),
         ...(formData.endingSubLocation && { endingSubLocation: formData.endingSubLocation }),
+        ...(formData.playerHighlight && { playerHighlight: formData.playerHighlight }),
         ...((formData.gameHighlights||organismLossContext) && {gameHighlights:[formData.gameHighlights,organismLossContext].filter(Boolean).join(" ")}),
       };
 

@@ -30,6 +30,7 @@ const KonradReviewSchema = z.object({fate:z.enum(['unknown','survived','airlock-
 
 // Schema for generate-story endpoint
 export const StoryRequestSchema = z.object({
+  openingTake: z.number().int().nonnegative().safe().optional(),
   marrekOpening:TormentorOpeningSchema.optional(),
   tormentorOpening:TormentorOpeningSchema.optional(),
   mission: MissionSchema.optional(),
@@ -160,6 +161,7 @@ export const EndingRequestSchema = z.object({
   victimsKilled: z.number().int().min(0).max(999).optional(),
   endingSubLocation: z.string().max(200).optional(),
   gameHighlights: z.string().max(2000).optional(),
+  playerHighlight: z.string().max(2000).optional(),
   roundsPlayed:z.number().int().min(1).max(999).optional(),
   playSummary:z.string().max(1800).optional(),
   konradReview:KonradReviewSchema.optional(),
