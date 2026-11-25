@@ -45,6 +45,7 @@ interface NowPlayingProps {
   playSyncBlocked?: boolean;
   onDiscard?: () => void;
   sessionId: string;
+  openingTake?: number;
   playEvents?: PlayEvent[];
   playMode?: boolean;
   playDrafts?: Record<string, PlayDetails>;
@@ -77,7 +78,7 @@ interface NowPlayingProps {
 const NowPlaying = ({
   playEvents = [], playDrafts = {}, playMode = false, showDeathPanel = true, syncPlayNow, getPlayEvents, onPlayEvent, playSyncBlocked=false,
   marrekFreshSetup=false,tormentorFreshSetup=false,evomorphFreshSetup=false,
-  sessionId, initialStory, initialSceneImageUrl, initialVisualBible, onCheckpoint, onDiscard,
+  sessionId, openingTake, initialStory, initialSceneImageUrl, initialVisualBible, onCheckpoint, onDiscard,
   killer,
   location,
   finalGirl,
@@ -243,6 +244,7 @@ const NowPlaying = ({
 
       // Build payload with complete objects matching the edge function's StoryRequest interface
       const payload = {
+        openingTake,
         mission: missionData,
         ...(tormentorOpening&&{tormentorOpening}),
         ...(marrekOpening&&{marrekOpening}),

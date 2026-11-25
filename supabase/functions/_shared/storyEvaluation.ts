@@ -190,7 +190,7 @@ export async function generateEvaluatedStory(options: {
       id,
       user_id: guard.user.id,
       kind,
-      prompt_version: options.promptVersion ?? "2026-11-04-v2",
+      prompt_version: options.promptVersion ?? (kind === "opening" ? "2026-11-25-opening-v3" : "2026-11-25-ending-v4"),
       system_prompt: effectiveTextSystem(system),
       user_prompt: user,
       model_context: context,

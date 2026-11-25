@@ -399,6 +399,7 @@ for (const kind of ["opening", "ending"])
     assert.equal(response.status, 200);
     await response.text();
     assert.equal(captured.kind, kind);
+    assert.equal(h.rows[0].prompt_version, kind === "opening" ? "2026-11-25-opening-v3" : "2026-11-25-ending-v4");
     assert(!JSON.stringify(captured.context).includes("UNSENT_FULL_LOG"));
     assert(!captured.user.includes("UNSENT_FULL_LOG"));
     assert(!captured.user.includes("forged"));
@@ -478,7 +479,7 @@ test('ending recovery replaces a blocked draft once, pins the original model and
  assert.equal(h.rows[0].error_code,'content_policy');
  assert.equal(h.rows[0].story_text,'Interrupted draft.');
  assert.equal(h.rows[1].story_text,'A complete aftermath.');
- assert.match(h.rows[1].prompt_version,/aftermath/);
+ assert.deepEqual(h.rows.map(row => row.prompt_version), ['2026-11-25-ending-v4', '2026-11-25-ending-aftermath-v2']);
  assert(!h.calls[1].user.includes('INHERITED_PROSE'));
  assert(!h.calls[1].user.includes('INHERITED_DESCRIPTION'));
  assert(h.calls[1].user.includes('She saved the Guide.'));

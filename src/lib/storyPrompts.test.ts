@@ -252,3 +252,23 @@ describe('non-graphic ending recovery preserves reviewed facts',()=>{
   expect(result.context.tormentorReview).toEqual({loss:'trap-terminal'});
  });
 });
+
+
+it('keeps a decisive player note separate from tracker facts in the scene and off-screen rewrite', () => {
+  const playerHighlight = 'I chose to stay behind with the Guide.';
+  const input = { ...cases[0], introStory: story, playerHighlight, gameHighlights: playerHighlight + '. Buddies in play at end: 1' };
+  for (const text of [buildEndingUser(input), buildEndingRecovery(input).user]) {
+    expect(text.split(playerHighlight)).toHaveLength(2);
+    expect(text).toContain("PLAYER'S HIGHLIGHT");
+    expect(text).toContain('"gameHighlights": "Buddies in play at end: 1"');
+    expect(text).toContain('Final Girl fate: survived');
+  }
+  const legacy = { ...input, playerHighlight: undefined };
+  const automaticOnly = { ...legacy, gameHighlights: 'Buddies in play at end: 1' };
+  for (const record of [legacy, automaticOnly]) {
+    for (const text of [buildEndingUser(record), buildEndingRecovery(record).user]) {
+      expect(text).not.toContain("PLAYER'S HIGHLIGHT");
+      expect(text).toContain(record.gameHighlights);
+    }
+  }
+});
