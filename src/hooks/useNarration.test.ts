@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
 import { useNarration } from './useNarration';
+import { NARRATION_PROFILE } from '../../supabase/functions/_shared/narration';
 const h = vi.hoisted(() => ({
   owner: 'owner-A',
   audio: [] as Array<{
@@ -63,7 +64,7 @@ beforeEach(() => {
     vi
       .fn()
       .mockResolvedValue(
-        new Response(JSON.stringify({ audioContent: 'dGVzdA==' }), {
+        new Response(JSON.stringify({ audioContent: 'dGVzdA==', castingProfile: NARRATION_PROFILE }), {
           status: 200,
         }),
       ),
@@ -96,6 +97,14 @@ describe('owned single-narrator playback', () => {
     expect(h.audio[0].pause).toHaveBeenCalled();
     hook.unmount();
   });
+  it('plays a recording from an older edge deployment without saving it as the new cast', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(Response.json({ audioContent: 'dGVzdA==' }));
+    const hook = renderHook(() => useNarration());
+    await act(() => hook.result.current.toggleNarration('A familiar opening.'));
+    expect(hook.result.current.isPlaying).toBe(true);
+    expect(h.clips.size).toBe(0);
+    hook.unmount();
+  });
   it('stops an introduction before a death narration can play', async () => {
     const intro = renderHook(() => useNarration()),
       death = renderHook(() => useNarration());
@@ -105,7 +114,7 @@ describe('owned single-narrator playback', () => {
       }),
     );
     vi.mocked(fetch).mockResolvedValueOnce(
-      new Response(JSON.stringify({ audioContent: 'dGVzdA==' }), {
+      new Response(JSON.stringify({ audioContent: 'dGVzdA==', castingProfile: NARRATION_PROFILE }), {
         status: 200,
       }),
     );
@@ -141,7 +150,7 @@ describe('owned single-narrator playback', () => {
     hook.unmount();
     await act(async () => {
       resolve(
-        new Response(JSON.stringify({ audioContent: 'dGVzdA==' }), {
+        new Response(JSON.stringify({ audioContent: 'dGVzdA==', castingProfile: NARRATION_PROFILE }), {
           status: 200,
         }),
       );
@@ -168,7 +177,7 @@ describe('owned single-narrator playback', () => {
     hook.rerender();
     await act(async () => {
       resolve(
-        new Response(JSON.stringify({ audioContent: 'dGVzdA==' }), {
+        new Response(JSON.stringify({ audioContent: 'dGVzdA==', castingProfile: NARRATION_PROFILE }), {
           status: 200,
         }),
       );

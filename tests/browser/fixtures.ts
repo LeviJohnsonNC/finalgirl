@@ -1,3 +1,4 @@
+import { NARRATION_PROFILE } from '../../supabase/functions/_shared/narration';
 import {deathFacts,deathSignature,isCompleteDeathText} from '../../src/lib/play/death';
 import type {PlayEvent} from '../../src/lib/play/events';
 import type {DeathScene} from '../../src/lib/play/death';
@@ -89,7 +90,7 @@ export class ArchiveMock {
           this.discarded.add(id);this.sessions=this.sessions.filter(row=>row.id!==id);this.history=this.history.filter(row=>row.id!==id);this.deathScenes=this.deathScenes.filter(row=>row.session_id!==id);
           return json({discarded:true,session:current,history,scenes,cleanupPending:this.cleanupPending});
         }
-        if(name==='narrate-story')return json({audioContent:'UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=',voiceId:'Test',persona:'cold'});
+        if(name==='narrate-story')return json({audioContent:'UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=',voiceId:'Test',persona:'cold',castingProfile:NARRATION_PROFILE});
         if(name==='generate-death-scene') {
           if(this.failDeaths)return json({error:'Scene unavailable. The death is still recorded.'},503);
           const b=request.postDataJSON();const session=this.sessions.find(r=>r.id===b.sessionId);

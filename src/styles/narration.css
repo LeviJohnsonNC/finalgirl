@@ -349,10 +349,11 @@ body:has(.narration-session) [role='dialog'] .film-grain { animation: none; tran
 .narration-transport button { display:inline-flex; align-items:center; justify-content:center; flex:none; width:36px; height:36px; border:1px solid #8e7b5738; border-radius:3px; background:#0d0b09b3; }
 .narration-transport button:hover { color:#f5ebd7; border-color:#a18a62; }
 .narration-transport :focus-visible { outline:2px solid #b7d5d2; outline-offset:3px; }
-.narration-timecode { flex:none; font:11px/1.2 'Courier New',monospace; font-variant-numeric:tabular-nums; }
+.narration-timecode { flex:none; min-width:5ch; font:11px/1.2 'Courier New',monospace; font-variant-numeric:tabular-nums; }
 .narration-seek { min-width:25px; flex:1; display:flex; }
 .narration-seek input { width:100%; min-width:0; height:32px; margin:0; accent-color:#b7d5d2; cursor:pointer; }
-.narration-buffering { width:5px; height:5px; border-radius:50%; background:#ba9e72; animation:narration-buffer 1s ease-in-out infinite alternate; }
+.narration-buffering { flex:none; visibility:hidden; width:5px; height:5px; border-radius:50%; background:#ba9e72; animation:narration-buffer 1s ease-in-out infinite alternate; }
+.narration-buffering[data-buffering="true"] { visibility:visible; }
 @keyframes narration-buffer { to { opacity:.3; } }
 @media (pointer:coarse) { .narration-transport button { width:44px; height:44px; } .narration-seek input { height:44px; } }
 @media (prefers-reduced-motion:reduce) { .narration-buffering { animation:none; } }
@@ -365,3 +366,8 @@ body:has(.narration-session) [role='dialog'] .film-grain { animation: none; tran
 .narration-seek input::-webkit-slider-thumb { appearance:none; -webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:#c3d6cd; margin-top:-3.5px; box-shadow:0 0 0 3px #b7d5d214; }
 .narration-seek input::-moz-range-track { height:3px; background:#b7d5d24d; }
 .narration-seek input::-moz-range-thumb { width:10px; height:10px; border:0; border-radius:50%; background:#c3d6cd; }
+
+/* A stream has a playback clock but no total duration yet. The fixed rail
+   becomes a buffered seek control on interaction and a normal scrubber at EOF. */
+.narration-seek[data-pending="true"] input::-webkit-slider-thumb { opacity:0; }
+.narration-seek[data-pending="true"] input::-moz-range-thumb { opacity:0; }

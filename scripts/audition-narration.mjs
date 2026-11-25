@@ -4,22 +4,30 @@ import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import ts from 'typescript';
 const ex = {};
 new Function('exports', ts.transpileModule(await readFile(new URL('../supabase/functions/_shared/narration.ts', import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText)(ex);
-const { NARRATION_MODEL, NARRATION_PROFILE, delivery } = ex;
+const { NARRATION_MODEL, NARRATION_PROFILE, DEFAULT_NARRATOR, delivery } = ex;
 if (!process.argv.includes('--run') || !process.env.INWORLD_API_KEY) {
-  console.log('Set INWORLD_API_KEY locally, then run: node scripts/audition-narration.mjs --run [output-directory]. Generates 10 short paid comparison clips.');
+  console.log('Set INWORLD_API_KEY locally, then run: node scripts/audition-narration.mjs --run [output-directory]. Add --cast to compare the old cast with the new narrator in 8 short paid clips. The default model comparison generates 10.');
   process.exit(0);
 }
-const directory = process.argv[process.argv.indexOf('--run') + 1] || '/tmp/final-girl-narration-audition';
+const compareCasting = process.argv.includes('--cast');
+const directory = process.argv.slice(process.argv.indexOf('--run') + 1).find(arg => !arg.startsWith('--')) || '/tmp/final-girl-narration-audition';
 await mkdir(directory, { recursive: true });
 const samples = [
   { kind: 'dread', voice: 'Levi', text: 'The lights went out at Camp Happy Trails. Laurie heard a branch snap behind the cabins. Then another, closer. “Nobody goes alone,” she whispered. The empty doorway gave her nothing back. Somewhere beyond the lake, a radio kept playing to a room full of people who were no longer listening.' },
   { kind: 'dread', voice: 'Damon', text: 'The lights went out at Camp Happy Trails. Laurie heard a branch snap behind the cabins. Then another, closer. “Nobody goes alone,” she whispered. The empty doorway gave her nothing back. Somewhere beyond the lake, a radio kept playing to a room full of people who were no longer listening.' },
   { kind: 'survivor', voice: 'Warren', text: 'Morning found Laurie on the road, still holding the flashlight. She had stopped running. That was all she could say for certain. Behind her, the camp lay quiet. The first car slowed, and the driver leaned across to open the door. Laurie looked once at the trees before she got in.' },
   { kind: 'cold', voice: 'Conrad', text: 'The phone rang until the machine picked up. Her own voice filled the empty kitchen, promising she would call back. Outside, the porch light clicked off in the morning sun. Nobody came to collect the paper. By noon, the rain had softened it into the concrete.' },
-  { kind: 'cold', voice: 'Conrad', text: 'The door shut before anyone reached it. A chair scraped once across the tiles, then fell. On the other side, someone whispered a name. There was no answer. The flashlight lay where it had landed, illuminating a narrow strip of floor and the shoes of the person who was still standing.' },
+  { kind: 'death', voice: 'Conrad', text: 'The door shut before anyone reached it. A chair scraped once across the tiles, then fell. On the other side, someone whispered a name. There was no answer. The flashlight lay where it had landed, illuminating a narrow strip of floor and the shoes of the person who was still standing.' },
 ];
 const results = [];
-for (const [index, sample] of samples.entries()) for (const model of ['inworld-tts-1.5-max', NARRATION_MODEL]) {
+// Use identical text, direction, model and audio format within each casting pair.
+const takes = compareCasting
+  ? [samples[0], samples[2], samples[3], samples[4]].flatMap(sample =>
+      [sample.voice, DEFAULT_NARRATOR].map(voice => ({ ...sample, voice, model: NARRATION_MODEL })))
+  : samples.flatMap(sample =>
+      ['inworld-tts-1.5-max', NARRATION_MODEL].map(model => ({ ...sample, model })));
+for (const [index, sample] of takes.entries()) {
+  const { model } = sample;
   const text = model === NARRATION_MODEL ? `[${delivery[sample.kind]}] ${sample.text}` : sample.text;
   const start = performance.now();
   const response = await fetch('https://api.inworld.ai/tts/v1/voice', {
@@ -34,4 +42,4 @@ for (const [index, sample] of samples.entries()) for (const model of ['inworld-t
   console.log(file);
 }
 await writeFile(`${directory}/results.json`, JSON.stringify(results, null, 2));
-console.log('Compare intelligibility, natural pacing, restrained delivery, name pronunciation and repeat-listening fatigue. These batch timings are not streaming time-to-first-audio.');
+console.log('Compare intelligibility, suspense, dramatic timing, name pronunciation and repeat-listening fatigue. These batch timings are not streaming time-to-first-audio.');

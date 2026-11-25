@@ -1,11 +1,15 @@
 /** Bump whenever casting, spoken-text preparation or delivery changes. */
-export const NARRATION_PROFILE = 'cinematic-tts2-v1';
+export const NARRATION_PROFILE = 'midnight-host-tts2-v2';
+/** Existing clients validate this field before decoding the PCM stream. */
+export const NARRATION_STREAM_PROFILE = 'cinematic-tts2-v1';
+export const DEFAULT_NARRATOR = 'Vincent';
 export const NARRATION_MODEL = 'inworld-tts-2';
 export const NARRATION_SAMPLE_RATE = 48000;
 export const delivery: Record<string, string> = {
-  dread: 'Intimate, watchful suspense narration. Natural conversational pacing, clear words, restrained tension. No theatrical growling or exaggerated whispering.',
-  survivor: 'Quiet, exhausted relief after surviving a frightening night. Warm but unsettled. Understated cinematic narration, never a triumphant advertisement.',
-  cold: 'Grave, restrained horror narration. Clear, measured and human, with quiet finality. No relish, villain voice, shouting or exaggerated whispering.',
+  dread: 'You host a 1980s midnight horror movie on local TV. Draw one viewer in with a conspiratorial smile. Keep the setup moving. Take a beat before the first unsettling detail, then let the smile leave your voice.',
+  survivor: 'The midnight horror host returns for the final reel. Allow one wry lift where the words earn it. Let the cost of the night catch up with you. Give the final image a clean, unhurried landing.',
+  cold: 'Close the midnight broadcast as a theatrical horror host. The playfulness has drained away. Let a little silence gather before the final image, then deliver it with crisp, quiet finality.',
+  death: 'A short cutaway from a 1980s midnight horror host. Stay close to the microphone and keep the scene moving. Catch the turn with one dry, precise emphasis, then let the silence speak.',
 };
 
 /** Display markup and arbitrary bracketed directions must never become voice instructions.

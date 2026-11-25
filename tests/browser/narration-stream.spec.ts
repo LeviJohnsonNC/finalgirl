@@ -1,9 +1,10 @@
 import { test, expect, gameId, selection, opening } from './fixtures';
+import { NARRATION_PROFILE } from '../../supabase/functions/_shared/narration';
 const draft = { version: 1, id: gameId, phase: 'nowPlaying', selection, introStory: opening };
 async function installStream(page: import('@playwright/test').Page) {
-  await page.addInitScript(() => {
+  await page.addInitScript((castingProfile: string) => {
     const original = window.fetch;
-    const state = window as unknown as { narrationCalls: number; finishNarration: (fail?: boolean) => void; cancelledNarration: boolean };
+    const state = window as unknown as { narrationCalls: number; moreAudio: () => void; finishNarration: (fail?: boolean) => void; cancelledNarration: boolean };
     state.narrationCalls = 0; state.cancelledNarration = false;
     window.fetch = async (input, init) => {
       if (!String(input).includes('/functions/v1/narrate-story')) return original(input, init);
@@ -16,14 +17,15 @@ async function installStream(page: import('@playwright/test').Page) {
       for (const byte of bytes) binary += String.fromCharCode(byte);
       const body = new ReadableStream({ start(controller) {
         const send = (value: unknown) => controller.enqueue(encoder.encode(JSON.stringify(value) + '\n'));
-        send({ type: 'start', sampleRate: 48000, profile: 'cinematic-tts2-v1', model: 'inworld-tts-2', voiceId: 'test' });
-        send({ type: 'audio', audio: btoa(binary) });
+        send({ type: 'start', sampleRate: 48000, profile: 'cinematic-tts2-v1', castingProfile, model: 'inworld-tts-2', voiceId: 'test' });
+        state.moreAudio = () => send({ type: 'audio', audio: btoa(binary) });
+        state.moreAudio();
         state.finishNarration = (fail = false) => { send(fail ? { type: 'error', error: 'Connection interrupted.' } : { type: 'done' }); controller.close(); };
         init?.signal?.addEventListener('abort', () => { state.cancelledNarration = true; controller.error(new DOMException('Aborted', 'AbortError')); }, { once: true });
       }, cancel() { state.cancelledNarration = true; } });
       return new Response(body, { headers: { 'Content-Type': 'application/x-ndjson' } });
     };
-  });
+  }, NARRATION_PROFILE);
 }
 async function resume(page: import('@playwright/test').Page) {
   await page.goto('/'); await page.getByRole('button', { name: 'RESUME GAME', exact: true }).click();
@@ -67,4 +69,31 @@ test('mid-stream failure does not cache the partial take and retry requests fres
   expect(await page.evaluate(() => (window as unknown as { narrationCalls: number }).narrationCalls)).toBe(2);
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   expect(await page.evaluate(() => (window as unknown as { cancelledNarration: boolean }).cancelledNarration)).toBe(true);
+});
+
+test('incoming audio keeps the timer layout still and preserves an in-progress seek', async ({ page, archive }, info) => {
+  await archive.install(page, { draft }); await installStream(page); await resume(page);
+  await page.getByRole('button', { name: 'Narrate', exact: true }).click();
+  const slider = page.getByRole('slider', { name: 'Seek narration' });
+  const total = page.locator('.narration-timecode').last();
+  await expect(total).toHaveText('--:--');
+  await page.getByRole('button', { name: 'Pause narration', exact: true }).click();
+  await expect(slider).toHaveAttribute('max', '6');
+  const bounds = await slider.boundingBox();
+  if (!bounds) throw new Error('Seek rail is missing');
+  await page.screenshot({ path: info.outputPath('streaming-timeline.png') });
+  await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+  await page.mouse.down();
+  await expect(slider).toHaveValue('3');
+  await page.evaluate(() => (window as unknown as { moreAudio: () => void }).moreAudio());
+  await expect(slider).toHaveAttribute('max', '6');
+  await expect(slider).toHaveValue('3');
+  await expect(total).toHaveText('--:--');
+  await page.mouse.up();
+  await expect(slider).toHaveAttribute('max', '12');
+  await page.evaluate(() => (window as unknown as { finishNarration: () => void }).finishNarration());
+  await expect(total).toHaveText('00:12');
+  expect(await slider.boundingBox()).toEqual(bounds);
+  await slider.press('End');
+  await expect(slider).toHaveValue('12');
 });

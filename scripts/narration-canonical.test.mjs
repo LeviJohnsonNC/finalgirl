@@ -304,12 +304,39 @@ for (const legacy of [false,true]) test(`Dr. Fright ${legacy?'legacy':'current'}
  test('Sacred Groves linked history retains canonical saved narration identity',async()=>{const f=await fixture({sacredGroves:true});assert.equal((await f.handler(f.request())).status,200);assert.deepEqual(f.spoken,['The canonical owned scene is narrated.']);});
 
 
+test('one default narrator stays with a film while scene direction and casting overrides still work', () => {
+  const narration = load('../supabase/functions/_shared/narration.ts', {});
+  function casting(overrides = {}) {
+    const exports = {};
+    new Function('require', 'exports', 'Deno', code('../supabase/functions/_shared/voices.ts'))(
+      () => narration, exports, { env: { get: key => overrides[key] } },
+    );
+    return exports.castVoice;
+  }
+  const cast = casting();
+  for (const [scene, label] of [
+    [{ kind: 'intro' }, 'dread'], [{ kind: 'ending', outcome: 'won' }, 'survivor'],
+    [{ kind: 'ending', outcome: 'lost' }, 'cold'], [{ kind: 'death' }, 'cold'],
+  ]) {
+    const voice = cast(scene);
+    assert.equal(voice.label, label);
+    assert.equal(voice.candidates[0], narration.DEFAULT_NARRATOR);
+    assert.equal(voice.candidates.at(-1), 'Blake');
+    assert.ok(narration.delivery[label]);
+  }
+  const alternate = casting({ INWORLD_VOICE_SURVIVOR: 'Alternate' });
+  assert.equal(alternate({ kind: 'ending', outcome: 'won' }).candidates[0], 'Alternate');
+  assert.equal(alternate({ kind: 'intro' }).candidates[0], narration.DEFAULT_NARRATOR);
+});
+
 test('streaming relays the first PCM before synthesis ends and terminates with explicit completion', async () => {
   let finish;
   const f = await fixture({ stream: true, provider: async (url, opts) => {
     assert.ok(url.endsWith('voice:stream'));
     const body = JSON.parse(opts.body);
     assert.equal(body.modelId, 'inworld-tts-2'); assert.equal(body.audioConfig.audioEncoding, 'PCM');
+    const { delivery } = load('../supabase/functions/_shared/narration.ts', {});
+    assert.equal(body.text, `[${delivery.death}] The canonical owned scene is narrated.`);
     return new Response(new ReadableStream({ start(c) {
       c.enqueue(new TextEncoder().encode('{"result":{"audioContent":"AAAA"}}\n'));
       finish = () => { c.enqueue(new TextEncoder().encode('{"result":{"audioContent":"AAAA"}}')); c.close(); };
@@ -319,7 +346,10 @@ test('streaming relays the first PCM before synthesis ends and terminates with e
   assert.equal(response.headers.get('Content-Type'), 'application/x-ndjson');
   const reader = response.body.getReader();
   const first = new TextDecoder().decode((await reader.read()).value);
-  assert.match(first, /"type":"start"/);
+  const start = JSON.parse(first);
+  assert.equal(start.type, 'start');
+  assert.equal(start.profile, 'cinematic-tts2-v1'); // Shipped clients require this wire value.
+  assert.equal(start.castingProfile, load('../supabase/functions/_shared/narration.ts', {}).NARRATION_PROFILE);
   const next = new TextDecoder().decode((await reader.read()).value);
   assert.match(next, /"type":"audio"/);
   finish(); let rest = ''; while (true) { const item = await reader.read(); if (item.done) break; rest += new TextDecoder().decode(item.value); }
