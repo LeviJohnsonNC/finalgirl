@@ -42,4 +42,4 @@ for (const [index, sample] of takes.entries()) {
   console.log(file);
 }
 await writeFile(`${directory}/results.json`, JSON.stringify(results, null, 2));
-console.log('Compare intelligibility, natural pacing, restrained delivery, name pronunciation and repeat-listening fatigue. These batch timings are not streaming time-to-first-audio.');
+console.log('Compare intelligibility, suspense, dramatic timing, name pronunciation and repeat-listening fatigue. These batch timings are not streaming time-to-first-audio.');
