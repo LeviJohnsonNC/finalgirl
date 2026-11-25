@@ -11,7 +11,7 @@ import {
 } from '@/lib/play/narrationCache';
 import { claimNarrator } from '@/lib/play/narrationCoordinator';
 import { NarrationPcmPlayer } from '@/lib/narration/pcmPlayer';
-import { narrationMessages, NARRATION_PROFILE } from '../../supabase/functions/_shared/narration';
+import { narrationMessages, NARRATION_PROFILE, NARRATION_STREAM_PROFILE, NARRATION_SAMPLE_RATE } from '../../supabase/functions/_shared/narration';
 import { isGameDiscarded } from '@/lib/discardedGames';
 export interface NarrationCasting {
   kind: 'intro' | 'ending' | 'death';
@@ -48,7 +48,7 @@ export const useNarration = () => {
     if (audio) {
       audio.onended = null;
       audio.onerror = null;
-      audio.ontimeupdate = null;
+      audio.ontimeupdate = null; audio.onloadedmetadata = null; audio.ondurationchange = null;
       audio.onwaiting = null; audio.onplaying = null;
       audio.pause();
       audio.src = '';
@@ -164,12 +164,13 @@ export const useNarration = () => {
           if (response.ok && response.headers.get('Content-Type')?.includes('application/x-ndjson')) {
             const player = pcmRef.current;
             if (!player || !response.body) throw new Error('Streaming audio is unavailable.');
-            let complete = false, begun = false;
+            let complete = false, begun = false, currentCast = false;
             for await (const message of narrationMessages(response.body)) {
               if (!current()) return;
               if (message.type === 'error') throw new Error(String(message.error).slice(0, 200));
               if (message.type === 'start') {
-                if (begun || message.sampleRate !== 48000 || message.profile !== NARRATION_PROFILE) throw new Error('The narrator needs an app refresh.');
+                if (begun || message.sampleRate !== NARRATION_SAMPLE_RATE || message.profile !== NARRATION_STREAM_PROFILE) throw new Error('The narrator needs an app refresh.');
+                currentCast = message.castingProfile === NARRATION_PROFILE;
                 begun = true;
               } else if (message.type === 'audio') {
                 if (!begun || complete || typeof message.audio !== 'string') throw new Error('Invalid narration stream.');
@@ -182,7 +183,7 @@ export const useNarration = () => {
             if (!current()) return;
             if (!complete) throw new Error('Narration was interrupted. Your story is still saved.');
             player.finish();
-            void putNarrationClip(requestOwner, key, player.toBlob(), gameId);
+            if (currentCast) void putNarrationClip(requestOwner, key, player.toBlob(), gameId);
             setIsComplete(true);
             return;
           }
@@ -202,14 +203,14 @@ export const useNarration = () => {
             throw new Error('The narration response was invalid.');
           blob = base64ToBlob(data.audioContent, 'audio/mpeg');
           // Playback does not wait on device storage, and memory is populated synchronously.
-          void putNarrationClip(requestOwner, key, blob, gameId);
+          if (data.castingProfile === NARRATION_PROFILE) void putNarrationClip(requestOwner, key, blob, gameId);
         }
         if (!current()) return;
         pcmRef.current?.dispose(); pcmRef.current = null;
         const url = URL.createObjectURL(blob);
         urlRef.current = url;
         audio.src = url;
-        audio.ontimeupdate = () => {
+        audio.onloadedmetadata = audio.ondurationchange = audio.ontimeupdate = () => {
           if (current())
             setProgress({
               elapsed: audio.currentTime,

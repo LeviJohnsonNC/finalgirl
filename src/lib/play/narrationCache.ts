@@ -21,7 +21,11 @@ export async function narrationKey(text: string, casting: unknown) {
 }
 /** Discard still finds unassociated device clips written before this model upgrade. */
 export async function narrationCleanupKeys(text: string, casting: unknown): Promise<string[]> {
-  return Promise.all([narrationKey(text, casting), audioKey({ version: 2, text, casting })]);
+  return Promise.all([
+    narrationKey(text, casting),
+    audioKey({ version: 'cinematic-tts2-v1', model: 'inworld-tts-2', text, casting }),
+    audioKey({ version: 2, text, casting }),
+  ]);
 }
 
 function database(): Promise<IDBDatabase | null> {

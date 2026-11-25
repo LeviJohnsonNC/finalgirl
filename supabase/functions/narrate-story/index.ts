@@ -6,7 +6,7 @@ import { getCorsHeaders } from "../_shared/auth.ts";
 import { NarrationRequestSchema, validateRequest } from "../_shared/validation.ts";
 import { requireUser } from "../_shared/guard.ts";
 import { castVoice } from "../_shared/voices.ts";
-import { NARRATION_PROFILE, NARRATION_MODEL, NARRATION_SAMPLE_RATE, delivery, narrationChunks, narrationMessages } from "../_shared/narration.ts";
+import { NARRATION_STREAM_PROFILE, NARRATION_PROFILE, NARRATION_MODEL, NARRATION_SAMPLE_RATE, delivery, narrationChunks, narrationMessages } from "../_shared/narration.ts";
 
 
 // Concatenate multiple base64 audio chunks into one
@@ -73,8 +73,6 @@ serve(async (req) => {
       );
     }
 
-    // Cast the voice for this moment. An opening and a losing ending should
-    // not be read by the same narrator in the same register.
     const persona = castVoice({
       kind: validation.data.kind,
       outcome: validation.data.outcome,
@@ -82,14 +80,14 @@ serve(async (req) => {
     });
 
     const streaming = validation.data.stream === true;
-    const direction = `[${delivery[persona.label] ?? delivery.dread}] `;
+    const direction = `[${validation.data.kind === "death" ? delivery.death : delivery[persona.label] ?? delivery.dread}] `;
     const chunks = narrationChunks(text, (streaming ? 4000 : 2000) - direction.length - 24);
     if (!chunks.length) return new Response(JSON.stringify({ error: 'No spoken text was provided.' }), { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } });
     const abort = new AbortController();
     const signal = AbortSignal.any([req.signal, abort.signal, AbortSignal.timeout(140000)]);
     const started = performance.now();
     let voiceId = '', firstAudioMs = 0, audioCount = 0;
-    const metadata = () => ({ profile: NARRATION_PROFILE, model: NARRATION_MODEL, voiceId, persona: persona.label, sampleRate: NARRATION_SAMPLE_RATE });
+    const metadata = () => ({ profile: NARRATION_STREAM_PROFILE, castingProfile: NARRATION_PROFILE, model: NARRATION_MODEL, voiceId, persona: persona.label, sampleRate: NARRATION_SAMPLE_RATE });
     const unavailableVoice = (payload: unknown) => {
       const error = payload as { code?: number; message?: string; error?: { code?: number; message?: string } };
       const detail = error?.error ?? error;
