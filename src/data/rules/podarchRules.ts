@@ -2,7 +2,7 @@ import { PODARCHS, PODARCH_FILM, PODARCH_SOURCE, PODARCH_POWERS, PODARCH_MINORS,
 import type { EntityRuleModule } from './moduleRules';
 
 export const podarchRules: EntityRuleModule = {
-  entity: PODARCHS, filmId: PODARCH_FILM, kind: 'killer', source: PODARCH_SOURCE, credits: {design:'Mike Martins', art:'Agnieszka Dąbrowiecka'}, 
+  entity: PODARCHS, filmId: PODARCH_FILM, kind: 'killer', source: PODARCH_SOURCE, credits: {design:'Mike Martins', art:'Agnieszka Dąbrowiecka'},
   tags: ['Podarch Evolution', 'Assimilated', 'Joan', 'Persuade', 'Docile', 'Hostile', 'Plants', 'Pods', ...[...PODARCH_POWERS, ...PODARCH_MINORS, ...PODARCH_FINALES, ...PODARCH_TERRORS].map(c => c.name)],
   setup: [{type: 'list', items: [
     'Join the two Bloodlust cards, use the starting circle, and set Horror to 4. There is no killer board or shared killer Health.',

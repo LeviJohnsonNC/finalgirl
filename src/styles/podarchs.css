@@ -16,5 +16,5 @@
 .podarch-objective > div { padding: 1rem; color: #fff5df; }
 .podarch-objective h3 { font-size: 1.25rem; margin: 0 0 .5rem; }
 .podarch-rule-stills { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,9rem),1fr)); gap: .6rem; }
-.podarch-rule-stills img { display:block; width:100%; height:auto; border-radius:.25rem; }
+.podarch-rule-stills img { display:block; width:100%; height:auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius:.25rem; }
 .podarch-rule-stills figcaption { margin-top:.25rem; font-weight:600; }

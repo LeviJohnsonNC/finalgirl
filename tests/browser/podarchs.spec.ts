@@ -50,7 +50,7 @@ test('Podarch moments, hostile transition, paired Finale and persistence', async
     await panel.locator('img').evaluateAll(images=>Promise.all(images.map(image=>{const img=image as HTMLImageElement; img.loading='eager'; return img.decode();})));
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await panel.scrollIntoViewIfNeeded();
-    await panel.screenshot({animations:'disabled',path:info.outputPath('podarch-panel-'+width+'.jpg')});
+    await panel.screenshot({animations:'disabled',style:'footer { visibility: hidden; }',path:info.outputPath('podarch-panel-'+width+'.jpg')});
   }
   await panel.locator('.module-card-section > summary').click();
   await chooseKillerCard(panel,'Finale','Born Again');
@@ -68,7 +68,8 @@ test('Podarch moments, hostile transition, paired Finale and persistence', async
   expect(summary.saved).toBe(1);
 });
 
-test('Collection and mixed-cast Rules show the photographic references without starting a log', async ({page, archive}, info) => {
+test('Collection and mixed-cast Rules show the photographic references without adding observations', async ({page, archive}, info) => {
+  archive.films = ['s4-terror-from-beyond','s1-camp-happy-trails'];
   await archive.install(page, {draft:{...activeGame, selection:{...activeGame.selection, killer:'The Podarchs', finalGirl:'Laurie', location:'Camp Happy Trails'}, playMode:true, playEvents:[]}});
   await page.goto('/');
   await page.getByRole('button',{name:'Collection',exact:true}).click();
@@ -79,6 +80,9 @@ test('Collection and mixed-cast Rules show the photographic references without s
   await card.screenshot({path:info.outputPath('podarch-collection.jpg')});
   await page.locator('footer').getByRole('button',{name:'Back',exact:true}).click();
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  const readLog = () => page.evaluate(key => JSON.parse(localStorage.getItem(key)!).playEvents as PlayEvent[], 'final-girl-active-game-v1:'+userId);
+  await expect.poll(async () => (await readLog()).map(entry => entry.kind)).toEqual(['start']);
+  const before = await readLog();
   await openModule(page,'camp');
   await expect(page.locator('[data-module="camp"]')).not.toContainText('Special characters');
   await page.getByRole('button',{name:'Read story',exact:true}).click();
@@ -91,6 +95,5 @@ test('Collection and mixed-cast Rules show the photographic references without s
   await stills.last().scrollIntoViewIfNeeded();
   await stills.last().locator('img').evaluateAll(images => Promise.all(images.map(image => (image as HTMLImageElement).decode())));
   await stills.last().screenshot({path:info.outputPath('podarch-terror-rules.jpg')});
-  const log = await page.evaluate(key => JSON.parse(localStorage.getItem(key)!).playEvents, 'final-girl-active-game-v1:'+userId);
-  expect(log).toEqual([]);
+  expect(await readLog()).toEqual(before);
 });
