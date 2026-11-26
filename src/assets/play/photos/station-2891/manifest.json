@@ -54,13 +54,13 @@
     "sha256": "0ee55152e2f914842a21134b03bfb7947f1192202dea31e2789f5db093f28093"
   },
   "chef-killed": {
-    "source": "exec-5ddaf744-7e29-4871-b2f9-0fc3e2a725e8.png",
-    "nativeWidth": 1774,
-    "nativeHeight": 887,
+    "source": "exec-d0eb3051-2bd4-4345-9d1d-f92702e46189.png",
+    "nativeWidth": 1672,
+    "nativeHeight": 941,
     "width": 1536,
-    "height": 768,
-    "bytes": 150482,
-    "sha256": "fcf0288c5a14da8575d33b97c81f01c074bcc278bc7b466788e953bda3268e64"
+    "height": 864,
+    "bytes": 106538,
+    "sha256": "a72f0120ecd66d0a01fd0b7697a80ba674c976622954b980e2539f804b402901"
   },
   "chef-saved": {
     "source": "exec-5055b234-a53a-4efb-9c8b-b8ada17433c4.png",

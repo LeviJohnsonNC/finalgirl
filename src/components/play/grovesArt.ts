@@ -2,6 +2,9 @@ import { sacredPhoto } from "./modulePhotos";
 import { sacredTokens, type SacredToken } from "./sacredSpaceTokens";
 import scenes from "@/assets/play/groves/scenes.webp";
 import people from "@/assets/play/groves/people.webp";
+import guideKilled from "@/assets/play/groves/guide-killed.webp";
+import touristKilled from "@/assets/play/groves/tourist-killed.webp";
+import holyManKilled from "@/assets/play/groves/holy-man-killed.webp";
 import type { ModuleArt } from "./ModuleArtwork";
 export const grovesScene = (i: number): ModuleArt => ({
   src: scenes,
@@ -14,24 +17,25 @@ export const grovesScene = (i: number): ModuleArt => ({
     cellHeight: 378,
   },
 });
-export const grovesPerson = (column: number, status?: string): ModuleArt => ({
-  src: people,
-  atlas: {
-    width: 1536,
-    height: 1536,
-    x: column * 512 + 3,
-    y:
-      (status === "saved"
-        ? 1
-        : ["killed", "removed", "away"].includes(status ?? "")
-          ? 2
-          : 0) *
-        512 +
-      3,
-    cellWidth: 506,
-    cellHeight: 506,
-  },
-});
+const killedPortraits = [guideKilled, touristKilled, holyManKilled];
+
+export function grovesPerson(column: number, status?: string): ModuleArt {
+  if (status === "killed") {
+    return { src: killedPortraits[column], fit: "slice", position: "center 38%" };
+  }
+  const row = status === "saved" ? 1 : status === "removed" || status === "away" ? 2 : 0;
+  return {
+    src: people,
+    atlas: {
+      width: 1536,
+      height: 1536,
+      x: column * 512 + 3,
+      y: row * 512 + 3,
+      cellWidth: 506,
+      cellHeight: 506,
+    },
+  };
+}
 
 /** Each observed token combination has one full-width photographic state. */
 export const grovesSite = (

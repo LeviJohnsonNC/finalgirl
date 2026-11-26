@@ -20,3 +20,31 @@ Each killer source is a 2-column by 5-row contact sheet. Sacred sources are 2 co
 Card numbering follows the canonical catalog before alphabetical display sorting. Dr. Fright's first two source cells are intentionally swapped in the derivatives so the pitchfork image belongs to Pitchfork Assault. Unused tenth portraits in the four nine-card sources are not shipped. Hans uses a rigid metal pig mask, red apron and sledgehammer (the older identity-photo cleaver does not replace the canonical weapon); Geppetto uses his dark coat/hat, red waistcoat and wooden humanlike puppets. Billy uses a tangible torn bear animatronic. Fright's quiet scene/prop motifs do not assert an attack or victim.
 
 Sacred bit ordering: Closed=1, Fire=2, Hallowed=4. The same landmarks/camera remain recognizable within each eight-image series. Closure is a physical gate/chain, Fire is modest flame/ember detail, Hallowed is flowers and warm available light; combinations retain every treatment. These are symbolic state images, not literal wildfire, religious affiliation, additional rules or facts for narrative generation.
+
+## Special Victim killed portraits
+
+Each listed state has a dedicated non-graphic photograph based on the location's existing character portrait. Buddyland's Birthday Girl uses a framed remembrance photo. The art follows the recorded role status.
+
+| Location | Killed photographs updated | Source |
+| --- | --- | --- |
+| Hellscape | Masochistic Peon, Curious Wretch, Sadistic Seeker | `exec-c7df4e16-e90e-4aa2-874c-7da4cebc9aa4.png` |
+| Creech Manor | White, Blue and Orange Ghost Hunters | `exec-1983c848-e3bc-4823-a7da-e4cae6c835b2.png` |
+| Sacred Groves | The Tour Guide, The Uber Tourist, The Holy Man | `exec-af172376-1f11-4412-8fa3-76aa345c7502.png` |
+| Maple Lane | Boyfriend, Smalley 1, Smalley 2 | `exec-2e9ef6e4-72ce-4f14-9c5b-8026eb316a83.png` |
+| Camp Happy Trails | Boyfriend, Girlfriend, The Damned | `exec-9c50c0c4-21e6-4373-98ed-012cd5e9f56e.png` |
+| Carnival of Blood and Sunnydaze Mall | Sibling, Fiancé, The Savior’s Girl | `exec-42225d6e-ef50-4851-9049-e61f0f860d88.png` |
+| Buddyland | Nick the Janitor and Birthday Girl | `exec-d83f0ca1-b13e-4dd7-800c-dae6fb327e66.png`, `exec-30a01a53-5005-4ce5-ba92-267a84dd9b0d.png` |
+| USS Konrad, Station 2891 and Storybook Woods | Jonas, Orphan Girl, Chef and Hansel | [Konrad](konrad/manifest.json) · [Station](station-2891/manifest.json) · [Woods](storybook-woods/manifest.json) |
+
+Falconwood, MegaBGCon, Wolfe Asylum, Shady Acres, Marrek Warehouse and Wingard Cottage already show a dedicated photograph for each recorded killed person.
+
+## Special Victim Saved portraits
+
+The Saved portraits show the same actors relieved after escape. Hellscape keeps these photographs in its main roster. Existing art in the other 13 locations already depicts a distinct Saved state.
+
+| Location | Saved photographs added in source order | Source |
+| --- | --- | --- |
+| Hellscape | Masochistic Peon, Curious Wretch, Sadistic Seeker | `exec-a9431d3d-96cc-4438-bd84-c91d113eab92.png` |
+| Creech Manor | White, Blue and Orange Ghost Hunters | `exec-a623af43-f28a-46d5-891d-4c9e9e5db9ac.png` |
+| Carnival of Blood | Sibling, Fiancé | `exec-91e40169-63d2-4ece-97a9-2f6ca661e944.png` |
+| Buddyland | Nick the Janitor, Birthday Girl, Pizza Guy | `exec-a4c50346-ef09-4f88-871d-f21cbda9c8e3.png` |

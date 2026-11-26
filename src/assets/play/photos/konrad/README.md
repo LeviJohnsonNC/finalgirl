@@ -59,9 +59,9 @@ New outcome and equipment sources (each independent native 1672×941; runtime 12
 | `captain-saved` | `exec-bf6b5a14-29a2-458e-a026-0f1f3b552185.png` | 95932 |
 | `captain-killed` | `exec-fe631bdf-f61a-43a7-a0f2-a0d0fde4e40a.png` | 92736 |
 | `jonas-saved` | `exec-e1afbf85-c50c-49c1-b648-e823d5a5a852.png` | 123498 |
-| `jonas-killed` | `exec-404c0247-cb85-4dbb-9653-03de6bd67d2a.png` | 98618 |
+| `jonas-killed` | `exec-c053f302-3e25-414c-b650-2621502d08a3.png` | 87598 |
 | `orphan-saved` | `exec-5c040826-9a30-404f-b171-98b60105d516.png` | 106596 |
-| `orphan-killed` | `exec-95b9c055-99a9-4a78-ad71-93d0df02545c.png` | 120494 |
+| `orphan-killed` | `exec-8068b5dd-29ef-403e-a506-c9bdda857304.png` | 121670 |
 | `loader-equipped` | `exec-621bc76d-4f4c-44f3-8b4c-9ece99e66c18.png` | 162560 |
 
-Saved outcomes preserve each role identity. Captain death is non-graphic; cat/child killed states depict empty familiar surroundings and belongings, with harm off-screen. Left play uses the dimmed original portrait. These illustrations are decorative and do not assert unrecorded circumstances.
+Saved outcomes preserve each role identity. Killed photos depict the Captain, Jonas and the Orphan Girl in non-graphic aftermaths. Left play uses the dimmed original portrait. These illustrations are decorative and do not assert unrecorded circumstances.

@@ -9,4 +9,4 @@ Original generated production stills in the app’s candid 1980s photographic st
 | `wretch.webp` | A woman in a washed blue jacket watching from the edge of a passage. | 748 × 499 |
 | `seeker.webp` | A man in a rust-orange jacket lit by a light down the corridor. | 748 × 499 |
 
-Each active face uses its original still, shown at 16:9 with the head in frame. The shared character styling mutes resolved faces and displays the recorded status in text. Undo restores the active portrait and its reminder. The main Casting, Collection and loader assets are independent.
+Each role has dedicated in-play, Saved and Killed photographs. The roster keeps Saved and Killed portraits in the same 16:9 frame. Undo restores the prior recorded state and portrait.

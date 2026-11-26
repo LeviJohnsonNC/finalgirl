@@ -16,6 +16,7 @@ Built-in image generation used the existing identity for likeness and the approv
 | The Eyeless | `exec-8155e750-e36a-4d6e-9ff0-8344e4705640.png` | Matte prosthetic crest, recessed blind face and natural folds under a practical lamp. |
 | The Intruders | `exec-a7ec1970-b8a1-4c6c-8410-bae3084f9cb9.png` | Close three-person triangle with three readable masks and complete antlers in suburban night light. |
 | The Organism | `exec-a5003c00-a4a7-4e20-8c31-a7c4b414ca15.png` | Frosted creature suit with the split torso maw readable against a station doorway. |
+| The Podarchs | `exec-3d9e0767-9112-4f97-8c8d-70e48876f065.png` | Reframe the basement in 2:3 with the full pod in the foreground and the silhouette in the doorway above it. |
 | Zombies | `exec-1dcc1c89-a3e3-4df5-8636-9bc180d51cda.png` | Distinct adult extras in subdued mortuary makeup on an ordinary wet street at night. |
 
 Evomorph, The Hunter, Dr. Fright and Destiny use focal-point changes to their existing identity photographs. A dedicated crop or portrait applies to the picker and selected slot, including the shuffle animation. The dossier uses its own framing.

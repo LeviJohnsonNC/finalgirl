@@ -63,3 +63,5 @@ The final local verification passed the production build, the asset checker, 1,1
 ## Release dependencies
 
 Deploy compatible shared Play readers in `generate-ending`, `generate-death-scene` and `narrate-story`, and the revised opening renderer in `generate-scene-image`, with the frontend. The reviewed private object is `opening-references/joan.jpg`, SHA-256 `64a58d91b34cc6354feffb650b1f7c623ab711112c9a5326a4c3931bfcb19e49`. Exact bytes are staged in `supabase/reference-assets/joan.jpg`. Verify the private object before enabling the updated renderer. Production deployment, a signed-in smoke test and live provider generation are separate release checks.
+
+Casting uses a separate 2:3 photograph for the Podarchs. The full pod and the figure in the doorway fit the picker, selected slot and dossier. [Casting preview](../verification/special-victims/podarchs-casting.webp)

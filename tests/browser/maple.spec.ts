@@ -97,6 +97,9 @@ for (const [killer, id] of [
     await panel(page)
       .getByRole("button", { name: "Mark Smalley 2 killed", exact: true })
       .click();
+    const smalley = panel(page).locator('.module-character[data-state="killed"]').filter({ hasText: "Smalley 2" });
+    await expect(smalley).toBeVisible();
+    await expect(smalley.locator("img")).toHaveAttribute("src", /smalley-2-killed.*\.webp$/);
     expect(await state(page)).toMatchObject({
       "person.smalley-1": "saved",
       "person.smalley-2": "killed",

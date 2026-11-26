@@ -11,7 +11,7 @@ Common prompt: real candid 1980s consumer 35mm mall photographs; coherent availa
 | savior-exited | Same boy outside the mall, safe after exit | 1120×630, `65% 12%`, full head safe |
 | savior-lost | Vacant bench and his folded hoodie; no depicted harm to a child | 1120×630, deliberate person-free physical state |
 | bart / bart-saved / bart-killed | Navy-uniform guard, safe exterior, non-graphic resolved outcome | 1120×630; killed crop `80% 40%` keeps face above caption |
-| girl / girl-saved / girl-killed | Same chestnut-haired adult woman/denim jacket, safe exterior, non-graphic resolved outcome | 1120×630; killed crop `80% 40%` |
+| girl / girl-saved / girl-killed | Same chestnut-haired adult woman/denim jacket, safe exterior, non-graphic resolved outcome | 1120×630 present and saved. Killed is 704×396 with a crop at `80% 40%`. |
 | twisted-bond | Same Savior facing a troubling concourse/shadow; no selected Killer inferred | 1120×630; shared compact chooser/wide active Minor |
 | lockdown / wet-floors / food-fight / escalators / nerds | Locked grille, puddle, food-court aftermath, physical escalator fault, two game-store patrons | 1120×630; image toggles dim only when inactive |
 | chopper-parked / chopper-riding / chopper-destroyed | Same real black/chrome motorcycle parked, ridden, wrecked | 1120×630; riding now uses the rider-free motion insert documented below |

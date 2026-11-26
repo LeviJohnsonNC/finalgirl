@@ -40,11 +40,30 @@ export function CreechHunters({ state, onEvent, onGroup, onOutcome, onCorrect }:
     </> : <>
       <button className="creech-hunter-summary" aria-label="View Ghost Hunters" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}><span>{summary}</span><small>{roster.filter(h => state[`hunter.${h.id}`] === 'in-play').length} in play · {expanded ? 'Hide' : 'Show'}</small></button>
       {expanded && <>
-        <div className="creech-hunters">{roster.map(h => <IllustratedTile key={h.id} id={`${id}-${h.id}`} className="creech-hunter-portrait" art={creechArt[`hunter-${h.id}`]} title={h.id[0].toUpperCase() + h.id.slice(1)} status={states.find(s => s.value === state[`hunter.${h.id}`])?.label ?? 'Not recorded'} data-state={state[`hunter.${h.id}`]} aria-label={`${state[`hunter.${h.id}`] === 'left-play' ? 'Restore' : 'View'} ${h.name}`} aria-expanded={selected === h.id} aria-pressed={selected === h.id} onClick={() => {
-          if (state[`hunter.${h.id}`] === 'left-play') {
-            if (onCorrect(`hunter.${h.id}`, 'in-play')) { setSelected(null); setBloodlust(''); }
-          } else { setSelected(selected === h.id ? null : h.id); setBloodlust(''); }
-        }} />)}</div>
+        <div className="creech-hunters">
+          {roster.map(person => {
+            const value = state[`hunter.${person.id}`];
+            const leftPlay = value === 'left-play';
+            const outcome = value === 'saved' || value === 'killed' ? `-${value}` : '';
+            return <IllustratedTile
+              key={person.id}
+              id={`${id}-${person.id}`}
+              className="creech-hunter-portrait"
+              art={creechArt[`hunter-${person.id}${outcome}`]}
+              title={person.id[0].toUpperCase() + person.id.slice(1)}
+              status={states.find(state => state.value === value)?.label ?? 'Not recorded'}
+              data-state={value}
+              aria-label={`${leftPlay ? 'Restore' : 'View'} ${person.name}`}
+              aria-expanded={selected === person.id}
+              aria-pressed={selected === person.id}
+              onClick={() => {
+                if (leftPlay && !onCorrect(`hunter.${person.id}`, 'in-play')) return;
+                setSelected(leftPlay || selected === person.id ? null : person.id);
+                setBloodlust('');
+              }}
+            />;
+          })}
+        </div>
         {hunter && <div className="creech-hunter-actions" role="group" aria-label={`${hunter.name} actions`}>
           <strong>{hunter.name}</strong>
           {state[`hunter.${hunter.id}`] === 'in-play' && <>

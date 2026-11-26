@@ -15,8 +15,8 @@ Publisher component art/credits and photo evidence are in
   details are a literal board reconstruction. HTML identifies each of 12 slots.
 - `people.webp`: 1536×1536, three columns and three rows, 512×512 cells.
   Columns: Boyfriend, Smalley 1, Smalley 2. Rows: present/in danger, saved/relieved,
-  killed/empty aftermath. The three illustrated people are fictional adults;
-  clothes/faces are visual interpretation, not new canonical character facts.
+  empty aftermath. The Killed state uses a dedicated photograph of each person.
+  The three adults and their wardrobe are visual interpretations.
   The generator's unequal row boundaries were individually cropped (source
   x: 0/418/838/1254; y: 0/412/807/1254), fitted without stretching into equal square
   cells, and assembled in identity order before display. Do not sort this mapping.

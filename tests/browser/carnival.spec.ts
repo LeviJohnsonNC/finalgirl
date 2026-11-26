@@ -218,6 +218,10 @@ test("Event activation and character outcomes are atomic and never resurrect end
   await expect(
     p.getByRole("combobox", { name: "Sibling status", exact: true }),
   ).toHaveText("In play");
+  await p.getByRole("button", { name: "Mark Sibling saved", exact: true }).click();
+  const sibling = p.locator('.module-character[data-state="saved"]').filter({ hasText: "Sibling" });
+  await expect(sibling).toBeVisible();
+  await expect(sibling.locator("img")).toHaveAttribute("src", /sibling-saved.*\.webp$/);
 });
 
 test("Werewolf has no illegal outcomes and discarding the Golf Cart ends its Event", async ({

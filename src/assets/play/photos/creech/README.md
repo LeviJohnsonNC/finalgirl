@@ -27,3 +27,5 @@ The four full-panel scenes replace the initial sheet derivatives with standalone
 | helicopter | exec-01aa6e42-86db-44c3-9c7d-ba1c016bdf1d |
 | restriction | exec-627bb046-d992-4c39-ab8d-9132724610f1 |
 | banner | exec-1ff074be-0fa9-4da1-b74c-1a82243fae4a |
+
+Three dedicated 498×498 killed stills use the same cast as the in-play images. Source `exec-1983c848-e3bc-4823-a7da-e4cae6c835b2.png` shows White, Blue and Orange from left to right. [Desktop and phone captures](../../../../../docs/verification/special-victims/)

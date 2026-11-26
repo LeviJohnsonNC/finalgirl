@@ -13,13 +13,25 @@ test('hunter group and reported Bloodlust save together, undo and reload',async(
  await panel.getByText('Bloodlust with death (optional)',{exact:true}).click();
  await panel.getByLabel('Observed final Bloodlust',{exact:true}).fill('4');
  await panel.getByRole('button',{name:'Mark Orange Ghost Hunter killed',exact:true}).click();
- await expect(panel.getByRole('button',{name:'View Orange Ghost Hunter',exact:true}).locator('.play-module-art')).toHaveCSS('filter','none');
+ const orangePortrait=panel.getByRole('button',{name:'View Orange Ghost Hunter',exact:true});
+ await expect(orangePortrait.locator('img')).toHaveAttribute('src',/hunter-orange-killed.*\.webp$/);
+ await expect(orangePortrait.locator('img')).toHaveCSS('filter','none');
  await expect(panel.getByRole('button',{name:'View Ghost Hunters',exact:true})).toContainText('Survivors can follow');
  await expect.poll(()=>page.evaluate(k=>JSON.parse(localStorage.getItem(k)!).playEvents.filter((e:{creechAction?:{kind:string}})=>e.creechAction?.kind==='hunter').length,key)).toBe(1);
- await undoLatestObservation(page);await expect(panel.getByRole('button',{name:'View Orange Ghost Hunter',exact:true})).toContainText('In play');await expect(panel.getByRole('button',{name:'View Ghost Hunters',exact:true})).toContainText('Will not follow yet');
+ await undoLatestObservation(page);await expect(orangePortrait).toContainText('In play');await expect(orangePortrait.locator('img')).toHaveAttribute('src',/hunter-orange(?!-killed).*\.webp$/);await expect(panel.getByRole('button',{name:'View Ghost Hunters',exact:true})).toContainText('Will not follow yet');
  await panel.getByRole('button',{name:'View Orange Ghost Hunter',exact:true}).click();await panel.getByText('Bloodlust with death (optional)',{exact:true}).click();await panel.getByLabel('Observed final Bloodlust',{exact:true}).fill('4');await panel.getByRole('button',{name:'Mark Orange Ghost Hunter killed',exact:true}).click();
  for(const size of info.project.name==='mobile'?[{width:390,height:844},{width:320,height:568}]:[{width:1280,height:640},{width:1366,height:768},{width:1440,height:900}]){await page.setViewportSize(size);await settled(page);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await panel.screenshot({path:info.outputPath(`hunters-${size.width}.png`),animations:'disabled',style:'.app-footer{visibility:hidden}'});}
  await page.reload();await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'creech');await expect(panel.getByRole('button',{name:'View Orange Ghost Hunter',exact:true})).toContainText('Killed');
+ for(const color of ['Blue','White']){
+  const name=`${color} Ghost Hunter`;
+  const portrait=panel.getByRole('button',{name:`View ${name}`,exact:true});
+  await portrait.click();
+  await panel.getByRole('button',{name:`Mark ${name} killed`,exact:true}).click();
+  await expect(portrait).toBeVisible();
+  await expect(portrait.locator('img')).toHaveAttribute('src',new RegExp(`hunter-${color.toLowerCase()}-killed.*\\.webp$`));
+  await expect.poll(()=>portrait.locator('img').evaluate((image:HTMLImageElement)=>image.naturalWidth)).toBeGreaterThan(0);
+ }
+ await panel.getByRole('region',{name:'Ghost Hunters'}).screenshot({path:info.outputPath('creech-killed-roster.png'),animations:'disabled',style:'.app-footer{visibility:hidden}'});
 });
 test('helicopter rescue is atomic with Carolyn and survives reload',async({page,archive},info)=>{
  await archive.install(page,{draft});await page.goto('/');await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();await openModule(page,'poltergeist');
@@ -79,7 +91,11 @@ test('legacy Rope Ladder stays unknown until clicked, and hunter disclosure does
  await expect(panel.getByRole('group',{name:'Orange Ghost Hunter actions',exact:true})).toHaveCount(0);await expect(panel.getByRole('group',{name:'Blue Ghost Hunter actions',exact:true})).toBeVisible();
  await panel.getByRole('button',{name:'View Ghost Hunters',exact:true}).click();await panel.getByRole('button',{name:'View Ghost Hunters',exact:true}).click();
  expect(await page.evaluate(k=>localStorage.getItem(k),key)).toBe(before);
- await panel.getByRole('button',{name:'Mark Blue Ghost Hunter saved',exact:true}).click();await expect(panel.getByRole('button',{name:'View Blue Ghost Hunter',exact:true})).toContainText('Saved');
+ await panel.getByRole('button',{name:'Mark Blue Ghost Hunter saved',exact:true}).click();
+ const bluePortrait=panel.getByRole('button',{name:'View Blue Ghost Hunter',exact:true});
+ await expect(bluePortrait).toBeVisible();
+ await expect(bluePortrait).toContainText('Saved');
+ await expect(bluePortrait.locator('img')).toHaveAttribute('src',/hunter-blue-saved.*\.webp$/);
  await expect(page.getByRole('button',{name:'Save one victim',exact:true})).toContainText('2');await expect(page.getByRole('button',{name:'Record one victim killed',exact:true})).toContainText('3');
  await undoLatestObservation(page);await expect(panel.getByRole('button',{name:'View Blue Ghost Hunter',exact:true})).toContainText('In play');
 });
