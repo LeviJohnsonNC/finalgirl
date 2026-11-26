@@ -48,7 +48,7 @@ export function deathFacts(
 ) {
   if ((selection.location !== HELLSCAPE || selection.killer === BIRDS) && events.some(event => event.moduleData?.module === HELLSCAPE_MODULE)) return null;
   if (selection.killer !== RAZORFACE && events.some(event => event.moduleData?.module === RAZORFACE_MODULE)) return null;
-  if(!birdsLogBelongsTo(selection.killer,events) || !validPlayLog(events) || !podarchOwnsLog(selection.killer,events) || !conOwnsLog(selection.location,selection.killer,events) || !wolfeOwnsLog(selection.location,events) || !ratchetLogBelongsTo(selection.killer, events) || !mortOwnsLog(selection.killer,events,selection.location))return null;
+  if(!birdsLogBelongsTo(selection.killer,events) || !validPlayLog(events) || !podarchOwnsLog(selection.killer,events,selection.location) || !conOwnsLog(selection.location,selection.killer,events) || !wolfeOwnsLog(selection.location,events) || !ratchetLogBelongsTo(selection.killer, events) || !mortOwnsLog(selection.killer,events,selection.location))return null;
   if (selection.location !== STATION && events.some(e=>e.stationReference || e.moduleData?.module===STATION_MODULE)) return null;
   if(selection.killer!==ORGANISM&&events.some(e=>e.moduleData?.module===ORGANISM_MODULE||e.organismReference)) return null;
   if (selection.location !== FALCONWOOD && events.some(e => e.moduleData?.module === FALCONWOOD_MODULE || e.falconwoodReference)) return null;
@@ -68,7 +68,7 @@ export function deathFacts(
   if(selection.location!=='USS Konrad'&&events.some(e=>e.moduleData?.module==='konrad'))return null;
   if(selection.killer!=='Evomorph'&&events.some(e=>e.moduleData?.module==='evomorph'))return null;
   if(events.some(e=>(e.moduleData?.module==='creech'&&selection.location!=='Creech Manor')||(e.linkedModule?.module==='poltergeist'&&selection.killer!=='Poltergeist')))return null;
-  if (!validPlayLog(events) || !podarchOwnsLog(selection.killer,events) || !conOwnsLog(selection.location,selection.killer,events) || (selection.killer!=='Poltergeist' && events.some(e=>e.moduleData?.module==='poltergeist'))) return null;
+  if (!validPlayLog(events) || !podarchOwnsLog(selection.killer,events,selection.location) || !conOwnsLog(selection.location,selection.killer,events) || (selection.killer!=='Poltergeist' && events.some(e=>e.moduleData?.module==='poltergeist'))) return null;
   const entries = summarizePlay(events).entries;
   const e = entries.find((e) => e.id === eventId && e.kind === "killed");
   if (!e) return null;

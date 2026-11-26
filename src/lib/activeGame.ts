@@ -112,7 +112,7 @@ export function isActiveGame(value: unknown): value is ActiveGame {
   if(game.mallSetupVersion!==undefined&&(game.mallSetupVersion!==1||game.selection?.location!==MALL))return false;
   if(game.playEvents?.some(e=>(e.mallReference||e.moduleData?.module===MALL_MODULE)&&game.selection?.location!==MALL||e.moduleData?.module===MALL_MODULE&&!e.mallAction&&(game.mallSetupVersion!==1||e.moduleData.changes.snapshot!==initialMall(game.selection?.startingEvent).snapshot)))return false;
   if (game.ratchetSetupVersion !== undefined && (game.ratchetSetupVersion !== 1 || game.selection?.killer !== RATCHET_LADY)) return false;
-  if (Array.isArray(game.playEvents) && (!podarchOwnsLog(game.selection?.killer,game.playEvents) || !ratchetLogBelongsTo(game.selection?.killer, game.playEvents) ||
+  if (Array.isArray(game.playEvents) && (!podarchOwnsLog(game.selection?.killer,game.playEvents,game.selection?.location) || !ratchetLogBelongsTo(game.selection?.killer, game.playEvents) ||
       game.playEvents.some(event => event?.moduleData?.module === RATCHET_MODULE && !event.ratchetAction &&
         typeof event.moduleData.changes?.maniacs === 'number' && game.ratchetSetupVersion !== 1))) return false;
   if(game.wolfeSetupVersion!==undefined&&(game.wolfeSetupVersion!==1||game.selection?.location!==WOLFE))return false;

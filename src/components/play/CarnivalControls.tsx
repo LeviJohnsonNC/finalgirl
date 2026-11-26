@@ -1,3 +1,5 @@
+import { eligibleStartingEvent } from '../../../supabase/functions/_shared/play/podarchEvents';
+import { PODARCHS } from '../../../supabase/functions/_shared/play/podarchs';
 import { useState } from "react";
 import { CharacterControl } from "./CharacterControl";
 import { EventControl } from "./EventControl";
@@ -89,9 +91,11 @@ function TrapSpaceNote({ name, space, onSave }: {
 }
 
 export function CarnivalControls({
+  killer,
   events,
   onEvent,
 }: {
+  killer?: string;
   events: PlayEvent[];
   onEvent: (event: PlayEvent) => boolean;
 }) {
@@ -112,7 +116,7 @@ export function CarnivalControls({
     if (changes) record(changes);
   };
   const actors = [
-    ...CARNIVAL_PEOPLE.map((p, index) => ({
+    ...(killer === PODARCHS ? [] : CARNIVAL_PEOPLE).map((p, index) => ({
       key: `person.${p.id}`,
       name: p.name,
       index,
@@ -323,7 +327,7 @@ export function CarnivalControls({
           reactivation.
         </p>
         <div className="carnival-events">
-          {CARNIVAL_EVENTS.map((event) => {
+          {CARNIVAL_EVENTS.filter(event => eligibleStartingEvent(killer, "Carnival of Blood", event.name)).map((event) => {
             const value = state[`event.${event.id}`],
               active = value === "active",
               allowed = activateCarnivalEvent(event.id, state) !== null;

@@ -52,9 +52,6 @@ const CastingRoom = ({ onStartGame, onGoToArchive, initialSelection }: CastingRo
     if (incompatibleEvent) setSelectedEvent(null);
   }, [incompatibleEvent]);
   const [selectedMission, setSelectedMission] = useState<string | null>(initialSelection?.mission ?? null);
-  useEffect(() => {
-    if (!eligibleStartingEvent(selection.killer,selection.location,selectedEvent)) setSelectedEvent(null);
-  }, [selection.killer,selection.location,selectedEvent]);
   const [previousLocation,setPreviousLocation] = useState(selection.location);
   useEffect(() => {
     if (selection.location === previousLocation) return;

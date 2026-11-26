@@ -1,3 +1,4 @@
+import { PODARCHS } from '../../../supabase/functions/_shared/play/podarchs';
 import { useState } from "react";
 import { newPlayEvent, summarizePlay } from "@/lib/play/events";
 import { moduleState } from "@/lib/play/modules";
@@ -22,7 +23,7 @@ const crossings = [
   {field:"raft",title:"Raft landings",on:"Placed",off:"Not placed"},
 ] as const;
 
-export function StorybookWoodsControls({events, onEvent, blocked}: ControlsProps) {
+export function StorybookWoodsControls({killer, events, onEvent, blocked}: ControlsProps) {
   const [choosing, setChoosing] = useState(false);
   const {record, message} = useModuleRecord(events, onEvent);
   const {entries} = summarizePlay(events);
@@ -78,7 +79,7 @@ export function StorybookWoodsControls({events, onEvent, blocked}: ControlsProps
         <h3>Ongoing effects</h3>
         <div className="woods-grid">{toggle("primrose","Primrose Flowers","Active","Inactive")}</div>
       </section>
-      <section aria-label="Special Victims">
+      {killer !== PODARCHS && <section aria-label="Special Victims">
         <h3>Special Victims</h3>
         <div className="woods-grid">
           {WOODS_PEOPLE.map(({id,name}) => {
@@ -93,7 +94,7 @@ export function StorybookWoodsControls({events, onEvent, blocked}: ControlsProps
             );
           })}
         </div>
-      </section>
+      </section>}
       {message && <p role="status">{message}</p>}
     </fieldset>
   );

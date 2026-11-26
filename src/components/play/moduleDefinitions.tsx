@@ -168,7 +168,7 @@ export const moduleDefinitions: Definition[] = [
     if (state.result === 'exhausted') return 'Affliction deck exhausted';
     return state.active === undefined ? 'Afflictions unrecorded' : state.active.length ? `${state.active.length} Afflictions in play` : 'Afflictions cleared';
   }},
- {id:'podarchs', owner:'killer', match:PODARCHS, title:PODARCHS, art:podarchArt('banner'), capabilities:['reveals','minor-effect'], Controls:PodarchControls,
+ {id:'podarchs', owner:'killer', match:PODARCHS, title:PODARCHS, art:podarchArt('banner'), capabilities:['objective','reveals','minor-effect'], Controls:PodarchControls,
   summary:(_fields,props)=>podarchBehavior(summarizePlay(props?.events ?? []).bloodlust)},
  {id:MORT_MODULE,owner:'killer',match:MORT,title:MORT,art:{src:mortBanner,position:'74% 36%'},capabilities:['reveals'],Controls:MortControls,
   summary:(_fields,props)=>mortSummary(summarizePlay(props?.events??[]).entries,props?.mortFresh === true && !props.events.length)},

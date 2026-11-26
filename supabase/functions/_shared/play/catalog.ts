@@ -257,6 +257,11 @@ export function playItems(
       : [];
 }
 export function playVictims(location: string, killer?: string): readonly { name: string }[] {
+  if (killer === PODARCHS) {
+    if (location === FALCONWOOD) return FALCONWOOD_ROLES.filter(role => eligibleStartingEvent(killer, location, role.name));
+    if (location === MEGABGCON) return [{ name: 'SWAG attendee' }];
+    return [];
+  }
   if (location === HELLSCAPE) return killer === BIRDS ? [] : HELLSCAPE_PEOPLE;
   return location === MEGABGCON ? [...CON_PEOPLE.map(p => ({ name: p.person })), { name: "SWAG attendee" }] : location === WOLFE ? WOLFE_EVENTS.filter(event=>WOLFE_PEOPLE.some(id=>id===event.id)) : location === STATION ? STATION_ROLES : location === FALCONWOOD ? FALCONWOOD_ROLES : location===MALL?[{name:'Bart the Mall Cop'},{name:'The Savior’s Girl'}]:location === WOODS ? WOODS_PEOPLE : location === WINGARD ? WINGARD_PEOPLE : location === "Marrek Warehouse" ? MARREK_PEOPLE : location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
     ? CAMP_VICTIMS

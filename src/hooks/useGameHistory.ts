@@ -174,7 +174,7 @@ const fromDbRow = (row: Record<string, unknown>): GameResult => ({
   sceneImageUrl: sanitizeStoredImageUrl(row.scene_image_url),
   visualBible: (row.visual_bible as string) || undefined,
   roundsPlayed: (row.rounds_played as number | null) ?? undefined,
-  playEvents: validPlayLog(row.play_events) && podarchOwnsLog(row.killer as string,row.play_events) && conOwnsLog(row.location as string, row.killer as string, row.play_events) && ratchetLogBelongsTo(row.killer as string, row.play_events) && mortOwnsLog(row.killer as string,row.play_events,row.location as string) ? row.play_events : undefined,
+  playEvents: validPlayLog(row.play_events) && podarchOwnsLog(row.killer as string,row.play_events,row.location as string) && conOwnsLog(row.location as string, row.killer as string, row.play_events) && ratchetLogBelongsTo(row.killer as string, row.play_events) && mortOwnsLog(row.killer as string,row.play_events,row.location as string) ? row.play_events : undefined,
   hasLegacyPoster: row.has_legacy_poster === true,
   hasLegacyScene: row.has_legacy_scene === true,
 });

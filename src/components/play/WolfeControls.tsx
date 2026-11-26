@@ -1,3 +1,4 @@
+import { PODARCHS } from '../../../supabase/functions/_shared/play/podarchs';
 import {useState} from 'react';
 import {FEATURE_FILMS} from '@/types/gameData';
 import {observedFinalGirlMaxHealth} from '@/data/finalGirlReferences';
@@ -241,7 +242,7 @@ export function WolfeControls({events,onEvent,onDeath,blocked,killer,finalGirl,f
             value={state['active.'+id]?'active':state['active.'+id]===false?'ended':undefined} interaction="toggle" allowed={!blocked}
             onActivate={()=>commit({command:'event',id,active:true})}
             onEnd={()=>commit({command:'event',id,active:false})} onClear={()=>commit({command:'event',id,active:false})}/>)}
-        {WOLFE_PEOPLE.map(id=>{
+        {killer !== PODARCHS && WOLFE_PEOPLE.map(id=>{
           const status=state['person.'+id] as typeof outcomes[number]['value']|undefined;
           return <CharacterControl key={id} className={eventsPicker||status?'':'hidden'} name={eventName(id)}
             art={wolfeArt(status==='saved'||status==='killed'?id+'-'+status:id)} present="present" states={outcomes}

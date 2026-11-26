@@ -33,7 +33,9 @@ describe("registered modules use their declared shared interactions", () => {
             module.owner === "location" ? module.match : "Camp Happy Trails"
           }
           finalGirl="Laurie"
-          events={module.id === "hellscape"
+          events={module.id === "podarchs"
+            ? [newPlayEvent({kind:"start",saved:0,killed:0,round:1}),newPlayEvent({kind:"moment",momentType:"finale",killerCard:"Luxuriant Growth",permanent:true,text:"Finale revealed"})]
+            : module.id === "hellscape"
             ? [newPlayEvent({kind: "start", saved: 0, killed: 0, round: 1}),
               newPlayEvent({kind: "module", moduleData: {module: "hellscape", changes: {"person.peon": "in-play"}}})]
             : []}

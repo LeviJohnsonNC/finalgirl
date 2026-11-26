@@ -39,8 +39,8 @@ export function PodarchControls({events,onEvent,blocked}: Props) {
   const cap = objective === 'leader' ? 5 : 6;
   const value = objective ? Number(fields[objective] ?? cap) : undefined;
   return <div className="podarch-controls">
-    <IllustratedTile className="module-control-tile" art={podarchArt('assimilation')} title="Victim assimilated" status="Remember this moment"
-      disabled={blocked} onClick={() => change({assimilated:true})} />
+    {objective !== 'countdown' && <IllustratedTile className="module-control-tile" art={podarchArt('assimilation')} title="Victim assimilated" status="Remember this moment"
+      disabled={blocked} onClick={() => change({assimilated:true})} />}
     <MinorPowerSection>
       <div className="module-minor-grid">
         {(recorded.length && !more ? recorded : PODARCH_MINORS).map(c => <PodarchMinor key={c.id} {...c} art={podarchArt(c.id)} events={events} onEvent={onEvent} blocked={blocked}/>)}
@@ -48,7 +48,7 @@ export function PodarchControls({events,onEvent,blocked}: Props) {
       {recorded.length === 1 && <button type="button" className="module-change-choice" onClick={() => setMore(!more)}>{more ? 'Done choosing Minor Powers' : 'Add another Minor Power'}</button>}
     </MinorPowerSection>
     <KillerCards killer={PODARCHS} events={events} onEvent={onEvent} disabled={blocked}/>
-    {objective && value !== undefined && <section className="podarch-objective" aria-label="Finale objective">
+    {objective && value !== undefined && <section className="podarch-objective" data-module-control="objective" aria-label="Finale objective">
       <ModuleArtwork art={podarchArt(objective === 'greenhouse' && value === 0 ? 'ruins' : objective)}/>
       <div><h3>{objective === 'greenhouse' ? 'The Greenhouse' : objective === 'leader' ? 'The Leader' : 'Countdown'}</h3>
         {objective === 'countdown' ? <PlaySelect aria-label="Countdown remaining" value={String(value)} disabled={blocked} onChange={e=>change({countdown:Number(e.target.value)})}>
@@ -57,7 +57,7 @@ export function PodarchControls({events,onEvent,blocked}: Props) {
           onChange={n=>change({[objective]:n})}/>}
         {objective === 'greenhouse' && value === 0 && <p>Escape at an exit with no Assimilated there.</p>}
         {objective === 'countdown' && value === 0 && <p>Check the loss condition at the start of the Killer phase.</p>}
-        {objective === 'leader' && (value === 0 || fields.leaderFinal) &&
+        {objective === 'leader' && value === 0 &&
           <PlaySelect aria-label="Leader Final Health" disabled={blocked} value={String(fields.leaderFinal ?? 'unresolved')}
             onChange={e=>change({leaderFinal:e.target.value})}>
             <option value="unresolved">Check Final Health</option><option value="recovered">Recovered · record Health</option><option value="defeated">Leader defeated</option>

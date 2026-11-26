@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PODARCHS, PODARCH_FINALES, PODARCH_TERRORS, podarchBehavior, podarchOwnsLog } from '../../../supabase/functions/_shared/play/podarchs';
+import { PODARCHS, PODARCH_FINALES, PODARCH_TERRORS, podarchBehavior, podarchOwnsLog, podarchFinishOptions, podarchFacts } from '../../../supabase/functions/_shared/play/podarchs';
 import { eligibleStartingEvent } from '../../../supabase/functions/_shared/play/podarchEvents';
 import { newPlayEvent, summarizePlay, validPlayLog } from './events';
 import { moduleState, moduleStoryBeats } from './modules';
@@ -16,6 +16,19 @@ describe('Terror From Beyond',()=>{
     expect(eligibleStartingEvent(PODARCHS,'Buddyland','Pizza Delivery')).toBe(false);
     expect(eligibleStartingEvent(PODARCHS,'Falconwood','Pizza Delivery')).toBe(true);
     expect(eligibleStartingEvent('Hans','Buddyland','Pizza Delivery')).toBe(true);
+    expect(eligibleStartingEvent(PODARCHS, 'Hellscape', 'Curious Wretch')).toBe(false);
+    expect(eligibleStartingEvent(PODARCHS, 'Hellscape', 'Lost in Excess')).toBe(true);
+  });
+  it('keeps Finish valid for sparse, unnamed and named Finale records', () => {
+    expect(podarchFinishOptions(true)).toHaveLength(4);
+    expect(podarchFinishOptions(true, {})).toHaveLength(3);
+    PODARCH_FINALES.forEach((card, index) => {
+      expect(podarchFinishOptions(true, {killerCard:card.name})).toEqual([podarchFinishOptions(true)[index+1]]);
+    });
+    expect(podarchFinishOptions(false, {killerCard:'Born Again'})).toContain('The Countdown expired');
+    expect(podarchFinishOptions(false, {killerCard:'Luxuriant Growth'})).not.toContain('The Countdown expired');
+    expect(podarchFacts({countdown:0, greenhouse:0},'Luxuriant Growth')).toContain('escape requires separate confirmation');
+    expect(podarchFacts({countdown:0, greenhouse:0},'Luxuriant Growth')).not.toContain('Countdown');
   });
   const start = () => newPlayEvent({kind:'start',round:1,saved:0,killed:0});
   it('records a rescue and a single Minor discard together, restoring both on Undo',()=>{

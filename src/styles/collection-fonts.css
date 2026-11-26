@@ -1,5 +1,11 @@
 /* Self-hosted fonts. Copyright notices and licenses: /licenses/collection-fonts.txt */
 @font-face {
+  font-family: "Crimson Pro";
+  src: url("../assets/fonts/crimson-pro.woff2") format("woff2");
+  font-weight: 200 900;
+  font-display: swap;
+}
+@font-face {
   font-family: "Kalam";
   src: url("../assets/fonts/collection/kalam.woff2") format("woff2");
   font-weight: 700;

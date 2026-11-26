@@ -21,7 +21,7 @@ import { poltergeistPower } from '../../supabase/functions/_shared/play/polterge
 import { ENDING_BOARD_SPACES } from '@/data/endingBoardSpaces';
 import { PLAY_ROOMS, selectionItems } from '@/lib/play/catalog';
 import { OutcomeChoices } from './outcome/OutcomeChoices';
-import { PODARCHS, PODARCH_OUTCOMES } from '../../supabase/functions/_shared/play/podarchs';
+import { PODARCHS, podarchFinishOptions } from '../../supabase/functions/_shared/play/podarchs';
 import { OutcomeSelect } from './outcome/OutcomeSelect';
 import { SuggestionInput } from './ui/suggestion-input';
 import '@/styles/outcome.css';
@@ -143,7 +143,7 @@ export const GameOutcomeForm = ({
   const isFalconwood = result.location === 'Falconwood';
   const isSlayer = result.killer === 'Slayer';
   const [podarchOutcome,setPodarchOutcome] = useDraftField('podarchOutcome','',initialDraft,onDraftChange);
-  const podarchOutcomes = PODARCH_OUTCOMES[isWin ? 'won' : 'lost'];
+  const podarchOutcomes = podarchFinishOptions(isWin, entries.find(entry => entry.momentType === 'finale'));
   const hasKillerDetails = result.killer === PODARCHS || (isWin && (isPoltergeist || isBerith)) || (!isWin && isOrganism)
     || result.killer==='The Hunter' || isEvomorph || isRatchetLady || isBigBadWolf || isIntruders || isBilly || isGrimlash
     || isShriek || isSlayer || result.killer === 'The Tormentor';

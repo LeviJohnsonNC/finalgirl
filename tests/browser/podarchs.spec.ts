@@ -1,5 +1,5 @@
 import { activeGame, expect, test, userId } from './fixtures';
-import { chooseKillerCard, openModule } from './play-helpers';
+import { chooseKillerCard, openModule, openMinorPowers, showMinorChoices } from './play-helpers';
 import { newPlayEvent, summarizePlay, type PlayEvent } from '../../src/lib/play/events';
 
 test('Podarch moments, hostile transition, paired Finale and persistence', async ({page,archive}, info) => {
@@ -11,6 +11,13 @@ test('Podarch moments, hostile transition, paired Finale and persistence', async
   await archive.install(page,{draft:{...activeGame, selection:{...activeGame.selection,killer:'The Podarchs',finalGirl:'Joan',filmId:'s4-terror-from-beyond'}, playMode:true,playEvents:[start,track]}});
   await page.goto('/');
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  await page.getByRole('button',{name:'View Joan info',exact:true}).click();
+  const dossier = page.getByRole('dialog');
+  await dossier.locator('.girl-ability > summary').click();
+  await expect(dossier).toContainText('Weak Attack');
+  await expect(dossier).toContainText('Take any top Item card');
+  await dossier.screenshot({path:info.outputPath('joan-dossier.jpg')});
+  await page.keyboard.press('Escape');
   const panel = page.locator('[data-module="podarchs"]');
   await expect(panel.locator('summary').first()).toContainText('Docile');
   await expect(page.getByRole('group',{name:'Killer Health tracker'})).toHaveCount(0);
@@ -21,7 +28,15 @@ test('Podarch moments, hostile transition, paired Finale and persistence', async
   expect(summarizePlay(await log())).toMatchObject({saved:0,killed:0,bloodlust:3});
   await page.getByRole('group',{name:'Bloodlust tracker'}).getByRole('button',{name:/increase bloodlust/i}).click();
   await expect(panel.locator('summary').first()).toContainText('Hostile');
+  await openMinorPowers(panel);
+  await panel.getByRole('button',{name:'Activate Targeted Growth'}).click();
+  await showMinorChoices(panel);
+  await panel.getByRole('button',{name:'Activate Sense of Urgency'}).click();
+  await page.getByRole('button',{name:'Save one victim',exact:true}).click();
+  await page.getByRole('group',{name:'Choose a Minor to discard for this rescue'}).getByRole('button',{name:'Targeted Growth'}).click();
+  await expect.poll(async()=>summarizePlay(await log()).saved).toBe(1);
   await panel.locator('.module-card-section > summary').click();
+  await chooseKillerCard(panel,'Dark Power','Obstinate Victims');
   await chooseKillerCard(panel,'Finale','Luxuriant Growth');
   const objective = panel.getByRole('region',{name:'Finale objective'});
   const heart = objective.getByRole('button',{name:/Remove one Greenhouse health/});
@@ -34,6 +49,48 @@ test('Podarch moments, hostile transition, paired Finale and persistence', async
     await page.setViewportSize({width,height});
     await panel.locator('img').evaluateAll(images=>Promise.all(images.map(image=>{const img=image as HTMLImageElement; img.loading='eager'; return img.decode();})));
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-    await panel.screenshot({path:info.outputPath('podarch-panel-'+width+'.jpg')});
+    await panel.scrollIntoViewIfNeeded();
+    await panel.screenshot({animations:'disabled',path:info.outputPath('podarch-panel-'+width+'.jpg')});
   }
+  await panel.locator('.module-card-section > summary').click();
+  await chooseKillerCard(panel,'Finale','Born Again');
+  await expect(panel.getByRole('button',{name:/Victim assimilated/})).toHaveCount(0);
+  await objective.getByLabel('Countdown remaining').click();
+  await page.getByRole('option',{name:'0 remaining',exact:true}).click();
+  await expect(objective).toContainText('start of the Killer phase');
+  await chooseKillerCard(panel,'Finale','You’re Next!');
+  const leaderHeart = objective.getByRole('button',{name:/Remove one Leader health/});
+  for(let i=0;i<5;i++) await leaderHeart.first().click();
+  await objective.getByLabel('Leader Final Health').click();
+  await page.getByRole('option',{name:'Leader defeated',exact:true}).click();
+  const summary = summarizePlay(await log());
+  expect(summary.killed).toBe(0);
+  expect(summary.saved).toBe(1);
+});
+
+test('Collection and mixed-cast Rules show the photographic references without starting a log', async ({page, archive}, info) => {
+  await archive.install(page, {draft:{...activeGame, selection:{...activeGame.selection, killer:'The Podarchs', finalGirl:'Laurie', location:'Camp Happy Trails'}, playMode:true, playEvents:[]}});
+  await page.goto('/');
+  await page.getByRole('button',{name:'Collection',exact:true}).click();
+  const card = page.locator('[data-film-id="s4-terror-from-beyond"]');
+  await expect(card).toContainText('Your choice');
+  await expect(card.getByRole('button',{name:'View Joan info'})).toBeVisible();
+  await card.scrollIntoViewIfNeeded();
+  await card.screenshot({path:info.outputPath('podarch-collection.jpg')});
+  await page.locator('footer').getByRole('button',{name:'Back',exact:true}).click();
+  await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  await openModule(page,'camp');
+  await expect(page.locator('[data-module="camp"]')).not.toContainText('Special characters');
+  await page.getByRole('button',{name:'Read story',exact:true}).click();
+  await page.getByRole('button',{name:'Special Rules',exact:true}).click();
+  const dialog = page.getByRole('dialog',{name:'Special Rules'});
+  await dialog.getByRole('tab',{name:'Rules',exact:true}).click();
+  await expect(dialog.getByRole('tabpanel')).toContainText('Evolution');
+  const stills = dialog.locator('.podarch-rule-stills');
+  await expect(stills.locator('img')).toHaveCount(8);
+  await stills.last().scrollIntoViewIfNeeded();
+  await stills.last().locator('img').evaluateAll(images => Promise.all(images.map(image => (image as HTMLImageElement).decode())));
+  await stills.last().screenshot({path:info.outputPath('podarch-terror-rules.jpg')});
+  const log = await page.evaluate(key => JSON.parse(localStorage.getItem(key)!).playEvents, 'final-girl-active-game-v1:'+userId);
+  expect(log).toEqual([]);
 });

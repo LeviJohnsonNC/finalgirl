@@ -37,6 +37,7 @@ export const podarchRules: EntityRuleModule = {
     {type:'table',headers:['Dark Power','Effect'],rows:PODARCH_POWERS.map(c=>[c.name,c.effect])},
     {type:'paragraph',text:'Minor Dark Powers apply to all Assimilated. Discard one per saved Victim, or discard them at Finale reveal. Location Minor Powers with Health spaces receive no Health markers. Ignore or replace incompatible Events and Items.'},
     {type:'table',headers:['Minor Power','Effect'],rows:PODARCH_MINORS.map(c=>[c.name,c.effect])},
+    {type:'podarch-photos',photos:PODARCH_TERRORS.map(({id,name})=>({id,label:name}))},
     {type:'table',headers:['Terror','Copies','Effect'],rows:PODARCH_TERRORS.map(c=>[c.name,String(c.quantity),c.effect])},
     {type:'paragraph',text:'Before the Finale, win at the end of the Killer phase if no Plants, Pods or Assimilated remain. With no Victims remaining at the end of the Killer phase, discard the rest of the Terror deck. Reveal the Finale in Upkeep when the deck runs out. Use both matching Finale Rules cards.'},
     {type:'table',headers:['Finale','Objective'],rows:PODARCH_FINALES.map(c=>[c.name,c.effect])},

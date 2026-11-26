@@ -451,6 +451,7 @@ export function moduleState(
     }
     const observation = e.moduleData?.module === module ? e.moduleData : ["groves","creech"].includes(e.moduleData?.module ?? "") && e.linkedModule?.module === module ? e.linkedModule : undefined;
     if ((e.kind !== "module" && !(module===PODARCH_MODULE && e.kind==="saved") && !(module===WOLFE_MODULE&&e.kind==='killed'&&e.wolfeAction?.command==='ram')) || !validModuleObservation(observation)) continue;
+    if (module === PODARCH_MODULE && typeof observation.changes.leader === "number" && observation.changes.leader > 0) delete state.leaderFinal;
     for (const [key, value] of Object.entries(observation.changes)) {
       if (value === null) delete state[key];
       else state[key] = value;

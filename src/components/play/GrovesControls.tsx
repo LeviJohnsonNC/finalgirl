@@ -1,3 +1,5 @@
+import { eligibleStartingEvent } from '../../../supabase/functions/_shared/play/podarchEvents';
+import { PODARCHS } from '../../../supabase/functions/_shared/play/podarchs';
 import { useState, useRef, useEffect } from "react";
 import { useModuleRecord } from "./useModuleRecord";
 import { CharacterControl } from "./CharacterControl";
@@ -193,7 +195,7 @@ export function GrovesControls({
         )}
       </WrathTrack>
       <SacredSpaces state={s} disabled={blocked} onChange={record} />
-      <section>
+      {killer !== PODARCHS && <section>
         <h3>Special Victims</h3>
         <div className="groves-people-grid">
           {GROVES_PEOPLE.map((person, i) => (
@@ -230,7 +232,7 @@ export function GrovesControls({
             </div>
           ))}
         </div>
-      </section>
+      </section>}
       {pending && (
         <section
           ref={resolutionRef}
@@ -330,7 +332,7 @@ export function GrovesControls({
             </p>
           )}
         <div className="groves-event-grid">
-          {[...GROVES_EVENTS]
+          {GROVES_EVENTS.filter(event => eligibleStartingEvent(killer, "Sacred Groves", event.name))
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((e) => {
               const person = GROVES_PEOPLE.find((p) => p.id === e.id);

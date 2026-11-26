@@ -1,3 +1,4 @@
+import { PODARCHS } from '../../../supabase/functions/_shared/play/podarchs';
 import { modulePhoto } from "./modulePhotos";
 import { CharacterControl } from "./CharacterControl";
 import { MinorPowerGroup } from "./MinorPowerGroup";
@@ -134,7 +135,7 @@ export function CampControls({
       {location === "Camp Happy Trails" && part !== "killer" && (
         <section aria-label="Camp tracking">
           <div className="play-camp-body">
-            <div>
+            {killer !== PODARCHS && <div>
               <h3 className="play-module-subheading">Special characters</h3>
 
               <div className="play-camp-victims">
@@ -172,7 +173,7 @@ export function CampControls({
                   );
                 })}
               </div>
-            </div>
+            </div>}
             <div>
               <h3 className="play-module-subheading">Ongoing events</h3>
 

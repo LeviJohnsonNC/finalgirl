@@ -23,8 +23,8 @@ export const PODARCH_MINORS = [
   { id: 'urgency', name: 'Sense of Urgency', effect: 'Assimilated move one additional space for each movement icon.' },
 ];
 export const PODARCH_FINALES = [
-  { id: 'greenhouse', name: 'Luxuriant Growth', effect: 'Put the Greenhouse in the space furthest from you and spawn two Assimilated there. Put a Health marker on each of the six hearts. Attack it in its space. Leftover damage cannot pass between it and other enemies. Each time you attack it, spawn one Assimilated on the closest exit. Destroy it and reach an exit with no Assimilated there to win.' },
-  { id: 'countdown', name: 'Born Again', effect: 'Start the Countdown at 6. Remove existing Plant/Pod tokens and remove the Podarch card from the game. Draw a Setup card and place Pods by the printed priority: Final Girl start, Killer start, exits, then search spaces furthest from you. Assimilated stop placing Plants with Victims and Victims can no longer become Assimilated. Pods remain until destroyed. At the end of each Killer phase, decrease the Countdown by one and spawn an Assimilated at the furthest Pod. Destroy all Pods to win. At the start of the Killer phase, lose if the Countdown is zero or if you share a Pod, even with Victims present.' },
+  { id: 'greenhouse', name: 'Luxuriant Growth', effect: 'Put the Greenhouse in the space furthest from you and spawn two Assimilated there. Put a Health marker on each of the six hearts. You may attack the Greenhouse as if it were an enemy. Leftover damage cannot pass between it and other enemies. Each time you attack it, spawn one Assimilated on the closest exit. Destroy it and reach an exit with no Assimilated there to win.' },
+  { id: 'countdown', name: 'Born Again', effect: 'Start the Countdown at 6. Remove existing Plant/Pod tokens and remove the Podarch card from the game. Draw a Setup card and place all five Pods, one per space, by the printed priority: Final Girl start, Killer start, exits, then search spaces furthest from you. Assimilated stop placing Plants with Victims and Victims can no longer become Assimilated. Pods remain until destroyed. At the end of each Killer phase, decrease the Countdown by one and spawn an Assimilated at the furthest Pod. Destroy all Pods to win. At the start of the Killer phase, lose if the Countdown is zero or if you share a Pod, even with Victims present.' },
   { id: 'leader', name: "You’re Next!", effect: 'Draw a Setup card and place the Leader at its Killer start. Place five Health markers and a Final Health token on the Leader card. The Leader is a Killer with its own action and the Bloodlust track’s movement and attack values. Defeat the Leader to win.' },
 ];
 export const PODARCH_TERRORS = [
@@ -40,17 +40,33 @@ export const PODARCH_OUTCOMES = {
   lost: ['The Final Girl was assimilated', 'No Assimilated token was available for a required assimilation', 'The Final Girl died', 'The Countdown expired', 'Shared a Pod at the start of the Killer phase during Born Again'],
 };
 
+export function podarchFinishOptions(won: boolean, finale?: { killerCard?: string }) {
+  const outcomes = won ? PODARCH_OUTCOMES.won : PODARCH_OUTCOMES.lost;
+  if (!finale) return outcomes;
+  const branch = PODARCH_FINALES.findIndex(card => card.name === finale.killerCard);
+  if (won) return branch < 0 ? outcomes.slice(1) : [outcomes[branch + 1]];
+  if (branch < 0) return outcomes;
+  // Born Again removes the Evolution card and prevents further Victim assimilation.
+  return branch === 1 ? outcomes.slice(2) : outcomes.slice(0, 3);
+}
+
 export const podarchMinorNames: Record<string,string> = {targeted: 'Targeted Growth', urgency: 'Sense of Urgency', slippery: 'Slippery', bond: 'Twisted Bond'};
 export function validPodarchField(key: string, value: unknown) {
   if (key === 'assimilated') return value === true;
-  if (podarchMinorNames[key]) return value === null || ['active','removed','inactive'].includes(String(value));
+  if (Object.prototype.hasOwnProperty.call(podarchMinorNames, key)) return value === null || ['active','removed','inactive'].includes(String(value));
   if (key === 'leaderFinal') return value === null || ['unresolved', 'recovered', 'defeated'].includes(String(value));
   return ['greenhouse','countdown','leader'].includes(key) && (value === null ||
     (typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= (key === 'leader' ? 5 : 6)));
 }
 
-export function podarchOwnsLog(killer: string, entries: readonly {moduleData?: {module: string}}[]) {
-  return killer === PODARCHS || entries.every(e => e.moduleData?.module !== PODARCH_MODULE);
+export function podarchOwnsLog(killer: string, entries: readonly {moduleData?: {module: string; changes?: Record<string, unknown>}}[], location?: string) {
+  return entries.every(({moduleData}) => {
+    if (moduleData?.module !== PODARCH_MODULE) return true;
+    if (killer !== PODARCHS) return false;
+    if ('slippery' in (moduleData.changes ?? {})) return location === 'USS Konrad';
+    if ('bond' in (moduleData.changes ?? {})) return location === 'Sunnydaze Mall';
+    return true;
+  });
 }
 
 export function podarchFacts(state: Record<string,unknown>, finale?: string) {
