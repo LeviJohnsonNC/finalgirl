@@ -21,6 +21,7 @@ import { poltergeistPower } from '../../supabase/functions/_shared/play/polterge
 import { ENDING_BOARD_SPACES } from '@/data/endingBoardSpaces';
 import { PLAY_ROOMS, selectionItems } from '@/lib/play/catalog';
 import { OutcomeChoices } from './outcome/OutcomeChoices';
+import { PODARCHS, PODARCH_OUTCOMES } from '../../supabase/functions/_shared/play/podarchs';
 import { OutcomeSelect } from './outcome/OutcomeSelect';
 import { SuggestionInput } from './ui/suggestion-input';
 import '@/styles/outcome.css';
@@ -141,7 +142,9 @@ export const GameOutcomeForm = ({
     result.killer === 'Mort the Teenage Dirtbag';
   const isFalconwood = result.location === 'Falconwood';
   const isSlayer = result.killer === 'Slayer';
-  const hasKillerDetails = (isWin && (isPoltergeist || isBerith)) || (!isWin && isOrganism)
+  const [podarchOutcome,setPodarchOutcome] = useDraftField('podarchOutcome','',initialDraft,onDraftChange);
+  const podarchOutcomes = PODARCH_OUTCOMES[isWin ? 'won' : 'lost'];
+  const hasKillerDetails = result.killer === PODARCHS || (isWin && (isPoltergeist || isBerith)) || (!isWin && isOrganism)
     || result.killer==='The Hunter' || isEvomorph || isRatchetLady || isBigBadWolf || isIntruders || isBilly || isGrimlash
     || isShriek || isSlayer || result.killer === 'The Tormentor';
   const hasLocationDetails = result.location===MALL || result.location === 'USS Konrad' || result.location === 'Shady Acres' || isFalconwood || isAbbey;
@@ -328,6 +331,7 @@ export const GameOutcomeForm = ({
   const buildFormData = (): EndingFormData => {
     // Augment gameHighlights with killer-specific conditions so the LLM gets full context
     let highlights = gameHighlights || '';
+    if (result.killer === PODARCHS && podarchOutcomes.includes(podarchOutcome)) highlights = [highlights, podarchOutcome].filter(Boolean).join('. ');
     if (legacyIntruder && !highlights.includes('Active Intruder at end:')) {
       highlights = [highlights,`Active Intruder at end: ${legacyIntruder}`].filter(Boolean).join('. ');
     }
@@ -560,6 +564,9 @@ export const GameOutcomeForm = ({
         {(hasKillerDetails || hasLocationDetails) && <div className="outcome-module-stack">
         {hasKillerDetails && <section className="outcome-modules" aria-labelledby="outcome-killer-details">
           <h2 id="outcome-killer-details" className="outcome-module-group-title">Killer details</h2>
+          {result.killer === PODARCHS && <OutcomeSelect label="How did the invasion end?" value={podarchOutcomes.includes(podarchOutcome) ? podarchOutcome : ''} onValueChange={setPodarchOutcome}>
+            <option value="">Unrecorded</option>{podarchOutcomes.map(reason=><option key={reason} value={reason}>{reason}</option>)}
+          </OutcomeSelect>}
           {/* Section: Poltergeist win conditions */}
           {isPoltergeist && isWin && (
             <div className="outcome-panel outcome-module space-y-3">

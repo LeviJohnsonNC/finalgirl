@@ -76,6 +76,7 @@ const Archive = () => {
     "s4-rotten-harvest",
     "s4-shriek",
     "s4-buddyland",
+    "s4-terror-from-beyond",
   ];
 
   return (

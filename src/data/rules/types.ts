@@ -1,4 +1,5 @@
 export type RuleBlock =
+  | { type: 'podarch-photos'; photos: { id:string; label:string }[] }
   | { type: 'wolfe-setups' }
   | { type: 'hellscape-upkeep' }
   | { type: 'groves-setup'; setup: string }

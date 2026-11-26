@@ -38,6 +38,7 @@ const photographs = [
 export const verifiedBloodlustMaximum: Readonly<Record<string, number>> = {
   [RAZORFACE]: RAZORFACE_MAX_BLOODLUST,
   [BIRDS]: BIRDS_MAX_BLOODLUST,
+  'The Podarchs': 10,
   [RATCHET_LADY]: RATCHET_MAX_BLOODLUST,
   [ORGANISM]: ORGANISM_MAX_BLOODLUST,
   "The Hunter": 10,

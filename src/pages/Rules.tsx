@@ -22,6 +22,7 @@ const CATEGORY_FILTERS: RuleCategory[] = ['ALL', 'CORE', 'TURN', 'COMBAT', 'KILL
 function blockToText(block: RuleBlock): string {
   switch (block.type) {
     case "hellscape-upkeep": return HELLSCAPE_UPKEEP.join(" ");
+    case "podarch-photos": return block.photos.map(p=>p.label).join(" ");
     case "wolfe-setups": return WOLFE_SETUPS.join(" ");
     case "groves-setup": return block.setup;
     case 'paragraph':

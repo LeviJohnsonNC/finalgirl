@@ -2,6 +2,8 @@ import { HELLSCAPE, HELLSCAPE_EVENTS, HELLSCAPE_ITEMS, HELLSCAPE_PEOPLE, HELLSCA
 import { MEGABGCON, MEGABGCON_SOURCE, BOOTH_EVENTS, CON_EVENTS, CON_ITEMS, CON_TERRORS, CON_SPACES, CON_PEOPLE } from "./megabgconCatalog.ts";
 import { MORT, MORT_TERRORS } from './mort.ts';
 import { WOLFE, WOLFE_EVENTS, WOLFE_ITEMS, WOLFE_PEOPLE, WOLFE_TERRORS, WOLFE_SPACES, WOLFE_SOURCE } from './wolfeCatalog.ts';
+import { eligibleStartingEvent } from './podarchEvents.ts';
+import { PODARCHS, PODARCH_TERRORS, PODARCH_SOURCE } from './podarchs.ts';
 import { RATCHET_LADY, RATCHET_TERRORS, RATCHET_SOURCE } from './ratchetLady.ts';
 import {STATION, STATION_EVENTS, STATION_ITEMS, STATION_ROLES, STATION_SOURCE, STATION_SPACES, STATION_TERRORS, stationNameKey} from './stationCatalog.ts';
 import { ORGANISM, ORGANISM_SOURCE, ORGANISM_TERRORS, ORGANISM_ITEM } from "./organism.ts";
@@ -62,6 +64,7 @@ export const PLAY_CARDS: readonly PlayCard[] = [
   ...WOLFE_EVENTS.map(card=>({...card,kind:'event' as const,location:WOLFE,source:WOLFE_SOURCE})),
   ...WOLFE_TERRORS.map(card=>({...card,kind:'terror' as const,location:WOLFE,source:WOLFE_SOURCE})),
   ...MORT_TERRORS.map(card => ({...card, kind:'terror' as const, killer:MORT, source:'Shriek · Mort Terror cards'})),
+  ...PODARCH_TERRORS.map(c => ({ ...c, kind:'terror' as const, killer:PODARCHS, source:PODARCH_SOURCE })),
   ...RATCHET_TERRORS.map(card => ({...card, kind:'terror' as const, killer:RATCHET_LADY, source:RATCHET_SOURCE})),
  ...FALCONWOOD_TERRORS.map(card => ({...card,kind:"terror" as const,location:FALCONWOOD,source:FALCONWOOD_SOURCE})),
  ...FALCONWOOD_EVENTS.map(card => ({...card,kind:"event" as const,location:FALCONWOOD,source:FALCONWOOD_SOURCE})),
@@ -135,7 +138,7 @@ export function applicablePlayCards(
 ) {
   return PLAY_CARDS.filter(
     (card) =>
-      card.kind === kind &&
+      card.kind === kind && (kind !== "event" || eligibleStartingEvent(selection.killer,selection.location,card.name)) &&
       !(card.location === HELLSCAPE && kind === "event" && birdsEventIncompatible(selection.killer, selection.location, card.name)) &&
       (card.location !== FALCONWOOD || card.name !== "Survive the Hunt" || selection.mission === "Survive the Hunt") &&
       (card.killer === selection.killer ||
@@ -164,6 +167,7 @@ export function suggestedDeathCards(selection: {killer:string;location:string;mi
       ? card.name === "Masochistic Peon"
       : HELLSCAPE_TERRORS.some(terror => terror.name === card.name && terror.death);
     if (card.killer === RAZORFACE) return RAZORFACE_TERRORS.some(terror => terror.name === card.name && 'death' in terror && terror.death);
+    if (card.killer===PODARCHS) return false;
     if (card.killer===RATCHET_LADY) return RATCHET_TERRORS.some(terror=>terror.name===card.name&&terror.death);
     if (card.killer===ORGANISM) return ORGANISM_TERRORS.some(terror=>terror.name===card.name&&terror.death);
     if (card.location === FALCONWOOD && kind === "event") return ["Head Researcher", "Conspiracy Theorist"].includes(card.name);

@@ -17,6 +17,10 @@ const line = (text: string, scale = 1, accent = false) => ({
   accent,
 });
 export const COLLECTION_ART: Record<string, CollectionArt> = {
+  "s4-terror-from-beyond": {
+    titleFont: "Georgia", titleWeight: 700, scene: "podarchs", accent: "#b7d66b", pale: "#f1e4c8", lettering: "gothic",
+    lines: [line("Terror", 1.15), line("From", .54), line("Beyond", 1.2, true)],
+  },
   "s1-camp-happy-trails": {
     titleFont: "Shelf Brush",
     titleWeight: 600,

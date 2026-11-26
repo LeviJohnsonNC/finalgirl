@@ -50,6 +50,7 @@
 // ../play/photos/hunter/mark-x.webp.png SHA-256: b57c0e35c24454e5d8fd57701a63053f421a76f8289e8750c37406faf721fd68
 // src/assets/casting-killers/slayer.webp SHA-256: 67387a5f2bce6e56be247f6d41c859a4ddd130ca6a08649c0434894f5ddc4928
 // christie.png SHA-256: 87734536352be57aeafeb1609963f1eab5a4499f85830518ffd40854e38deca5
+// joan.png SHA-256: 61f8a575f263e278f2724482a985e9250a77015dd5e822ba3d995a8b99469b1e
 export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: string }> = {
   "Billy the Bear": {
     "path": "billy-the-bear.jpg",
@@ -246,5 +247,9 @@ export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: 
   "Christie": {
     "path": "christie-f046e1bd197c499d.jpg",
     "sha256": "f046e1bd197c499dec7ca97969251f02387d63614b3076135cf4054fd2a96fda"
+  },
+  "Joan": {
+    "path": "joan.jpg",
+    "sha256": "64a58d91b34cc6354feffb650b1f7c623ab711112c9a5326a4c3931bfcb19e49"
   }
 };

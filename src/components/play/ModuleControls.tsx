@@ -1,3 +1,5 @@
+import { PODARCH_HOSTILE } from '../../../supabase/functions/_shared/play/podarchs';
+import { podarchArt } from './podarchArt';
 import { evomorphStageArt } from './evomorphArt';
 import { useAuth } from "@/hooks/useAuth";
 import { summarizePlay } from "@/lib/play/events";
@@ -10,7 +12,7 @@ export function ModuleControls({
   ...props
 }: ControlsProps & { sessionId: string }) {
   const { user } = useAuth();
-  const entries = summarizePlay(props.events).entries;
+  const { entries, bloodlust } = summarizePlay(props.events);
   return (
     <div className="play-module-stack">
       {moduleDefinitions
@@ -24,7 +26,7 @@ export function ModuleControls({
               id={module.id}
               title={module.title}
               kind={module.owner === "killer" ? "Killer" : "Location"}
-              art={module.id === 'evomorph' ? evomorphStageArt(moduleState(entries, 'evomorph').stage) : module.art}
+              art={module.id === 'podarchs' ? podarchArt(bloodlust === undefined ? 'banner' : bloodlust >= PODARCH_HOSTILE ? 'hostile' : 'docile') : module.id === 'evomorph' ? evomorphStageArt(moduleState(entries, 'evomorph').stage) : module.art}
               summary={module.summary(moduleState(entries, module.id), props)}
               preferenceKey={key}
             >

@@ -17,6 +17,7 @@ export const FILM_BLURBS: Record<string, string> = {
   's3-hell-to-pay': 'Enter Hellscape and confront Razorface. A brutal journey through infernal horror awaits beyond the familiar world.',
   's3-marrek-murders': 'Wake up inside a warehouse of cruel choices and deadly traps. The Tormentor has prepared a game of survival.',
   's3-dont-make-sound': 'Noise draws the Eyeless. Move carefully through Utopia in a tense creature feature where every sound can betray you.',
+  's4-terror-from-beyond': 'The neighbors remember everything. Something else is living behind their eyes.',
   's3-terror-from-destiny': 'Death has a plan. This vignette brings a sinister chain of fate to another location, with consequences waiting to unfold.',
   's4-buddyland': 'The party is over, but Billy the Bear is still performing. Brave a neon-lit pizza arcade where the animatronic mascots turn playtime deadly.',
   's4-shriek': 'Mort the Teenage Dirtbag crashes MegaBGCon. A crowded gaming convention becomes the stage for a gleefully chaotic slasher.',

@@ -1,5 +1,6 @@
 import { RAZORFACE, RAZORFACE_MAX_BLOODLUST, razorfaceState } from '../../../supabase/functions/_shared/play/razorface';
 import { BIRDS, BIRDS_MAX_BLOODLUST } from '../../../supabase/functions/_shared/play/birds';
+import { PODARCHS, PODARCH_MAX, podarchMinorNames } from '../../../supabase/functions/_shared/play/podarchs';
 import { MORT, MORT_MAX_BLOODLUST, MORT_MAX_HEALTH, mortState } from '../../../supabase/functions/_shared/play/mort';
 import { MortPowerPicker, MortRevealEntry } from './MortControls';
 import { mortEvent } from '@/lib/play/mortRecord';
@@ -218,13 +219,17 @@ export function PlayScreen(props: PlayScreenProps) {
   const finalGirlMaxHealth = observedFinalGirlMaxHealth(finalGirl, events, props.finalGirlStartingHealth, killer);
   // Legacy sessions can use the catalog to bound new input without backfilling observations.
   const razorface = killer === RAZORFACE ? razorfaceState(summary.entries) : null;
+  const podarchGame = killer === PODARCHS;
+  const podarchFields = podarchGame ? moduleState(summary.entries,'podarchs') : {};
+  const removableMinors = Object.keys(podarchMinorNames).filter(id=>podarchFields[id] === 'active');
+  const [choosingPodarchMinor,setChoosingPodarchMinor] = useState(false);
   const isRatchetLady = killer === RATCHET_LADY;
   const maniacs = isRatchetLady ? moduleState(summary.entries, RATCHET_MODULE).maniacs : undefined;
   const wolfe = location===WOLFE ? moduleState(summary.entries,WOLFE_MODULE) : undefined;
   const resistance = wolfe && wolfeAmped(wolfe) && wolfe[ampKey('resistance')];
   const ratchetShield = ratchetCount(maniacs) && maniacs > 0 &&
     summary.entries.some(event => event.momentType === 'dark-power' && event.killerCard === SHIELD_OF_MADNESS);
-  const trackerLimits = { ...stateLimits, ...(razorface&&{bloodlust:RAZORFACE_MAX_BLOODLUST}), ...(killer===BIRDS&&{bloodlust:BIRDS_MAX_BLOODLUST}), ...(mort&&{killerHealth:MORT_MAX_HEALTH,bloodlust:MORT_MAX_BLOODLUST}), ...(isRatchetLady && { killerHealth: RATCHET_HEALTH_STORAGE_MAX, bloodlust: RATCHET_MAX_BLOODLUST }), ...(killer===INTRUDERS&&{bloodlust:10}), ...(killer===ORGANISM&&{bloodlust:ORGANISM_MAX_BLOODLUST}), finalGirlHealth: observedFinalGirlMaxHealth(
+  const trackerLimits = { ...stateLimits, ...(podarchGame && {bloodlust:PODARCH_MAX}), ...(razorface&&{bloodlust:RAZORFACE_MAX_BLOODLUST}), ...(killer===BIRDS&&{bloodlust:BIRDS_MAX_BLOODLUST}), ...(mort&&{killerHealth:MORT_MAX_HEALTH,bloodlust:MORT_MAX_BLOODLUST}), ...(isRatchetLady && { killerHealth: RATCHET_HEALTH_STORAGE_MAX, bloodlust: RATCHET_MAX_BLOODLUST }), ...(killer===INTRUDERS&&{bloodlust:10}), ...(killer===ORGANISM&&{bloodlust:ORGANISM_MAX_BLOODLUST}), finalGirlHealth: observedFinalGirlMaxHealth(
     finalGirl, events, props.finalGirlStartingHealth ?? startingValues.finalGirlHealth, killer,
   ) ?? stateLimits.finalGirlHealth };
   const [message, setMessage] = useState("");
@@ -372,6 +377,13 @@ export function PlayScreen(props: PlayScreenProps) {
       </header>
       {props.narrationTransport && <div className="play-narration-transport">{props.narrationTransport}</div>}
       <section className="play-tracking" aria-label="Play controls">
+        {choosingPodarchMinor && removableMinors.length > 1 && <div className="module-linked-preview" role="group" aria-label="Choose a Minor to discard for this rescue">
+          <p>Save one Victim and discard one Minor Dark Power.</p>
+          {removableMinors.map(id => <button key={id} type="button" onClick={()=>{
+            if (commit({kind:'saved',quantity:1,moduleData:{module:'podarchs',changes:{[id]:'removed'}}})) setChoosingPodarchMinor(false);
+          }}>{podarchMinorNames[id]}</button>)}
+          <button onClick={()=>setChoosingPodarchMinor(false)}>Cancel</button>
+        </div>}
         <div className="play-counters">
           {(["round", "saved", "killed"] as const).map((counter) => {
             const value =
@@ -394,13 +406,14 @@ export function PlayScreen(props: PlayScreenProps) {
                   className="play-count-add"
                   aria-label={increment}
                   disabled={value >= 999}
-                  onClick={() =>
+                  onClick={() => counter === 'saved' && removableMinors.length > 1 ? setChoosingPodarchMinor(true) :
                     commit(
                       counter === "round"
                         ? { kind: "round" }
                         : {
                             kind: counter,
                             quantity: 1,
+                            ...(counter === 'saved' && removableMinors.length === 1 && {moduleData:{module:'podarchs' as const,changes:{[removableMinors[0]]:'removed'}}}),
                             ...(counter === "killed" && {
                               cause: "unspecified" as const,
                             }),
@@ -472,12 +485,12 @@ export function PlayScreen(props: PlayScreenProps) {
       <section
         className="play-panel play-track-more"
         aria-label="Game trackers"
-        data-healthless={killer === 'Poltergeist' || killer === BIRDS || undefined}
+        data-healthless={killer === 'Poltergeist' || podarchGame || killer === BIRDS || undefined}
       >
         <h2>Game trackers</h2>
         {killer==='Grimlash'&&summary.finalGirlHealth!==undefined&&finalGirlMaxHealth!==undefined&&summary.finalGirlHealth>finalGirlMaxHealth&&<p role="status" className="grim-health-discrepancy">Recorded Health {summary.finalGirlHealth} exceeds the current maximum {finalGirlMaxHealth}.</p>}
         <div className="play-state-grid">
-          {orderedStateFields.filter(field=>field!=='killerHealth'||(killer!=='Poltergeist'&&killer!==BIRDS)).map((field) => {
+          {orderedStateFields.filter(field=>field!=='killerHealth'||(killer!=='Poltergeist'&&killer!==BIRDS && !podarchGame)).map((field) => {
             if(field==="killerHealth"&&killer===ORGANISM) return <OrganismRoster key={field} events={events} onEvent={onEvent} />;
             if(field==="killerHealth"&&killer===INTRUDERS) return <IntruderRoster key={field} events={events} onEvent={onEvent} />;
             if(field==='killerHealth'&&killer==='The Hunter'&&['mark-v','countdown'].includes(hunter.phase))return <HunterCoreTracker key={field} events={events} onEvent={onEvent}/>;
@@ -602,7 +615,7 @@ export function PlayScreen(props: PlayScreenProps) {
           Remember this <span>The moments that made your night</span>
         </h2>
         <div className="play-moment-choices">
-          {orderedMoments.filter(choice=>!(killer===ORGANISM&&["dark-power","killer-revived"].includes(choice.type))&&(!(killer==='Poltergeist'||killer===BIRDS||killer===INTRUDERS||killer===RAZORFACE)||choice.type!=='killer-revived')&&!(mort&&!mortProgress.reveal&&choice.type==='killer-revived')&&!(killer==='The Hunter'&&['mark-v','countdown'].includes(hunter.phase)&&choice.type==='killer-revived')).map((choice) => {
+          {orderedMoments.filter(choice=>!(killer===ORGANISM&&["dark-power","killer-revived"].includes(choice.type))&&(!(podarchGame||killer==='Poltergeist'||killer===BIRDS||killer===INTRUDERS||killer===RAZORFACE)||choice.type!=='killer-revived')&&!(mort&&!mortProgress.reveal&&choice.type==='killer-revived')&&!(killer==='The Hunter'&&['mark-v','countdown'].includes(hunter.phase)&&choice.type==='killer-revived')).map((choice) => {
             const revealed = summary.entries.find(e => e.kind === "moment" && e.momentType === choice.type);
             const active = PERMANENT_MOMENTS.includes(choice.type) && (!!revealed || mort&&(choice.type==='finale'&&!!mortProgress.reveal||choice.type==='dark-power'&&!!mortProgress.power) || choice.type==='ultimate-unlocked'&&mallUnlocksUltimate(summary.entries) || killer==='The Hunter'&&hunterHasReveal(hunter,choice.type));
             const selectedArt = active && (choice.type === 'dark-power' || choice.type === 'finale')
@@ -627,7 +640,7 @@ export function PlayScreen(props: PlayScreenProps) {
         {moment && (
           <div className="play-moment-editor">
             {isReveal && <KillerCards killer={killer} events={events} onEvent={onEvent} typeOnly={moment.momentType as "dark-power" | "finale"} />}
-            {isReveal && killer !== RAZORFACE && killer !== WOLF && killer !== INTRUDERS && killer !== ORGANISM && killer !== 'The Hunter' && killer !== 'Slayer' && momentCards.length > 0 && (
+            {isReveal && !podarchGame && killer !== RAZORFACE && killer !== WOLF && killer !== INTRUDERS && killer !== ORGANISM && killer !== 'The Hunter' && killer !== 'Slayer' && momentCards.length > 0 && (
               <label>
                 {moment.momentType === "dark-power"
                   ? "Which Dark Power?"

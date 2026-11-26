@@ -1,4 +1,5 @@
 import { HellscapeUpkeepGuide } from "./HellscapeUpkeepGuide";
+import { podarchArt } from '../play/podarchArt';
 import { WolfeSetupReference } from './WolfeSetupReference';
 import { GrovesBoard } from "../play/GrovesBoard";
 import { RuleBlock as RuleBlockType, GlossaryTerm as GlossaryTermType } from '@/data/rules/types';
@@ -100,6 +101,8 @@ function RuleRecords({ block, renderCell, jumpId }: {
 export const RuleBlock = ({ block, glossary, onJumpTo, jumpId, inModal }: RuleBlockProps) => {
   switch (block.type) {
     case "hellscape-upkeep": return <HellscapeUpkeepGuide />;
+    case 'podarch-photos': return <div className="podarch-rule-stills">{block.photos.map(p=><figure key={p.id}>
+      <img src={podarchArt(p.id).src} loading="lazy" decoding="async" alt="" width="508" height="252"/><figcaption>{p.label}</figcaption></figure>)}</div>;
     case "wolfe-setups": return <WolfeSetupReference/>;
     case "groves-setup": return <GrovesBoard setup={block.setup}/>;
     case 'paragraph':

@@ -22,6 +22,7 @@ export const REVIEWED_FINAL_GIRL_IDENTITIES: Readonly<Record<string, string>> = 
   Heather: 'A fair-skinned young woman with dark-rooted yellow-blond hair cut in a tousled, chin-length bob. She wears a worn dark brown leather jacket over a black shirt.',
   Janelle: 'A fair-skinned young woman with an oval face and light brown waves, partly tied back under an oversized pink bow. She wears gold hoop earrings and a colorful patterned denim jacket.',
   Jenette: 'A Black woman with deep brown skin, strong cheekbones and black hair swept up in a high pompadour with cropped sides. She wears an olive tank top and a red cloth tied around her upper arm.',
+  Joan: 'An adult woman with dark eyes and dark wavy hair pinned up with a swept fringe. She wears a dark red ribbed turtleneck and a small round gold pendant.',
   Joy: 'A fair-skinned young woman with light blond hair parted in the middle and braided into two long pigtails. She wears green plaid flannel with blue denim overalls.',
   Julie: 'A young woman with wavy, shoulder-length dark hair, voluminous layers and brow-length bangs. She wears a light-wash denim jacket with a grey T-shirt beneath it.',
   Kat: 'A fair-skinned adult woman with dark-blond hair swept back from her face. She wears gold-rimmed aviator sunglasses and a green jacket.',

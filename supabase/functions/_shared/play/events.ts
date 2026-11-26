@@ -212,6 +212,11 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if (e.moduleData?.module === 'podarchs') {
+    if (!validModuleObservation(e.moduleData)) return false;
+    const changes = Object.entries(e.moduleData.changes);
+    if (changes.length !== 1 || (e.kind !== 'module' && !(e.kind === 'saved' && e.quantity === 1 && ['targeted','urgency','slippery','bond'].includes(changes[0][0]) && changes[0][1] === 'removed'))) return false;
+  }
   if(e.mallReference!==undefined&&(e.kind!=='killed'||e.mallReference!==true))return false;
   if(e.mallAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!==MALL_MODULE||!validMallAction(e.mallAction)))return false;
   if(e.moduleData?.module===MALL_MODULE&&(e.kind!=='module'||!validModuleObservation(e.moduleData)||(!e.mallAction&&!isInitialMall(e.moduleData.changes))))return false;
@@ -1197,6 +1202,7 @@ export function describeEvent(e: PlayEvent): string {
     case "moment":
       return `${e.text}${e.killerCard ? `: ${e.killerCard}` : ""}${e.detail ? `${e.killerCard ? ". " : ": "}${e.detail}` : ""}`;
     case "module":
+      if (e.moduleData?.module === 'podarchs' && e.moduleData.changes.assimilated) return 'A Victim was assimilated';
       if(e.wolfeAction?.command==='eat'||e.wolfeAction?.command==='spend') return 'Pills consumed';
       if(e.wolfeAction?.command==='ram') return 'Hospital Gurney ram recorded';
       if(e.wolfeAction?.command==='spent') return 'Hospital Gurney marked spent';

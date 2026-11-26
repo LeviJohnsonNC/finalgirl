@@ -2,6 +2,7 @@ import { HELLSCAPE, HELLSCAPE_MODULE } from "./hellscape.ts";
 import { MEGABGCON, MEGABGCON_MODULE } from "./megabgconCatalog.ts";
 import { RAZORFACE, RAZORFACE_MODULE, razorfaceFacts } from './razorface.ts';
 import { BIRDS, BIRDS_MODULE, birdsLogBelongsTo, birdsState } from './birds.ts';
+import { PODARCHS, podarchOwnsLog } from './podarchs.ts';
 import { conFacts, conOwnsLog } from "./megabgcon.ts";
 import { MORT, MORT_SUSPECTS, mortFacts, mortOwnsLog } from './mort.ts';
 import { WOLFE } from './wolfeCatalog.ts';
@@ -47,7 +48,7 @@ export function deathFacts(
 ) {
   if ((selection.location !== HELLSCAPE || selection.killer === BIRDS) && events.some(event => event.moduleData?.module === HELLSCAPE_MODULE)) return null;
   if (selection.killer !== RAZORFACE && events.some(event => event.moduleData?.module === RAZORFACE_MODULE)) return null;
-  if(!birdsLogBelongsTo(selection.killer,events) || !validPlayLog(events) || !conOwnsLog(selection.location,selection.killer,events) || !wolfeOwnsLog(selection.location,events) || !ratchetLogBelongsTo(selection.killer, events) || !mortOwnsLog(selection.killer,events,selection.location))return null;
+  if(!birdsLogBelongsTo(selection.killer,events) || !validPlayLog(events) || !podarchOwnsLog(selection.killer,events) || !conOwnsLog(selection.location,selection.killer,events) || !wolfeOwnsLog(selection.location,events) || !ratchetLogBelongsTo(selection.killer, events) || !mortOwnsLog(selection.killer,events,selection.location))return null;
   if (selection.location !== STATION && events.some(e=>e.stationReference || e.moduleData?.module===STATION_MODULE)) return null;
   if(selection.killer!==ORGANISM&&events.some(e=>e.moduleData?.module===ORGANISM_MODULE||e.organismReference)) return null;
   if (selection.location !== FALCONWOOD && events.some(e => e.moduleData?.module === FALCONWOOD_MODULE || e.falconwoodReference)) return null;
@@ -67,7 +68,7 @@ export function deathFacts(
   if(selection.location!=='USS Konrad'&&events.some(e=>e.moduleData?.module==='konrad'))return null;
   if(selection.killer!=='Evomorph'&&events.some(e=>e.moduleData?.module==='evomorph'))return null;
   if(events.some(e=>(e.moduleData?.module==='creech'&&selection.location!=='Creech Manor')||(e.linkedModule?.module==='poltergeist'&&selection.killer!=='Poltergeist')))return null;
-  if (!validPlayLog(events) || !conOwnsLog(selection.location,selection.killer,events) || (selection.killer!=='Poltergeist' && events.some(e=>e.moduleData?.module==='poltergeist'))) return null;
+  if (!validPlayLog(events) || !podarchOwnsLog(selection.killer,events) || !conOwnsLog(selection.location,selection.killer,events) || (selection.killer!=='Poltergeist' && events.some(e=>e.moduleData?.module==='poltergeist'))) return null;
   const entries = summarizePlay(events).entries;
   const e = entries.find((e) => e.id === eventId && e.kind === "killed");
   if (!e) return null;
@@ -85,12 +86,12 @@ export function deathFacts(
   const ratchetDeath = selection.killer === RATCHET_LADY && e.ratchetReference;
   const wolfeDeath = selection.location === WOLFE && e.wolfeReference;
   const conDeath = selection.location === MEGABGCON && e.megabgconReference;
-  const historical = conDeath || mortDeath || wolfeDeath || ratchetDeath || stationDeath || falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
+  const historical = selection.killer === PODARCHS || conDeath || mortDeath || wolfeDeath || ratchetDeath || stationDeath || falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
     ? summarizePlay(events.slice(0, events.findIndex(event => event.id === eventId) + 1)).entries
     : [];
   // The death's own fields reflect deliberate edits. Only the surrounding
   // context is frozen for newly recorded Woods deaths.
-  const contextEntries = woodsDeath || wolfeDeath
+  const contextEntries = selection.killer === PODARCHS || woodsDeath || wolfeDeath
     ? historical : entries.slice(0, entries.indexOf(e) + 1);
   let context = moduleContext(
     selection,
@@ -335,6 +336,7 @@ export function detailsForCause(
   return {
     ...details,
     attacker:
+      killer===PODARCHS && cause==='killer' ? (details.attacker==='Leader'?'Leader':'') :
       killer===ORGANISM&&(cause==="killer"||cause==="terror") ? (details.attacker===ORGANISM?"":details.attacker??"") :
       killer === RATCHET_LADY && cause === 'terror' ? details.attacker ?? '' :
       mortAttribution ? (mortDisguise?.attacker ?? "") :

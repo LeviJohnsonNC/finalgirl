@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo, useEffect, useRef, useLayoutEffect } fr
 import { AlertTriangle, Play, Loader2, RotateCcw } from 'lucide-react';
 import { CastingSlot } from '@/components/CastingSlot';
 import { CastingPicker } from '@/components/CastingPicker';
+import { eligibleStartingEvent } from '../../supabase/functions/_shared/play/podarchEvents';
 import { ScenarioDropdowns } from '@/components/ScenarioDropdowns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { GameIcon } from '@/components/GameIcon';
@@ -46,11 +47,14 @@ const CastingRoom = ({ onStartGame, onGoToArchive, initialSelection }: CastingRo
   const [selectedEvent, setSelectedEvent] = useState<string | null>(initialSelection?.startingEvent ?? null);
   const [birdsRequired, setBirdsRequired] = useState<BirdsTarget>(initialSelection?.birdsRequired ?? 2);
   const isBirds = selection.killer === BIRDS;
-  const incompatibleEvent = birdsEventIncompatible(selection.killer, selection.location, selectedEvent);
+  const incompatibleEvent = !eligibleStartingEvent(selection.killer,selection.location,selectedEvent) || birdsEventIncompatible(selection.killer, selection.location, selectedEvent);
   useEffect(() => {
     if (incompatibleEvent) setSelectedEvent(null);
   }, [incompatibleEvent]);
   const [selectedMission, setSelectedMission] = useState<string | null>(initialSelection?.mission ?? null);
+  useEffect(() => {
+    if (!eligibleStartingEvent(selection.killer,selection.location,selectedEvent)) setSelectedEvent(null);
+  }, [selection.killer,selection.location,selectedEvent]);
   const [previousLocation,setPreviousLocation] = useState(selection.location);
   useEffect(() => {
     if (selection.location === previousLocation) return;
