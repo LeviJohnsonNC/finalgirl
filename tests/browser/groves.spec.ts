@@ -88,6 +88,9 @@ for (const [killer, id] of [
       .getByRole("button", { name: "Record outcome", exact: true })
       .click();
     await expect(p.getByLabel("Current Divine Wrath")).toHaveText("8/10");
+    const guide = p.locator('.module-character[data-state="killed"]').filter({ hasText: "The Tour Guide" });
+    await expect(guide).toBeVisible();
+    await expect(guide.locator("img")).toHaveAttribute("src", /guide-killed.*\.webp$/);
     await undoLatestObservation(page);
     await expect(p.getByLabel("Current Divine Wrath")).toHaveText("2/10");
     await p

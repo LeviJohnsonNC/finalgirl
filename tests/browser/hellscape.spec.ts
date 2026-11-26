@@ -90,9 +90,16 @@ test("records a starting Victim and a later Event, retries and corrects after re
   await expect(wretch).toHaveAttribute("data-state", "saved");
   await wretch.getByRole("button", {name: "Mark Curious Wretch killed", exact: true}).click();
   await expect(wretch).toHaveAttribute("data-state", "killed");
+  await expect(wretch).toBeVisible();
+  await expect(wretch.locator("img")).toHaveAttribute("src", /wretch-killed.*\.webp$/);
+  await page.reload();
+  await resume(page);
+  await expect(wretch).toBeVisible();
+  await expect(wretch.locator("img")).toHaveAttribute("src", /wretch-killed.*\.webp$/);
   await openHistory(page);
   await page.getByRole("button", {name: /^Undo Curious Wretch: killed/}).click();
   await expect(wretch).toHaveAttribute("data-state", "saved");
+  await expect(wretch.locator("img")).toHaveAttribute("src", /wretch(?!-killed).*\.webp$/);
   expect(summarizePlay(await log(page)).finalHorrorLevel).toBe(before.finalHorrorLevel);
   expect((await log(page)).filter(event => event.moduleData?.changes["person.wretch"] === "saved")).toHaveLength(1);
   await page.getByRole("button", {name: "Finish game", exact: true}).click();
@@ -116,11 +123,13 @@ test("loaded artwork, actions and quiet disclosure fit the five viewport sizes",
     await page.setViewportSize({width, height});
     const images = module.locator("img");
     await expect(images).toHaveCount(4);
-    expect(new Set(await images.evaluateAll(async images => Promise.all(images.map(async element => {
-      const image = element as HTMLImageElement;
-      await image.decode();
-      return image.currentSrc;
-    })))).size).toBe(4);
+    await images.evaluateAll(images => {
+      for (const image of images) (image as HTMLImageElement).loading = "eager";
+    });
+    await expect.poll(() => images.evaluateAll(images => new Set(images
+      .map(element => element as HTMLImageElement)
+      .filter(image => image.complete && image.naturalWidth > 0)
+      .map(image => image.currentSrc)).size)).toBe(4);
     await expect(module.getByRole("button", {name: "Mark Sadistic Seeker killed"})).toBeVisible();
     expect(await module.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -129,6 +138,16 @@ test("loaded artwork, actions and quiet disclosure fit the five viewport sizes",
     await expect(module.getByRole("button", {name: "Hellscape rules", exact: true})).toHaveCount(0);
     await expect(module.locator(".module-active-reminder, .module-correction")).toHaveCount(0);
   }
+  for (const [name, id] of [["Masochistic Peon", "peon"], ["Curious Wretch", "wretch"], ["Sadistic Seeker", "seeker"]]) {
+    await module.getByRole("button", {name: `Mark ${name} killed`, exact: true}).click();
+    const portrait = module.locator('.hellscape-person[data-state="killed"]').filter({hasText: name});
+    await expect(portrait).toBeVisible();
+    const image = portrait.locator("img");
+    await expect(image).toHaveAttribute("src", new RegExp(`${id}-killed.*\\.webp$`));
+    await expect.poll(() => image.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+  }
+  await module.screenshot({path: info.outputPath("hellscape-killed-roster.png"), animations: "disabled",
+    style: ".app-footer, [data-sonner-toaster] { visibility: hidden; }"});
   await page.getByRole("button", {name: "Record one victim killed", exact: true}).click();
   await page.getByRole("button", {name: "Terror card", exact: true}).click();
   const death = page.getByRole("dialog");

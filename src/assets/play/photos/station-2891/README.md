@@ -24,7 +24,7 @@ Original generated stills. Each WebP is a responsive runtime source shared by th
 
 ## Special victims
 
-The Doctor, Chef and Comms Specialist each have present, saved and killed photographs. Saved views keep the person's identity at the airport, and killed views show personal effects and an empty room. Left play and aboard reuse the present photograph with separate state labels.
+The Doctor, Chef and Comms Specialist each have present, saved and killed photographs. Saved views keep the person's identity at the airport. Each killed photograph shows the person in a quiet aftermath. Left play and aboard reuse the present photograph with separate state labels.
 
 ## Allies and Terror crops
 

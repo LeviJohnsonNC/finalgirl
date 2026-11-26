@@ -210,15 +210,16 @@
   {
     "id": "girl-killed",
     "file": "src/assets/play/photos/sunnydaze/girl-killed.webp",
-    "source": "exec-67480898-cfbf-4351-8d5f-f4aafe9fc537.png",
-    "sourceSha256": "099f50967816c59486c229337f5fd27d2220713bcf163de40bceff5d24e7b951",
-    "nativeWidth": 1536,
-    "nativeHeight": 1024,
-    "width": 1120,
-    "height": 630,
-    "bytes": 140386,
-    "sha256": "6596a6680c004aa3570cee441e4773749b78e766cf875cd9da5c1c11df95e1fa",
-    "prompt": "One wide 3:2 candid 1980s consumer 35mm horror film still for a fictional game. Match the clothing and location of the left-hand reference. mall planter aftermath, denim jacket and dropped belongings at a knocked-over bench, scattered glass and disrupted storefront, no person visible. Scene should imply fatal aftermath through stillness, disturbed environment and naturalistic light. No visible blood, injury, gore, action, collage or lettering. Center subject for a wide card crop."
+    "source": "exec-42225d6e-ef50-4851-9049-e61f0f860d88.png",
+    "sourceSha256": "c17c8cc67d4364deb51e62887b4c332da9b312727d9f3a26f328b910e36b1f2a",
+    "nativeWidth": 2172,
+    "nativeHeight": 724,
+    "width": 704,
+    "height": 396,
+    "bytes": 35276,
+    "sha256": "2785de16a7fb6f126d2a563c0ee58b0ce188ac2b5e4f7494fd6e1b87b3d1e288",
+    "prompt": "Candid non-graphic 1980s-style aftermath portrait. Same woman and jacket, motionless beside the indoor planter.",
+    "crop": "Right cell of the three-column Carnival and Sunnydaze portrait sheet"
   },
   {
     "id": "chopper-riding",

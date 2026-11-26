@@ -17,7 +17,7 @@ The [Hell to Pay rules](https://www.rulespal.com/final-girl-hell-to-pay/rulebook
 ## Interaction and artwork
 
 - The physical table holds the moving maze, dice, tokens, Peon Health and card effects. The compact illustrated Rules guide shows matching-symbol flips and different-symbol swaps, including where pieces go. Hellshift has its own Rules table.
-- When a Special Victim Event takes effect on the physical board, record the role once in Play. A named starting Event is offered through the same confirmation as a later draw. Record Saved, Killed or Left play directly on the role. Terminal cases move to a collapsible history where outcomes can be corrected. Character effects and the maze guide are available in the main Rules view.
+- When a Special Victim Event takes effect on the physical board, record the role once in Play. A named starting Event is offered through the same confirmation as a later draw. Record Saved, Killed or Left play directly on the role. Killed victims stay in the roster with their own portraits. Saved and Left play cases use the collapsible history. Character effects and the maze guide are available in the main Rules view.
 - Saved-game recovery uses immutable, single-role observations and the shared character controls and retry path. Hero and portrait art is [documented with the shipped assets](../../src/assets/play/photos/hellscape/README.md). Artwork and static Rules are independent of the observed scene.
 - Named locations, applicable cards and roles are scoped to the location. Scenario and Event lookup, Rules search, story prompts and Gruesome Death share the catalog. Ending context includes confirmed outcomes, and the Hellscape portion of a death snapshot is reconstructed as of the death even after later Undo. Games with Birds use the core redraw rule for competing Special Victim meeples.
 
@@ -29,3 +29,4 @@ The [Hell to Pay rules](https://www.rulespal.com/final-girl-hell-to-pay/rulebook
 - Local checks: `npm run check` (1,127 application and 158 Edge tests), `npm run check:assets`, and `npm run build`. Browser tests cover both desktop and phone, with local mocks for signed-in generation.
 - The release needs the rebuilt frontend and Edge bundles that consume shared Play validation and death/narration facts. No schema migration or private portrait reference upload is required.
 - Production deploy and signed-in live generation are separate post-merge smoke checks.
+- The killed-portrait follow-up verifies all three images, visibility after reload and portrait restoration on Undo. This follow-up requires a frontend build. [Desktop and phone captures](../verification/special-victims/)

@@ -20,10 +20,9 @@ not shipped. Art is thematic interpretation, never evidence for a rule or placem
   Generated source `exec-aeb19f70-cee4-4a5b-8774-6d69b5afe4a6.png`.
   Columns: Tour Guide, Uber Tourist, Holy Man. Rows: present/in danger,
   saved/relieved, departed/empty aftermath. Unknown uses the first-row motif
-  with explicit HTML Not recorded. Killed/removed/away use the third row with
-  distinct HTML status; aftermath does not claim a cause of death. The people
-  are fictional adults; their clothes/faces/gender are illustrative choices,
-  not additional canonical character facts. No corpses are used.
+  with explicit HTML Not recorded. Removed and away use the third row.
+  Dedicated `*-killed.webp` stills show the same adults in the Killed state.
+  Clothing and faces are illustrative choices.
 
 Both generated square sources have equal grid cells and were normalized to the
 specified square atlas resolution; no identity order changes during sorting.

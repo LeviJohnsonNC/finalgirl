@@ -25,6 +25,9 @@ import {
 import banner from "@/assets/play/maple/banner.webp";
 import scenes from "@/assets/play/maple/scenes.webp";
 import people from "@/assets/play/maple/people.webp";
+import boyfriendKilled from "@/assets/play/maple/boyfriend-killed.webp";
+import smalleyOneKilled from "@/assets/play/maple/smalley-1-killed.webp";
+import smalleyTwoKilled from "@/assets/play/maple/smalley-2-killed.webp";
 import "@/styles/play-maple.css";
 
 const scene = (cell: number): ModuleArt => ({
@@ -38,19 +41,24 @@ const scene = (cell: number): ModuleArt => ({
     cellHeight: 362,
   },
 });
-// Portrait atlas dimensions are normalized once when installed; columns are identities,
-// rows are in-play / saved / empty aftermath. Never sort before choosing a crop.
-const portrait = (column: number, value?: string): ModuleArt => ({
-  src: people,
-  atlas: {
-    width: 1536,
-    height: 1536,
-    x: column * 512,
-    y: (value === "saved" ? 1 : value === "killed" ? 2 : 0) * 512,
-    cellWidth: 512,
-    cellHeight: 512,
-  },
-});
+// Artwork follows the source order of MAPLE_PEOPLE.
+const killedPortraits = [boyfriendKilled, smalleyOneKilled, smalleyTwoKilled];
+function portrait(column: number, value?: string): ModuleArt {
+  if (value === "killed") {
+    return { src: killedPortraits[column], fit: "slice", position: "center 38%" };
+  }
+  return {
+    src: people,
+    atlas: {
+      width: 1536,
+      height: 1536,
+      x: column * 512,
+      y: value === "saved" ? 512 : 0,
+      cellWidth: 512,
+      cellHeight: 512,
+    },
+  };
+}
 const effect = (id: string) => MAPLE_EVENTS.find((e) => e.id === id)!.effect;
 const item = (id: string) => MAPLE_ITEMS.find((e) => e.id === id)!.effect;
 const houseName = (id: unknown) =>

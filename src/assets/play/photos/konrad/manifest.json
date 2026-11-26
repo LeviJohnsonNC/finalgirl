@@ -448,13 +448,13 @@
   {
     "id": "jonas-killed",
     "file": "src/assets/play/photos/konrad/jonas-killed.webp",
-    "source": "exec-404c0247-cb85-4dbb-9653-03de6bd67d2a.png",
+    "source": "exec-c053f302-3e25-414c-b650-2621502d08a3.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
     "width": 1280,
     "height": 720,
-    "bytes": 98618,
-    "sha256": "42ee019077d11e8fd1bd3c3b7486784eace635fce2061197b2d5ba9de672227d",
+    "bytes": 87598,
+    "sha256": "5b7077f7b3d98b32e93f74665f95178be371b57448875ec73a0a3db04ec146f7",
     "quality": 84
   },
   {
@@ -472,13 +472,13 @@
   {
     "id": "orphan-killed",
     "file": "src/assets/play/photos/konrad/orphan-killed.webp",
-    "source": "exec-95b9c055-99a9-4a78-ad71-93d0df02545c.png",
+    "source": "exec-8068b5dd-29ef-403e-a506-c9bdda857304.png",
     "nativeWidth": 1672,
     "nativeHeight": 941,
     "width": 1280,
     "height": 720,
-    "bytes": 120494,
-    "sha256": "4194ea3af49b4a8534134fc6914a0ccba0c00cba3b26398b3ee121f67ce8888b",
+    "bytes": 121670,
+    "sha256": "0369d4fe0e45ce487bafeab5b25ca626a0dbcec8e8ab262170fb76298aa88853",
     "quality": 84
   },
   {
