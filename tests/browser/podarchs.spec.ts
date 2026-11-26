@@ -92,8 +92,15 @@ test('Collection and mixed-cast Rules show the photographic references without a
   await expect(dialog.getByRole('tabpanel')).toContainText('Evolution');
   const stills = dialog.locator('.podarch-rule-stills');
   await expect(stills.locator('img')).toHaveCount(8);
-  await stills.last().scrollIntoViewIfNeeded();
-  await stills.last().locator('img').evaluateAll(images => Promise.all(images.map(image => (image as HTMLImageElement).decode())));
-  await stills.last().screenshot({path:info.outputPath('podarch-terror-rules.jpg')});
+  const gallery = stills.last();
+  const photos = gallery.locator('img');
+  await photos.evaluateAll(images => {
+    for (const image of images) (image as HTMLImageElement).loading = 'eager';
+  });
+  await expect.poll(() => photos.evaluateAll(images => images.every(element => {
+    const image = element as HTMLImageElement;
+    return image.complete && image.naturalWidth > 0;
+  }))).toBe(true);
+  await gallery.screenshot({path:info.outputPath('podarch-terror-rules.jpg')});
   expect(await readLog()).toEqual(before);
 });
