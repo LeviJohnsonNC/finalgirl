@@ -70,6 +70,7 @@ test('Podarch moments, hostile transition, paired Finale and persistence', async
 
 test('Collection and mixed-cast Rules show the photographic references without adding observations', async ({page, archive}, info) => {
   archive.films = ['s4-terror-from-beyond','s1-camp-happy-trails'];
+  archive.aiCastingArt = true;
   await archive.install(page, {draft:{...activeGame, selection:{...activeGame.selection, killer:'The Podarchs', finalGirl:'Laurie', location:'Camp Happy Trails'}, playMode:true, playEvents:[]}});
   await page.goto('/');
   await page.getByRole('button',{name:'Collection',exact:true}).click();
@@ -77,6 +78,8 @@ test('Collection and mixed-cast Rules show the photographic references without a
   await expect(card).toContainText('Your choice');
   await expect(card.getByRole('button',{name:'View Joan info'})).toBeVisible();
   await card.scrollIntoViewIfNeeded();
+  const cover = card.getByRole('img',{name:'Terror From Beyond box art',exact:true});
+  await expect.poll(() => cover.evaluate((img: HTMLImageElement) => img.naturalHeight)).toBe(509);
   await card.screenshot({path:info.outputPath('podarch-collection.jpg')});
   await page.locator('footer').getByRole('button',{name:'Back',exact:true}).click();
   await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
