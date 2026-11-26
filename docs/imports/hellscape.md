@@ -17,7 +17,7 @@ The [Hell to Pay rules](https://www.rulespal.com/final-girl-hell-to-pay/rulebook
 ## Interaction and artwork
 
 - The physical table holds the moving maze, dice, tokens, Peon Health and card effects. The compact illustrated Rules guide shows matching-symbol flips and different-symbol swaps, including where pieces go. Hellshift has its own Rules table.
-- When a Special Victim Event takes effect on the physical board, record the role once in Play. A named starting Event is offered through the same confirmation as a later draw. Record Saved, Killed or Left play directly on the role. Killed victims stay in the roster with their own portraits. Saved and Left play cases use the collapsible history. Character effects and the maze guide are available in the main Rules view.
+- When a Special Victim Event takes effect on the physical board, record the role once in Play. A named starting Event is offered through the same confirmation as a later draw. Record Saved, Killed or Left play directly on the role. Saved and Killed victims stay in the roster with their own portraits. Left play cases use the collapsible history. Character effects and the maze guide are available in the main Rules view.
 - Saved-game recovery uses immutable, single-role observations and the shared character controls and retry path. Hero and portrait art is [documented with the shipped assets](../../src/assets/play/photos/hellscape/README.md). Artwork and static Rules are independent of the observed scene.
 - Named locations, applicable cards and roles are scoped to the location. Scenario and Event lookup, Rules search, story prompts and Gruesome Death share the catalog. Ending context includes confirmed outcomes, and the Hellscape portion of a death snapshot is reconstructed as of the death even after later Undo. Games with Birds use the core redraw rule for competing Special Victim meeples.
 
@@ -30,3 +30,5 @@ The [Hell to Pay rules](https://www.rulespal.com/final-girl-hell-to-pay/rulebook
 - The release needs the rebuilt frontend and Edge bundles that consume shared Play validation and death/narration facts. No schema migration or private portrait reference upload is required.
 - Production deploy and signed-in live generation are separate post-merge smoke checks.
 - The killed-portrait follow-up verifies all three images, visibility after reload and portrait restoration on Undo. This follow-up requires a frontend build. [Desktop and phone captures](../verification/special-victims/)
+
+The Saved-portrait follow-up adds one 16:9 photo per role and keeps Saved cases visible. Browser checks cover every Saved and Killed image, reload and Undo. [Saved desktop capture](../verification/special-victims/saved-desktop.webp) · [Saved phone capture](../verification/special-victims/saved-phone.webp)

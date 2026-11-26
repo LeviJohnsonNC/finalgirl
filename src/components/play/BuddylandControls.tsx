@@ -316,13 +316,10 @@ export function BuddylandControls({
                         "../../assets/play/roster/" +
                           v.id +
                           "-" +
-                          (state === "killed"
-                            ? "killed"
-                            : state === "active" || state === "saved"
-                              ? "active"
-                              : "off") +
+                          (state === "away" ? "off" : state) +
                           ".webp"
                       ],
+                      position: state === "saved" ? "center 22%" : undefined,
                     }}
                     states={[
                       { value: "on-board", label: "In play" },

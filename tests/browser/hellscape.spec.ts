@@ -85,9 +85,10 @@ test("records a starting Victim and a later Event, retries and corrects after re
   expect([after.saved, after.killed, after.finalHorrorLevel]).toEqual([before.saved, before.killed, before.finalHorrorLevel]);
   await page.reload();
   await resume(page);
-  await module.getByText("Recorded outcomes", {exact: true}).click();
   const wretch = module.locator(".hellscape-person").filter({hasText: "Curious Wretch"});
+  await expect(wretch).toBeVisible();
   await expect(wretch).toHaveAttribute("data-state", "saved");
+  await expect(wretch.locator("img")).toHaveAttribute("src", /wretch-saved.*\.webp$/);
   await wretch.getByRole("button", {name: "Mark Curious Wretch killed", exact: true}).click();
   await expect(wretch).toHaveAttribute("data-state", "killed");
   await expect(wretch).toBeVisible();
@@ -99,7 +100,7 @@ test("records a starting Victim and a later Event, retries and corrects after re
   await openHistory(page);
   await page.getByRole("button", {name: /^Undo Curious Wretch: killed/}).click();
   await expect(wretch).toHaveAttribute("data-state", "saved");
-  await expect(wretch.locator("img")).toHaveAttribute("src", /wretch(?!-killed).*\.webp$/);
+  await expect(wretch.locator("img")).toHaveAttribute("src", /wretch-saved.*\.webp$/);
   expect(summarizePlay(await log(page)).finalHorrorLevel).toBe(before.finalHorrorLevel);
   expect((await log(page)).filter(event => event.moduleData?.changes["person.wretch"] === "saved")).toHaveLength(1);
   await page.getByRole("button", {name: "Finish game", exact: true}).click();
@@ -138,16 +139,18 @@ test("loaded artwork, actions and quiet disclosure fit the five viewport sizes",
     await expect(module.getByRole("button", {name: "Hellscape rules", exact: true})).toHaveCount(0);
     await expect(module.locator(".module-active-reminder, .module-correction")).toHaveCount(0);
   }
-  for (const [name, id] of [["Masochistic Peon", "peon"], ["Curious Wretch", "wretch"], ["Sadistic Seeker", "seeker"]]) {
-    await module.getByRole("button", {name: `Mark ${name} killed`, exact: true}).click();
-    const portrait = module.locator('.hellscape-person[data-state="killed"]').filter({hasText: name});
-    await expect(portrait).toBeVisible();
-    const image = portrait.locator("img");
-    await expect(image).toHaveAttribute("src", new RegExp(`${id}-killed.*\\.webp$`));
-    await expect.poll(() => image.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+  for (const outcome of ["saved", "killed"]) {
+    for (const [name, id] of [["Masochistic Peon", "peon"], ["Curious Wretch", "wretch"], ["Sadistic Seeker", "seeker"]]) {
+      await module.getByRole("button", {name: `Mark ${name} ${outcome}`, exact: true}).click();
+      const portrait = module.locator(`.hellscape-person[data-state="${outcome}"]`).filter({hasText: name});
+      await expect(portrait).toBeVisible();
+      const image = portrait.locator("img");
+      await expect(image).toHaveAttribute("src", new RegExp(`${id}-${outcome}.*\\.webp$`));
+      await expect.poll(() => image.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+    }
+    await module.screenshot({path: info.outputPath(`hellscape-${outcome}-roster.png`), animations: "disabled",
+      style: ".app-footer, [data-sonner-toaster] { visibility: hidden; }"});
   }
-  await module.screenshot({path: info.outputPath("hellscape-killed-roster.png"), animations: "disabled",
-    style: ".app-footer, [data-sonner-toaster] { visibility: hidden; }"});
   await page.getByRole("button", {name: "Record one victim killed", exact: true}).click();
   await page.getByRole("button", {name: "Terror card", exact: true}).click();
   const death = page.getByRole("dialog");

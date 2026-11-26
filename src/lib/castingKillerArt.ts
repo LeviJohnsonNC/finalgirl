@@ -10,6 +10,7 @@ import slayer from '@/assets/casting-killers/slayer.webp';
 import eyeless from '@/assets/casting-killers/the-eyeless.webp';
 import intruders from '@/assets/casting-killers/the-intruders.webp';
 import organism from '@/assets/casting-killers/the-organism.webp';
+import podarchs from '@/assets/casting-killers/the-podarchs.webp';
 import zombies from '@/assets/casting-killers/zombies.webp';
 
 const portraitByKiller: Readonly<Record<string, string>> = {
@@ -23,6 +24,7 @@ const portraitByKiller: Readonly<Record<string, string>> = {
   'The Eyeless': eyeless,
   'The Intruders': intruders,
   'The Organism': organism,
+  'The Podarchs': podarchs,
   Zombies: zombies,
 };
 

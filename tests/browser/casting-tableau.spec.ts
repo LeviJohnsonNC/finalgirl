@@ -31,3 +31,30 @@ test('reference collage review', async ({ page, archive }, info) => {
   }
   expect(archive.calls).toEqual([]);
 });
+
+test('the Podarchs use a portrait composition in the killer picker and casting slot', async ({ page, archive }, info) => {
+  archive.films = ['s4-terror-from-beyond', 's1-camp-happy-trails'];
+  await archive.install(page);
+  const widths = info.project.name === 'mobile' ? [320, 390] : [1280, 1440];
+  await page.goto('/');
+  await page.getByRole('button', { name: 'START THE TAPE', exact: true }).click();
+  await page.getByRole('button', { name: 'Choose', exact: true }).first().click();
+  const picker = page.getByRole('dialog');
+  const option = picker.getByRole('button', { name: /The Podarchs/ });
+  for (const width of widths) {
+    await page.setViewportSize({ width, height: width < 400 ? 640 : 800 });
+    const image = option.getByRole('img', { name: 'The Podarchs', exact: true });
+    await expect.poll(() => image.evaluate((img: HTMLImageElement) =>
+      [img.naturalWidth, img.naturalHeight])).toEqual([768, 1152]);
+    await option.screenshot({ path: info.outputPath(`podarchs-picker-${width}.png`) });
+  }
+  await option.click();
+  const selected = page.locator('.casting-photo-image[alt="The Podarchs"]');
+  await expect.poll(() => selected.evaluate((img: HTMLImageElement) =>
+    [img.naturalWidth, img.naturalHeight])).toEqual([768, 1152]);
+  await selected.screenshot({ path: info.outputPath('podarchs-slot.png') });
+  await page.getByRole('button', { name: 'View The Podarchs info', exact: true }).click();
+  const dossier = page.getByRole('dialog').getByRole('img', { name: 'The Podarchs', exact: true });
+  await expect.poll(() => dossier.evaluate((img: HTMLImageElement) =>
+    [img.naturalWidth, img.naturalHeight])).toEqual([768, 1152]);
+});

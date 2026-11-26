@@ -20,10 +20,16 @@ import art18 from '@/assets/play/banners/creech.webp';
 import orangeHunterKilled from '@/assets/play/photos/creech/hunter-orange-killed.webp';
 import blueHunterKilled from '@/assets/play/photos/creech/hunter-blue-killed.webp';
 import whiteHunterKilled from '@/assets/play/photos/creech/hunter-white-killed.webp';
+import orangeHunterSaved from '@/assets/play/photos/creech/hunter-orange-saved.webp';
+import blueHunterSaved from '@/assets/play/photos/creech/hunter-blue-saved.webp';
+import whiteHunterSaved from '@/assets/play/photos/creech/hunter-white-saved.webp';
 import type {ModuleArt} from './ModuleArtwork';
 export const creechArt:Record<string,ModuleArt>={
   'hunter-orange-killed': {src: orangeHunterKilled, fit: 'slice'},
   'hunter-blue-killed': {src: blueHunterKilled, fit: 'slice'},
   'hunter-white-killed': {src: whiteHunterKilled, fit: 'slice'},
+  'hunter-orange-saved': {src: orangeHunterSaved, fit: 'slice'},
+  'hunter-blue-saved': {src: blueHunterSaved, fit: 'slice'},
+  'hunter-white-saved': {src: whiteHunterSaved, fit: 'slice'},
 'hunter-orange':{src:art0,fit:'slice'},'hunter-blue':{src:art1,fit:'slice'},'hunter-white':{src:art2,fit:'slice'},'helicopter':{src:art3,fit:'slice'},'liquid-courage':{src:art4,fit:'slice'},'frozen-in-fear':{src:art5,fit:'slice'},'lights-out':{src:art6,fit:'slice'},'clingy-victims':{src:art7,fit:'slice'},'hunters':{src:art8,fit:'slice'},'skull':{src:art9,fit:'slice'},'padlock':{src:art10,fit:'slice'},'restriction':{src:art11,fit:'slice'},'ladder-usable':{src:art12,fit:'slice'},'ladder-broken':{src:art13,fit:'slice'},'rope-unplaced':{src:art14,fit:'slice'},'rope-left-drop':{src:art15,fit:'slice'},'rope-upper-window':{src:art16,fit:'slice'},'rope-lower-window':{src:art17,fit:'slice'},'banner':{src:art18,fit:'slice'}
 };

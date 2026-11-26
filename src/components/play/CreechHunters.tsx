@@ -44,12 +44,12 @@ export function CreechHunters({ state, onEvent, onGroup, onOutcome, onCorrect }:
           {roster.map(person => {
             const value = state[`hunter.${person.id}`];
             const leftPlay = value === 'left-play';
-            const artwork = value === 'killed' ? `hunter-${person.id}-killed` : `hunter-${person.id}`;
+            const outcome = value === 'saved' || value === 'killed' ? `-${value}` : '';
             return <IllustratedTile
               key={person.id}
               id={`${id}-${person.id}`}
               className="creech-hunter-portrait"
-              art={creechArt[artwork]}
+              art={creechArt[`hunter-${person.id}${outcome}`]}
               title={person.id[0].toUpperCase() + person.id.slice(1)}
               status={states.find(state => state.value === value)?.label ?? 'Not recorded'}
               data-state={value}

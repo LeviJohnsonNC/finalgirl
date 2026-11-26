@@ -91,7 +91,11 @@ test('legacy Rope Ladder stays unknown until clicked, and hunter disclosure does
  await expect(panel.getByRole('group',{name:'Orange Ghost Hunter actions',exact:true})).toHaveCount(0);await expect(panel.getByRole('group',{name:'Blue Ghost Hunter actions',exact:true})).toBeVisible();
  await panel.getByRole('button',{name:'View Ghost Hunters',exact:true}).click();await panel.getByRole('button',{name:'View Ghost Hunters',exact:true}).click();
  expect(await page.evaluate(k=>localStorage.getItem(k),key)).toBe(before);
- await panel.getByRole('button',{name:'Mark Blue Ghost Hunter saved',exact:true}).click();await expect(panel.getByRole('button',{name:'View Blue Ghost Hunter',exact:true})).toContainText('Saved');
+ await panel.getByRole('button',{name:'Mark Blue Ghost Hunter saved',exact:true}).click();
+ const bluePortrait=panel.getByRole('button',{name:'View Blue Ghost Hunter',exact:true});
+ await expect(bluePortrait).toBeVisible();
+ await expect(bluePortrait).toContainText('Saved');
+ await expect(bluePortrait.locator('img')).toHaveAttribute('src',/hunter-blue-saved.*\.webp$/);
  await expect(page.getByRole('button',{name:'Save one victim',exact:true})).toContainText('2');await expect(page.getByRole('button',{name:'Record one victim killed',exact:true})).toContainText('3');
  await undoLatestObservation(page);await expect(panel.getByRole('button',{name:'View Blue Ghost Hunter',exact:true})).toContainText('In play');
 });

@@ -37,3 +37,14 @@ Each listed state has a dedicated non-graphic photograph based on the location's
 | USS Konrad, Station 2891 and Storybook Woods | Jonas, Orphan Girl, Chef and Hansel | [Konrad](konrad/manifest.json) · [Station](station-2891/manifest.json) · [Woods](storybook-woods/manifest.json) |
 
 Falconwood, MegaBGCon, Wolfe Asylum, Shady Acres, Marrek Warehouse and Wingard Cottage already show a dedicated photograph for each recorded killed person.
+
+## Special Victim Saved portraits
+
+The Saved portraits show the same actors relieved after escape. Hellscape keeps these photographs in its main roster. Existing art in the other 13 locations already depicts a distinct Saved state.
+
+| Location | Saved photographs added in source order | Source |
+| --- | --- | --- |
+| Hellscape | Masochistic Peon, Curious Wretch, Sadistic Seeker | `exec-a9431d3d-96cc-4438-bd84-c91d113eab92.png` |
+| Creech Manor | White, Blue and Orange Ghost Hunters | `exec-a623af43-f28a-46d5-891d-4c9e9e5db9ac.png` |
+| Carnival of Blood | Sibling, Fiancé | `exec-91e40169-63d2-4ece-97a9-2f6ca661e944.png` |
+| Buddyland | Nick the Janitor, Birthday Girl, Pizza Guy | `exec-a4c50346-ef09-4f88-871d-f21cbda9c8e3.png` |

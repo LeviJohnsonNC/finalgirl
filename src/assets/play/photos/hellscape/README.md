@@ -9,4 +9,4 @@ Original generated production stills in the app’s candid 1980s photographic st
 | `wretch.webp` | A woman in a washed blue jacket watching from the edge of a passage. | 748 × 499 |
 | `seeker.webp` | A man in a rust-orange jacket lit by a light down the corridor. | 748 × 499 |
 
-Each role has an in-play photograph and a dedicated killed photograph. Killed keeps the portrait in the roster with the same 16:9 frame. Undo restores the prior recorded state and portrait.
+Each role has dedicated in-play, Saved and Killed photographs. The roster keeps Saved and Killed portraits in the same 16:9 frame. Undo restores the prior recorded state and portrait.

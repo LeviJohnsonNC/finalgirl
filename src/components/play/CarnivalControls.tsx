@@ -26,6 +26,8 @@ import itemArt from "@/assets/play/carnival/item-traps.webp";
 import peopleArt from "@/assets/play/carnival/companions.webp";
 import siblingKilled from "@/assets/play/carnival/sibling-killed.webp";
 import fianceKilled from "@/assets/play/carnival/fiance-killed.webp";
+import siblingSaved from "@/assets/play/carnival/sibling-saved.webp";
+import fianceSaved from "@/assets/play/carnival/fiance-saved.webp";
 import eventArt from "@/assets/play/carnival/events.webp";
 import "@/styles/play-carnival.css";
 
@@ -45,9 +47,15 @@ const atlas = (
     cellHeight: 1024 / rows - 8,
   },
 });
-const killedArtwork: Record<string, ModuleArt> = {
-  "person.sibling": { src: siblingKilled, fit: "slice" },
-  "person.fiance": { src: fianceKilled, fit: "slice" },
+const outcomeArtwork: Record<"saved" | "killed", Record<string, ModuleArt>> = {
+  saved: {
+    "person.sibling": { src: siblingSaved, fit: "slice" },
+    "person.fiance": { src: fianceSaved, fit: "slice" },
+  },
+  killed: {
+    "person.sibling": { src: siblingKilled, fit: "slice" },
+    "person.fiance": { src: fianceKilled, fit: "slice" },
+  },
 };
 const eventArtwork: Record<string, ModuleArt> = {
   "animal-panic": atlas(eventArt, 1, 2, 2),
@@ -294,6 +302,9 @@ export function CarnivalControls({
               present = ["in-play", "with-you", "available"].includes(
                 String(value),
               );
+            const outcomeArt = value === "saved" || value === "killed"
+              ? outcomeArtwork[value][actor.key]
+              : undefined;
             return (
               <CharacterControl
                 key={actor.key}
@@ -305,7 +316,7 @@ export function CarnivalControls({
                   label: statuses[value],
                 }))}
                 outcomes={actor.values.slice(1)}
-                art={(value === "killed" && killedArtwork[actor.key]) || atlas(peopleArt, actor.index)}
+                art={outcomeArt ?? atlas(peopleArt, actor.index)}
                 tileClassName="carnival-actor-tile"
                 help={actor.help}
                 showRules={!actor.key.startsWith("person.")}

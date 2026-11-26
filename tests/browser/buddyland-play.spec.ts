@@ -24,6 +24,31 @@ function portrait(page: import("@playwright/test").Page, name: string) {
     }),
   });
 }
+
+test("Buddyland keeps every Saved Special Victim on their own portrait after reload", async ({ page, archive }, info) => {
+  await archive.install(page, { draft: { ...activeGame, selection, playMode: true } });
+  await open(page);
+  for (const name of victims) {
+    await portrait(page, name).click();
+    await page.getByRole("button", { name: `Mark ${name} saved`, exact: true }).click();
+  }
+  await page.reload();
+  await open(page);
+  for (const [name, id] of [["Birthday Girl", "birthday-girl"], ["Nick the Janitor", "nick"], ["Pizza Guy", "pizza-guy"]]) {
+    const tile = portrait(page, name);
+    await expect(tile).toBeVisible();
+    await expect(tile).toHaveAttribute("data-state", "saved");
+    const image = tile.locator("img");
+    await expect(image).toHaveAttribute("src", new RegExp(`${id}-saved.*\\.webp$`));
+    await image.scrollIntoViewIfNeeded();
+    await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+  }
+  await page.getByRole("region", { name: "Buddyland tracking", exact: true }).screenshot({
+    path: info.outputPath("buddyland-saved-roster.png"),
+    animations: "disabled",
+    style: ".app-footer { visibility: hidden; }",
+  });
+});
 async function reveal(
   page: import("@playwright/test").Page,
   kind: "Dark Power" | "Finale",

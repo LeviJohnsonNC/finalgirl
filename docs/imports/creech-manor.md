@@ -153,4 +153,4 @@ Levi's four screenshots (6:36:16, 6:36:31, 6:37:31 and 6:38:50 PM) requested a c
 
 Verification: updated hunter outcome/atomic Bloodlust, actual Undo, quiet disclosure, mixed-owner routes, legacy unknown state, keyboard cycle, rejected local writes/retry/reload and no casualty inference journeys. The initial focused run passed all 64 Creech/Poltergeist/shared-polish desktop/phone journeys. Actual loaded controls/banner/trackers were inspected at 1280×640, 1366×768, 1440×900, 390×844 and 320×568. Final build/unit/edge/asset checks and final-head Reliability CI are recorded in the delivery PR; production release is separate.
 
-The killed-portrait follow-up gives all three Ghost Hunters distinct photographs. Their cards stay visible when the Event ends. Browser checks cover the portrait swap, a recorded Bloodlust change, reload and Undo. [Desktop and phone captures](../verification/special-victims/)
+All three Ghost Hunters have distinct Saved and Killed photographs. Their cards stay visible when the Event ends. Browser checks cover the portrait swap, a recorded Bloodlust change, reload and Undo. [Desktop and phone captures](../verification/special-victims/)

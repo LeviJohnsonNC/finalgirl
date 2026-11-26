@@ -287,7 +287,7 @@
   margin-top: 12px;
 }
 
-.play-module-content .module-character[data-state="killed"] > .module-control-tile {
+.play-module-content .module-character:is([data-state="saved"], [data-state="killed"]) > .module-control-tile {
   opacity: 1;
 }
 .module-character[data-state="lost"] .module-control-tile > .play-module-art,

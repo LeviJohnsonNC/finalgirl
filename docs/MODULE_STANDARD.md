@@ -35,7 +35,7 @@ Use [shared controls](module-controls.md) rather than reimplementing these patte
 
 For each proposed tracker or input, identify the decision it helps the player make. Track the smallest useful observation: presence can be known while endpoints, location or token detail remain unrecorded. Keep physical-board details in Rules unless a tracked consequence genuinely needs them. Prefer an existing picture toggle, clickable task/checkpoint, use counter or quiet action over a second correction form. Entry actions should carry their intent directly; do not ask the player to repeat it in a dropdown. Preserve necessary linked choices and safe correction/Undo semantics.
 
-New special-person controls should keep Saved/Killed/Left play outcomes correctable without repeating effects. Left play restores through the portrait. Saved/Killed require explicit correction. Inactive and left portraits are grey, and present portraits use color. Use distinct, identity-consistent Saved photos where available. Named killed Victims stay visible in their roster with a dedicated full-color outcome photo and a Killed label. Do not add a character or outcome unsupported by the source.
+New special-person controls should keep Saved/Killed/Left play outcomes correctable without repeating effects. Left play restores through the portrait. Saved/Killed require explicit correction. Inactive and left portraits are grey, and present portraits use color. Named Special Victims who are Saved or Killed stay visible in their roster with a dedicated full-color photograph and an explicit outcome label. Do not add a character or outcome unsupported by the source.
 
 ## Composition and photography
 
