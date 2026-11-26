@@ -52,13 +52,17 @@ Joan has five Health on both faces. Her four rescue rewards are move one space, 
 
 ## Artwork and verification
 
-The Play catalog includes 19 photographic scenes and eight small chooser derivatives. Collection uses the owner-supplied box photo with either art preference. Collection and casting also have the film scene, cast portraits and shelf thumbnails. Joan’s Health strip has two additional expressions from the same photographic session. [Art ledger](../../src/assets/play/photos/podarchs/README.md) · [Publisher listing](https://vanrydergames.com/products/final-girl-terror-from-beyond-vignette)
+The Play catalog includes 26 photographic scenes and eight small chooser derivatives. Collection uses the owner-supplied box photo with either art preference. Collection and casting also have the film scene, cast portraits and shelf thumbnails. Joan’s Health strip has two additional expressions from the same photographic session. [Art ledger](../../src/assets/play/photos/podarchs/README.md) · [Publisher listing](https://vanrydergames.com/products/final-girl-terror-from-beyond-vignette)
 
 The focused Playwright journeys cover opening Joan’s dossier, reading the rules in a mixed cast without writing a log, optional assimilation, the Hostile threshold, both Minors, a rescue, card selection, named Finale correction, Greenhouse Health and escape, Countdown and Leader Final Health, and reload. The first screenshot review showed oversized objective hearts and an oversized assimilation photograph. Both now use bounded sizes. Browser services are mocked. Unit coverage includes sparse and named Finish choices, Undo, owner validation, quantities and source-specific Event compatibility.
 
 The final local verification passed the production build, the asset checker, 1,137 application tests and 159 Edge tests. All four Podarch browser cases passed on the laptop and phone projects. The existing Collection suite also passed on both projects. These are Chromium checks with mocked services.
 
 [Collection card](../verification/podarchs/collection.webp) · [Joan’s dossier](../verification/podarchs/joan.webp) · [Laptop Play](../verification/podarchs/play-laptop.webp) · [Phone Play](../verification/podarchs/play-phone.webp) · [Terror gallery](../verification/podarchs/terror-rules.webp)
+
+The Play follow-up uses the owner’s banner, Sense of Urgency and Finale screenshots as crop and layout references. The banner keeps the neighbor’s face in view, and the urgency tile frames the runners. Both reveal entry points show the named Finale and its controls on one card, with **Clear card name** underneath. The Leader’s hearts sit on **You’re Next!**. **Born Again** switches among seven photographs of a mechanical timer showing six through zero. The timer is artwork for the manually set count. A successful assimilation write shows a confirmation, and a failed write leaves the observation available to retry. The browser test exercises both cases and checks that neither produces a death, rescue or Bloodlust increase.
+
+Chromium verification covers the populated panel at 1280, 1366, 1440, 320 and 390 pixels wide. Both device projects check the two reveal entry points, all seven countdown photos, the order of the correction action and the Leader’s Final Health. [Play crops](../verification/podarchs/play-crops.webp) · [Seven countdown stages](../verification/podarchs/countdown-stages.webp)
 
 ## Release dependencies
 
