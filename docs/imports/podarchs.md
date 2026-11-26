@@ -52,7 +52,7 @@ Joan has five Health on both faces. Her four rescue rewards are move one space, 
 
 ## Artwork and verification
 
-The Play catalog includes 19 photographic scenes and eight small chooser derivatives. Collection defaults to the owner-supplied box photo. The illustrated cover is available with the alternate art preference. Collection and casting also have the film scene, cast portraits and shelf thumbnails. Joan’s Health strip has two additional expressions from the same photographic session. [Art ledger](../../src/assets/play/photos/podarchs/README.md) · [Publisher listing](https://vanrydergames.com/products/final-girl-terror-from-beyond-vignette)
+The Play catalog includes 19 photographic scenes and eight small chooser derivatives. Collection uses the owner-supplied box photo with either art preference. Collection and casting also have the film scene, cast portraits and shelf thumbnails. Joan’s Health strip has two additional expressions from the same photographic session. [Art ledger](../../src/assets/play/photos/podarchs/README.md) · [Publisher listing](https://vanrydergames.com/products/final-girl-terror-from-beyond-vignette)
 
 The focused Playwright journeys cover opening Joan’s dossier, reading the rules in a mixed cast without writing a log, optional assimilation, the Hostile threshold, both Minors, a rescue, card selection, named Finale correction, Greenhouse Health and escape, Countdown and Leader Final Health, and reload. The first screenshot review showed oversized objective hearts and an oversized assimilation photograph. Both now use bounded sizes. Browser services are mocked. Unit coverage includes sparse and named Finish choices, Undo, owner validation, quantities and source-specific Event compatibility.
 

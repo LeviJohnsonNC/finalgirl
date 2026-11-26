@@ -25,6 +25,6 @@ Sources are original generation filenames; row order is top to bottom. Three-row
 
 Budget: every scene ≤200KiB, cover derivative ≤96KiB and portrait derivative ≤30KiB, enforced by `check:assets`. Missing scene images leave readable card content; missing covers show Cover unavailable; missing portrait crops show an initial while the named info button remains usable. Reload or a changed source preference can retry an image.
 
-The owner-supplied *Terror From Beyond* box photo is preserved in [box-art](../box-art/terror-from-beyond.png). Its [384×509 shelf derivative](../collection-thumbnails/terror-from-beyond.webp) trims the transparent margins around the full box.
+Both art preferences use the owner-supplied *Terror From Beyond* box photo. The 384×509 shelf derivative trims the transparent margins around the full box. [Source photo](../box-art/terror-from-beyond.png) · [Shelf derivative](../collection-thumbnails/terror-from-beyond.webp)
 
 The 2026-10-26 cinematic refinement preserves these scene files. Directional darkness, edge vignette, sparse foreground scratches/mist and the strongly dimmed unowned presentation are live CSS layers, with a single subtle outer frame. Keep ownership actions legible and all touch targets at least 44px when changing the visual control sizes.

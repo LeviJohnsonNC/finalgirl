@@ -59,13 +59,11 @@ describe("Collection artwork coverage", () => {
         }
   });
 
-  it("uses the supplied Terror From Beyond box photo by default", () => {
+  it("uses the supplied Terror From Beyond box photo with either art preference", () => {
     const film = FEATURE_FILMS.find(({ id }) => id === "s4-terror-from-beyond");
     expect(getBoxArtThumbnail(film?.boxArt)).toMatch(
       /collection-thumbnails\/terror-from-beyond\.webp$/,
     );
-    expect(getBoxArtThumbnail(film?.boxArtAi)).toMatch(
-      /collection-thumbnails\/ai\/terror-from-beyond\.webp$/,
-    );
+    expect(film?.boxArtAi).toBeUndefined();
   });
 });

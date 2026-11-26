@@ -1,6 +1,6 @@
 # Podarch photographs
 
-Original generated 1980s consumer-camera stills. The photographed print components supplied the game facts and Joan’s wardrobe. The alternate Collection cover is an original illustration.
+Original generated 1980s consumer-camera stills. The photographed print components supplied the game facts and Joan’s wardrobe. The ledger includes the original illustrated cover used before the owner supplied the box photo.
 
 | Master | Generated source | SHA-256 |
 | --- | --- | --- |
