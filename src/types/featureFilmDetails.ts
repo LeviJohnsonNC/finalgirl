@@ -49,6 +49,12 @@ export interface FeatureFilmDetail {
 }
 
 export const FEATURE_FILM_DETAILS: Record<string, FeatureFilmDetail> = {
+  's4-terror-from-beyond': {
+    filmId: 's4-terror-from-beyond', isVignette: true,
+    vignetteDescription: 'Familiar faces are going through the motions of everyday life. Strange plants have taken root among them.',
+    finalGirls: [{ name: 'Joan', backstory: 'Joan noticed people in town losing their spark. In a letter to her sister, she described how they looked the same and remembered their lives, yet seemed to feel nothing. She tried to tell others. Nobody listened.' }],
+    killer: { name: 'The Podarchs', description: 'An alien plant matures into a Pod and assimilates a person. The replacement inherits their appearance and memories. The crowd works quietly to spread the invasion until interference turns it hostile.' },
+  },
   's4-buddyland': BUDDYLAND_DETAILS,
   's1-camp-happy-trails': {
     filmId: 's1-camp-happy-trails',

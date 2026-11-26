@@ -173,6 +173,8 @@ const CHARACTER_FILES: Record<string, string> = {
   'Birds': 'birds.png',
   'Patsy': 'patsy.png',
   'Zombies': 'zombies.png',
+  'Joan': 'joan.png',
+  'The Podarchs': 'podarchs.png',
   'Gabrielle': 'gabrielle.png',
   'Destiny': 'destiny.png',
   'Adrianne': 'adrianne.png',
@@ -219,6 +221,7 @@ const FILM_BOX_ART_FILES: Record<string, string> = {
   's3-hell-to-pay': 'hell-to-pay.png',
   's3-marrek-murders': 'the-marrek-murders.png',
   's3-dont-make-sound': 'dont-make-a-sound.png',
+  's4-terror-from-beyond': 'terror-from-beyond.png',
   's3-terror-from-destiny': 'terror-from-destiny.png',
   's4-buddyland': 'bad-times-at-buddyland.png',
   's4-shriek': 'shriek.png',
@@ -308,6 +311,7 @@ const BASE_FEATURE_FILMS: Omit<FeatureFilm, 'boxArt' | 'boxArtAi'>[] = [
   { id: 's3-terror-from-destiny', name: 'Terror From Destiny', season: 3, killer: 'Destiny', location: '', finalGirls: ['Gabrielle'], isVignette: true },
 
   // Season 4
+  { id: 's4-terror-from-beyond', name: 'Terror From Beyond', season: 4, killer: 'The Podarchs', location: '', finalGirls: ['Joan'], isVignette: true },
   { id: 's4-shriek', name: 'Shriek', season: 4, killer: 'Mort the Teenage Dirtbag', location: 'MegaBGCon', finalGirls: ['Adrianne', 'Maureen'] },
   { id: 's4-demon-shadows', name: 'A Demon in the Shadows', season: 4, killer: 'TBD', location: 'TBD', finalGirls: ['TBD', 'TBD'] },
   { id: 's4-buddyland', name: 'Bad Times at Buddyland', season: 4, killer: 'Billy the Bear', location: 'Buddyland', finalGirls: ['Rena', 'Gwynn'] },

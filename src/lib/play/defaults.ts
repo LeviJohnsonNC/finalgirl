@@ -28,6 +28,7 @@ export function playStartingValues(
     Geppetto: 8,
     'Dr. Fright': 9,
   };
+  if (killer === 'The Podarchs') return { finalGirlHealth: getFinalGirlHealth(finalGirl), finalHorrorLevel: 4, bloodlust: 0 };
   if (killer === MORT) return { finalGirlHealth: getFinalGirlHealth(finalGirl), finalHorrorLevel:3, bloodlust:0 };
   if (killer === RATCHET_LADY) return {finalGirlHealth:getFinalGirlHealth(finalGirl),...RATCHET_SETUP};
   if (killer === ORGANISM) return {finalGirlHealth:getFinalGirlHealth(finalGirl),...ORGANISM_SETUP};

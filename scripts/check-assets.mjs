@@ -604,3 +604,20 @@ if (razorfaceNames.size ||
   throw Error('Incomplete Razorface art');
 }
 console.log('Verified all 27 Razorface photographs and nine chooser thumbnails.');
+
+const podarchDir = 'src/assets/play/photos/podarchs';
+const podarchReveals = ['mob', 'obstinate', 'hysteria', 'targeted', 'urgency', 'greenhouse', 'countdown', 'leader'];
+const podarchStills = ['banner', 'docile', 'hostile', 'flowers', 'pod', 'assimilation', 'ruins', 'lifeform', 'mutation', 'possessed', 'less-human'];
+const podarchPhotos = [...podarchStills, ...podarchReveals, ...podarchReveals.map(id => id + '-thumb')];
+const podarchHashes = new Set();
+for (const id of podarchPhotos) {
+  const bytes = readFileSync(join(podarchDir, id + '.webp'));
+  const [width, height] = konradWebpDimensions(bytes);
+  const thumb = id.endsWith('-thumb');
+  const hash = createHash('sha256').update(bytes).digest('hex');
+  if (bytes.length > (thumb ? 24 : 96) * 1024 || (thumb ? width !== 288 || height !== 162 : width < 500 || height < 250) || podarchHashes.has(hash)) {
+    throw Error('Invalid or duplicate Podarch photograph: ' + id);
+  }
+  podarchHashes.add(hash);
+}
+console.log('Verified ' + podarchPhotos.length + ' Podarch photographs and card derivatives.');

@@ -1,3 +1,4 @@
+import { PODARCHS } from '../../../supabase/functions/_shared/play/podarchs';
 import { useState } from "react";
 import { canUndoCon, newPlayEvent, summarizePlay } from "@/lib/play/events";
 import { BOOTHS, BOOTH_EFFECTS, CON_EVENTS, CON_ONGOING, CON_PEOPLE, MEGABGCON_MODULE, type Booth } from "../../../supabase/functions/_shared/play/megabgconCatalog";
@@ -133,7 +134,7 @@ export function MegaBGConControls({ events, onEvent, blocked, killer, startingEv
       </div>
     </details>
 
-    <details className="con-disclosure">
+    {killer !== PODARCHS && <details className="con-disclosure">
       <summary>Special Victims</summary>
       <div className="con-grid">
         {CON_PEOPLE.map(source => {
@@ -152,7 +153,7 @@ export function MegaBGConControls({ events, onEvent, blocked, killer, startingEv
           </div>;
         })}
       </div>
-    </details>
+    </details>}
 
     <details className="con-disclosure" open={state.buggy ? true : undefined}>
       <summary>Medical Buggy{state.buggy ? state.buggy === "active" ? " · In play" : " · Spent" : ""}</summary>

@@ -1,3 +1,4 @@
+import { PODARCHS } from '../../../supabase/functions/_shared/play/podarchs';
 import { modulePhoto } from "./modulePhotos";
 import { useModuleRecord } from "./useModuleRecord";
 import { CharacterControl } from "./CharacterControl";
@@ -286,7 +287,7 @@ export function BuddylandControls({
       {location === "Buddyland" && part !== "killer" && (
         <section aria-label="Buddyland tracking">
           {!embedded && <h2>Inside Buddyland</h2>}
-          <div className="play-character-grid">
+          {killer !== PODARCHS && <div className="play-character-grid">
             {[...SPECIAL_VICTIMS]
               .sort((a, b) => a.name.localeCompare(b.name))
               .map((v) => {
@@ -344,7 +345,7 @@ export function BuddylandControls({
                   />
                 );
               })}
-          </div>
+          </div>}
         </section>
       )}
       <p role="status" className="play-feedback">

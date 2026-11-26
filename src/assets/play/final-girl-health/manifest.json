@@ -1103,5 +1103,28 @@
     },
     "scale": 1.25,
     "origin": "center bottom"
+  },
+  {
+    "name": "Joan",
+    "slug": "joan",
+    "original": "src/assets/characters/ai/joan.png",
+    "originalSha256": "61f8a575f263e278f2724482a985e9250a77015dd5e822ba3d995a8b99469b1e",
+    "position": "50% 30%",
+    "healthy": {
+      "source": "exec-c5084ce8f46cc0c400b7c42cfb7c9feed9d0a760a596234c572a48985a94cf80.png",
+      "nativeWidth": 720,
+      "nativeHeight": 720,
+      "width": 768,
+      "height": 768,
+      "sha256": "a3c1dc3e08552d666eb64dd45a62daaa92a3fb7a8bbbc759196617542fecaabb"
+    },
+    "critical": {
+      "source": "exec-c5084ce8f46cc0c400b7c42cfb7c9feed9d0a760a596234c572a48985a94cf80.png",
+      "nativeWidth": 720,
+      "nativeHeight": 720,
+      "width": 768,
+      "height": 768,
+      "sha256": "d360224a42d375ab1f995de412518960269fab127cdb9dffa27d7eab713afef0"
+    }
   }
 ]

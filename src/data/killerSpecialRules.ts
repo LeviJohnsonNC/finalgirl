@@ -112,6 +112,10 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   // ── Season 3 Vignette ────────────────────────────────────────────────────
 
+  'The Podarchs': {
+    isVignette: true, narrativeNote: 'An invasion of alien plants replacing people who keep their faces and memories. The Assimilated seek to replace Victims even after they turn Hostile toward the Final Girl. Assimilation is not a death.',
+    winCondition: 'Clear the invasion before the Finale or fulfill the selected Finale objective. Use the reported outcome.',
+  },
   'Destiny': {
     narrativeNote:
       'A vignette killer — not a physical being but the force of fate itself. Deaths happen through accidents, coincidences, and an uncanny chain of bad luck. There is no killer to fight, only a pattern of doom to unravel or escape.',

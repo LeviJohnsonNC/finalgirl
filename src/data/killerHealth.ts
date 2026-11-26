@@ -16,6 +16,7 @@ const UNKILLABLE_KILLERS = new Set([
   'Birds',
   'Zombies',
   'Destiny',
+  'The Podarchs',
 ]);
 
 /** Per-killer max HP for killers that can be defeated in combat. */

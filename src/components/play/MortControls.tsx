@@ -1,3 +1,7 @@
+import { PODARCHS } from '../../../supabase/functions/_shared/play/podarchs';
+import { PodarchMinor } from './PodarchControls';
+import { konradArt } from './konradArt';
+import { mallArt } from './mallArt';
 import { useEffect, useRef, useState } from "react";
 import { Check, Clapperboard, Fingerprint, Search, Undo2 } from "lucide-react";
 import {
@@ -1051,6 +1055,7 @@ export function MortLocationMinor({
   const entries = summarizePlay(events).entries;
   const state = mortState(entries);
   const { record, message } = useModuleRecord(events, onEvent);
+  if (killer === PODARCHS) return <PodarchMinor id={name === "Slippery" ? "slippery" : "bond"} name={name} art={name === "Slippery" ? konradArt("slippery") : mallArt("twisted-bond")} events={events} onEvent={onEvent} blocked={blocked}/>;
   if (killer !== MORT || state.reveal) return <>{children}</>;
   const active = state.locationMinor === location;
   return (

@@ -1,5 +1,6 @@
 import { BirdsResultFields } from '@/components/BirdsResultFields';
 import { RAZORFACE, RAZORFACE_MODULE, razorfaceLatest, razorfaceState } from '../../supabase/functions/_shared/play/razorface';
+import { eligibleStartingEvent } from '../../supabase/functions/_shared/play/podarchEvents';
 import { BIRDS, BIRDS_MODULE, birdsEventIncompatible, birdsParent, birdsReasonMatches, birdsResult, birdsReview, birdsState, isBirdsReason, isBirdsTarget, resolveBirdsAction, type BirdsReason, type BirdsReview, type BirdsTarget } from '../../supabase/functions/_shared/play/birds';
 import { FALCONWOOD, falconwoodReview, falconwoodReviewText, falconwoodState, missionByName } from "../../supabase/functions/_shared/play/falconwood";
 import { SLAYER, dimensionLabel } from "@/lib/play/slayer";
@@ -158,6 +159,10 @@ const IndexContent = () => {
   }) => {
     if (activeGame) {
       toast.error('Resume or discard the current game before casting a new one.');
+      return;
+    }
+    if (!eligibleStartingEvent(selection.killer, selection.location, selection.startingEvent)) {
+      toast.error('Redraw the Event featuring a Special Victim for the Podarchs.');
       return;
     }
     if (selection.killer === BIRDS && (!isBirdsTarget(selection.birdsRequired) ||

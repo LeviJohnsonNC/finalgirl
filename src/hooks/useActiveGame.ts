@@ -25,6 +25,7 @@ import { grimlashParent, resolveGrimlashAction } from '@/lib/play/grimlash';
 import { konradParent, resolveKonradAction } from '../../supabase/functions/_shared/play/konrad';
 import { evomorphParent, resolveEvomorphAction } from '../../supabase/functions/_shared/play/evomorph';
 import { RAZORFACE, RAZORFACE_MODULE, RAZORFACE_MAX_BLOODLUST, razorfaceEntry } from '../../supabase/functions/_shared/play/razorface';
+import { PODARCHS, PODARCH_MAX, podarchOwnsLog } from '../../supabase/functions/_shared/play/podarchs';
 import { BIRDS, BIRDS_MODULE, BIRDS_MAX_BLOODLUST, birdsLogBelongsTo, initialBirds, isBirdsTarget, resolveBirdsAction, sameBirdsChanges } from '../../supabase/functions/_shared/play/birds';
 import { poltergeistParent, resolvePoltergeistAction } from '../../supabase/functions/_shared/play/poltergeist';
 import { resolveGrovesAction } from "../../supabase/functions/_shared/play/groves";
@@ -137,6 +138,9 @@ export function useActiveGame() {
       if(event.moduleData?.module==='konrad'&&(previous.selection.location!=='USS Konrad'||!event.konradAction))return previous;
       if(event.kind==='undo'&&!canUndoEvomorph(log,event.target!))return previous;
       if (event.kind === 'death-count' && !canChangeDeathCount(log, event)) return previous;
+      if (!podarchOwnsLog(previous.selection.killer, [event], previous.selection.location)) return previous;
+      if (previous.selection.killer === PODARCHS && event.kind === 'state' && event.field === 'bloodlust' &&
+          typeof event.value === 'number' && event.value > PODARCH_MAX) return previous;
       const isRatchetLady = previous.selection.killer === RATCHET_LADY;
       if (event.moduleData?.module===WOLFE_MODULE&&!event.wolfeAction) return previous;
       if (!conOwnsLog(previous.selection.location, previous.selection.killer, [event])) return previous;
@@ -180,7 +184,7 @@ export function useActiveGame() {
       if(event.kind==='killed'&&previous.selection.location===MALL)accepted={...accepted,mallReference:true};
       if (event.kind === "killed" && isFalconwood) accepted = {...accepted, falconwoodReference: true};
       if(event.kind==='killed' && previous.selection.location===WINGARD)accepted={...accepted,wingardReference:true};
-      if(previous.selection.killer==='Poltergeist' && ((event.kind==='state'&&event.field==='killerHealth') || (event.kind==='moment'&&event.momentType==='killer-revived'))) return previous;
+      if(['Poltergeist','The Podarchs'].includes(previous.selection.killer) && ((event.kind==='state'&&event.field==='killerHealth') || (event.kind==='moment'&&event.momentType==='killer-revived'))) return previous;
       if (event.moduleData?.module === 'groves' && previous.selection.location !== 'Sacred Groves') return previous;
       if (event.linkedModule && !(event.moduleData?.module==='groves'&&previous.selection.location==='Sacred Groves'&&previous.selection.killer==='Inkanyamba') && !(event.moduleData?.module==='creech'&&previous.selection.location==='Creech Manor'&&previous.selection.killer==='Poltergeist')) return previous;
       if (isBirds && isBirdsTarget(previous.selection.birdsRequired) && event.creechAction?.kind === 'event' &&

@@ -102,6 +102,7 @@ export const FILM_THEMES: Record<string, FilmTheme> = {
     secondary: '30 30% 60%',     // bone white
     tagline: "Don't move. Don't breathe. Don't make a sound.",
   },
+  's4-terror-from-beyond': {primary: '82 33% 38%', secondary: '346 34% 28%', tagline: 'You recognize every face.'},
   's3-terror-from-destiny': {
     primary: '270 50% 35%',      // fate purple
     secondary: '40 60% 50%',     // golden prophecy

@@ -1,3 +1,4 @@
+import { PODARCHS } from '../../../supabase/functions/_shared/play/podarchs';
 import { MortLocationMinor } from './MortControls';
 import {useState} from 'react';
 import {newPlayEvent,summarizePlay} from '@/lib/play/events';
@@ -46,9 +47,9 @@ export function KonradControls({events,onEvent,blocked,killer,location}:Controls
   <section aria-label="Maintenance shafts"><h3>Maintenance shafts</h3><div className="konrad-grid konrad-shafts">
    {KONRAD_SHAFTS.map(id=><SwitchPicture key={id} name={`${title(id)} shaft`} on={konradToggle(s,`shaft:${id}`)} inactive={`shaft-${id}-inactive`} active={`shaft-${id}-active`} onChange={active=>toggle(`shaft:${id}`,active)}/>)}
   </div></section>
-  <section aria-label="Ship crew" className="konrad-crew"><h3>People aboard</h3><div className="konrad-grid">
+  {killer !== PODARCHS && <section aria-label="Ship crew" className="konrad-crew"><h3>People aboard</h3><div className="konrad-grid">
    {KONRAD_PEOPLE.map(p=><CharacterControl key={p.id} name={p.name} value={s.people[p.id]} present="in-play" states={roleStates} art={konradArt(s.people[p.id]==='saved'||s.people[p.id]==='killed'?`${p.id}-${s.people[p.id]}`:p.id)} showRules={false} showStatusEditor={false} reactivateFrom={['left']} outcomes={['saved','killed','left']} onChange={status=>status==='in-play'?commit({command:'add-person',id:p.id}):commit({command:'person',id:p.id,status:status as 'saved'|'killed'|'left'|null})}/>)}
-  </div></section>
+  </div></section>}
   <section aria-label="Ongoing ship Events"><h3>Ship Events</h3><div className="konrad-grid">
    {KONRAD_EVENTS.filter(e=>e.kind==='ongoing').map(e=><EventControl key={e.id} name={e.name} value={s.events[e.id]} art={konradArt(e.id)} interaction="toggle" onActivate={()=>commit({command:'event',id:e.id,active:true})} onEnd={()=>commit({command:'event',id:e.id,active:false})} onClear={()=>{}}/>)}
   </div></section>

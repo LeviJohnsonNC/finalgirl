@@ -6,6 +6,8 @@ import { MORT_ATTACK, MORT_MOVE, MORT_POWERS, MORT_SUSPECTS, MORT_TERRORS, MORT_
 import { wolfeRules, WOLFE_PROMPT_CONTEXT } from './wolfeRules';
 import { ratchetLadyRules, RATCHET_PROMPT_CONTEXT } from "./ratchetLadyRules";
 import {stationRules, STATION_PROMPT_CONTEXT} from './stationRules';
+import { podarchRules } from './podarchRules';
+import { PODARCHS, PODARCH_STORY, PODARCH_VISUAL } from '../../../supabase/functions/_shared/play/podarchs';
 import {organismRules, ORGANISM_PROMPT_CONTEXT} from "./organismRules";
 import { FALCONWOOD_EVENTS, FALCONWOOD_ITEMS, FALCONWOOD_MISSION_ITEMS, FALCONWOOD_MISSION_RULES, FALCONWOOD_SETUPS, FALCONWOOD_SOURCE, FALCONWOOD_TERRORS } from "../../../supabase/functions/_shared/play/falconwoodCatalog";
 import { FALCONWOOD_LEADS, missionById } from "../../../supabase/functions/_shared/play/falconwood";
@@ -412,7 +414,7 @@ const falconwood: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [razorfaceRules,hellscapeRules,birdsRules,ratchetLadyRules,wolfeRules,stationRules,organismRules,mallRules,hunterRules,tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolfRules, shadyAcres, mortTheTeenageDirtbag, megaBgCon, intruderRules, wingardCottage, falconwood, slayerRules, marrekRules];
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [podarchRules,razorfaceRules,hellscapeRules,birdsRules,ratchetLadyRules,wolfeRules,stationRules,organismRules,mallRules,hunterRules,tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolfRules, shadyAcres, mortTheTeenageDirtbag, megaBgCon, intruderRules, wingardCottage, falconwood, slayerRules, marrekRules];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -423,6 +425,7 @@ export interface ModulePromptContext {
 const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
   Razorface:RAZORFACE_PROMPT_CONTEXT,
   Birds:BIRDS_PROMPT_CONTEXT,
+  [PODARCHS]: { narrativeGuidance: PODARCH_STORY, visualGuidance: PODARCH_VISUAL, rulesSummary: "Evolution precedes the Killer phase. Persuade Victims before rescuing them. Follow the selected Finale or pre-Finale victory." },
   "The Organism":ORGANISM_PROMPT_CONTEXT,
   "Ratchet Lady":RATCHET_PROMPT_CONTEXT,
   "Wolfe Asylum":WOLFE_PROMPT_CONTEXT,

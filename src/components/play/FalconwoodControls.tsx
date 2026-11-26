@@ -1,3 +1,4 @@
+import { PODARCHS } from '../../../supabase/functions/_shared/play/podarchs';
 import { useState, type ReactNode } from 'react';
 import { BookOpen, Check, LockKeyholeOpen } from 'lucide-react';
 import { newPlayEvent, summarizePlay } from '@/lib/play/events';
@@ -42,7 +43,7 @@ function Count({label, value, max, onChange}: {label: string; value?: number; ma
   </div>;
 }
 
-export function FalconwoodControls({events, onEvent, mission: selected, falconwoodFresh, startingEvent, blocked}: ControlsProps) {
+export function FalconwoodControls({killer, events, onEvent, mission: selected, falconwoodFresh, startingEvent, blocked}: ControlsProps) {
   const entries = summarizePlay(events).entries;
   const fields = moduleState(entries, FALCONWOOD_MODULE);
   const displayed = !events.length && falconwoodFresh ? initialFalconwood(selected, startingEvent) ?? fields : fields;
@@ -195,7 +196,7 @@ export function FalconwoodControls({events, onEvent, mission: selected, falconwo
           <EventControl key={key} name={name} value={state.effects[key] === undefined ? undefined : state.effects[key] ? 'active' : 'ended'}
             art={falconwoodArt(state.effects[key] === false && (key === 'dry' || key === 'van') ? `${key}-off` : key)}
             interaction="toggle" onActivate={() => send('effect', true, key)} onEnd={() => send('effect', false, key)} onClear={() => send('effect', false, key)} />)}
-        {FALCONWOOD_PEOPLE.filter(name => showEvents || state.people[name]).map(name =>
+        {killer !== PODARCHS && FALCONWOOD_PEOPLE.filter(name => showEvents || state.people[name]).map(name =>
           <div key={name}>{renderPerson(name, toArt(name), state.people[name], value => send('person', value, name))}</div>)}
       </div>
     </fieldset>

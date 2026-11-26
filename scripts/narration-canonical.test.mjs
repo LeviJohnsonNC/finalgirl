@@ -14,6 +14,8 @@ const code = (path) =>
 const load = (path, imports) => {
   const ex = {};
   new Function('require', 'exports', code(path))((name) => {
+    if (name === './podarchs.ts' || name === './play/podarchs.ts') return podarchs;
+    if (name === './podarchEvents.ts') return podarchEvents;
     if(name==='./razorface.ts')return razorface;
     if(name==='./hellscape.ts'||name==='./play/hellscape.ts')return hellscape;
     if(name==='./birds.ts'||name==='./play/birds.ts')return birds;
@@ -36,6 +38,8 @@ const load = (path, imports) => {
 };
 const razorface=load('../supabase/functions/_shared/play/razorface.ts',{});
 const hellscape=load('../supabase/functions/_shared/play/hellscape.ts',{});
+const podarchs = load('../supabase/functions/_shared/play/podarchs.ts', {});
+const podarchEvents = load('../supabase/functions/_shared/play/podarchEvents.ts', {});
 const birds=load('../supabase/functions/_shared/play/birds.ts',{});
 const wolfeCatalog=load('../supabase/functions/_shared/play/wolfeCatalog.ts',{});
 const wolfe=load('../supabase/functions/_shared/play/wolfe.ts',{});

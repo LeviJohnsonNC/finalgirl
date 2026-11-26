@@ -1,3 +1,4 @@
+import { PODARCHS } from '../../../supabase/functions/_shared/play/podarchs';
 import { useState } from 'react';
 import {
   initialStation, resolveStationAction, stationParent, stationState, stationSummary,
@@ -67,7 +68,7 @@ function FlightCorrection({state, submit}: {state: StationState; submit: (comman
   </div>;
 }
 
-export function StationControls({events,onEvent,blocked,stationFresh,startingEvent}: ControlsProps) {
+export function StationControls({killer,events,onEvent,blocked,stationFresh,startingEvent}: ControlsProps) {
   const entries = summarizePlay(events).entries;
   const state = stationState(!events.length && stationFresh ? initialStation(startingEvent) : moduleState(entries,STATION_MODULE));
   const parent = stationParent(entries);
@@ -141,7 +142,7 @@ export function StationControls({events,onEvent,blocked,stationFresh,startingEve
       </details>
     </section>
     <StationEnvironment state={state} commit={commit}/>
-    <StationCrew state={state} commit={commit}/>
+    {killer !== PODARCHS && <StationCrew state={state} commit={commit}/>}
     <StationAllies state={state} commit={commit}/>
     {message && <p role="alert">{message}</p>}
   </fieldset>;

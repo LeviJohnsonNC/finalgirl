@@ -1,4 +1,5 @@
 import { BIRDS, birdsEventIncompatible } from '../../supabase/functions/_shared/play/birds';
+import { eligibleStartingEvent } from '../../supabase/functions/_shared/play/podarchEvents';
 import { useState, useMemo, useId } from 'react';
 import { Dices, Crosshair, Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -52,8 +53,8 @@ const ScenarioDropdownsForLocation = ({
 
   const events = useMemo(() => {
     if (!filmId) return [];
-    return getEventsForLocation(filmId);
-  }, [filmId]);
+    return getEventsForLocation(filmId).filter(e=>eligibleStartingEvent(selectedKiller,selectedLocation,e.name));
+  }, [filmId,selectedKiller,selectedLocation]);
 
   const showMissions = locationHasMissions(selectedLocation);
   const selectedMissionData = getMissionByName(selectedMission);

@@ -151,8 +151,8 @@ test("illustrated shelf covers the catalog and opens truthful character details"
   await archive.install(page);
   await page.goto("/");
   await page.getByRole("button", { name: "Collection", exact: true }).click();
-  await expect(page.locator(".collection-film")).toHaveCount(23);
-  await expect(page.locator(".collection-girl-link")).toHaveCount(39);
+  await expect(page.locator(".collection-film")).toHaveCount(24);
+  await expect(page.locator(".collection-girl-link")).toHaveCount(40);
   await expect(page.locator("[data-coming-soon=true]")).toHaveCount(2);
   for (const upcoming of await page.locator("[data-coming-soon=true]").all()) {
     await expect(upcoming.getByRole("switch")).toBeDisabled();
@@ -391,7 +391,7 @@ test("all films load distinct display faces and share one medium sans-serif supp
   await page.goto("/");
   await page.getByRole("button", { name: "Collection", exact: true }).click();
   // Navigation can finish before the mocked collection response is rendered.
-  await expect(page.locator(".collection-film")).toHaveCount(23);
+  await expect(page.locator(".collection-film")).toHaveCount(24);
   await page.evaluate(() => document.fonts.ready);
   const fonts = await page
     .locator(".collection-film")
@@ -417,7 +417,7 @@ test("all films load distinct display faces and share one medium sans-serif supp
       }
       return result;
     });
-  expect(new Set(fonts.map((f) => f.title)).size).toBe(23);
+  expect(new Set(fonts.map((f) => f.title)).size).toBe(24);
   for (const font of fonts) {
     expect(font.body).toContain("Source Sans 3");
     expect(font.weight).toBe("500");

@@ -1,3 +1,4 @@
+import { PODARCHS } from '../../../supabase/functions/_shared/play/podarchs';
 import { useState } from "react";
 import { CharacterControl } from "./CharacterControl";
 import { EventControl } from "./EventControl";
@@ -88,6 +89,7 @@ function StatusArt({
 }
 
 export function MapleControls({
+  killer,
   location,
   events,
   onEvent,
@@ -233,7 +235,7 @@ export function MapleControls({
         </details>
       </section>
 
-      <section>
+      {killer !== PODARCHS && <section>
         <h3>People on Maple Lane</h3>
         <button
           className="maple-action"
@@ -282,7 +284,7 @@ export function MapleControls({
             spaces toward you; lose 2 Time if he shares your space.
           </p>
         )}
-      </section>
+      </section>}
 
       <section>
         <h3>Streets & lasting effects</h3>
