@@ -16,6 +16,7 @@ Sources are original generation filenames; row order is top to bottom. Three-row
 | `grave`, `falconwood`, `mall` | `exec-700c546c-d2f6-4dec-8895-83d9fa8b3e31.png` |
 | `hellscape`, `warehouse`, `utopia` | `exec-5eaa0f62-920e-427c-979c-52066de1e8e0.png` |
 | `destiny`, `convention`, `harvest` | `exec-b4725f85-76b7-46f5-b83e-15cfe80e63ca.png` |
+| `podarchs` | [Terror From Beyond art ledger](../play/photos/podarchs/README.md) |
 | `upcoming-shadows`, `upcoming-green` | `exec-b97cbcf9-5608-47f7-9b47-83f941f08a2e.png` |
 
 `src/data/collectionArt.ts` maps stable film IDs to scenes, colors, and authored live-text title line breaks/scales. Every catalog entry must be covered; unit tests check names and uniqueness. Each film now uses a distinct real title face from the art manifest. See `../fonts/collection/README.md` for the twenty new display faces, supporting Source Sans 3 and their bundled licenses; Caveat, Barlow Condensed and IM Fell each remain assigned to one film. Never bake controls or text into an illustration.
@@ -23,5 +24,7 @@ Sources are original generation filenames; row order is top to bottom. Three-row
 `npm run images:collection` regenerates cover/portrait derivatives using ImageMagick. Cover derivatives use a 384×576 maximum, Lanczos resizing and a restrained unsharp mask for the larger shelf presentation. Uniform empty cover margins are trimmed only in the derivative; the entire actual box stays visible with `object-fit: contain`. Portraits remain small full-image derivatives with CSS display crops; opening the modal loads the original selected portrait. The existing official/AI preference selects the corresponding derivative by source URL, including the separately supplied Buddyland cover.
 
 Budget: every scene ≤200KiB, cover derivative ≤96KiB and portrait derivative ≤30KiB, enforced by `check:assets`. Missing scene images leave readable card content; missing covers show Cover unavailable; missing portrait crops show an initial while the named info button remains usable. Reload or a changed source preference can retry an image.
+
+The owner-supplied *Terror From Beyond* box photo is preserved in [box-art](../box-art/terror-from-beyond.png). Its [384×509 shelf derivative](../collection-thumbnails/terror-from-beyond.webp) trims the transparent margins around the full box.
 
 The 2026-10-26 cinematic refinement preserves these scene files. Directional darkness, edge vignette, sparse foreground scratches/mist and the strongly dimmed unowned presentation are live CSS layers, with a single subtle outer frame. Keep ownership actions legible and all touch targets at least 44px when changing the visual control sizes.
