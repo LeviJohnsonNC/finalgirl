@@ -608,7 +608,8 @@ console.log('Verified all 27 Razorface photographs and nine chooser thumbnails.'
 const podarchDir = 'src/assets/play/photos/podarchs';
 const podarchReveals = ['mob', 'obstinate', 'hysteria', 'targeted', 'urgency', 'greenhouse', 'countdown', 'leader'];
 const podarchStills = ['banner', 'docile', 'hostile', 'flowers', 'pod', 'assimilation', 'ruins', 'lifeform', 'mutation', 'possessed', 'less-human'];
-const podarchPhotos = [...podarchStills, ...podarchReveals, ...podarchReveals.map(id => id + '-thumb')];
+const podarchCountdown = Array.from({length: 7}, (_, n) => `countdown-${n}`);
+const podarchPhotos = [...podarchStills, ...podarchReveals, ...podarchReveals.map(id => id + '-thumb'), ...podarchCountdown];
 const podarchHashes = new Set();
 for (const id of podarchPhotos) {
   const bytes = readFileSync(join(podarchDir, id + '.webp'));

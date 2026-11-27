@@ -5,8 +5,10 @@ import {OrganismFinaleControl} from "./OrganismControls";
 import { SLAYER, SLAYER_COLLAPSE } from '@/lib/play/slayer';
 import { SlayerCollapseControl } from './SlayerCollapseControl';
 import { HUNTER, hunterState, hunterHasReveal } from '@/lib/play/hunter';
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { WOLF } from "@/lib/play/bigBadWolf";
+import { PODARCHS } from '../../../supabase/functions/_shared/play/podarchs';
+import { PodarchFinaleControl } from './PodarchFinaleControl';
 import { newPlayEvent, summarizePlay, type PlayEvent } from "@/lib/play/events";
 import { moduleState } from "@/lib/play/modules";
 import { IllustratedTile } from "./IllustratedTile";
@@ -74,6 +76,12 @@ export function KillerCards({
   const hunter=killer===HUNTER?hunterState(moduleState(entries,'hunter')):undefined;
   const { record, message } = useModuleRecord(events, onEvent);
   const [editingSecond, setEditingSecond] = useState(false);
+  const namedPodarchFinale = !typeOnly && killer === PODARCHS && entries.some(
+    event => event.momentType === "finale" && Boolean(event.killerCard),
+  );
+  const openFinaleDisclosure = useCallback((disclosure: HTMLDetailsElement | null) => {
+    if (disclosure && namedPodarchFinale) disclosure.open = true;
+  }, [namedPodarchFinale]);
   const choose = (type: CardType, name: string) => {
     if (
       disabled ||
@@ -137,7 +145,11 @@ export function KillerCards({
                   {reveal?.killerCard || "Card name not specified"}
                 </p>
               )}
-              {selected && <RevealedCard card={selected} label={label} />}
+              {selected && (killer === PODARCHS && type === "finale" ? (
+                <PodarchFinaleControl card={selected} entries={entries} events={events} onEvent={onEvent} disabled={disabled} />
+              ) : (
+                <RevealedCard card={selected} label={label} />
+              ))}
               {killer === RATCHET_LADY && type === 'finale' &&
                 <RatchetFinaleControl events={events} onEvent={onEvent} disabled={disabled} />}
               {killer===ORGANISM&&type==="finale"&&<OrganismFinaleControl events={events} onEvent={onEvent} disabled={disabled} />}
@@ -244,7 +256,7 @@ export function KillerCards({
   return typeOnly ? (
     <div className="module-reveals">{content}</div>
   ) : (
-    <details className="module-card-section" data-module-control="reveals">
+    <details className="module-card-section" data-module-control="reveals" ref={openFinaleDisclosure}>
       <summary>{killer===ORGANISM?"Finale":"Dark Power & Finale"}</summary>
       {content}
     </details>

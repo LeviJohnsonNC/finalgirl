@@ -19,25 +19,52 @@ test('Podarch moments, hostile transition, paired Finale and persistence', async
   await dossier.screenshot({path:info.outputPath('joan-dossier.jpg')});
   await page.keyboard.press('Escape');
   const panel = page.locator('[data-module="podarchs"]');
-  await expect(panel.locator('summary').first()).toContainText('Docile');
+  const banner = panel.locator(':scope > summary');
+  await expect(banner).toContainText('Docile');
+  await banner.screenshot({path:info.outputPath('docile-banner.jpg')});
   await expect(page.getByRole('group',{name:'Killer Health tracker'})).toHaveCount(0);
   await openModule(page,'podarchs');
   expect((await log()).length).toBe(2);
-  await panel.getByRole('button',{name:/Victim assimilated/}).click();
+  const assimilation = panel.getByRole('button',{name:/Victim assimilated/});
+  const receipt = page.getByText('Victim assimilation recorded', { exact: true });
+  await page.evaluate(key => {
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (name, value) {
+      if (name === key) {
+        Storage.prototype.setItem = original;
+        throw new Error('Synthetic storage failure');
+      }
+      return original.call(this, name, value);
+    };
+  }, key);
+  await assimilation.click();
+  await expect(panel.getByRole('alert')).toContainText('could not be saved');
+  await expect(receipt).toHaveCount(0);
+  expect(await log()).toHaveLength(2);
+  await assimilation.click();
+  await expect(receipt).toBeVisible();
   await expect.poll(async()=>summarizePlay(await log()).entries.length).toBe(3);
   expect(summarizePlay(await log())).toMatchObject({saved:0,killed:0,bloodlust:3});
   await page.getByRole('group',{name:'Bloodlust tracker'}).getByRole('button',{name:/increase bloodlust/i}).click();
-  await expect(panel.locator('summary').first()).toContainText('Hostile');
+  await expect(banner).toContainText('Hostile');
+  await banner.screenshot({path:info.outputPath('hostile-banner.jpg')});
   await openMinorPowers(panel);
   await panel.getByRole('button',{name:'Activate Targeted Growth'}).click();
   await showMinorChoices(panel);
   await panel.getByRole('button',{name:'Activate Sense of Urgency'}).click();
+  await panel.getByRole('button',{name:'End effect: Sense of Urgency'}).screenshot({
+    style:'[data-sonner-toaster] { visibility: hidden; }',
+    path:info.outputPath('sense-of-urgency.jpg'),
+  });
   await page.getByRole('button',{name:'Save one victim',exact:true}).click();
   await page.getByRole('group',{name:'Choose a Minor to discard for this rescue'}).getByRole('button',{name:'Targeted Growth'}).click();
   await expect.poll(async()=>summarizePlay(await log()).saved).toBe(1);
-  await panel.locator('.module-card-section > summary').click();
+  const remember = page.getByRole('region',{name:'Remember this',exact:true});
+  await remember.getByRole('button',{name:'Finale',exact:true}).click();
+  await chooseKillerCard(remember,'Finale','Luxuriant Growth');
+  await remember.getByRole('button',{name:'Record',exact:true}).click();
+  await expect(panel.locator('.module-card-section')).toHaveAttribute('open','');
   await chooseKillerCard(panel,'Dark Power','Obstinate Victims');
-  await chooseKillerCard(panel,'Finale','Luxuriant Growth');
   const objective = panel.getByRole('region',{name:'Finale objective'});
   const heart = objective.getByRole('button',{name:/Remove one Greenhouse health/});
   for(let i=0;i<6;i++) await heart.first().click();
@@ -47,18 +74,53 @@ test('Podarch moments, hostile transition, paired Finale and persistence', async
   await expect(objective).toContainText('Escape at an exit');
   for(const [width,height] of (info.project.name==='desktop'?[[1280,640],[1366,768],[1440,900]]:[[320,568],[390,844]])){
     await page.setViewportSize({width,height});
-    await panel.locator('img').evaluateAll(images=>Promise.all(images.map(image=>{const img=image as HTMLImageElement; img.loading='eager'; return img.decode();})));
+    const images = panel.locator('img');
+    await images.evaluateAll(elements => {
+      for (const image of elements) (image as HTMLImageElement).loading = 'eager';
+    });
+    await expect.poll(() => images.evaluateAll(elements => elements.every(element => {
+      const image = element as HTMLImageElement;
+      return image.complete && image.naturalWidth > 0;
+    }))).toBe(true);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await panel.scrollIntoViewIfNeeded();
     await panel.screenshot({animations:'disabled',style:'footer { visibility: hidden; }',path:info.outputPath('podarch-panel-'+width+'.jpg')});
   }
-  await panel.locator('.module-card-section > summary').click();
+  const finale = panel.getByRole('region',{name:'Finale selection',exact:true});
+  const hero = finale.locator('.module-revealed-hero');
+  const scene = hero.locator('.module-revealed-art img');
+  const expectCorrectionBelow = async () => {
+    const cardBottom = await hero.evaluate(element => element.getBoundingClientRect().bottom);
+    const correctionTop = await finale.getByRole('button', {name:'Clear Finale card name',exact:true})
+      .evaluate(element => element.getBoundingClientRect().top);
+    expect(correctionTop).toBeGreaterThanOrEqual(cardBottom);
+  };
   await chooseKillerCard(panel,'Finale','Born Again');
-  await expect(panel.getByRole('button',{name:/Victim assimilated/})).toHaveCount(0);
-  await objective.getByLabel('Countdown remaining').click();
-  await page.getByRole('option',{name:'0 remaining',exact:true}).click();
+  await expect(assimilation).toHaveCount(0);
+  const countdown = objective.getByLabel('Countdown remaining');
+  for (const count of [6, 5, 4, 3, 2, 1, 0]) {
+    if (count !== 6) {
+      await countdown.click();
+      await page.getByRole('option',{name:`${count} remaining`,exact:true}).click();
+    }
+    await expect(countdown).toHaveText(`${count} remaining`);
+    await expect(scene).toHaveAttribute('src',new RegExp(`/countdown-${count}(?:-[\\w-]+)?\\.webp$`));
+    await expect.poll(() => scene.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+    await hero.screenshot({path:info.outputPath(`countdown-${count}.jpg`)});
+  }
   await expect(objective).toContainText('start of the Killer phase');
+  await expectCorrectionBelow();
   await chooseKillerCard(panel,'Finale','You’re Next!');
+  await expect(hero).toHaveCount(1);
+  await expect(hero.getByRole('group',{name:'Leader health'}).getByRole('button')).toHaveCount(5);
+  await expectCorrectionBelow();
+  await hero.screenshot({path:info.outputPath('youre-next.jpg')});
+  if (info.project.name === 'mobile') {
+    await page.setViewportSize({width:320,height:568});
+    const bounds = (await hero.boundingBox())!;
+    const hearts = await hero.getByRole('group',{name:'Leader health'}).getByRole('button').last().boundingBox();
+    expect(hearts!.x + hearts!.width).toBeLessThanOrEqual(bounds.x + bounds.width);
+  }
   const leaderHeart = objective.getByRole('button',{name:/Remove one Leader health/});
   for(let i=0;i<5;i++) await leaderHeart.first().click();
   await objective.getByLabel('Leader Final Health').click();
