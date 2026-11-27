@@ -20,6 +20,7 @@
 .module-card-grid.module-cinematic-chooser {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
+  align-items: stretch;
 }
 .module-cinematic-chooser .module-killer-card > .play-module-art {
   height: 86px;
@@ -34,6 +35,7 @@
 .module-card-grid.module-cinematic-chooser
   .module-killer-card
   > .play-tile-caption {
+  flex-grow: 1;
   min-height: 70px;
   padding: 9px 10px;
   background: #0b1011;
@@ -47,7 +49,8 @@
     Georgia,
     serif;
 }
-.module-cinematic-chooser .module-killer-card .play-tile-state {
+.module-card-grid.module-cinematic-chooser .module-killer-card .play-tile-state {
+  min-height: 0;
   font:
     500 9px/1.4 "Source Sans 3",
     Arial,
