@@ -65,6 +65,7 @@ export function MegaBGConControls({ events, onEvent, blocked, killer, startingEv
   const starting = CON_EVENTS.find(event =>
     event.id !== "swag" && event.name.toLowerCase() === startingEvent?.trim().toLowerCase());
   const buggyAction = [...progress.entries].reverse().find(e => e.megabgconAction?.kind === "buggy");
+  const buggyStatus = state.buggy === "active" ? "In play" : state.buggy === "spent" ? "Spent" : "Add when Keys are found";
   const startingPerson = CON_PEOPLE.find(p => p.id === starting?.id);
   const starterPending = starting && !state.ongoing[starting.id] && (startingPerson
     ? !state.people[startingPerson.id]
@@ -156,9 +157,9 @@ export function MegaBGConControls({ events, onEvent, blocked, killer, startingEv
     </details>}
 
     <details className="con-disclosure" open={state.buggy ? true : undefined}>
-      <summary>Medical Buggy{state.buggy ? state.buggy === "active" ? " · In play" : " · Spent" : ""}</summary>
+      <summary>Medical Buggy{state.buggy && <span className="con-summary-status"> · {buggyStatus}</span>}</summary>
       <IllustratedTile className="module-control-tile con-buggy" art={conArt(state.buggy === "spent" ? "buggy-spent" : "buggy")}
-        title="Medical Buggy" status={state.buggy === "active" ? "In play" : state.buggy === "spent" ? "Spent" : "Add when Keys are found"}
+        status={buggyStatus} aria-label={`Medical Buggy ${buggyStatus}`}
         data-muted={!state.buggy} data-record={state.buggy} disabled={blocked || state.buggy === "spent"} onClick={() => {
           if (state.buggy === "active") setBuggy(!buggy);
           else if (commit({ kind: "buggy", status: "active" })) setBuggy(true);

@@ -112,7 +112,7 @@ test("older sessions keep unknown trays until explicitly recorded, including no 
   await resume(page);
   const p = panel(page);
   await expect(
-    p.getByText("Record the current tray", { exact: true }),
+    p.getByText(/The current puppet tray is not fully recorded/),
   ).toBeVisible();
   await expect(
     p.getByRole("button", { name: "Apply spawn & ready" }),
@@ -175,9 +175,10 @@ test("unnamed Finale disables initial spawning; named reveal offers effects with
     p.getByRole("button", { name: "Apply spawn & ready" }),
   ).toHaveCount(0);
   await expect(
-    p.getByText("Finale revealed, card not specified.", { exact: false }),
+    p.getByRole("heading", { name: "Finale in play", exact: true }),
   ).toBeVisible();
   await p.getByText("Dark Power & Finale", { exact: true }).click();
+  await expect(p.getByRole("heading", { name: "Finale Revealed", exact: true })).toBeVisible();
   await p.getByRole("button", { name: /Remember Them\?/ }).click();
   await expect(
     p

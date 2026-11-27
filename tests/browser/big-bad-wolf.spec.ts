@@ -45,7 +45,10 @@ test("Wolf setup, linked reveals, Minor health and loaded photographs", async ({
 
   await panel.locator("details.module-card-section > summary").click();
   const power = panel.getByRole("region", { name: "Dark Power selection" });
-  await power.getByRole("button", { name: "Record Dark Power card name", exact: true }).click();
+  await power.getByRole("button", { name: "Reveal without a card name (Dark Power)", exact: true }).click();
+  await expect(power.getByRole("heading", { name: "Dark Power Revealed", exact: true })).toBeVisible();
+  await expect(power.getByRole("button", { name: "Clear Dark Power card name", exact: true })).toHaveCount(0);
+  await power.screenshot({ path: info.outputPath("unnamed-dark-power.jpg"), style: ".app-footer{visibility:hidden}" });
   await expect(mode.getByRole("heading")).toHaveText("Power revealed · mode unconfirmed");
   await captureMode(mode, "unconfirmed", info);
   const savedBeforeFailure = await page.evaluate(k => localStorage.getItem(k), key);

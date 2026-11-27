@@ -93,11 +93,9 @@ export function GeppettoControls({
     <section className="play-geppetto" aria-label="Geppetto tracking">
       <div className="geppetto-tray-heading">
         <h3>Puppet tray</h3>
-        <span aria-live="polite">
-          {counts.recorded
-            ? `${counts.onBoard} on board · ${counts.ready} ready · ${counts.exhausted} exhausted`
-            : "Record the current tray"}
-        </span>
+        {counts.recorded && <span aria-live="polite">
+          {`${counts.onBoard} on board · ${counts.ready} ready · ${counts.exhausted} exhausted`}
+        </span>}
       </div>
       {!counts.recorded && (
         <div className="geppetto-setup">
@@ -206,11 +204,7 @@ export function GeppettoControls({
       <div className="geppetto-spawn-step">
         <h3>{state.finaleRevealed ? "Finale in play" : "Before the Finale"}</h3>
         {state.finaleRevealed ? (
-          <p>
-            {finale
-              ? finale.effect
-              : "Finale revealed, card not specified. Choose its name below for the correct action reference."}
-          </p>
+          finale && <p>{finale.effect}</p>
         ) : (
           <>
             <p>
@@ -239,9 +233,7 @@ export function GeppettoControls({
       )}
       <MinorPowerGroup className="geppetto-minors module-minor-grid" description={
         <p className="geppetto-quiet">
-          Separate Health: remove these markers before Geppetto’s ordinary
-          Health. Tap a filled heart to remove one, or an empty heart to restore
-          one.
+          Remove these Health markers before Geppetto’s ordinary Health.
         </p>
       }>
         {GEPPETTO_MINOR_POWERS.map((c, row) => {

@@ -29,7 +29,7 @@ export function PodarchFinaleControl({ card, entries, events, onEvent, disabled 
   );
 
   return (
-    <RevealedCard card={{ ...card, heroArt: art }} label="Finale">
+    <RevealedCard card={{ ...card, heroArt: art }} label="Finale" showEyebrow={false}>
       <section className="podarch-objective" data-module-control="objective" aria-label="Finale objective">
         <h5>{formLabel}</h5>
         {objective === 'countdown' ? (

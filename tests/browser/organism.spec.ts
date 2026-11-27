@@ -109,7 +109,7 @@ test('Organism records a forced casualty once and an unnamed Finale atomically',
   await openModule(page,'organism');
   const panel=page.locator('.play-module-panel[data-module="organism"]');
   await panel.locator('details.module-card-section > summary').click();
-  await panel.getByRole('button',{name:'Record Finale card name'}).click();
+  await panel.getByRole('button',{name:'Reveal without a card name (Finale)',exact:true}).click();
   await panel.getByRole('button',{name:'Record Finale assimilation'}).click();
   for(const [color,form] of [['Grey','Fast'],['Red','Tough'],['Black','Strong']]){
     if(color!=='Black'){

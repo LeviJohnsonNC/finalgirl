@@ -322,15 +322,7 @@ export function GrovesControls({
       )}
       <details className="groves-details">
         <summary>Events</summary>
-        {startingEvent &&
-          !s[
-            `event.${GROVES_EVENTS.find((e) => e.name === startingEvent)?.id}`
-          ] && (
-            <p>
-              Starting Event: <strong>{startingEvent}</strong>. Activate its
-              card below, then choose any physical placements.
-            </p>
-          )}
+        {startingEvent && !starting && <p>Starting Event · {startingEvent}</p>}
         <div className="groves-event-grid">
           {GROVES_EVENTS.filter(event => eligibleStartingEvent(killer, "Sacred Groves", event.name))
             .sort((a, b) => a.name.localeCompare(b.name))

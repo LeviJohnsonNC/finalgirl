@@ -44,6 +44,9 @@ it("clears only the Dark Power name, retains its permanent reveal, and retries r
     screen.getByRole("button", { name: "Clear Dark Power card name" }),
   );
   expect(screen.queryByRole("heading", { name: "Rising Dread" })).toBeNull();
+  expect(screen.getByRole("heading", { name: "Dark Power Revealed" })).toBeVisible();
+  expect(screen.queryByRole("button", { name: "Clear Dark Power card name" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Reveal without a card name (Dark Power)" })).toBeNull();
   accepting = false;
   fireEvent.click(
     screen.getByRole("button", { name: "Choose Volatile Temper" }),
@@ -65,4 +68,24 @@ it("clears only the Dark Power name, retains its permanent reveal, and retries r
     summarizePlay(saved).entries.find((e) => e.momentType === "dark-power")
       ?.killerCard,
   ).toBe("Volatile Temper");
+});
+
+it("keeps an earlier recorded name available for correction outside the current catalog", () => {
+  const reveal = newPlayEvent({
+    kind: "moment",
+    momentType: "finale",
+    text: "Finale revealed",
+    killerCard: "Earlier Finale name",
+    permanent: true,
+  });
+  const start = newPlayEvent({ kind: "start", saved: 0, killed: 0, round: 1 });
+  const save = vi.fn(() => true);
+  render(<KillerCards killer="Inkanyamba" typeOnly="finale" events={[start, reveal]} onEvent={save} />);
+
+  expect(screen.getByRole("heading", { name: "Finale Revealed" })).toBeVisible();
+  expect(screen.getByText("Earlier Finale name", { exact: true })).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Clear Finale card name" }));
+  expect(save).toHaveBeenCalledWith(expect.objectContaining({
+    kind: "details", target: reveal.id, killerCard: "",
+  }));
 });

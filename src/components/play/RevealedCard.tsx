@@ -7,10 +7,12 @@ export function RevealedCard({
   card,
   label,
   children,
+  showEyebrow = true,
 }: {
   card: IllustratedKillerCard;
   label: string;
   children?: ReactNode;
+  showEyebrow?: boolean;
 }) {
   return (
     <div
@@ -26,7 +28,7 @@ export function RevealedCard({
         <span className="module-revealed-stamp">
           Revealed{card.epic ? " · Epic" : ""}
         </span>
-        <span className="cinematic-eyebrow">{label}</span>
+        {showEyebrow && <span className="cinematic-eyebrow">{label}</span>}
         <h4>{card.name}</h4>
         {children ?? <span className="module-revealed-rule" aria-hidden="true" />}
       </div>
