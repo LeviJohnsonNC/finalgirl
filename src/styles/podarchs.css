@@ -10,13 +10,69 @@
 }
 
 .podarch-controls { display: grid; gap: 1rem; }
-.play-module-content .podarch-controls > .play-illustrated-tile {
+.podarch-assimilation {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #6d403b;
+  border-radius: 8px;
+  background: #131012;
+}
+.play-module-content .podarch-assimilation > .play-illustrated-tile {
   width: 100%;
-  height: clamp(145px, 20vw, 235px);
+  height: clamp(195px, 27vw, 310px);
   min-height: 0;
   aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
 }
-.podarch-controls > .play-illustrated-tile > img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.podarch-assimilation > .play-illustrated-tile:focus-visible {
+  outline-offset: -4px;
+}
+.podarch-assimilation > [data-has-portrait]::after {
+  background: linear-gradient(0deg, #050909f2, transparent 47%);
+}
+@media (min-width: 800px) {
+  .podarch-assimilation > [data-has-portrait] > .play-module-art {
+    inset: 0 0 0 auto;
+    width: min(82%, 820px);
+    mask-image: linear-gradient(90deg, transparent, #000 28%);
+  }
+  .podarch-assimilation > [data-has-portrait]::after {
+    background: linear-gradient(0deg, #050909ce, transparent 26%);
+  }
+}
+.podarch-assimilation-status,
+.podarch-assimilation-error {
+  margin: 0;
+  padding: 10px 13px;
+  color: #decebb;
+  font-size: .88rem;
+}
+.podarch-assimilation-error { color: #ffd0bc; }
+.podarch-assimilation-strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 0 12px 10px;
+  scrollbar-color: #826553 #131012;
+}
+.podarch-assimilation-strip:focus-visible {
+  outline: 2px solid #e1b49c;
+  outline-offset: -2px;
+}
+.podarch-assimilation-frame {
+  flex: 0 0 clamp(52px, 7vw, 83px);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid #77574c;
+  border-radius: 3px;
+  background: #271c1e;
+}
+.podarch-assimilation-frame:first-child { margin-inline-start: auto; }
+.podarch-assimilation-frame[data-latest] {
+  border-color: #e1b49c;
+}
 .module-revealed-hero[data-has-controls] .podarch-objective {
   display: grid;
   gap: 8px;
