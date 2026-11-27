@@ -74,11 +74,13 @@ it("keeps an earlier recorded name available for correction outside the current 
   const reveal = newPlayEvent({
     kind: "moment",
     momentType: "finale",
+    text: "Finale revealed",
     killerCard: "Earlier Finale name",
     permanent: true,
   });
+  const start = newPlayEvent({ kind: "start", saved: 0, killed: 0, round: 1 });
   const save = vi.fn(() => true);
-  render(<KillerCards killer="Inkanyamba" typeOnly="finale" events={[reveal]} onEvent={save} />);
+  render(<KillerCards killer="Inkanyamba" typeOnly="finale" events={[start, reveal]} onEvent={save} />);
 
   expect(screen.getByRole("heading", { name: "Finale Revealed" })).toBeVisible();
   expect(screen.getByText("Earlier Finale name", { exact: true })).toBeVisible();
