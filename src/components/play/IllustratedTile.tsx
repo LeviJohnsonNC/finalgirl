@@ -13,7 +13,7 @@ export function IllustratedTile({
   ...button
 }: {
   art: ModuleArt;
-  title: string;
+  title?: string;
   status: string;
   children?: ReactNode;
 } & ButtonHTMLAttributes<HTMLButtonElement>) {
@@ -25,7 +25,7 @@ export function IllustratedTile({
     >
       <ModuleArtwork art={art} />
       <span className="play-tile-caption">
-        <strong>{title}</strong>
+        {title && <strong>{title}</strong>}
         {status && <small className="play-tile-state">{status}</small>}
       </span>
       {children}

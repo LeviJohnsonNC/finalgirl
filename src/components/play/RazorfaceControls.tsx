@@ -106,8 +106,9 @@ export function RazorfaceControls({events, onEvent, blocked = false, razorfaceFr
     <header className="razorface-heading">
       <div>
         <h3>Afflictions</h3>
-        <p aria-live="polite">{state.active === undefined ? 'Record the face-up cards from your table.'
-          : `${active.length} in play${state.purged.length ? ` · ${state.purged.length} purged` : ''}`}</p>
+        {state.active !== undefined && <p aria-live="polite">
+          {`${active.length} in play${state.purged.length ? ` · ${state.purged.length} purged` : ''}`}
+        </p>}
       </div>
       <p className="razorface-status" aria-live="polite">{canReveal || state.result === 'revived' ? <Unlink2 aria-hidden /> : <Link2 aria-hidden />}{title}</p>
     </header>

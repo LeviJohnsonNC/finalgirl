@@ -33,11 +33,11 @@ export function CreechHunters({ state, onEvent, onGroup, onOutcome, onCorrect }:
     }
   };
   return <section aria-label="Ghost Hunters" className="creech-hunter-section" data-module-control="character">
-    <h3>Ghost Hunters</h3>
     {!known ? <>
       <IllustratedTile className="creech-scene" art={creechArt.hunters} title="Ghost Hunters" status={active ? 'Choose participating hunters' : state['event.hunters'] === 'ended' ? 'Ended · Activate' : 'Not recorded · Activate'} data-state={active ? 'active' : state['event.hunters'] ?? 'unknown'} aria-label="View Ghost Hunters" onClick={() => onEvent(!active)} />
       {active && <div className="creech-editor"><div className="creech-color-choices">{CREECH_PEOPLE.map(h => <label key={h.id}><input type="checkbox" checked={colors.includes(h.id)} onChange={e => setColors(e.target.checked ? [...colors, h.id] : colors.filter(c => c !== h.id))} />{h.id[0].toUpperCase() + h.id.slice(1)}</label>)}</div><button onClick={() => onGroup(colors)}>Record participating hunters</button></div>}
     </> : <>
+      <h3>Ghost Hunters</h3>
       <button className="creech-hunter-summary" aria-label="View Ghost Hunters" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}><span>{summary}</span><small>{roster.filter(h => state[`hunter.${h.id}`] === 'in-play').length} in play · {expanded ? 'Hide' : 'Show'}</small></button>
       {expanded && <>
         <div className="creech-hunters">

@@ -25,7 +25,7 @@ test('Podarch moments, hostile transition, paired Finale and persistence', async
   await expect(page.getByRole('group',{name:'Killer Health tracker'})).toHaveCount(0);
   await openModule(page,'podarchs');
   expect((await log()).length).toBe(2);
-  const assimilation = panel.getByRole('button',{name:/Victim assimilated/});
+  const assimilation = panel.getByRole('button',{name:'Record assimilation',exact:true});
   const receipt = panel.getByRole('region',{name:'Victim assimilation',exact:true}).getByRole('status');
   await page.evaluate(key => {
     const original = Storage.prototype.setItem;
@@ -144,7 +144,7 @@ test('Assimilation portraits grow past twelve and keep their history on reload a
   await page.setViewportSize({width,height:width === 390 ? 844 : 768});
   await openModule(page,'podarchs');
   const gallery = page.getByRole('region',{name:'Victim assimilation',exact:true});
-  const action = gallery.getByRole('button',{name:'Victim assimilated',exact:true});
+  const action = gallery.getByRole('button',{name:'Record assimilation',exact:true});
   const status = gallery.getByRole('status');
   const photo = action.locator('img');
   const strip = gallery.getByRole('region',{name:'Assimilation portraits'});

@@ -66,10 +66,15 @@ test("MegaBGCon hides retired controls and replays saved effects alongside event
   await lunch.click();
   await panel.getByRole("button", { name: "End Action phase" }).click();
   await expect(panel.getByText("1 Action phase left")).toBeVisible();
-  await panel.getByText("Medical Buggy", { exact: true }).first().click();
+  const buggySummary = panel.locator("summary").filter({ hasText: "Medical Buggy" });
+  await buggySummary.click();
   await panel.getByRole("button", { name: "Medical Buggy Add when Keys are found" }).click();
   await panel.getByRole("button", { name: "Spend · Deal 2 to Killer" }).click();
-  await expect(panel.getByText("Medical Buggy · Spent")).toBeVisible();
+  await expect(panel.getByRole("button", { name: "Medical Buggy Spent", exact: true })).toBeVisible();
+  await expect(buggySummary.getByText("· Spent")).toBeHidden();
+  await buggySummary.click();
+  await expect(buggySummary.getByText("· Spent")).toBeVisible();
+  await buggySummary.click();
   await panel.getByRole("button", { name: "Undo Buggy hit" }).click();
   const saved = await page.evaluate(key => JSON.parse(localStorage.getItem(key)!), key);
   expect(validPlayLog(saved.playEvents)).toBe(true);
@@ -84,7 +89,7 @@ test("MegaBGCon hides retired controls and replays saved effects alongside event
   await page.reload();
   await page.getByRole("button", { name: "RESUME GAME", exact: true }).click();
   await expect(panel.getByRole("button", { name: "Wet Floor Van Ryder Games" })).toBeVisible();
-  await expect(panel.getByText("Medical Buggy · In play")).toBeVisible();
+  await expect(panel.getByRole("button", { name: "Medical Buggy In play", exact: true })).toBeVisible();
   await panel.getByText("Special Victims", { exact: true }).click();
   await panel.getByRole("button", { name: "Add Game Designer" }).click();
   await choose(page, "Booth drawn", "Hatrock Games");

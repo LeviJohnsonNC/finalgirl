@@ -19,6 +19,7 @@
 .con-grid > * { min-width: 0; }
 .con-disclosure { border-top: 1px solid #514333; min-width: 0; }
 .con-disclosure > summary { color: #eee0c8; cursor: pointer; padding-block: .7rem; min-width: 0; }
+.con-disclosure[open] > summary .con-summary-status { display: none; }
 .con-disclosure .con-grid { margin-bottom: .2rem; }
 .con-starting { padding: .5rem .65rem; border: 1px solid #655342; border-radius: .35rem; justify-content: space-between; }
 .con-starting > .con-editor { flex: 1 0 100%; }

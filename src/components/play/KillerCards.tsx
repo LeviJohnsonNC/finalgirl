@@ -48,8 +48,9 @@ export function KillerCardChoices({
           data-epic={card.epic || undefined}
           art={card.art}
           title={card.name}
-          status={`${selected?.id === card.id ? "Revealed" : "Choose when revealed"}${card.epic ? " · Epic" : ""}`}
+          status={card.epic ? "Epic" : ""}
           aria-label={`Choose ${second ? "second power " : ""}${card.name}`}
+          aria-description={card.epic ? "Epic" : undefined}
           aria-pressed={selected?.id === card.id}
           disabled={disabled(card.name)}
           onClick={() => choose(card.name)}
@@ -126,10 +127,9 @@ export function KillerCards({
           const reveal = entries.find(
             (event) => event.kind === "moment" && event.momentType === type,
           );
-          const selected = cards.find(
-            (card) => card.name === reveal?.killerCard,
-          );
-          const autoRevealed=hunter&&hunterHasReveal(hunter,type);
+          const recordedName = reveal?.killerCard;
+          const selected = cards.find(card => card.name === recordedName);
+          const revealed = Boolean(reveal || (hunter && hunterHasReveal(hunter, type)));
           const label = type === "dark-power" ? "Dark Power" : "Finale";
           return (
             <section
@@ -139,16 +139,17 @@ export function KillerCards({
               key={type}
               aria-label={`${label} selection`}
             >
-              <h3>{label}</h3>
-              {(reveal || autoRevealed) && !selected && (
-                <p className="module-control-help">
-                  {reveal?.killerCard || "Card name not specified"}
-                </p>
+              <h3>
+                {label}
+                {revealed && !selected && <> <span className="module-reveal-state">Revealed</span></>}
+              </h3>
+              {recordedName && !selected && (
+                <p className="module-control-help">{recordedName}</p>
               )}
               {selected && (killer === PODARCHS && type === "finale" ? (
                 <PodarchFinaleControl card={selected} entries={entries} events={events} onEvent={onEvent} disabled={disabled} />
               ) : (
-                <RevealedCard card={selected} label={label} />
+                <RevealedCard card={selected} label={label} showEyebrow={false} />
               ))}
               {killer === RATCHET_LADY && type === 'finale' &&
                 <RatchetFinaleControl events={events} onEvent={onEvent} disabled={disabled} />}
@@ -168,13 +169,14 @@ export function KillerCards({
                   choose={(name) => choose(type, name)}
                 />
               )}
-              {(reveal||!autoRevealed)&&<button
+              {(recordedName || !revealed) && <button
+                type="button"
                 className="module-unnamed"
                 disabled={disabled}
                 onClick={() => choose(type, "")}
-                aria-label={`${reveal ? "Clear" : "Record"} ${label} card name`}
+                aria-label={recordedName ? `Clear ${label} card name` : `Reveal without a card name (${label})`}
               >
-                {reveal ? "Clear card name" : "Reveal without a card name"}
+                {recordedName ? "Clear card name" : "Reveal without a card name"}
               </button>}
             </section>
           );
@@ -183,7 +185,7 @@ export function KillerCards({
       {killer === "Hans" && hans.finale === "Dark, Darker, Darkest" && (
         <section className="module-second-power">
           <h3>Second Dark Power</h3>
-          {second && <RevealedCard card={second} label="Second Dark Power" />}
+          {second && <RevealedCard card={second} label="Second Dark Power" showEyebrow={false} />}
           {(!second || editingSecond) && (
             <KillerCardChoices
               cards={secondCards}

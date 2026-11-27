@@ -27,8 +27,36 @@ export function MarrekControls({killer, events,onEvent,blocked}:ControlsProps){
    <article data-state={s.plank===null?'unknown':s.plank?'active':'inactive'}><IllustratedTile art={marrekArt(s.plank?'plank-on':'plank-off')} title="Plank" status={s.plank?'Placed':s.plank===null?'Placement not recorded':'Not placed'} aria-label="Toggle Plank placement" aria-pressed={s.plank===null?'mixed':!!s.plank} onClick={()=>commit({command:'plank',value:!s.plank})}/></article>
   </div></section>
   <section aria-label="Warehouse ongoing Events"><h3>Ongoing effects</h3><div className="marrek-pairs">{([{id:'days',name:'“It Has Been 0 Days Since…”'},{id:'smarter',name:'Smarter Than They Look'}] as const).map(e=><EventControl key={e.id} name={e.name} value={s[e.id]===null?undefined:s[e.id]?'active':'ended'} art={marrekArt(e.id)} interaction="toggle" onActivate={()=>commit({command:'ongoing',id:e.id,value:true})} onEnd={()=>commit({command:'ongoing',id:e.id,value:false})} onClear={()=>commit({command:'ongoing',id:e.id,value:null})}/>)}</div></section>
-  <section aria-label="Warehouse Severed Heads"><h3>Tumbling Boxes</h3><div className="marrek-pairs"><article data-state={s.heads===null?'unknown':s.heads>0?'active':'inactive'}><IllustratedTile art={marrekArt('heads')} title="Severed Head tokens" status={s.heads===null?'Placement not recorded':s.heads===0?'No tokens · Event inactive':`${s.heads} remaining`} aria-label="Record four physically placed Head tokens" disabled={blocked||s.heads!==null&&s.heads>0} onClick={()=>commit({command:'heads',value:4})}/></article><div className="marrek-count">{s.heads!==null&&<><div role="group" aria-label="Severed Heads remaining"><button aria-label="Remove one Head token" disabled={s.heads===0} onClick={()=>commit({command:'heads',value:s.heads!-1})}>−</button><output aria-label="Heads remaining">{s.heads}</output><button aria-label="Restore one Head token" disabled={blocked||s.heads===4} onClick={()=>commit({command:'heads',value:s.heads!+1})}>+</button></div></>}</div></div></section>
-  <section aria-label="Warehouse truck arrivals"><h3>Trucks Are Here!</h3><div className="marrek-pairs"><article data-state={s.trucks?trucksActive(s)?'active':'inactive':'unknown'}><IllustratedTile art={marrekArt('trucks')} title="Trucks Are Here!" status={!s.trucks?'Not recorded':trucksActive(s)?'Deliveries pending':'Both entered · Event ended'} aria-label="Record physical Trucks Event" disabled={blocked||!!s.trucks} onClick={()=>commit({command:'trucks',intent:'resolve'})}/></article><div>{s.trucks&&<><p className="marrek-muted">{trucksActive(s)?'Deliveries recorded':'Both Victims entered · Event ended'}</p><p className="marrek-muted">{(['a','b'] as const).map(id=>`Dock ${id.toUpperCase()}: ${s.trucks![id]==='entered'?'entered play':s.trucks![id]==='waiting'?'waiting':'not recorded'}`).join(' · ')}</p><button className="play-text-action" onClick={()=>commit({command:'clear-trucks'})}>Clear mistaken record</button></>}</div></div></section>
+  <section aria-label="Warehouse Severed Heads">
+   <h3>Tumbling Boxes</h3>
+   <div className="marrek-pairs">
+    <article data-state={s.heads===null?'unknown':s.heads>0?'active':'inactive'}>
+     <IllustratedTile art={marrekArt('heads')} title="Severed Head tokens"
+       status={s.heads===null?'Placement not recorded':s.heads===0?'Event inactive':''}
+       aria-label="Record four physically placed Head tokens" disabled={blocked||s.heads!==null&&s.heads>0}
+       onClick={()=>commit({command:'heads',value:4})}/>
+    </article>
+    <div className="marrek-count">{s.heads!==null&&<div role="group" aria-label="Severed Heads remaining">
+     <button aria-label="Remove one Head token" disabled={s.heads===0} onClick={()=>commit({command:'heads',value:s.heads!-1})}>−</button>
+     <output aria-label="Heads remaining">{s.heads}</output>
+     <button aria-label="Restore one Head token" disabled={blocked||s.heads===4} onClick={()=>commit({command:'heads',value:s.heads!+1})}>+</button>
+    </div>}</div>
+   </div>
+  </section>
+  <section aria-label="Warehouse truck arrivals">
+   <div className="marrek-pairs">
+    <article data-state={s.trucks?trucksActive(s)?'active':'inactive':'unknown'}>
+     <IllustratedTile art={marrekArt('trucks')} title="Trucks Are Here!"
+       status={!s.trucks?'Not recorded':trucksActive(s)?'Deliveries pending':'Both Victims entered · Event ended'}
+       aria-label="Record physical Trucks Event" disabled={blocked||!!s.trucks}
+       onClick={()=>commit({command:'trucks',intent:'resolve'})}/>
+    </article>
+    <div>{s.trucks&&<>
+     <p className="marrek-muted">{(['a','b'] as const).map(id=>`Dock ${id.toUpperCase()}: ${s.trucks![id]==='entered'?'entered play':s.trucks![id]==='waiting'?'waiting':'not recorded'}`).join(' · ')}</p>
+     <button className="play-text-action" onClick={()=>commit({command:'clear-trucks'})}>Clear mistaken record</button>
+    </>}</div>
+   </div>
+  </section>
   <details className="marrek-traps"><summary>Placed Booby Traps{s.traps?.length?` · ${s.traps.length}`:''}</summary>{!s.initialized&&<p className="marrek-muted">Other existing trap placements are not recorded.</p>}<div className="marrek-grid">{s.traps?.map(id=><article key={id}><IllustratedTile art={marrekArt('trap')} title="Booby Trap" status={MARREK_SPACES.find(p=>p.id===id)!.name} disabled onClick={()=>{}}/><button className="play-text-action" onClick={()=>commit({command:'trap',space:id,present:false})}>Remove trap<span className="sr-only">: {MARREK_SPACES.find(p=>p.id===id)!.name}</span></button></article>)}</div><div className="marrek-placement"><label>Actual space<PlaySelect aria-label="Booby Trap space" value={trapSpace} onChange={e=>setTrapSpace(e.target.value)}><option value="">Choose a board space</option>{MARREK_SPACES.filter(p=>!s.traps?.includes(p.id)).slice().sort((a,b)=>a.name.localeCompare(b.name)).map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</PlaySelect></label><button disabled={blocked||!trapSpace} onClick={()=>{if(commit({command:'trap',space:trapSpace,present:true}))setTrapSpace('');}}>Record placed trap</button></div></details>
   {(message||error)&&<p role="alert">{message||error}</p>}
  </fieldset>;

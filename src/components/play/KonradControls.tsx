@@ -20,7 +20,7 @@ const title=(value:string)=>value.charAt(0).toUpperCase()+value.slice(1).replace
 
 function SwitchPicture({name,on,inactive,active,onChange}:{name:string;on:boolean|undefined;inactive:string;active:string;onChange:(value:boolean)=>unknown}){
  return <article className="konrad-switch" data-state={on===undefined?'unknown':on?'on':'off'}>
-  <IllustratedTile art={konradArt(on?active:inactive)} title={name} status={on===undefined?'Not recorded · Click to turn on':on?'On · Click to turn off':'Off · Click to turn on'} aria-label={`Toggle ${name}`} aria-pressed={on} onClick={()=>onChange(on!==true)}/>
+  <IllustratedTile art={konradArt(on?active:inactive)} title={name} status={on===undefined?'Not recorded':on?'On':'Off'} aria-label={`Toggle ${name}`} aria-description={on===undefined?'Not recorded':undefined} aria-pressed={on} onClick={()=>onChange(on!==true)}/>
  </article>;
 }
 

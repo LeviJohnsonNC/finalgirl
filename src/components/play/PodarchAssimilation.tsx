@@ -43,9 +43,9 @@ export function PodarchAssimilation({ entries, events, onEvent, disabled }: {
   return (
     <section className="podarch-assimilation" aria-label="Victim assimilation">
       <IllustratedTile className="module-control-tile"
-        art={podarchArt(latest?.art ?? 'assimilation-empty')} title="Victim assimilated" status="Record this moment"
+        art={podarchArt(latest?.art ?? 'assimilation-empty')} title="Record assimilation" status=""
         data-has-portrait={Boolean(latest) || undefined}
-        aria-label="Victim assimilated" aria-describedby={statusId} disabled={disabled} onClick={assimilate} />
+        aria-describedby={statusId} disabled={disabled} onClick={assimilate} />
       <p id={statusId} role="status" className="podarch-assimilation-status">{status}</p>
       {latest && (
         <div className="podarch-assimilation-strip" dir="rtl" ref={strip}
