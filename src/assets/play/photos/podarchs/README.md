@@ -11,11 +11,16 @@ Original generated 1980s consumer-camera stills. The photographed print componen
 | cover | exec-23bbfd9c-c930-4811-9839-2f7fe809c017.png | `d2939fae0cec4e85338d9bce20865890ab999286cfb3ba3bb5229ec9a1f20500` |
 | Countdown 6–3 | exec-05f5a835-db3c-42c7-a42d-13dc621629d9.png | `b7a434dd68ac920513911a0da5c66acc10bc5a06326f71228e54856bcc4f5359` |
 | Countdown 2–0 | exec-a122965b-e1df-41b4-86c8-67c5eaf1cbfd.png | `c225490171a0407cafc6d060681b102f6880c1d2b64dc068e4c39dbf8500f82d` |
+| Empty street | exec-76a5c1f3-b885-4e9b-aaec-b69ec393ee92.png | `bb1d9c650bca60c84071d699c2f479c1e26ab2b600ada1730883188166c6c2a6` |
+| Assimilated portraits 1–4 | exec-c1d46ffb-a2fc-494f-9164-81ce65fd0c56.png | `9250d5ed0feca1ef92089cb8eadcb2b33d85611a451b24a15c3e8c189f534e96` |
+| Assimilated portraits 5–8 | exec-b828d950-ed7e-49c9-8cf3-f2b3127f09d4.png | `a9df47538b4b419544a796d3779b1b6f173a2d26cc5feb81ac4883ead425a619` |
+| Assimilated portraits 9–12 | exec-5f85a2e7-8cf3-4d12-86d6-f7eeb44cc3d8.png | `803d1aeb95f76614b74e10c5ba5f37dacb56ba39a96c238f1648cf6662d30f8e` |
 
 | Assets | Surface and crop |
 | --- | --- |
 | banner, docile, hostile | Wide owner headers with the photograph anchored to the right. Docile and Hostile use head-height focal points on the same neighbor. |
-| flowers, pod, assimilation | Plant, Pod and replacement in Rules. The assimilation photograph also opens the optional Play moment. |
+| flowers, pod, assimilation | Plant, Pod and replacement in Rules. |
+| assimilation-empty, assimilation-1 through assimilation-12 | Empty Play scene and the twelve neighbors added by the optional assimilation moment. |
 | mob, obstinate, hysteria, targeted, urgency | Three Dark Powers and two Minors, each with an individual scene. The Sense of Urgency crop keeps the runners' faces in view. |
 | greenhouse, ruins, countdown, leader | Finale cards and objectives, with a separate destroyed Greenhouse. |
 | countdown-0 through countdown-6 | Seven alternate garden stills for the selected Born Again card. Each shows its matching number on an in-scene mechanical timer, with an opened Pod at zero. |
@@ -23,3 +28,5 @@ Original generated 1980s consumer-camera stills. The photographed print componen
 | Joan, healthy Joan, critical Joan | Same actor, dark red turtleneck, pinned dark hair and pendant. The studio identifier and private JPEG manifest live separately from the Play catalog. |
 
 The color Play photographs preserve native contact-sheet resolution. The header strips are 764px wide. Card scenes are 508px wide with 288×162 chooser exports. Four Terror close-ups are 724×543. The new countdown stages are 764×508. The asset check tests every expected file, independent bytes, dimensions and a 96 KiB cap per still or 24 KiB per choice.
+
+The empty street export is 960×540. The three portrait sheets use row-major order and a three-pixel safety inset for 762×506 portraits. The strip uses separately cropped 288×162 thumbnails. The empty street and portraits borrow the color and practical effects of the existing Docile and assimilation stills. The first twelve recorded moments show a different neighbor, from the woman on the porch to the man in the greenhouse. The film strip repeats this sequence for further observations.

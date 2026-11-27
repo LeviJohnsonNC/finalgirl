@@ -1,5 +1,5 @@
 import { activeGame, expect, test, userId } from './fixtures';
-import { chooseKillerCard, openModule, openMinorPowers, showMinorChoices } from './play-helpers';
+import { chooseKillerCard, openHistory, openModule, openMinorPowers, showMinorChoices } from './play-helpers';
 import { newPlayEvent, summarizePlay, type PlayEvent } from '../../src/lib/play/events';
 
 test('Podarch moments, hostile transition, paired Finale and persistence', async ({page,archive}, info) => {
@@ -26,7 +26,7 @@ test('Podarch moments, hostile transition, paired Finale and persistence', async
   await openModule(page,'podarchs');
   expect((await log()).length).toBe(2);
   const assimilation = panel.getByRole('button',{name:/Victim assimilated/});
-  const receipt = page.getByText('Victim assimilation recorded', { exact: true });
+  const receipt = panel.getByRole('region',{name:'Victim assimilation',exact:true}).getByRole('status');
   await page.evaluate(key => {
     const original = Storage.prototype.setItem;
     Storage.prototype.setItem = function (name, value) {
@@ -39,10 +39,11 @@ test('Podarch moments, hostile transition, paired Finale and persistence', async
   }, key);
   await assimilation.click();
   await expect(panel.getByRole('alert')).toContainText('could not be saved');
-  await expect(receipt).toHaveCount(0);
+  await expect(receipt).toHaveText('No assimilations recorded');
+  await expect(assimilation.locator('img')).toHaveAttribute('src',/assimilation-empty/);
   expect(await log()).toHaveLength(2);
   await assimilation.click();
-  await expect(receipt).toBeVisible();
+  await expect(receipt).toHaveText('1 assimilation recorded');
   await expect.poll(async()=>summarizePlay(await log()).entries.length).toBe(3);
   expect(summarizePlay(await log())).toMatchObject({saved:0,killed:0,bloodlust:3});
   await page.getByRole('group',{name:'Bloodlust tracker'}).getByRole('button',{name:/increase bloodlust/i}).click();
@@ -53,7 +54,6 @@ test('Podarch moments, hostile transition, paired Finale and persistence', async
   await showMinorChoices(panel);
   await panel.getByRole('button',{name:'Activate Sense of Urgency'}).click();
   await panel.getByRole('button',{name:'End effect: Sense of Urgency'}).screenshot({
-    style:'[data-sonner-toaster] { visibility: hidden; }',
     path:info.outputPath('sense-of-urgency.jpg'),
   });
   await page.getByRole('button',{name:'Save one victim',exact:true}).click();
@@ -128,6 +128,92 @@ test('Podarch moments, hostile transition, paired Finale and persistence', async
   const summary = summarizePlay(await log());
   expect(summary.killed).toBe(0);
   expect(summary.saved).toBe(1);
+});
+
+test('Assimilation portraits grow past twelve and keep their history on reload and Undo', async ({page,archive}, info) => {
+  test.setTimeout(90000);
+  const key = 'final-girl-active-game-v1:' + userId;
+  const readLog = () => page.evaluate(key => JSON.parse(localStorage.getItem(key)!).playEvents as PlayEvent[], key);
+  const start = newPlayEvent({kind:'start',round:1,saved:0,killed:0});
+  const bloodlust = newPlayEvent({kind:'state',field:'bloodlust',value:0});
+  await archive.install(page,{draft:{...activeGame,selection:{...activeGame.selection,
+    killer:'The Podarchs',finalGirl:'Joan',filmId:'s4-terror-from-beyond'},playMode:true,playEvents:[start,bloodlust]}});
+  await page.goto('/');
+  await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  const width = info.project.name === 'mobile' ? 390 : 1366;
+  await page.setViewportSize({width,height:width === 390 ? 844 : 768});
+  await openModule(page,'podarchs');
+  const gallery = page.getByRole('region',{name:'Victim assimilation',exact:true});
+  const action = gallery.getByRole('button',{name:'Victim assimilated',exact:true});
+  const status = gallery.getByRole('status');
+  const photo = action.locator('img');
+  const strip = gallery.getByRole('region',{name:'Assimilation portraits'});
+  const frames = strip.locator('img');
+  const asset = (id: string, thumb = false) => new RegExp(`/assimilation-${id}${thumb ? '-thumb' : ''}(?:-[\\w-]+)?\\.webp$`);
+  const loaded = () => expect.poll(() => photo.evaluate((image: HTMLImageElement) =>
+    image.complete && image.naturalWidth > 0)).toBe(true);
+  const capture = (id: string) => gallery.screenshot({animations:'disabled',style:'footer { visibility: hidden; }',
+    path:info.outputPath(`assimilation-${id}.jpg`)});
+
+  await expect(status).toHaveText('No assimilations recorded');
+  await expect(photo).toHaveAttribute('src',asset('empty'));
+  await expect(strip).toHaveCount(0);
+  await gallery.scrollIntoViewIfNeeded();
+  await loaded();
+  await capture('empty');
+  expect(await readLog()).toHaveLength(2);
+
+  for (let count = 1; count <= 13; count++) {
+    if (count === 1) {
+      await action.focus();
+      await action.press('Enter');
+    } else {
+      await action.click();
+    }
+    const portrait = String((count - 1) % 12 + 1);
+    await expect(status).toHaveText(count === 1 ? '1 assimilation recorded' : `${count} assimilations recorded`);
+    await expect(photo).toHaveAttribute('src',asset(portrait));
+    await expect(frames).toHaveCount(count);
+    await expect(frames.first()).toHaveAttribute('src',asset(portrait,true));
+    await loaded();
+    await capture(String(count));
+  }
+  expect(summarizePlay(await readLog())).toMatchObject({saved:0,killed:0,bloodlust:0});
+  const beforeReload = await readLog();
+
+  await page.reload();
+  await page.getByRole('button',{name:'RESUME GAME',exact:true}).click();
+  await openModule(page,'podarchs');
+  await expect(status).toHaveText('13 assimilations recorded');
+  await expect(photo).toHaveAttribute('src',asset('1'));
+  await expect(frames).toHaveCount(13);
+  expect(await readLog()).toEqual(beforeReload);
+  if (info.project.name === 'mobile') {
+    await page.setViewportSize({width:320,height:568});
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+    await expect.poll(() => strip.evaluate(el => el.scrollWidth > el.clientWidth)).toBe(true);
+    await expect.poll(() => strip.evaluate(el => el.scrollLeft)).toBe(0);
+    await gallery.scrollIntoViewIfNeeded();
+    await loaded();
+    await capture('narrow-phone');
+    await strip.focus();
+    await strip.press('ArrowLeft');
+    await expect.poll(() => strip.evaluate(el => el.scrollLeft)).toBeLessThan(0);
+  }
+
+  await openHistory(page);
+  const timeline = page.getByRole('region',{name:'Game timeline',exact:true});
+  const undo = timeline.getByRole('button',{name:/^Undo A Victim was assimilated/});
+  await undo.first().click();
+  await expect(photo).toHaveAttribute('src',asset('12'));
+  await expect(frames).toHaveCount(12);
+  await undo.nth(2).click();
+  await expect(photo).toHaveAttribute('src',asset('12'));
+  await expect(frames.nth(2)).toHaveAttribute('src',asset('9',true));
+  await expect(status).toHaveText('11 assimilations recorded');
+  await timeline.getByRole('button',{name:/^Restore A Victim was assimilated/}).nth(1).click();
+  await expect(frames.nth(2)).toHaveAttribute('src',asset('10',true));
+  await expect(status).toHaveText('12 assimilations recorded');
 });
 
 test('Collection and mixed-cast Rules show the photographic references without adding observations', async ({page, archive}, info) => {
