@@ -77,6 +77,7 @@ Their hair is matted, stringy, and disheveled, caked with grime and the remnants
 They appear as a weathered, decaying tide of humanity, functioning as a singular, overwhelming force rather than individuals. They wear soiled, tattered, and distressed clothing—ranging from business suits to casual denim—that looks genuinely worn and abandoned. The overall aesthetic is gritty, grounded, and cinematic, reminiscent of mid-century creature horror.`,
 
   // Season 3 - Terror From Destiny (Vignette)
+  "The Volk'ar": 'A four-armed alien trophy hunter with violet skin, a horned, tusked face, yellow eyes, a skull pauldron, crescent blades and a refractive cloak.',
   'The Podarchs': 'A quiet cluster of eerily ordinary townspeople, standing around a fibrous alien seed pod. Replacements retain their human faces and memories.',
   'Destiny': `Ultra-realistic 1980s film photograph, shot on 35mm with natural grain and slight color fade. Nighttime or late dusk. Practical lighting only (streetlights, lamps, headlights), creating deep shadows and warm highlights. Scene suggests a strange accident or near-miss, but the cause is unclear. Everyday objects slightly out of place—a fallen ladder, spilled groceries, a swinging door, a flickering light, a stopped clock, rain on pavement reflecting light. No visible attacker. No supernatural glow. Just eerie coincidence.
 
@@ -96,5 +97,5 @@ Emotional tone: paranoid fun, "who's behind the mask?", teen horror energy.`
  * Returns undefined if no description exists
  */
 export function getKillerDescription(name: string): string | undefined {
-  return KILLER_DESCRIPTIONS[name];
+  return KILLER_DESCRIPTIONS[name.replace(/’/g,"'")];
 }

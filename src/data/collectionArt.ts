@@ -266,7 +266,7 @@ export const COLLECTION_ART: Record<string, CollectionArt> = {
     titleScale: 0.79,
     titleFont: "Nosifer",
     titleWeight: 400,
-    scene: "upcoming-green",
+    scene: "green-terror",
     accent: "#a6c37a",
     pale: "#e2ddbd",
     lettering: "brush",

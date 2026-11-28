@@ -173,6 +173,9 @@ const CHARACTER_FILES: Record<string, string> = {
   'Birds': 'birds.png',
   'Patsy': 'patsy.png',
   'Zombies': 'zombies.png',
+  'Dakota': 'dakota.png',
+  'Alois': 'alois.png',
+  "The Volk'ar": 'volkar.png',
   'Joan': 'joan.png',
   'The Podarchs': 'podarchs.png',
   'Gabrielle': 'gabrielle.png',
@@ -183,6 +186,7 @@ const CHARACTER_FILES: Record<string, string> = {
 };
 
 const LOCATION_FILES: Record<string, string> = {
+  'Pesadilla Verde': 'pesadilla-verde.png',
   'Buddyland': 'buddyland.png',
   'Camp Happy Trails': 'camp-happy-trails.png',
   'Maple Lane': 'maple-lane.png',
@@ -224,6 +228,7 @@ const FILM_BOX_ART_FILES: Record<string, string> = {
   's4-terror-from-beyond': 'terror-from-beyond.png',
   's3-terror-from-destiny': 'terror-from-destiny.png',
   's4-buddyland': 'bad-times-at-buddyland.png',
+  's4-green-terror': 'the-green-terror.png',
   's4-shriek': 'shriek.png',
   's4-rotten-harvest': 'rotten-harvest.png',
 };
@@ -316,7 +321,7 @@ const BASE_FEATURE_FILMS: Omit<FeatureFilm, 'boxArt' | 'boxArtAi'>[] = [
   { id: 's4-demon-shadows', name: 'A Demon in the Shadows', season: 4, killer: 'TBD', location: 'TBD', finalGirls: ['TBD', 'TBD'] },
   { id: 's4-buddyland', name: 'Bad Times at Buddyland', season: 4, killer: 'Billy the Bear', location: 'Buddyland', finalGirls: ['Rena', 'Gwynn'] },
   { id: 's4-rotten-harvest', name: 'A Rotten Harvest', season: 4, killer: 'Grimlash', location: 'Shady Acres', finalGirls: ['Joy', 'Vicky'] },
-  { id: 's4-green-terror', name: 'The Green Terror', season: 4, killer: 'TBD', location: 'TBD', finalGirls: ['TBD', 'TBD'] },
+  { id: 's4-green-terror', name: 'The Green Terror', season: 4, killer: "The Volk'ar", location: 'Pesadilla Verde', finalGirls: ['Dakota', 'Alois'] },
 ];
 
 export const FEATURE_FILMS: FeatureFilm[] = BASE_FEATURE_FILMS.map(film => {
@@ -351,7 +356,7 @@ export const getFilmIdByLocation = (locationName: string): string | null => {
 // Helper to find film ID by killer name
 export const getFilmIdByKiller = (killerName: string): string | null => {
   if (!killerName) return null;
-  const film = FEATURE_FILMS.find(f => f.killer === killerName);
+  const film = FEATURE_FILMS.find(f => f.killer === killerName.replace(/’/g,"'"));
   return film?.id ?? null;
 };
 

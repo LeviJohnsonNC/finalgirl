@@ -40,6 +40,7 @@ const KILLER_MAX_HP: Record<string, number> = {
   'The Eyeless': 8,
 
   // Season 4
+  "The Volk'ar": 10,
   'Grimlash': 10,
   'Billy the Bear': 8,
 };
@@ -58,5 +59,5 @@ export function isKillerUnkillable(name: string): boolean {
  */
 export function getKillerMaxHealth(name: string): number {
   if (UNKILLABLE_KILLERS.has(name) || name==='The Organism') return 0;
-  return KILLER_MAX_HP[name] ?? 9;
+  return KILLER_MAX_HP[name.replace(/’/g,"'")] ?? 9;
 }

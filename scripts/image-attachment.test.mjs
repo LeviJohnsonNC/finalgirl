@@ -450,3 +450,20 @@ test('Christie’s opening uses her own reviewed JPEG and preserves legacy Julie
   assert.deepEqual(opening.openingReferenceNames('Julie','Razorface',false),['Julie']);
   assert.deepEqual(opening.openingReferenceNames('Kenzie','Razorface',false),['Kenzie']);
 });
+
+test('Green Terror openings verify both selected identities from their staged objects', async () => {
+  const killer = "The Volk'ar";
+  const objects = new Map();
+  for (const [name, file] of [[killer, 'the-volk-ar'], ['Alois', 'alois'], ['Dakota', 'dakota']]) {
+    const bytes = readFileSync(new URL('../supabase/reference-assets/' + file + '.jpg', import.meta.url));
+    const sha256 = createHash('sha256').update(bytes).digest('hex');
+    const path = file + '-' + sha256.slice(0,16) + '.jpg';
+    assert.deepEqual(REFERENCE_MANIFEST[name], {path, sha256});
+    objects.set(path, bytes);
+  }
+  for (const girl of ['Dakota', 'Alois']) {
+    const refs = await opening.openingReferences(girl, killer, async path => objects.get(path));
+    assert.deepEqual(refs.map(ref => ref.name), [girl, killer]);
+    await assert.rejects(opening.openingReferences(girl, killer, async () => objects.get(REFERENCE_MANIFEST[killer].path)), /does not match/);
+  }
+});

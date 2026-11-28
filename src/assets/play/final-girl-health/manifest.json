@@ -1126,5 +1126,51 @@
       "height": 768,
       "sha256": "d360224a42d375ab1f995de412518960269fab127cdb9dffa27d7eab713afef0"
     }
+  },
+  {
+    "name": "Alois",
+    "slug": "alois",
+    "original": "src/assets/characters/ai/alois.png",
+    "originalSha256": "83b2e3734e854d3c722fbfc88b8d45be89ccd70ead8ac0916f521b6dbd9b6cd2",
+    "position": "50% 31%",
+    "healthy": {
+      "source": "imagegen-65a239f4d009e062972725b94746a1aa80a0e8dc71a10ac6dfa637485de2836a.png",
+      "nativeWidth": 1536,
+      "nativeHeight": 1024,
+      "width": 768,
+      "height": 512,
+      "sha256": "4f41298c3c90e9382cb03b3815144317f7a77bad4d9877134ef6947ce4ab88aa"
+    },
+    "critical": {
+      "source": "imagegen-eb525089d562c2552a3d5c2bcfa638d17badf9782197af2ac79f26e63303c88a.png",
+      "nativeWidth": 1536,
+      "nativeHeight": 1024,
+      "width": 768,
+      "height": 512,
+      "sha256": "990d37954895751457958f08d73e6cb6120598b81d522d81adaccd259239344b"
+    }
+  },
+  {
+    "name": "Dakota",
+    "slug": "dakota",
+    "original": "src/assets/characters/ai/dakota.png",
+    "originalSha256": "aba1b1ebd5881ee38b003ba05f412c7fefc85628fcec0ed06c44a8e757e83b73",
+    "position": "50% 31%",
+    "healthy": {
+      "source": "imagegen-7db2d79f57a0c59b30c1a87a688eb352a05820017566d0ee569df37c36d50eac.png",
+      "nativeWidth": 1536,
+      "nativeHeight": 1024,
+      "width": 768,
+      "height": 512,
+      "sha256": "25f305d0a0ec6cd0573ea18cfc43eacd4d5a2f5775a41e7a22bd51b3b1d46f21"
+    },
+    "critical": {
+      "source": "imagegen-cd776df7d4bc8a4be02bf0a70c8cc01aa9c8b4ff98bdf6bc2f960642ddcf68ff.png",
+      "nativeWidth": 1536,
+      "nativeHeight": 1024,
+      "width": 768,
+      "height": 512,
+      "sha256": "79cd1d31727c0d13671d5fbeac26506d0aebea176ffca69348319eceeb5cfcc2"
+    }
   }
 ]

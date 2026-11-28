@@ -11,6 +11,7 @@ import { BUDDYLAND_VISUALS } from './buddyland';
  */
 
 export const LOCATION_DESCRIPTIONS: Record<string, string> = {
+  "Pesadilla Verde": "A humid jungle of dense canopy, tangled vines, isolated clearings and a remote supply depot.",
   "Sacred Groves": GROVES_VISUAL,
   'Buddyland': BUDDYLAND_VISUALS.location,
   // Season 3 - Don't Make a Sound
