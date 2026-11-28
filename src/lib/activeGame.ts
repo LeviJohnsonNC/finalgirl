@@ -1,3 +1,5 @@
+import { pesadillaOwnsLog } from '../../supabase/functions/_shared/play/pesadilla';
+import { PESADILLA } from '../../supabase/functions/_shared/play/pesadillaCatalog';
 import {volkarOwnsLog} from '../../supabase/functions/_shared/play/volkar';
 import { HELLSCAPE, HELLSCAPE_MODULE } from "../../supabase/functions/_shared/play/hellscape";
 import { conOwnsLog } from "../../supabase/functions/_shared/play/megabgcon";
@@ -60,6 +62,7 @@ export interface ActiveGame {
   organismSetupVersion?: 1;
   intrudersSetupVersion?: 1;
   mortSetupVersion?: 1;
+  pesadillaSetupVersion?: 1;
   mallSetupVersion?:1;
   falconwoodSetupVersion?: 1;
   slayerSetupVersion?: 1;
@@ -111,6 +114,9 @@ export function isActiveGame(value: unknown): value is ActiveGame {
         (target === undefined || target !== e.moduleData.changes?.required)))) return false;
   if (game.formData?.birdsReview !== undefined &&
       (game.selection?.killer !== BIRDS || !isBirdsReview(game.formData.birdsReview))) return false;
+  if (game.pesadillaSetupVersion !== undefined && (game.pesadillaSetupVersion !== 1 || game.selection?.location !== PESADILLA)) return false;
+  if (Array.isArray(game.playEvents) && !pesadillaOwnsLog({ ...game.selection, startingEvent: game.selection?.startingEvent }, game.playEvents)) return false;
+  if (game.pesadillaSetupVersion !== 1 && game.playEvents?.some(e => e?.moduleData?.module === "pesadilla-verde" && !e.pesadillaAction)) return false;
   if(game.mallSetupVersion!==undefined&&(game.mallSetupVersion!==1||game.selection?.location!==MALL))return false;
   if(game.playEvents?.some(e=>(e.mallReference||e.moduleData?.module===MALL_MODULE)&&game.selection?.location!==MALL||e.moduleData?.module===MALL_MODULE&&!e.mallAction&&(game.mallSetupVersion!==1||e.moduleData.changes.snapshot!==initialMall(game.selection?.startingEvent).snapshot)))return false;
   if (game.ratchetSetupVersion !== undefined && (game.ratchetSetupVersion !== 1 || game.selection?.killer !== RATCHET_LADY)) return false;

@@ -17,6 +17,7 @@ import { MinorPowerControl } from "./MinorPowerControl";
 import { useModuleRecord } from "./useModuleRecord";
 import { FrightControls } from "./FrightControls";
 import { EvomorphControls } from "./EvomorphControls";
+import { PesadillaControls } from "./PesadillaControls";
 import { initialFright } from "../../../supabase/functions/_shared/play/fright";
 
 afterEach(cleanup);
@@ -77,6 +78,20 @@ describe("registered modules use their declared shared interactions", () => {
       ).size,
     ).toBe(moduleDefinitions.length);
   });
+});
+
+describe("Pesadilla Verde mixed casting", () => {
+  it.each(moduleDefinitions.filter(definition => definition.owner === 'killer').map(definition => definition.match))(
+    '%s keeps a fresh Huey and a partly known river hazard independent of the killer',
+    killer => {
+      const onEvent = vi.fn(() => true);
+      render(<PesadillaControls killer={killer} location="Pesadilla Verde" finalGirl="Dakota"
+        pesadillaFresh startingEvent="Piranhas!" events={[]} onEvent={onEvent} />);
+      expect(screen.getByRole('button', { name: /The Huey Clearing is an Exit/ })).toBeVisible();
+      expect(screen.getByRole('button', { name: /Piranhas! River reach unrecorded/ })).toBeVisible();
+      expect(onEvent).not.toHaveBeenCalled();
+    },
+  );
 });
 
 describe("shared player interaction contracts", () => {

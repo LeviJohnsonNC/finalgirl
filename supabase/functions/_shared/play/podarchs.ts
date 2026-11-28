@@ -50,7 +50,7 @@ export function podarchFinishOptions(won: boolean, finale?: { killerCard?: strin
   return branch === 1 ? outcomes.slice(2) : outcomes.slice(0, 3);
 }
 
-export const podarchMinorNames: Record<string,string> = {targeted: 'Targeted Growth', urgency: 'Sense of Urgency', slippery: 'Slippery', bond: 'Twisted Bond'};
+export const podarchMinorNames: Record<string,string> = {targeted: 'Targeted Growth', urgency: 'Sense of Urgency', slippery: 'Slippery', bond: 'Twisted Bond', rivermaster: 'Rivermaster'};
 export function validPodarchField(key: string, value: unknown) {
   if (key === 'assimilated') return value === true;
   if (Object.prototype.hasOwnProperty.call(podarchMinorNames, key)) return value === null || ['active','removed','inactive'].includes(String(value));
@@ -64,6 +64,7 @@ export function podarchOwnsLog(killer: string, entries: readonly {moduleData?: {
     if (moduleData?.module !== PODARCH_MODULE) return true;
     if (killer !== PODARCHS) return false;
     if ('slippery' in (moduleData.changes ?? {})) return location === 'USS Konrad';
+    if ('rivermaster' in (moduleData.changes ?? {})) return location === 'Pesadilla Verde';
     if ('bond' in (moduleData.changes ?? {})) return location === 'Sunnydaze Mall';
     return true;
   });

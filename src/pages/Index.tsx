@@ -1,3 +1,4 @@
+import { PESADILLA } from '../../supabase/functions/_shared/play/pesadillaCatalog';
 import { BirdsResultFields } from '@/components/BirdsResultFields';
 import { RAZORFACE, RAZORFACE_MODULE, razorfaceLatest, razorfaceState } from '../../supabase/functions/_shared/play/razorface';
 import { eligibleStartingEvent } from '../../supabase/functions/_shared/play/podarchEvents';
@@ -187,6 +188,7 @@ const IndexContent = () => {
       ...(selection.location === 'Marrek Warehouse' && {marrekSetupVersion:1 as const}),
       ...(selection.location === 'Shady Acres' && {shadySetupVersion:1 as const}),
       ...(selection.location === 'USS Konrad' && {konradSetupVersion:1 as const}),
+      ...(selection.location === PESADILLA && {pesadillaSetupVersion: 1 as const}),
       ...(selection.location==='Sunnydaze Mall'&&{mallSetupVersion:1 as const}),
       ...(selection.killer === SLAYER && {slayerSetupVersion:1 as const}),
       ...(selection.killer === 'The Hunter' && {hunterSetupVersion:1 as const}),
@@ -499,7 +501,7 @@ const IndexContent = () => {
               birdsRequired={activeGame.selection.birdsRequired}
               falconwoodFresh={activeGame.falconwoodSetupVersion === 1}
               razorfaceFresh={activeGame.razorfaceSetupVersion === 1}
-              stationFresh={activeGame.stationSetupVersion === 1} mortFresh={activeGame.mortSetupVersion === 1} volkarFresh={activeGame.volkarSetupVersion===1}
+              stationFresh={activeGame.stationSetupVersion === 1} mortFresh={activeGame.mortSetupVersion === 1} volkarFresh={activeGame.volkarSetupVersion===1} pesadillaFresh={activeGame.pesadillaSetupVersion===1}
               filmId={gameSelection.filmId}
               key={activeGame.id}
               sessionId={activeGame.id}

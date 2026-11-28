@@ -1,3 +1,4 @@
+import { pesadillaRules, PESADILLA_PROMPT_CONTEXT } from './pesadillaRules';
 import { volkarRules } from './volkarRules';
 import { hellscapeRules, HELLSCAPE_PROMPT_CONTEXT } from "./hellscapeRules";
 import { razorfaceRules, RAZORFACE_PROMPT_CONTEXT } from './razorfaceRules';
@@ -415,7 +416,7 @@ const falconwood: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [volkarRules,podarchRules,razorfaceRules,hellscapeRules,birdsRules,ratchetLadyRules,wolfeRules,stationRules,organismRules,mallRules,hunterRules,tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolfRules, shadyAcres, mortTheTeenageDirtbag, megaBgCon, intruderRules, wingardCottage, falconwood, slayerRules, marrekRules];
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [pesadillaRules, volkarRules,podarchRules,razorfaceRules,hellscapeRules,birdsRules,ratchetLadyRules,wolfeRules,stationRules,organismRules,mallRules,hunterRules,tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolfRules, shadyAcres, mortTheTeenageDirtbag, megaBgCon, intruderRules, wingardCottage, falconwood, slayerRules, marrekRules];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -433,6 +434,7 @@ const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
   "Wolfe Asylum":WOLFE_PROMPT_CONTEXT,
   "Station 2891":STATION_PROMPT_CONTEXT,
  'Sunnydaze Mall':MALL_PROMPT_CONTEXT,
+ 'Pesadilla Verde':PESADILLA_PROMPT_CONTEXT,
  'The Hunter': HUNTER_PROMPT_CONTEXT,
   Evomorph: EVOMORPH_PROMPT_CONTEXT,
   'USS Konrad':KONRAD_PROMPT_CONTEXT,

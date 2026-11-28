@@ -1,3 +1,4 @@
+export const mortLocationMinors: Readonly<Record<string,string>> = {"USS Konrad":"Slippery", "Sunnydaze Mall":"Twisted Bond", "Pesadilla Verde":"Rivermaster"};
 import type { PlayEvent } from "./events.ts";
 
 export const MORT = "Mort the Teenage Dirtbag";
@@ -421,7 +422,7 @@ export function validMortAction(input: unknown): input is MortAction {
       );
     case "location-minor":
       return (
-        ["USS Konrad", "Sunnydaze Mall"].includes(a.location) &&
+        Object.prototype.hasOwnProperty.call(mortLocationMinors, a.location) &&
         typeof a.active === "boolean"
       );
     case "advance":
@@ -782,7 +783,7 @@ export function describeMort(a: MortAction) {
     case "reveal":
       return `Mort revealed · ${name(a.suspect)}`;
     case "location-minor":
-      return `${a.active ? "Revealed" : "Discarded"} ${a.location === "USS Konrad" ? "Slippery" : "Twisted Bond"}`;
+      return `${a.active ? "Revealed" : "Discarded"} ${mortLocationMinors[a.location]}`;
     case "advance":
       return a.track === "horror" ? "Increased Horror" : "Increased Bloodlust";
   }

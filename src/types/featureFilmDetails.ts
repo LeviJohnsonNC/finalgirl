@@ -1,3 +1,4 @@
+import { PESADILLA_SETUPS, PESADILLA_EVENTS } from '../../supabase/functions/_shared/play/pesadillaCatalog';
 import { HELLSCAPE, HELLSCAPE_EVENTS, HELLSCAPE_SETUPS, HELLSCAPE_VISUAL } from "../../supabase/functions/_shared/play/hellscape";
 import { CON_EVENTS, CON_SETUPS } from "../../supabase/functions/_shared/play/megabgconCatalog";
 import { WOLFE_EVENTS, WOLFE_SETUPS } from '../../supabase/functions/_shared/play/wolfeCatalog';
@@ -55,7 +56,7 @@ export const FEATURE_FILM_DETAILS: Record<string, FeatureFilmDetail> = {
       {name:'Dakota',backstorySource:'app-original',backstory:'Dakota stops when the insects fall silent. Somewhere above the trail a branch bends under a weight she cannot see. She watches the next branch.'},
       {name:'Alois',backstorySource:'app-original',backstory:'Alois counts the people coming out of the brush. One short. She shoulders her pack and goes back in before anyone can tell her to wait.'},
     ],
-    location:{name:'Pesadilla Verde',description:'Dense jungle surrounds the supply depot. Bravo Company entered expecting a routine assignment and began losing soldiers in the sudden quiet.',setupCards:[],events:[]},
+    location:{name:'Pesadilla Verde',description:'Dense jungle surrounds the supply depot. Bravo Company entered expecting a routine assignment and began losing soldiers in the sudden quiet.',setupCards:PESADILLA_SETUPS.map(name=>({name,description:'Use the matching physical Setup card.'})),events:PESADILLA_EVENTS.map(card=>({name:card.name,description:card.effect}))},
     killer:{name:"The Volk'ar",description:'A cloaked extraterrestrial hunter stalks her prey and keeps trophies. Her refractive armor can leave little more than a ripple in the air.'},
   },
   's4-terror-from-beyond': {

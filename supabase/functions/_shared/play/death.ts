@@ -1,3 +1,5 @@
+import { PESADILLA } from './pesadillaCatalog.ts';
+import { pesadillaOwnsLog } from './pesadilla.ts';
 import {volkarOwnsLog} from './volkar.ts';
 import { HELLSCAPE, HELLSCAPE_MODULE } from "./hellscape.ts";
 import { MEGABGCON, MEGABGCON_MODULE } from "./megabgconCatalog.ts";
@@ -47,6 +49,7 @@ export function deathFacts(
   events: PlayEvent[],
   eventId: string,
 ) {
+  if (!pesadillaOwnsLog(selection,events)) return null;
   if ((selection.location !== HELLSCAPE || selection.killer === BIRDS) && events.some(event => event.moduleData?.module === HELLSCAPE_MODULE)) return null;
   if (selection.killer !== RAZORFACE && events.some(event => event.moduleData?.module === RAZORFACE_MODULE)) return null;
   if(!birdsLogBelongsTo(selection.killer,events) || !validPlayLog(events) || !volkarOwnsLog(selection.killer,events,selection.finalGirl) || !podarchOwnsLog(selection.killer,events,selection.location) || !conOwnsLog(selection.location,selection.killer,events) || !wolfeOwnsLog(selection.location,events) || !ratchetLogBelongsTo(selection.killer, events) || !mortOwnsLog(selection.killer,events,selection.location))return null;
@@ -87,12 +90,12 @@ export function deathFacts(
   const ratchetDeath = selection.killer === RATCHET_LADY && e.ratchetReference;
   const wolfeDeath = selection.location === WOLFE && e.wolfeReference;
   const conDeath = selection.location === MEGABGCON && e.megabgconReference;
-  const historical = selection.killer === "The Volk'ar" || selection.killer === PODARCHS || conDeath || mortDeath || wolfeDeath || ratchetDeath || stationDeath || falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
+  const historical = selection.location === PESADILLA || selection.killer === "The Volk'ar" || selection.killer === PODARCHS || conDeath || mortDeath || wolfeDeath || ratchetDeath || stationDeath || falconwoodDeath || slayerDeath || mallDeath || hunterDeath || woodsDeath || wolfDeath || intruderDeath || wingardDeath || organismDeath
     ? summarizePlay(events.slice(0, events.findIndex(event => event.id === eventId) + 1)).entries
     : [];
   // The death's own fields reflect deliberate edits. Only the surrounding
   // context is frozen for newly recorded Woods deaths.
-  const contextEntries = selection.killer === "The Volk'ar" || selection.killer === PODARCHS || woodsDeath || wolfeDeath
+  const contextEntries = selection.location === PESADILLA || selection.killer === "The Volk'ar" || selection.killer === PODARCHS || woodsDeath || wolfeDeath
     ? historical : entries.slice(0, entries.indexOf(e) + 1);
   let context = moduleContext(
     selection,

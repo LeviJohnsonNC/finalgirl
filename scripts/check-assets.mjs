@@ -641,3 +641,20 @@ for (const id of volkarPhotoIds) {
   volkarHashes.add(hash);
 }
 console.log('Verified all 18 Volk’ar Play photographs, including both Ultimate faces.');
+
+const pesadillaDirectory = 'src/assets/play/photos/pesadilla';
+const pesadillaPhotos = JSON.parse(readFileSync(join(pesadillaDirectory, 'manifest.json'), 'utf8'));
+const pesadillaFiles = readdirSync(pesadillaDirectory).filter(file => file.endsWith('.webp'));
+const pesadillaHashes = new Set();
+if (pesadillaFiles.length !== 24 || Object.keys(pesadillaPhotos).length !== pesadillaFiles.length)
+  throw new Error('Pesadilla Verde is missing required Play photographs.');
+for (const file of pesadillaFiles) {
+  const photo = pesadillaPhotos[file.replace(/\.webp$/, '')];
+  const data = readFileSync(join(pesadillaDirectory, file));
+  const hash = createHash('sha256').update(data).digest('hex');
+  const dimensions = konradWebpDimensions(data).join('x');
+  if (photo?.size !== dimensions || !photo?.source || photo.bytes !== data.length || photo.sha256 !== hash || pesadillaHashes.has(hash))
+    throw new Error('Invalid Pesadilla Verde photograph manifest entry: ' + file);
+  pesadillaHashes.add(hash);
+}
+console.log('Verified all 24 independent Pesadilla Verde Play photographs.');

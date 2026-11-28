@@ -1,8 +1,9 @@
+import { pesadillaArt } from './pesadillaArt';
 import {useState} from 'react';
 import {Ellipsis, Minus, Plus} from 'lucide-react';
 import {Dialog, DialogContent, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
 import {
-  ORGANISM, ORGANISM_COLORS, ORGANISM_FORMS, ORGANISM_MINORS, ORGANISM_MODULE,
+  ORGANISM, ORGANISM_COLORS, ORGANISM_FORMS, ORGANISM_MINORS, ORGANISM_MODULE, ORGANISM_RIVERMASTER,
   isOrganismCasualty, minorHealthKey, minorOwnerKey, organismColorLabel,
   organismFinale, organismLiving, organismParent, organismRevealEffects, organismRoster, resolveOrganismAction,
   type OrganismAction, type OrganismAssignment, type OrganismColor, type OrganismCommand, type OrganismForm,
@@ -235,24 +236,27 @@ function FinaleAssignment({colors,forms,onAdd}:{colors:OrganismColor[];forms:Rea
   </div>;
 }
 
-export function OrganismCards({events,onEvent,blocked}:ControlsProps) {
+export function OrganismMinorCards({events,onEvent,blocked,river = false}:ControlsProps & {river?: boolean}) {
   const {state,send,message}=useOrganismRecord({events,onEvent});
-  const [assign,setAssign]=useState<typeof ORGANISM_MINORS[number]['id']>();
+  const cards = river ? [ORGANISM_RIVERMASTER] : ORGANISM_MINORS;
+  const [assign,setAssign]=useState<typeof cards[number]['id']>();
+  const art = (id: typeof cards[number]['id'], choice = false) =>
+    id === 'rivermaster' ? pesadillaArt(id) : organismArt(id,choice);
   const living=organismLiving(state);
-  return <section aria-label="Organism cards">
+  return <>
     <MinorPowerGroup description={assign&&<div className="organism-actions">
       <PlaySelect aria-label="Assign Minor Dark Power" value="" onChange={event=>{
-        const card=ORGANISM_MINORS.find(item=>item.id===assign)!;
+        const card=cards.find(item=>item.id===assign)!;
         if(event.target.value&&send({command:'minor',card:assign,owner:event.target.value as OrganismColor,health:card.health}))setAssign(undefined);
       }}><option value="" disabled>Choose the closest mutation</option>
         {living.map(figure=><option key={figure.who} value={figure.who}>{organismColorLabel(figure.who)} · {figure.form?.name}</option>)}
       </PlaySelect><button type="button" className="organism-quiet" onClick={()=>setAssign(undefined)}>Cancel</button>
     </div>}>
-      {ORGANISM_MINORS.map(card=>{
+      {cards.map(card=>{
         const value=state[minorHealthKey(card.id)];
         const owner=state[minorOwnerKey(card.id)] as OrganismColor|'waiting'|undefined;
         return <MinorPowerControl key={card.id} name={card.name} health={typeof value==='number'?value:undefined}
-          maxHealth={card.health} disabled={blocked} heroArt={organismArt(card.id)} choiceArt={organismArt(card.id,true)} art={()=>organismArt(card.id)}
+          maxHealth={card.health} disabled={blocked} heroArt={art(card.id)} choiceArt={art(card.id,true)} art={()=>art(card.id)}
           observation={owner==='waiting'?'Waiting for a mutation':owner?organismColorLabel(owner):undefined}
           onChange={health=>{
             if(!owner&&health!==null&&living.length>1) {setAssign(card.id);return;}
@@ -260,7 +264,13 @@ export function OrganismCards({events,onEvent,blocked}:ControlsProps) {
           }}/>;
       })}
     </MinorPowerGroup>
-    <KillerCards killer={ORGANISM} events={events} onEvent={onEvent} disabled={blocked} />
     {message&&<p role="alert" className="play-module-error">{message}</p>}
+  </>;
+}
+
+export function OrganismCards(props: ControlsProps) {
+  return <section aria-label="Organism cards">
+    <OrganismMinorCards {...props} />
+    <KillerCards killer={ORGANISM} events={props.events} onEvent={props.onEvent} disabled={props.blocked} />
   </section>;
 }

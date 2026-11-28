@@ -40,6 +40,7 @@ import { useActiveImages } from '@/hooks/useActiveImages';
 import { evomorphStageArt } from './evomorphArt';
 import geppettoPuppets from '@/assets/play/geppetto/puppets.webp';
 import { ModuleArtwork } from './ModuleArtwork';
+import { pesadillaArt } from "./pesadillaArt";
 import causeKiller from "@/assets/play/cause-killer.webp";
 import causeMinion from "@/assets/play/cause-minion.webp";
 import causeTerror from "@/assets/play/cause-terror.webp";
@@ -151,6 +152,17 @@ const {characterImages}=useActiveImages();
     : undefined;
   const wolfeTerror=selection.location===WOLFE&&WOLFE_TERRORS.find(card=>card.name===values.terrorCard&&card.death);
   const wolfeEvent=selection.location===WOLFE&&WOLFE_EVENTS.find(card=>card.name===values.eventCard&&card.death);
+  const pesadillaCauseArt = (cause: string) => {
+    if (selection.location !== 'Pesadilla Verde' || values.cause !== cause) return undefined;
+    if (cause === 'terror' && values.terrorCard === 'Cave Collapse') return pesadillaArt('cave-fallen');
+    if (cause === 'terror' && values.terrorCard === 'Flash Flood') return pesadillaArt('rain');
+    if (cause === 'event' && values.eventCard?.replace(/[^a-z]/gi,'').toLowerCase() === 'piranhas') {
+      return pesadillaArt(values.room === 'Upper River' ? 'piranhas-upper' : values.room === 'Central River' ? 'piranhas-central' : 'river');
+    }
+    if (cause === 'event' && values.eventCard === 'Cursed Temple') return pesadillaArt('temple-active');
+    if (values.mechanism === 'Friendly fire') return pesadillaArt('patrol-twitchy');
+    return undefined;
+  };
   const wolfeCauseArt=(cause:string)=>{
     if(cause==='terror'&&wolfeTerror) return wolfeArt('death-'+wolfeTerror.id);
     if(cause==='event'&&wolfeEvent) return wolfeArt(wolfeEvent.id==='gurney'?'gurney-spent':'death-'+wolfeEvent.id);
@@ -407,7 +419,7 @@ const {characterImages}=useActiveImages();
                     }
                   }}
                 >
-                  {wolfeCauseArt(cause) ? <ModuleArtwork art={wolfeCauseArt(cause)!}/> : stationTerror && cause==='terror' ? <ModuleArtwork art={stationTerrorArt[stationTerror.id]}/> : stationCauseArt && cause===values.cause ? <ModuleArtwork art={stationCauseArt}/> : selection.location===MALL&&cause==='hazard'?<ModuleArtwork art={mallArt('wet-floors')}/>:selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
+                  {pesadillaCauseArt(cause) ? <ModuleArtwork art={pesadillaCauseArt(cause)!} /> : wolfeCauseArt(cause) ? <ModuleArtwork art={wolfeCauseArt(cause)!}/> : stationTerror && cause==='terror' ? <ModuleArtwork art={stationTerrorArt[stationTerror.id]}/> : stationCauseArt && cause===values.cause ? <ModuleArtwork art={stationCauseArt}/> : selection.location===MALL&&cause==='hazard'?<ModuleArtwork art={mallArt('wet-floors')}/>:selection.killer===HUNTER&&cause==='killer'?<ModuleArtwork art={hunterArt(hunterDeathPhoto)}/>:cause==='terror'&&cottageTerror ? <ModuleArtwork art={wingardArt(cottageTerror.id,true)} />
                     :cause==='event'&&cottageEvent ? <ModuleArtwork art={wingardArt(cottageEvent.id,true)} />
                     :selection.killer===RATCHET_LADY && cause==='killer' ? <ModuleArtwork art={ratchetLadyArt('banner')}/>
                     :selection.killer===RATCHET_LADY && cause==='minion' ? <ModuleArtwork art={ratchetLadyArt('maniacs-2')}/>

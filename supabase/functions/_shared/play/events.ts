@@ -1,3 +1,6 @@
+import { podarchMinorNames } from './podarchs.ts';
+import { PESADILLA_MODULE } from './pesadillaCatalog.ts';
+import { describePesadilla, freshPesadilla, pesadillaParent, resolvePesadilla, samePesadillaFields, validPesadillaAction, type PesadillaAction } from './pesadilla.ts';
 import { MEGABGCON_MODULE } from "./megabgconCatalog.ts";
 import { canRecordCon, conDescription, conOutcome, conTrackedFields, conTrackerChanges, megabgconState, validConAction, type ConAction } from "./megabgcon.ts";
 import { MORT_MODULE, canRecordMort, describeMort, mortEventKind, mortParent, mortState, mortTrackerChanges, validMortAction, type MortAction } from './mort.ts';
@@ -74,6 +77,7 @@ export const isPermanentMoment = (e: Pick<PlayEvent, "kind" | "momentType">): bo
 export const isLockedPlayEvent = (e: PlayEvent): boolean =>
   (isPermanentMoment(e) && e.permanent === true && !e.volkarCard && !e.ultimateFace) ||
   (e.moduleData?.module === BIRDS_MODULE && (!e.birdsAction || e.birdsAction.command === 'review')) ||
+  (e.kind === 'module' && e.moduleData?.module === PESADILLA_MODULE && !e.pesadillaAction) ||
   (e.kind === "module" && e.moduleData?.module === FALCONWOOD_MODULE && !e.falconwoodAction) ||
   (e.kind === "module" && e.moduleData?.module === STATION_MODULE && !e.stationAction) ||
   (e.kind === "module" && e.moduleData?.module === WOLFE_MODULE && !e.wolfeAction) ||
@@ -159,6 +163,7 @@ export interface PlayEvent extends PlayDetails {
   id: string;
   at: number;
   kind: PlayKind;
+  pesadillaAction?: PesadillaAction;
   quantity?: number;
   delta?: number;
   saved?: number;
@@ -214,6 +219,18 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if (e.pesadillaAction !== undefined || e.moduleData?.module === PESADILLA_MODULE) {
+    if (e.moduleData?.module !== PESADILLA_MODULE || !validModuleObservation(e.moduleData)) return false;
+    const action = e.pesadillaAction;
+    if (!action) {
+      if (e.kind !== 'module' || e.moduleData.changes.initialized !== true) return false;
+    } else {
+      if (!validPesadillaAction(action)) return false;
+      if (action.command === 'evacuate' && action.count) {
+        if (e.kind !== 'saved' || e.quantity !== action.count) return false;
+      } else if (e.kind !== 'module') return false;
+    }
+  }
   if(e.ultimateFace!==undefined && (!['Dakota','Alois'].includes(e.ultimateFace) || e.kind!=='moment' || e.momentType!=='ultimate-unlocked')) return false;
   if(e.volkarCard!==undefined && (e.volkarCard!==true || !(e.kind==='details' && typeof e.killerCard==='string' || e.kind==='moment' && ['dark-power','finale'].includes(e.momentType??'')))) return false;
   if(e.moduleData?.module==='volkar' && (e.kind!=='module' || !validModuleObservation(e.moduleData) || Object.keys(e.moduleData.changes).length!==1)) return false;
@@ -221,7 +238,7 @@ export function isPlayEvent(input: unknown): input is PlayEvent {
   if (e.moduleData?.module === 'podarchs') {
     if (!validModuleObservation(e.moduleData)) return false;
     const changes = Object.entries(e.moduleData.changes);
-    if (changes.length !== 1 || (e.kind !== 'module' && !(e.kind === 'saved' && e.quantity === 1 && ['targeted','urgency','slippery','bond'].includes(changes[0][0]) && changes[0][1] === 'removed'))) return false;
+    if (changes.length !== 1 || (e.kind !== 'module' && !(e.kind === 'saved' && e.quantity === 1 && Object.prototype.hasOwnProperty.call(podarchMinorNames, changes[0][0]) && changes[0][1] === 'removed'))) return false;
   }
   if(e.mallReference!==undefined&&(e.kind!=='killed'||e.mallReference!==true))return false;
   if(e.mallAction!==undefined&&(e.kind!=='module'||e.moduleData?.module!==MALL_MODULE||!validMallAction(e.mallAction)))return false;
@@ -380,9 +397,35 @@ export function validPlayLog(log: unknown): log is PlayEvent[] {
     log.length <= 1000 &&
     log.every(isPlayEvent) &&
     validConHistory(log) && validMortHistory(log) && validWolfeHistory(log) && validRatchetHistory(log) && validStationHistory(log) && validFalconwoodHistory(log) && validMallHistory(log) && validSlayerHistory(log) && validHunterHistory(log) && validOrganismHistory(log) && validIntruderHistory(log) && validWoodsHistory(log) && validWingardHistory(log) && validMarrekHistory(log) && validTormentorHistory(log) && validEvomorphHistory(log) && validKonradHistory(log) && validGrimlashHistory(log) && validShadyHistory(log) &&
-    validBirdsHistory(log) && validRazorfaceHistory(log) && new Set(log.map((e) => e.id)).size === log.length
+    validPesadillaHistory(log) && validBirdsHistory(log) && validRazorfaceHistory(log) && new Set(log.map((e) => e.id)).size === log.length
   );
 }
+export function canUndoPesadilla(log: readonly PlayEvent[], event: PlayEvent, restore = false) {
+  const action = event.pesadillaAction;
+  if (!action) return false;
+  const summary = summarizePlay(log);
+  return restore
+    ? summary.inactive.has(event.id) && pesadillaParent(summary.entries) === action.parent
+    : !summary.inactive.has(event.id) && pesadillaParent(summary.entries) === event.id;
+}
+
+function validPesadillaHistory(log: readonly PlayEvent[]) {
+  const observations = new Map<string, PlayEvent>();
+  return log.every((event, index) => {
+    if (event.moduleData?.module === PESADILLA_MODULE) {
+      const a = event.pesadillaAction;
+      const entries = summarizePlay(log.slice(0,index)).entries;
+      const changes = a && resolvePesadilla(a, moduleState(entries, PESADILLA_MODULE));
+      if (a && (a.parent !== pesadillaParent(entries) || !changes || !samePesadillaFields(changes,event.moduleData.changes))) return false;
+      if (!a && (observations.size || ![null,'Piranhas!','Heavy Rains','Get to the Choppa!','Cursed Temple','Twitchy Soldiers','Sgt. Weathers','Archeologist','Rebel Leader'].some(name=>samePesadillaFields(freshPesadilla(null,name),event.moduleData!.changes)))) return false;
+      observations.set(event.id,event);
+    }
+    const target = event.target && observations.get(event.target);
+    if (target && (event.kind === 'undo' || event.kind === 'restore')) return canUndoPesadilla(log.slice(0,index),target,event.kind==='restore');
+    return true;
+  });
+}
+
 export function canUndoRazorface(log: readonly PlayEvent[], target: string, restore = false) {
   const original = log.find(entry => entry.id === target);
   const action = original && razorfaceEntry(original);
@@ -1092,6 +1135,11 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     if (deltas.has(e.id)) summary.killed = Math.max(0, Math.min(999, summary.killed! + deltas.get(e.id)!));
     if (e.kind === "round")
       summary.round = Math.min(999, (summary.round ?? 0) + 1);
+    const pesadilla = e.pesadillaAction;
+    if (pesadilla?.command === 'person' && pesadilla.id === 'weathers' && pesadilla.resolve &&
+        pesadilla.status === 'killed' && summary.finalHorrorLevel !== undefined && summary.finalHorrorLevel <= 5) {
+      summary.finalHorrorLevel += 2;
+    }
     if(e.kind==='module'&&e.mallAction?.command==='person'&&e.mallAction.id==='girl'&&e.mallAction.value==='killed'&&e.mallAction.resolve&&mallState(moduleState(summary.entries,MALL_MODULE)).people.girl==='present'&&summary.finalHorrorLevel!==undefined)summary.finalHorrorLevel=Math.min(6,summary.finalHorrorLevel+1);
     if(e.kind==='module'&&e.hunterAction) {
       const before=hunterState(moduleState(summary.entries,HUNTER_MODULE));
@@ -1132,7 +1180,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
       if (e.value === null) delete summary[e.field!];
       else summary[e.field!] = e.value!;
     }
-    if (!(e.kind === "killed" || e.kind === "saved") || e.quantity)
+    if (!(e.kind === "killed" || e.kind === "saved") || e.quantity || e.pesadillaAction)
       summary.entries.push({ ...e, currentRound: summary.round });
   }
   return summary;
@@ -1160,11 +1208,12 @@ export function decrementPlay(
   const baselineIndex = baseline ? s.entries.indexOf(baseline) : -1;
   const recent = s.entries.slice(baselineIndex + 1);
   const matching = [...recent].reverse().find((e) =>
-    e.kind === counter || (counter === "killed" && e.kind === "death-count"));
+    e.kind === counter && (counter === 'round' || !!e.quantity) || (counter === "killed" && e.kind === "death-count"));
   if (matching) {
     const group = matching.kind === "death-count"
       ? s.entries.find(e => e.id === matching.target && e.kind === "killed")
       : matching;
+    if (group?.pesadillaAction?.command === 'evacuate') return { kind: 'reduce', target: group.id };
     if (group?.birdsAction) return canUndoBirds(log, group.id) ? {kind:'undo',target:group.id} : null;
     if (group?.mortAction) return canUndoMort(log,group.id)?{kind:'undo',target:group.id}:null;
     if (group?.megabgconAction) return canUndoCon(log, group.id) ? { kind: "undo", target: group.id } : null;
@@ -1189,6 +1238,8 @@ export function decrementPlay(
 }
 export function describeEvent(e: PlayEvent): string {
   if(e.mortAction) return describeMort(e.mortAction);
+  if (e.pesadillaAction) return describePesadilla(e.pesadillaAction,e.quantity);
+  if (e.moduleData?.module === PESADILLA_MODULE) return 'Pesadilla Verde starting observations';
   if (e.megabgconAction) return conDescription(e.megabgconAction);
   switch (e.kind) {
     case "start":

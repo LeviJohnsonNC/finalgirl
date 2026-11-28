@@ -1,6 +1,8 @@
+import { PESADILLA, PESADILLA_MODULE, PESADILLA_ITEMS } from './pesadillaCatalog.ts';
+import { pesadillaFacts, validPesadillaField } from './pesadilla.ts';
 import { isVolkar, VOLKAR_MINORS, VOLKAR_POWERS, VOLKAR_FINALES, validVolkarField, huntLabel } from './volkar.ts';
 import { HELLSCAPE, HELLSCAPE_MODULE, HELLSCAPE_PEOPLE, hellscapeFacts, hellscapePerson, validHellscapeObservation } from "./hellscape.ts";
-import { podarchFacts, PODARCHS, PODARCH_MODULE, PODARCH_POWERS, PODARCH_FINALES, validPodarchField } from './podarchs.ts';
+import { podarchFacts, PODARCHS, PODARCH_MODULE, PODARCH_POWERS, PODARCH_FINALES, podarchMinorNames, validPodarchField } from './podarchs.ts';
 import { MEGABGCON, MEGABGCON_MODULE, CON_VISUAL, CON_ITEMS } from "./megabgconCatalog.ts";
 import { conFacts, type ConAction } from "./megabgcon.ts";
 import { MORT, MORT_MODULE, mortFacts, type MortAction } from './mort.ts';
@@ -78,7 +80,7 @@ import {
 
 export type ModuleValue = string | number | boolean | null;
 export interface ModuleObservation {
-  module: "volkar" | typeof PODARCH_MODULE | typeof HELLSCAPE_MODULE | typeof RAZORFACE_MODULE | typeof BIRDS_MODULE | typeof MEGABGCON_MODULE | typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  module: typeof PESADILLA_MODULE | "volkar" | typeof PODARCH_MODULE | typeof HELLSCAPE_MODULE | typeof RAZORFACE_MODULE | typeof BIRDS_MODULE | typeof MEGABGCON_MODULE | typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "buddyland" | "hans" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   changes: Record<string, ModuleValue>;
 }
 type ObservedEvent = {
@@ -209,6 +211,7 @@ function validField(
   if (module==='volkar') return validVolkarField(key,value);
   if (module === PODARCH_MODULE) return validPodarchField(key,value);
   if (module === RATCHET_MODULE) return validRatchetField(key,value);
+  if (module === PESADILLA_MODULE) return validPesadillaField(key, value);
   if (module === MALL_MODULE) return validMallField(key,value);
   if (module === FALCONWOOD_MODULE) return validFalconwoodField(key, value);
   if (module === STATION_MODULE) return validStationField(key,value);
@@ -342,7 +345,7 @@ export function validModuleObservation(
   if (!input || typeof input !== "object" || Array.isArray(input)) return false;
   const m = input as ModuleObservation;
   if (
-    !["volkar", PODARCH_MODULE, HELLSCAPE_MODULE, RAZORFACE_MODULE, BIRDS_MODULE, MEGABGCON_MODULE, MORT_MODULE, WOLFE_MODULE, RATCHET_MODULE, STATION_MODULE, ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
+    ![PESADILLA_MODULE, "volkar", PODARCH_MODULE, HELLSCAPE_MODULE, RAZORFACE_MODULE, BIRDS_MODULE, MEGABGCON_MODULE, MORT_MODULE, WOLFE_MODULE, RATCHET_MODULE, STATION_MODULE, ORGANISM_MODULE, FALCONWOOD_MODULE, SLAYER_MODULE, MALL_MODULE, HUNTER_MODULE, WINGARD_MODULE, "intruders", "storybook-woods", "big-bad-wolf", "marrek", "tormentor", "shady-acres", "grimlash", "konrad", "evomorph", "creech", "poltergeist", "groves", "inkanyamba", "billy", "buddyland", "hans", "camp", "geppetto", "carnival", "fright", "maple"].includes(
       m.module,
     ) ||
     !m.changes ||
@@ -409,13 +412,17 @@ export function moduleState(
     return state;
   }
   for (const e of entries) {
+    if (module === PESADILLA_MODULE && (
+      e.moduleData?.module === 'poltergeist' && e.moduleData.changes.minorsRemoved === true ||
+      e.moduleData?.module === RAZORFACE_MODULE && parseRazorfaceAction(e.moduleData.changes.action)?.kind === 'purge'
+    ) && state.minor !== undefined) state.minor = 0;
     if (module==='volkar' && e.kind==='moment' && e.momentType==='finale' &&
         e.originalFinaleName===e.killerCard && (e.killerCard==='Rampage' || e.killerCard==='Self-Destruct')) {
       state.hunt='visible';
       if (e.killerCard==='Self-Destruct') state.countdown=3;
     }
     if (module === PODARCH_MODULE && e.kind === 'moment' && e.momentType === 'finale') {
-      for (const id of ['targeted','urgency','slippery','bond']) if (state[id] === 'active') state[id] = 'removed';
+      for (const id of Object.keys(podarchMinorNames)) if (state[id] === 'active') state[id] = 'removed';
     }
     if(module==='grimlash'&&e.kind==='moment') {if(e.momentType==='dark-power') {state.powerRevealed=true;state.power=GRIMLASH_POWERS.find(c=>c.name===e.killerCard)?.id??null;} if(e.momentType==='finale') {state.finaleRevealed=true;state.finale=GRIMLASH_FINALES.find(c=>c.name===e.killerCard)?.id??null;}}
     if(module === "evomorph" && e.kind === "moment") {if(e.momentType === "dark-power") {state.powerRevealed=true; state.power=EVOMORPH_POWERS.find(c=>c.name===e.killerCard)?.id??null;}if(e.momentType === "finale") {state.finaleRevealed=true;state.finale=EVOMORPH_FINALES.find(c=>c.name===e.killerCard)?.id??null;}}
@@ -460,7 +467,7 @@ export function moduleState(
       }
     }
     const observation = e.moduleData?.module === module ? e.moduleData : ["groves","creech"].includes(e.moduleData?.module ?? "") && e.linkedModule?.module === module ? e.linkedModule : undefined;
-    if ((e.kind !== "module" && !(module===PODARCH_MODULE && e.kind==="saved") && !(module===WOLFE_MODULE&&e.kind==='killed'&&e.wolfeAction?.command==='ram')) || !validModuleObservation(observation)) continue;
+    if ((e.kind !== "module" && !([PODARCH_MODULE, PESADILLA_MODULE].includes(module) && e.kind==="saved") && !(module===WOLFE_MODULE&&e.kind==='killed'&&e.wolfeAction?.command==='ram')) || !validModuleObservation(observation)) continue;
     if(module==='volkar' && 'countdown' in observation.changes &&
         !entries.some(reveal=>reveal.id===e.target && reveal.kind==='moment' && reveal.momentType==='finale' && reveal.killerCard==='Self-Destruct')) continue;
     if (module === PODARCH_MODULE && typeof observation.changes.leader === "number" && observation.changes.leader > 0) delete state.leaderFinal;
@@ -579,6 +586,7 @@ export function describeModule(observation: ModuleObservation) {
   }
   if (observation.module === FALCONWOOD_MODULE) return falconwoodFacts(falconwoodState(observation.changes)) || "Falconwood updated";
   if (observation.module === SLAYER_MODULE) return slayerFacts(observation.changes) || "Dimension Tracker recorded";
+  if (observation.module === PESADILLA_MODULE) return pesadillaFacts(observation.changes);
   if (observation.module === MALL_MODULE) return mallFacts(observation.changes);
   if (observation.module === HUNTER_MODULE) {
     return observation.changes.snapshot ? hunterFacts(observation.changes) : Object.entries(observation.changes).map(([key,value])=>`${key}: ${value??'unrecorded'}`).join('; ');
@@ -650,6 +658,7 @@ export function moduleContext(
     const facts=wolfeFacts(moduleState(entries,WOLFE_MODULE));
     if(facts) context[WOLFE_MODULE]={facts};
   }
+  if (selection.location===PESADILLA && entries.some(e=>e.moduleData?.module===PESADILLA_MODULE)) context[PESADILLA_MODULE]={facts:pesadillaFacts(moduleState(entries,PESADILLA_MODULE))};
   if (selection.location===MALL && entries.some(e=>e.moduleData?.module===MALL_MODULE)) context[MALL_MODULE]={facts:mallFacts(moduleState(entries,MALL_MODULE))};
   if (selection.killer === MORT && mortFacts(entries)) context.mort = {facts:mortFacts(entries)};
   if (selection.killer === SLAYER && entries.some(e => e.moduleData?.module === SLAYER_MODULE)) {
@@ -770,6 +779,7 @@ export function moduleStoryBeats(
     const town = falconwoodFacts(falconwoodState(moduleState(entries,FALCONWOOD_MODULE)));
     return [fitStoryText(town,threat ? 510 : 895), fitStoryText(threat,town ? 375 : 895)].filter(Boolean).join("\n");
   }
+  if(selection.location===PESADILLA){const threat=moduleStoryBeats({...selection,location:""},entries);const place=pesadillaFacts(moduleState(entries,PESADILLA_MODULE));return [fitStoryText(place,threat?500:890),fitStoryText(threat,380)].filter(Boolean).join("\n");}
   if(selection.location===MALL){const threat=moduleStoryBeats({...selection,location:''},entries);const place=mallFacts(moduleState(entries,MALL_MODULE));return [fitStoryText(place,threat?520:895),fitStoryText(threat,370)].filter(Boolean).join('\n');}
   if(selection.killer===HUNTER) {
     const fields=moduleState(entries,HUNTER_MODULE);
@@ -1033,6 +1043,7 @@ export function buddylandReferences(
     const state = context?.[WOODS_MODULE];
     if (state) refs.push({name:"Storybook Woods observations",effect:woodsFacts(woodsState(state)).join(" ")});
   }
+  if(selection.location===PESADILLA){refs.push({name:PESADILLA,effect:"Humid forest and isolated river reaches. A revealed Event alone establishes no exposure, victim identity or cause of death."}); const facts=context?.[PESADILLA_MODULE]?.facts; if(typeof facts==="string" && facts) refs.push({name:"Location observations",effect:facts});}
   if(selection.location===MALL){refs.push({name:MALL,effect:MALL_VISUAL});if(typeof context?.[MALL_MODULE]?.facts==='string')refs.push({name:'Mall observations',effect:context[MALL_MODULE].facts as string});}
   if(selection.location===WINGARD) refs.push({name:WINGARD,effect:WINGARD_VISUAL});
   if(selection.location===WOLFE) {
@@ -1295,7 +1306,7 @@ export function moduleItemBeats(
   entries: readonly ObservedEvent[],
 ) {
   const locationCatalog =
-    selection.location === MEGABGCON ? CON_ITEMS : selection.location === WOLFE ? WOLFE_ITEMS : selection.location === MALL ? MALL_ITEMS : selection.location === WINGARD ? WINGARD_ITEMS : selection.location === "Marrek Warehouse" ? MARREK_ITEMS : selection.location === "Shady Acres" ? SHADY_ITEMS : selection.location === "USS Konrad" ? KONRAD_ITEMS : selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
+    selection.location === PESADILLA ? PESADILLA_ITEMS : selection.location === MEGABGCON ? CON_ITEMS : selection.location === WOLFE ? WOLFE_ITEMS : selection.location === MALL ? MALL_ITEMS : selection.location === WINGARD ? WINGARD_ITEMS : selection.location === "Marrek Warehouse" ? MARREK_ITEMS : selection.location === "Shady Acres" ? SHADY_ITEMS : selection.location === "USS Konrad" ? KONRAD_ITEMS : selection.location === "Creech Manor" ? CREECH_ITEMS : selection.location === "Sacred Groves" ? GROVES_ITEMS : selection.location === "Maple Lane" ? MAPLE_ITEMS : selection.location === "Camp Happy Trails"
       ? CAMP_ITEMS
       : selection.location === "Carnival of Blood"
         ? CARNIVAL_ITEMS

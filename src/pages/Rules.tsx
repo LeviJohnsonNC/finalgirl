@@ -25,6 +25,7 @@ function blockToText(block: RuleBlock): string {
     case "podarch-photos": return block.photos.map(p=>p.label).join(" ");
     case "wolfe-setups": return WOLFE_SETUPS.join(" ");
     case "groves-setup": return block.setup;
+    case 'link':
     case 'paragraph':
     case 'heading':
       return block.text;

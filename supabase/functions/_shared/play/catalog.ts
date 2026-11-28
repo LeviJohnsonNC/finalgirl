@@ -1,3 +1,5 @@
+import { PESADILLA, PESADILLA_TERRORS, PESADILLA_EVENTS, PESADILLA_ITEMS, PESADILLA_PEOPLE, PESADILLA_SOURCE, PESADILLA_SPACES } from './pesadillaCatalog.ts';
+import { pesadillaPersonEvents } from './pesadilla.ts';
 import { VOLKAR, VOLKAR_TERRORS, VOLKAR_SOURCE } from './volkar.ts';
 import { HELLSCAPE, HELLSCAPE_EVENTS, HELLSCAPE_ITEMS, HELLSCAPE_PEOPLE, HELLSCAPE_SOURCE, HELLSCAPE_SPACES, HELLSCAPE_TERRORS } from "./hellscape.ts";
 import { MEGABGCON, MEGABGCON_SOURCE, BOOTH_EVENTS, CON_EVENTS, CON_ITEMS, CON_TERRORS, CON_SPACES, CON_PEOPLE } from "./megabgconCatalog.ts";
@@ -86,6 +88,8 @@ export const PLAY_CARDS: readonly PlayCard[] = [
  ...SHADY_EVENTS.map(c=>({...c,kind:'event' as const,location:'Shady Acres',source:SHADY_SOURCE})),
   ...TORMENTOR_TERRORS.map(c=>({...c,kind:'terror' as const,killer:'The Tormentor',source:TORMENTOR_SOURCE})),
   ...GRIMLASH_TERRORS.map(c=>({...c,kind:'terror' as const})),
+  ...PESADILLA_TERRORS.map(card => ({ ...card, kind: "terror" as const, location: PESADILLA, source: PESADILLA_SOURCE })),
+  ...PESADILLA_EVENTS.map(card => ({ ...card, kind: "event" as const, location: PESADILLA, source: PESADILLA_SOURCE })),
   ...KONRAD_TERRORS.map(c=>({...c,kind:"terror" as const})),
   ...KONRAD_EVENTS.map(c=>({...c,kind:"event" as const,location:"USS Konrad",source:KONRAD_SOURCE})),
   ...EVOMORPH_TERRORS.map(c=>({...c,kind:"terror" as const})),
@@ -209,6 +213,7 @@ export const PLAY_ROOMS: Record<string, readonly string[]> = {
   "Maple Lane": [...MAPLE_HOUSES,...MAPLE_STREETS].map(s=>s.name),
   "Carnival of Blood": CARNIVAL_ROOMS,
   [STATION]: [...Object.values(STATION_SPACES), 'Armory', 'Hallway', 'Outside'],
+  [PESADILLA]: PESADILLA_SPACES,
   "USS Konrad": [...KONRAD_SPACES],
   "Creech Manor": CREECH_SPACES.map(s=>s.name),
   "Camp Happy Trails": CAMP_ROOMS,
@@ -241,6 +246,7 @@ export function playMechanisms(selection: {
     ...(selection.location === "Maple Lane" ? ["Fire", "Booby Trap", "Street traffic"] : []),
     ...(selection.location==='USS Konrad'?['Crusher','Incinerator','Airlock','Self Destruct','Hull breach','Gas leak','Faulty Wiring','Garbage Day']:[]),
     ...(selection.location==='Creech Manor'?['Attic Skull','Window fall','Living trees']:[]),
+    ...(selection.location===PESADILLA?['Piranhas', 'Cave collapse', 'Flash flood', 'Friendly fire', 'Cursed Temple']:[]),
     ...(selection.location===MALL?['Railing fall','Store wall knockback','Escalator']:[]),
     "Location hazard",
     "Other",
@@ -252,7 +258,7 @@ export function playItems(
   location: string,
 ): readonly { name: string; effect: string }[] {
   if (location === HELLSCAPE) return HELLSCAPE_ITEMS;
-  return location === MEGABGCON ? CON_ITEMS : location === WOLFE ? WOLFE_ITEMS : location === STATION ? STATION_ITEMS : location === FALCONWOOD ? FALCONWOOD_ITEMS : location === MALL ? MALL_ITEMS : location === WOODS ? WOODS_ITEMS : location === WINGARD ? WINGARD_ITEMS : location === "Marrek Warehouse" ? MARREK_ITEMS : location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
+  return location === PESADILLA ? PESADILLA_ITEMS : location === MEGABGCON ? CON_ITEMS : location === WOLFE ? WOLFE_ITEMS : location === STATION ? STATION_ITEMS : location === FALCONWOOD ? FALCONWOOD_ITEMS : location === MALL ? MALL_ITEMS : location === WOODS ? WOODS_ITEMS : location === WINGARD ? WINGARD_ITEMS : location === "Marrek Warehouse" ? MARREK_ITEMS : location === "Shady Acres" ? SHADY_ITEMS : location === "USS Konrad" ? KONRAD_ITEMS : location === "Creech Manor" ? CREECH_ITEMS : location === "Sacred Groves" ? GROVES_ITEMS : location === "Maple Lane" ? MAPLE_ITEMS : location === "Carnival of Blood" ? CARNIVAL_ITEMS : location === "Camp Happy Trails"
     ? CAMP_ITEMS
     : location === "Buddyland"
       ? BUDDYLAND_ITEMS
@@ -264,6 +270,7 @@ export function playVictims(location: string, killer?: string): readonly { name:
     if (location === MEGABGCON) return [{ name: 'SWAG attendee' }];
     return [];
   }
+  if (location === PESADILLA) return Object.values(PESADILLA_PEOPLE).filter(name => pesadillaPersonEvents(killer) && eligibleStartingEvent(killer,location,name)).map(name => ({name}));
   if (location === HELLSCAPE) return killer === BIRDS ? [] : HELLSCAPE_PEOPLE;
   return location === MEGABGCON ? [...CON_PEOPLE.map(p => ({ name: p.person })), { name: "SWAG attendee" }] : location === WOLFE ? WOLFE_EVENTS.filter(event=>WOLFE_PEOPLE.some(id=>id===event.id)) : location === STATION ? STATION_ROLES : location === FALCONWOOD ? FALCONWOOD_ROLES : location===MALL?[{name:'Bart the Mall Cop'},{name:'The Savior’s Girl'}]:location === WOODS ? WOODS_PEOPLE : location === WINGARD ? WINGARD_PEOPLE : location === "Marrek Warehouse" ? MARREK_PEOPLE : location === "Shady Acres" ? SHADY_PEOPLE : location === "USS Konrad" ? KONRAD_PEOPLE : location === "Creech Manor" ? CREECH_PEOPLE : location === "Sacred Groves" ? GROVES_PEOPLE : location === "Maple Lane" ? MAPLE_PEOPLE : location === "Carnival of Blood" ? CARNIVAL_PEOPLE : location === "Camp Happy Trails"
     ? CAMP_VICTIMS
