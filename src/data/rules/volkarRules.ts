@@ -46,7 +46,7 @@ export const volkarRules: EntityRuleModule = {
     { type: "heading", level: 3, text: "Killer phase and Bloodlust" },
     {
       type: "paragraph",
-      text: "Use the state at the start of the Killer phase. Before the Finale, Concealed uses the upper row: add a face-up Movement card, then roll one die. On 1–4 raise Bloodlust by one. Visible uses the lower row: target the closest Final Girl or Victim, attack once and add a facedown Movement card.",
+      text: "The Volk’ar has no Movement Value. Her Path directs her movement. Use her state at the start of the Killer phase. Before the Finale, Concealed uses the upper row: add a face-up Movement card, then roll one die. On 1–4 raise Bloodlust by one. Visible uses the lower row: target the closest Final Girl or Victim, attack once and add a facedown Movement card.",
     },
     {
       type: "table",
@@ -67,7 +67,7 @@ export const volkarRules: EntityRuleModule = {
       type: "list",
       items: [
         "Open eye: add a face-up Movement card. Crossed eye: add a facedown card. If Visible, she cloaks immediately. Mark her current space and the new Origin, then return her meeple to the Finale. Reshuffle the Movement discards only when a draw needs a new deck.",
-        "The purple cluster of eyes resolves the Path. A sixth card also triggers resolution after completing the current card or action, even if the row passes six. A concealed attack with positive potential damage triggers resolution. Turning cards face up with Track alone leaves her Concealed.",
+        "The purple cluster of eyes resolves the Path. A sixth card also triggers resolution after completing the current card or action, even if the row passes six. A concealed attack with positive potential damage triggers resolution. If Track exposes every card, you can determine her exact space. She stays Concealed until her Path resolves.",
         "Place the meeple at the Origin even if it has become inaccessible. Return both Origin markers to the deck. Starting there, reveal and resolve Movement cards in order. Follow movement restrictions at the selected location and the printed targeting and attack lines. Resolve Final Health after the entire Path. Discard the resolved row and leave her Visible at its endpoint. Do not inspect the Movement discard pile.",
         "While Concealed use the Origin for relative placement or distance. Ignore effects placing the Killer. Treat a Killer Action line on another card as a crossed eye. Victims skip Panic-phase panic. Resolve explicit panic instructions on cards.",
       ],
@@ -84,7 +84,7 @@ export const volkarRules: EntityRuleModule = {
     { type: "heading", level: 3, text: "Movement deck" },
     {
       type: "paragraph",
-      text: "Numbered movement follows the indicated panic direction for one space. For destination cards use the closest eligible space, exclude the current space and apply the printed tie-break. Attack lines target the closest Final Girl or Victim.",
+      text: "Numbered movement follows the indicated panic direction for one space. For destination cards use the closest eligible space, exclude the current space and apply the printed tie-break. After each move, resolve any printed attack in her current space. An empty space leaves that attack without a target.",
     },
     {
       type: "table",

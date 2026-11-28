@@ -1,0 +1,105 @@
+.volkar-controls {
+  display: grid;
+  gap: 0.8rem;
+  min-width: 0;
+}
+.volkar-controls > .play-illustrated-tile {
+  width: 100%;
+  min-height: 9rem;
+}
+.volkar-controls > button:not(.play-illustrated-tile),
+.volkar-actions button,
+.minor-count-buttons button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #887955;
+  border-radius: 0.35rem;
+  color: #f8f3e9;
+  background: #232321;
+}
+.volkar-actions,
+.minor-count-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.volkar-actions button[aria-pressed="true"] {
+  background: #5d4825;
+  border-color: #dab168;
+}
+.volkar-countdown {
+  padding: 0.85rem;
+  border: 1px solid #736447;
+  border-radius: 0.5rem;
+  background: #211f1d;
+}
+.volkar-countdown p {
+  margin: 0.4rem 0 0.65rem;
+}
+.volkar-controls > .play-illustrated-tile {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: clamp(145px, 23vw, 250px);
+  border-radius: 0.45rem;
+  text-align: left;
+  background: #101413;
+}
+.volkar-controls > .play-illustrated-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.volkar-controls > .play-illustrated-tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(0deg, rgba(5, 10, 10, 0.91), transparent 58%);
+}
+.volkar-controls > .play-illustrated-tile .play-tile-caption {
+  z-index: 1;
+  bottom: 12px;
+}
+.volkar-device .volkar-countdown {
+  background: rgba(18, 19, 17, 0.89);
+  color: #f3ede0;
+  max-width: 28rem;
+}
+@media (max-width: 600px) {
+  .volkar-device .module-revealed-hero {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .volkar-device .module-revealed-art {
+    position: relative;
+    inset: auto;
+    height: 145px;
+    flex: none;
+    width: 100%;
+  }
+  .volkar-device .module-revealed-copy {
+    position: relative;
+    min-height: 0;
+    width: 100%;
+    padding: 12px;
+  }
+}
+
+[data-volkar-cards]
+  .module-cinematic-chooser
+  .module-killer-card
+  > .play-module-art,
+[data-module="volkar"]
+  .module-cinematic-minor
+  .module-minor-choice
+  .play-module-art {
+  filter: saturate(0.55) brightness(0.72);
+}
+[data-volkar-cards] .module-unnamed,
+[data-module="volkar"] .module-minor-clear {
+  min-height: 44px;
+}

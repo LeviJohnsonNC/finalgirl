@@ -1,3 +1,4 @@
+import { VOLKAR,VOLKAR_WIN } from '../../supabase/functions/_shared/play/volkar';
 import { RAZORFACE, razorfaceState } from '../../supabase/functions/_shared/play/razorface';
 import { MORT, MORT_MAX_HEALTH, MORT_SUSPECTS, mortState } from '../../supabase/functions/_shared/play/mort';
 import { RATCHET_LADY, RATCHET_MODULE, RATCHET_HEALTH_STORAGE_MAX, ratchetCount } from '../../supabase/functions/_shared/play/ratchetLady';
@@ -142,6 +143,8 @@ export const GameOutcomeForm = ({
     result.killer === 'Mort the Teenage Dirtbag';
   const isFalconwood = result.location === 'Falconwood';
   const isSlayer = result.killer === 'Slayer';
+  const selfDestruct = result.killer===VOLKAR && entries.some(e=>e.momentType==='finale' && e.killerCard==='Self-Destruct');
+  const [volkarLoss,setVolkarLoss]=useDraftField('volkarLoss','',initialDraft,onDraftChange);
   const [podarchOutcome,setPodarchOutcome] = useDraftField('podarchOutcome','',initialDraft,onDraftChange);
   const podarchOutcomes = podarchFinishOptions(isWin, entries.find(entry => entry.momentType === 'finale'));
   const hasKillerDetails = result.killer === PODARCHS || (isWin && (isPoltergeist || isBerith)) || (!isWin && isOrganism)
@@ -331,6 +334,7 @@ export const GameOutcomeForm = ({
   const buildFormData = (): EndingFormData => {
     // Augment gameHighlights with killer-specific conditions so the LLM gets full context
     let highlights = gameHighlights || '';
+    if (selfDestruct) highlights=[highlights,isWin ? VOLKAR_WIN : volkarLoss].filter(Boolean).join('. ');
     if (result.killer === PODARCHS && podarchOutcomes.includes(podarchOutcome)) highlights = [highlights, podarchOutcome].filter(Boolean).join('. ');
     if (legacyIntruder && !highlights.includes('Active Intruder at end:')) {
       highlights = [highlights,`Active Intruder at end: ${legacyIntruder}`].filter(Boolean).join('. ');
@@ -468,9 +472,12 @@ export const GameOutcomeForm = ({
           if (isBirds && !birdsReasonMatches(value as 'won'|'lost',birdsReason)) setBirdsReason('');
           setReviewedOutcome(value as 'won' | 'lost');
         }}>
-          <option value="won" disabled={fatalEnding}>Won</option>
+          <option value="won" disabled={fatalEnding}>{selfDestruct ? VOLKAR_WIN : 'Won'}</option>
           <option value="lost">Lost</option>
         </OutcomeSelect>
+        {selfDestruct && !isWin && <OutcomeSelect label="Self-Destruct loss" value={volkarLoss} onValueChange={setVolkarLoss}>
+          <option value="">Cause unrecorded</option><option value="The Countdown expired">The Countdown expired</option><option value="Lost for another reason">Lost for another reason</option>
+        </OutcomeSelect>}
         {isBirds && <BirdsResultFields outcome={isWin?'won':'lost'} value={birdsReason} onChange={setBirdsReason} />}
         {needsRazorfaceReview && <label className="flex min-h-[44px] items-center gap-2">
           <input type="checkbox" checked={razorfaceDefeated} onChange={event=>setRazorfaceDefeated(event.target.checked)} />

@@ -19,6 +19,7 @@ export function playStartingValues(
   finalGirl: string,
 ): Record<Exclude<StateField,'killerHealth'>, number> & {killerHealth?:number} {
   const killerHealth: Record<string, number> = {
+    "The Volk'ar": 10,
     Razorface: 9,
     Grimlash: 10,
     Evomorph: 4,

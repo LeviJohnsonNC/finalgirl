@@ -1,3 +1,4 @@
+import {volkarOwnsLog} from '../../supabase/functions/_shared/play/volkar';
 import { HELLSCAPE, HELLSCAPE_MODULE } from "../../supabase/functions/_shared/play/hellscape";
 import { MEGABGCON } from "../../supabase/functions/_shared/play/megabgconCatalog";
 import { conOwnsLog } from "../../supabase/functions/_shared/play/megabgcon";
@@ -138,8 +139,8 @@ export function useActiveGame() {
       if(event.moduleData?.module==='konrad'&&(previous.selection.location!=='USS Konrad'||!event.konradAction))return previous;
       if(event.kind==='undo'&&!canUndoEvomorph(log,event.target!))return previous;
       if (event.kind === 'death-count' && !canChangeDeathCount(log, event)) return previous;
-      if (!podarchOwnsLog(previous.selection.killer, [event], previous.selection.location)) return previous;
-      if (previous.selection.killer === PODARCHS && event.kind === 'state' && event.field === 'bloodlust' &&
+      if (!volkarOwnsLog(previous.selection.killer,[event],previous.selection.finalGirl) || !podarchOwnsLog(previous.selection.killer, [event], previous.selection.location)) return previous;
+      if ([PODARCHS,"The Volk'ar"].includes(previous.selection.killer) && event.kind === 'state' && event.field === 'bloodlust' &&
           typeof event.value === 'number' && event.value > PODARCH_MAX) return previous;
       const isRatchetLady = previous.selection.killer === RATCHET_LADY;
       if (event.moduleData?.module===WOLFE_MODULE&&!event.wolfeAction) return previous;
@@ -219,6 +220,9 @@ export function useActiveGame() {
       const setup = firstPlayWrite
         ? initialModuleObservations(previous.selection, previous.geppettoSetupVersion === 1, previous.carnivalSetupVersion === 1, previous.billySetupVersion === 1, previous.mapleSetupVersion === 1, previous.inkanyambaSetupVersion === 1, previous.grovesSetupVersion === 1, previous.poltergeistSetupVersion === 1, previous.creechSetupVersion === 1, previous.evomorphSetupVersion === 1, previous.konradSetupVersion === 1, previous.grimlashSetupVersion === 1, previous.shadySetupVersion === 1, previous.tormentorSetupVersion === 1, previous.marrekSetupVersion === 1).map(moduleData => newPlayEvent({ kind: 'module', moduleData }))
         : [];
+      const volkar = previous.selection.killer === "The Volk'ar";
+      if (volkar && firstPlayWrite && previous.volkarSetupVersion === 1)
+        setup.push(newPlayEvent({kind:'module',moduleData:{module:'volkar',changes:{hunt:'concealed'}}}));
       if (isBirds && firstPlayWrite && isBirdsTarget(previous.selection.birdsRequired)) {
         setup.push(newPlayEvent({kind:'module', moduleData:{module:BIRDS_MODULE, changes:initialBirds(previous.selection.birdsRequired)}}));
       }
@@ -255,7 +259,7 @@ export function useActiveGame() {
       if(!log.length&&freshOrganism) setup.push(newPlayEvent({kind:"module",moduleData:{module:ORGANISM_MODULE,changes:initialOrganism()}}));
       const freshIntruders=isIntruders && previous.intrudersSetupVersion===1;
       if (!log.length && freshIntruders) setup.push(newPlayEvent({kind:'module',moduleData:{module:INTRUDER_MODULE,changes:initialIntruders()}}));
-      if (firstPlayWrite && (!isBirds || isBirdsTarget(previous.selection.birdsRequired)) && (!isMort||freshMort) && (!isRatchetLady||freshRatchet) && (!isIntruders||freshIntruders) && (!isOrganism||freshOrganism) && previous.coreTrackersVersion === 1 && (!isRazorface || previous.razorfaceSetupVersion === 1) && (!isWolf || freshWolf) && (!isHunter || freshHunter) && (!isSlayer || freshSlayer)) {
+      if (firstPlayWrite && (!volkar || previous.volkarSetupVersion===1) && (!isBirds || isBirdsTarget(previous.selection.birdsRequired)) && (!isMort||freshMort) && (!isRatchetLady||freshRatchet) && (!isIntruders||freshIntruders) && (!isOrganism||freshOrganism) && previous.coreTrackersVersion === 1 && (!isRazorface || previous.razorfaceSetupVersion === 1) && (!isWolf || freshWolf) && (!isHunter || freshHunter) && (!isSlayer || freshSlayer)) {
         const values = playStartingValues(previous.selection.killer, previous.selection.finalGirl);
         values.finalGirlHealth = previous.selection.finalGirlStartingHealth ?? values.finalGirlHealth;
         for (const field of ['finalGirlHealth', 'killerHealth', 'bloodlust', 'finalHorrorLevel'] as const) {
@@ -264,6 +268,14 @@ export function useActiveGame() {
         }
       }
       if (log.length === 0 && previous.frightSetupVersion === 1 && previous.selection.killer === 'Dr. Fright' && event.moduleData?.module !== 'fright') setup.unshift(newPlayEvent({kind:'module',moduleData:{module:'fright',changes:{snapshot:JSON.stringify(initialFright())}}}));
+      if(event.moduleData?.module==='volkar') {
+        const entries=summarizePlay([...log,...baseline,...setup]).entries;
+        const state=moduleState(entries,'volkar');
+        const [key,value]=Object.entries(event.moduleData.changes)[0];
+        if (state[key]===value || (value===null && state[key]===undefined)) return previous;
+        if(key==='hunt' && (value==='hit' || value==='ambush') && state.hunt!=='concealed') return previous;
+        if(key==='countdown' && !entries.some(e=>e.id===event.target && e.momentType==='finale' && e.killerCard==='Self-Destruct')) return previous;
+      }
       if (event.moduleData?.module === 'maple') {
         if (previous.selection.location !== 'Maple Lane') return previous;
         const current=moduleState(summarizePlay([...log,...baseline,...setup]).entries,'maple');

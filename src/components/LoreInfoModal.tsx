@@ -1,3 +1,4 @@
+import {ultimatePortrait} from './play/volkarArt';
 import { FinalGirlReference } from "@/components/FinalGirlReference";
 import { Crown, Info } from "lucide-react";
 import {
@@ -148,9 +149,9 @@ function LoreInfoContent({
   lore,
   ultimate,
 }: LoreInfoModalProps & { lore: ReturnType<typeof getLoreDetails> }) {
-  const { characterImages, locationImages } = useActiveImages();
+  const { characterImages, locationImages, aiEnabled } = useActiveImages();
   const image =
-    type === "location" ? locationImages[name] : characterImages[name];
+    type === "location" ? locationImages[name] : (type==="finalGirl" && ultimate && ultimatePortrait(name,aiEnabled)) || characterImages[name];
   if (type === "finalGirl") {
     return (
       <div className="girl-dossier-layout">

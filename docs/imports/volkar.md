@@ -88,5 +88,29 @@ The working branch is `codex/volkar`. The application baseline was `f7b19c9`.
 
 - Catalog and artwork. The existing film ID now supplies the Volk’ar, Dakota, Alois and the basic Pesadilla Verde location. The shared rules and card records use the supplied photographs. The cast includes the supplied illustrations and separate photographic portraits. Both short dossier vignettes are labeled app-original. The actual front cover was checked against the publisher listing. [Publisher cover](https://cdn.shopify.com/s/files/1/0593/6984/8897/files/ff19-front_b7063d66-3682-4024-9d6e-c8956e3ecae2.png)
 - Play and persistence. The hunt, both reveal entry points, growing Energy Shield, Self-Destruct, Ultimate faces, archive outcomes and historical death context are implemented. Fresh games initialize on their first durable Play write. An old game without a visibility record keeps that uncertainty.
-- Verification in progress. The asset checker validates the 18 Play photographs. The edge loader verifies the exact JPEG bytes for the new cast. Browser walkthroughs have verified blind attack outcomes, rejected writes, correction, reload, win and loss review, manual and Mall Ultimate flips, and mixed casting. The final production-build regression run and screenshot inspection are in progress.
-- Release. Three digest-keyed identity objects are staged locally. Private Storage upload, deployed-function smoke testing and a hands-on session using a physical phone remain outstanding.
+
+## Verification results
+
+| Check | Result |
+| --- | --- |
+| Application and edge suites | `npm run check` passed. All 1,146 application tests and 160 edge tests passed. TypeScript passed. ESLint reported 10 existing warnings and zero errors. |
+| Artwork and build | `npm run check:assets` and the production build passed. The asset check includes all 18 Volk’ar Play photographs. Vite reported the existing chunk-size advisory. |
+| Browser journeys | 116 passed across desktop Chromium and iPhone emulation. Coverage included the new film, mixed casting and shuffle, the Mall, Podarchs, Razorface, both cast-art preferences, Health portraits, narrated endings, save-only records and outcome review. Both sparse-game journeys passed again after the final Rules wording change. Backend requests used the project’s browser fixtures. |
+| Persistence and corrections | Verified a rejected write followed by one successful retry, reload, Undo and restore. A late Self-Destruct identification preserves an unknown count. A recorded zero survives replay. Correcting or restoring the Finale keeps a later independent cloak observation. The two-condition win reached the ending request and archive. The countdown loss reached the archive. |
+| Rules and visual acceptance | Compared the Path sequence with pages 4–5 of the publisher booklet. Verified the eleven card choices across 320, 390, 1280, 1366 and 1440 pixel widths with reduced motion. Inspected the populated phone and laptop panels, card crops, Epic labels, hit and ambush feedback, and both Ultimate dossiers. The final hunt photographs match the supplied tusks and horned silhouette in an anonymous doorway. |
+
+The screenshots were captured from the local production build. [Phone hunt](volkar-evidence/hunt-phone.jpg) · [Laptop hunt](volkar-evidence/hunt-laptop.jpg) · [Powers and Finales](volkar-evidence/finales-and-powers.jpg) · [Minor Powers](volkar-evidence/minor-powers.jpg) · [Hit](volkar-evidence/hit.jpg) · [Ambush](volkar-evidence/ambush.jpg) · [Dakota’s Ultimate](volkar-evidence/dakota-ultimate.jpg) · [Alois’s Ultimate](volkar-evidence/alois-ultimate.jpg)
+
+## Release status
+
+The production reference loader accepted each selected pair from the staged JPEG bytes. A mismatched portrait failed its digest check. The committed sources match the following private `opening-references` keys byte for byte. The complete digests are in the [manifest](../../supabase/functions/_shared/openingReferenceManifest.ts).
+
+| Committed source | Private object key |
+| --- | --- |
+| [Alois](../../supabase/reference-assets/alois.jpg) | `alois-a963f0a3cbe3ce7d.jpg` |
+| [Dakota](../../supabase/reference-assets/dakota.jpg) | `dakota-6951ca1609737f13.jpg` |
+| [The Volk’ar](../../supabase/reference-assets/the-volk-ar.jpg) | `the-volk-ar-6af75fe7774486d9.jpg` |
+
+Private upload and readback, backend/frontend deployment and a signed-in live smoke test remain pending. This checkout has no configured deployment credentials. The affected function bundles are `generate-story`, `generate-ending`, `generate-visual-bible`, `generate-scene-image`, `generate-death-scene` and `narrate-story`. Verify the private objects before activating the manifest. Deploy compatible functions before the frontend. The change requires no SQL migration. The separate PostgreSQL integration suite was not run because this workspace has no disposable database or PostgreSQL client.
+
+The tabletop walkthrough used an emulated phone. A hands-on game with a physical phone and cards remains unverified. Pesadilla Verde supports basic casting and generic play. Its Soldiers, Orders, Items, Events and dedicated location mechanics are outside this import.
