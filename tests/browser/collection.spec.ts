@@ -152,13 +152,19 @@ test("illustrated shelf covers the catalog and opens truthful character details"
   await page.goto("/");
   await page.getByRole("button", { name: "Collection", exact: true }).click();
   await expect(page.locator(".collection-film")).toHaveCount(24);
-  await expect(page.locator(".collection-girl-link")).toHaveCount(40);
-  await expect(page.locator("[data-coming-soon=true]")).toHaveCount(2);
-  for (const upcoming of await page.locator("[data-coming-soon=true]").all()) {
-    await expect(upcoming.getByRole("switch")).toBeDisabled();
-    await expect(upcoming.locator(".collection-girl-link")).toHaveCount(0);
-    await expect(upcoming).toContainText("Cast and setting to be announced");
-  }
+  await expect(page.locator(".collection-girl-link")).toHaveCount(42);
+  const greenTerror = page.locator('[data-film-id="s4-green-terror"]');
+  await expect(
+    greenTerror.getByRole("button", { name: "View Dakota info", exact: true }),
+  ).toBeVisible();
+  await expect(
+    greenTerror.getByRole("button", { name: "View Alois info", exact: true }),
+  ).toBeVisible();
+  const upcoming = page.locator("[data-coming-soon=true]");
+  await expect(upcoming).toHaveCount(1);
+  await expect(upcoming.getByRole("switch")).toBeDisabled();
+  await expect(upcoming.locator(".collection-girl-link")).toHaveCount(0);
+  await expect(upcoming).toContainText("Cast and setting to be announced");
   const vignette = page.locator('[data-film-id="s1-terror-from-above"]');
   await expect(vignette.locator(".collection-girl-link")).toHaveCount(1);
   await expect(vignette).toContainText("Your choice");
