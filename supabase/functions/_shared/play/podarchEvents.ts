@@ -1,9 +1,11 @@
+import { PESADILLA, PESADILLA_PEOPLE } from './pesadillaCatalog.ts';
 import { HELLSCAPE, HELLSCAPE_PEOPLE } from './hellscape.ts';
 import { PODARCHS } from './podarchs.ts';
 
 // Only cards featuring Special Victim meeples are removed. Setup people and
 // events merely referring to a Victim remain part of their location.
 const specialVictimEvents: Record<string, readonly string[]> = {
+  [PESADILLA]: Object.values(PESADILLA_PEOPLE),
   [HELLSCAPE]: HELLSCAPE_PEOPLE.map(person => person.name),
   'Camp Happy Trails': ['Boyfriend','Girlfriend','Vengeance'],
   'Creech Manor': ['Ghost Hunters'],
@@ -23,7 +25,7 @@ const specialVictimEvents: Record<string, readonly string[]> = {
   'Buddyland': ['Birthday Girl','Nick the Janitor','Pizza Delivery'],
 };
 export function eligibleStartingEvent(killer: string | null | undefined, location: string | null, name: string | null) {
-  if (killer !== PODARCHS || !location || !name) return true;
+  if ((killer !== PODARCHS && !(killer === 'Birds' && location === PESADILLA)) || !location || !name) return true;
   const key = (text: string) => text.toLowerCase().replace(/[^a-z0-9]/g, '');
   return !specialVictimEvents[location]?.some(event => key(event) === key(name));
 }

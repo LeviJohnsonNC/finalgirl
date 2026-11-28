@@ -53,7 +53,9 @@ type Observation = Record<string, string | number | boolean | null>;
 type Entry = {id?:string;kind:string;momentType?:string;killerCard?:string;moduleData?:{module:string;changes:Observation}};
 type Token = 'black' | 'white' | 'pending-black' | 'pending-white' | 'pending-unknown' | 'defeated';
 type Status = 'exposed' | 'safe' | 'casualty' | 'mutated';
-type Minor = typeof ORGANISM_MINORS[number]['id'];
+export const ORGANISM_RIVERMASTER = {id:'rivermaster',name:'Rivermaster',health:2} as const;
+const applicableMinors = [...ORGANISM_MINORS, ORGANISM_RIVERMASTER];
+type Minor = typeof applicableMinors[number]['id'];
 type TestSource = 'ordinary' | 'forced' | 'alone';
 export type OrganismAssignment = {who:OrganismColor;form:OrganismForm};
 export type OrganismAction = {parent:string} & (
@@ -116,7 +118,7 @@ export function validOrganismField(key:string,value:unknown) {
     key===orderKey(who)&&(value===null||validInt(value,1,3)) ||
     key===tokenKey(who)&&(value===null||isToken(value)) ||
     key===healthKey(who)&&(value===null||validInt(value,0,7))) ||
-    ORGANISM_MINORS.some(card=>key===minorOwnerKey(card.id)&&(value===null||isColor(value)||value==='waiting') ||
+    applicableMinors.some(card=>key===minorOwnerKey(card.id)&&(value===null||isColor(value)||value==='waiting') ||
       key===minorHealthKey(card.id)&&(value===null||validInt(value,0,card.health)));
 }
 export function validOrganismAction(input:unknown):input is OrganismAction {
@@ -125,7 +127,7 @@ export function validOrganismAction(input:unknown):input is OrganismAction {
   if(typeof a.parent!=='string'||(a.parent!=='root'&&!uuid.test(a.parent))) return false;
   if(a.command==='finale') return typeof a.reveal==='string'&&uuid.test(a.reveal)&&Array.isArray(a.assignments)&&
     a.assignments.length>=1&&a.assignments.length<=3&&a.assignments.every(item=>item&&isColor(item.who)&&formById(item.form));
-  if(a.command==='minor') return ORGANISM_MINORS.some(card=>card.id===a.card&&(a.health===null||validInt(a.health,0,card.health)))&&
+  if(a.command==='minor') return applicableMinors.some(card=>card.id===a.card&&(a.health===null||validInt(a.health,0,card.health)))&&
     (a.owner===null||a.owner==='waiting'||isColor(a.owner));
   if(!isColor(a.who)) return false;
   switch(a.command) {
@@ -147,7 +149,7 @@ function assignForm(state:Observation,who:OrganismColor,form:OrganismForm):Obser
   if(nextOrder>3) return;
   const changes:Observation = {[statusKey(who)]:'mutated',[formKey(who)]:form,[orderKey(who)]:nextOrder,
     [tokenKey(who)]:'black',[healthKey(who)]:card.hp};
-  for(const minor of ORGANISM_MINORS) {
+  for(const minor of applicableMinors) {
     const key=minorOwnerKey(minor.id);
     if(state[key]==='waiting') changes[key]=who;
   }
@@ -180,7 +182,7 @@ export function resolveOrganismAction(action:OrganismAction,state:Observation,en
     if(action.card==='acidic'&&action.health===0&&isColor(action.owner)) {
       const figure=organismFigure(state,action.owner);
       if(figure.health!==undefined&&figure.health>1) return;
-      if(ORGANISM_MINORS.some(minor=>minor.id!=='acidic'&&state[minorOwnerKey(minor.id)]===action.owner&&Number(state[minorHealthKey(minor.id)])>0)) return;
+      if(applicableMinors.some(minor=>minor.id!=='acidic'&&state[minorOwnerKey(minor.id)]===action.owner&&Number(state[minorHealthKey(minor.id)])>0)) return;
     }
     return state[hpKey]===action.health&&owner===action.owner?undefined:{[ownerKey]:action.owner,[hpKey]:action.health};
   }
@@ -211,7 +213,7 @@ export function resolveOrganismAction(action:OrganismAction,state:Observation,en
     return {[healthKey(who)]:action.value};
   }
   if(action.command==='token-loss') {
-    if(figure.pending||figure.health!==1||ORGANISM_MINORS.some(card=>
+    if(figure.pending||figure.health!==1||applicableMinors.some(card=>
       state[minorOwnerKey(card.id)]===who&&Number(state[minorHealthKey(card.id)])>0)) return;
     return {[tokenKey(who)]:figure.token==='black'?'pending-black':figure.token==='white'?'pending-white':'pending-unknown',[healthKey(who)]:0};
   }

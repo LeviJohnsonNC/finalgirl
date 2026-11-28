@@ -1,3 +1,4 @@
+import type { ModuleArt as LocationMinorArt } from "./ModuleArtwork";
 import { PODARCHS } from '../../../supabase/functions/_shared/play/podarchs';
 import { PodarchMinor } from './PodarchControls';
 import { konradArt } from './konradArt';
@@ -13,6 +14,7 @@ import {
   canRecordMort,
   describeMort,
   mortFinale,
+  mortLocationMinors,
   mortMatches,
   mortState,
   type MortCommand,
@@ -468,7 +470,7 @@ function ClueEditor({
   if (state.locationMinor && location === state.locationMinor)
     discardOptions.push({
       id: "location",
-      name: location === "USS Konrad" ? "Slippery" : "Twisted Bond",
+      name: mortLocationMinors[location],
     });
   return (
     <form
@@ -1048,16 +1050,22 @@ export function MortLocationMinor({
   blocked,
   children,
   name,
+  locationMinorArt,
 }: Pick<
   ControlsProps,
   "killer" | "location" | "events" | "onEvent" | "blocked"
-> & { name: string; children: React.ReactNode }) {
+> & { name: string; children: React.ReactNode; locationMinorArt?: LocationMinorArt }) {
   const entries = summarizePlay(events).entries;
   const state = mortState(entries);
   const { record, message } = useModuleRecord(events, onEvent);
-  if (killer === PODARCHS) return <PodarchMinor id={name === "Slippery" ? "slippery" : "bond"} name={name} art={name === "Slippery" ? konradArt("slippery") : mallArt("twisted-bond")} events={events} onEvent={onEvent} blocked={blocked}/>;
+  if (killer === PODARCHS) return <PodarchMinor id={location === "Pesadilla Verde" ? "rivermaster" : location === "USS Konrad" ? "slippery" : "bond"} name={name} art={locationMinorArt ?? (name === "Slippery" ? konradArt("slippery") : mallArt("twisted-bond"))} events={events} onEvent={onEvent} blocked={blocked}/>;
   if (killer !== MORT || state.reveal) return <>{children}</>;
   const active = state.locationMinor === location;
+  if (locationMinorArt) return <>
+    <MinorPowerControl mode="presence" name={name} active={active} art={locationMinorArt}
+      disabled={blocked} onChange={next=>record(mortEvent({kind:'location-minor',location,active:next},entries))} />
+    {message && <p role="alert">{message}</p>}
+  </>;
   return (
     <div className="mort-play">
       <p>

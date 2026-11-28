@@ -1,0 +1,170 @@
+{
+  "archeologist": {
+    "source": "exec-a6d3a40c-cd58-40fd-9acd-aa4279d3d80c.png",
+    "size": "960x640",
+    "bytes": 74058,
+    "sha256": "d7e1ad3d6a07747b2a012e4ef2f47c6797038893a0a1eb8dfd20e976d4a384a7",
+    "position": "50% 48%"
+  },
+  "archeologist-killed": {
+    "source": "exec-3063bd41-37a5-49e0-863f-5e0fe39bde0c.png",
+    "size": "960x540",
+    "bytes": 115862,
+    "sha256": "d8f3ecc66493053e23411fb9e065357a98b0ab8b9d5eb3c9d586e918010ce12b",
+    "position": "50% 48%"
+  },
+  "archeologist-saved": {
+    "source": "exec-e7fa818b-b36f-46ff-9a20-6b2af0bd2529.png",
+    "size": "960x540",
+    "bytes": 118004,
+    "sha256": "910810d21ac926f5f2a6b890b586723cd10992bf41be0a390f05b4c1d007f125",
+    "position": "50% 48%"
+  },
+  "cave-fallen": {
+    "source": "exec-88e8dd5a-1c3f-44a6-91b3-b6e8828ecb1b.png",
+    "size": "960x540",
+    "bytes": 152528,
+    "sha256": "a51e7617d35fc5937e9ba938405ff045eec52b2631e69a3b50011d37ea269c68",
+    "position": "50% 48%"
+  },
+  "cave-intact": {
+    "source": "exec-5fc52b79-af1b-46a8-9aac-a57b2dd1851b.png",
+    "size": "960x540",
+    "bytes": 127762,
+    "sha256": "65a21fbde6c041ba1bee9c916ccaf9e52d955313bbf864244a9c58b00fac9ad3",
+    "position": "50% 48%"
+  },
+  "huey-away": {
+    "source": "exec-f346ef22-5ce5-490d-9cab-207608dcf624.png",
+    "size": "960x540",
+    "bytes": 124392,
+    "sha256": "8691e321e2c1777871a2c850f3156afe6904065013fadb2b9db2f4cf4c74c8f0",
+    "position": "50% 48%"
+  },
+  "huey-grounded": {
+    "source": "exec-f13da8e1-7a14-4c76-aab5-27d1be9bdf5b.png",
+    "size": "960x540",
+    "bytes": 116318,
+    "sha256": "ca2706aea19a3181fcfa7ba813234125254e031cd9cee772fcdb9c166a7a8c52",
+    "position": "50% 48%"
+  },
+  "idol": {
+    "source": "exec-fe2ecf2a-b569-4ca3-a710-b91c18ec656a.png",
+    "size": "960x640",
+    "bytes": 88186,
+    "sha256": "21be14fe90c106dd4e1136d62f9b491ac86b2a0cb61648c3854c5116515f9aad",
+    "position": "50% 48%"
+  },
+  "patrol": {
+    "source": "exec-1068835e-e5b5-4bf7-a39e-fb877e8e57c7.png",
+    "size": "960x540",
+    "bytes": 103740,
+    "sha256": "debd4fbab06e82badda073ecee63e4afb07bb856c1b5f408df8a1b027775dd62",
+    "position": "50% 22%"
+  },
+  "patrol-trained": {
+    "source": "exec-504ca5f4-2fc6-496a-b5e7-1be04a4c4cf4.png",
+    "size": "960x540",
+    "bytes": 103582,
+    "sha256": "eb110cd47efe030bbb21d13cd07b06a75c554593a1d474af46711d86017ad557",
+    "position": "50% 22%"
+  },
+  "patrol-twitchy": {
+    "source": "exec-d5a4ada7-1799-4ba8-8d65-681fe8b4ba0d.png",
+    "size": "960x540",
+    "bytes": 105866,
+    "sha256": "3b3b7e2b4a01b1ddc3b8589b5b55a3d1cd7f14e58fe158178c21e44caad5cfac",
+    "position": "50% 22%"
+  },
+  "piranhas-central": {
+    "source": "exec-a98fea18-8394-4b1c-a854-8bea75e9f165.png",
+    "size": "960x640",
+    "bytes": 106818,
+    "sha256": "0cecff9674eb1441a91aa8f4418e154124374be6920bc9a897424ba19481d911",
+    "position": "50% 48%"
+  },
+  "piranhas-upper": {
+    "source": "exec-410e39dc-968b-4521-ba39-321b1f7c8d94.png",
+    "size": "960x640",
+    "bytes": 144054,
+    "sha256": "be6bd4d5a057d6c1b61abdef26f6585dff62d7c8c547308df973f1e04026a90c",
+    "position": "50% 48%"
+  },
+  "rain": {
+    "source": "exec-41e900c2-37bd-44d5-a7cf-8f04c6f4b8ec.png",
+    "size": "960x640",
+    "bytes": 117610,
+    "sha256": "856e224ed43eef39b987b33885688637d15a06c3607dfc62c2c790714a7f0bd3",
+    "position": "50% 48%"
+  },
+  "rebel": {
+    "source": "exec-013adbfe-e947-4a29-8ede-b181911b8d45.png",
+    "size": "960x640",
+    "bytes": 65078,
+    "sha256": "d69191fc591bb80bda562ad293bff82626a38ea2fdc4f9b6d188a2dd57889678",
+    "position": "50% 48%"
+  },
+  "rebel-killed": {
+    "source": "exec-f30df5d8-da15-4a35-9996-5c51bea15955.png",
+    "size": "960x540",
+    "bytes": 91792,
+    "sha256": "47be4626536d3558190f3be17eeadef9f2fdd63966538f5a5c3b3d22d5360aaf",
+    "position": "50% 48%"
+  },
+  "rebel-saved": {
+    "source": "exec-67a3d1cb-f8f2-4214-a967-3f4280985878.png",
+    "size": "960x540",
+    "bytes": 68288,
+    "sha256": "c225fa73f4165b7a3594c412067ebed6baeb807d612c35bd333fb0397d6fff57",
+    "position": "50% 48%"
+  },
+  "river": {
+    "source": "exec-93af7636-cd2e-4ff3-b206-d53eb0be09e1.png",
+    "size": "960x540",
+    "bytes": 113488,
+    "sha256": "0a5784ab729063b6290a49ed1ab779d3da1207f323ead82c0bbde7aa8c47ed0a",
+    "position": "50% 48%"
+  },
+  "rivermaster": {
+    "source": "exec-a93270ed-5152-4ffd-bff4-b47cf6ffef5e.png",
+    "size": "960x640",
+    "bytes": 54022,
+    "sha256": "357a445671ff2cb79fbef579cd0a8d9b4af425ab48a2a539a014716890c057b5",
+    "position": "50% 48%"
+  },
+  "temple-active": {
+    "source": "exec-3550b7c1-ee55-4783-8eb6-144cce1a1708.png",
+    "size": "960x541",
+    "bytes": 151854,
+    "sha256": "ea1dd93a0547f4c09a68ff5e457cfe1861df68718079d459a5611b55f549f177",
+    "position": "50% 48%"
+  },
+  "temple-clear": {
+    "source": "exec-347acb5e-9a57-4db4-b7a6-f78edac22918.png",
+    "size": "960x540",
+    "bytes": 145008,
+    "sha256": "d590d8133cf76fe9580f951eb17e4f71e4e934460aae57f4082b1d3f3ae9e756",
+    "position": "50% 48%"
+  },
+  "weathers": {
+    "source": "exec-7d215eab-3151-40c2-813a-0f36d39a91c7.png",
+    "size": "960x640",
+    "bytes": 63380,
+    "sha256": "ffd1b70d67a812827564d87a0aca0291e4cd7dc2e412c8262e8a6a3461cd69f6",
+    "position": "50% 48%"
+  },
+  "weathers-killed": {
+    "source": "exec-34b045be-6b5e-497d-9a0a-65297229725e.png",
+    "size": "480x640",
+    "bytes": 44354,
+    "sha256": "a66f0784e991d29dbb7271ae4c05d1a17e602dec8f06fa3b0f6c6c4742f85d95",
+    "position": "50% 48%"
+  },
+  "weathers-saved": {
+    "source": "exec-6d7a4334-17f3-40b7-bb40-956ce1badf30.png",
+    "size": "480x640",
+    "bytes": 49574,
+    "sha256": "b693296da95d03751faa8457cee02cc9b74f20227e82e890166aa2514bca49ce",
+    "position": "50% 48%"
+  }
+}

@@ -1,3 +1,5 @@
+import { freshPesadilla, pesadillaOwnsLog, pesadillaParent, resolvePesadilla } from '../../supabase/functions/_shared/play/pesadilla';
+import { PESADILLA, PESADILLA_MODULE } from '../../supabase/functions/_shared/play/pesadillaCatalog';
 import {volkarOwnsLog} from '../../supabase/functions/_shared/play/volkar';
 import { HELLSCAPE, HELLSCAPE_MODULE } from "../../supabase/functions/_shared/play/hellscape";
 import { MEGABGCON } from "../../supabase/functions/_shared/play/megabgconCatalog";
@@ -114,6 +116,7 @@ export function useActiveGame() {
         if (event.kind==='reduce' && log.some(e=>e.id===event.target&&e.mortAction)) return previous;
       }
       if(event.kind==='undo'&&!canUndoWingard(log,event.target!))return previous;
+      if (event.moduleData?.module === PESADILLA_MODULE && (!event.pesadillaAction || !pesadillaOwnsLog(previous.selection,[event]))) return previous;
       if((event.moduleData?.module===MALL_MODULE&&(!event.mallAction||previous.selection.location!==MALL))||(event.mallReference&&previous.selection.location!==MALL))return previous;
       const isStation = previous.selection.location === STATION;
       if ((event.moduleData?.module === STATION_MODULE && (!isStation || !event.stationAction)) ||
@@ -243,6 +246,8 @@ export function useActiveGame() {
       if (log.length === 0 && freshWolf) {
         setup.push(newPlayEvent({ kind: "module", moduleData: { module: "big-bad-wolf", changes: { mode: "track" } } }));
       }
+      const freshLocation = firstPlayWrite && previous.pesadillaSetupVersion === 1 && previous.selection.location === PESADILLA;
+      if (freshLocation) setup.push(newPlayEvent({kind:"module",moduleData:{module:PESADILLA_MODULE,changes:freshPesadilla(previous.selection.killer,previous.selection.startingEvent)}}));
       if(!log.length&&previous.mallSetupVersion===1&&previous.selection.location===MALL)setup.push(newPlayEvent({kind:'module',moduleData:{module:MALL_MODULE,changes:initialMall(previous.selection.startingEvent)}}));
       const freshFalconwood = isFalconwood && previous.falconwoodSetupVersion === 1;
       const falconwoodSetup = !log.length && freshFalconwood && initialFalconwood(previous.selection.mission, previous.selection.startingEvent);
@@ -369,6 +374,14 @@ export function useActiveGame() {
         accepted={...event,evomorphAction:request,moduleData:{module:'evomorph',changes}};
         if(request.command==='evolve'&&changes.stage==='adult'&&!entries.some(e=>e.kind==='moment'&&e.momentType==='dark-power'))reveal.push(newPlayEvent({kind:'moment',momentType:'dark-power',permanent:true,text:'Dark Power revealed'}));
       }
+      if (event.pesadillaAction) {
+        const entries = summarizePlay([...log,...baseline,...setup]).entries;
+        const action = freshLocation && event.pesadillaAction.parent === 'root'
+          ? {...event.pesadillaAction, parent:pesadillaParent(entries)} : event.pesadillaAction;
+        const changes = resolvePesadilla(action,moduleState(entries,PESADILLA_MODULE));
+        if (!changes || action.parent !== pesadillaParent(entries)) return previous;
+        accepted = {...event,pesadillaAction:action,moduleData:{module:PESADILLA_MODULE,changes}};
+      }
       if(event.mallAction){const entries=summarizePlay([...log,...baseline,...setup]).entries;const action=!log.length&&previous.mallSetupVersion===1&&event.mallAction.parent==='root'?{...event.mallAction,parent:mallParent(entries)}:event.mallAction;const changes=resolveMallAction(action,moduleState(entries,MALL_MODULE),entries);if(!changes||(log.length&&!sameHunterChanges(changes,event.moduleData!.changes)))return previous;accepted={...event,mallAction:action,moduleData:{module:MALL_MODULE,changes}};}
       if (event.falconwoodAction) {
         const entries = summarizePlay([...log, ...baseline, ...setup]).entries;
@@ -401,6 +414,7 @@ export function useActiveGame() {
         if (!changes || changes.snapshot !== event.moduleData!.changes.snapshot) return previous;
         accepted = {...event,stationAction:action,moduleData:{module:STATION_MODULE,changes}};
       }
+      if (event.organismAction?.command === "minor" && event.organismAction.card === "rivermaster" && previous.selection.location !== PESADILLA) return previous;
       if(event.organismAction) {
         const entries=summarizePlay([...log,...baseline,...setup]).entries;
         const action=!log.length&&freshOrganism&&event.organismAction.parent==="root"
@@ -427,6 +441,7 @@ export function useActiveGame() {
       if([...log,...additions].some(e=>e.moduleData?.module==='shady-acres')&&!validPlayLog([...log,...additions]))return previous;
       if([...log,...additions].some(e=>e.moduleData?.module==='grimlash')&&!validPlayLog([...log,...additions]))return previous;
       if((event.konradAction||event.kind==='undo'||event.kind==='restore')&&[...log,...additions].some(e=>e.moduleData?.module==='konrad')&&!validPlayLog([...log,...additions]))return previous;
+      if (previous.selection.location === PESADILLA && !validPlayLog([...log,...additions])) return previous;
       if(previous.selection.location===MALL&&!validPlayLog([...log,...additions]))return previous;
       if (isFalconwood && !validPlayLog([...log, ...additions])) return previous;
       if (previous.selection.location === MEGABGCON && !validPlayLog([...log, ...additions])) return previous;

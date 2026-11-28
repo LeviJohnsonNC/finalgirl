@@ -105,6 +105,7 @@ export const RuleBlock = ({ block, glossary, onJumpTo, jumpId, inModal }: RuleBl
       <img src={podarchArt(p.id).src} loading="lazy" decoding="async" alt="" width="508" height="252"/><figcaption>{p.label}</figcaption></figure>)}</div>;
     case "wolfe-setups": return <WolfeSetupReference/>;
     case "groves-setup": return <GrovesBoard setup={block.setup}/>;
+    case 'link': return <a className="underline underline-offset-4" href={block.url} target="_blank" rel="noreferrer">{block.text}</a>;
     case 'paragraph':
       return (
         <p className="rule-paragraph text-foreground/90 leading-7 type-body-sm">
