@@ -1,3 +1,4 @@
+import { VOLKAR, VOLKAR_TERRORS, VOLKAR_SOURCE } from './volkar.ts';
 import { HELLSCAPE, HELLSCAPE_EVENTS, HELLSCAPE_ITEMS, HELLSCAPE_PEOPLE, HELLSCAPE_SOURCE, HELLSCAPE_SPACES, HELLSCAPE_TERRORS } from "./hellscape.ts";
 import { MEGABGCON, MEGABGCON_SOURCE, BOOTH_EVENTS, CON_EVENTS, CON_ITEMS, CON_TERRORS, CON_SPACES, CON_PEOPLE } from "./megabgconCatalog.ts";
 import { MORT, MORT_TERRORS } from './mort.ts';
@@ -64,6 +65,7 @@ export const PLAY_CARDS: readonly PlayCard[] = [
   ...WOLFE_EVENTS.map(card=>({...card,kind:'event' as const,location:WOLFE,source:WOLFE_SOURCE})),
   ...WOLFE_TERRORS.map(card=>({...card,kind:'terror' as const,location:WOLFE,source:WOLFE_SOURCE})),
   ...MORT_TERRORS.map(card => ({...card, kind:'terror' as const, killer:MORT, source:'Shriek · Mort Terror cards'})),
+  ...VOLKAR_TERRORS.map(c=>({...c,kind:"terror" as const,killer:VOLKAR,source:VOLKAR_SOURCE})),
   ...PODARCH_TERRORS.map(c => ({ ...c, kind:'terror' as const, killer:PODARCHS, source:PODARCH_SOURCE })),
   ...RATCHET_TERRORS.map(card => ({...card, kind:'terror' as const, killer:RATCHET_LADY, source:RATCHET_SOURCE})),
  ...FALCONWOOD_TERRORS.map(card => ({...card,kind:"terror" as const,location:FALCONWOOD,source:FALCONWOOD_SOURCE})),

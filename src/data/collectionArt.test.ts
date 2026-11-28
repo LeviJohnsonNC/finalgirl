@@ -39,7 +39,7 @@ describe("Collection artwork coverage", () => {
         ),
       ),
     ];
-    expect(girls).toHaveLength(40);
+    expect(girls).toHaveLength(42);
     for (const images of [CHARACTER_IMAGES, CHARACTER_IMAGES_AI])
       for (const girl of girls) {
         expect(images[girl], girl).toBeTruthy();

@@ -177,6 +177,7 @@ const IndexContent = () => {
     const rotation = openingRotation(owner, selection.killer, selection.location);
     if (saveActiveGame({ version: 1, id: crypto.randomUUID(), openingTake: rotation.take, phase: 'nowPlaying',
       coreTrackersVersion: 1,
+      ...(selection.killer === "The Volk'ar" && {volkarSetupVersion: 1 as const}),
       ...(selection.killer === RAZORFACE && {razorfaceSetupVersion:1 as const}),
       ...(selection.location === "Wolfe Asylum" && {wolfeSetupVersion:1 as const}),
       ...(selection.killer === "Ratchet Lady" && {ratchetSetupVersion:1 as const}),
@@ -498,7 +499,7 @@ const IndexContent = () => {
               birdsRequired={activeGame.selection.birdsRequired}
               falconwoodFresh={activeGame.falconwoodSetupVersion === 1}
               razorfaceFresh={activeGame.razorfaceSetupVersion === 1}
-              stationFresh={activeGame.stationSetupVersion === 1} mortFresh={activeGame.mortSetupVersion === 1}
+              stationFresh={activeGame.stationSetupVersion === 1} mortFresh={activeGame.mortSetupVersion === 1} volkarFresh={activeGame.volkarSetupVersion===1}
               filmId={gameSelection.filmId}
               key={activeGame.id}
               sessionId={activeGame.id}

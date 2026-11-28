@@ -1,3 +1,6 @@
+import { VolkarControls } from './VolkarControls';
+import { volkarArt } from './volkarArt';
+import { VOLKAR, huntLabel } from '../../../supabase/functions/_shared/play/volkar';
 import { HELLSCAPE, HELLSCAPE_MODULE, HELLSCAPE_PEOPLE } from "../../../supabase/functions/_shared/play/hellscape";
 import { HellscapeControls } from "./HellscapeControls";
 import hellscapeNexus from "@/assets/play/photos/hellscape/banner.webp";
@@ -105,6 +108,7 @@ export interface ControlsProps {
   mission?: string | null;
   falconwoodFresh?: boolean;
   stationFresh?: boolean;
+  volkarFresh?: boolean;
   mortFresh?: boolean;
   razorfaceFresh?: boolean;
   setupScenario?: string | null;
@@ -127,7 +131,7 @@ export type SharedControlCapability =
   | "minor-power";
 interface Definition {
   capabilities: readonly SharedControlCapability[];
-  id: 'podarchs' | typeof HELLSCAPE_MODULE | typeof RAZORFACE_MODULE | typeof BIRDS_MODULE | typeof MEGABGCON_MODULE | typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
+  id: 'volkar' | 'podarchs' | typeof HELLSCAPE_MODULE | typeof RAZORFACE_MODULE | typeof BIRDS_MODULE | typeof MEGABGCON_MODULE | typeof MORT_MODULE | typeof WOLFE_MODULE | typeof RATCHET_MODULE | typeof STATION_MODULE | typeof ORGANISM_MODULE | typeof FALCONWOOD_MODULE | typeof SLAYER_MODULE | typeof MALL_MODULE | "hunter" | typeof WINGARD_MODULE | "intruders" | "storybook-woods" | "big-bad-wolf" | "marrek" | "tormentor" | "shady-acres" | "grimlash" | "konrad" | "evomorph" | "creech" | "poltergeist" | "groves" | "inkanyamba" | "billy" | "hans" | "buddyland" | "camp" | "geppetto" | "carnival" | "fright" | "maple";
   owner: "killer" | "location";
   match: string;
   title: string;
@@ -168,6 +172,7 @@ export const moduleDefinitions: Definition[] = [
     if (state.result === 'exhausted') return 'Affliction deck exhausted';
     return state.active === undefined ? 'Afflictions unrecorded' : state.active.length ? `${state.active.length} Afflictions in play` : 'Afflictions cleared';
   }},
+ {id:'volkar',owner:'killer',match:VOLKAR,title:VOLKAR,art:volkarArt('banner'),capabilities:['reveals','minor-power'],Controls:VolkarControls,summary:(state,props)=>huntLabel(state.hunt ?? (props?.volkarFresh && !props.events.length ? "concealed" : undefined))},
  {id:'podarchs', owner:'killer', match:PODARCHS, title:PODARCHS, art:podarchArt('banner'), capabilities:['objective','reveals','minor-effect'], Controls:PodarchControls,
   summary:(_fields,props)=>podarchBehavior(summarizePlay(props?.events ?? []).bloodlust)},
  {id:MORT_MODULE,owner:'killer',match:MORT,title:MORT,art:{src:mortBanner,position:'74% 36%'},capabilities:['reveals'],Controls:MortControls,

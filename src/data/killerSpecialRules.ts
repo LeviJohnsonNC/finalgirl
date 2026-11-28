@@ -112,6 +112,10 @@ export const KILLER_SPECIAL_RULES: Record<string, KillerSpecialRules> = {
 
   // ── Season 3 Vignette ────────────────────────────────────────────────────
 
+  "The Volk'ar": {
+    narrativeNote: 'A four-armed extraterrestrial hunter uses a refractive cloak to track prey. Her physical Path determines where she appears. Use the current location and only recorded observations.',
+    winCondition: 'Defeat the hunter. During Self-Destruct, also be on an Exit before the last Countdown token is removed.',
+  },
   'The Podarchs': {
     isVignette: true, narrativeNote: 'An invasion of alien plants replacing people who keep their faces and memories. The Assimilated seek to replace Victims even after they turn Hostile toward the Final Girl. Assimilation is not a death.',
     winCondition: 'Clear the invasion before the Finale or fulfill the selected Finale objective. Use the reported outcome.',

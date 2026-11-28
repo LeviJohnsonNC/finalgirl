@@ -1,3 +1,5 @@
+import { VOLKAR, VOLKAR_WIN, volkarAttack } from '../../../supabase/functions/_shared/play/volkar';
+import {huntArt,ultimatePortrait} from './volkarArt';
 import { RAZORFACE, RAZORFACE_MAX_BLOODLUST, razorfaceState } from '../../../supabase/functions/_shared/play/razorface';
 import { BIRDS, BIRDS_MAX_BLOODLUST } from '../../../supabase/functions/_shared/play/birds';
 import { PODARCHS, PODARCH_MAX, podarchMinorNames } from '../../../supabase/functions/_shared/play/podarchs';
@@ -90,6 +92,7 @@ import { PlaySelect } from "./PlaySelect";
 import "@/styles/play-state-art.css";
 
 export interface PlayScreenProps {
+  volkarFresh?: boolean;
   mortFresh?: boolean;
   killer: string;
   location: string;
@@ -210,7 +213,7 @@ export function PlayScreen(props: PlayScreenProps) {
   const mortProgress=mortState(summary.entries,props.mortFresh&&!events.length);
   const mortFinaleArt=mortProgress.reveal?mortPhoto(`${mortProgress.reveal.suspect}-finale`):undefined;
   const hunter=hunterState(moduleState(summary.entries,'hunter'));
-  const killerPortrait = mortFinaleArt ? {src:mortFinaleArt,position:"50% 38%"} : killer === 'The Hunter' && hunter.phase==='mark-x' ? hunterArt('mark-x') : killer === "Evomorph"
+  const killerPortrait = killer===VOLKAR ? huntArt(moduleState(summary.entries,"volkar").hunt ?? (props.volkarFresh && !events.length ? "concealed" : undefined)) : mortFinaleArt ? {src:mortFinaleArt,position:"50% 38%"} : killer === 'The Hunter' && hunter.phase==='mark-x' ? hunterArt('mark-x') : killer === "Evomorph"
     ? evomorphStageArt(moduleState(summary.entries, "evomorph").stage)
     : {
         src: killerImage,
@@ -229,7 +232,7 @@ export function PlayScreen(props: PlayScreenProps) {
   const resistance = wolfe && wolfeAmped(wolfe) && wolfe[ampKey('resistance')];
   const ratchetShield = ratchetCount(maniacs) && maniacs > 0 &&
     summary.entries.some(event => event.momentType === 'dark-power' && event.killerCard === SHIELD_OF_MADNESS);
-  const trackerLimits = { ...stateLimits, ...(podarchGame && {bloodlust:PODARCH_MAX}), ...(razorface&&{bloodlust:RAZORFACE_MAX_BLOODLUST}), ...(killer===BIRDS&&{bloodlust:BIRDS_MAX_BLOODLUST}), ...(mort&&{killerHealth:MORT_MAX_HEALTH,bloodlust:MORT_MAX_BLOODLUST}), ...(isRatchetLady && { killerHealth: RATCHET_HEALTH_STORAGE_MAX, bloodlust: RATCHET_MAX_BLOODLUST }), ...(killer===INTRUDERS&&{bloodlust:10}), ...(killer===ORGANISM&&{bloodlust:ORGANISM_MAX_BLOODLUST}), finalGirlHealth: observedFinalGirlMaxHealth(
+  const trackerLimits = { ...stateLimits, ...(killer===VOLKAR && {bloodlust:10}), ...(podarchGame && {bloodlust:PODARCH_MAX}), ...(razorface&&{bloodlust:RAZORFACE_MAX_BLOODLUST}), ...(killer===BIRDS&&{bloodlust:BIRDS_MAX_BLOODLUST}), ...(mort&&{killerHealth:MORT_MAX_HEALTH,bloodlust:MORT_MAX_BLOODLUST}), ...(isRatchetLady && { killerHealth: RATCHET_HEALTH_STORAGE_MAX, bloodlust: RATCHET_MAX_BLOODLUST }), ...(killer===INTRUDERS&&{bloodlust:10}), ...(killer===ORGANISM&&{bloodlust:ORGANISM_MAX_BLOODLUST}), finalGirlHealth: observedFinalGirlMaxHealth(
     finalGirl, events, props.finalGirlStartingHealth ?? startingValues.finalGirlHealth, killer,
   ) ?? stateLimits.finalGirlHealth };
   const [message, setMessage] = useState("");
@@ -301,6 +304,9 @@ export function PlayScreen(props: PlayScreenProps) {
   const pickMoment = (choice: (typeof moments)[number]) => {
     if (!saveMoment()) return;
     setHunterRevealOpen(null);
+    if(killer===VOLKAR && (choice.type==='dark-power' || choice.type==='finale')) {
+      setMomentId(null); setHunterRevealOpen(choice.type); return;
+    }
     if (mort && (choice.type==='finale'||choice.type==='dark-power')) {
       setMomentId(null); setMortMoment(mortMoment===choice.type?null:choice.type); return;
     }
@@ -319,8 +325,9 @@ export function PlayScreen(props: PlayScreenProps) {
       momentType: choice.type,
       text: choice.subtitle ? `${choice.title}: ${choice.subtitle}` : choice.title,
       ...(permanent && { permanent: true as const }),
+      ...(choice.type==='ultimate-unlocked' && (finalGirl==='Dakota'||finalGirl==='Alois') && {ultimateFace:finalGirl}),
     });
-    if (!e) pendingMoments.current.delete(choice.type);
+    if (!e || e.ultimateFace) pendingMoments.current.delete(choice.type);
     if (e) {
       setMomentId(e.id);
       setAnnouncement(`${choice.title} recorded.`);
@@ -535,6 +542,7 @@ export function PlayScreen(props: PlayScreenProps) {
                 <div className="play-state-control-bar">
                   <div className="play-state-caption">
                     <span className="play-state-title">{trackerTitles[field]}</span>
+                    {field === "bloodlust" && killer === VOLKAR && value !== undefined && <small>Attack {volkarAttack(value)}</small>}
                     {value === undefined && <small className="play-state-unknown">{disguised?(mortProgress.known?'Disguised · Health unrevealed':'Disguise unrecorded'):'Not recorded'}</small>}
                     {field === 'killerHealth' && ratchetShield && <small>Shield of Madness · {resistance ? 'Resistance active' : `${maniacs} ${maniacs===1?'Maniac':'Maniacs'}`}</small>}
                     {field === 'killerHealth' && razorface && razorface.result === undefined && value !== undefined && value <= 1 &&
@@ -622,7 +630,7 @@ export function PlayScreen(props: PlayScreenProps) {
               ? illustratedKillerCards(killer, choice.type).find(card => card.name === revealed?.killerCard)?.art : undefined;
             const ultimate = choice.type === "ultimate-unlocked";
             return <button key={choice.type} aria-label={choice.title} disabled={ultimate && active} data-recorded={active || undefined} aria-pressed={PERMANENT_MOMENTS.includes(choice.type) ? active : undefined} onClick={() => pickMoment(choice)}>
-              {selectedArt ? <ModuleArtwork art={selectedArt} /> : <img src={active ? choice.activeImage ?? choice.image : choice.image} alt="" loading="lazy" />}
+              {selectedArt ? <ModuleArtwork art={selectedArt} /> : <img src={(ultimate && (active ? ultimatePortrait(finalGirl,aiEnabled) : ['Dakota','Alois'].includes(finalGirl) && characterImages[finalGirl])) || (active ? choice.activeImage ?? choice.image : choice.image)} alt="" loading="lazy" />}
               {(active || ultimate) && <small className="play-moment-seal">{ultimate ? active ? "Unlocked" : "Locked" : choice.type === "dark-power" || choice.type === "finale" ? "Revealed" : "Returned"}</small>}
               <span><strong>{ultimate ? "Ultimate" : choice.title}</strong>{choice.subtitle && <small>{choice.subtitle}</small>}</span>
             </button>;
@@ -636,11 +644,11 @@ export function PlayScreen(props: PlayScreenProps) {
             </div>
           </div>
         )}
-        {hunterRevealOpen&&hunterHasReveal(hunter,hunterRevealOpen)&&<div className="play-moment-editor"><KillerCards killer={killer} events={events} onEvent={onEvent} typeOnly={hunterRevealOpen}/><button onClick={()=>setHunterRevealOpen(null)}>Record</button></div>}
+        {hunterRevealOpen&&(killer===VOLKAR || hunterHasReveal(hunter,hunterRevealOpen))&&<div className="play-moment-editor"><KillerCards killer={killer} events={events} onEvent={onEvent} typeOnly={hunterRevealOpen}/><button onClick={()=>setHunterRevealOpen(null)}>Record</button></div>}
         {moment && (
           <div className="play-moment-editor">
             {isReveal && <KillerCards killer={killer} events={events} onEvent={onEvent} typeOnly={moment.momentType as "dark-power" | "finale"} />}
-            {isReveal && !podarchGame && killer !== RAZORFACE && killer !== WOLF && killer !== INTRUDERS && killer !== ORGANISM && killer !== 'The Hunter' && killer !== 'Slayer' && momentCards.length > 0 && (
+            {isReveal && !podarchGame && killer !== VOLKAR && killer !== RAZORFACE && killer !== WOLF && killer !== INTRUDERS && killer !== ORGANISM && killer !== 'The Hunter' && killer !== 'Slayer' && momentCards.length > 0 && (
               <label>
                 {moment.momentType === "dark-power"
                   ? "Which Dark Power?"
@@ -807,7 +815,7 @@ export function PlayScreen(props: PlayScreenProps) {
               className="play-finish-won"
               onClick={() => { if (killer === BIRDS) setFinishOpen(false); props.onFinish("won"); }}
             >
-              Won
+              {killer===VOLKAR && summary.entries.some(e=>e.momentType==='finale' && e.killerCard==='Self-Destruct') ? VOLKAR_WIN : 'Won'}
             </button>
             <button
               className="play-finish-lost"

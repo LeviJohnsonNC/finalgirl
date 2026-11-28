@@ -63,3 +63,5 @@ Tests cover distinct images for every verified position, generic/unknown/legacy 
 The Organism has eight verified positions (0–7), counted on the supplied killer board inset and all three mutation faces. Its displayed positions map across the existing moon series. The top position uses the final image.
 
 Razorface uses nine printed positions, 0–8, from the *Hell to Pay* killer board (IMG_9623). Every position maps to a distinct shared image. The repeat arrow at the top is an overflow instruction, not a tenth position.
+
+The Volk’ar uses the eleven printed positions 0–10 on the standard Green Terror board. Her Attack values are 1 at 0–3, 2 at 4–7, 3 at 8–9 and 4 at 10. The repeated top-space effect is listed in Rules.

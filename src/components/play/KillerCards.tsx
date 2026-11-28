@@ -1,3 +1,5 @@
+import {VolkarCountdown} from './VolkarCountdown';
+import {VOLKAR} from '../../../supabase/functions/_shared/play/volkar';
 import { RATCHET_LADY } from '../../../supabase/functions/_shared/play/ratchetLady';
 import { RatchetFinaleControl } from './RatchetLadyControls';
 import {ORGANISM} from "@/lib/play/organism";
@@ -98,12 +100,13 @@ export function KillerCards({
     if (existing?.killerCard === name) {
       return;
     }
+    const owner = killer===VOLKAR ? {volkarCard:true as const} : {};
     record(
         newPlayEvent(
           existing
-            ? { kind: "details", target: existing.id, killerCard: name }
+            ? { ...owner, kind: "details", target: existing.id, killerCard: name }
             : {
-                kind: "moment",
+                ...owner, kind: "moment",
                 momentType: type,
                 killerCard: name,
                 permanent: true,
@@ -135,6 +138,7 @@ export function KillerCards({
             <section
               className="module-reveal-cards"
               data-hunter-transferred={type==='dark-power'&&hunter&&hunter.phase!=='unknown'&&hunter.phase!=='mark-v'||undefined}
+              data-volkar-cards={killer === VOLKAR || undefined}
               data-wolf-cards={killer === WOLF || undefined}
               key={type}
               aria-label={`${label} selection`}
@@ -146,7 +150,8 @@ export function KillerCards({
               {recordedName && !selected && (
                 <p className="module-control-help">{recordedName}</p>
               )}
-              {selected && (killer === PODARCHS && type === "finale" ? (
+               {selected && (killer===VOLKAR && selected.name==='Self-Destruct' ?
+                <VolkarCountdown card={selected} events={events} onEvent={onEvent} disabled={disabled}/> : killer === PODARCHS && type === "finale" ? (
                 <PodarchFinaleControl card={selected} entries={entries} events={events} onEvent={onEvent} disabled={disabled} />
               ) : (
                 <RevealedCard card={selected} label={label} showEyebrow={false} />

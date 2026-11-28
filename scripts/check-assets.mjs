@@ -45,7 +45,7 @@ for (const entry of healthManifest) {
   if (sourceHash !== entry.originalSha256) throw new Error('Original portrait changed: ' + entry.name);
   for (const state of ['healthy', 'critical', ...('injured' in entry ? ['injured'] : [])]) {
     const file = join(healthDirectory, `${entry.slug}-${state}.webp`), metadata = entry[state];
-    if (!metadata?.source || !/^exec-[a-f0-9-]+\.png$/.test(metadata.source)) throw new Error('Missing health-photo provenance: ' + file);
+    if (!metadata?.source || !/^(?:exec-[a-f0-9-]+|imagegen-[a-f0-9]{64})\.png$/.test(metadata.source)) throw new Error('Missing health-photo provenance: ' + file);
     const bytes = readFileSync(file);
     if (metadata.sha256 !== createHash('sha256').update(bytes).digest('hex')) throw new Error('Health-photo manifest mismatch: ' + file);
     if (Math.max(metadata.width, metadata.height) !== 768 || Math.min(metadata.width, metadata.height) < 500) throw new Error('Invalid health-photo resolution: ' + file);
@@ -626,3 +626,18 @@ for (const id of podarchPhotos) {
   podarchHashes.add(hash);
 }
 console.log('Verified ' + podarchPhotos.length + ' Podarch photographs and card derivatives.');
+
+const volkarPhotoIds = [
+  'concealed', 'visible', 'hit', 'ambush', 'banner', 'blades', 'chameleon', 'stress',
+  'merciless', 'shield', 'collector', 'evasion', 'rampage', 'guerilla', 'self-destruct',
+  'regenerative', 'alois-ultimate', 'dakota-ultimate',
+];
+const volkarHashes = new Set();
+for (const id of volkarPhotoIds) {
+  const bytes = readFileSync(join('src/assets/play/photos/volkar', id + '.webp'));
+  const [width, height] = konradWebpDimensions(bytes);
+  const hash = createHash('sha256').update(bytes).digest('hex');
+  if (width < 470 || height < 250 || volkarHashes.has(hash)) throw Error('Invalid or duplicate Volk’ar photograph: ' + id);
+  volkarHashes.add(hash);
+}
+console.log('Verified all 18 Volk’ar Play photographs, including both Ultimate faces.');

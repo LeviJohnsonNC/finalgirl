@@ -23,5 +23,5 @@ export const FILM_BLURBS: Record<string, string> = {
   's4-shriek': 'Mort the Teenage Dirtbag crashes MegaBGCon. A crowded gaming convention becomes the stage for a gleefully chaotic slasher.',
   's4-rotten-harvest': 'Something is wrong beneath the fields of Shady Acres. Face Grimlash in a rural nightmare of creeping dread.',
   's4-demon-shadows': 'A new nightmare is waiting in the shadows. This module’s cast and details will appear when it is ready to play.',
-  's4-green-terror': 'Another feature is growing in the dark. This module’s cast and details will appear when it is ready to play.',
+  's4-green-terror': 'Deep in the jungle of Pesadilla Verde, a cloaked trophy hunter stalks the patrol. A flicker in the canopy may be the only warning.',
 };

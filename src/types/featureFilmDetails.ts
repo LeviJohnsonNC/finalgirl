@@ -49,6 +49,15 @@ export interface FeatureFilmDetail {
 }
 
 export const FEATURE_FILM_DETAILS: Record<string, FeatureFilmDetail> = {
+  's4-green-terror': {
+    filmId:'s4-green-terror',
+    finalGirls:[
+      {name:'Dakota',backstorySource:'app-original',backstory:'Dakota stops when the insects fall silent. Somewhere above the trail a branch bends under a weight she cannot see. She watches the next branch.'},
+      {name:'Alois',backstorySource:'app-original',backstory:'Alois counts the people coming out of the brush. One short. She shoulders her pack and goes back in before anyone can tell her to wait.'},
+    ],
+    location:{name:'Pesadilla Verde',description:'Dense jungle surrounds the supply depot. Bravo Company entered expecting a routine assignment and began losing soldiers in the sudden quiet.',setupCards:[],events:[]},
+    killer:{name:"The Volk'ar",description:'A cloaked extraterrestrial hunter stalks her prey and keeps trophies. Her refractive armor can leave little more than a ripple in the air.'},
+  },
   's4-terror-from-beyond': {
     filmId: 's4-terror-from-beyond', isVignette: true,
     vignetteDescription: 'Familiar faces are going through the motions of everyday life. Strange plants have taken root among them.',

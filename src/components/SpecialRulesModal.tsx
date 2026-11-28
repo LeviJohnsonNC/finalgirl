@@ -16,7 +16,7 @@ interface SpecialRulesModalProps {
 
 function findModule(name: string, kind: 'killer' | 'location'): EntityRuleModule | undefined {
   return ENTITY_RULE_MODULES.find(
-    (m) => m.kind === kind && m.entity.toLowerCase() === name.toLowerCase()
+    (m) => m.kind === kind && m.entity.toLowerCase().replace(/’/g,"'") === name.toLowerCase().replace(/’/g,"'")
   );
 }
 

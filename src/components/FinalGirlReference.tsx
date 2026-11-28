@@ -211,7 +211,7 @@ export function FinalGirlReference({
           <div className="girl-panel-content">
             <p>{ref.ultimate}</p>
             {ref.dossierRescues && <>
-              <p>Unlock after saving {ref.dossierRescues} Victims. Choose an unused reward for each rescue.</p>
+              <p>Unlock after saving {ref.dossierRescues} Victims. {['Dakota','Alois'].includes(name) ? 'Choose an unused rescue cost each time.' : 'Choose an unused reward for each rescue.'}</p>
               <ul className="girl-rescue-rewards">{ref.rescueRewards.map((reward,index)=><li key={index}>{reward}</li>)}</ul>
             </>}
             <p className="girl-reference-note">

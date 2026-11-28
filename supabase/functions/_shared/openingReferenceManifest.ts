@@ -51,6 +51,9 @@
 // src/assets/casting-killers/slayer.webp SHA-256: 67387a5f2bce6e56be247f6d41c859a4ddd130ca6a08649c0434894f5ddc4928
 // christie.png SHA-256: 87734536352be57aeafeb1609963f1eab5a4499f85830518ffd40854e38deca5
 // joan.png SHA-256: 61f8a575f263e278f2724482a985e9250a77015dd5e822ba3d995a8b99469b1e
+// dakota.png SHA-256: aba1b1ebd5881ee38b003ba05f412c7fefc85628fcec0ed06c44a8e757e83b73
+// alois.png SHA-256: 83b2e3734e854d3c722fbfc88b8d45be89ccd70ead8ac0916f521b6dbd9b6cd2
+// volkar.png SHA-256: 053198e17956db0eea70e0bc83d5e95f7cd10039e458f2708adbb0a5b0bc73be
 export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: string }> = {
   "Billy the Bear": {
     "path": "billy-the-bear.jpg",
@@ -251,5 +254,17 @@ export const OPENING_REFERENCE_MANIFEST: Record<string, { path: string; sha256: 
   "Joan": {
     "path": "joan.jpg",
     "sha256": "64a58d91b34cc6354feffb650b1f7c623ab711112c9a5326a4c3931bfcb19e49"
+  },
+  "Dakota": {
+    "path": "dakota-6951ca1609737f13.jpg",
+    "sha256": "6951ca1609737f13dcbe5103fa0a8f2966816d7e6bd06ea015013a05cb3df69d"
+  },
+  "Alois": {
+    "path": "alois-a963f0a3cbe3ce7d.jpg",
+    "sha256": "a963f0a3cbe3ce7d7bb5b49f6af68520b3547c5d820ccc875eaf9913fc989a4d"
+  },
+  "The Volk'ar": {
+    "path": "the-volk-ar-6af75fe7774486d9.jpg",
+    "sha256": "6af75fe7774486d91f7b9c6c7424a70104ec666b5ec27dcb3df423317bdd6a2c"
   }
 };

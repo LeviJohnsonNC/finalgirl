@@ -14,6 +14,7 @@ type MinorPowerProps = {
       mode?: "health";
       health?: number;
       maxHealth?: number;
+      growing?: boolean;
       art: (health: number) => ModuleArt;
       onChange: (health: number | null) => unknown;
       previouslyRevealed?: boolean;
@@ -37,6 +38,7 @@ export function MinorPowerControl(props: MinorPowerProps) {
   const showScene = active || health !== undefined;
   const status = active && presence ? "Active"
     : health === undefined ? (previouslyRevealed ? "Revealed earlier · health not recorded" : "Not recorded")
+    : !presence && props.growing ? (health===0 ? 'Removed · 0 health' : health+' health')
     : health === 0 ? `Removed · 0/${maxHealth} health`
     : `${health}/${maxHealth} health`;
   const recordLabel = presence ? "Discard" : "Clear record";
@@ -91,7 +93,10 @@ export function MinorPowerControl(props: MinorPowerProps) {
               {!presence && props.observation ? `${props.observation} · ${status}` : status}
             </p>
             {!presence && health !== undefined && (
-              <HealthTokens
+              props.growing ? <div className="minor-count-buttons">
+                <button type="button" aria-label={'Remove one Health from '+name} disabled={disabled||health===0} onClick={()=>props.onChange(health-1)}>−</button>
+                <button type="button" aria-label={'Add one Health to '+name} disabled={disabled} onClick={()=>props.onChange(health+1)}>+</button>
+              </div> : <HealthTokens
                 name={name}
                 health={health}
                 maxHealth={maxHealth}

@@ -48,3 +48,7 @@ The Saved portraits show the same actors relieved after escape. Hellscape keeps 
 | Creech Manor | White, Blue and Orange Ghost Hunters | `exec-a623af43-f28a-46d5-891d-4c9e9e5db9ac.png` |
 | Carnival of Blood | Sibling, Fiancé | `exec-91e40169-63d2-4ece-97a9-2f6ca661e944.png` |
 | Buddyland | Nick the Janitor, Birthday Girl, Pizza Guy | `exec-a4c50346-ef09-4f88-871d-f21cbda9c8e3.png` |
+
+## The Green Terror
+
+The `volkar` folder holds four hunt states, a neutral banner, eleven named card scenes and two Ultimate portraits. The paired cloak and reveal photographs share a composition. These ImageGen derivatives use the supplied illustrated faces and killer artwork as identity references. The original drawings remain available in the cast-art setting. The countdown, card titles and Epic labels are rendered by the interface.

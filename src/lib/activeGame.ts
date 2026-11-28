@@ -1,3 +1,4 @@
+import {volkarOwnsLog} from '../../supabase/functions/_shared/play/volkar';
 import { HELLSCAPE, HELLSCAPE_MODULE } from "../../supabase/functions/_shared/play/hellscape";
 import { conOwnsLog } from "../../supabase/functions/_shared/play/megabgcon";
 import { MORT, mortOwnsLog } from '../../supabase/functions/_shared/play/mort';
@@ -45,6 +46,7 @@ export interface EndingFormData {
 export interface ActiveGame {
   openingTake?: number;
   /** New sessions initialize the always-visible core trackers once on first Play entry. */
+  volkarSetupVersion?: 1;
   coreTrackersVersion?: 1;
   ratchetSetupVersion?: 1;
   razorfaceSetupVersion?: 1;
@@ -112,7 +114,7 @@ export function isActiveGame(value: unknown): value is ActiveGame {
   if(game.mallSetupVersion!==undefined&&(game.mallSetupVersion!==1||game.selection?.location!==MALL))return false;
   if(game.playEvents?.some(e=>(e.mallReference||e.moduleData?.module===MALL_MODULE)&&game.selection?.location!==MALL||e.moduleData?.module===MALL_MODULE&&!e.mallAction&&(game.mallSetupVersion!==1||e.moduleData.changes.snapshot!==initialMall(game.selection?.startingEvent).snapshot)))return false;
   if (game.ratchetSetupVersion !== undefined && (game.ratchetSetupVersion !== 1 || game.selection?.killer !== RATCHET_LADY)) return false;
-  if (Array.isArray(game.playEvents) && (!podarchOwnsLog(game.selection?.killer,game.playEvents,game.selection?.location) || !ratchetLogBelongsTo(game.selection?.killer, game.playEvents) ||
+  if (Array.isArray(game.playEvents) && (!volkarOwnsLog(game.selection?.killer,game.playEvents,game.selection?.finalGirl) || !podarchOwnsLog(game.selection?.killer,game.playEvents,game.selection?.location) || !ratchetLogBelongsTo(game.selection?.killer, game.playEvents) ||
       game.playEvents.some(event => event?.moduleData?.module === RATCHET_MODULE && !event.ratchetAction &&
         typeof event.moduleData.changes?.maniacs === 'number' && game.ratchetSetupVersion !== 1))) return false;
   if(game.wolfeSetupVersion!==undefined&&(game.wolfeSetupVersion!==1||game.selection?.location!==WOLFE))return false;
@@ -120,6 +122,7 @@ export function isActiveGame(value: unknown): value is ActiveGame {
   if(Array.isArray(game.playEvents)&&(!wolfeOwnsLog(game.selection?.location,game.playEvents)||game.playEvents.some(event=>
     event?.moduleData?.module===WOLFE_MODULE&&!event.wolfeAction&&
       (game.wolfeSetupVersion!==1||!event.moduleData.changes||!sameWolfe(event.moduleData.changes,initialWolfe(game.selection?.startingEvent))))))return false;
+  if(game.volkarSetupVersion!==undefined && game.volkarSetupVersion!==1) return false;
   if(game.coreTrackersVersion!==undefined&&game.coreTrackersVersion!==1)return false;
   if (game.woodsSetupVersion !== undefined && (game.woodsSetupVersion !== 1 || game.selection?.location !== WOODS)) return false;
   if (Array.isArray(game.playEvents) && game.playEvents.some(event =>

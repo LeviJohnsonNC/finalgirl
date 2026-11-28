@@ -68,6 +68,7 @@ interface NowPlayingProps {
   falconwoodFresh?: boolean;
   birdsRequired?: BirdsTarget;
   stationFresh?: boolean;
+  volkarFresh?: boolean;
   mortFresh?: boolean;
   razorfaceFresh?: boolean;
   filmId: string | null;
@@ -89,7 +90,7 @@ const NowPlaying = ({
   falconwoodFresh,
   birdsRequired,
   stationFresh,
-  mortFresh,
+  volkarFresh, mortFresh,
   razorfaceFresh,
   filmId,
   onBack,
@@ -337,7 +338,7 @@ const NowPlaying = ({
     }
     onGameEnd(outcome, !isGenerating && !error ? story || undefined : undefined, sceneImageUrl || undefined, visualBible);
   };
-  if (playMode && onPlayEvent) return <PlayScreen mortFresh={mortFresh} killer={killer} location={location} finalGirl={finalGirl} finalGirlStartingHealth={finalGirlStartingHealth}
+  if (playMode && onPlayEvent) return <PlayScreen volkarFresh={volkarFresh} mortFresh={mortFresh} killer={killer} location={location} finalGirl={finalGirl} finalGirlStartingHealth={finalGirlStartingHealth}
     imageUrl={sceneImageUrl || bgImage} events={playEvents} onEvent={recordPlayEvent}
     onExit={() => onCheckpoint({ playMode: false })}
     onFinish={finishPlay}
@@ -346,7 +347,7 @@ const NowPlaying = ({
     onNarrate={handleNarrate} narrationBusy={isNarrating} narrationPlaying={isPlaying || isPaused} hasStory={Boolean(story)}
     showDeathDetails={showDeathPanel} onShowDeathDetails={enabled => onCheckpoint({showDeathPanel: enabled})}
     drafts={playDrafts} onDraft={saveDraft}
-    moduleControls={<ModuleControls birdsRequired={birdsRequired} mission={mission} falconwoodFresh={falconwoodFresh} stationFresh={stationFresh} razorfaceFresh={razorfaceFresh} mortFresh={mortFresh} setupScenario={setupScenario} startingEvent={startingEvent} sessionId={sessionId} killer={killer} location={location} finalGirl={finalGirl} finalGirlStartingHealth={finalGirlStartingHealth} events={playEvents} onEvent={recordPlayEvent} onDeath={event=>setDeathEventId(event.id)} blocked={playSyncBlocked} />}
+    moduleControls={<ModuleControls birdsRequired={birdsRequired} mission={mission} falconwoodFresh={falconwoodFresh} stationFresh={stationFresh} razorfaceFresh={razorfaceFresh} volkarFresh={volkarFresh} mortFresh={mortFresh} setupScenario={setupScenario} startingEvent={startingEvent} sessionId={sessionId} killer={killer} location={location} finalGirl={finalGirl} finalGirlStartingHealth={finalGirlStartingHealth} events={playEvents} onEvent={recordPlayEvent} onDeath={event=>setDeathEventId(event.id)} blocked={playSyncBlocked} />}
     deathPanel={deathEventId && syncPlayNow ? <DeathSceneDialog key={deathEventId} sessionId={sessionId} selection={{killer,location,finalGirl,mission}} events={playEvents} getEvents={getPlayEvents} eventId={deathEventId} draft={playDrafts[deathEventId]} onDraft={saveDraft} onClose={()=>setDeathEventId(null)} onEvent={onPlayEvent} syncNow={syncPlayNow}/> : undefined}
     onDeath={event=>setDeathEventId(event.id)}/>;
 

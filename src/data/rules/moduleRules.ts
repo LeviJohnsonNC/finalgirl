@@ -1,3 +1,4 @@
+import { volkarRules } from './volkarRules';
 import { hellscapeRules, HELLSCAPE_PROMPT_CONTEXT } from "./hellscapeRules";
 import { razorfaceRules, RAZORFACE_PROMPT_CONTEXT } from './razorfaceRules';
 import { birdsRules, BIRDS_PROMPT_CONTEXT } from './birdsRules';
@@ -414,7 +415,7 @@ const falconwood: EntityRuleModule = {
   ],
 };
 
-export const ENTITY_RULE_MODULES: EntityRuleModule[] = [podarchRules,razorfaceRules,hellscapeRules,birdsRules,ratchetLadyRules,wolfeRules,stationRules,organismRules,mallRules,hunterRules,tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolfRules, shadyAcres, mortTheTeenageDirtbag, megaBgCon, intruderRules, wingardCottage, falconwood, slayerRules, marrekRules];
+export const ENTITY_RULE_MODULES: EntityRuleModule[] = [volkarRules,podarchRules,razorfaceRules,hellscapeRules,birdsRules,ratchetLadyRules,wolfeRules,stationRules,organismRules,mallRules,hunterRules,tormentorRules,konradRules,evomorphRules,creechRules,poltergeistRules, grovesRules, inkanyambaRules, mapleRules, frightRules, carnivalRules, geppettoRules, hansRules, campRules, billyRules, buddylandRules, grimlash, storybookWoods, bigBadWolfRules, shadyAcres, mortTheTeenageDirtbag, megaBgCon, intruderRules, wingardCottage, falconwood, slayerRules, marrekRules];
 
 export interface ModulePromptContext {
   narrativeGuidance: string;
@@ -425,6 +426,7 @@ export interface ModulePromptContext {
 const MODULE_PROMPT_CONTEXT: Record<string, ModulePromptContext> = {
   Razorface:RAZORFACE_PROMPT_CONTEXT,
   Birds:BIRDS_PROMPT_CONTEXT,
+  "The Volk'ar": { narrativeGuidance: 'The cloaked hunter stalks prey at the selected location. A reveal or ambush alone establishes no death or injury.', visualGuidance: 'A four-armed hunter in horned armor with yellow eyes and refractive cloaking technology. Respect the observed visibility.', rulesSummary: 'Build the hidden Path with physical Movement cards. Resolve it to locate the hunter.' },
   [PODARCHS]: { narrativeGuidance: PODARCH_STORY, visualGuidance: PODARCH_VISUAL, rulesSummary: "Evolution precedes the Killer phase. Persuade Victims before rescuing them. Follow the selected Finale or pre-Finale victory." },
   "The Organism":ORGANISM_PROMPT_CONTEXT,
   "Ratchet Lady":RATCHET_PROMPT_CONTEXT,

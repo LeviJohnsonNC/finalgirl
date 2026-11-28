@@ -1,3 +1,4 @@
+import {huntArt} from './volkarArt';
 import { PODARCH_HOSTILE } from '../../../supabase/functions/_shared/play/podarchs';
 import { podarchArt } from './podarchArt';
 import { evomorphStageArt } from './evomorphArt';
@@ -26,7 +27,7 @@ export function ModuleControls({
               id={module.id}
               title={module.title}
               kind={module.owner === "killer" ? "Killer" : "Location"}
-              art={module.id === 'podarchs' ? podarchArt(bloodlust === undefined ? 'banner' : bloodlust >= PODARCH_HOSTILE ? 'hostile' : 'docile') : module.id === 'evomorph' ? evomorphStageArt(moduleState(entries, 'evomorph').stage) : module.art}
+              art={module.id === 'volkar' ? huntArt(moduleState(entries,'volkar').hunt ?? (props.volkarFresh && !props.events.length ? 'concealed' : undefined)) : module.id === 'podarchs' ? podarchArt(bloodlust === undefined ? 'banner' : bloodlust >= PODARCH_HOSTILE ? 'hostile' : 'docile') : module.id === 'evomorph' ? evomorphStageArt(moduleState(entries, 'evomorph').stage) : module.art}
               summary={module.summary(moduleState(entries, module.id), props)}
               preferenceKey={key}
             >

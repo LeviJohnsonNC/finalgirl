@@ -72,7 +72,7 @@ export const isPermanentMoment = (e: Pick<PlayEvent, "kind" | "momentType">): bo
   e.kind === "moment" && PERMANENT_MOMENTS.includes(e.momentType!);
 /** New milestones carry an explicit lock. Legacy undone observations stay undone. */
 export const isLockedPlayEvent = (e: PlayEvent): boolean =>
-  (isPermanentMoment(e) && e.permanent === true) ||
+  (isPermanentMoment(e) && e.permanent === true && !e.volkarCard && !e.ultimateFace) ||
   (e.moduleData?.module === BIRDS_MODULE && (!e.birdsAction || e.birdsAction.command === 'review')) ||
   (e.kind === "module" && e.moduleData?.module === FALCONWOOD_MODULE && !e.falconwoodAction) ||
   (e.kind === "module" && e.moduleData?.module === STATION_MODULE && !e.stationAction) ||
@@ -146,6 +146,8 @@ export interface PlayEvent extends PlayDetails {
   creechAction?: CreechAction;
   poltergeistAction?: PoltergeistAction;
   birdsAction?: BirdsAction;
+  ultimateFace?: 'Dakota' | 'Alois';
+  volkarCard?: true;
   linkedModule?: ModuleObservation;
   /** Provenance for newly recorded Inkanyamba card facts; legacy death hashes stay unchanged. */
   inkanyambaReference?: true;
@@ -179,7 +181,7 @@ export interface PlaySummary {
   killerHealthTracking?: boolean;
   finalHorrorLevel?: number;
   bloodlust?: number;
-  entries: Array<PlayEvent & { currentRound: number | null; wolfPowerMode?: WolfMode; intruderFinale?: string; intruderPower?: string; mortTokenPlaced?: boolean; mortTime?: number; mortTerror?: number }>;
+  entries: Array<PlayEvent & { currentRound: number | null; wolfPowerMode?: WolfMode; originalFinaleName?: string; intruderFinale?: string; intruderPower?: string; mortTokenPlaced?: boolean; mortTime?: number; mortTerror?: number }>;
   inactive: Set<string>;
 }
 const uuid =
@@ -212,6 +214,10 @@ export function validPlayDetails(input: unknown): input is PlayDetails {
 export function isPlayEvent(input: unknown): input is PlayEvent {
   if (!validPlayDetails(input)) return false;
   const e = input as PlayEvent;
+  if(e.ultimateFace!==undefined && (!['Dakota','Alois'].includes(e.ultimateFace) || e.kind!=='moment' || e.momentType!=='ultimate-unlocked')) return false;
+  if(e.volkarCard!==undefined && (e.volkarCard!==true || !(e.kind==='details' && typeof e.killerCard==='string' || e.kind==='moment' && ['dark-power','finale'].includes(e.momentType??'')))) return false;
+  if(e.moduleData?.module==='volkar' && (e.kind!=='module' || !validModuleObservation(e.moduleData) || Object.keys(e.moduleData.changes).length!==1)) return false;
+  if(e.moduleData?.module==='volkar' && 'countdown' in e.moduleData.changes && (!e.target || !uuid.test(e.target))) return false;
   if (e.moduleData?.module === 'podarchs') {
     if (!validModuleObservation(e.moduleData)) return false;
     const changes = Object.entries(e.moduleData.changes);
@@ -930,7 +936,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
   const inactive = new Set<string>();
   const targets = new Set(
     log
-      .filter((e) => !["undo", "restore", "details"].includes(e.kind) && !isLockedPlayEvent(e))
+      .filter((e) => (!["undo", "restore", "details"].includes(e.kind) || e.volkarCard===true) && !isLockedPlayEvent(e))
       .map((e) => e.id),
   );
   for (const e of log) {
@@ -1004,6 +1010,8 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     delete e.mortTime;
     delete e.mortTerror;
     if (e.mortAction && !canRecordMort(e.mortAction,mortState(summary.entries),summary.entries)) { summary.inactive.add(e.id); continue; }
+    delete e.originalFinaleName;
+    if(e.kind==='moment' && e.momentType==='finale' && e.killerCard) e.originalFinaleName=e.killerCard;
     delete e.intruderFinale;
     delete e.intruderPower;
     const intruderReveal = e.kind==='moment' && (e.momentType==='finale' ? 'intruderFinale' : e.momentType==='dark-power' ? 'intruderPower' : undefined);
@@ -1019,7 +1027,7 @@ export function summarizePlay(log: readonly PlayEvent[] = []): PlaySummary {
     }
     if (e.kind === "killed" || e.kind === "moment")
       for (const edit of log) {
-        if (edit.kind === "details" && edit.target === e.id) {
+        if (edit.kind === "details" && !inactive.has(edit.id) && edit.target === e.id) {
           if (e.kind === "killed")
             for (const field of DETAIL_FIELDS) {
               // Legacy details records replace these four fields, including clearing.
@@ -1234,6 +1242,8 @@ export function describeEvent(e: PlayEvent): string {
       if (e.woodsAction) return describeWoodsAction(e.woodsAction);
       if (e.wingardAction) return describeWingardAction(e.wingardAction);
       return e.moduleData ? [describeModule(e.moduleData), e.linkedModule && describeModule(e.linkedModule)].filter(Boolean).join("; ") : "";
+    case "details":
+      return e.volkarCard ? (e.killerCard ? "Card identified as "+e.killerCard : "Card name cleared") : "";
     default:
       return "";
   }

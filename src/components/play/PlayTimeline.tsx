@@ -40,8 +40,8 @@ export function PlayTimeline({
 }: Props) {
   const summary = summarizePlay(events);
   const originals = events
-    .filter((e) => !["undo", "restore", "details"].includes(e.kind))
-    .filter((e) => !(e.permanent && !summary.entries.some(entry => entry.id === e.id)))
+    .filter((e) => (!["undo", "restore", "details"].includes(e.kind) || e.volkarCard===true))
+    .filter((e) => !(e.permanent && !e.volkarCard && !e.ultimateFace && !summary.entries.some(entry => entry.id === e.id)))
     .slice(-limit)
     .reverse();
   return (
@@ -116,7 +116,7 @@ export function PlayTimeline({
                 {describeEvent(entry)}
               </p>
               <div className="flex items-center gap-3 flex-wrap">
-                {onToggle && entry.kind !== "start" && !isPermanentMoment(entry) && !isLockedPlayEvent(entry) && (
+                {onToggle && entry.kind !== "start" && (!isPermanentMoment(entry) || entry.volkarCard || entry.ultimateFace) && !isLockedPlayEvent(entry) && (
                   <button
                     type="button"
                     disabled={birdsBlocked||mortBlocked||wolfeBlocked||ratchetBlocked||falconwoodBlocked||mallBlocked||slayerBlocked||hunterBlocked||wingardBlocked||intruderBlocked||woodsBlocked||marrekBlocked||tormentorBlocked||shadyBlocked||konradBlocked||grimlashBlocked}

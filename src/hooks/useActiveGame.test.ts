@@ -577,3 +577,17 @@ it('blocks new arrival Undo after Mark X damage while retaining accepted older l
  expect(restored.result.current.activeGame).not.toBeNull();
  expect(restored.result.current.activeGame.playEvents).toHaveLength(log.length+1);
 });
+
+it.each([true,false])('seeds the Volk’ar only on a fresh durable start (fresh %s)',fresh=>{
+  const {result}=renderHook(useActiveGame);
+  const selection={...game.selection,killer:"The Volk'ar",finalGirl:'Dakota'};
+  act(()=>result.current.save({...game,selection,coreTrackersVersion:1,...(fresh&&{volkarSetupVersion:1 as const})}));
+  expect(result.current.activeGame.playEvents).toBeUndefined();
+  const start=newPlayEvent({kind:'start',round:1,saved:0,killed:0});
+  act(()=>expect(result.current.appendPlayEvent(game.id,start)).toBe(true));
+  const summary=summarizePlay(result.current.activeGame.playEvents);
+  expect(moduleState(summary.entries,'volkar').hunt).toBe(fresh?'concealed':undefined);
+  expect(summary.killerHealth).toBe(fresh?10:undefined);
+  act(()=>expect(result.current.appendPlayEvent(game.id,start)).toBe(false));
+  expect(result.current.activeGame.playEvents.filter(e=>e.moduleData?.module==='volkar')).toHaveLength(fresh?1:0);
+});

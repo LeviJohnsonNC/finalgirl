@@ -1,3 +1,5 @@
+import { isVolkar, VOLKAR_POWERS, VOLKAR_FINALES } from '../../../supabase/functions/_shared/play/volkar';
+import {volkarArt} from './volkarArt';
 import { RAZORFACE, RAZORFACE_POWERS, RAZORFACE_FINALES } from '../../../supabase/functions/_shared/play/razorface';
 import { razorfaceArt } from './razorfaceArt';
 import { BIRDS, BIRDS_POWERS, BIRDS_FINALES } from '../../../supabase/functions/_shared/play/birds';
@@ -83,6 +85,7 @@ export function illustratedKillerCards(
   if (killer === RAZORFACE) return [...(power ? RAZORFACE_POWERS : RAZORFACE_FINALES)]
     .map(card => ({...card, epic:"epic" in card && card.epic === true, art:razorfaceArt(card.id,true), heroArt:razorfaceArt(card.id)}));
   if (killer === BIRDS) return (power ? BIRDS_POWERS : BIRDS_FINALES).map(card=>({...card,art:birdsArt(card.id)})).sort((a,b)=>a.name.localeCompare(b.name));
+  if (isVolkar(killer)) return (power ? VOLKAR_POWERS : VOLKAR_FINALES).map(c=>({...c,art:volkarArt(c.id),heroArt:volkarArt(c.id)}));
   if (killer === PODARCHS) return (power ? PODARCH_POWERS : PODARCH_FINALES).map(c => ({...c,art:podarchArt(c.id,true),heroArt:podarchArt(c.id)})).sort((a,b) => a.name.localeCompare(b.name));
   if (killer === MORT) {
     const cards = power ? MORT_POWERS : MORT_SUSPECTS.map(suspect => ({
